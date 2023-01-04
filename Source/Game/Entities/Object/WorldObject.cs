@@ -1467,13 +1467,18 @@ namespace Game.Entities
                 InstanceMap instanceMap = map.ToInstanceMap();
                 if (instanceMap != null)
                     return (ZoneScript)instanceMap.GetInstanceScript();
-                else if (!map.IsBattlegroundOrArena())
+
+                BattlegroundMap bgMap = map.ToBattlegroundMap();
+                if (bgMap != null)
+                    return (ZoneScript)bgMap.GetBG();
+
+                if (!map.IsBattlegroundOrArena())
                 {
                     BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(map, GetZoneId());
                     if (bf != null)
                         return bf;
-                    else
-                        return Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(map, GetZoneId());
+                    
+                    return Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(map, GetZoneId());
                 }
             }
 
