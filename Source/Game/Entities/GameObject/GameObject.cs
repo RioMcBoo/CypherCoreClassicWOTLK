@@ -3450,6 +3450,8 @@ namespace Game.Entities
                     bg.UpdateWorldState((int)GetGoInfo().CapturePoint.worldState1, (byte)m_goValue.CapturePoint.State);
                 }
             }
+
+            GetMap().UpdateSpawnGroupConditions();
         }
 
         public bool CanInteractWithCapturePoint(Player target)
