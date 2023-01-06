@@ -245,7 +245,7 @@ namespace Game
                             mapID = (uint)corpseMapEntry.CorpseMapID;
 
                             pos = new Vector3(Global.ObjectMgr.GetMapCorpsePosition(corpseMapEntry.Id),
-                                entranceTerrain.GetStaticHeight(player.GetPhaseShift(), pos.X, pos.Y, MapConst.MaxHeight));
+                                entranceTerrain.GetStaticHeight(player.GetPhaseShift(), mapID, pos.X, pos.Y, MapConst.MaxHeight));
                         }
                     }
                 }
