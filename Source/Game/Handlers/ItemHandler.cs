@@ -92,7 +92,7 @@ namespace Game
 
             if ((src.IsBankPos || dst.IsBankPos) && !CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleSwapInvItemOpcode - {m_currentBankerGUID} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleSwapInvItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
                 return;
             }
 
@@ -147,10 +147,9 @@ namespace Game
                 return;
             }
 
-
             if ((src.IsBankPos || dst.IsBankPos) && !CanUseBank())
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleSwapInvItemOpcode - {m_currentBankerGUID} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleSwapInvItemOpcode - {_player.PlayerTalkClass.GetInteractionData().SourceGuid} not found or you can't interact with him.");
                 return;
             }
 
@@ -1022,9 +1021,9 @@ namespace Game
         {
             // bankerGUID parameter is optional, set to 0 by default.
             if (bankerGUID.IsEmpty())
-                bankerGUID = m_currentBankerGUID;
+                bankerGUID = _player.PlayerTalkClass.GetInteractionData().SourceGuid;
 
-            bool isUsingBankCommand = (bankerGUID == GetPlayer().GetGUID() && bankerGUID == m_currentBankerGUID);
+            bool isUsingBankCommand = bankerGUID == GetPlayer().GetGUID() && bankerGUID == _player.PlayerTalkClass.GetInteractionData().SourceGuid;
 
             if (!isUsingBankCommand)
             {
