@@ -3219,9 +3219,9 @@ namespace Game.Entities
             return IsInDist2d(pos, dist + GetCombatReach());
         }
 
-        public bool IsWithinDist(WorldObject obj, float dist2compare, bool is3D = true)
+        public bool IsWithinDist(WorldObject obj, float dist2compare, bool is3D = true, bool incOwnRadius = true, bool incTargetRadius = true)
         {
-            return obj != null && _IsWithinDist(obj, dist2compare, is3D);
+            return obj != null && _IsWithinDist(obj, dist2compare, is3D, incOwnRadius, incTargetRadius);
         }
 
         public bool IsWithinDistInMap(WorldObject obj, float dist2compare, bool is3D = true, bool incOwnRadius = true, bool incTargetRadius = true)
