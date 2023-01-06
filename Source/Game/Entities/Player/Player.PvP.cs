@@ -18,7 +18,6 @@
 using Framework.Constants;
 using Framework.Database;
 using Game.Arenas;
-using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Cache;
 using Game.DataStorage;
@@ -753,10 +752,29 @@ namespace Game.Entities
             }
         }
         public uint GetArenaTeamId(byte slot) { return 0; }
-        public uint GetArenaPersonalRating(byte slot) { return m_activePlayerData.PvpInfo[slot].Rating; }
         public void SetArenaTeamIdInvited(uint ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         public uint GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
-        public uint GetRBGPersonalRating() { return m_activePlayerData.PvpInfo[3].Rating; }
+        public uint GetRBGPersonalRating() { return GetArenaPersonalRating(3); }
+
+        public uint GetArenaPersonalRating(int slot)
+        {
+            PVPInfo pvpInfo = GetPvpInfoForBracket(slot);
+            if (pvpInfo != null)
+                return pvpInfo.Rating;
+
+            return 0;
+        }
+
+        public PVPInfo GetPvpInfoForBracket(int bracket)
+        {
+            if (bracket < m_activePlayerData.PvpInfo.GetSize())
+            {
+                if (!m_activePlayerData.PvpInfo[bracket].Disqualified)
+                    return m_activePlayerData.PvpInfo[bracket];
+            }
+
+            return null;
+        }
 
         //OutdoorPVP
         public bool IsOutdoorPvPActive()
