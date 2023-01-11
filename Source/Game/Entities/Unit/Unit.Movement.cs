@@ -644,8 +644,6 @@ namespace Game.Entities
             else if (turn)
                 UpdateOrientation(orientation);
 
-            UpdatePositionData();
-
             _positionUpdateInfo.Relocated = relocated;
             _positionUpdateInfo.Turned = turn;
 
