@@ -403,8 +403,8 @@ namespace Game.DataStorage
             //    !SpellNameStorage.ContainsKey(387936))                // last spell added in 9.2.7 (45114)
             //{
             //    Log.outError(LogFilter.Misc, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
-            //    Global.WorldMgr.ShutdownServ(10, ShutdownMask.Force, ShutdownExitCode.Error);
-            //}
+            //    Environment.Exit(1);
+            //}            
 
             Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DB2 data storages in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
 

@@ -2319,7 +2319,7 @@ namespace Game.Spells
                                 break;
                             default:
                                 if (miscVal < 1)
-                                    return;
+                                    break;
 
                                 mechanicImmunityMask |= 1u << miscVal;
                                 break;

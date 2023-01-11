@@ -297,7 +297,7 @@ namespace Game
         }
 
         //General
-        public void LoadCypherStrings()
+        public bool LoadCypherStrings()
         {
             var time = Time.GetMSTime();
             CypherStringStorage.Clear();
@@ -306,8 +306,7 @@ namespace Game
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 CypherStrings. DB table `trinity_string` is empty.");
-                Global.WorldMgr.StopNow();
-                return;
+                return false;
             }
             uint count = 0;
             do
@@ -322,7 +321,8 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} CypherStrings in {1} ms", count, Time.GetMSTimeDiffToNow(time));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} CypherStrings in {Time.GetMSTimeDiffToNow(time)} ms");
+            return true;
         }
 
         public void LoadRaceAndClassExpansionRequirements()
