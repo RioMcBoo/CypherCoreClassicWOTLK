@@ -397,7 +397,7 @@ namespace Game
                 return;
             }
 
-            _player.MoveItemFromInventory(item.GetBagSlot(), item.GetSlot(), true);
+            _player.MoveItemFromInventory(item.InventoryBagSlot, item.InventorySlot, true);
 
             SQLTransaction trans = new();
             item.DeleteFromInventoryDB(trans);

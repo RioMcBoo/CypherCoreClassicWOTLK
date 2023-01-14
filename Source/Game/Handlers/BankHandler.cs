@@ -47,7 +47,7 @@ namespace Game
                 return;
             }
 
-            if (dest.Count == 1 && dest[0].pos == item.GetPos())
+            if (dest.Count == 1 && dest[0].pos == item.GetPosition())
             {
                 GetPlayer().SendEquipError(InventoryResult.CantSwap, item);
                 return;

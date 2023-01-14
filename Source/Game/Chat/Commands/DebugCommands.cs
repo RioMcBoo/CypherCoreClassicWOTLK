@@ -200,7 +200,7 @@ namespace Game.Chat
                     if (i >= InventorySlots.BuyBackStart && i < InventorySlots.BuyBackEnd)
                         continue;
 
-                    Item item = player.GetItemByPos(InventorySlots.Bag0, i);
+                    Item item = player.GetItemByPos(new(i));
                     if (item)
                     {
                         Bag bag = item.ToBag();
@@ -211,11 +211,11 @@ namespace Game.Chat
                                 Item item2 = bag.GetItemByPos(j);
                                 if (item2)
                                     if (item2.GetState() == state)
-                                        handler.SendSysMessage("bag: 255 slot: {0} guid: {1} owner: {2}", item2.GetSlot(), item2.GetGUID().ToString(), item2.GetOwnerGUID().ToString());
+                                        handler.SendSysMessage($"bag: 255 slot: {item2.InventorySlot} guid: {item2.GetGUID()} owner: {item2.GetOwnerGUID()}");
                             }
                         }
                         else if (item.GetState() == state)
-                            handler.SendSysMessage("bag: 255 slot: {0} guid: {1} owner: {2}", item.GetSlot(), item.GetGUID().ToString(), item.GetOwnerGUID().ToString());
+                            handler.SendSysMessage($"bag: 255 slot: {item.InventorySlot} guid: {item.GetGUID()} owner: {item.GetOwnerGUID()}");
                     }
                 }
             }
@@ -230,7 +230,7 @@ namespace Game.Chat
                         continue;
 
                     Bag container = item.GetContainer();
-                    byte bagSlot = container ? container.GetSlot() : InventorySlots.Bag0;
+                    byte bagSlot = container ? container.InventorySlot : InventorySlots.Bag0;
 
                     string st = "";
                     switch (item.GetState())
@@ -249,7 +249,7 @@ namespace Game.Chat
                             break;
                     }
 
-                    handler.SendSysMessage("bag: {0} slot: {1} guid: {2} - state: {3}", bagSlot, item.GetSlot(), item.GetGUID().ToString(), st);
+                    handler.SendSysMessage($"bag: {bagSlot} slot: {item.InventorySlot} guid: {item.GetGUID()} - state: {st}");
                 }
                 if (updateQueue.Empty())
                     handler.SendSysMessage("The player's updatequeue is empty");
@@ -264,20 +264,20 @@ namespace Game.Chat
                     if (i >= InventorySlots.BuyBackStart && i < InventorySlots.BuyBackEnd)
                         continue;
 
-                    Item item = player.GetItemByPos(InventorySlots.Bag0, i);
+                    Item item = player.GetItemByPos(new(i));
                     if (!item)
                         continue;
 
-                    if (item.GetSlot() != i)
+                    if (item.InventorySlot != i)
                     {
-                        handler.SendSysMessage("Item with slot {0} and guid {1} has an incorrect slot value: {2}", i, item.GetGUID().ToString(), item.GetSlot());
+                        handler.SendSysMessage("Item with slot {0} and guid {1} has an incorrect slot value: {2}", i, item.GetGUID().ToString(), item.InventorySlot);
                         error = true;
                         continue;
                     }
 
                     if (item.GetOwnerGUID() != player.GetGUID())
                     {
-                        handler.SendSysMessage("The item with slot {0} and itemguid {1} does have non-matching owner guid ({2}) and player guid ({3}) !", item.GetSlot(), item.GetGUID().ToString(), item.GetOwnerGUID().ToString(), player.GetGUID().ToString());
+                        handler.SendSysMessage("The item with slot {0} and itemguid {1} does have non-matching owner guid ({2}) and player guid ({3}) !", item.InventorySlot, item.GetGUID().ToString(), item.GetOwnerGUID().ToString(), player.GetGUID().ToString());
                         error = true;
                         continue;
                     }
@@ -285,7 +285,7 @@ namespace Game.Chat
                     Bag container = item.GetContainer();
                     if (container)
                     {
-                        handler.SendSysMessage("The item with slot {0} and guid {1} has a container (slot: {2}, guid: {3}) but shouldn't!", item.GetSlot(), item.GetGUID().ToString(), container.GetSlot(), container.GetGUID().ToString());
+                        handler.SendSysMessage("The item with slot {0} and guid {1} has a container (slot: {2}, guid: {3}) but shouldn't!", item.InventorySlot, item.GetGUID().ToString(), container.InventorySlot, container.GetGUID().ToString());
                         error = true;
                         continue;
                     }
@@ -295,28 +295,28 @@ namespace Game.Chat
                         ushort qp = (ushort)item.GetQueuePos();
                         if (qp > updateQueue.Count)
                         {
-                            handler.SendSysMessage("The item with slot {0} and guid {1} has its queuepos ({2}) larger than the update queue size! ", item.GetSlot(), item.GetGUID().ToString(), qp);
+                            handler.SendSysMessage("The item with slot {0} and guid {1} has its queuepos ({2}) larger than the update queue size! ", item.InventorySlot, item.GetGUID().ToString(), qp);
                             error = true;
                             continue;
                         }
 
                         if (updateQueue[qp] == null)
                         {
-                            handler.SendSysMessage("The item with slot {0} and guid {1} has its queuepos ({2}) pointing to NULL in the queue!", item.GetSlot(), item.GetGUID().ToString(), qp);
+                            handler.SendSysMessage("The item with slot {0} and guid {1} has its queuepos ({2}) pointing to NULL in the queue!", item.InventorySlot, item.GetGUID().ToString(), qp);
                             error = true;
                             continue;
                         }
 
                         if (updateQueue[qp] != item)
                         {
-                            handler.SendSysMessage("The item with slot {0} and guid {1} has a queuepos ({2}) that points to another item in the queue (bag: {3}, slot: {4}, guid: {5})", item.GetSlot(), item.GetGUID().ToString(), qp, updateQueue[qp].GetBagSlot(), updateQueue[qp].GetSlot(), updateQueue[qp].GetGUID().ToString());
+                            handler.SendSysMessage("The item with slot {0} and guid {1} has a queuepos ({2}) that points to another item in the queue (bag: {3}, slot: {4}, guid: {5})", item.InventorySlot, item.GetGUID().ToString(), qp, updateQueue[qp].InventoryBagSlot, updateQueue[qp].InventorySlot, updateQueue[qp].GetGUID().ToString());
                             error = true;
                             continue;
                         }
                     }
                     else if (item.GetState() != ItemUpdateState.Unchanged)
                     {
-                        handler.SendSysMessage("The item with slot {0} and guid {1} is not in queue but should be (state: {2})!", item.GetSlot(), item.GetGUID().ToString(), item.GetState());
+                        handler.SendSysMessage("The item with slot {0} and guid {1} is not in queue but should be (state: {2})!", item.InventorySlot, item.GetGUID().ToString(), item.GetState());
                         error = true;
                         continue;
                     }
@@ -330,16 +330,16 @@ namespace Game.Chat
                             if (!item2)
                                 continue;
 
-                            if (item2.GetSlot() != j)
+                            if (item2.InventorySlot != j)
                             {
-                                handler.SendSysMessage("The item in bag {0} and slot {1} (guid: {2}) has an incorrect slot value: {3}", bag.GetSlot(), j, item2.GetGUID().ToString(), item2.GetSlot());
+                                handler.SendSysMessage("The item in bag {0} and slot {1} (guid: {2}) has an incorrect slot value: {3}", bag.InventorySlot, j, item2.GetGUID().ToString(), item2.InventorySlot);
                                 error = true;
                                 continue;
                             }
 
                             if (item2.GetOwnerGUID() != player.GetGUID())
                             {
-                                handler.SendSysMessage("The item in bag {0} at slot {1} and with itemguid {2}, the owner's guid ({3}) and the player's guid ({4}) don't match!", bag.GetSlot(), item2.GetSlot(), item2.GetGUID().ToString(), item2.GetOwnerGUID().ToString(), player.GetGUID().ToString());
+                                handler.SendSysMessage("The item in bag {0} at slot {1} and with itemguid {2}, the owner's guid ({3}) and the player's guid ({4}) don't match!", bag.InventorySlot, item2.InventorySlot, item2.GetGUID().ToString(), item2.GetOwnerGUID().ToString(), player.GetGUID().ToString());
                                 error = true;
                                 continue;
                             }
@@ -347,14 +347,14 @@ namespace Game.Chat
                             Bag container1 = item2.GetContainer();
                             if (!container1)
                             {
-                                handler.SendSysMessage("The item in bag {0} at slot {1} with guid {2} has no container!", bag.GetSlot(), item2.GetSlot(), item2.GetGUID().ToString());
+                                handler.SendSysMessage("The item in bag {0} at slot {1} with guid {2} has no container!", bag.InventorySlot, item2.InventorySlot, item2.GetGUID().ToString());
                                 error = true;
                                 continue;
                             }
 
                             if (container1 != bag)
                             {
-                                handler.SendSysMessage("The item in bag {0} at slot {1} with guid {2} has a different container(slot {3} guid {4})!", bag.GetSlot(), item2.GetSlot(), item2.GetGUID().ToString(), container1.GetSlot(), container1.GetGUID().ToString());
+                                handler.SendSysMessage("The item in bag {0} at slot {1} with guid {2} has a different container(slot {3} guid {4})!", bag.InventorySlot, item2.InventorySlot, item2.GetGUID().ToString(), container1.InventorySlot, container1.GetGUID().ToString());
                                 error = true;
                                 continue;
                             }
@@ -364,28 +364,28 @@ namespace Game.Chat
                                 ushort qp = (ushort)item2.GetQueuePos();
                                 if (qp > updateQueue.Count)
                                 {
-                                    handler.SendSysMessage("The item in bag {0} at slot {1} having guid {2} has a queuepos ({3}) larger than the update queue size! ", bag.GetSlot(), item2.GetSlot(), item2.GetGUID().ToString(), qp);
+                                    handler.SendSysMessage("The item in bag {0} at slot {1} having guid {2} has a queuepos ({3}) larger than the update queue size! ", bag.InventorySlot, item2.InventorySlot, item2.GetGUID().ToString(), qp);
                                     error = true;
                                     continue;
                                 }
 
                                 if (updateQueue[qp] == null)
                                 {
-                                    handler.SendSysMessage("The item in bag {0} at slot {1} having guid {2} has a queuepos ({3}) that points to NULL in the queue!", bag.GetSlot(), item2.GetSlot(), item2.GetGUID().ToString(), qp);
+                                    handler.SendSysMessage("The item in bag {0} at slot {1} having guid {2} has a queuepos ({3}) that points to NULL in the queue!", bag.InventorySlot, item2.InventorySlot, item2.GetGUID().ToString(), qp);
                                     error = true;
                                     continue;
                                 }
 
                                 if (updateQueue[qp] != item2)
                                 {
-                                    handler.SendSysMessage("The item in bag {0} at slot {1} having guid {2} has a queuepos ({3}) that points to another item in the queue (bag: {4}, slot: {5}, guid: {6})", bag.GetSlot(), item2.GetSlot(), item2.GetGUID().ToString(), qp, updateQueue[qp].GetBagSlot(), updateQueue[qp].GetSlot(), updateQueue[qp].GetGUID().ToString());
+                                    handler.SendSysMessage("The item in bag {0} at slot {1} having guid {2} has a queuepos ({3}) that points to another item in the queue (bag: {4}, slot: {5}, guid: {6})", bag.InventorySlot, item2.InventorySlot, item2.GetGUID().ToString(), qp, updateQueue[qp].InventoryBagSlot, updateQueue[qp].InventorySlot, updateQueue[qp].GetGUID().ToString());
                                     error = true;
                                     continue;
                                 }
                             }
                             else if (item2.GetState() != ItemUpdateState.Unchanged)
                             {
-                                handler.SendSysMessage("The item in bag {0} at slot {1} having guid {2} is not in queue but should be (state: {3})!", bag.GetSlot(), item2.GetSlot(), item2.GetGUID().ToString(), item2.GetState());
+                                handler.SendSysMessage("The item in bag {0} at slot {1} having guid {2} is not in queue but should be (state: {3})!", bag.InventorySlot, item2.InventorySlot, item2.GetGUID().ToString(), item2.GetState());
                                 error = true;
                                 continue;
                             }
@@ -416,18 +416,18 @@ namespace Game.Chat
                     if (item.GetState() == ItemUpdateState.Removed)
                         continue;
 
-                    Item test = player.GetItemByPos(item.GetBagSlot(), item.GetSlot());
+                    Item test = player.GetItemByPos(item.InventoryPosition);
 
                     if (test == null)
                     {
-                        handler.SendSysMessage("queue({0}): The bag({1}) and slot({2}) values for the item with guid {3} are incorrect, the player doesn't have any item at that position!", i, item.GetBagSlot(), item.GetSlot(), item.GetGUID().ToString());
+                        handler.SendSysMessage("queue({0}): The bag({1}) and slot({2}) values for the item with guid {3} are incorrect, the player doesn't have any item at that position!", i, item.InventoryBagSlot, item.InventorySlot, item.GetGUID().ToString());
                         error = true;
                         continue;
                     }
 
                     if (test != item)
                     {
-                        handler.SendSysMessage("queue({0}): The bag({1}) and slot({2}) values for the item with guid {3} are incorrect, an item which guid is {4} is there instead!", i, item.GetBagSlot(), item.GetSlot(), item.GetGUID().ToString(), test.GetGUID().ToString());
+                        handler.SendSysMessage("queue({0}): The bag({1}) and slot({2}) values for the item with guid {3} are incorrect, an item which guid is {4} is there instead!", i, item.InventoryBagSlot, item.InventorySlot, item.GetGUID().ToString(), test.GetGUID().ToString());
                         error = true;
                         continue;
                     }
@@ -566,7 +566,7 @@ namespace Game.Chat
             if (!item)
                 return false;
 
-            handler.GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+            handler.GetPlayer().DestroyItem(item.InventoryPosition, true);
             Global.ScriptMgr.OnItemExpire(handler.GetPlayer(), item.GetTemplate());
 
             return true;

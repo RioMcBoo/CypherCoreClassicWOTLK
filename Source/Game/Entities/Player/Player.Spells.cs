@@ -577,7 +577,7 @@ namespace Game.Entities
                             break;
                         case ItemEnchantmentType.Damage:
                         {
-                            WeaponAttackType attackType = Player.GetAttackBySlot(item.GetSlot(), item.GetTemplate().GetInventoryType());
+                            WeaponAttackType attackType = Player.GetAttackBySlot(item.InventorySlot, item.GetTemplate().GetInventoryType());
                             if (attackType != WeaponAttackType.Max)
                                 UpdateDamageDoneMods(attackType, apply ? -1 : (int)slot);
                         }
@@ -853,7 +853,7 @@ namespace Game.Entities
                         }
                         case ItemEnchantmentType.Totem:           // Shaman Rockbiter Weapon
                         {
-                            WeaponAttackType attackType = Player.GetAttackBySlot(item.GetSlot(), item.GetTemplate().GetInventoryType());
+                            WeaponAttackType attackType = Player.GetAttackBySlot(item.InventorySlot, item.GetTemplate().GetInventoryType());
                             if (attackType != WeaponAttackType.Max)
                                 UpdateDamageDoneMods(attackType, apply ? -1 : (int)slot);
                             break;
@@ -879,7 +879,7 @@ namespace Game.Entities
             // visualize enchantment at player and equipped items
             if (slot == EnchantmentSlot.EnhancementPermanent)
             {
-                VisibleItem visibleItem = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VisibleItems, item.GetSlot());
+                VisibleItem visibleItem = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VisibleItems, item.InventorySlot);
                 SetUpdateFieldValue(visibleItem.ModifyValue(visibleItem.ItemVisual), item.GetVisibleItemVisual(this));
             }
 
@@ -1018,7 +1018,7 @@ namespace Game.Entities
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
             for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
+                Item pItem = GetItemByPos(new(i));
                 if (pItem && !Global.SpellMgr.IsArenaAllowedEnchancment(pItem.GetEnchantmentId(slot)))
                     pItem.ClearEnchantment(slot);
             }
@@ -1455,7 +1455,7 @@ namespace Game.Entities
                 if (i == slot)
                     continue;
 
-                Item pItem2 = GetItemByPos(InventorySlots.Bag0, i);
+                Item pItem2 = GetItemByPos(new(i));
                 if (pItem2 != null && !pItem2.IsBroken())
                 {
                     foreach (SocketedGem gemData in pItem2.m_itemData.Gems)
@@ -1505,10 +1505,11 @@ namespace Game.Entities
                 }
             }
 
-            Log.outDebug(LogFilter.Player, "Checking Condition {0}, there are {1} Meta Gems, {2} Red Gems, {3} Yellow Gems and {4} Blue Gems, Activate:{5}", enchantmentcondition, curcount[0], curcount[1], curcount[2], curcount[3], activate ? "yes" : "no");
+            Log.outDebug(LogFilter.Player, $"Checking Condition {enchantmentcondition}, there are {curcount[0]} Meta Gems, {curcount[1]} Red Gems, {curcount[2]} Yellow Gems and {curcount[3]} Blue Gems, Activate:{activate}");
 
             return activate;
         }
+
         void CorrectMetaGemEnchants(byte exceptslot, bool apply)
         {
             //cycle all equipped items
@@ -1518,7 +1519,7 @@ namespace Game.Entities
                 if (slot == exceptslot)
                     continue;
 
-                Item pItem = GetItemByPos(InventorySlots.Bag0, slot);
+                Item pItem = GetItemByPos(new(slot));
 
                 if (pItem == null || pItem.GetSocketColor(0) == 0)
                     continue;
@@ -1744,12 +1745,12 @@ namespace Game.Entities
             {
                 case ItemClass.Weapon:
                 {
-                    Item item = GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                    Item item = GetUseableItemByPos(new(EquipmentSlot.MainHand));
                     if (item)
                         if (item != ignoreItem && item.IsFitToSpellRequirements(spellInfo))
                             return true;
 
-                    item = GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                    item = GetUseableItemByPos(new(EquipmentSlot.OffHand));
                     if (item)
                         if (item != ignoreItem && item.IsFitToSpellRequirements(spellInfo))
                             return true;
@@ -1762,7 +1763,7 @@ namespace Game.Entities
                         // most used check: shield only
                         if ((spellInfo.EquippedItemSubClassMask & (1 << (int)ItemSubClassArmor.Shield)) != 0)
                         {
-                            Item item = GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                            Item item = GetUseableItemByPos(new(EquipmentSlot.OffHand));
                             if (item != null)
                                 if (item != ignoreItem && item.IsFitToSpellRequirements(spellInfo))
                                     return true;
@@ -1779,7 +1780,7 @@ namespace Game.Entities
                         // tabard not have dependent spells
                         for (byte i = EquipmentSlot.Start; i < EquipmentSlot.MainHand; ++i)
                         {
-                            Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
+                            Item item = GetUseableItemByPos(new(i));
                             if (item)
                                 if (item != ignoreItem && item.IsFitToSpellRequirements(spellInfo))
                                     return true;
@@ -1790,7 +1791,7 @@ namespace Game.Entities
                         // requires item equipped in all armor slots
                         foreach (byte i in new[] { EquipmentSlot.Head, EquipmentSlot.Shoulders, EquipmentSlot.Chest, EquipmentSlot.Waist, EquipmentSlot.Legs, EquipmentSlot.Feet, EquipmentSlot.Wrist, EquipmentSlot.Hands })
                         {
-                            Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
+                            Item item = GetUseableItemByPos(new(i));
                             if (!item || item == ignoreItem || !item.IsFitToSpellRequirements(spellInfo))
                                 return false;
                         }
@@ -1800,7 +1801,7 @@ namespace Game.Entities
                     break;
                 }
                 default:
-                    Log.outError(LogFilter.Player, "HasItemFitToSpellRequirements: Not handled spell requirement for item class {0}", spellInfo.EquippedItemClass);
+                    Log.outError(LogFilter.Player, $"HasItemFitToSpellRequirements: Not handled spell requirement for item class {spellInfo.EquippedItemClass}");
                     break;
             }
 
@@ -1823,7 +1824,7 @@ namespace Game.Entities
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
             for (byte slot = InventorySlots.ItemStart; slot < inventoryEnd; ++slot)
             {
-                Item item = GetItemByPos(InventorySlots.Bag0, slot);
+                Item item = GetItemByPos(new(slot));
                 if (item)
                     ApplyItemObtainSpells(item, true);
             }
@@ -2023,7 +2024,7 @@ namespace Game.Entities
             PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
             foreach (var tspell in info.customSpells)
             {
-                Log.outDebug(LogFilter.Player, "PLAYER (Class: {0} Race: {1}): Adding initial spell, id = {2}", GetClass(), GetRace(), tspell);
+                Log.outDebug(LogFilter.Player, $"PLAYER (Class: {GetClass()} Race: {GetRace()}): Adding initial spell, id = {tspell}");
                 if (!IsInWorld)                                    // will send in INITIAL_SPELLS in list anyway at map add
                     AddSpell(tspell, true, true, true, false);
                 else                                                // but send in normal spell in game learn case

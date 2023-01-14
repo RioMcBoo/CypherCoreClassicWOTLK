@@ -304,26 +304,25 @@ namespace Game.Entities
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
             for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
+                Item pItem = GetItemByPos(new(i));
                 if (pItem != null)
                 {
-                    ushort eDest;
+                    List<ItemPosCount> destList;
                     // equip offhand weapon/shield if it attempt equipped before main-hand weapon
-                    InventoryResult msg = CanEquipItem(ItemConst.NullSlot, out eDest, pItem, false);
+                    InventoryResult msg = CanEquipItem(ItemConst.NullSlot, out destList, pItem, false);
                     if (msg == InventoryResult.Ok)
                     {
-                        RemoveItem(InventorySlots.Bag0, i, true);
-                        EquipItem(eDest, pItem, true);
+                        RemoveItem(new(i), true);
+                        EquipItem(destList, pItem, true);
                     }
                     // move other items to more appropriate slots
                     else
                     {
-                        List<ItemPosCount> sDest = new();
-                        msg = CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, sDest, pItem, false);
+                        msg = CanStoreItem(ItemPos.Undefined, out destList, pItem, false);
                         if (msg == InventoryResult.Ok)
                         {
-                            RemoveItem(InventorySlots.Bag0, i, true);
-                            StoreItem(sDest, pItem, true);
+                            RemoveItem(new(i), true);
+                            StoreItem(destList, pItem, true);
                         }
                     }
                 }
@@ -4265,7 +4264,7 @@ namespace Game.Entities
                         if (spellInfo.Reagent[i] > 0)
                         {
                             List<ItemPosCount> dest = new();       //for succubus, voidwalker, felhunter and felguard credit soulshard when despawn reason other than death (out of range, logout)
-                            InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
+                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, dest, (uint)spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
                             if (msg == InventoryResult.Ok)
                             {
                                 Item item = StoreNewItem(dest, (uint)spellInfo.Reagent[i], true, new ItemRandomEnchantmentId());
@@ -6946,9 +6945,9 @@ namespace Game.Entities
 
             Item item;
             if (useable)
-                item = GetUseableItemByPos(InventorySlots.Bag0, slot);
+                item = GetUseableItemByPos(new(slot));
             else
-                item = GetItemByPos(InventorySlots.Bag0, slot);
+                item = GetItemByPos(new(slot));
 
             if (item == null || item.GetTemplate().GetClass() != ItemClass.Weapon)
                 return null;
@@ -6964,6 +6963,7 @@ namespace Game.Entities
 
             return item;
         }
+
         public static WeaponAttackType GetAttackBySlot(byte slot, InventoryType inventoryType)
         {
             return slot switch
@@ -6973,9 +6973,10 @@ namespace Game.Entities
                 _ => WeaponAttackType.Max,
             };
         }
+
         public void AutoUnequipOffhandIfNeed(bool force = false)
         {
-            Item offItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+            Item offItem = GetItemByPos(new(EquipmentSlot.OffHand));
             if (offItem == null)
                 return;
 
@@ -6990,16 +6991,16 @@ namespace Game.Entities
             if (!force && (CanTitanGrip() || (offtemplate.GetInventoryType() != InventoryType.Weapon2Hand && !IsTwoHandUsed())))
                 return;
 
-            List<ItemPosCount> off_dest = new();
-            InventoryResult off_msg = CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, off_dest, offItem, false);
+            List<ItemPosCount> off_dest;
+            InventoryResult off_msg = CanStoreItem(ItemPos.Undefined, out off_dest, offItem, false);
             if (off_msg == InventoryResult.Ok)
             {
-                RemoveItem(InventorySlots.Bag0, EquipmentSlot.OffHand, true);
+                RemoveItem(new(EquipmentSlot.OffHand), true);
                 StoreItem(off_dest, offItem, true);
             }
             else
             {
-                MoveItemFromInventory(InventorySlots.Bag0, EquipmentSlot.OffHand, true);
+                MoveItemFromInventory(new(EquipmentSlot.OffHand), true);
                 SQLTransaction trans = new();
                 offItem.DeleteFromInventoryDB(trans);                   // deletes item from character's inventory
                 offItem.SaveToDB(trans);                                // recursive and not have transaction guard into self, item not in inventory and can be save standalone

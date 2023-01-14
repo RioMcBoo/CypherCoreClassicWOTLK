@@ -435,17 +435,17 @@ namespace Game.AI
                 case Class.Warlock:
                     return true;
                 case Class.Hunter:
-                    {
-                        // check if we have a ranged weapon equipped
-                        Item rangedSlot = who.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
+                {
+                    // check if we have a ranged weapon equipped
+                    Item rangedSlot = who.GetItemByPos(new(EquipmentSlot.Ranged));
 
-                        ItemTemplate rangedTemplate = rangedSlot ? rangedSlot.GetTemplate() : null;
-                        if (rangedTemplate != null)
-                            if (Convert.ToBoolean((1 << (int)rangedTemplate.GetSubClass()) & (int)ItemSubClassWeapon.MaskRanged))
-                                return true;
+                    ItemTemplate rangedTemplate = rangedSlot ? rangedSlot.GetTemplate() : null;
+                    if (rangedTemplate != null)
+                        if (Convert.ToBoolean((1 << (int)rangedTemplate.GetSubClass()) & (int)ItemSubClassWeapon.MaskRanged))
+                            return true;
 
-                        return false;
-                    }
+                    return false;
+                }
                 case Class.Priest:
                     return who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestShadow;
                 case Class.Shaman:
@@ -579,7 +579,7 @@ namespace Game.AI
 
             uint rangedAttackSpell = 0;
 
-            Item rangedItem = me.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
+            Item rangedItem = me.GetItemByPos(new(EquipmentSlot.Ranged));
             ItemTemplate rangedTemplate = rangedItem ? rangedItem.GetTemplate() : null;
             if (rangedTemplate != null)
             {

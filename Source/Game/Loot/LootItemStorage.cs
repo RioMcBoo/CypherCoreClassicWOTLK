@@ -134,7 +134,7 @@ namespace Game.Loots
                     lt.CopyConditions(li);
 
                     // If container item is in a bag, add that player as an allowed looter
-                    if (item.GetBagSlot() != 0)
+                    if (item.InventoryBagSlot != 0)
                         li.AddAllowedLooter(player);
 
                     // Finally add the LootItem to the container

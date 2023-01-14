@@ -43,8 +43,8 @@ namespace Game.Entities
                     if (item.IsInWorld)
                     {
                         Log.outFatal(LogFilter.PlayerItems, "Item {0} (slot {1}, bag slot {2}) in bag {3} (slot {4}, bag slot {5}, m_bagslot {6}) is to be deleted but is still in world.",
-                            item.GetEntry(), item.GetSlot(), item.GetBagSlot(),
-                            GetEntry(), GetSlot(), GetBagSlot(), i);
+                            item.GetEntry(), item.InventorySlot, item.InventoryBagSlot,
+                            GetEntry(), InventorySlot, InventoryBagSlot, i);
                         item.RemoveFromWorld();
                     }
                     m_bagslot[i].Dispose();
@@ -161,7 +161,7 @@ namespace Game.Entities
                 pItem.SetContainedIn(GetGUID());
                 pItem.SetOwnerGUID(GetOwnerGUID());
                 pItem.SetContainer(this);
-                pItem.SetSlot(slot);
+                pItem.InventorySlot(slot);
             }
         }
 

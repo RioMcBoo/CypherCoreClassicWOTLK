@@ -736,7 +736,7 @@ namespace Game.Scripting
         public virtual void OnMemberDepositMoney(Guild guild, Player player, ulong amount) { }
 
         // Called when a guild member moves an item in a guild bank.
-        public virtual void OnItemMove(Guild guild, Player player, Item pItem, bool isSrcBank, byte srcContainer, byte srcSlotId, bool isDestBank, byte destContainer, byte destSlotId) { }
+        public virtual void OnItemMove(Guild guild, Player player, Item pItem, bool isSrcBank, ItemPos src, bool isDestBank, ItemPos desc) { }
 
         public virtual void OnEvent(Guild guild, byte eventType, ulong playerGuid1, ulong playerGuid2, byte newRank) { }
 

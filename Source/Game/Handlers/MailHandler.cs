@@ -261,7 +261,7 @@ namespace Game
                             }
 
                             item.SetNotRefundable(GetPlayer()); // makes the item no longer refundable
-                            player.MoveItemFromInventory(item.GetBagSlot(), item.GetSlot(), true);
+                            player.MoveItemFromInventory(item.InventoryBagSlot, item.InventorySlot, true);
 
                             item.DeleteFromInventoryDB(trans);     // deletes item from character's inventory
                             item.SetOwnerGUID(receiverGuid);

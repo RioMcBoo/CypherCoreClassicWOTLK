@@ -180,7 +180,7 @@ namespace Game
     //                transmogrified.SetModifier(ItemConst.SecondaryAppearanceModifierSlotBySpec[player.GetActiveTalentGroup()], transmogPair.Value[1]);
     //            }
 
-    //            player.SetVisibleItemSlot(transmogrified.GetSlot(), transmogrified);
+    //            player.SetVisibleItemSlot(transmogrified.InventorySlot, transmogrified);
 
     //            transmogrified.SetNotRefundable(player);
     //            transmogrified.ClearSoulboundTradeable(player);
@@ -212,7 +212,7 @@ namespace Game
     //                transmogrified.SetModifier(ItemConst.IllusionModifierSlotBySpec[player.GetActiveTalentGroup()], illusionPair.Value);
     //            }
 
-    //            player.SetVisibleItemSlot(transmogrified.GetSlot(), transmogrified);
+    //            player.SetVisibleItemSlot(transmogrified.InventorySlot, transmogrified);
 
     //            transmogrified.SetNotRefundable(player);
     //            transmogrified.ClearSoulboundTradeable(player);
@@ -261,7 +261,7 @@ namespace Game
     //            }
 
     //            item.SetState(ItemUpdateState.Changed, player);
-    //            player.SetVisibleItemSlot(item.GetSlot(), item);
+    //            player.SetVisibleItemSlot(item.InventorySlot, item);
     //        }
 
     //        foreach (Item item in resetIllusionItems)
@@ -290,7 +290,7 @@ namespace Game
     //            }
 
     //            item.SetState(ItemUpdateState.Changed, player);
-    //            player.SetVisibleItemSlot(item.GetSlot(), item);
+    //            player.SetVisibleItemSlot(item.InventorySlot, item);
     //        }
 
     //        foreach (uint itemModifedAppearanceId in bindAppearances)

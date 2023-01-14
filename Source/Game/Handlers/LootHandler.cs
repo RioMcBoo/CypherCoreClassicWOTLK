@@ -345,7 +345,7 @@ namespace Game
                 {
                     // Only delete item if no loot or money (unlooted loot is saved to db) or if it isn't an openable item
                     if (loot.IsLooted() || !proto.HasFlag(ItemFlags.HasLoot))
-                        player.DestroyItem(pItem.GetBagSlot(), pItem.GetSlot(), true);
+                        player.DestroyItem(pItem.InventoryBagSlot, pItem.InventorySlot, true);
                 }
                 return;                                             // item can be looted only single player
             }

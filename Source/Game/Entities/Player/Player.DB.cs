@@ -94,27 +94,24 @@ namespace Game.Entities
                         if (bagGuid.IsEmpty())
                         {
                             item.SetContainer(null);
-                            item.SetSlot(slot);
-
-                            if (IsInventoryPos(InventorySlots.Bag0, slot))
+                            item.InventorySlot = slot;
+                            ItemPos itemPos = new(slot);
+                            List<ItemPosCount> dest;
+                            if (itemPos.IsInventoryPos)
                             {
-                                List<ItemPosCount> dest = new();
-                                err = CanStoreItem(InventorySlots.Bag0, slot, dest, item, false);
+                                err = CanStoreItem(itemPos, out dest, item, false);
                                 if (err == InventoryResult.Ok)
                                     item = StoreItem(dest, item, true);
                             }
-                            else if (IsEquipmentPos(InventorySlots.Bag0, slot))
+                            else if (itemPos.IsEquipmentPos)
                             {
-                                ushort dest;
-
                                 err = CanEquipItem(slot, out dest, item, false, false);
                                 if (err == InventoryResult.Ok)
                                     QuickEquipItem(dest, item);
                             }
-                            else if (IsBankPos(InventorySlots.Bag0, slot))
+                            else if (itemPos.IsBankPos)
                             {
-                                List<ItemPosCount> dest = new();
-                                err = CanBankItem(InventorySlots.Bag0, slot, dest, item, false, false);
+                                err = CanBankItem(itemPos, out dest, item, false, false);
                                 if (err == InventoryResult.Ok)
                                     item = BankItem(dest, item, true);
                             }
@@ -122,26 +119,25 @@ namespace Game.Entities
                             // Remember bags that may contain items in them
                             if (err == InventoryResult.Ok)
                             {
-                                if (IsBagPos(item.GetPos()))
+                                if (item.InventoryPosition.IsBagPos)
                                 {
                                     Bag pBag = item.ToBag();
                                     if (pBag != null)
                                         bagMap.Add(item.GetGUID(), pBag);
                                 }
                             }
-                            else if (IsBagPos(item.GetPos()))
+                            else if (item.InventoryPosition.IsBagPos)
                                 if (item.IsBag())
                                     invalidBagMap.Add(item.GetGUID(), item);
                         }
                         else
                         {
-                            item.SetSlot(ItemConst.NullSlot);
+                            item.InventorySlot = ItemConst.NullSlot;
                             // Item is in the bag, find the bag
                             var bag = bagMap.LookupByKey(bagGuid);
                             if (bag != null)
                             {
-                                List<ItemPosCount> dest = new();
-                                err = CanStoreItem(bag.GetSlot(), slot, dest, item);
+                                err = CanStoreItem(new(slot, bag.InventorySlot), out List<ItemPosCount> dest, item);
                                 if (err == InventoryResult.Ok)
                                     item = StoreItem(dest, item, true);
                             }
@@ -153,8 +149,8 @@ namespace Game.Entities
                             }
                             else
                             {
-                                Log.outError(LogFilter.Player, "LoadInventory: player (GUID: {0}, name: '{1}') has item (GUID: {2}, entry: {3}) which doesnt have a valid bag (Bag GUID: {4}, slot: {5}). Possible cheat?",
-                                    GetGUID().ToString(), GetName(), item.GetGUID().ToString(), item.GetEntry(), bagGuid, slot);
+                                Log.outError(LogFilter.Player, $"LoadInventory: player (GUID: {GetGUID()}, name: '{GetName()}') has item (GUID: { item.GetGUID()}, " + 
+                                    $"entry: {item.GetEntry()}) which doesnt have a valid bag (Bag GUID: {bagGuid}, slot: {slot}). Possible cheat?");                                  
                                 item.DeleteFromInventoryDB(trans);
                                 continue;
                             }
@@ -166,8 +162,9 @@ namespace Game.Entities
                             item.SetState(ItemUpdateState.Unchanged, this);
                         else
                         {
-                            Log.outError(LogFilter.Player, "LoadInventory: player (GUID: {0}, name: '{1}') has item (GUID: {2}, entry: {3}) which can't be loaded into inventory (Bag GUID: {4}, slot: {5}) by reason {6}. " +
-                                "Item will be sent by mail.", GetGUID().ToString(), GetName(), item.GetGUID().ToString(), item.GetEntry(), bagGuid, slot, err);
+                            Log.outError(LogFilter.Player, $"LoadInventory: player (GUID: {GetGUID()}, name: '{GetName()}') has item (GUID: {item.GetGUID()}, " +
+                                $"entry: {item.GetEntry()}) which can't be loaded into inventory (Bag GUID: {bagGuid}, slot: {slot}) by reason {err}. " +
+                                $"Item will be sent by mail.");
                             item.DeleteFromInventoryDB(trans);
                             problematicItems.Enqueue(item);
                         }
@@ -1576,19 +1573,19 @@ namespace Game.Entities
                 Bag container = item.GetContainer();
                 if (item.GetState() != ItemUpdateState.Removed)
                 {
-                    Item test = GetItemByPos(item.GetBagSlot(), item.GetSlot());
+                    Item test = GetItemByPos(item.InventoryPosition);
                     if (test == null)
                     {
                         ulong bagTestGUID = 0;
-                        Item test2 = GetItemByPos(InventorySlots.Bag0, item.GetBagSlot());
+                        Item test2 = GetItemByPos(new(item.InventoryBagSlot));
                         if (test2 != null)
                             bagTestGUID = test2.GetGUID().GetCounter();
                         Log.outError(LogFilter.Player, "Player(GUID: {0} Name: {1}).SaveInventory - the bag({2}) and slot({3}) values for the item with guid {4} (state {5}) are incorrect, " +
-                            "the player doesn't have an item at that position!", GetGUID().ToString(), GetName(), item.GetBagSlot(), item.GetSlot(), item.GetGUID().ToString(), item.GetState());
+                            "the player doesn't have an item at that position!", GetGUID().ToString(), GetName(), item.InventoryBagSlot, item.InventorySlot, item.GetGUID().ToString(), item.GetState());
                         // according to the test that was just performed nothing should be in this slot, delete
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY_BY_BAG_SLOT);
                         stmt.AddValue(0, bagTestGUID);
-                        stmt.AddValue(1, item.GetSlot());
+                        stmt.AddValue(1, item.InventorySlot);
                         stmt.AddValue(2, GetGUID().GetCounter());
                         trans.Append(stmt);
 
@@ -1603,7 +1600,7 @@ namespace Game.Entities
                     else if (test != item)
                     {
                         Log.outError(LogFilter.Player, "Player(GUID: {0} Name: {1}).SaveInventory - the bag({2}) and slot({3}) values for the item with guid {4} are incorrect, " +
-                            "the item with guid {5} is there instead!", GetGUID().ToString(), GetName(), item.GetBagSlot(), item.GetSlot(), item.GetGUID().ToString(), test.GetGUID().ToString());
+                            "the item with guid {5} is there instead!", GetGUID().ToString(), GetName(), item.InventoryBagSlot, item.InventorySlot, item.GetGUID().ToString(), test.GetGUID().ToString());
                         // save all changes to the item...
                         if (item.GetState() != ItemUpdateState.New) // only for existing items, no dupes
                             item.SaveToDB(trans);
@@ -1619,7 +1616,7 @@ namespace Game.Entities
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_INVENTORY_ITEM);
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, container ? container.GetGUID().GetCounter() : 0);
-                        stmt.AddValue(2, item.GetSlot());
+                        stmt.AddValue(2, item.InventorySlot);
                         stmt.AddValue(3, item.GetGUID().GetCounter());
                         trans.Append(stmt);
                         break;
@@ -3405,7 +3402,7 @@ namespace Game.Entities
                 // cache equipment...
                 for (byte i = 0; i < InventorySlots.BagEnd; ++i)
                 {
-                    Item item = GetItemByPos(InventorySlots.Bag0, i);
+                    Item item = GetItemByPos(new(i));
                     if (item != null)
                     {
                         ss.Append($"{(uint)item.GetTemplate().GetInventoryType()} {item.GetDisplayId(this)} ");
@@ -3551,7 +3548,7 @@ namespace Game.Entities
                 // cache equipment...
                 for (byte i = 0; i < InventorySlots.BagEnd; ++i)
                 {
-                    Item item = GetItemByPos(InventorySlots.Bag0, i);
+                    Item item = GetItemByPos(new(i));
                     if (item != null)
                     {
                         ss.Append($"{(uint)item.GetTemplate().GetInventoryType()} {item.GetDisplayId(this)} ");
