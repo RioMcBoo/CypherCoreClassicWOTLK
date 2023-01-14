@@ -167,7 +167,7 @@ namespace Game
 
                 voidStorageTransferChanges.AddedItems.Add(voidItem);
 
-                player.DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+                player.DestroyItem(item.InventoryBagSlot, item.InventorySlot, true);
                 ++depositCount;
             }
 

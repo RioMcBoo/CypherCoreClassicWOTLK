@@ -49,7 +49,7 @@ namespace Game
         //    }
 
         //    if (_collectionMgr.AddToy(item.GetEntry(), false, false))
-        //        _player.DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+        //        _player.DestroyItem(item.InventoryBagSlot, item.InventorySlot, true);
         //}
 
         //[WorldPacketHandler(ClientOpcodes.UseToy, Processing = PacketProcessing.Inplace)]

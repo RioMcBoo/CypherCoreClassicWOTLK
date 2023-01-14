@@ -1601,7 +1601,7 @@ namespace Game
             ObjectGuid ignoredItemGuid = new(0x0C00040000000000, 0xFFFFFFFFFFFFFFFF);
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
-                Log.outDebug(LogFilter.Player, "{0}: ContainerSlot: {1}, Slot: {2}", useEquipmentSet.Items[i].Item.ToString(), useEquipmentSet.Items[i].ContainerSlot, useEquipmentSet.Items[i].Slot);
+                Log.outDebug(LogFilter.Player, "{0}: BagSlot: {1}, Slot: {2}", useEquipmentSet.Items[i].Item.ToString(), useEquipmentSet.Items[i].ContainerSlot, useEquipmentSet.Items[i].Slot);
 
                 // check if item slot is set to "ignored" (raw value == 1), must not be unequipped then
                 if (useEquipmentSet.Items[i].Item == ignoredItemGuid)
@@ -1636,13 +1636,13 @@ namespace Game
                     continue;
                 }
 
-                if (item.GetPos() == dstPos)
+                if (item.GetPosition() == dstPos)
                     continue;
 
                 if (_player.CanEquipItem(i, out dstPos, item, true) != InventoryResult.Ok)
                     continue;
 
-                GetPlayer().SwapItem(item.GetPos(), dstPos);
+                GetPlayer().SwapItem(item.GetPosition(), dstPos);
             }
 
             UseEquipmentSetResult result = new();

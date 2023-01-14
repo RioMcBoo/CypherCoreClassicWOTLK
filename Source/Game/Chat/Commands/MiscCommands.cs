@@ -776,10 +776,7 @@ namespace Game.Chat
             if (handler.GetSession().GetPlayer().IsValidPos(InventorySlots.Bag0, dstSlot, false))
                 return false;
 
-            ushort src = (ushort)((InventorySlots.Bag0 << 8) | srcSlot);
-            ushort dst = (ushort)((InventorySlots.Bag0 << 8) | dstSlot);
-
-            handler.GetSession().GetPlayer().SwapItem(src, dst);
+            handler.GetSession().GetPlayer().SwapItem(new(srcSlot), new(dstSlot));
 
             return true;
         }
@@ -2213,8 +2210,8 @@ namespace Game.Chat
             uint noSpaceForCount = 0;
 
             // check space and find places
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, (uint)count, out noSpaceForCount);
+            List<ItemPosCount> dest;
+            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemId, (uint)count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= (int)noSpaceForCount;
 
@@ -2231,7 +2228,7 @@ namespace Game.Chat
             {
                 foreach (var posCount in dest)
                 {
-                    Item item1 = player.GetItemByPos(posCount.pos);
+                    Item item1 = player.GetItemByPos(posCount.Pos);
                     if (item1)
                         item1.SetBinding(false);
                 }
@@ -2293,8 +2290,8 @@ namespace Game.Chat
                     continue;
 
                 found = true;
-                List<ItemPosCount> dest = new();
-                InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, template.Value.GetId(), 1);
+                List<ItemPosCount> dest;
+                InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, template.Value.GetId(), 1);
                 if (msg == InventoryResult.Ok)
                 {
                     List<int> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
@@ -2453,8 +2450,8 @@ namespace Game.Chat
             uint noSpaceForCount = 0;
 
             // check space and find places
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, (uint)count, out noSpaceForCount);
+            List<ItemPosCount> dest;
+            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemId, (uint)count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= (int)noSpaceForCount;
 
@@ -2469,9 +2466,9 @@ namespace Game.Chat
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)
             {
-                foreach (var itemPostCount in dest)
+                foreach (var itemPosCount in dest)
                 {
-                    Item item1 = player.GetItemByPos(itemPostCount.pos);
+                    Item item1 = player.GetItemByPos(itemPosCount.Pos);
                     if (item1 != null)
                         item1.SetBinding(false);
                 }

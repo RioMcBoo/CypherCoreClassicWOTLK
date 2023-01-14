@@ -193,9 +193,9 @@ namespace Game
             if (artifact.IsEquipped())
             {
                 // change weapon appearance
-                _player.SetVisibleItemSlot(artifact.GetSlot(), artifact);
+                _player.SetVisibleItemSlot(artifact.InventorySlot, artifact);
                 if (childItem)
-                    _player.SetVisibleItemSlot(childItem.GetSlot(), childItem);
+                    _player.SetVisibleItemSlot(childItem.InventorySlot, childItem);
 
                 // change druid form appearance
                 if (artifactAppearance.OverrideShapeshiftDisplayID != 0 && artifactAppearance.OverrideShapeshiftFormID != 0 && _player.GetShapeshiftForm() == (ShapeShiftForm)artifactAppearance.OverrideShapeshiftFormID)

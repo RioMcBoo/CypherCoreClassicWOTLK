@@ -73,7 +73,7 @@ namespace Game.Entities
             {
                 Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() {0} deleted but still in world!!", GetGUID().ToString());
                 if (IsTypeMask(TypeMask.Item))
-                    Log.outFatal(LogFilter.Misc, "Item slot {0}", ((Item)this).GetSlot());
+                    Log.outFatal(LogFilter.Misc, "Item slot {0}", ((Item)this).InventorySlot);
                 Cypher.Assert(false);
             }
 

@@ -445,8 +445,7 @@ namespace Game.Entities
             if (srcitem > 0)
             {
                 uint count = quest.SourceItemIdCount;
-                List<ItemPosCount> dest = new();
-                InventoryResult msg2 = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, srcitem, count);
+                InventoryResult msg2 = CanStoreNewItem(ItemPos.Undefined, out _, srcitem, count);
 
                 // player already have max number (in most case 1) source item, no additional item needed and quest can be added.
                 if (msg2 == InventoryResult.ItemMaxCount)
@@ -594,7 +593,7 @@ namespace Game.Entities
                         {
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == rewardId)
                             {
-                                InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, quest.RewardChoiceItemId[i], quest.RewardChoiceItemCount[i]);
+                                InventoryResult res = CanStoreNewItem(ItemPos.Undefined, out dest, quest.RewardChoiceItemId[i], quest.RewardChoiceItemCount[i]);
                                 if (res != InventoryResult.Ok)
                                 {
                                     if (msg)
@@ -616,7 +615,7 @@ namespace Game.Entities
                 {
                     if (quest.RewardItemId[i] != 0)
                     {
-                        InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, quest.RewardItemId[i], quest.RewardItemCount[i]);
+                        InventoryResult res = CanStoreNewItem(ItemPos.Undefined, out dest, quest.RewardItemId[i], quest.RewardItemCount[i]);
                         if (res != InventoryResult.Ok)
                         {
                             if (msg)
@@ -643,7 +642,7 @@ namespace Game.Entities
                         if (CanSelectQuestPackageItem(questPackageItem))
                         {
                             hasFilteredQuestPackageReward = true;
-                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
+                            InventoryResult res = CanStoreNewItem(ItemPos.Undefined, out dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
                             if (res != InventoryResult.Ok)
                             {
                                 SendEquipError(res, null, null, questPackageItem.ItemID);
@@ -663,7 +662,7 @@ namespace Game.Entities
                             if (questPackageItem.ItemID != rewardId)
                                 continue;
 
-                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
+                            InventoryResult res = CanStoreNewItem(ItemPos.Undefined, out dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
                             if (res != InventoryResult.Ok)
                             {
                                 SendEquipError(res, null, null, questPackageItem.ItemID);
@@ -723,7 +722,7 @@ namespace Game.Entities
                         destroyItem = false;
 
                     if (destroyItem)
-                        DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+                        DestroyItem(item.InventoryPosition, true);
 
                     break;
                 }
@@ -918,8 +917,7 @@ namespace Game.Entities
                     if (CanSelectQuestPackageItem(questPackageItem))
                     {
                         hasFilteredQuestPackageReward = true;
-                        List<ItemPosCount> dest = new();
-                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
@@ -938,8 +936,7 @@ namespace Game.Entities
                         if (onlyItemId != 0 && questPackageItem.ItemID != onlyItemId)
                             continue;
 
-                        List<ItemPosCount> dest = new();
-                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
@@ -992,8 +989,7 @@ namespace Game.Entities
                     uint itemId = quest.RewardItemId[i];
                     if (itemId != 0)
                     {
-                        List<ItemPosCount> dest = new();
-                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(itemId));
                             SendNewItem(item, quest.RewardItemCount[i], true, false);
@@ -1014,8 +1010,7 @@ namespace Game.Entities
                         {
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == rewardId)
                             {
-                                List<ItemPosCount> dest = new();
-                                if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
+                                if (CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
                                 {
                                     Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(rewardId));
                                     SendNewItem(item, quest.RewardChoiceItemCount[i], true, false);
@@ -1713,8 +1708,7 @@ namespace Game.Entities
                 if (count <= 0)
                     count = 1;
 
-                List<ItemPosCount> dest = new();
-                InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, srcitem, count);
+                InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, srcitem, count);
                 if (msg == InventoryResult.Ok)
                 {
                     Item item = StoreNewItem(dest, srcitem, true, new ItemRandomEnchantmentId());

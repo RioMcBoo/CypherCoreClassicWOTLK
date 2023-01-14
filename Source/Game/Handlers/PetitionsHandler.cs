@@ -395,7 +395,7 @@ namespace Game
             // Proceed with guild/arena team creation
 
             // Delete charter item
-            GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+            GetPlayer().DestroyItem(item.InventoryBagSlot, item.InventorySlot, true);
 
             // Create guild
             Guild guild = new();

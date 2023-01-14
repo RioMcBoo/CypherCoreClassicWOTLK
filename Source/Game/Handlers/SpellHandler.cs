@@ -191,7 +191,7 @@ namespace Game
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
                 stmt.AddValue(0, item.GetGUID().GetCounter());
 
-                var pos = item.GetPos();
+                var pos = item.GetPosition();
                 var itemGuid = item.GetGUID();
                 _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt)
                     .WithCallback(result => HandleOpenWrappedItemCallback(pos, itemGuid, result)));
@@ -234,7 +234,7 @@ namespace Game
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.Network, $"Wrapped item {item.GetGUID()} don't have record in character_gifts table and will deleted");
-                GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+                GetPlayer().DestroyItem(item.InventoryBagSlot, item.InventorySlot, true);
                 return;
             }
 

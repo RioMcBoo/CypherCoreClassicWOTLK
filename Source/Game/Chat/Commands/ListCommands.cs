@@ -129,23 +129,27 @@ namespace Game.Chat.Commands
                 do
                 {
                     ObjectGuid itemGuid = ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(0));
-                    uint itemBag = result.Read<uint>(1);
-                    byte itemSlot = result.Read<byte>(2);
+                    ItemPos itemPos = new
+                    (
+                        containerSlot:  (byte)result.Read<uint>(1),
+                        slot:           result.Read<byte>(2)
+                    );
+
                     ObjectGuid ownerGuid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(3));
                     uint ownerAccountId = result.Read<uint>(4);
                     string ownerName = result.Read<string>(5);
 
-                    string itemPos;
-                    if (Player.IsEquipmentPos((byte)itemBag, itemSlot))
-                        itemPos = "[equipped]";
-                    else if (Player.IsInventoryPos((byte)itemBag, itemSlot))
-                        itemPos = "[in inventory]";
-                    else if (Player.IsBankPos((byte)itemBag, itemSlot))
-                        itemPos = "[in bank]";
+                    string itemPosMessage;
+                    if (itemPos.IsEquipmentPos)
+                        itemPosMessage = "[equipped]";
+                    else if (itemPos.IsInventoryPos)
+                        itemPosMessage = "[in inventory]";
+                    else if (itemPos.IsBankPos)
+                        itemPosMessage = "[in bank]";
                     else
-                        itemPos = "";
+                        itemPosMessage = "";
 
-                    handler.SendSysMessage(CypherStrings.ItemlistSlot, itemGuid.ToString(), ownerName, ownerGuid.ToString(), ownerAccountId, itemPos);
+                    handler.SendSysMessage(CypherStrings.ItemlistSlot, itemGuid.ToString(), ownerName, ownerGuid.ToString(), ownerAccountId, itemPosMessage);
 
                     count--;
                 }

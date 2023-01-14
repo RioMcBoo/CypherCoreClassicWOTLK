@@ -1021,9 +1021,9 @@ namespace Game.Scripting
         {
             ForEach<GuildScript>(p => p.OnMemberDepositMoney(guild, player, amount));
         }
-        public void OnGuildItemMove(Guild guild, Player player, Item pItem, bool isSrcBank, byte srcContainer, byte srcSlotId, bool isDestBank, byte destContainer, byte destSlotId)
+        public void OnGuildItemMove(Guild guild, Player player, Item pItem, bool isSrcBank, ItemPos src, bool isDestBank, ItemPos dest)
         {
-            ForEach<GuildScript>(p => p.OnItemMove(guild, player, pItem, isSrcBank, srcContainer, srcSlotId, isDestBank, destContainer, destSlotId));
+            ForEach<GuildScript>(p => p.OnItemMove(guild, player, pItem, isSrcBank, src, isDestBank, dest));
         }
         public void OnGuildEvent(Guild guild, byte eventType, ulong playerGuid1, ulong playerGuid2, byte newRank)
         {

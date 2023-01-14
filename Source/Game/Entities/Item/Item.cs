@@ -128,12 +128,12 @@ namespace Game.Entities
             if (duration == 0)
                 return;
 
-            Log.outDebug(LogFilter.Player, "Item.UpdateDuration Item (Entry: {0} Duration {1} Diff {2})", GetEntry(), duration, diff);
+            Log.outDebug(LogFilter.Player, $"Item.UpdateDuration Item (Entry: {GetEntry()} Duration {duration} Diff {diff})");
 
             if (duration <= diff)
             {
                 Global.ScriptMgr.OnItemExpire(owner, GetTemplate());
-                owner.DestroyItem(GetBagSlot(), GetSlot(), true);
+                owner.DestroyItem(InventoryPosition, true);
                 return;
             }
 
@@ -771,7 +771,7 @@ namespace Game.Entities
             }
         }
 
-        public void UpdateItemSuffixFactor() 
+        public void UpdateItemSuffixFactor()
         {
             if (GetTemplate().GetRandomSuffix() == null)
                 return;
@@ -866,11 +866,6 @@ namespace Game.Entities
             item.uQueuePos = -1;
         }
 
-        public byte GetBagSlot()
-        {
-            return m_container != null ? m_container.GetSlot() : InventorySlots.Bag0;
-        }
-
         public bool IsEquipped() { return !IsInBag() && m_slot < EquipmentSlot.End; }
 
         public bool CanBeTraded(bool mail = false, bool trade = false)
@@ -881,13 +876,13 @@ namespace Game.Entities
             if ((!mail || !IsBoundAccountWide()) && (IsSoulBound() && (!IsBOPTradeable() || !trade)))
                 return false;
 
-            if (IsBag() && (Player.IsBagPos(GetPos()) || !ToBag().IsEmpty()))
+            if (IsBag() && (InventoryPosition.IsBagPos || !ToBag().IsEmpty()))
                 return false;
 
             Player owner = GetOwner();
             if (owner != null)
             {
-                if (owner.CanUnequipItem(GetPos(), false) != InventoryResult.Ok)
+                if (owner.CanUnequipItem(InventoryPosition, false) != InventoryResult.Ok)
                     return false;
                 if (owner.GetLootGUID() == GetGUID())
                     return false;
@@ -955,7 +950,7 @@ namespace Game.Entities
 
             return cost;
         }
-        
+
         bool HasEnchantRequiredSkill(Player player)
         {
             // Check all enchants for required skill
@@ -1074,11 +1069,11 @@ namespace Game.Entities
             {
                 var oldEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(slot));
                 if (oldEnchant != null && !oldEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotLog))
-                        owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), oldEnchant.Id, (uint)slot);
+                    owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), oldEnchant.Id, (uint)slot);
 
                 var newEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(id);
                 if (newEnchant != null && !newEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotLog))
-                        owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), caster, GetGUID(), GetEntry(), id, (uint)slot);
+                    owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), caster, GetGUID(), GetEntry(), id, (uint)slot);
             }
 
             ApplyArtifactPowerEnchantmentBonuses(slot, GetEnchantmentId(slot), false, owner);
@@ -1894,7 +1889,7 @@ namespace Game.Entities
             uint minItemLevelCutoff = (uint)owner.m_unitData.MinItemLevelCutoff.GetValue();
             uint maxItemLevel = itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : (uint)owner.m_unitData.MaxItemLevel.GetValue();
             bool pvpBonus = owner.IsUsingPvpItemLevels();
-            
+
             return GetItemLevel(itemTemplate, _bonusData, owner.GetLevel(), GetModifier(ItemModifier.TimewalkerLevel),
                 minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus);
         }
@@ -1905,7 +1900,7 @@ namespace Game.Entities
                 return 1;
 
             uint itemLevel = itemTemplate.GetBaseItemLevel();
-            
+
             if (bonusData.PlayerLevelToItemLevelCurveId != 0)
             {
                 if (fixedLevel != 0)
@@ -2116,7 +2111,7 @@ namespace Game.Entities
 
             return itemModifiedAppearanceId;
         }
-        
+
         public uint GetVisibleEnchantmentId(Player owner)
         {
             uint enchantmentId = GetModifier(ItemConst.IllusionModifierSlotBySpec[owner.GetActiveTalentGroup()]);
@@ -2454,9 +2449,9 @@ namespace Game.Entities
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\nOwner: {GetOwnerGUID()} Count: {GetCount()} BagSlot: {GetBagSlot()} Slot: {GetSlot()} Equipped: {IsEquipped()}";
+            return $"{base.GetDebugInfo()}\nOwner: {GetOwnerGUID()} Count: {GetCount()} BagSlot: {InventoryBagSlot} Slot: {InventorySlot} Equipped: {IsEquipped()}";
         }
-        
+
         public static Item NewItemOrBag(ItemTemplate proto)
         {
             if (proto.GetInventoryType() == InventoryType.Bag)
@@ -2654,17 +2649,18 @@ namespace Game.Entities
         public uint GetCount() { return m_itemData.StackCount; }
         public uint GetMaxStackCount() { return GetTemplate().GetMaxStackSize(); }
 
-        public byte GetSlot() { return m_slot; }
+        public byte InventorySlot { get => m_slot; set => m_slot = value; }
+        public byte InventoryBagSlot { get => m_container != null ? m_container.InventorySlot : InventorySlots.Bag0; }
+        public ItemPos InventoryPosition { get => new(InventorySlot, InventoryBagSlot); }
         public Bag GetContainer() { return m_container; }
-        public void SetSlot(byte slot) { m_slot = slot; }
-        public ushort GetPos() { return (ushort)(GetBagSlot() << 8 | GetSlot()); }
+        
         public void SetContainer(Bag container) { m_container = container; }
 
         bool IsInBag() { return m_container != null; }
 
         // ItemRandomPropertyId (signed but stored as unsigned)
         public int GetItemRandomPropertyId() { return m_itemData.RandomPropertiesID; }
-        public uint GetItemSuffixFactor() { return (uint)(int)m_itemData.PropertySeed; }       
+        public uint GetItemSuffixFactor() { return (uint)(int)m_itemData.PropertySeed; }
         public ItemRandomEnchantmentId GetItemRandomEnchantmentId() { return m_randomEnchantment; }
         public uint GetEnchantmentId(EnchantmentSlot slot) { return (uint)m_itemData.Enchantment[(int)slot].ID.GetValue(); }
         public uint GetEnchantmentDuration(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Duration; }
@@ -2723,8 +2719,8 @@ namespace Game.Entities
         public void SetChildItem(ObjectGuid childItem) { m_childItem = childItem; }
 
         public ItemEffectRecord[] GetEffects() { return _bonusData.Effects[0.._bonusData.EffectCount]; }
-        
-        public override Loot GetLootForPlayer(Player player)  { return loot; }
+
+        public override Loot GetLootForPlayer(Player player) { return loot; }
 
         //Static
         public static bool ItemCanGoIntoBag(ItemTemplate pProto, ItemTemplate pBagProto)
@@ -2858,24 +2854,128 @@ namespace Game.Entities
         }
     }
 
-    public class ItemPosCount
+    public readonly record struct ItemPos
     {
-        public ItemPosCount(ushort _pos, uint _count)
+        public static implicit operator ItemPos(byte slot) => new(slot);
+        public static ItemPos Undefined = new(ItemConst.NullSlot, ItemConst.NullBag);
+
+        public ItemPos(byte slot, byte containerSlot = InventorySlots.Bag0)
         {
-            pos = _pos;
-            count = _count;
+            Slot = slot;
+            BagSlot = containerSlot;
+        }
+
+        public bool IsSpecificSlot
+        {
+            get => BagSlot != ItemConst.NullBag && Slot != ItemConst.NullSlot;
+        }
+
+        public bool IsInventoryPos
+        {
+            get
+            {
+                if (BagSlot == InventorySlots.Bag0 && Slot == ItemConst.NullSlot)
+                    return true;
+                if (BagSlot == InventorySlots.Bag0 && (Slot >= InventorySlots.ItemStart && Slot < InventorySlots.ItemEnd))
+                    return true;
+                if (BagSlot >= InventorySlots.BagStart && BagSlot < InventorySlots.BagEnd)
+                    return true;
+                if (BagSlot == InventorySlots.Bag0 && (Slot >= InventorySlots.KeyringStart && Slot < InventorySlots.KeyringEnd))
+                    return true;
+                if (BagSlot == InventorySlots.Bag0 && (Slot >= InventorySlots.ChildEquipmentStart && Slot < InventorySlots.ChildEquipmentEnd))
+                    return true;
+                return false;
+            }
+        }
+        
+        public bool IsBankPos
+        {
+            get
+            {
+                if (BagSlot == InventorySlots.Bag0 && (Slot >= InventorySlots.BankItemStart && Slot < InventorySlots.BankItemEnd))
+                    return true;
+                if (BagSlot == InventorySlots.Bag0 && (Slot >= InventorySlots.BankBagStart && Slot < InventorySlots.BankBagEnd))
+                    return true;
+                if (BagSlot >= InventorySlots.BankBagStart && BagSlot < InventorySlots.BankBagEnd)
+                    return true;
+                return false;
+            }
+        }
+
+        public bool IsBagPos
+        {
+            get
+            {
+                if (BagSlot == InventorySlots.Bag0 && (Slot >= InventorySlots.BagStart && Slot < InventorySlots.BagEnd))
+                    return true;
+                if (BagSlot == InventorySlots.Bag0 && (Slot >= InventorySlots.BankBagStart && Slot < InventorySlots.BankBagEnd))
+                    return true;
+                return false;
+            }
+        }
+
+        public bool IsEquipmentPos
+        {
+            get
+            {
+                if (BagSlot == InventorySlots.Bag0 && (Slot < EquipmentSlot.End))
+                    return true;
+                if (BagSlot == InventorySlots.Bag0 && (Slot >= InventorySlots.BagStart && Slot < InventorySlots.BagEnd))
+                    return true;
+                return false;
+            }
+        }
+
+        public bool IsChildEquipmentPos
+        {
+            get
+            {
+                return BagSlot == InventorySlots.Bag0 && (Slot >= InventorySlots.ChildEquipmentStart && Slot < InventorySlots.ChildEquipmentEnd);
+            }
+        }
+
+        public bool IsBuyBackPos
+        {
+            get
+            {
+                return BagSlot == InventorySlots.Bag0 && (Slot >= InventorySlots.BuyBackStart && Slot < InventorySlots.BuyBackEnd);
+            }
+        }        
+
+        public readonly byte Slot;
+        public readonly byte BagSlot;
+    }
+
+    public readonly record struct ItemPosCount
+    {
+        public ItemPosCount(ItemPos pos, uint count = 1)
+        {
+            Pos = pos;
+            Count = count;
+        }
+
+        public ItemPosCount(byte slot, byte containerSlot, uint count = 1)
+        {
+            Pos = new ItemPos(slot, containerSlot);
+            Count = count;
+        }
+
+        public ItemPosCount(byte slot, uint count = 1)
+        {
+            Pos = new ItemPos(slot);
+            Count = count;
         }
 
         public bool IsContainedIn(List<ItemPosCount> vec)
         {
             foreach (var posCount in vec)
-                if (posCount.pos == pos)
+                if (posCount.Pos == Pos)
                     return true;
             return false;
         }
 
-        public ushort pos;
-        public uint count;
+        public readonly ItemPos Pos;
+        public readonly uint Count;
     }
 
     public class ItemSetEffect
@@ -2921,7 +3021,7 @@ namespace Game.Entities
             RelicType = -1;
             HasFixedLevel = false;
             RequiredLevelOverride = 0;
-            
+
             EffectCount = 0;
             foreach (ItemEffectRecord itemEffect in proto.Effects)
                 Effects[EffectCount++] = itemEffect;
@@ -3038,7 +3138,7 @@ namespace Game.Entities
                 case ItemBonusType.OverrideRequiredLevel:
                     RequiredLevelOverride = values[0];
                     break;
-                case ItemBonusType.AzeriteTierUnlockSet:                    
+                case ItemBonusType.AzeriteTierUnlockSet:
                     break;
                 case ItemBonusType.OverrideCanDisenchant:
                     CanDisenchant = values[0] != 0;
@@ -3171,7 +3271,7 @@ namespace Game.Entities
 
                 } while (artifactResult.NextRow());
             }
-        }            
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

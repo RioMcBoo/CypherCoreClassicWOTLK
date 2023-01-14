@@ -114,9 +114,9 @@ namespace Game
 
             Item item = GetPlayer().GetItemByGuid(packet.Item);
             ushort dstPos = (ushort)(packet.ItemDstSlot | (InventorySlots.Bag0 << 8));
-            ushort srcPos = (ushort)(packet.Inv.Items[0].Slot | (packet.Inv.Items[0].ContainerSlot << 8));
+            ushort srcPos = (ushort)(packet.Inv.Items[0].Slot | (packet.Inv.Items[0].BagSlot << 8));
 
-            if (item == null || item.GetPos() != srcPos || srcPos == dstPos)
+            if (item == null || item.GetPosition() != srcPos || srcPos == dstPos)
                 return;
 
             GetPlayer().SwapItem(srcPos, dstPos);
@@ -190,7 +190,7 @@ namespace Game
                 return;
             }
 
-            ushort src = srcItem.GetPos();
+            ushort src = srcItem.GetPosition();
             if (dest == src)                                           // prevent equip in same slot, only at cheat
                 return;
 
@@ -216,8 +216,8 @@ namespace Game
             }
             else                                                    // have currently equipped item, not simple case
             {
-                byte dstbag = dstItem.GetBagSlot();
-                byte dstslot = dstItem.GetSlot();
+                byte dstbag = dstItem.InventoryBagSlot;
+                byte dstslot = dstItem.InventorySlot;
 
                 msg = pl.CanUnequipItem(dest, !srcItem.IsBag());
                 if (msg != InventoryResult.Ok)
@@ -292,7 +292,7 @@ namespace Game
                             // dest is now empty
                             _player.SwapItem(src, dest);
                             // src is now empty
-                            _player.SwapItem(parentItem.GetPos(), src);
+                            _player.SwapItem(parentItem.GetPosition(), src);
                         }
                     }
                 }
@@ -481,7 +481,7 @@ namespace Game
                         }
                         else
                         {
-                            pl.RemoveItem(pItem.GetBagSlot(), pItem.GetSlot(), true);
+                            pl.RemoveItem(pItem.InventoryBagSlot, pItem.InventorySlot, true);
                             pl.ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
                             Item.RemoveItemFromUpdateQueueOf(pItem, pl);
                             pl.AddItemToBuyBackSlot(pItem);
@@ -554,7 +554,7 @@ namespace Game
 
                     byte bag = ItemConst.NullBag;
                     if (bagItem != null && bagItem.IsBag())
-                        bag = bagItem.GetSlot();
+                        bag = bagItem.InventorySlot;
                     else if (packet.ContainerGUID == GetPlayer().GetGUID()) // The client sends the player guid when trying to store an item in the default backpack
                         bag = InventorySlots.Bag0;
 
@@ -588,7 +588,7 @@ namespace Game
                 return;
             }
 
-            ushort src = item.GetPos();
+            ushort src = item.GetPosition();
             InventoryResult msg;
             // check unequip potability for equipped items and bank bags
             if (Player.IsEquipmentPos(src) || Player.IsBagPos(src))
@@ -654,10 +654,10 @@ namespace Game
             }
 
             // Gift
-            byte giftContainerSlot = packet.Inv.Items[0].ContainerSlot;
+            byte giftContainerSlot = packet.Inv.Items[0].BagSlot;
             byte giftSlot = packet.Inv.Items[0].Slot;
             // Item
-            byte itemContainerSlot = packet.Inv.Items[1].ContainerSlot;
+            byte itemContainerSlot = packet.Inv.Items[1].BagSlot;
             byte itemSlot = packet.Inv.Items[1].Slot;
 
             Item gift = GetPlayer().GetItemByPos(giftContainerSlot, giftSlot);
@@ -792,7 +792,7 @@ namespace Game
                 return;
 
             //this slot is excepted when applying / removing meta gem bonus
-            byte slot = itemTarget.IsEquipped() ? itemTarget.GetSlot() : ItemConst.NullSlot;
+            byte slot = itemTarget.IsEquipped() ? itemTarget.InventorySlot : ItemConst.NullSlot;
 
             Item[] gems = new Item[ItemConst.MaxGemSockets];
             ItemDynamicFieldGems[] gemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];
@@ -936,7 +936,7 @@ namespace Game
 
             //remove ALL mods - gem can change item level
             if (itemTarget.IsEquipped())
-                _player._ApplyItemMods(itemTarget, itemTarget.GetSlot(), false);
+                _player._ApplyItemMods(itemTarget, itemTarget.InventorySlot, false);
 
             for (ushort i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
@@ -958,16 +958,16 @@ namespace Game
             }
 
             if (itemTarget.IsEquipped())
-                _player._ApplyItemMods(itemTarget, itemTarget.GetSlot(), true);
+                _player._ApplyItemMods(itemTarget, itemTarget.InventorySlot, true);
 
             Item childItem = _player.GetChildItemByGuid(itemTarget.GetChildItem());
             if (childItem)
             {
                 if (childItem.IsEquipped())
-                    _player._ApplyItemMods(childItem, childItem.GetSlot(), false);
+                    _player._ApplyItemMods(childItem, childItem.InventorySlot, false);
                 childItem.CopyArtifactDataFromParent(itemTarget);
                 if (childItem.IsEquipped())
-                    _player._ApplyItemMods(childItem, childItem.GetSlot(), true);
+                    _player._ApplyItemMods(childItem, childItem.InventorySlot, true);
             }
 
             bool SocketBonusToBeActivated = itemTarget.GemsFitSockets();//current socketbonus state
@@ -1070,7 +1070,7 @@ namespace Game
                     GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
             }
 
-            GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+            GetPlayer().DestroyItem(item.InventoryBagSlot, item.InventorySlot, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.RemoveNewItem, Processing = PacketProcessing.Inplace)]

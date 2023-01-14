@@ -1769,27 +1769,27 @@ namespace Game.Guilds
             return Math.Min(m_bankMoney, (ulong)_GetMemberRemainingMoney(member));
         }
         
-        public void SwapItems(Player player, byte tabId, byte slotId, byte destTabId, byte destSlotId, uint splitedAmount)
+        public void SwapItems(Player player, ItemPos src, ItemPos dest, uint splitedAmount)
         {
-            if (tabId >= _GetPurchasedTabsSize() || slotId >= GuildConst.MaxBankSlots ||
-                destTabId >= _GetPurchasedTabsSize() || destSlotId >= GuildConst.MaxBankSlots)
+            if (src.BagSlot >= _GetPurchasedTabsSize() || src.Slot >= GuildConst.MaxBankSlots ||
+                dest.BagSlot >= _GetPurchasedTabsSize() || dest.Slot >= GuildConst.MaxBankSlots)
                 return;
 
-            if (tabId == destTabId && slotId == destSlotId)
+            if (src == dest)
                 return;
 
-            BankMoveItemData from = new(this, player, tabId, slotId);
-            BankMoveItemData to = new(this, player, destTabId, destSlotId);
+            BankMoveItemData from = new(this, player, src);
+            BankMoveItemData to = new(this, player, dest);
             _MoveItems(from, to, splitedAmount);
         }
 
-        public void SwapItemsWithInventory(Player player, bool toChar, byte tabId, byte slotId, byte playerBag, byte playerSlotId, uint splitedAmount)
+        public void SwapItemsWithInventory(Player player, bool toChar, ItemPos source, ItemPos playerInvPos, uint splitedAmount)
         {
-            if ((slotId >= GuildConst.MaxBankSlots && slotId != ItemConst.NullSlot) || tabId >= _GetPurchasedTabsSize())
+            if ((source.Slot >= GuildConst.MaxBankSlots && source.Slot != ItemConst.NullSlot) || source.BagSlot >= _GetPurchasedTabsSize())
                 return;
 
-            BankMoveItemData bankData = new(this, player, tabId, slotId);
-            PlayerMoveItemData charData = new(this, player, playerBag, playerSlotId);
+            BankMoveItemData bankData = new(this, player, source);
+            PlayerMoveItemData charData = new(this, player, playerInvPos);
             if (toChar)
                 _MoveItems(bankData, charData, splitedAmount);
             else
@@ -2099,19 +2099,19 @@ namespace Game.Guilds
             Global.ScriptMgr.OnGuildBankEvent(this, (byte)eventType, tabId, lowguid, itemOrMoney, itemStackCount, destTabId);
         }
 
-        Item _GetItem(byte tabId, byte slotId)
+        Item _GetItem(ItemPos pos)
         {
-            BankTab tab = GetBankTab(tabId);
+            BankTab tab = GetBankTab(pos.BagSlot);
             if (tab != null)
-                return tab.GetItem(slotId);
+                return tab.GetItem(pos.Slot);
             return null;
         }
 
-        void _RemoveItem(SQLTransaction trans, byte tabId, byte slotId)
+        void _RemoveItem(SQLTransaction trans, ItemPos itemPos)
         {
-            BankTab pTab = GetBankTab(tabId);
+            BankTab pTab = GetBankTab(itemPos.BagSlot);
             if (pTab != null)
-                pTab.SetItem(trans, slotId, null);
+                pTab.SetItem(trans, itemPos.Slot, null);
         }
 
         void _MoveItems(MoveItemData pSrc, MoveItemData pDest, uint splitedAmount)
@@ -2227,24 +2227,24 @@ namespace Game.Guilds
             List<byte> slots = new();
             if (pSrc.IsBank()) // B .
             {
-                tabId = pSrc.GetContainer();
-                slots.Insert(0, pSrc.GetSlotId());
+                tabId = pSrc.Container;
+                slots.Insert(0, pSrc.Slot);
                 if (pDest.IsBank()) // B . B
                 {
                     // Same tab - add destination slots to collection
-                    if (pDest.GetContainer() == pSrc.GetContainer())
+                    if (pDest.Container == pSrc.Container)
                         pDest.CopySlots(slots);
                     else // Different tabs - send second message
                     {
                         List<byte> destSlots = new();
                         pDest.CopySlots(destSlots);
-                        _SendBankContentUpdate(pDest.GetContainer(), destSlots);
+                        _SendBankContentUpdate(pDest.Container, destSlots);
                     }
                 }
             }
             else if (pDest.IsBank()) // C . B
             {
-                tabId = pDest.GetContainer();
+                tabId = pDest.Container;
                 pDest.CopySlots(slots);
             }
 
@@ -3605,12 +3605,11 @@ namespace Game.Guilds
 
         public abstract class MoveItemData
         {
-            protected MoveItemData(Guild guild, Player player, byte container, byte slotId)
+            protected MoveItemData(Guild guild, Player player, ItemPos itemPos)
             {
                 m_pGuild = guild;
                 m_pPlayer = player;
-                m_container = container;
-                m_slotId = slotId;
+                m_itemPos = itemPos;
                 m_pItem = null;
                 m_pClonedItem = null;
             }
@@ -3625,7 +3624,7 @@ namespace Game.Guilds
                 return true;
             }
 
-            public InventoryResult CanStore(Item pItem, bool swap, bool sendError)
+            protected InventoryResult CanStore(Item pItem, bool swap, bool sendError)
             {
                 m_vec.Clear();
                 InventoryResult msg = CanStore(pItem, swap);
@@ -3651,14 +3650,14 @@ namespace Game.Guilds
                 Cypher.Assert(pFrom.GetItem() != null);
 
                 Global.ScriptMgr.OnGuildItemMove(m_pGuild, m_pPlayer, pFrom.GetItem(),
-                     pFrom.IsBank(), pFrom.GetContainer(), pFrom.GetSlotId(),
-                     IsBank(), GetContainer(), GetSlotId());
+                     pFrom.IsBank(), pFrom.Position,
+                     IsBank(), Position);
             }
 
             public void CopySlots(List<byte> ids)
             {
                 foreach (var item in m_vec)
-                    ids.Add((byte)item.pos);
+                    ids.Add(item.Pos.Slot);
             }
 
             public void SendEquipError(InventoryResult result, Item item)
@@ -3681,31 +3680,31 @@ namespace Game.Guilds
             // Log bank event
             public abstract void LogBankEvent(SQLTransaction trans, MoveItemData pFrom, uint count);
 
-            public abstract InventoryResult CanStore(Item pItem, bool swap);
+            protected abstract InventoryResult CanStore(Item pItem, bool swap);
 
             public Item GetItem(bool isCloned = false) { return isCloned ? m_pClonedItem : m_pItem; }
-            public byte GetContainer() { return m_container; }
-            public byte GetSlotId() { return m_slotId; }
+            public byte Container => m_itemPos.BagSlot; 
+            public byte Slot => m_itemPos.Slot;
+            public ItemPos Position => m_itemPos;
 
-            public Guild m_pGuild;
-            public Player m_pPlayer;
-            public byte m_container;
-            public byte m_slotId;
-            public Item m_pItem;
-            public Item m_pClonedItem;
-            public List<ItemPosCount> m_vec = new();
+            protected Guild m_pGuild;
+            protected Player m_pPlayer;
+            protected ItemPos m_itemPos;
+            protected Item m_pItem;
+            protected Item m_pClonedItem;
+            protected List<ItemPosCount> m_vec = new();
         }
 
         public class PlayerMoveItemData : MoveItemData
         {
-            public PlayerMoveItemData(Guild guild, Player player, byte container, byte slotId)
-                : base(guild, player, container, slotId) { }
+            public PlayerMoveItemData(Guild guild, Player player, ItemPos itemPos)
+                : base(guild, player, itemPos) { }
 
             public override bool IsBank() { return false; }
 
             public override bool InitItem()
             {
-                m_pItem = m_pPlayer.GetItemByPos(m_container, m_slotId);
+                m_pItem = m_pPlayer.GetItemByPos(new(Slot));
                 if (m_pItem != null)
                 {
                     // Anti-WPE protection. Do not move non-empty bags to bank.
@@ -3734,7 +3733,7 @@ namespace Game.Guilds
                 }
                 else
                 {
-                    m_pPlayer.MoveItemFromInventory(m_container, m_slotId, true);
+                    m_pPlayer.MoveItemFromInventory(Position, true);
                     m_pItem.DeleteFromInventoryDB(trans);
                     m_pItem = null;
                 }
@@ -3752,48 +3751,48 @@ namespace Game.Guilds
             {
                 Cypher.Assert(pFrom != null);
                 // Bank . Char
-                m_pGuild._LogBankEvent(trans, GuildBankEventLogTypes.WithdrawItem, pFrom.GetContainer(), m_pPlayer.GetGUID().GetCounter(),
+                m_pGuild._LogBankEvent(trans, GuildBankEventLogTypes.WithdrawItem, pFrom.Container, m_pPlayer.GetGUID().GetCounter(),
                     pFrom.GetItem().GetEntry(), (ushort)count);
             }
 
-            public override InventoryResult CanStore(Item pItem, bool swap)
+            protected override InventoryResult CanStore(Item pItem, bool swap)
             {
-                return m_pPlayer.CanStoreItem(m_container, m_slotId, m_vec, pItem, swap);
+                return m_pPlayer.CanStoreItem(Position, out m_vec, pItem, swap);
             }
         }
 
         public class BankMoveItemData : MoveItemData
         {
-            public BankMoveItemData(Guild guild, Player player, byte container, byte slotId)
-                : base(guild, player, container, slotId) { }
+            public BankMoveItemData(Guild guild, Player player, ItemPos itemPos)
+                : base(guild, player, itemPos) { }
 
             public override bool IsBank() { return true; }
 
             public override bool InitItem()
             {
-                m_pItem = m_pGuild._GetItem(m_container, m_slotId);
+                m_pItem = m_pGuild._GetItem(Position);
                 return (m_pItem != null);
             }
             public override bool HasStoreRights(MoveItemData pOther)
             {
                 Cypher.Assert(pOther != null);
                 // Do not check rights if item is being swapped within the same bank tab
-                if (pOther.IsBank() && pOther.GetContainer() == m_container)
+                if (pOther.IsBank() && pOther.Container == Container)
                     return true;
-                return m_pGuild._MemberHasTabRights(m_pPlayer.GetGUID(), m_container, GuildBankRights.DepositItem);
+                return m_pGuild._MemberHasTabRights(m_pPlayer.GetGUID(), Container, GuildBankRights.DepositItem);
             }
 
             public override bool HasWithdrawRights(MoveItemData pOther)
             {
                 Cypher.Assert(pOther != null);
                 // Do not check rights if item is being swapped within the same bank tab
-                if (pOther.IsBank() && pOther.GetContainer() == m_container)
+                if (pOther.IsBank() && pOther.Container == Container)
                     return true;
 
                 int slots = 0;
                 Member member = m_pGuild.GetMember(m_pPlayer.GetGUID());
                 if (member != null)
-                    slots = m_pGuild._GetMemberRemainingSlots(member, m_container);
+                    slots = m_pGuild._GetMemberRemainingSlots(member, Container);
 
                 return slots != 0;
             }
@@ -3809,12 +3808,12 @@ namespace Game.Guilds
                 }
                 else
                 {
-                    m_pGuild._RemoveItem(trans, m_container, m_slotId);
+                    m_pGuild._RemoveItem(trans, Position);
                     m_pItem = null;
                 }
                 // Decrease amount of player's remaining items (if item is moved to different tab or to player)
-                if (!pOther.IsBank() || pOther.GetContainer() != m_container)
-                    m_pGuild._UpdateMemberWithdrawSlots(trans, m_pPlayer.GetGUID(), m_container);
+                if (!pOther.IsBank() || pOther.Container != Container)
+                    m_pGuild._UpdateMemberWithdrawSlots(trans, m_pPlayer.GetGUID(), Container);
             }
 
             public override Item StoreItem(SQLTransaction trans, Item pItem)
@@ -3822,15 +3821,14 @@ namespace Game.Guilds
                 if (pItem == null)
                     return null;
 
-                BankTab pTab = m_pGuild.GetBankTab(m_container);
+                BankTab pTab = m_pGuild.GetBankTab(Container);
                 if (pTab == null)
                     return null;
 
                 Item pLastItem = pItem;
                 foreach (var pos in m_vec)
                 {
-                    Log.outDebug(LogFilter.Guild, "GUILD STORAGE: StoreItem tab = {0}, slot = {1}, item = {2}, count = {3}",
-                        m_container, m_slotId, pItem.GetEntry(), pItem.GetCount());
+                    Log.outDebug(LogFilter.Guild, $"GUILD STORAGE: StoreItem tab = {Container}, slot = {Slot}, item = {pItem.GetEntry()}, count = {pItem.GetCount()}");
                     pLastItem = _StoreItem(trans, pTab, pItem, pos, pos.Equals(m_vec.Last()));
                 }
                 return pLastItem;
@@ -3841,28 +3839,29 @@ namespace Game.Guilds
                Cypher.Assert(pFrom.GetItem() != null);
                 if (pFrom.IsBank())
                     // Bank . Bank
-                    m_pGuild._LogBankEvent(trans, GuildBankEventLogTypes.MoveItem, pFrom.GetContainer(), m_pPlayer.GetGUID().GetCounter(),
-                        pFrom.GetItem().GetEntry(), (ushort)count, m_container);
+                    m_pGuild._LogBankEvent(trans, GuildBankEventLogTypes.MoveItem, pFrom.Container, m_pPlayer.GetGUID().GetCounter(),
+                        pFrom.GetItem().GetEntry(), (ushort)count, Container);
                 else
                     // Char . Bank
-                    m_pGuild._LogBankEvent(trans, GuildBankEventLogTypes.DepositItem, m_container, m_pPlayer.GetGUID().GetCounter(),
+                    m_pGuild._LogBankEvent(trans, GuildBankEventLogTypes.DepositItem, Container, m_pPlayer.GetGUID().GetCounter(),
                         pFrom.GetItem().GetEntry(), (ushort)count);
             }
+
             public override void LogAction(MoveItemData pFrom)
             {
                 base.LogAction(pFrom);
                 if (!pFrom.IsBank() && m_pPlayer.GetSession().HasPermission(RBACPermissions.LogGmTrade)) // @todo Move this to scripts
                 {
-                    Log.outCommand(m_pPlayer.GetSession().GetAccountId(), "GM {0} ({1}) (Account: {2}) deposit item: {3} (Entry: {4} Count: {5}) to guild bank named: {6} (Guild ID: {7})",
-                        m_pPlayer.GetName(), m_pPlayer.GetGUID().ToString(), m_pPlayer.GetSession().GetAccountId(), pFrom.GetItem().GetTemplate().GetName(),
-                        pFrom.GetItem().GetEntry(), pFrom.GetItem().GetCount(), m_pGuild.GetName(), m_pGuild.GetId());
+                    Log.outCommand(m_pPlayer.GetSession().GetAccountId(), $"GM {m_pPlayer.GetName()} ({m_pPlayer.GetGUID()}) (Account: {m_pPlayer.GetSession().GetAccountId()}) " +
+                        $"deposit item: {pFrom.GetItem().GetTemplate().GetName()} (Entry: {pFrom.GetItem().GetEntry()} Count: {pFrom.GetItem().GetCount()}) " +
+                        $"to guild bank named: {m_pGuild.GetName()} (Guild ID: {m_pGuild.GetId()})");
                 }
             }
 
             Item _StoreItem(SQLTransaction trans, BankTab pTab, Item pItem, ItemPosCount pos, bool clone)
             {
-                byte slotId = (byte)pos.pos;
-                uint count = pos.count;
+                byte slotId = pos.Pos.Slot;
+                uint count = pos.Count;
                 Item pItemDest = pTab.GetItem(slotId);
                 if (pItemDest != null)
                 {
@@ -3918,7 +3917,7 @@ namespace Game.Guilds
                     if (slotId == skipSlotId)
                         continue;
 
-                    Item pItemDest = m_pGuild._GetItem(m_container, slotId);
+                    Item pItemDest = m_pGuild._GetItem(Position);
                     if (pItemDest == pItem)
                         pItemDest = null;
 
@@ -3930,10 +3929,9 @@ namespace Game.Guilds
                 }
             }
 
-            public override InventoryResult CanStore(Item pItem, bool swap)
+            protected override InventoryResult CanStore(Item pItem, bool swap)
             {
-                Log.outDebug(LogFilter.Guild, "GUILD STORAGE: CanStore() tab = {0}, slot = {1}, item = {2}, count = {3}",
-                    m_container, m_slotId, pItem.GetEntry(), pItem.GetCount());
+                Log.outDebug(LogFilter.Guild, $"GUILD STORAGE: CanStore() tab = {Container}, slot = {Slot}, item = {pItem.GetEntry()}, count = {pItem.GetCount()}");
 
                 uint count = pItem.GetCount();
                 // Soulbound items cannot be moved
@@ -3941,18 +3939,18 @@ namespace Game.Guilds
                     return InventoryResult.DropBoundItem;
 
                 // Make sure destination bank tab exists
-                if (m_container >= m_pGuild._GetPurchasedTabsSize())
+                if (Container >= m_pGuild._GetPurchasedTabsSize())
                     return InventoryResult.WrongBagType;
 
                 // Slot explicitely specified. Check it.
-                if (m_slotId != ItemConst.NullSlot)
+                if (Slot != ItemConst.NullSlot)
                 {
-                    Item pItemDest = m_pGuild._GetItem(m_container, m_slotId);
+                    Item pItemDest = m_pGuild._GetItem(Position);
                     // Ignore swapped item (this slot will be empty after move)
                     if ((pItemDest == pItem) || swap)
                         pItemDest = null;
 
-                    if (!_ReserveSpace(m_slotId, pItem, pItemDest, ref count))
+                    if (!_ReserveSpace(Slot, pItem, pItemDest, ref count))
                         return InventoryResult.CantStack;
 
                     if (count == 0)
@@ -3963,13 +3961,13 @@ namespace Game.Guilds
                 // Search for stacks to merge with
                 if (pItem.GetMaxStackCount() > 1)
                 {
-                    CanStoreItemInTab(pItem, m_slotId, true, ref count);
+                    CanStoreItemInTab(pItem, Slot, true, ref count);
                     if (count == 0)
                         return InventoryResult.Ok;
                 }
 
                 // Search free slot for item
-                CanStoreItemInTab(pItem, m_slotId, false, ref count);
+                CanStoreItemInTab(pItem, Slot, false, ref count);
                 if (count == 0)
                     return InventoryResult.Ok;
 

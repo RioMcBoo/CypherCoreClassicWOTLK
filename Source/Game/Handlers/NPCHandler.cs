@@ -424,7 +424,7 @@ namespace Game
 
                 Item item = GetPlayer().GetItemByGuid(packet.ItemGUID);
                 if (item)
-                    GetPlayer().DurabilityRepair(item.GetPos(), true, discountMod);
+                    GetPlayer().DurabilityRepair(item.GetPosition(), true, discountMod);
             }
             else
             {

@@ -188,7 +188,7 @@ namespace Game
                 Item item = myTrade.GetItem((TradeSlots)i);
                 if (item)
                 {
-                    Log.outDebug(LogFilter.Network, "player trade item {0} bag: {1} slot: {2}", item.GetGUID().ToString(), item.GetBagSlot(), item.GetSlot());
+                    Log.outDebug(LogFilter.Network, "player trade item {0} bag: {1} slot: {2}", item.GetGUID().ToString(), item.InventoryBagSlot, item.InventorySlot);
                     //Can return null
                     myItems[i] = item;
                     myItems[i].SetInTrade();
@@ -196,7 +196,7 @@ namespace Game
                 item = hisTrade.GetItem((TradeSlots)i);
                 if (item)
                 {
-                    Log.outDebug(LogFilter.Network, "partner trade item {0} bag: {1} slot: {2}", item.GetGUID().ToString(), item.GetBagSlot(), item.GetSlot());
+                    Log.outDebug(LogFilter.Network, "partner trade item {0} bag: {1} slot: {2}", item.GetGUID().ToString(), item.InventoryBagSlot, item.InventorySlot);
                     hisItems[i] = item;
                     hisItems[i].SetInTrade();
                 }
@@ -455,12 +455,12 @@ namespace Game
                     if (myItems[i])
                     {
                         myItems[i].SetGiftCreator(GetPlayer().GetGUID());
-                        GetPlayer().MoveItemFromInventory(myItems[i].GetBagSlot(), myItems[i].GetSlot(), true);
+                        GetPlayer().MoveItemFromInventory(myItems[i].InventoryBagSlot, myItems[i].InventorySlot, true);
                     }
                     if (hisItems[i])
                     {
                         hisItems[i].SetGiftCreator(trader.GetGUID());
-                        trader.MoveItemFromInventory(hisItems[i].GetBagSlot(), hisItems[i].GetSlot(), true);
+                        trader.MoveItemFromInventory(hisItems[i].InventoryBagSlot, hisItems[i].InventorySlot, true);
                     }
                 }
 

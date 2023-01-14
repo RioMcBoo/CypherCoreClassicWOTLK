@@ -1338,7 +1338,7 @@ namespace Game.Spells
             if (newitemid == 0)
                 return;
 
-            ushort pos = m_CastItem.GetPos();
+            ushort pos = m_CastItem.GetPosition();
 
             Item pNewItem = Item.CreateItem(newitemid, 1, m_CastItem.GetContext(), player);
             if (pNewItem == null)
@@ -1357,10 +1357,10 @@ namespace Game.Spells
             if (player.IsInventoryPos(pos))
             {
                 List<ItemPosCount> dest = new();
-                InventoryResult msg = player.CanStoreItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), dest, pNewItem, true);
+                InventoryResult msg = player.CanStoreItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, dest, pNewItem, true);
                 if (msg == InventoryResult.Ok)
                 {
-                    player.DestroyItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), true);
+                    player.DestroyItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, true);
 
                     // prevent crash at access and unexpected charges counting with item update queue corrupt
                     if (m_CastItem == m_targets.GetItemTarget())
@@ -1380,10 +1380,10 @@ namespace Game.Spells
             else if (Player.IsBankPos(pos))
             {
                 List<ItemPosCount> dest = new();
-                InventoryResult msg = player.CanBankItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), dest, pNewItem, true);
+                InventoryResult msg = player.CanBankItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, dest, pNewItem, true);
                 if (msg == InventoryResult.Ok)
                 {
-                    player.DestroyItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), true);
+                    player.DestroyItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, true);
 
                     // prevent crash at access and unexpected charges counting with item update queue corrupt
                     if (m_CastItem == m_targets.GetItemTarget())
@@ -1402,9 +1402,9 @@ namespace Game.Spells
             {
                 ushort dest;
 
-                player.DestroyItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), true);
+                player.DestroyItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, true);
 
-                InventoryResult msg = player.CanEquipItem(m_CastItem.GetSlot(), out dest, pNewItem, true);
+                InventoryResult msg = player.CanEquipItem(m_CastItem.InventorySlot, out dest, pNewItem, true);
 
                 if (msg == InventoryResult.Ok || msg == InventoryResult.ClientLockedOut)
                 {
@@ -5057,7 +5057,7 @@ namespace Game.Spells
             Player player = unitTarget.ToPlayer();
             Item item = player.GetItemByEntry(effectInfo.ItemType);
             if (item)
-                player.DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+                player.DestroyItem(item.InventoryBagSlot, item.InventorySlot, true);
         }
 
         [SpellEffectHandler(SpellEffectName.LearnGarrisonBuilding)]
@@ -5264,7 +5264,7 @@ namespace Game.Spells
 
             player.SendPlaySpellVisual(player, SharedConst.SpellVisualUncagePet, 0, 0, 0.0f, false);
 
-            player.DestroyItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), true);
+            player.DestroyItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, true);
             m_CastItem = null;
         }
 
@@ -5299,7 +5299,7 @@ namespace Game.Spells
             itemTarget.SetState(ItemUpdateState.Changed, player);
             itemTarget.SetModifier(ItemModifier.EnchantIllusionAllSpecs, (uint)effectInfo.MiscValue);
             if (itemTarget.IsEquipped())
-                player.SetVisibleItemSlot(itemTarget.GetSlot(), itemTarget);
+                player.SetVisibleItemSlot(itemTarget.InventorySlot, itemTarget);
 
             player.RemoveTradeableItem(itemTarget);
             itemTarget.ClearSoulboundTradeable(player);

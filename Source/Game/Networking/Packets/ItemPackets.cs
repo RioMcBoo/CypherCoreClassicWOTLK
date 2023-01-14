@@ -1039,12 +1039,12 @@ namespace Game.Networking.Packets
     {
         public InvUpdate(WorldPacket data)
         {
-            Items = new List<InvItem>();
+            Items = new List<ItemPos>();
             int size = data.ReadBits<int>(2);
             data.ResetBitPos();
             for (int i = 0; i < size; ++i)
             {
-                var item = new InvItem
+                var item = new ItemPos
                 {
                     ContainerSlot = data.ReadUInt8(),
                     Slot = data.ReadUInt8()
@@ -1053,13 +1053,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<InvItem> Items;
-
-        public struct InvItem
-        {
-            public byte ContainerSlot;
-            public byte Slot;
-        }
+        public List<ItemPos> Items;
     }
 
     struct ItemPurchaseRefundItem
