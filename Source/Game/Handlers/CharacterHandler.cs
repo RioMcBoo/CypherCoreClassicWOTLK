@@ -1516,7 +1516,7 @@ namespace Game
                         ObjectGuid itemGuid = saveEquipmentSet.Set.Pieces[i];
                         if (!itemGuid.IsEmpty())
                         {
-                            Item item = _player.GetItemByPos(InventorySlots.Bag0, i);
+                            Item item = _player.GetItemByPos(i);
 
                             // cheating check 1 (item equipped but sent empty guid)
                             if (!item)
@@ -1601,7 +1601,7 @@ namespace Game
             ObjectGuid ignoredItemGuid = new(0x0C00040000000000, 0xFFFFFFFFFFFFFFFF);
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
-                Log.outDebug(LogFilter.Player, "{0}: BagSlot: {1}, Slot: {2}", useEquipmentSet.Items[i].Item.ToString(), useEquipmentSet.Items[i].ContainerSlot, useEquipmentSet.Items[i].Slot);
+                Log.outDebug(LogFilter.Player, $"{useEquipmentSet.Items[i].Item}: BagSlot: {useEquipmentSet.Items[i].ContainerSlot}, Slot: {useEquipmentSet.Items[i].Slot}");
 
                 // check if item slot is set to "ignored" (raw value == 1), must not be unequipped then
                 if (useEquipmentSet.Items[i].Item == ignoredItemGuid)
@@ -1613,21 +1613,20 @@ namespace Game
 
                 Item item = GetPlayer().GetItemByGuid(useEquipmentSet.Items[i].Item);
 
-                ushort dstPos = (ushort)(i | (InventorySlots.Bag0 << 8));
+                ItemPos dstPos = i;
                 if (!item)
                 {
-                    Item uItem = GetPlayer().GetItemByPos(InventorySlots.Bag0, i);
+                    Item uItem = GetPlayer().GetItemByPos(i);
                     if (!uItem)
                         continue;
-
-                    List<ItemPosCount> itemPosCount = new();
-                    InventoryResult inventoryResult = GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, itemPosCount, uItem, false);
+                                        
+                    InventoryResult inventoryResult = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> itemPosCount, uItem, false);
                     if (inventoryResult == InventoryResult.Ok)
                     {
                         if (_player.CanUnequipItem(dstPos, true) != InventoryResult.Ok)
                             continue;
 
-                        GetPlayer().RemoveItem(InventorySlots.Bag0, i, true);
+                        GetPlayer().RemoveItem(dstPos, true);
                         GetPlayer().StoreItem(itemPosCount, uItem, true);
                     }
                     else
@@ -1636,13 +1635,13 @@ namespace Game
                     continue;
                 }
 
-                if (item.GetPosition() == dstPos)
+                if (item.InventoryPosition == dstPos)
                     continue;
 
-                if (_player.CanEquipItem(i, out dstPos, item, true) != InventoryResult.Ok)
+                if (_player.CanEquipItem(i, out ItemPos dest, item, true) != InventoryResult.Ok)
                     continue;
 
-                GetPlayer().SwapItem(item.GetPosition(), dstPos);
+                GetPlayer().SwapItem(item.InventoryPosition, dest);
             }
 
             UseEquipmentSetResult result = new();

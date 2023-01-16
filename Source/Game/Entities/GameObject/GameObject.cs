@@ -1787,7 +1787,7 @@ namespace Game.Entities
                         {
                             Loot pushLoot = new(GetMap(), GetGUID(), LootType.Chest, null);
                             pushLoot.FillLoot(info.Chest.chestPushLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), GetMap().GetDifficultyLootItemContext());
-                            pushLoot.AutoStore(player, ItemConst.NullBag, ItemConst.NullSlot);
+                            pushLoot.AutoStore(player, ItemPos.Undefined);
                         }
 
                         if (info.Chest.triggeredEvent != 0)

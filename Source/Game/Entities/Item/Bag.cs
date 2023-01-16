@@ -161,7 +161,7 @@ namespace Game.Entities
                 pItem.SetContainedIn(GetGUID());
                 pItem.SetOwnerGUID(GetOwnerGUID());
                 pItem.SetContainer(this);
-                pItem.InventorySlot(slot);
+                pItem.InventorySlot = slot;
             }
         }
 

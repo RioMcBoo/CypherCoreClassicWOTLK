@@ -1824,15 +1824,15 @@ namespace Game.Spells
                         if (damageInfo != null)
                         {
                             if (damageInfo.GetAttackType() != WeaponAttackType.OffAttack)
-                                item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                                item = target.ToPlayer().GetUseableItemByPos(EquipmentSlot.MainHand);
                             else
-                                item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                                item = target.ToPlayer().GetUseableItemByPos(EquipmentSlot.OffHand);
                         }
                     }
                     else if (GetSpellInfo().EquippedItemClass == ItemClass.Armor)
                     {
                         // Check if player is wearing shield
-                        item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                        item = target.ToPlayer().GetUseableItemByPos(EquipmentSlot.OffHand);
                     }
 
                     if (!item || item.IsBroken() || !item.IsFitToSpellRequirements(GetSpellInfo()))

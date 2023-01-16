@@ -188,8 +188,8 @@ namespace Game.Chat
                 case QuestObjectiveType.Item:
                 {
                     uint curItemCount = player.GetItemCount((uint)obj.ObjectID, true);
-                    List<ItemPosCount> dest = new();
-                    var msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)obj.ObjectID, (uint)(obj.Amount - curItemCount));
+
+                    var msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, (uint)obj.ObjectID, (uint)(obj.Amount - curItemCount));
                     if (msg == InventoryResult.Ok)
                     {
                         Item item = player.StoreNewItem(dest, (uint)obj.ObjectID, true, new ItemRandomEnchantmentId());

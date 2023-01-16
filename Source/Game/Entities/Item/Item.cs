@@ -2859,10 +2859,16 @@ namespace Game.Entities
         public static implicit operator ItemPos(byte slot) => new(slot);
         public static ItemPos Undefined = new(ItemConst.NullSlot, ItemConst.NullBag);
 
-        public ItemPos(byte slot, byte containerSlot = InventorySlots.Bag0)
+        public ItemPos(byte slot, byte bagSlot = InventorySlots.Bag0)
         {
             Slot = slot;
-            BagSlot = containerSlot;
+            BagSlot = bagSlot;
+        }
+
+        public ItemPos(byte slot, byte? bagSlot)
+        {
+            Slot = slot;
+            BagSlot = bagSlot.HasValue ? bagSlot.Value : InventorySlots.Bag0;
         }
 
         public bool IsSpecificSlot

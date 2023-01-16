@@ -40,7 +40,7 @@ namespace Game
             if (user.GetUnitBeingMoved() != user)
                 return;
 
-            Item item = user.GetUseableItemByPos(packet.PackSlot, packet.Slot);
+            Item item = user.GetUseableItemByPos(new(packet.Slot, packet.PackSlot));
             if (item == null)
             {
                 user.SendEquipError(InventoryResult.ItemNotFound);
@@ -143,7 +143,7 @@ namespace Game
                 return;
             }
 
-            Item item = player.GetItemByPos(packet.Slot, packet.PackSlot);
+            Item item = player.GetItemByPos(new(packet.Slot, packet.PackSlot));
             if (!item)
             {
                 player.SendEquipError(InventoryResult.ItemNotFound);
@@ -191,7 +191,7 @@ namespace Game
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
                 stmt.AddValue(0, item.GetGUID().GetCounter());
 
-                var pos = item.GetPosition();
+                var pos = item.InventoryPosition;
                 var itemGuid = item.GetGUID();
                 _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt)
                     .WithCallback(result => HandleOpenWrappedItemCallback(pos, itemGuid, result)));
@@ -219,7 +219,7 @@ namespace Game
             }
         }
 
-        void HandleOpenWrappedItemCallback(ushort pos, ObjectGuid itemGuid, SQLResult result)
+        void HandleOpenWrappedItemCallback(ItemPos pos, ObjectGuid itemGuid, SQLResult result)
         {
             if (!GetPlayer())
                 return;
@@ -234,7 +234,7 @@ namespace Game
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.Network, $"Wrapped item {item.GetGUID()} don't have record in character_gifts table and will deleted");
-                GetPlayer().DestroyItem(item.InventoryBagSlot, item.InventorySlot, true);
+                GetPlayer().DestroyItem(pos, true);
                 return;
             }
 
@@ -636,7 +636,7 @@ namespace Game
                 foreach (var slot in itemSlots)
                 {
                     uint itemDisplayId;
-                    Item item = player.GetItemByPos(InventorySlots.Bag0, slot);
+                    Item item = player.GetItemByPos(slot);
                     if (item != null)
                         itemDisplayId = item.GetDisplayId(player);
                     else

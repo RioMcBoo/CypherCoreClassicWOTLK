@@ -592,7 +592,7 @@ namespace Scripts.Spells.Shaman
             if (player.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanEnhancement)
                 slot = EquipmentSlot.OffHand;
 
-            Item targetItem = player.GetItemByPos(InventorySlots.Bag0, slot);
+            Item targetItem = player.GetItemByPos(slot);
             if (targetItem == null || !targetItem.GetTemplate().IsWeapon())
                 return;
 

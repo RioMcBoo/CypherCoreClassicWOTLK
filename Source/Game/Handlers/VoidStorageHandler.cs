@@ -126,7 +126,7 @@ namespace Game
                 int inventoryEnd = InventorySlots.ItemStart + _player.GetInventorySlotCount();
                 for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
                 {
-                    if (!player.GetItemByPos(InventorySlots.Bag0, i))
+                    if (!player.GetItemByPos(i))
                         ++freeBagSlots;
                 }
             }
@@ -167,7 +167,7 @@ namespace Game
 
                 voidStorageTransferChanges.AddedItems.Add(voidItem);
 
-                player.DestroyItem(item.InventoryBagSlot, item.InventorySlot, true);
+                player.DestroyItem(item.InventoryPosition, true);
                 ++depositCount;
             }
 
@@ -185,8 +185,7 @@ namespace Game
                     continue;
                 }
 
-                List<ItemPosCount> dest = new();
-                InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemVS.ItemEntry, 1);
+                InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, itemVS.ItemEntry, 1);
                 if (msg != InventoryResult.Ok)
                 {
                     SendVoidStorageTransferResult(VoidTransferError.InventoryFull);

@@ -770,10 +770,10 @@ namespace Game.Chat
             if (srcSlot == dstSlot)
                 return true;
 
-            if (handler.GetSession().GetPlayer().IsValidPos(InventorySlots.Bag0, srcSlot, true))
+            if (handler.GetSession().GetPlayer().IsValidPos(srcSlot, true))
                 return false;
 
-            if (handler.GetSession().GetPlayer().IsValidPos(InventorySlots.Bag0, dstSlot, false))
+            if (handler.GetSession().GetPlayer().IsValidPos(dstSlot, false))
                 return false;
 
             handler.GetSession().GetPlayer().SwapItem(new(srcSlot), new(dstSlot));

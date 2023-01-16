@@ -1371,7 +1371,7 @@ namespace Game.Spells
                 // and also HandleAuraModDisarm is not triggered
                 if (!target.CanUseAttackType(WeaponAttackType.BaseAttack))
                 {
-                    Item pItem = target.ToPlayer().GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                    Item pItem = target.ToPlayer().GetItemByPos(EquipmentSlot.MainHand);
                     if (pItem != null)
                         target.ToPlayer()._ApplyWeaponDamage(EquipmentSlot.MainHand, pItem, apply);
                 }
@@ -1813,7 +1813,7 @@ namespace Game.Spells
             {
                 Player player = target.ToPlayer();
 
-                Item item = player.GetItemByPos(InventorySlots.Bag0, slot);
+                Item item = player.GetItemByPos(slot);
                 if (item != null)
                 {
                     WeaponAttackType attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
@@ -4460,8 +4460,7 @@ namespace Game.Spells
             uint noSpaceForCount;
             uint count = (uint)GetAmount();
 
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = plCaster.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, GetSpellEffectInfo().ItemType, count, out noSpaceForCount);
+            InventoryResult msg = plCaster.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, GetSpellEffectInfo().ItemType, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)
             {
                 count -= noSpaceForCount;

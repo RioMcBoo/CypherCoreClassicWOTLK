@@ -154,7 +154,6 @@ namespace Game.Entities
                                 item.DeleteFromInventoryDB(trans);
                                 continue;
                             }
-
                         }
 
                         // Item's state may have changed after storing
@@ -1577,7 +1576,7 @@ namespace Game.Entities
                     if (test == null)
                     {
                         ulong bagTestGUID = 0;
-                        Item test2 = GetItemByPos(new(item.InventoryBagSlot));
+                        Item test2 = GetItemByPos(item.InventoryBagSlot);
                         if (test2 != null)
                             bagTestGUID = test2.GetGUID().GetCounter();
                         Log.outError(LogFilter.Player, "Player(GUID: {0} Name: {1}).SaveInventory - the bag({2}) and slot({3}) values for the item with guid {4} (state {5}) are incorrect, " +
@@ -3402,7 +3401,7 @@ namespace Game.Entities
                 // cache equipment...
                 for (byte i = 0; i < InventorySlots.BagEnd; ++i)
                 {
-                    Item item = GetItemByPos(new(i));
+                    Item item = GetItemByPos(i);
                     if (item != null)
                     {
                         ss.Append($"{(uint)item.GetTemplate().GetInventoryType()} {item.GetDisplayId(this)} ");
@@ -3548,7 +3547,7 @@ namespace Game.Entities
                 // cache equipment...
                 for (byte i = 0; i < InventorySlots.BagEnd; ++i)
                 {
-                    Item item = GetItemByPos(new(i));
+                    Item item = GetItemByPos(i);
                     if (item != null)
                     {
                         ss.Append($"{(uint)item.GetTemplate().GetInventoryType()} {item.GetDisplayId(this)} ");

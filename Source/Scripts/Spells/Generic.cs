@@ -1300,7 +1300,7 @@ namespace Scripts.Spells.Generic
                     Player player = caster.ToPlayer();
                     if (player)
                     {
-                        Item mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                        Item mainItem = player.GetItemByPos(EquipmentSlot.MainHand);
                         if (mainItem)
                             target.SetVirtualItem(0, mainItem.GetEntry());
                     }
@@ -1316,7 +1316,7 @@ namespace Scripts.Spells.Generic
                     Player player = caster.ToPlayer();
                     if (player)
                     {
-                        Item offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                        Item offItem = player.GetItemByPos(EquipmentSlot.OffHand);
                         if (offItem)
                             target.SetVirtualItem(1, offItem.GetEntry());
                     }
@@ -1331,7 +1331,7 @@ namespace Scripts.Spells.Generic
                     Player player = caster.ToPlayer();
                     if (player)
                     {
-                        Item rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                        Item rangedItem = player.GetItemByPos(EquipmentSlot.MainHand);
                         if (rangedItem)
                             target.SetVirtualItem(2, rangedItem.GetEntry());
                     }
@@ -2045,7 +2045,7 @@ namespace Scripts.Spells.Generic
         {
             PreventHitDefaultEffect(effIndex);
             uint spellId;
-            Item mainHand = GetCaster().ToPlayer().GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+            Item mainHand = GetCaster().ToPlayer().GetItemByPos(EquipmentSlot.MainHand);
             if (!mainHand || mainHand.GetTemplate().GetClass() != ItemClass.Weapon || (ItemSubClassWeapon)mainHand.GetTemplate().GetSubClass() != ItemSubClassWeapon.FishingPole)
                 spellId = SpellIds.FishingNoFishingPole;
             else

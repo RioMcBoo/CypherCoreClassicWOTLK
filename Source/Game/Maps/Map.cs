@@ -4478,8 +4478,7 @@ namespace Game.Maps
                         Player pReceiver = _GetScriptPlayerSourceOrTarget(source, target, step.script);
                         if (pReceiver)
                         {
-                            var dest = new List<ItemPosCount>();
-                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
+                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
                             if (msg == InventoryResult.Ok)
                             {
                                 Item item = pReceiver.StoreNewItem(dest, step.script.CreateItem.ItemEntry, true, new ItemRandomEnchantmentId());

@@ -533,7 +533,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 
         bool PlayerHasWeaponEquipped(Player player, uint itemEntry)
         {
-            Item item = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+            Item item = player.GetItemByPos(EquipmentSlot.MainHand);
             if (item && item.GetEntry() == itemEntry)
                 return true;
 

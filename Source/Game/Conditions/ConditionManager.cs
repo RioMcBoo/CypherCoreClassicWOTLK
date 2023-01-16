@@ -2121,7 +2121,7 @@ namespace Game
 
             if (condition.WeaponSubclassMask != 0)
             {
-                Item mainHand = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                Item mainHand = player.GetItemByPos(EquipmentSlot.MainHand);
                 if (!mainHand || !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.WeaponSubclassMask))
                     return false;
             }

@@ -261,7 +261,7 @@ namespace Game.Entities
 
         bool IsTwoHandUsed()
         {
-            Item mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+            Item mainItem = GetItemByPos(EquipmentSlot.MainHand);
             if (!mainItem)
                 return false;
 
@@ -273,11 +273,11 @@ namespace Game.Entities
 
         bool IsUsingTwoHandedWeaponInOneHand()
         {
-            Item offItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+            Item offItem = GetItemByPos(EquipmentSlot.OffHand);
             if (offItem && offItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
                 return true;
 
-            Item mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+            Item mainItem = GetItemByPos(EquipmentSlot.MainHand);
             if (!mainItem || mainItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
                 return false;
 

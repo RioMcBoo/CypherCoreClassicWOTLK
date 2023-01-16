@@ -444,7 +444,7 @@ namespace Game.Entities
             // update visible transmog
             for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
             {
-                Item equippedItem = GetItemByPos(InventorySlots.Bag0, i);
+                Item equippedItem = GetItemByPos(i);
                 if (equippedItem)
                     SetVisibleItemSlot(i, equippedItem);
             }

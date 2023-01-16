@@ -968,9 +968,8 @@ namespace Game.Spells
             num_to_add *= (uint)items_count;
 
             // can the player store the new item?
-            List<ItemPosCount> dest = new();
             uint no_space;
-            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, newitemid, num_to_add, out no_space);
+            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, newitemid, num_to_add, out no_space);
             if (msg != InventoryResult.Ok)
             {
                 // convert to possible store amount
@@ -1338,7 +1337,7 @@ namespace Game.Spells
             if (newitemid == 0)
                 return;
 
-            ushort pos = m_CastItem.GetPosition();
+            ItemPos pos = m_CastItem.InventoryPosition;
 
             Item pNewItem = Item.CreateItem(newitemid, 1, m_CastItem.GetContext(), player);
             if (pNewItem == null)
@@ -1354,13 +1353,12 @@ namespace Game.Spells
                 player.DurabilityLoss(pNewItem, lossPercent);
             }
 
-            if (player.IsInventoryPos(pos))
+            if (pos.IsInventoryPos)
             {
-                List<ItemPosCount> dest = new();
-                InventoryResult msg = player.CanStoreItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, dest, pNewItem, true);
+                InventoryResult msg = player.CanStoreItem(pos, out List<ItemPosCount> dest, pNewItem, true);
                 if (msg == InventoryResult.Ok)
                 {
-                    player.DestroyItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, true);
+                    player.DestroyItem(pos, true);
 
                     // prevent crash at access and unexpected charges counting with item update queue corrupt
                     if (m_CastItem == m_targets.GetItemTarget())
@@ -1377,13 +1375,12 @@ namespace Game.Spells
                     return;
                 }
             }
-            else if (Player.IsBankPos(pos))
+            else if (pos.IsBankPos)
             {
-                List<ItemPosCount> dest = new();
-                InventoryResult msg = player.CanBankItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, dest, pNewItem, true);
+                InventoryResult msg = player.CanBankItem(pos, out List<ItemPosCount> dest, pNewItem, true);
                 if (msg == InventoryResult.Ok)
                 {
-                    player.DestroyItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, true);
+                    player.DestroyItem(pos, true);
 
                     // prevent crash at access and unexpected charges counting with item update queue corrupt
                     if (m_CastItem == m_targets.GetItemTarget())
@@ -1398,13 +1395,11 @@ namespace Game.Spells
                     return;
                 }
             }
-            else if (Player.IsEquipmentPos(pos))
+            else if (pos.IsEquipmentPos)
             {
-                ushort dest;
+                player.DestroyItem(pos, true);
 
-                player.DestroyItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, true);
-
-                InventoryResult msg = player.CanEquipItem(m_CastItem.InventorySlot, out dest, pNewItem, true);
+                InventoryResult msg = player.CanEquipItem(m_CastItem.InventorySlot, out ItemPos dest, pNewItem, true);
 
                 if (msg == InventoryResult.Ok || msg == InventoryResult.ClientLockedOut)
                 {
@@ -2698,19 +2693,22 @@ namespace Game.Spells
                                     m_caster.CastSpell(unitTarget, 22682, new CastSpellExtraArgs(this));
                                     return;
                                 }
-                            // Mug Transformation
-                            case 41931:
+
+                                #region TODO: to refactoring!
+                                // Mug Transformation
+                                case 41931:
                                 {
                                     if (!m_caster.IsTypeId(TypeId.Player))
                                         return;
 
+                                    ItemPos pos = new(0, 19);
                                     byte bag = 19;
                                     byte slot = 0;
                                     Item item;
-
+                            
                                     while (bag != 0) // 256 = 0 due to var Type
                                     {
-                                        item = m_caster.ToPlayer().GetItemByPos(bag, slot);
+                                        item = m_caster.ToPlayer().GetItemByPos(new(slot, bag));
                                         if (item != null && item.GetEntry() == 38587)
                                             break;
 
@@ -2721,18 +2719,20 @@ namespace Game.Spells
                                             ++bag;
                                         }
                                     }
+
                                     if (bag != 0)
                                     {
-                                        if (m_caster.ToPlayer().GetItemByPos(bag, slot).GetCount() == 1) m_caster.ToPlayer().RemoveItem(bag, slot, true);
-                                        else m_caster.ToPlayer().GetItemByPos(bag, slot).SetCount(m_caster.ToPlayer().GetItemByPos(bag, slot).GetCount() - 1);
+                                        if (m_caster.ToPlayer().GetItemByPos(new(slot, bag)).GetCount() == 1) m_caster.ToPlayer().RemoveItem(new(slot, bag), true);
+                                        else m_caster.ToPlayer().GetItemByPos(new(slot, bag)).SetCount(m_caster.ToPlayer().GetItemByPos(new(slot, bag)).GetCount() - 1);
                                         // Spell 42518 (Braufest - Gratisprobe des Braufest herstellen)
                                         m_caster.CastSpell(m_caster, 42518, new CastSpellExtraArgs(this));
                                         return;
                                     }
                                     break;
                                 }
-                            // Brutallus - Burn
-                            case 45141:
+                        #endregion
+                        // Brutallus - Burn
+                        case 45141:
                             case 45151:
                                 {
                                     //Workaround for Range ... should be global for every ScriptEffect
@@ -3090,7 +3090,7 @@ namespace Game.Spells
                 return;
 
             Player item_owner = unitTarget.ToPlayer();
-            Item item = item_owner.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+            Item item = item_owner.GetItemByPos(EquipmentSlot.MainHand);
 
             if (item == null)
                 return;
@@ -4022,7 +4022,7 @@ namespace Game.Spells
             if (slot >= InventorySlots.BagEnd)
                 return;
 
-            Item item = unitTarget.ToPlayer().GetItemByPos(InventorySlots.Bag0, (byte)slot);
+            Item item = unitTarget.ToPlayer().GetItemByPos((byte)slot);
             if (item != null)
             {
                 unitTarget.ToPlayer().DurabilityPointsLoss(item, damage);
@@ -4056,7 +4056,7 @@ namespace Game.Spells
             if (damage <= 0)
                 return;
 
-            Item item = unitTarget.ToPlayer().GetItemByPos(InventorySlots.Bag0, (byte)slot);
+            Item item = unitTarget.ToPlayer().GetItemByPos((byte)slot);
             if (item != null)
                 unitTarget.ToPlayer().DurabilityLoss(item, damage / 100.0f);
         }
@@ -4099,7 +4099,7 @@ namespace Game.Spells
             GameObjectTemplate goinfo = Global.ObjectMgr.GetGameObjectTemplate(name_id);
             if (goinfo == null)
             {
-                Log.outError(LogFilter.Sql, "Gameobject (Entry: {0}) not exist and not created at spell (ID: {1}) cast", name_id, m_spellInfo.Id);
+                Log.outError(LogFilter.Sql, $"Gameobject (Entry: {name_id}) not exist and not created at spell (ID: {m_spellInfo.Id}) cast");
                 return;
             }
 
@@ -5057,7 +5057,7 @@ namespace Game.Spells
             Player player = unitTarget.ToPlayer();
             Item item = player.GetItemByEntry(effectInfo.ItemType);
             if (item)
-                player.DestroyItem(item.InventoryBagSlot, item.InventorySlot, true);
+                player.DestroyItem(item.InventoryPosition, true);
         }
 
         [SpellEffectHandler(SpellEffectName.LearnGarrisonBuilding)]
@@ -5264,7 +5264,7 @@ namespace Game.Spells
 
             player.SendPlaySpellVisual(player, SharedConst.SpellVisualUncagePet, 0, 0, 0.0f, false);
 
-            player.DestroyItem(m_CastItem.InventoryBagSlot, m_CastItem.InventorySlot, true);
+            player.DestroyItem(m_CastItem.InventoryPosition, true);
             m_CastItem = null;
         }
 

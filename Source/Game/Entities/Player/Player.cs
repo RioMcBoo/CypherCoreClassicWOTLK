@@ -304,7 +304,7 @@ namespace Game.Entities
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
             for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
-                Item pItem = GetItemByPos(new(i));
+                Item pItem = GetItemByPos(i);
                 if (pItem != null)
                 {
                     List<ItemPosCount> destList;
@@ -6945,9 +6945,9 @@ namespace Game.Entities
 
             Item item;
             if (useable)
-                item = GetUseableItemByPos(new(slot));
+                item = GetUseableItemByPos(slot);
             else
-                item = GetItemByPos(new(slot));
+                item = GetItemByPos(slot);
 
             if (item == null || item.GetTemplate().GetClass() != ItemClass.Weapon)
                 return null;
@@ -6976,7 +6976,7 @@ namespace Game.Entities
 
         public void AutoUnequipOffhandIfNeed(bool force = false)
         {
-            Item offItem = GetItemByPos(new(EquipmentSlot.OffHand));
+            Item offItem = GetItemByPos(EquipmentSlot.OffHand);
             if (offItem == null)
                 return;
 

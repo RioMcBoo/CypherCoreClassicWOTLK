@@ -131,7 +131,7 @@ namespace Game.Chat.Commands
                     ObjectGuid itemGuid = ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(0));
                     ItemPos itemPos = new
                     (
-                        containerSlot:  (byte)result.Read<uint>(1),
+                        bagSlot:  (byte)result.Read<uint>(1),
                         slot:           result.Read<byte>(2)
                     );
 

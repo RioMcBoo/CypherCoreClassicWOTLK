@@ -172,9 +172,9 @@ namespace Scripts.Spells.Rogue
             if (target != null)
             {
 
-                Item item = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                Item item = player.GetItemByPos(EquipmentSlot.MainHand);
                 if (item == GetCastItem())
-                    item = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                    item = player.GetItemByPos(EquipmentSlot.OffHand);
 
                 if (!item)
                     return;

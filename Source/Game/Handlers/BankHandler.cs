@@ -35,25 +35,25 @@ namespace Game
                 return;
             }
 
-            Item item = GetPlayer().GetItemByPos(packet.Bag, packet.Slot);
+            ItemPos itemPos = new(packet.Slot, packet.Bag);
+            Item item = GetPlayer().GetItemByPos(itemPos);
             if (!item)
                 return;
 
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = GetPlayer().CanBankItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item, false);
+            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<ItemPosCount> dest, item, false);
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, item);
                 return;
             }
 
-            if (dest.Count == 1 && dest[0].pos == item.GetPosition())
+            if (dest.Count == 1 && dest[0].Pos == item.InventoryPosition)
             {
                 GetPlayer().SendEquipError(InventoryResult.CantSwap, item);
                 return;
             }
 
-            GetPlayer().RemoveItem(packet.Bag, packet.Slot, true);
+            GetPlayer().RemoveItem(itemPos, true);
             GetPlayer().ItemRemovedQuestCheck(item.GetEntry(), item.GetCount());
             GetPlayer().BankItem(dest, item, true);
         }
@@ -83,36 +83,35 @@ namespace Game
                 return;
             }
 
-            Item item = GetPlayer().GetItemByPos(packet.Bag, packet.Slot);
+            ItemPos itemPos = new(packet.Slot, packet.Bag);
+            Item item = GetPlayer().GetItemByPos(itemPos);
             if (!item)
                 return;
 
-            if (Player.IsBankPos(packet.Bag, packet.Slot))                 // moving from bank to inventory
+            if (itemPos.IsBankPos)                 // moving from bank to inventory
             {
-                List<ItemPosCount> dest = new();
-                InventoryResult msg = GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item, false);
+                InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, item, false);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);
                     return;
                 }
 
-                GetPlayer().RemoveItem(packet.Bag, packet.Slot, true);
+                GetPlayer().RemoveItem(itemPos, true);
                 Item storedItem = GetPlayer().StoreItem(dest, item, true);
                 if (storedItem)
                     GetPlayer().ItemAddedQuestCheck(storedItem.GetEntry(), storedItem.GetCount());
             }
             else                                                    // moving from inventory to bank
             {
-                List<ItemPosCount> dest = new();
-                InventoryResult msg = GetPlayer().CanBankItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item, false);
+                InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<ItemPosCount> dest, item, false);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);
                     return;
                 }
 
-                GetPlayer().RemoveItem(packet.Bag, packet.Slot, true);
+                GetPlayer().RemoveItem(itemPos, true);
                 GetPlayer().BankItem(dest, item, true);
             }
         }

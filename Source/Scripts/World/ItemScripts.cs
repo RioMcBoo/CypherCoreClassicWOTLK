@@ -151,8 +151,7 @@ namespace Scripts.World.ItemScripts
 
         public override bool OnExpire(Player player, ItemTemplate pItemProto)
         {
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 39883, 1); // Cracked Egg
+            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, 39883, 1); // Cracked Egg
             if (msg == InventoryResult.Ok)
                 player.StoreNewItem(dest, 39883, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(39883));
 
@@ -167,8 +166,7 @@ namespace Scripts.World.ItemScripts
 
         public override bool OnExpire(Player player, ItemTemplate pItemProto)
         {
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 44718, 1); // Ripe Disgusting Jar
+            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, 44718, 1); // Ripe Disgusting Jar
             if (msg == InventoryResult.Ok)
                 player.StoreNewItem(dest, 44718, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(44718));
 

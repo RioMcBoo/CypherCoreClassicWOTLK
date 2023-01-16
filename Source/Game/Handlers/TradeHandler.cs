@@ -105,8 +105,8 @@ namespace Game
             {
                 List<ItemPosCount> traderDst = new();
                 List<ItemPosCount> playerDst = new();
-                bool traderCanTrade = (myItems[i] == null || trader.CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, traderDst, myItems[i], false) == InventoryResult.Ok);
-                bool playerCanTrade = (hisItems[i] == null || GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, playerDst, hisItems[i], false) == InventoryResult.Ok);
+                bool traderCanTrade = (myItems[i] == null || trader.CanStoreItem(ItemPos.Undefined, out traderDst, myItems[i], false) == InventoryResult.Ok);
+                bool playerCanTrade = (hisItems[i] == null || GetPlayer().CanStoreItem(ItemPos.Undefined, out playerDst, hisItems[i], false) == InventoryResult.Ok);
                 if (traderCanTrade && playerCanTrade)
                 {
                     // Ok, if trade item exists and can be stored
@@ -158,7 +158,7 @@ namespace Game
                     {
                         if (!traderCanTrade)
                             Log.outError(LogFilter.Network, "trader can't store item: {0}", myItems[i].GetGUID().ToString());
-                        if (GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, playerDst, myItems[i], false) == InventoryResult.Ok)
+                        if (GetPlayer().CanStoreItem(ItemPos.Undefined, out playerDst, myItems[i], false) == InventoryResult.Ok)
                             GetPlayer().MoveItemToInventory(playerDst, myItems[i], true, true);
                         else
                             Log.outError(LogFilter.Network, "player can't take item back: {0}", myItems[i].GetGUID().ToString());
@@ -168,7 +168,7 @@ namespace Game
                     {
                         if (!playerCanTrade)
                             Log.outError(LogFilter.Network, "player can't store item: {0}", hisItems[i].GetGUID().ToString());
-                        if (trader.CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, traderDst, hisItems[i], false) == InventoryResult.Ok)
+                        if (trader.CanStoreItem(ItemPos.Undefined, out traderDst, hisItems[i], false) == InventoryResult.Ok)
                             trader.MoveItemToInventory(traderDst, hisItems[i], true, true);
                         else
                             Log.outError(LogFilter.Network, "trader can't take item back: {0}", hisItems[i].GetGUID().ToString());
@@ -188,7 +188,7 @@ namespace Game
                 Item item = myTrade.GetItem((TradeSlots)i);
                 if (item)
                 {
-                    Log.outDebug(LogFilter.Network, "player trade item {0} bag: {1} slot: {2}", item.GetGUID().ToString(), item.InventoryBagSlot, item.InventorySlot);
+                    Log.outDebug(LogFilter.Network, $"player trade item {item.GetGUID()} bag: {item.InventoryBagSlot} slot: {item.InventorySlot}");
                     //Can return null
                     myItems[i] = item;
                     myItems[i].SetInTrade();
@@ -196,7 +196,7 @@ namespace Game
                 item = hisTrade.GetItem((TradeSlots)i);
                 if (item)
                 {
-                    Log.outDebug(LogFilter.Network, "partner trade item {0} bag: {1} slot: {2}", item.GetGUID().ToString(), item.InventoryBagSlot, item.InventorySlot);
+                    Log.outDebug(LogFilter.Network, $"partner trade item {item.GetGUID()} bag: {item.InventoryBagSlot} slot: {item.InventorySlot}");
                     hisItems[i] = item;
                     hisItems[i].SetInTrade();
                 }
@@ -455,12 +455,12 @@ namespace Game
                     if (myItems[i])
                     {
                         myItems[i].SetGiftCreator(GetPlayer().GetGUID());
-                        GetPlayer().MoveItemFromInventory(myItems[i].InventoryBagSlot, myItems[i].InventorySlot, true);
+                        GetPlayer().MoveItemFromInventory(myItems[i].InventoryPosition, true);
                     }
                     if (hisItems[i])
                     {
                         hisItems[i].SetGiftCreator(trader.GetGUID());
-                        trader.MoveItemFromInventory(hisItems[i].InventoryBagSlot, hisItems[i].InventorySlot, true);
+                        trader.MoveItemFromInventory(hisItems[i].InventoryPosition, true);
                     }
                 }
 
@@ -481,8 +481,7 @@ namespace Game
                         Log.outCommand(GetPlayer().GetSession().GetAccountId(), "GM {0} (Account: {1}) give money (Amount: {2}) to player: {3} (Account: {4})",
                             trader.GetName(), trader.GetSession().GetAccountId(), his_trade.GetMoney(), GetPlayer().GetName(), GetPlayer().GetSession().GetAccountId());
                     }
-                }
-                
+                }                
 
                 // update money
                 GetPlayer().ModifyMoney(-(long)my_trade.GetMoney());
@@ -715,7 +714,7 @@ namespace Game
             }
 
             // check cheating, can't fail with correct client operations
-            Item item = GetPlayer().GetItemByPos(setTradeItem.PackSlot, setTradeItem.ItemSlotInPack);
+            Item item = GetPlayer().GetItemByPos(new(setTradeItem.ItemSlotInPack, setTradeItem.PackSlot));
             if (!item || (setTradeItem.TradeSlot != (byte)TradeSlots.NonTraded && !item.CanBeTraded(false, true)))
             {
                 info.Status = TradeStatus.Cancelled;

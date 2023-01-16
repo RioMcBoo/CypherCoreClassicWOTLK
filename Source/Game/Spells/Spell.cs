@@ -6490,8 +6490,7 @@ namespace Game.Spells
 
                                 uint createCount = (uint)Math.Clamp(spellEffectInfo.CalcValue(), 1u, itemTemplate.GetMaxStackSize());
 
-                                List<ItemPosCount> dest = new();
-                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, createCount);
+                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemPos.Undefined, out _, spellEffectInfo.ItemType, createCount);
                                 if (msg != InventoryResult.Ok)
                                 {
                                     /// @todo Needs review
@@ -6529,8 +6528,8 @@ namespace Game.Spells
                             // do not allow to enchant vellum from scroll made by vellum-prevent exploit
                             if (m_CastItem != null && m_CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost))
                                 return SpellCastResult.TotemCategory;
-                            List<ItemPosCount> dest = new();
-                            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, 1);
+
+                            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out _, spellEffectInfo.ItemType, 1);
                             if (msg != InventoryResult.Ok)
                             {
                                 player.SendEquipError(msg, null, null, spellEffectInfo.ItemType);

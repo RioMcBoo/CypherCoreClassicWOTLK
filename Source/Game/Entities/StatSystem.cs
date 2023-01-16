@@ -985,7 +985,7 @@ namespace Game.Entities
             {
                 if (playerVictim.CanBlock())
                 {
-                    Item tmpitem = playerVictim.GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                    Item tmpitem = playerVictim.GetUseableItemByPos(EquipmentSlot.OffHand);
                     if (tmpitem && !tmpitem.IsBroken() && tmpitem.GetTemplate().GetInventoryType() == InventoryType.Shield)
                         chance = playerVictim.m_activePlayerData.BlockPercentage;
                 }

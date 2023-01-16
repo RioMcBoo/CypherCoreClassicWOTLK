@@ -636,7 +636,7 @@ namespace Game.Loots
                         var disenchant = GetItemDisenchantLoot();
                         Loot loot = new(m_map, m_loot.GetOwnerGUID(), LootType.Disenchanting, null);
                         loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true, false, LootModes.Default, ItemContext.None);
-                        if (!loot.AutoStore(player, ItemConst.NullBag, ItemConst.NullSlot, true))
+                        if (!loot.AutoStore(player, ItemPos.Undefined, true))
                         {
                             for (uint i = 0; i < loot.items.Count; ++i)
                             {
@@ -695,7 +695,7 @@ namespace Game.Loots
             }
         }
 
-        public bool AutoStore(Player player, byte bag, byte slot, bool broadcast = false, bool createdByPlayer = false)
+        public bool AutoStore(Player player, ItemPos pos, bool broadcast = false, bool createdByPlayer = false)
         {
             bool allLooted = true;
             for (uint i = 0; i < items.Count; ++i)
@@ -714,12 +714,12 @@ namespace Game.Loots
                 if (!lootItem.rollWinnerGUID.IsEmpty() && lootItem.rollWinnerGUID != GetGUID())
                     continue;
 
-                List<ItemPosCount> dest = new();
-                InventoryResult msg = player.CanStoreNewItem(bag, slot, dest, lootItem.itemid, lootItem.count);
-                if (msg != InventoryResult.Ok && slot != ItemConst.NullSlot)
-                    msg = player.CanStoreNewItem(bag, ItemConst.NullSlot, dest, lootItem.itemid, lootItem.count);
-                if (msg != InventoryResult.Ok && bag != ItemConst.NullBag)
-                    msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, lootItem.itemid, lootItem.count);
+                List<ItemPosCount> dest = null;
+                InventoryResult msg = player.CanStoreNewItem(pos, out dest, lootItem.itemid, lootItem.count);
+                if (msg != InventoryResult.Ok && pos.Slot != ItemConst.NullSlot)
+                    msg = player.CanStoreNewItem(new(ItemConst.NullSlot, pos.BagSlot), out dest, lootItem.itemid, lootItem.count);
+                if (msg != InventoryResult.Ok && pos.BagSlot != ItemConst.NullBag)
+                    msg = player.CanStoreNewItem(ItemPos.Undefined, out dest, lootItem.itemid, lootItem.count);
                 if (msg != InventoryResult.Ok)
                 {
                     player.SendEquipError(msg, null, null, lootItem.itemid);

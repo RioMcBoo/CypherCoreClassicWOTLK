@@ -1114,7 +1114,7 @@ namespace Game.Networking.Packets
             ContainerItemSlot = _worldPacket.ReadUInt8();
 
             if (_worldPacket.HasBit())
-                ContainerSlot = _worldPacket.ReadUInt8();
+                ContainerSlot = _worldPacket.ReadUInt8();            
         }
 
         public ObjectGuid Banker;

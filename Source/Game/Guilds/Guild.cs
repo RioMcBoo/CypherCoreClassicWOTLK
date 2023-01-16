@@ -3624,7 +3624,7 @@ namespace Game.Guilds
                 return true;
             }
 
-            protected InventoryResult CanStore(Item pItem, bool swap, bool sendError)
+            public InventoryResult CanStore(Item pItem, bool swap, bool sendError)
             {
                 m_vec.Clear();
                 InventoryResult msg = CanStore(pItem, swap);

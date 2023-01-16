@@ -261,7 +261,7 @@ namespace Game
                             }
 
                             item.SetNotRefundable(GetPlayer()); // makes the item no longer refundable
-                            player.MoveItemFromInventory(item.InventoryBagSlot, item.InventorySlot, true);
+                            player.MoveItemFromInventory(item.InventoryPosition, true);
 
                             item.DeleteFromInventoryDB(trans);     // deletes item from character's inventory
                             item.SetOwnerGUID(receiverGuid);
@@ -276,7 +276,7 @@ namespace Game
                     }
 
                     if (log && sendMail.Info.SendMoney > 0)
-                        Log.outCommand(GetAccountId(), "GM {GetPlayerName()} ({_player.GetGUID()}) (Account: {GetAccountId()}) mail money: {mailInfo.SendMoney} to: {mailInfo.Target} ({receiverGuid}) (Account: {receiverAccountId})");
+                        Log.outCommand(GetAccountId(), $"GM {GetPlayerName()} ({_player.GetGUID()}) (Account: {GetAccountId()}) mail money: {sendMail.Info.SendMoney} to: {sendMail.Info.Target} ({receiverGuid}) (Account: {receiverAccountId})");
                 }
 
                 // If theres is an item, there is a one hour delivery delay if sent to another account's character.
@@ -449,8 +449,7 @@ namespace Game
 
             Item it = player.GetMItem(takeItem.AttachID);
 
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, dest, it, false);
+            InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, it, false);
             if (msg == InventoryResult.Ok)
             {
                 SQLTransaction trans = new();
@@ -480,8 +479,8 @@ namespace Game
                             if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(sender_guid, out sender_name))
                                 sender_name = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
                         }
-                        Log.outCommand(GetAccountId(), "GM {0} (Account: {1}) receiver mail item: {2} (Entry: {3} Count: {4}) and send COD money: {5} to player: {6} (Account: {7})",
-                            GetPlayerName(), GetAccountId(), it.GetTemplate().GetName(), it.GetEntry(), it.GetCount(), m.COD, sender_name, sender_accId);
+                        Log.outCommand(GetAccountId(), $"GM {GetPlayerName()} (Account: {GetAccountId()}) receiver mail item: {it.GetTemplate().GetName()} " +
+                            $"(Entry: {it.GetEntry()} Count: {it.GetCount()}) and send COD money: {m.COD} to player: {sender_name} (Account: {sender_accId})");
                     }
                     else if (!receiver)
                         sender_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(sender_guid);
@@ -623,10 +622,9 @@ namespace Game
 
             bodyItem.SetItemFlag(ItemFieldFlags.Readable);
 
-            Log.outInfo(LogFilter.Network, "HandleMailCreateTextItem mailid={0}", createTextItem.MailID);
+            Log.outInfo(LogFilter.Network, $"HandleMailCreateTextItem mailid={createTextItem.MailID}");
 
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, dest, bodyItem, false);
+            InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, bodyItem, false);
             if (msg == InventoryResult.Ok)
             {
                 m.checkMask = m.checkMask | MailCheckMask.Copied;

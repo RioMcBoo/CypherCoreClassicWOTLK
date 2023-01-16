@@ -437,7 +437,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsEncounterLoot);
             _worldPacket.FlushBits();
 
-            Item.Write(_worldPacket);            
+            Item.Write(_worldPacket);
         }
 
         public ObjectGuid PlayerGUID;
@@ -445,7 +445,7 @@ namespace Game.Networking.Packets
         public int SlotInBag;
         public ItemInstance Item;
         public int QuestLogItemID;// Item ID used for updating quest progress
-                                   // only set if different than real ID (similar to CreatureTemplate.KillCredit)
+                                  // only set if different than real ID (similar to CreatureTemplate.KillCredit)
         public uint Quantity;
         public uint QuantityInInventory;
         public int DungeonEncounterID;
@@ -529,7 +529,7 @@ namespace Game.Networking.Packets
         public EnchantmentLog() : base(ServerOpcodes.EnchantmentLog, ConnectionType.Instance) { }
 
         public override void Write()
-        {    
+        {
             _worldPacket.WritePackedGuid(Owner);
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WritePackedGuid(ItemGUID);
@@ -573,7 +573,7 @@ namespace Game.Networking.Packets
         public uint SpellID;
         public uint Cooldown;
     }
-    
+
     class ItemEnchantTimeUpdate : ServerPacket
     {
         public ItemEnchantTimeUpdate() : base(ServerOpcodes.ItemEnchantTimeUpdate, ConnectionType.Instance) { }
@@ -735,7 +735,7 @@ namespace Game.Networking.Packets
     }
 
     public class ItemMod
-    {  
+    {
         public uint Value;
         public ItemModifier Type;
 
@@ -1044,12 +1044,10 @@ namespace Game.Networking.Packets
             data.ResetBitPos();
             for (int i = 0; i < size; ++i)
             {
-                var item = new ItemPos
-                {
-                    ContainerSlot = data.ReadUInt8(),
-                    Slot = data.ReadUInt8()
-                };
-                Items.Add(item);
+                byte containerSlot = data.ReadUInt8();
+                byte slot = data.ReadUInt8();
+
+                Items.Add(new(slot, containerSlot));
             }
         }
 

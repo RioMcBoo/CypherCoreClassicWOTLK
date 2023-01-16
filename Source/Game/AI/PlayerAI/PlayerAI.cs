@@ -437,7 +437,7 @@ namespace Game.AI
                 case Class.Hunter:
                 {
                     // check if we have a ranged weapon equipped
-                    Item rangedSlot = who.GetItemByPos(new(EquipmentSlot.Ranged));
+                    Item rangedSlot = who.GetItemByPos(EquipmentSlot.Ranged);
 
                     ItemTemplate rangedTemplate = rangedSlot ? rangedSlot.GetTemplate() : null;
                     if (rangedTemplate != null)
@@ -579,7 +579,7 @@ namespace Game.AI
 
             uint rangedAttackSpell = 0;
 
-            Item rangedItem = me.GetItemByPos(new(EquipmentSlot.Ranged));
+            Item rangedItem = me.GetItemByPos(EquipmentSlot.Ranged);
             ItemTemplate rangedTemplate = rangedItem ? rangedItem.GetTemplate() : null;
             if (rangedTemplate != null)
             {

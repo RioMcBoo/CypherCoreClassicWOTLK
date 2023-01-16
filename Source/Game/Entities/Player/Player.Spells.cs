@@ -1018,7 +1018,7 @@ namespace Game.Entities
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
             for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
-                Item pItem = GetItemByPos(new(i));
+                Item pItem = GetItemByPos(i);
                 if (pItem && !Global.SpellMgr.IsArenaAllowedEnchancment(pItem.GetEnchantmentId(slot)))
                     pItem.ClearEnchantment(slot);
             }
@@ -1455,7 +1455,7 @@ namespace Game.Entities
                 if (i == slot)
                     continue;
 
-                Item pItem2 = GetItemByPos(new(i));
+                Item pItem2 = GetItemByPos(i);
                 if (pItem2 != null && !pItem2.IsBroken())
                 {
                     foreach (SocketedGem gemData in pItem2.m_itemData.Gems)
@@ -1519,7 +1519,7 @@ namespace Game.Entities
                 if (slot == exceptslot)
                     continue;
 
-                Item pItem = GetItemByPos(new(slot));
+                Item pItem = GetItemByPos(slot);
 
                 if (pItem == null || pItem.GetSocketColor(0) == 0)
                     continue;
@@ -1824,7 +1824,7 @@ namespace Game.Entities
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
             for (byte slot = InventorySlots.ItemStart; slot < inventoryEnd; ++slot)
             {
-                Item item = GetItemByPos(new(slot));
+                Item item = GetItemByPos(slot);
                 if (item)
                     ApplyItemObtainSpells(item, true);
             }
@@ -3335,7 +3335,7 @@ namespace Game.Entities
             for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
             {
                 // If usable, try to cast item spell
-                Item item = GetItemByPos(InventorySlots.Bag0, i);
+                Item item = GetItemByPos(i);
                 if (item != null)
                 {
                     if (!item.IsBroken() && CanUseAttackType(damageInfo.GetAttackType()))

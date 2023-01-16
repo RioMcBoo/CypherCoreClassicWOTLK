@@ -218,7 +218,7 @@ namespace Game.Networking.Packets
 
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
-                Item item = player.GetItemByPos(InventorySlots.Bag0, i);
+                Item item = player.GetItemByPos(i);
                 if (item != null)
                     Items.Add(new InspectItemData(item, i));
             }

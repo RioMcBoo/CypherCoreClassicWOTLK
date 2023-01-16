@@ -74,8 +74,7 @@ namespace Game
                 return;
             }
 
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = GetPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, charterItemID, pProto.GetBuyCount());
+            InventoryResult msg = GetPlayer().CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, charterItemID, pProto.GetBuyCount());
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, null, null, charterItemID);
@@ -395,7 +394,7 @@ namespace Game
             // Proceed with guild/arena team creation
 
             // Delete charter item
-            GetPlayer().DestroyItem(item.InventoryBagSlot, item.InventorySlot, true);
+            GetPlayer().DestroyItem(item.InventoryPosition, true);
 
             // Create guild
             Guild guild = new();
@@ -435,7 +434,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Petitioner, NPCFlags2.None);
             if (!creature)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandlePetitionShowListOpcode - {0} not found or you can't interact with him.", guid.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandlePetitionShowListOpcode - {guid} not found or you can't interact with him.");
                 return;
             }
 

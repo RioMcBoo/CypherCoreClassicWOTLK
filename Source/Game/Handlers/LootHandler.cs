@@ -345,7 +345,7 @@ namespace Game
                 {
                     // Only delete item if no loot or money (unlooted loot is saved to db) or if it isn't an openable item
                     if (loot.IsLooted() || !proto.HasFlag(ItemFlags.HasLoot))
-                        player.DestroyItem(pItem.InventoryBagSlot, pItem.InventorySlot, true);
+                        player.DestroyItem(pItem.InventoryPosition, true);
                 }
                 return;                                             // item can be looted only single player
             }
@@ -436,8 +436,7 @@ namespace Game
 
                 LootItem item = loot.items[req.LootListID];
 
-                List<ItemPosCount> dest = new();
-                InventoryResult msg = target.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
+                InventoryResult msg = target.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, item.itemid, item.count);
                 if (!item.HasAllowedLooter(target.GetGUID()))
                     msg = InventoryResult.CantEquipEver;
                 if (msg != InventoryResult.Ok)

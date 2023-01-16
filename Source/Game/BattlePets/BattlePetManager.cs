@@ -575,9 +575,7 @@ namespace Game.BattlePets
             if (pet.PacketInfo.Health < pet.PacketInfo.MaxHealth)
                 return;
 
-            List<ItemPosCount> dest = new();
-
-            if (_owner.GetPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, SharedConst.BattlePetCageItemId, 1) != InventoryResult.Ok)
+            if (_owner.GetPlayer().CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, SharedConst.BattlePetCageItemId, 1) != InventoryResult.Ok)
                 return;
 
             Item item = _owner.GetPlayer().StoreNewItem(dest, SharedConst.BattlePetCageItemId, true, new ItemRandomEnchantmentId());

@@ -200,7 +200,7 @@ namespace Game.Chat
                     if (i >= InventorySlots.BuyBackStart && i < InventorySlots.BuyBackEnd)
                         continue;
 
-                    Item item = player.GetItemByPos(new(i));
+                    Item item = player.GetItemByPos(i);
                     if (item)
                     {
                         Bag bag = item.ToBag();
@@ -264,7 +264,7 @@ namespace Game.Chat
                     if (i >= InventorySlots.BuyBackStart && i < InventorySlots.BuyBackEnd)
                         continue;
 
-                    Item item = player.GetItemByPos(new(i));
+                    Item item = player.GetItemByPos(i);
                     if (!item)
                         continue;
 

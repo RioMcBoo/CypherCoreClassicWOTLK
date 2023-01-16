@@ -424,7 +424,7 @@ namespace Game
 
                 Item item = GetPlayer().GetItemByGuid(packet.ItemGUID);
                 if (item)
-                    GetPlayer().DurabilityRepair(item.GetPosition(), true, discountMod);
+                    GetPlayer().DurabilityRepair(item.InventoryPosition, true, discountMod);
             }
             else
             {
@@ -447,7 +447,7 @@ namespace Game
             Creature vendor = GetPlayer().GetNPCIfCanInteractWith(vendorGuid, NPCFlags.Vendor, NPCFlags2.None);
             if (vendor == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: SendListInventory - {0} not found or you can not interact with him.", vendorGuid.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: SendListInventory - {vendorGuid} not found or you can not interact with him.");
                 GetPlayer().SendSellError(SellResult.CantFindVendor, null, ObjectGuid.Empty);
                 return;
             }
@@ -505,7 +505,7 @@ namespace Game
 
                     if (!Global.ConditionMgr.IsObjectMeetingVendorItemConditions(vendor.GetEntry(), vendorItem.item, _player, vendor))
                     {
-                        Log.outDebug(LogFilter.Condition, "SendListInventory: conditions not met for creature entry {0} item {1}", vendor.GetEntry(), vendorItem.item);
+                        Log.outDebug(LogFilter.Condition, $"SendListInventory: conditions not met for creature entry {vendor.GetEntry()} item {vendorItem.item}");
                         continue;
                     }
 
