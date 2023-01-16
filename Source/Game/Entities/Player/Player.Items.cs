@@ -2367,6 +2367,9 @@ namespace Game.Entities
             #region impossible merge/fill, do real swap
             // check src->dest move possibility
             InventoryResult _msg = CheckMovePossibility(pSrcItem, dst, out List<ItemPosCount> sDest1);
+            #region impossible merge/fill, do real swap
+            // check src->dest move possibility
+            InventoryResult _msg = CheckMovePossibility(pSrcItem, dst, out List<ItemPosCount> _sDest);
             if (_msg != InventoryResult.Ok)
             {
                 SendEquipError(_msg, pSrcItem, pDstItem);
@@ -2451,6 +2454,7 @@ namespace Game.Entities
                     }
                 }
             }
+            #endregion
 
             // now do moves, remove...
             RemoveItem(dst, false);
