@@ -2451,7 +2451,6 @@ namespace Game.Entities
                     }
                 }
             }
-            #endregion
 
             // now do moves, remove...
             RemoveItem(dst, false);
