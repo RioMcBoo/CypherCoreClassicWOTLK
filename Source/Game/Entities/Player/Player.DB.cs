@@ -119,14 +119,14 @@ namespace Game.Entities
                             // Remember bags that may contain items in them
                             if (err == InventoryResult.Ok)
                             {
-                                if (item.InventoryPosition.IsBagPos)
+                                if (item.InventoryPosition.IsBagSlotPos)
                                 {
                                     Bag pBag = item.ToBag();
                                     if (pBag != null)
                                         bagMap.Add(item.GetGUID(), pBag);
                                 }
                             }
-                            else if (item.InventoryPosition.IsBagPos)
+                            else if (item.InventoryPosition.IsBagSlotPos)
                                 if (item.IsBag())
                                     invalidBagMap.Add(item.GetGUID(), item);
                         }

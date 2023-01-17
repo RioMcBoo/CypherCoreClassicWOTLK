@@ -574,7 +574,7 @@ namespace Game.Entities
             }
 
             // in specific slot
-            if (pos.IsSpecificSlot)
+            if (pos.IsSpecificPos)
             {
                 res = CanStoreItem_InSpecificSlot(pos, dest, pProto, ref count, swap, pItem);
                 if (res != InventoryResult.Ok)
@@ -597,12 +597,12 @@ namespace Game.Entities
             byte inventoryEnd = (byte)(InventorySlots.ItemStart + GetInventorySlotCount());
 
             // in specific bag
-            if (pos.BagSlot != ItemConst.NullBag)
+            if (pos.BagSlot.IsSpecificBag)
             {
                 // search stack in bag for merge to
                 if (pProto.GetMaxStackSize() != 1)
                 {
-                    if (pos.BagSlot == InventorySlots.Bag0)               // inventory
+                    if (pos.IsNotInsideBag)               // inventory
                     {
                         res = CanStoreItem_InInventorySlots(InventorySlots.KeyringStart, InventorySlots.KeyringEnd, dest, pProto, ref count, true, pItem, pos.BagSlot, pos.Slot);
                         if (res != InventoryResult.Ok)
@@ -647,9 +647,9 @@ namespace Game.Entities
                     else                                            // equipped bag
                     {
                         // we need check 2 time (specialized/non_specialized), use NULL_BAG to prevent skipping bag
-                        res = CanStoreItem_InBag(pos.BagSlot, dest, pProto, ref count, true, false, pItem, ItemConst.NullBag, pos.Slot);
+                        res = CanStoreItem_InBag(pos.BagSlot, dest, pProto, ref count, true, false, pItem, ItemSlot.NullBagSlot, pos.Slot);
                         if (res != InventoryResult.Ok)
-                            res = CanStoreItem_InBag(pos.BagSlot, dest, pProto, ref count, true, true, pItem, ItemConst.NullBag, pos.Slot);
+                            res = CanStoreItem_InBag(pos.BagSlot, dest, pProto, ref count, true, true, pItem, ItemSlot.NullBagSlot, pos.Slot);
 
                         if (res != InventoryResult.Ok)
                         {
@@ -669,7 +669,7 @@ namespace Game.Entities
                 }
 
                 // search free slot in bag for place to
-                if (pos.BagSlot == InventorySlots.Bag0)                     // inventory
+                if (pos.IsNotInsideBag)                     // inventory
                 {
                     // search free slot - keyring case
                     if ((pProto.GetBagFamily() & BagFamilyMask.Keys) != 0)
@@ -1229,11 +1229,12 @@ namespace Game.Entities
 
                 if (pItem.GetBonding() == ItemBondingType.OnAcquire ||
                     pItem.GetBonding() == ItemBondingType.Quest ||
-                    (pItem.GetBonding() == ItemBondingType.OnEquip && pos.IsBagPos))
+                    (pItem.GetBonding() == ItemBondingType.OnEquip && pos.IsBagSlotPos))
                     pItem.SetBinding(true);
 
                 Bag pBag = null;
-                if (pos.BagSlot != InventorySlots.Bag0)
+
+                if (!pos.IsNotInsideBag)
                     pBag = GetBagByPos(pos.BagSlot);
 
                 if (pBag == null)
@@ -1262,7 +1263,7 @@ namespace Game.Entities
                 AddEnchantmentDurations(pItem);
                 AddItemDurations(pItem);
 
-                if (pos.BagSlot == InventorySlots.Bag0 || (pos.BagSlot >= InventorySlots.BagStart && pos.BagSlot < InventorySlots.BagEnd))
+                if (pos.IsNotInsideBag || pos.BagSlot.IsCharBagSlot)
                     ApplyItemObtainSpells(pItem, true);
 
                 return pItem;
@@ -1271,7 +1272,7 @@ namespace Game.Entities
             {
                 if (pItem2.GetBonding() == ItemBondingType.OnAcquire ||
                     pItem2.GetBonding() == ItemBondingType.Quest ||
-                    (pItem2.GetBonding() == ItemBondingType.OnEquip && pos.IsBagPos))
+                    (pItem2.GetBonding() == ItemBondingType.OnEquip && pos.IsBagSlotPos))
                     pItem2.SetBinding(true);
 
                 pItem2.SetCount(pItem2.GetCount() + count);
@@ -1301,7 +1302,7 @@ namespace Game.Entities
 
                 pItem2.SetState(ItemUpdateState.Changed, this);
 
-                if (pos.BagSlot == InventorySlots.Bag0 || (pos.BagSlot >= InventorySlots.BagStart && pos.BagSlot < InventorySlots.BagEnd))
+                if (pos.IsNotInsideBag || pos.BagSlot.IsCharBagSlot)
                     ApplyItemObtainSpells(pItem2, true);
 
                 return pItem2;
@@ -1997,9 +1998,9 @@ namespace Game.Entities
                 RemoveItemDurations(pItem);
                 RemoveTradeableItem(pItem);
 
-                if (pos.BagSlot == InventorySlots.Bag0)
+                if (pos.IsNotInsideBag)
                 {
-                    if (pos.Slot < InventorySlots.BagEnd)
+                    if (pos.IsEquipmentPos)
                     {
                         // item set bonuses applied only at equip and removed at unequip, and still active for broken items
                         ItemTemplate pProto = pItem.GetTemplate();
@@ -2215,10 +2216,10 @@ namespace Game.Entities
             // SRC checks
 
             // check unequip potability for equipped items and bank bags
-            if (src.IsEquipmentPos || src.IsBagPos)
+            if (src.IsEquipmentPos || src.IsBagSlotPos)
             {
                 // bags can be swapped with empty bag slots, or with empty bag (items move possibility checked later)
-                InventoryResult msg = CanUnequipItem(src, !src.IsBagPos || dst.IsBagPos || (pDstItem != null && pDstItem.ToBag() != null && pDstItem.ToBag().IsEmpty()));
+                InventoryResult msg = CanUnequipItem(src, !src.IsBagSlotPos || dst.IsBagSlotPos || (pDstItem != null && pDstItem.ToBag() != null && pDstItem.ToBag().IsEmpty()));
                 if (msg != InventoryResult.Ok)
                 {
                     SendEquipError(msg, pSrcItem, pDstItem);
@@ -2227,14 +2228,14 @@ namespace Game.Entities
             }
 
             // prevent put equipped/bank bag in self
-            if (src.IsBagPos && src.Slot == dst.BagSlot)
+            if (src.IsBagSlotPos && src.Slot == dst.BagSlot)
             {
                 SendEquipError(InventoryResult.BagInBag, pSrcItem, pDstItem);
                 return;
             }
 
             // prevent equipping bag in the same slot from its inside
-            if (dst.IsBagPos && src.BagSlot == dst.Slot)
+            if (dst.IsBagSlotPos && src.BagSlot == dst.Slot)
             {
                 SendEquipError(InventoryResult.CantSwap, pSrcItem, pDstItem);
                 return;
@@ -2244,10 +2245,10 @@ namespace Game.Entities
             if (pDstItem != null)
             {
                 // check unequip potability for equipped items and bank bags
-                if (dst.IsEquipmentPos || dst.IsBagPos)
+                if (dst.IsEquipmentPos || dst.IsBagSlotPos)
                 {
                     // bags can be swapped with empty bag slots, or with empty bag (items move possibility checked later)
-                    InventoryResult msg = CanUnequipItem(dst, !dst.IsBagPos || src.IsBagPos || (pSrcItem.ToBag() != null && pSrcItem.ToBag().IsEmpty()));
+                    InventoryResult msg = CanUnequipItem(dst, !dst.IsBagSlotPos || src.IsBagSlotPos || (pSrcItem.ToBag() != null && pSrcItem.ToBag().IsEmpty()));
                     if (msg != InventoryResult.Ok)
                     {
                         SendEquipError(msg, pSrcItem, pDstItem);
@@ -2391,12 +2392,12 @@ namespace Game.Entities
                 {
                     Bag emptyBag = null;
                     Bag fullBag = null;
-                    if (srcBag.IsEmpty() && !src.IsBagPos)
+                    if (srcBag.IsEmpty() && !src.IsBagSlotPos)
                     {
                         emptyBag = srcBag;
                         fullBag = dstBag;
                     }
-                    else if (dstBag.IsEmpty() && !dst.IsBagPos)
+                    else if (dstBag.IsEmpty() && !dst.IsBagSlotPos)
                     {
                         emptyBag = dstBag;
                         fullBag = srcBag;
@@ -2484,7 +2485,7 @@ namespace Game.Entities
             if (!GetAELootView().Empty())
             {
                 bool released = false;
-                if (src.IsBagPos)
+                if (src.IsBagSlotPos)
                 {
                     Bag bag = pSrcItem.ToBag();
                     for (byte i = 0; i < bag.GetBagSize(); ++i)
@@ -2502,7 +2503,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (!released && dst.IsBagPos)
+                if (!released && dst.IsBagSlotPos)
                 {
                     Bag bag = pDstItem.ToBag();
                     for (byte i = 0; i < bag.GetBagSize(); ++i)
@@ -4264,7 +4265,7 @@ namespace Game.Entities
 
             if (pSrcItem)
             {
-                if (pSrcItem.IsNotEmptyBag() && !pos.IsBagPos)
+                if (pSrcItem.IsNotEmptyBag() && !pos.IsBagSlotPos)
                     return InventoryResult.DestroyNonemptyBag;
 
                 if (pSrcItem.HasItemFlag(ItemFieldFlags.Child) && !pos.IsEquipmentPos && !pos.IsChildEquipmentPos)
@@ -4412,7 +4413,7 @@ namespace Game.Entities
                 return res;
 
             // in specific slot
-            if (pos.IsSpecificSlot)
+            if (pos.IsSpecificPos)
             {
                 if (pos.Slot >= InventorySlots.BagStart && pos.Slot < InventorySlots.BagEnd)
                 {
@@ -5172,7 +5173,7 @@ namespace Game.Entities
         public InventoryResult CanUnequipItem(ItemPos pos, bool swap)
         {
             // Applied only to equipped items and bank bags
-            if (!pos.IsEquipmentPos && !pos.IsBagPos)
+            if (!pos.IsEquipmentPos && !pos.IsBagSlotPos)
                 return InventoryResult.Ok;
 
             Item pItem = GetItemByPos(pos);

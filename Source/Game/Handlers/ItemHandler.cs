@@ -173,7 +173,7 @@ namespace Game
             if (srcItem == null)
                 return;                                             // only at cheat
 
-            InventoryResult msg = player.CanEquipItem(ItemConst.NullSlot, out ItemPos dest, srcItem, !srcItem.IsBag());
+            InventoryResult msg = player.CanEquipItem(ItemSlot.NullSlot, out ItemPos dest, srcItem, !srcItem.IsBag());
             if (msg != InventoryResult.Ok)
             {
                 player.SendEquipError(msg, srcItem);
@@ -220,7 +220,7 @@ namespace Game
                     {
                         msg = player.CanStoreItem(src, out sSrc, dstItem, true);
                         if (msg != InventoryResult.Ok)
-                            msg = player.CanStoreItem(new(ItemConst.NullSlot, src.BagSlot), out sSrc, dstItem, true);
+                            msg = player.CanStoreItem(ItemPos.UndefinedSlot(src.BagSlot), out sSrc, dstItem, true);
                         if (msg != InventoryResult.Ok)
                             msg = player.CanStoreItem(ItemPos.Undefined, out sSrc, dstItem, true);
                     }
@@ -228,7 +228,7 @@ namespace Game
                     {
                         msg = player.CanBankItem(src, out sSrc, dstItem, true);
                         if (msg != InventoryResult.Ok)
-                            msg = player.CanBankItem(new(ItemConst.NullSlot, src.BagSlot), out sSrc, dstItem, true);
+                            msg = player.CanBankItem(ItemPos.UndefinedSlot(src.BagSlot), out sSrc, dstItem, true);
                         if (msg != InventoryResult.Ok)
                             msg = player.CanBankItem(ItemPos.Undefined, out sSrc, dstItem, true);
                     }
@@ -286,7 +286,7 @@ namespace Game
 
                 // if inventory item was moved, check if we can remove dependent auras, because they were not removed in Player::RemoveItem (update was set to false)
                 // do this after swaps are done, we pass nullptr because both weapons could be swapped and none of them should be ignored
-                if ((src.BagSlot == InventorySlots.Bag0 && src.Slot < InventorySlots.BagEnd) || (dest.BagSlot == InventorySlots.Bag0 && dest.Slot < InventorySlots.BagEnd))
+                if (src.IsEquipmentPos || dest.IsEquipmentPos)
                     player.ApplyItemDependentAuras(null, false);
             }
         }
@@ -297,7 +297,7 @@ namespace Game
             ItemPos itemPos = new(destroyItem.SlotNum, destroyItem.ContainerId);
 
             // prevent drop unequipable items (in combat, for example) and non-empty bags
-            if (itemPos.IsEquipmentPos || itemPos.IsBagPos)
+            if (itemPos.IsEquipmentPos || itemPos.IsBagSlotPos)
             {
                 InventoryResult msg = _player.CanUnequipItem(itemPos, false);
                 if (msg != InventoryResult.Ok)
@@ -564,7 +564,7 @@ namespace Game
             }
 
             ItemPos src = new(packet.SlotA, packet.ContainerSlotA);
-            ItemPos destBagSlot = new(ItemConst.NullSlot, packet.ContainerSlotB);
+            ItemPos destBagSlot = ItemPos.UndefinedSlot(packet.ContainerSlotB);
 
             Item item = GetPlayer().GetItemByPos(src);
             if (!item)
@@ -578,9 +578,9 @@ namespace Game
 
             InventoryResult msg;
             // check unequip potability for equipped items and bank bags
-            if (src.IsEquipmentPos || src.IsBagPos)
+            if (src.IsEquipmentPos || src.IsBagSlotPos)
             {
-                msg = GetPlayer().CanUnequipItem(src, !src.IsBagPos);
+                msg = GetPlayer().CanUnequipItem(src, !src.IsBagSlotPos);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);
@@ -635,10 +635,9 @@ namespace Game
         {
             if (packet.Inv.Items.Count != 2)
             {
-                Log.outError(LogFilter.Network, "HandleWrapItem - Invalid itemCount ({0})", packet.Inv.Items.Count);
+                Log.outError(LogFilter.Network, $"HandleWrapItem - Invalid itemCount ({packet.Inv.Items.Count})");
                 return;
             }
-
             
             ItemPos giftPos = new(packet.Inv.Items[0].Slot, packet.Inv.Items[0].BagSlot);            
             ItemPos itemPos = new(packet.Inv.Items[1].Slot, packet.Inv.Items[1].BagSlot);
