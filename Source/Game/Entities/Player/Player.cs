@@ -309,7 +309,7 @@ namespace Game.Entities
                 {
                     List<ItemPosCount> destList;
                     // equip offhand weapon/shield if it attempt equipped before main-hand weapon
-                    InventoryResult msg = CanEquipItem(ItemConst.NullSlot, out destList, pItem, false);
+                    InventoryResult msg = CanEquipItem(ItemSlot.Null, out destList, pItem, false);
                     if (msg == InventoryResult.Ok)
                     {
                         RemoveItem(new(i), true);

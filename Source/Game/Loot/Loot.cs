@@ -716,9 +716,9 @@ namespace Game.Loots
 
                 List<ItemPosCount> dest = null;
                 InventoryResult msg = player.CanStoreNewItem(pos, out dest, lootItem.itemid, lootItem.count);
-                if (msg != InventoryResult.Ok && pos.Slot != ItemConst.NullSlot)
-                    msg = player.CanStoreNewItem(new(ItemConst.NullSlot, pos.BagSlot), out dest, lootItem.itemid, lootItem.count);
-                if (msg != InventoryResult.Ok && pos.BagSlot != ItemConst.NullBag)
+                if (msg != InventoryResult.Ok && pos.Slot != ItemSlot.Null)
+                    msg = player.CanStoreNewItem(new(ItemSlot.Null, pos.BagSlot), out dest, lootItem.itemid, lootItem.count);
+                if (msg != InventoryResult.Ok && pos.BagSlot != ItemSlot.Null)
                     msg = player.CanStoreNewItem(ItemPos.Undefined, out dest, lootItem.itemid, lootItem.count);
                 if (msg != InventoryResult.Ok)
                 {

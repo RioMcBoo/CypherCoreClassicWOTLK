@@ -230,7 +230,7 @@ namespace Game.Chat
                         continue;
 
                     Bag container = item.GetContainer();
-                    byte bagSlot = container ? container.InventorySlot : ItemSlot.Bag0;
+                    byte bagSlot = container ? container.InventorySlot : ItemSlot.Null;
 
                     string st = "";
                     switch (item.GetState())

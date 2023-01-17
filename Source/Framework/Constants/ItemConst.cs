@@ -25,8 +25,6 @@ namespace Framework.Constants
         public const int MaxSpells = 5;
         public const int MaxStats = 10;
         public const int MaxBagSize = 36;
-        public const byte NullBag = 0;
-        public const byte NullSlot = 255;
         public const int MaxOutfitItems = 24;
         public const int MaxItemExtCostItems = 5;
         public const int MaxItemExtCostCurrencies = 5;
@@ -129,7 +127,6 @@ namespace Framework.Constants
         public const byte ChildEquipmentStart = 126;
         public const byte ChildEquipmentEnd = 129;
 
-        public const byte Bag0 = 255;
         public const byte DefaultSize = 16;
     }
 

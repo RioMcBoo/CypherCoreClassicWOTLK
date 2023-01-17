@@ -495,7 +495,7 @@ namespace Game
 
             ItemPos guildBankPos = new(autoStoreGuildBankItem.BankSlot, autoStoreGuildBankItem.BankTab);
 
-            guild.SwapItemsWithInventory(GetPlayer(), true, guildBankPos, ItemConst.NullSlot, 0);
+            guild.SwapItemsWithInventory(GetPlayer(), true, guildBankPos, ItemSlot.Null, 0);
         }
 
         [WorldPacketHandler(ClientOpcodes.MergeGuildBankItemWithGuildBankItem)]

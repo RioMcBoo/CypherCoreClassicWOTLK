@@ -132,7 +132,7 @@ namespace Game.Entities
                         }
                         else
                         {
-                            item.InventorySlot = ItemConst.NullSlot;
+                            item.InventorySlot = ItemSlot.Null;
                             // Item is in the bag, find the bag
                             var bag = bagMap.LookupByKey(bagGuid);
                             if (bag != null)

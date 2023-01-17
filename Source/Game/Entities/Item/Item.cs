@@ -2651,7 +2651,7 @@ namespace Game.Entities
         public uint GetMaxStackCount() { return GetTemplate().GetMaxStackSize(); }
 
         public byte InventorySlot { get => m_slot; set => m_slot = value; }
-        public byte InventoryBagSlot { get => m_container != null ? m_container.InventorySlot : ItemSlot.Bag0; }
+        public byte InventoryBagSlot { get => m_container != null ? m_container.InventorySlot : ItemSlot.Null; }
         public ItemPos InventoryPosition { get => new(InventorySlot, InventoryBagSlot); }
         public Bag GetContainer() { return m_container; }
         
@@ -2859,18 +2859,15 @@ namespace Game.Entities
     {
         public static implicit operator ItemSlot(byte slot) => new(slot);
         public static implicit operator byte(ItemSlot slot) => slot.Value;
-        public const byte NullSlot = ItemConst.NullSlot;
-        public const byte NullBagSlot = ItemConst.NullBag;
-        public const byte Bag0 = InventorySlots.Bag0;
+        public const byte Null = byte.MaxValue;
         public ItemSlot(byte slot) { Value = slot; }
-        
-        /// <summary>Is the BagSlot clearly determined?</summary>
-        public bool IsSpecificBag => Value != NullBagSlot;
+
         /// <summary>Is the Slot clearly determined?</summary>
-        public bool IsSpecificSlot => Value != NullSlot;
-        public bool IsCharEquipSlot => Value < EquipmentSlot.End;
-        public bool IsCharBagSlot => Value >= InventorySlots.BagStart && Value < InventorySlots.BagEnd;
-        public bool IsCharItemSlot => Value >= InventorySlots.ItemStart && Value < InventorySlots.ItemEnd;
+        public bool IsSpecific => Value != Null;
+        public bool IsEquipSlot => Value < EquipmentSlot.End;
+        public bool IsEquipBagSlot => Value >= InventorySlots.BagStart && Value < InventorySlots.BagEnd;
+        public bool IsItemSlot => Value >= InventorySlots.ItemStart && Value < InventorySlots.ItemEnd;
+        public bool IsCharItemSlot(byte backPackCapacity) => Value >= InventorySlots.ItemStart && Value < (InventorySlots.ItemStart + backPackCapacity);
         public bool IsBankItemSlot => Value >= InventorySlots.BankItemStart && Value < InventorySlots.BankItemEnd;
         public bool IsBankBagSlot => Value >= InventorySlots.BankBagStart && Value < InventorySlots.BankBagEnd;
         public bool IsKeyringSlot => Value >= InventorySlots.KeyringStart && Value < InventorySlots.KeyringEnd;
@@ -2885,11 +2882,10 @@ namespace Game.Entities
     public readonly record struct ItemPos
     {
         public static implicit operator ItemPos(byte slot) => new(slot);
-        public static readonly ItemPos Undefined = new(ItemSlot.NullSlot, ItemSlot.NullBagSlot);
-        public static ItemPos UndefinedBag(byte knownSlot) => new(knownSlot, ItemSlot.NullBagSlot);
-        public static ItemPos UndefinedSlot(byte knownBagSlot) => new(ItemSlot.NullSlot, knownBagSlot);
+        public static implicit operator ItemPos(ItemSlot slot) => new(slot);
+        public static readonly ItemPos Undefined = new(ItemSlot.Null, ItemSlot.Null);
 
-        public ItemPos(byte slot, byte bagSlot = ItemSlot.Bag0)
+        public ItemPos(byte slot, byte bagSlot = ItemSlot.Null)
         {
             Slot = slot;
             BagSlot = bagSlot;
@@ -2898,29 +2894,27 @@ namespace Game.Entities
         public ItemPos(byte slot, byte? bagSlot)
         {
             Slot = slot;
-            BagSlot = bagSlot.HasValue ? bagSlot.Value : ItemSlot.Bag0;
+            BagSlot = bagSlot.HasValue ? bagSlot.Value : ItemSlot.Null;
         }
 
         /// <summary>Is the position clearly determined?</summary>
-        public bool IsSpecificPos
-        {
-            get => BagSlot.IsSpecificBag && Slot.IsSpecificSlot;
-        }
+        public bool IsSpecificPos => Slot != ItemSlot.Null;
+
+        /// <summary>Is the bag clearly determined?</summary>
+        public bool IsSpecificBag => BagSlot != ItemSlot.Null;
 
         /// <summary>Points to any place in the player's default inventory</summary>
         public bool IsInventoryPos
         {
             get
             {
-                if (IsNotInsideBag && !Slot.IsSpecificSlot)
+                if (!IsSpecificBag && Slot.IsItemSlot)
                     return true;
-                if (IsNotInsideBag && Slot.IsCharItemSlot)
+                if (BagSlot.IsEquipBagSlot)
                     return true;
-                if (BagSlot.IsCharBagSlot)
+                if (!IsSpecificBag && Slot.IsKeyringSlot)
                     return true;
-                if (IsNotInsideBag && Slot.IsKeyringSlot)
-                    return true;
-                if (IsNotInsideBag && Slot.IsChildEquipmentSlot)
+                if (!IsSpecificBag && Slot.IsChildEquipmentSlot)
                     return true;
                 return false;
             }
@@ -2931,9 +2925,9 @@ namespace Game.Entities
         {
             get
             {
-                if (IsNotInsideBag && Slot.IsBankItemSlot)
+                if (!IsSpecificBag && Slot.IsBankItemSlot)
                     return true;
-                if (IsNotInsideBag && Slot.IsBankBagSlot)
+                if (!IsSpecificBag && Slot.IsBankBagSlot)
                     return true;
                 if (BagSlot.IsBankBagSlot)
                     return true;
@@ -2946,9 +2940,9 @@ namespace Game.Entities
         {
             get
             {
-                if (IsNotInsideBag && Slot.IsCharBagSlot)
+                if (!IsSpecificBag && Slot.IsEquipBagSlot)
                     return true;
-                if (IsNotInsideBag && Slot.IsBankBagSlot)
+                if (!IsSpecificBag && Slot.IsBankBagSlot)
                     return true;
                 return false;
             }
@@ -2959,22 +2953,19 @@ namespace Game.Entities
         {
             get
             {
-                if (IsNotInsideBag && Slot.IsCharEquipSlot)
+                if (!IsSpecificBag && Slot.IsEquipSlot)
                     return true;
-                if (IsNotInsideBag && Slot.IsCharBagSlot)
+                if (!IsSpecificBag && Slot.IsEquipBagSlot)
                     return true;
                 return false;
             }
         }
 
         /// <summary>TODO: I don't know what is it</summary>
-        public bool IsChildEquipmentPos => IsNotInsideBag && Slot.IsChildEquipmentSlot;
+        public bool IsChildEquipmentPos => !IsSpecificBag && Slot.IsChildEquipmentSlot;
 
         /// <summary>Points to BuyBack slot</summary>
-        public bool IsBuyBackPos => IsNotInsideBag && Slot.IsBuyBackSlot;
-
-        /// <summary>Not in bag or container</summary>
-        public bool IsNotInsideBag => BagSlot == ItemSlot.Bag0;
+        public bool IsBuyBackPos => !IsSpecificBag && Slot.IsBuyBackSlot;        
 
         public readonly ItemSlot Slot;
         public readonly ItemSlot BagSlot;

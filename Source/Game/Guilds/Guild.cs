@@ -1785,7 +1785,7 @@ namespace Game.Guilds
 
         public void SwapItemsWithInventory(Player player, bool toChar, ItemPos source, ItemPos playerInvPos, uint splitedAmount)
         {
-            if ((source.Slot >= GuildConst.MaxBankSlots && source.Slot != ItemConst.NullSlot) || source.BagSlot >= _GetPurchasedTabsSize())
+            if ((source.Slot >= GuildConst.MaxBankSlots && source.Slot != ItemSlot.Null) || source.BagSlot >= _GetPurchasedTabsSize())
                 return;
 
             BankMoveItemData bankData = new(this, player, source);
@@ -3943,7 +3943,7 @@ namespace Game.Guilds
                     return InventoryResult.WrongBagType;
 
                 // Slot explicitely specified. Check it.
-                if (Slot != ItemConst.NullSlot)
+                if (Slot != ItemSlot.Null)
                 {
                     Item pItemDest = m_pGuild._GetItem(Position);
                     // Ignore swapped item (this slot will be empty after move)

@@ -264,7 +264,7 @@ namespace Game.Entities
                     if (m_bagslot[i].GetGUID() == guid)
                         return i;
 
-            return ItemConst.NullSlot;
+            return ItemSlot.Null;
         }
 
         public Item GetItemByPos(byte slot)
