@@ -173,7 +173,7 @@ namespace Game
             if (srcItem == null)
                 return;                                             // only at cheat
 
-            InventoryResult msg = player.CanEquipItem(ItemSlot.NullSlot, out ItemPos dest, srcItem, !srcItem.IsBag());
+            InventoryResult msg = player.CanEquipItem(ItemSlot.Null, out ItemPos dest, srcItem, !srcItem.IsBag());
             if (msg != InventoryResult.Ok)
             {
                 player.SendEquipError(msg, srcItem);
@@ -220,7 +220,7 @@ namespace Game
                     {
                         msg = player.CanStoreItem(src, out sSrc, dstItem, true);
                         if (msg != InventoryResult.Ok)
-                            msg = player.CanStoreItem(ItemPos.UndefinedSlot(src.BagSlot), out sSrc, dstItem, true);
+                            msg = player.CanStoreItem(ItemPos.AnySlotInBag(src.BagSlot), out sSrc, dstItem, true);
                         if (msg != InventoryResult.Ok)
                             msg = player.CanStoreItem(ItemPos.Undefined, out sSrc, dstItem, true);
                     }
@@ -228,7 +228,7 @@ namespace Game
                     {
                         msg = player.CanBankItem(src, out sSrc, dstItem, true);
                         if (msg != InventoryResult.Ok)
-                            msg = player.CanBankItem(ItemPos.UndefinedSlot(src.BagSlot), out sSrc, dstItem, true);
+                            msg = player.CanBankItem(ItemPos.AnySlotInBag(src.BagSlot), out sSrc, dstItem, true);
                         if (msg != InventoryResult.Ok)
                             msg = player.CanBankItem(ItemPos.Undefined, out sSrc, dstItem, true);
                     }
@@ -564,7 +564,7 @@ namespace Game
             }
 
             ItemPos src = new(packet.SlotA, packet.ContainerSlotA);
-            ItemPos destBagSlot = ItemPos.UndefinedSlot(packet.ContainerSlotB);
+            ItemPos destBagSlot = ItemPos.AnySlotInBag(packet.ContainerSlotB);
 
             Item item = GetPlayer().GetItemByPos(src);
             if (!item)

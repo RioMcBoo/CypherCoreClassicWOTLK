@@ -514,7 +514,7 @@ namespace Game.Entities
         }
 
         //Store Item
-        public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, bool swap = false)
+        public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, bool swapIfSpecificNotEmpty = false)
         {
             if (pItem == null)
             {
@@ -522,15 +522,15 @@ namespace Game.Entities
                 return InventoryResult.ItemNotFound;
             }
 
-            return CanStoreItem(pos, out dest, pItem.GetEntry(), pItem.GetCount(), pItem, swap);
+            return CanStoreItem(pos, out dest, pItem.GetEntry(), pItem.GetCount(), pItem, swapIfSpecificNotEmpty);
         }
 
-        InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, uint entry, uint count, Item pItem, bool swap)
+        InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, uint entry, uint count, Item pItem, bool swapIfSpecificNotEmpty)
         {
-            return CanStoreItem(pos, out dest, entry, count, pItem, swap, out _);
+            return CanStoreItem(pos, out dest, entry, count, pItem, swapIfSpecificNotEmpty, out _);
         }
 
-        InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, uint entry, uint count, Item pItem, bool swap, out uint no_space_count)
+        InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, uint entry, uint count, Item pItem, bool swapIfSpecificNotEmpty, out uint no_space_count)
         {
             dest = new();
 
@@ -541,7 +541,7 @@ namespace Game.Entities
             if (pProto == null)
             {
                 no_space_count = count;
-                return swap ? InventoryResult.CantSwap : InventoryResult.ItemNotFound;
+                return swapIfSpecificNotEmpty ? InventoryResult.CantSwap : InventoryResult.ItemNotFound;
             }
 
             if (pItem != null)
@@ -559,9 +559,14 @@ namespace Game.Entities
                     return InventoryResult.NotOwner;
                 }
             }
-            
-            // check count of items (skip for auto move for same player from bank)
-            uint no_similar_count = 0;                            // can't store this amount similar items
+
+            //needs for some private methods (TODO: need refactoring)
+            bool canMerge = pProto.GetMaxStackSize() != 1;
+
+            // can't store this amount similar items
+            uint no_similar_count = 0;
+
+            #region Check for similar items            
             InventoryResult res = CanTakeMoreSimilarItems(entry, count, pItem, ref no_similar_count);
             if (res != InventoryResult.Ok)
             {
@@ -572,316 +577,95 @@ namespace Game.Entities
                 }
                 count -= no_similar_count;
             }
+            #endregion
 
-            // in specific slot
+            #region #1-Try Store in specific slot
             if (pos.IsSpecificPos)
             {
-                res = CanStoreItem_InSpecificSlot(pos, dest, pProto, ref count, swap, pItem);
-                if (res != InventoryResult.Ok)
-                {
-                    no_space_count = count + no_similar_count;
-                    return res;
-                }
-
-                if (count == 0)
-                {
-                    if (no_similar_count == 0)
-                        return InventoryResult.Ok;
-
-                    no_space_count = count + no_similar_count;
-                    return InventoryResult.ItemMaxCount;
-                }
+                res = CanStoreItem_InSpecificSlot(pos, dest, pProto, ref count, swapIfSpecificNotEmpty, pItem);
+                if (CheckForDone())
+                    goto return_res;
             }
+            #endregion
 
-            // not specific slot or have space for partly store only in specific slot
-            byte inventoryEnd = (byte)(InventorySlots.ItemStart + GetInventorySlotCount());
-
-            // in specific bag
-            if (pos.BagSlot.IsSpecificBag)
+            #region #2-Try Store in any free slot into specific Bag
+            if (pos.IsSpecificBagSlot)
             {
-                // search stack in bag for merge to
-                if (pProto.GetMaxStackSize() != 1)
-                {
-                    if (pos.IsNotInsideBag)               // inventory
-                    {
-                        res = CanStoreItem_InInventorySlots(InventorySlots.KeyringStart, InventorySlots.KeyringEnd, dest, pProto, ref count, true, pItem, pos.BagSlot, pos.Slot);
-                        if (res != InventoryResult.Ok)
-                        {
-                            no_space_count = count + no_similar_count;
-                            return res;
-                        }
+                //skip-Slot after specific slot
+                ItemPos skip = dest.Empty() ? ItemPos.Undefined : new(pos.Slot);
 
-                        res = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, true, pItem, pos.BagSlot, pos.Slot);
-                        if (res != InventoryResult.Ok)
-                        {
-                            no_space_count = count + no_similar_count;
-                            return res;
-                        }
-
-                        if (count == 0)
-                        {
-                            if (no_similar_count == 0)
-                                return InventoryResult.Ok;
-
-                            no_space_count = count + no_similar_count;
-                            return InventoryResult.ItemMaxCount;
-                        }
-
-                        res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, true, pItem, pos.BagSlot, pos.Slot);
-                        if (res != InventoryResult.Ok)
-                        {
-                            no_space_count = count + no_similar_count;
-                            return res;
-                        }
-
-                        if (count == 0)
-                        {
-                            if (no_similar_count == 0)
-                                return InventoryResult.Ok;
-
-
-                            no_space_count = count + no_similar_count;
-                            return InventoryResult.ItemMaxCount;
-                        }
-                    }
-                    else                                            // equipped bag
-                    {
-                        // we need check 2 time (specialized/non_specialized), use NULL_BAG to prevent skipping bag
-                        res = CanStoreItem_InBag(pos.BagSlot, dest, pProto, ref count, true, false, pItem, ItemSlot.NullBagSlot, pos.Slot);
-                        if (res != InventoryResult.Ok)
-                            res = CanStoreItem_InBag(pos.BagSlot, dest, pProto, ref count, true, true, pItem, ItemSlot.NullBagSlot, pos.Slot);
-
-                        if (res != InventoryResult.Ok)
-                        {
-                            no_space_count = count + no_similar_count;
-                            return res;
-                        }
-
-                        if (count == 0)
-                        {
-                            if (no_similar_count == 0)
-                                return InventoryResult.Ok;
-
-                            no_space_count = count + no_similar_count;
-                            return InventoryResult.ItemMaxCount;
-                        }
-                    }
-                }
-
-                // search free slot in bag for place to
-                if (pos.IsNotInsideBag)                     // inventory
-                {
-                    // search free slot - keyring case
-                    if ((pProto.GetBagFamily() & BagFamilyMask.Keys) != 0)
-                    {
-                        res = CanStoreItem_InInventorySlots(InventorySlots.KeyringStart, InventorySlots.KeyringEnd, dest, pProto, ref count, false, pItem, pos.BagSlot, pos.Slot);
-                        if (res != InventoryResult.Ok)
-                        {
-                            no_space_count = count + no_similar_count;
-                            return res;
-                        }
-
-                        if (count == 0)
-                        {
-                            if (no_similar_count == 0)
-                                return InventoryResult.Ok;
-
-                            no_space_count = count + no_similar_count;
-                            return InventoryResult.ItemMaxCount;
-                        }
-                    }
-
-                    if (pItem && pItem.HasItemFlag(ItemFieldFlags.Child))
-                    {
-                        res = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, false, pItem, pos.BagSlot, pos.Slot);
-                        if (res != InventoryResult.Ok)
-                        {
-                            no_space_count = count + no_similar_count;
-                            return res;
-                        }
-
-                        if (count == 0)
-                        {
-                            if (no_similar_count == 0)
-                                return InventoryResult.Ok;
-
-                            no_space_count = count + no_similar_count;
-                            return InventoryResult.ItemMaxCount;
-                        }
-                    }
-
-                    res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, false, pItem, pos.BagSlot, pos.Slot);
-                    if (res != InventoryResult.Ok)
-                    {
-                        no_space_count = count + no_similar_count;
-                        return res;
-                    }
-
-                    if (count == 0)
-                    {
-                        if (no_similar_count == 0)
-                            return InventoryResult.Ok;
-
-                        no_space_count = count + no_similar_count;
-                        return InventoryResult.ItemMaxCount;
-                    }
-                }
-                else                                                // equipped bag
-                {
-                    res = CanStoreItem_InBag(pos.BagSlot, dest, pProto, ref count, false, false, pItem, ItemConst.NullBag, pos.Slot);
-                    if (res != InventoryResult.Ok)
-                        res = CanStoreItem_InBag(pos.BagSlot, dest, pProto, ref count, false, true, pItem, ItemConst.NullBag, pos.Slot);
-
-                    if (res != InventoryResult.Ok)
-                    {
-                        no_space_count = count + no_similar_count;
-                        return res;
-                    }
-
-                    if (count == 0)
-                    {
-                        if (no_similar_count == 0)
-                            return InventoryResult.Ok;
-
-                        no_space_count = count + no_similar_count;
-                        return InventoryResult.ItemMaxCount;
-                    }
-                }
-            }
-
-            // not specific bag or have space for partly store only in specific bag
-
-            // search stack for merge to
-            if (pProto.GetMaxStackSize() != 1)
-            {
-                res = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, true, pItem, pos.BagSlot, pos.Slot);
+                // we need check 2 time (specialized/non_specialized)
+                res = CanStoreItem_InBag(pos.BagSlot, dest, pProto, ref count, canMerge, false, pItem, skip);                
                 if (res != InventoryResult.Ok)
-                {
-                    no_space_count = count + no_similar_count;
-                    return res;
-                }
+                    res = CanStoreItem_InBag(pos.BagSlot, dest, pProto, ref count, canMerge, true, pItem, ItemPos.Undefined);
 
-                if (count == 0)
-                {
-                    if (no_similar_count == 0)
-                        return InventoryResult.Ok;
-
-                    no_space_count = count + no_similar_count;
-                    return InventoryResult.ItemMaxCount;
-                }
-
-                res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, true, pItem, pos.BagSlot, pos.Slot);
-                if (res != InventoryResult.Ok)
-                {
-                    no_space_count = count + no_similar_count;
-                    return res;
-                }
-
-                if (count == 0)
-                {
-                    if (no_similar_count == 0)
-                        return InventoryResult.Ok;
-
-                    no_space_count = count + no_similar_count;
-                    return InventoryResult.ItemMaxCount;
-                }
-
-                if (pProto.GetBagFamily() != 0)
-                {
-                    for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
-                    {
-                        res = CanStoreItem_InBag(i, dest, pProto, ref count, true, false, pItem, pos.BagSlot, pos.Slot);
-                        if (res != InventoryResult.Ok)
-                            continue;
-
-                        if (count == 0)
-                        {
-                            if (no_similar_count == 0)
-                                return InventoryResult.Ok;
-
-                            no_space_count = count + no_similar_count;
-                            return InventoryResult.ItemMaxCount;
-                        }
-                    }
-                }
-
-                for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
-                {
-                    res = CanStoreItem_InBag(i, dest, pProto, ref count, true, true, pItem, pos.BagSlot, pos.Slot);
-                    if (res != InventoryResult.Ok)
-                        continue;
-
-                    if (count == 0)
-                    {
-                        if (no_similar_count == 0)
-                            return InventoryResult.Ok;
-
-                        no_space_count = count + no_similar_count;
-                        return InventoryResult.ItemMaxCount;
-                    }
-                }
+                if (CheckForDone())
+                    goto return_res;
             }
+            #endregion
 
-            // search free slot - special bag case
+            #region #3-Try Store into suitable slot in Inventory  
+
+            //search specialized bag
             if (pProto.GetBagFamily() != 0)
             {
-                if ((pProto.GetBagFamily() & BagFamilyMask.Keys) != 0)
-                {
-                    res = CanStoreItem_InInventorySlots(InventorySlots.KeyringStart, InventorySlots.KeyringEnd, dest, pProto, ref count, false, pItem, pos.BagSlot, pos.Slot);
-                    if (res != InventoryResult.Ok)
-                    {
-                        no_space_count = count + no_similar_count;
-                        return res;
-                    }
-
-                    if (count == 0)
-                    {
-                        if (no_similar_count == 0)
-                            return InventoryResult.Ok;
-
-                        no_space_count = count + no_similar_count;
-                        return InventoryResult.ItemMaxCount;
-                    }
-                }
-
                 for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
                 {
-                    res = CanStoreItem_InBag(i, dest, pProto, ref count, false, false, pItem, pos.BagSlot, pos.Slot);
-                    if (res != InventoryResult.Ok)
-                        continue;
-
-                    if (count == 0)
-                    {
-                        if (no_similar_count == 0)
-                            return InventoryResult.Ok;
-
-                        no_space_count = count + no_similar_count;
-                        return InventoryResult.ItemMaxCount;
-                    }
+                    // we need checkonly specialized
+                    res = CanStoreItem_InBag(i, dest, pProto, ref count, canMerge, true, pItem, pos);
+                    if (CheckForDone())
+                        goto return_res;
                 }
             }
-
-            if (pItem != null && pItem.IsNotEmptyBag())
-                return InventoryResult.BagInBag;
 
             if (pItem && pItem.HasItemFlag(ItemFieldFlags.Child))
             {
-                res = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, false, pItem, pos.BagSlot, pos.Slot);
-                if (res != InventoryResult.Ok)
-                {
-                    no_space_count = count + no_similar_count;
-                    return res;
-                }
+                res = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, canMerge, pItem, pos);
+                if (CheckForDone())
+                    goto return_res;
+            }
 
-                if (count == 0)
-                {
-                    if (no_similar_count == 0)
-                        return InventoryResult.Ok;
+            // search free slot - keyring case
+            if ((pProto.GetBagFamily() & BagFamilyMask.Keys) != 0)
+            {
+                res = CanStoreItem_InInventorySlots(InventorySlots.KeyringStart, InventorySlots.KeyringEnd, dest, pProto, ref count, canMerge, pItem, pos);
+                if (CheckForDone())
+                    goto return_res;
+            }
+            #endregion
 
-                    no_space_count = count + no_similar_count;
-                    return InventoryResult.ItemMaxCount;
+            #region #4-Try Store in any free slot into Bag
+            if (pProto.GetBagFamily() != 0)
+            {
+                for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
+                {
+                    // we need checkonly non-specialized
+                    res = CanStoreItem_InBag(i, dest, pProto, ref count, canMerge, false, pItem, pos);
+
+                    if (CheckForDone())
+                        goto return_res;
                 }
             }
+            #endregion
+
+            #region Try Store in any free slot in Inventory
+            //Determining the maximum capacity of a backpack
+            byte inventoryEnd = (byte)(InventorySlots.ItemStart + GetInventorySlotCount());
+            res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, canMerge, pItem, pos);
+            if (CheckForDone())
+                goto return_res;
+            #endregion
+
+
+
+            
+
+                
+
+            //-------------
+
+            if (pItem != null && pItem.IsNotEmptyBag())
+                return InventoryResult.BagInBag;            
 
             // search free slot
             byte searchSlotStart = InventorySlots.ItemStart;
@@ -891,40 +675,36 @@ namespace Game.Entities
                 searchSlotStart = InventorySlots.BagStart;
 
             res = CanStoreItem_InInventorySlots(searchSlotStart, inventoryEnd, dest, pProto, ref count, false, pItem, pos.BagSlot, pos.Slot);
-            if (res != InventoryResult.Ok)
-            {
-                no_space_count = count + no_similar_count;
-                return res;
-            }
+           
+            //----------------
+           
 
-            if (count == 0)
-            {
-                if (no_similar_count == 0)
-                    return InventoryResult.Ok;
+            res = InventoryResult.InvFull;
 
-                no_space_count = count + no_similar_count;
-                return InventoryResult.ItemMaxCount;
-            }
+        return_res:
+            no_space_count = count + no_similar_count;
+            return res;
 
-            for (var i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
+            #region Helpers
+            bool CheckForDone()
             {
-                res = CanStoreItem_InBag(i, dest, pProto, ref count, false, true, pItem, pos.BagSlot, pos.Slot);
                 if (res != InventoryResult.Ok)
-                    continue;
+                    return true;
 
                 if (count == 0)
                 {
                     if (no_similar_count == 0)
-                        return InventoryResult.Ok;
+                    {
+                        res = InventoryResult.Ok;
+                        return true;
+                    }
 
-                    no_space_count = count + no_similar_count;
-                    return InventoryResult.ItemMaxCount;
+                    res = InventoryResult.ItemMaxCount;
+                    return true;
                 }
+                return false;
             }
-
-            no_space_count = count + no_similar_count;
-
-            return InventoryResult.InvFull;
+            #endregion
         }
 
         public InventoryResult CanStoreItems(Item[] items, int count, ref uint offendingItemId)
@@ -1470,7 +1250,7 @@ namespace Game.Entities
                 return InventoryResult.LootGone;
 
             // no maximum
-            if ((pProto.GetMaxCount() <= 0 && pProto.GetItemLimitCategory() == 0) || pProto.GetMaxCount() == 2147483647)
+            if ((pProto.GetMaxCount() <= 0 && pProto.GetItemLimitCategory() == 0) || pProto.GetMaxCount() == int.MaxValue)
                 return InventoryResult.Ok;
 
             if (pProto.GetMaxCount() > 0)
@@ -2590,7 +2370,7 @@ namespace Game.Entities
                 it = StoreNewItem(dest, item, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(item), null, ItemContext.Vendor, crItem.BonusListIDs, false);
             else
                 it = EquipNewItem(dest, item, ItemContext.Vendor, true);
-            
+
             if (it != null)
             {
                 uint new_count = pVendor.UpdateVendorItemCurrentCount(crItem, count);
@@ -3531,7 +3311,7 @@ namespace Game.Entities
                 }
             }
 
-            if ((pos.BagSlot == ItemConst.NullBag && pos.Slot == ItemConst.NullSlot) || pos.IsInventoryPos)
+            if (pos.IsInventoryPos || !pos.IsSpecificPos)
             {
                 if (!_StoreOrEquipNewItem(vendorslot, item, count, pos, (int)price, pProto, creature, crItem, true))
                     return false;
@@ -4202,7 +3982,7 @@ namespace Game.Entities
         }
 
         //Inventory       
-        InventoryResult CanStoreItem_InInventorySlots(byte slot_begin, byte slot_end, List<ItemPosCount> dest, ItemTemplate pProto, ref uint count, bool merge, Item pSrcItem, byte skip_bag = ItemConst.NullBag, byte skip_slot = ItemConst.NullSlot)
+        InventoryResult CanStoreItem_InInventorySlots(byte slot_begin, byte slot_end, List<ItemPosCount> dest, ItemTemplate pProto, ref uint count, bool merge, Item pSrcItem, ItemPos skip)
         {
             //this is never called for non-bag slots so we can do this
             if (pSrcItem != null && pSrcItem.IsNotEmptyBag())
@@ -4211,7 +3991,7 @@ namespace Game.Entities
             for (var j = slot_begin; j < slot_end; j++)
             {
                 // skip specific slot already processed in first called CanStoreItem_InSpecificSlot
-                if (InventorySlots.Bag0 == skip_bag && j == skip_slot)
+                if (!skip.IsSpecificBag && j == skip.Slot)
                     continue;
 
                 Item pItem2 = GetItemByPos(j);
@@ -4278,14 +4058,14 @@ namespace Game.Entities
             // empty specific slot - check item fit to slot
             if (pItem2 == null || swap)
             {
-                if (pos.BagSlot == InventorySlots.Bag0)
+                if (pos.IsNotInsideBag)
                 {
                     // keyring case
-                    if (pos.Slot >= InventorySlots.KeyringStart && (pos.Slot < InventorySlots.KeyringEnd) && (pProto.GetBagFamily() & BagFamilyMask.Keys) == 0)
+                    if (pos.Slot.IsKeyringSlot && (pProto.GetBagFamily() & BagFamilyMask.Keys) == 0)
                         return InventoryResult.WrongBagType;
 
                     // prevent cheating
-                    if ((pos.Slot >= InventorySlots.BuyBackStart && pos.Slot < InventorySlots.BuyBackEnd) || pos.Slot >= (byte)PlayerSlots.End)
+                    if (pos.Slot.IsBuyBackSlot || pos.Slot >= (byte)PlayerSlots.End)
                         return InventoryResult.WrongBagType;
                 }
                 else
@@ -4665,10 +4445,10 @@ namespace Game.Entities
             return null;
         }
 
-        InventoryResult CanStoreItem_InBag(byte bag, List<ItemPosCount> dest, ItemTemplate pProto, ref uint count, bool merge, bool non_specialized, Item pSrcItem, byte skip_bag = ItemConst.NullBag, byte skip_slot = ItemConst.NullSlot)
+        InventoryResult CanStoreItem_InBag(byte bag, List<ItemPosCount> dest, ItemTemplate pProto, ref uint count, bool merge, bool non_specialized, Item pSrcItem, ItemPos skip)
         {
             // skip specific bag already processed in first called CanStoreItem_InBag
-            if (bag == skip_bag)
+            if (bag == skip.BagSlot)
                 return InventoryResult.WrongBagType;
 
             // skip not existed bag or self targeted bag
@@ -4699,7 +4479,7 @@ namespace Game.Entities
             for (byte j = 0; j < pBag.GetBagSize(); j++)
             {
                 // skip specific slot already processed in first called CanStoreItem_InSpecificSlot
-                if (j == skip_slot)
+                if (j == skip.Slot)
                     continue;
 
                 Item pItem2 = GetItemByPos(new(j, bag));
@@ -4909,7 +4689,7 @@ namespace Game.Entities
             return result;
         }
 
-        public InventoryResult CanEquipItem(byte slot, out ItemPos dest, Item pItem, bool swap, bool not_loading = true)        
+        public InventoryResult CanEquipItem(byte slot, out ItemPos dest, Item pItem, bool swap, bool not_loading = true)
         {
             dest = new();
             if (pItem != null)
@@ -5213,7 +4993,7 @@ namespace Game.Entities
 
             return InventoryResult.Ok;
         }
-        
+
         //Artifact
         void ApplyArtifactPowers(Item item, bool apply)
         {
@@ -5441,7 +5221,7 @@ namespace Game.Entities
 
                 Bag pBag;
                 ItemTemplate pProto = pItem.GetTemplate();
-                if (itemPos.BagSlot == InventorySlots.Bag0)
+                if (itemPos.IsNotInsideBag)
                 {
                     SetInvSlot(itemPos.Slot, ObjectGuid.Empty);
 
@@ -5503,7 +5283,7 @@ namespace Game.Entities
                 if (pProto.GetInventoryType() != InventoryType.NonEquip)
                     UpdateAverageItemLevelTotal();
 
-                if (itemPos.BagSlot == InventorySlots.Bag0)
+                if (itemPos.IsNotInsideBag)
                     UpdateAverageItemLevelEquipped();
             }
         }
@@ -6395,7 +6175,7 @@ namespace Game.Entities
             {
                 ItemTemplate itemTemplate = item.GetTemplate();
                 if (itemTemplate != null)
-                {                    
+                {
                     if (item.IsEquipped())
                     {
                         uint itemLevel = item.GetItemLevel(this);
