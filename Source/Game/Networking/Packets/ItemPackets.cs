@@ -368,9 +368,9 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Inv = new InvUpdate(_worldPacket);
-            ContainerSlotB = _worldPacket.ReadUInt8();
+            Inv = new InvUpdate(_worldPacket);            
             ContainerSlotA = _worldPacket.ReadUInt8();
+            ContainerSlotB = _worldPacket.ReadUInt8();
             SlotA = _worldPacket.ReadUInt8();
         }
 
