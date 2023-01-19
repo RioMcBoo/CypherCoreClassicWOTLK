@@ -6484,9 +6484,7 @@ namespace Game.Spells
 
                             if (spellEffectInfo.ItemType != 0)
                             {
-                                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType);
-                                if (itemTemplate == null)
-                                    return SpellCastResult.ItemNotFound;
+                                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType);                                
 
                                 uint createCount = (uint)Math.Clamp(spellEffectInfo.CalcValue(), 1u, itemTemplate.GetMaxStackSize());
 

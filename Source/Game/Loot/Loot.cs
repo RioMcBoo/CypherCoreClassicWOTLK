@@ -636,7 +636,7 @@ namespace Game.Loots
                         var disenchant = GetItemDisenchantLoot();
                         Loot loot = new(m_map, m_loot.GetOwnerGUID(), LootType.Disenchanting, null);
                         loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true, false, LootModes.Default, ItemContext.None);
-                        if (!loot.AutoStore(player, ItemPos.Undefined, true))
+                        if (!loot.AutoStore(player, true))
                         {
                             for (uint i = 0; i < loot.items.Count; ++i)
                             {
@@ -695,12 +695,13 @@ namespace Game.Loots
             }
         }
 
-        public bool AutoStore(Player player, ItemPos pos, bool broadcast = false, bool createdByPlayer = false)
+        public bool AutoStore(Player player, bool broadcast = false, bool createdByPlayer = false)
         {
             bool allLooted = true;
             for (uint i = 0; i < items.Count; ++i)
             {
                 LootItem lootItem = LootItemInSlot(i, player, out NotNormalLootItem ffaitem);
+                
                 if (lootItem == null || lootItem.is_looted)
                     continue;
 
@@ -713,13 +714,9 @@ namespace Game.Loots
                 // dont allow protected item to be looted by someone else
                 if (!lootItem.rollWinnerGUID.IsEmpty() && lootItem.rollWinnerGUID != GetGUID())
                     continue;
-
+                                
                 List<ItemPosCount> dest = null;
-                InventoryResult msg = player.CanStoreNewItem(pos, out dest, lootItem.itemid, lootItem.count);
-                if (msg != InventoryResult.Ok && pos.Slot != ItemSlot.Null)
-                    msg = player.CanStoreNewItem(new(ItemSlot.Null, pos.BagSlot), out dest, lootItem.itemid, lootItem.count);
-                if (msg != InventoryResult.Ok && pos.BagSlot != ItemSlot.Null)
-                    msg = player.CanStoreNewItem(ItemPos.Undefined, out dest, lootItem.itemid, lootItem.count);
+                InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out dest, lootItem.itemid, lootItem.count);                
                 if (msg != InventoryResult.Ok)
                 {
                     player.SendEquipError(msg, null, null, lootItem.itemid);

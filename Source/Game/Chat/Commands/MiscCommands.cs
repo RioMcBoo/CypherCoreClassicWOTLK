@@ -2211,11 +2211,11 @@ namespace Game.Chat
 
             // check space and find places
             List<ItemPosCount> dest;
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemId, (uint)count, out noSpaceForCount);
+            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, (uint)count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= (int)noSpaceForCount;
 
-            if (count == 0 || dest.Empty())                         // can't add any
+            if (count == 0)   // can't add any
             {
                 handler.SendSysMessage(CypherStrings.ItemCannotCreate, itemId, noSpaceForCount);
                 return false;
@@ -2290,8 +2290,8 @@ namespace Game.Chat
                     continue;
 
                 found = true;
-                List<ItemPosCount> dest;
-                InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, template.Value.GetId(), 1);
+                
+                InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, template.Value, 1, out _);
                 if (msg == InventoryResult.Ok)
                 {
                     List<int> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
@@ -2451,7 +2451,7 @@ namespace Game.Chat
 
             // check space and find places
             List<ItemPosCount> dest;
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemId, (uint)count, out noSpaceForCount);
+            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, (uint)count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= (int)noSpaceForCount;
 

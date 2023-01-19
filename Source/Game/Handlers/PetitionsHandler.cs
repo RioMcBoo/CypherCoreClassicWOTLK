@@ -74,7 +74,7 @@ namespace Game
                 return;
             }
 
-            InventoryResult msg = GetPlayer().CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, charterItemID, pProto.GetBuyCount());
+            InventoryResult msg = GetPlayer().CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, pProto, pProto.GetBuyCount(), out _);
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, null, null, charterItemID);

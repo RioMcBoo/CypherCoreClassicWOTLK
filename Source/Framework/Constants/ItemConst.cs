@@ -1094,7 +1094,8 @@ namespace Framework.Constants
         WrongBagType2 = 16, // That Item Doesn'T Go In That Container.
         ItemMaxCount = 17, // You Can'T Carry Any More Of Those Items.
         NoSlotAvailable3 = 18, // No Equipment Slot Is Available For That Item.
-        CantStack = 19, // This Item Cannot Stack.
+        /// <summary>This Item Cannot Stack.</summary>
+        CantStack = 19,
         NotEquippable = 20, // This Item Cannot Be Equipped.
         CantSwap = 21, // These Items Can'T Be Swapped.
         SlotEmpty = 22, // That Slot Is Empty.
@@ -1131,7 +1132,8 @@ namespace Framework.Constants
         VendorSoldOut = 53, // That Item Is Currently Sold Out.
         BagFull2 = 54, // That Bag Is Full.
         ItemNotFound2 = 55, // The Item Was Not Found.
-        CantStack2 = 56, // This Item Cannot Stack.
+        /// <summary>This Item Cannot Be Fully Stacked.</summary>
+        CantStack2 = 56,
         BagFull3 = 57, // That Bag Is Full.
         VendorSoldOut2 = 58, // That Item Is Currently Sold Out.
         ObjectIsBusy = 59, // That Object Is Busy.

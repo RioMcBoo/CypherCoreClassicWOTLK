@@ -29,6 +29,8 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Game.AI.SmartAction;
+using static Game.AI.SmartEvent;
 
 namespace Game.Entities
 {
@@ -622,6 +624,7 @@ namespace Game.Entities
                                 SendQuestFailed(quest.Id, res);
 
                             return false;
+
                         }
                     }
                 }
@@ -661,8 +664,7 @@ namespace Game.Entities
                         {
                             if (questPackageItem.ItemID != rewardId)
                                 continue;
-
-                            InventoryResult res = CanStoreNewItem(ItemPos.Undefined, out dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
+                                InventoryResult res = CanStoreNewItem(ItemPos.Undefined, out dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
                             if (res != InventoryResult.Ok)
                             {
                                 SendEquipError(res, null, null, questPackageItem.ItemID);
@@ -941,7 +943,7 @@ namespace Game.Entities
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
-                    }
+                    }                    
                 }
             }
         }
@@ -1002,9 +1004,8 @@ namespace Game.Entities
 
             switch (rewardType)
             {
-                case LootItemType.Item:
-                    ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(rewardId);
-                    if (rewardProto != null && quest.GetRewChoiceItemsCount() != 0)
+                case LootItemType.Item:                    
+                    if (quest.GetRewChoiceItemsCount() != 0)
                     {
                         for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                         {
@@ -1019,9 +1020,8 @@ namespace Game.Entities
                         }
                     }
 
-
                     // QuestPackageItem.db2
-                    if (rewardProto != null && quest.PackageID != 0)
+                    if (quest.PackageID != 0)
                         RewardQuestPackage(quest.PackageID, rewardId);
                     break;
                 case LootItemType.Currency:
@@ -1708,7 +1708,7 @@ namespace Game.Entities
                 if (count <= 0)
                     count = 1;
 
-                InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, srcitem, count);
+                InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, itemTemplate, count, out _);
                 if (msg == InventoryResult.Ok)
                 {
                     Item item = StoreNewItem(dest, srcitem, true, new ItemRandomEnchantmentId());

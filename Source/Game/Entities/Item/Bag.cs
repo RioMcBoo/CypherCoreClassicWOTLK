@@ -276,6 +276,7 @@ namespace Game.Entities
         }
 
         public uint GetBagSize() { return m_containerData.NumSlots; }
+        public bool IsValidSlot(ItemSlot slotInThisBag) => slotInThisBag < GetBagSize();
         void SetBagSize(uint numSlots) { SetUpdateFieldValue(m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.NumSlots), numSlots); }
 
         void SetSlot(int slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.Slots, slot), guid); }

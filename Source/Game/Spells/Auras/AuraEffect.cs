@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
+using static Game.ScriptNameContainer;
 
 namespace Game.Spells
 {
@@ -4447,6 +4448,10 @@ namespace Game.Spells
             if (GetSpellEffectInfo().ItemType == 0)
                 return;
 
+            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(GetSpellEffectInfo().ItemType);
+            if (itemTemplate == null)
+                return;
+
             // Soul Shard
             if (GetSpellEffectInfo().ItemType == 6265)
             {
@@ -4460,7 +4465,7 @@ namespace Game.Spells
             uint noSpaceForCount;
             uint count = (uint)GetAmount();
 
-            InventoryResult msg = plCaster.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, GetSpellEffectInfo().ItemType, count, out noSpaceForCount);
+            InventoryResult msg = plCaster.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, itemTemplate, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)
             {
                 count -= noSpaceForCount;

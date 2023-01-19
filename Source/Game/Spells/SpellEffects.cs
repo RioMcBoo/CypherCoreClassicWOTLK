@@ -969,7 +969,7 @@ namespace Game.Spells
 
             // can the player store the new item?
             uint no_space;
-            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, newitemid, num_to_add, out no_space);
+            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, pProto, num_to_add, out no_space);
             if (msg != InventoryResult.Ok)
             {
                 // convert to possible store amount

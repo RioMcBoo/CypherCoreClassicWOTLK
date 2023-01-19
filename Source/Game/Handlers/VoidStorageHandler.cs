@@ -178,7 +178,7 @@ namespace Game
             for (int i = 0; i < voidStorageTransfer.Withdrawals.Length; ++i)
             {
                 byte slot;
-                VoidStorageItem itemVS = player.GetVoidStorageItem(voidStorageTransfer.Withdrawals[i].GetCounter(), out slot);
+                VoidStorageItem itemVS = player.GetVoidStorageItem(voidStorageTransfer.Withdrawals[i].GetCounter(), out slot);          
                 if (itemVS == null)
                 {
                     Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - {0} {1} tried to withdraw an invalid item ({2})", player.GetGUID().ToString(), player.GetName(), voidStorageTransfer.Withdrawals[i].ToString());
