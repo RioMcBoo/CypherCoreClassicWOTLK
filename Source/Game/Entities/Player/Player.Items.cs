@@ -533,6 +533,7 @@ namespace Game.Entities
             return CanStoreNewItem(pos, out dest, itemProto, count, out _);
         }
 
+        //Store Item
         public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, bool swapIfSpecificNotEmpty = false)
         {
             dest = null;
