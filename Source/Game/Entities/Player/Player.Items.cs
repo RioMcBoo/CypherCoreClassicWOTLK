@@ -656,7 +656,7 @@ namespace Game.Entities
                         ///Try Store into suitable slot in Inventory
                         {
                             // new bags can be directly equipped
-                            if (!needMerge && !pItem && pProto.GetClass() == ItemClass.Container && (ItemSubClassContainer)pProto.GetSubClass() == ItemSubClassContainer.Container &&
+                            if (!pItem && pProto.GetClass() == ItemClass.Container && (ItemSubClassContainer)pProto.GetSubClass() == ItemSubClassContainer.Container &&
                                 (pProto.GetBonding() == ItemBondingType.None || pProto.GetBonding() == ItemBondingType.OnAcquire))
                             {
                                 CanStoreItem_InInventorySlots(InventorySlots.BagStart, InventorySlots.BagEnd, dest, pProto, ref count, needMerge, pItem, pos);
