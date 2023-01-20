@@ -2869,6 +2869,7 @@ namespace Game.Entities
         public bool IsEquipBagSlot => Value >= InventorySlots.BagStart && Value < InventorySlots.BagEnd;
         public bool IsItemSlot => Value >= InventorySlots.ItemStart && Value < InventorySlots.ItemEnd;
         public bool IsValidItemSlot(byte backPackCapacity) => Value >= InventorySlots.ItemStart && Value < (InventorySlots.ItemStart + backPackCapacity);
+        public bool IsValidBagSlot => Value <= ItemConst.MaxBagSize || Value == Null;
         public bool IsBankItemSlot => Value >= InventorySlots.BankItemStart && Value < InventorySlots.BankItemEnd;
         public bool IsBankBagSlot => Value >= InventorySlots.BankBagStart && Value < InventorySlots.BankBagEnd;
         public bool IsKeyringSlot => Value >= InventorySlots.KeyringStart && Value < InventorySlots.KeyringEnd;
@@ -2911,7 +2912,7 @@ namespace Game.Entities
             {
                 if (!IsSpecificBag && Slot.IsItemSlot)
                     return true;
-                if (BagSlot.IsEquipBagSlot)
+                if (BagSlot.IsEquipBagSlot && Slot.IsValidBagSlot) 
                     return true;
                 if (!IsSpecificBag && Slot.IsKeyringSlot)
                     return true;
