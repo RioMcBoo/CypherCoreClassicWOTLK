@@ -514,6 +514,8 @@ namespace Game.Entities
                 _ApplyItemMods(item, pos.Slot, true);
         }
 
+        //Store Item
+
         public InventoryResult CanStoreNewItem(ItemPos pos, out List<ItemPosCount> dest, ItemTemplate itemProto, uint count, out uint no_space_count)
         {
             return CanStoreItem(pos, out dest, itemProto, count, null, false, out no_space_count);
@@ -532,7 +534,6 @@ namespace Game.Entities
             return CanStoreNewItem(pos, out dest, itemProto, count, out _);
         }
 
-        //Store Item
         public InventoryResult CanStoreItem(ItemPos pos, out List<ItemPosCount> dest, Item pItem, bool swapIfSpecificNotEmpty = false)
         {
             dest = null;
