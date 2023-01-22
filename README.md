@@ -14,7 +14,7 @@ The current support game version is: 3.4.0.47168
 * Make sure Conf files are updated and point the the correct folders and sql user and databases
 
 ### Installing the database
-* Download the full Trinity Core database (TDB_full_world_927.22082_2022_08_21) [Download](https://github.com/TrinityCore/TrinityCore/releases)
+* Download the full Trinity Core database (TDB_full_world_927.22082_2022_08_21) [Download](https://github.com/TrinityCore/TrinityCore/releases/download/TDB927.22082/TDB_full_927.22082_2022_08_21.7z)
 * Extract the sql files (full and updates) into the core sql folder (ex: C:\CypherCore\sql)
 
 ### Playing
