@@ -218,11 +218,11 @@ namespace Game
                     List<ItemPosCount> sSrc = new();                    
                     if (src.IsInventoryPos)
                     {
-                        msg = player.CanStoreItem(src, out sSrc, dstItem, true);
+                        msg = player.CanStoreItem(src, Player.ItemStoringRule.IgnoreUnfree, out sSrc, dstItem);
                         if (msg != InventoryResult.Ok)
-                            msg = player.CanStoreItem(new(ItemSlot.Null, src.BagSlot), out sSrc, dstItem, true);
+                            msg = player.CanStoreItem(new(ItemSlot.Null, src.BagSlot), Player.ItemStoringRule.IgnoreUnfree, out sSrc, dstItem);
                         if (msg != InventoryResult.Ok)
-                            msg = player.CanStoreItem(ItemPos.Undefined, out sSrc, dstItem, true);
+                            msg = player.CanStoreItem(ItemPos.Undefined, Player.ItemStoringRule.IgnoreUnfree, out sSrc, dstItem);
                     }
                     else if (src.IsBankPos)
                     {
@@ -507,7 +507,7 @@ namespace Game
                     return;
                 }
 
-                InventoryResult msg = _player.CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, pItem, false);
+                InventoryResult msg = _player.CanStoreItem(ItemPos.Undefined, Player.ItemStoringRule.IncludePosition, out List<ItemPosCount> dest, pItem);
                 if (msg == InventoryResult.Ok)
                 {
                     _player.ModifyMoney(-price);
@@ -588,7 +588,7 @@ namespace Game
                 }
             }
 
-            msg = GetPlayer().CanStoreItem(destBagSlot, out List<ItemPosCount> dest, item, false);
+            msg = GetPlayer().CanStoreItem(destBagSlot, Player.ItemStoringRule.IncludePosition, out List<ItemPosCount> dest, item);
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, item);

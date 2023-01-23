@@ -1026,6 +1026,19 @@ namespace Game.Entities
             return InventoryResult.Ok;
         }
 
+        public InventoryResult CanBeMergedWith(ItemTemplate proto)
+        {
+            // not allow merge looting currently items
+            if (m_lootGenerated)
+                return InventoryResult.LootGone;
+
+            // check item Type
+            if (GetEntry() != proto.GetId())
+                return InventoryResult.CantStack;
+
+            return InventoryResult.Ok;
+        }
+
         public bool IsFitToSpellRequirements(SpellInfo spellInfo)
         {
             ItemTemplate proto = GetTemplate();

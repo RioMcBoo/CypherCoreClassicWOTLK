@@ -449,7 +449,7 @@ namespace Game
 
             Item it = player.GetMItem(takeItem.AttachID);
 
-            InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, it, false);
+            InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, Player.ItemStoringRule.IncludePosition, out List<ItemPosCount> dest, it);
             if (msg == InventoryResult.Ok)
             {
                 SQLTransaction trans = new();
@@ -624,7 +624,7 @@ namespace Game
 
             Log.outInfo(LogFilter.Network, $"HandleMailCreateTextItem mailid={createTextItem.MailID}");
 
-            InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, bodyItem, false);
+            InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, Player.ItemStoringRule.IncludePosition, out List<ItemPosCount> dest, bodyItem);
             if (msg == InventoryResult.Ok)
             {
                 m.checkMask = m.checkMask | MailCheckMask.Copied;

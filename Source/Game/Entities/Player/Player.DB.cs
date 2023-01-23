@@ -99,7 +99,7 @@ namespace Game.Entities
                             List<ItemPosCount> dest;
                             if (itemPos.IsInventoryPos)
                             {
-                                err = CanStoreItem(itemPos, out dest, item, false);
+                                err = CanStoreItem(itemPos, ItemStoringRule.IncludePosition, out dest, item);
                                 if (err == InventoryResult.Ok)
                                     item = StoreItem(dest, item, true);
                             }
@@ -137,7 +137,7 @@ namespace Game.Entities
                             var bag = bagMap.LookupByKey(bagGuid);
                             if (bag != null)
                             {
-                                err = CanStoreItem(new(slot, bag.InventorySlot), out List<ItemPosCount> dest, item);
+                                err = CanStoreItem(new(slot, bag.InventorySlot), ItemStoringRule.IncludePosition, out List<ItemPosCount> dest, item);
                                 if (err == InventoryResult.Ok)
                                     item = StoreItem(dest, item, true);
                             }

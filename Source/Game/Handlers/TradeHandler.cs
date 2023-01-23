@@ -105,8 +105,8 @@ namespace Game
             {
                 List<ItemPosCount> traderDst = new();
                 List<ItemPosCount> playerDst = new();
-                bool traderCanTrade = (myItems[i] == null || trader.CanStoreItem(ItemPos.Undefined, out traderDst, myItems[i], false) == InventoryResult.Ok);
-                bool playerCanTrade = (hisItems[i] == null || GetPlayer().CanStoreItem(ItemPos.Undefined, out playerDst, hisItems[i], false) == InventoryResult.Ok);
+                bool traderCanTrade = (myItems[i] == null || trader.CanStoreItem(ItemPos.Undefined, Player.ItemStoringRule.IncludePosition, out traderDst, myItems[i]) == InventoryResult.Ok);
+                bool playerCanTrade = (hisItems[i] == null || GetPlayer().CanStoreItem(ItemPos.Undefined, Player.ItemStoringRule.IncludePosition, out playerDst, hisItems[i]) == InventoryResult.Ok);
                 if (traderCanTrade && playerCanTrade)
                 {
                     // Ok, if trade item exists and can be stored
@@ -158,7 +158,7 @@ namespace Game
                     {
                         if (!traderCanTrade)
                             Log.outError(LogFilter.Network, "trader can't store item: {0}", myItems[i].GetGUID().ToString());
-                        if (GetPlayer().CanStoreItem(ItemPos.Undefined, out playerDst, myItems[i], false) == InventoryResult.Ok)
+                        if (GetPlayer().CanStoreItem(ItemPos.Undefined, Player.ItemStoringRule.IncludePosition, out playerDst, myItems[i]) == InventoryResult.Ok)
                             GetPlayer().MoveItemToInventory(playerDst, myItems[i], true, true);
                         else
                             Log.outError(LogFilter.Network, "player can't take item back: {0}", myItems[i].GetGUID().ToString());
@@ -168,7 +168,7 @@ namespace Game
                     {
                         if (!playerCanTrade)
                             Log.outError(LogFilter.Network, "player can't store item: {0}", hisItems[i].GetGUID().ToString());
-                        if (trader.CanStoreItem(ItemPos.Undefined, out traderDst, hisItems[i], false) == InventoryResult.Ok)
+                        if (trader.CanStoreItem(ItemPos.Undefined, Player.ItemStoringRule.IncludePosition, out traderDst, hisItems[i]) == InventoryResult.Ok)
                             trader.MoveItemToInventory(traderDst, hisItems[i], true, true);
                         else
                             Log.outError(LogFilter.Network, "trader can't take item back: {0}", hisItems[i].GetGUID().ToString());
