@@ -3369,7 +3369,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_activePlayerData.TodayHonorableKills);
                 stmt.AddValue(index++, m_activePlayerData.YesterdayHonorableKills);
                 stmt.AddValue(index++, m_playerData.PlayerTitle);
-                stmt.AddValue(index++, m_activePlayerData.WatchedFactionIndex);
+                stmt.AddValue(index++, (uint)m_activePlayerData.WatchedFactionIndex.GetValue());
                 stmt.AddValue(index++, GetDrunkValue());
                 stmt.AddValue(index++, GetHealth());
 
@@ -3515,7 +3515,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_activePlayerData.TodayHonorableKills);
                 stmt.AddValue(index++, m_activePlayerData.YesterdayHonorableKills);
                 stmt.AddValue(index++, m_playerData.PlayerTitle);
-                stmt.AddValue(index++, m_activePlayerData.WatchedFactionIndex);
+                stmt.AddValue(index++, (uint)m_activePlayerData.WatchedFactionIndex.GetValue());
                 stmt.AddValue(index++, GetDrunkValue());
                 stmt.AddValue(index++, GetHealth());
 
