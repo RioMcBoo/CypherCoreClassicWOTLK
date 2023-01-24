@@ -177,7 +177,7 @@ namespace Game.Entities
             foreach (ConversationLine line in m_conversationData.Lines.GetValue())
             {
                 ConversationActorField actor = line.ActorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[line.ActorIndex] : null;
-                if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty() && actor.NoActorObject == 0))
+                if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty()))
                 {
                     Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {GetEntry()}) due to missing actor (Idx: {line.ActorIndex}).");
                     return false;
