@@ -155,7 +155,9 @@ namespace Game.Collision
             Vector3 pModel = iInvRot.Multiply(point - iPos) * iInvScale;
             Vector3 zDirModel = iInvRot.Multiply(new Vector3(0.0f, 0.0f, -1.0f));
             float zDist;
-            if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, info))
+
+            GroupLocationInfo groupInfo = new();
+            if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, groupInfo))
             {
                 Vector3 modelGround = pModel + zDist * zDirModel;
                 float world_Z = (iInvRot.Multiply(modelGround) * iScale + iPos).Z;
@@ -225,14 +227,14 @@ namespace Game.Collision
         public bool IsMapObject() { return isWmo; }
         public byte GetNameSetId() { return owner.GetNameSetId(); }
         
-        public static void LoadGameObjectModelList()
+        public static bool LoadGameObjectModelList()
         {
             uint oldMSTime = Time.GetMSTime();
             var filename = Global.WorldMgr.GetDataPath() + "/vmaps/GameObjectModels.dtree";
             if (!File.Exists(filename))
             {
                 Log.outWarn(LogFilter.Server, "Unable to open '{0}' file.", filename);
-                return;
+                return false;
             }
             try
             {
@@ -241,7 +243,7 @@ namespace Game.Collision
                 if (magic != MapConst.VMapMagic)
                 {
                     Log.outError(LogFilter.Misc, $"File '{filename}' has wrong header, expected {MapConst.VMapMagic}.");
-                    return;
+                    return false;
                 }
 
                 long length = reader.BaseStream.Length;
@@ -266,6 +268,7 @@ namespace Game.Collision
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObject models in {1} ms", StaticModelList.models.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            return true;
         }
 
         bool _collisionEnabled;

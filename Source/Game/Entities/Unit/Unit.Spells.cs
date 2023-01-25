@@ -3100,7 +3100,7 @@ namespace Game.Entities
                     else
                     {
                         Unit caster = aura.GetCaster();
-                        if (!caster || !caster.IsInPhase(this))
+                        if (!caster || !caster.InSamePhase(this))
                             RemoveOwnedAura(pair);
                     }
                 }
@@ -3110,7 +3110,7 @@ namespace Game.Entities
             for (var i = 0; i < m_scAuras.Count; i++)
             {
                 var aura = m_scAuras[i];
-                if (aura.GetUnitOwner() != this && (!onPhaseChange || !aura.GetUnitOwner().IsInPhase(this)))
+                if (aura.GetUnitOwner() != this && (!onPhaseChange || !aura.GetUnitOwner().InSamePhase(this)))
                     aura.Remove();
             }
         }

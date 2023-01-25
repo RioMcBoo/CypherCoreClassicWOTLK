@@ -94,6 +94,7 @@ namespace Game.Entities
         public uint SpellSchoolImmuneMask;
         public CreatureFlagsExtra FlagsExtra;
         public uint ScriptID;
+        public string StringId;
 
         public QueryCreatureResponse QueryData;
 

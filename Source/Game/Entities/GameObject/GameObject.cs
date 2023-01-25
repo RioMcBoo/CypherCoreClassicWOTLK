@@ -2685,7 +2685,7 @@ namespace Game.Entities
 
         public bool IsWithinDistInMap(Player player)
         {
-            return IsInMap(player) && IsInPhase(player) && IsAtInteractDistance(player);
+            return IsInMap(player) && InSamePhase(player) && IsAtInteractDistance(player);
         }
 
         public SpellInfo GetSpellForLock(Player player)
@@ -3450,6 +3450,8 @@ namespace Game.Entities
                     bg.UpdateWorldState((int)GetGoInfo().CapturePoint.worldState1, (byte)m_goValue.CapturePoint.State);
                 }
             }
+
+            GetMap().UpdateSpawnGroupConditions();
         }
 
         public bool CanInteractWithCapturePoint(Player target)

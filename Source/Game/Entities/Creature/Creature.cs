@@ -434,6 +434,8 @@ namespace Game.Entities
             //We must update last scriptId or it looks like we reloaded a script, breaking some things such as gossip temporarily
             LastUsedScriptID = GetScriptId();
 
+            m_stringIds[0] = cInfo.StringId;
+
             return true;
         }
 
@@ -2524,7 +2526,7 @@ namespace Game.Entities
             bool canHover = CanHover();
             bool isInAir = (MathFunctions.fuzzyGt(GetPositionZ(), ground + (canHover ? m_unitData.HoverHeight : 0.0f) + MapConst.GroundHeightTolerance) || MathFunctions.fuzzyLt(GetPositionZ(), ground - MapConst.GroundHeightTolerance)); // Can be underground too, prevent the falling
 
-            if (GetMovementTemplate().IsFlightAllowed() && isInAir && !IsFalling())
+            if (GetMovementTemplate().IsFlightAllowed() && (isInAir || !GetMovementTemplate().IsGroundAllowed()) && !IsFalling())
             {
                 if (GetMovementTemplate().Flight == CreatureFlightMovementType.CanFly)
                     SetCanFly(true);
@@ -2767,6 +2769,27 @@ namespace Game.Entities
             return Global.ObjectMgr.GetCreatureTemplate(GetEntry()) != null ? Global.ObjectMgr.GetCreatureTemplate(GetEntry()).ScriptID : 0;
         }
 
+        public bool HasStringId(string id)
+        {
+            return m_stringIds.Contains(id);
+        }
+
+        void SetScriptStringId(string id)
+        {
+            if (!id.IsEmpty())
+            {
+                m_scriptStringId = id;
+                m_stringIds[2] = m_scriptStringId;
+            }
+            else
+            {
+                m_scriptStringId = null;
+                m_stringIds[2] = null;
+            }
+        }
+
+        public string[] GetStringIds() { return m_stringIds; }
+        
         public VendorItemData GetVendorItems()
         {
             return Global.ObjectMgr.GetNpcVendorItemList(GetEntry());
@@ -3305,6 +3328,8 @@ namespace Game.Entities
 
             // checked at creature_template loading
             DefaultMovementType = (MovementGeneratorType)data.movementType;
+
+            m_stringIds[1] = data.StringId;
 
             if (addToMap && !GetMap().AddToMap(this))
                 return false;
