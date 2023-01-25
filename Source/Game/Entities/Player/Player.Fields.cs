@@ -682,9 +682,14 @@ namespace Game.Entities
         public QuestObjective Objective;
     }
 
-    public class PlayerTalent
+    public readonly record struct PlayerTalent
     {
-        public PlayerSpellState state;
-        public byte spec;
+        public PlayerTalent(byte spec, PlayerSpellState state)
+        {
+            this.state = state;
+            this.spec = spec;
+        }
+        public readonly PlayerSpellState state;
+        public readonly byte spec;
     };
 }

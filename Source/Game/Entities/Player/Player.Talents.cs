@@ -75,20 +75,20 @@ namespace Game.Entities
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Spells, "Player.AddTalent: Spell (ID: {0}) does not exist.", spellId);
+                Log.outError(LogFilter.Spells, $"Player.AddTalent: Spell (ID: {spellId}) does not exist.");
                 return false;
             }
 
             if (!Global.SpellMgr.IsSpellValid(spellInfo, this, false))
             {
-                Log.outError(LogFilter.Spells, "Player.AddTalent: Spell (ID: {0}) is invalid", spellId);
+                Log.outError(LogFilter.Spells, $"Player.AddTalent: Spell (ID: {spellId}) is invalid");
                 return false;
             }
 
             var itr = GetTalentMap(spec);
             if (itr.ContainsKey(spellId))
             {
-                itr[spellId].state = PlayerSpellState.Unchanged;
+                itr[spellId] = new(spec, PlayerSpellState.Unchanged);
             }
             else if (Global.DB2Mgr.GetTalentSpellPos(spellId) is TalentSpellPos talentPos)
             {
@@ -103,12 +103,12 @@ namespace Game.Entities
                             continue;
 
                         if (itr.ContainsKey(rankSpellId))
-                            itr[rankSpellId].state = PlayerSpellState.Removed;
+                            itr[rankSpellId] = new(spec, PlayerSpellState.Removed);
                     }
                 }
 
-                itr[spellId].state = learning ? PlayerSpellState.New : PlayerSpellState.Unchanged;
-                
+                itr[spellId] = new(spec, learning ? PlayerSpellState.New : PlayerSpellState.Unchanged);
+                                
                 if (learning)
                     RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.ChangeTalent);
 
@@ -133,7 +133,7 @@ namespace Game.Entities
             var talentMap = GetTalentMap(GetActiveTalentGroup());
             // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
             if (talentMap.ContainsKey(spellId))
-                talentMap[spellId].state = PlayerSpellState.Removed;
+                talentMap[spellId] = new(GetActiveTalentGroup(), PlayerSpellState.Removed);
         }
 
         public void LearnTalent(uint talentId, uint talentRank)
@@ -160,7 +160,7 @@ namespace Game.Entities
 
             // find current max talent rank (0~5)
             byte curtalent_maxrank = 0; // 0 = not learned any rank
-            for (byte rank = PlayerConst.MaxTalentRank - 1; rank >= 0; --rank)
+            for (int rank = PlayerConst.MaxTalentRank - 1; rank >= 0; --rank)
             {
                 if (talentInfo.SpellRank[rank] != 0 && HasSpell((uint)talentInfo.SpellRank[rank]))
                 {
