@@ -55,6 +55,26 @@ namespace Game.Networking.Packets
         public ushort Rank;
     }
 
+    class LearnTalentsGroup : ClientPacket
+    {
+        public LearnTalentsGroup(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            count = _worldPacket.ReadUInt32();
+
+            for (int i = 0; i < count; i++)
+            {
+                TalentInfo talentInfo = new TalentInfo();
+                talentInfo.Read(_worldPacket);
+                talentInfos.Add(talentInfo);
+            }
+        }
+
+        public uint count;
+        public List<TalentInfo> talentInfos= new();
+    }
+
     class RespecWipeConfirm : ServerPacket
     {
         public RespecWipeConfirm() : base(ServerOpcodes.RespecWipeConfirm) { }
@@ -224,6 +244,12 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt32(TalentID);
             data.WriteUInt8(Rank);
+        }
+
+        public void Read(WorldPacket data)
+        {
+            TalentID = data.ReadUInt32();
+            Rank = data.ReadUInt8();
         }
 
         public uint TalentID;

@@ -340,6 +340,7 @@ namespace Framework.Constants
         KeyboundOverride = 0x3221,
         LatencyReport = 0x3771,
         LearnTalent = 0x3552,
+        LearnTalentsGroup = 0x3553,
         LeaveGroup = 0x364b,
         LeavePetBattleQueue = 0x31df,
         LfgListApplyToGroup = 0x360e,
