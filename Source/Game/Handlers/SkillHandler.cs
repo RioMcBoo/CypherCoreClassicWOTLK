@@ -33,6 +33,17 @@ namespace Game
             _player.SendTalentsInfoData(false);
         }
 
+        [WorldPacketHandler(ClientOpcodes.LearnPreviewTalents, Processing = PacketProcessing.Inplace)]
+        void HandleLearnTalentsGroup(LearnTalentsGroup packet)
+        {
+            foreach(var talentInfo in packet.talentInfos)
+            {
+                _player.LearnTalent(talentInfo.TalentID, talentInfo.Rank);
+            }
+            _player.SendTalentsInfoData(false);
+        }
+        
+
         [WorldPacketHandler(ClientOpcodes.LearnPvpTalents, Processing = PacketProcessing.Inplace)]
         void HandleLearnPvpTalents(LearnPvpTalents packet)
         {
