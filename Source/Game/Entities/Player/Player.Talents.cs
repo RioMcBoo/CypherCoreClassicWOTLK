@@ -269,8 +269,10 @@ namespace Game.Entities
 
         bool HasTalent(uint talentId, byte group)
         {
-            GetTalentMap(group).TryGetValue(talentId, out PlayerTalent itr);            
-                return itr != null && itr.state != PlayerSpellState.Removed;
+            if (GetTalentMap(group).TryGetValue(talentId, out PlayerTalent itr))
+                return itr.state != PlayerSpellState.Removed;
+            else
+                return false;
         }
 
         uint GetTalentResetCost() { return _specializationInfo.ResetTalentsCost; }
