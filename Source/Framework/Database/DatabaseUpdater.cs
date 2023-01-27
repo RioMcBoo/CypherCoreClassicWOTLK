@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Configuration;
 using System;
@@ -37,9 +23,6 @@ namespace Framework.Database
             SQLResult result = _database.Query("SHOW TABLES");
             if (!result.IsEmpty() && !result.IsEmpty())
                 return true;
-
-            if (!DBUpdaterUtil.CheckExecutable())
-                return false;
 
             Log.outInfo(LogFilter.SqlUpdates, $"Database {_database.GetDatabaseName()} is empty, auto populating it...");
 
@@ -85,9 +68,6 @@ namespace Framework.Database
 
         public bool Update()
         {
-            if (!DBUpdaterUtil.CheckExecutable())
-                return false;
-
             Log.outInfo(LogFilter.SqlUpdates, $"Updating {_database.GetDatabaseName()} database...");
 
             string sourceDirectory = GetSourceDirectory();
@@ -478,29 +458,5 @@ namespace Framework.Database
     {
         Apply,
         Rehash
-    }
-
-    static class DBUpdaterUtil
-    {
-        static string mysqlExecutablePath;
-
-        public static string GetMySQLExecutable()
-        {
-            return mysqlExecutablePath;
-        }
-
-        public static bool CheckExecutable()
-        {
-            string mysqlExePath = ConfigMgr.GetDefaultValue("MySQLExecutable", "");
-            if (mysqlExePath.IsEmpty() || !File.Exists(mysqlExePath))
-            {
-                Log.outFatal(LogFilter.SqlUpdates, $"Didn't find any executable MySQL binary at \'{mysqlExePath}\' or in path, correct the path in the *.conf (\"MySQLExecutable\").");
-                return false;
-            }
-
-            // Correct the path to the cli
-            mysqlExecutablePath = mysqlExePath;
-            return true;
-        }
     }
 }

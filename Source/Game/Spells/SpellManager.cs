@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Framework.Database;
@@ -88,7 +74,7 @@ namespace Game.Entities
             if (SpellEffectsHandlers.Count == 0)
             {
                 Log.outFatal(LogFilter.ServerLoading, "Could'nt find any SpellEffectHandlers. Dev needs to check this out.");
-                Global.WorldMgr.ShutdownServ(0, ShutdownMask.Force, ShutdownExitCode.Error);
+                Environment.Exit(1);
             }
         }
 
@@ -576,9 +562,9 @@ namespace Game.Entities
             return false;
         }
 
-        public List<int> GetSpellLinked(int spell_id)
+        public List<int> GetSpellLinked(SpellLinkedType type, uint spellId)
         {
-            return mSpellLinkedMap.LookupByKey(spell_id);
+            return mSpellLinkedMap.LookupByKey((type, spellId));
         }
 
         public MultiMap<uint, uint> GetPetLevelupSpellList(CreatureFamily petFamily)
@@ -1744,7 +1730,7 @@ namespace Game.Entities
             {
                 int trigger = result.Read<int>(0);
                 int effect = result.Read<int>(1);
-                int type = result.Read<int>(2);
+                SpellLinkedType type = (SpellLinkedType)result.Read<byte>(2);
 
                 SpellInfo spellInfo = GetSpellInfo((uint)Math.Abs(trigger), Difficulty.None);
                 if (spellInfo == null)
@@ -1768,14 +1754,32 @@ namespace Game.Entities
                     continue;
                 }
 
-                if (type != 0) //we will find a better way when more types are needed
+                if (type < SpellLinkedType.Cast || type > SpellLinkedType.Remove)
                 {
-                    if (trigger > 0)
-                        trigger += 200000 * type;
-                    else
-                        trigger -= 200000 * type;
+                    Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` has invalid link type {type}, skipped.");
+                    continue;
                 }
-                mSpellLinkedMap.Add(trigger, effect);
+
+                if (trigger < 0)
+                {
+                    if (type != SpellLinkedType.Cast)
+                        Log.outError(LogFilter.Sql, $"The spell trigger {trigger} listed in `spell_linked_spell` has invalid link type {type}, changed to 0.");
+
+                    trigger = -trigger;
+                    type = SpellLinkedType.Remove;
+                }
+
+
+                if (type != SpellLinkedType.Aura)
+                {
+                    if (trigger == effect)
+                    {
+                        Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` triggers itself (infinite loop), skipped.");
+                        continue;
+                    }
+                }
+
+                mSpellLinkedMap.Add((type, (uint)trigger), effect);
 
                 ++count;
             } while (result.NextRow());
@@ -2725,6 +2729,9 @@ namespace Game.Entities
                             {
                                 uint enchantId = (uint)spellEffectInfo.MiscValue;
                                 var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
+                                if (enchant == null)
+                                    break;
+
                                 for (var s = 0; s < ItemConst.MaxItemEnchantmentEffects; ++s)
                                 {
                                     if (enchant.Effect[s] != ItemEnchantmentType.CombatSpell)
@@ -4680,7 +4687,7 @@ namespace Game.Entities
         public bool IsPrimaryProfessionSkill(uint skill)
         {
             SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey(skill);
-            return pSkill != null && pSkill.CategoryID == SkillCategory.Profession;
+            return pSkill != null && pSkill.CategoryID == SkillCategory.Profession && pSkill.ParentSkillLineID == 0;
         }
 
         public bool IsWeaponSkill(uint skill)
@@ -4741,7 +4748,7 @@ namespace Game.Entities
         Dictionary<(uint id, Difficulty difficulty), SpellProcEntry> mSpellProcMap = new();
         Dictionary<uint, SpellThreatEntry> mSpellThreatMap = new();
         Dictionary<uint, PetAura> mSpellPetAuraMap = new();
-        MultiMap<int, int> mSpellLinkedMap = new();
+        MultiMap<(SpellLinkedType, uint), int> mSpellLinkedMap = new();
         Dictionary<uint, SpellEnchantProcEntry> mSpellEnchantProcEventMap = new();
         MultiMap<uint, SpellArea> mSpellAreaMap = new();
         MultiMap<uint, SpellArea> mSpellAreaForQuestMap = new();

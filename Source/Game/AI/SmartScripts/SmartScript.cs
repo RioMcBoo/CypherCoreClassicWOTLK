@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Game.Chat;
@@ -22,6 +8,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Maps;
 using Game.Misc;
+using Game.Movement;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -1824,12 +1811,28 @@ namespace Game.AI
                 }
                 case SmartActions.JumpToPos:
                 {
-                    foreach (var target in targets)
+                    WorldObject target = null;
+
+                    if (!targets.Empty())
+                        target = targets.SelectRandom();
+
+                    Position pos = new(e.Target.x, e.Target.y, e.Target.z);
+                    if (target)
                     {
-                        Creature creature = target.ToCreature();
-                        if (creature != null)
-                            creature.GetMotionMaster().MoveJump(e.Target.x, e.Target.y, e.Target.z, 0.0f, e.Action.jump.speedxy, e.Action.jump.speedz);
+                        float x, y, z;
+                        target.GetPosition(out x, out y, out z);
+                        if (e.Action.jump.ContactDistance > 0)
+                            target.GetContactPoint(_me, out x, out y, out z, e.Action.jump.ContactDistance);
+                        pos = new Position(x + e.Target.x, y + e.Target.y, z + e.Target.z);
                     }
+
+                    if (e.Action.jump.Gravity != 0 || e.Action.jump.UseDefaultGravity != 0)
+                    {
+                        float gravity = e.Action.jump.UseDefaultGravity != 0 ? (float)MotionMaster.gravity : e.Action.jump.Gravity;
+                        _me.GetMotionMaster().MoveJumpWithGravity(pos, e.Action.jump.SpeedXY, gravity, e.Action.jump.PointId);
+                    }
+                    else
+                        _me.GetMotionMaster().MoveJump(pos, e.Action.jump.SpeedXY, e.Action.jump.SpeedZ, e.Action.jump.PointId);
                     break;
                 }
                 case SmartActions.GoSetLootState:

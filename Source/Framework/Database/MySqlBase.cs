@@ -1,25 +1,13 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Configuration;
 using Framework.Threading;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -300,7 +288,7 @@ namespace Framework.Database
 
             // Invokes a mysql process which doesn't leak credentials to logs
             Process process = new();
-            process.StartInfo = new(DBUpdaterUtil.GetMySQLExecutable());
+            process.StartInfo = new(DBExecutableUtil.GetMySQLExecutable());
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
@@ -308,16 +296,18 @@ namespace Framework.Database
             process.StartInfo.Arguments = args;
 
             process.Start();
+
+            process.WaitForExit();
+
             Log.outInfo(LogFilter.SqlUpdates, process.StandardOutput.ReadToEnd());
             Log.outError(LogFilter.SqlUpdates, process.StandardError.ReadToEnd());
-            process.WaitForExit();
 
             if (process.ExitCode != 0)
             {
                 Log.outFatal(LogFilter.SqlUpdates, $"Applying of file \'{path}\' to database \'{GetDatabaseName()}\' failed!" +
                     " If you are a user, please pull the latest revision from the repository. " +
                     "Also make sure you have not applied any of the databases with your sql client. " +
-                    "You cannot use auto-update system and import sql files from CYpherCore repository with your sql client. " +
+                    "You cannot use auto-update system and import sql files from CypherCore repository with your sql client. " +
                     "If you are a developer, please fix your sql query.");
 
                 throw new Exception("update failed");
@@ -434,5 +424,29 @@ namespace Framework.Database
         }
 
         public abstract void PreparedStatements();
+    }
+
+    public static class DBExecutableUtil
+    {
+        static string mysqlExecutablePath;
+
+        public static string GetMySQLExecutable()
+        {
+            return mysqlExecutablePath;
+        }
+
+        public static bool CheckExecutable()
+        {
+            string mysqlExePath = ConfigMgr.GetDefaultValue("MySQLExecutable", "");
+            if (mysqlExePath.IsEmpty() || !File.Exists(mysqlExePath))
+            {
+                Log.outFatal(LogFilter.SqlUpdates, $"Didn't find any executable MySQL binary at \'{mysqlExePath}\' or in path, correct the path in the *.conf (\"MySQLExecutable\").");
+                return false;
+            }
+
+            // Correct the path to the cli
+            mysqlExecutablePath = mysqlExePath;
+            return true;
+        }
     }
 }

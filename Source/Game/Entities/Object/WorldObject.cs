@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Framework.Dynamic;
@@ -1155,7 +1141,7 @@ namespace Game.Entities
             if (smoothPhasing != null && smoothPhasing.IsBeingReplacedForSeer(GetGUID()))
                 return false;
 
-            if (!Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions((uint)obj.GetTypeId(), obj.GetEntry(), this))
+            if (!obj.IsPrivateObject() && !Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions((uint)obj.GetTypeId(), obj.GetEntry(), this))
                 return false;
 
             bool corpseVisibility = false;
@@ -3219,9 +3205,9 @@ namespace Game.Entities
             return IsInDist2d(pos, dist + GetCombatReach());
         }
 
-        public bool IsWithinDist(WorldObject obj, float dist2compare, bool is3D = true)
+        public bool IsWithinDist(WorldObject obj, float dist2compare, bool is3D = true, bool incOwnRadius = true, bool incTargetRadius = true)
         {
-            return obj != null && _IsWithinDist(obj, dist2compare, is3D);
+            return obj != null && _IsWithinDist(obj, dist2compare, is3D, incOwnRadius, incTargetRadius);
         }
 
         public bool IsWithinDistInMap(WorldObject obj, float dist2compare, bool is3D = true, bool incOwnRadius = true, bool incTargetRadius = true)
@@ -3651,7 +3637,7 @@ namespace Game.Entities
             // Unit is flying, check for potential collision via vmaps
             if (path.GetPathType().HasFlag(PathType.NotUsingPath))
             {
-                col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap().GetTerrain(), pos.posX, pos.posY),
+                col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMapId(), GetMap().GetTerrain(), pos.posX, pos.posY),
                     pos.posX, pos.posY, pos.posZ + halfHeight,
                     destx, desty, destz + halfHeight,
                     out destx, out desty, out destz, -0.5f);

@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Game.Chat;
@@ -41,51 +27,45 @@ namespace Game
                     return;
             }
 
-            if (packet.ChannelName.IsEmpty() || char.IsDigit(packet.ChannelName[0]))
-            {
-                ChannelNotify channelNotify = new();
-                channelNotify.Type = ChatNotify.InvalidNameNotice;
-                channelNotify.Channel = packet.ChannelName;
-                SendPacket(channelNotify);
-                return;
-            }
-
-            if (packet.Password.Length > 127)
-            {
-                Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a password more than 127 characters long - blocked");
-                return;
-            }
-
             ChannelManager cMgr = ChannelManager.ForTeam(GetPlayer().GetTeam());
-            if (cMgr != null)
-            {
-                if (packet.ChatChannelId != 0)
+            if (cMgr == null)
+                return;
+
+            if (packet.ChatChannelId != 0)
+            { // system channel
+                Channel channel = cMgr.GetSystemChannel((uint)packet.ChatChannelId, zone);
+                if (channel != null)
+                    channel.JoinChannel(GetPlayer());
+            }
+            else
+            { // custom channel
+                if (packet.ChannelName.IsEmpty() || Char.IsDigit(packet.ChannelName[0]))
                 {
-                    // system channel
-                    Channel channel = cMgr.GetSystemChannel((uint)packet.ChatChannelId, zone);
-                    if (channel != null)
-                        channel.JoinChannel(GetPlayer());
+                    ChannelNotify channelNotify = new();
+                    channelNotify.Type = ChatNotify.InvalidNameNotice;
+                    channelNotify.Channel = packet.ChannelName;
+                    SendPacket(channelNotify);
+                    return;
                 }
+
+                if (packet.Password.Length > 127)
+                {
+                    Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a password more than {127} characters long - blocked");
+                    return;
+                }
+                if (!DisallowHyperlinksAndMaybeKick(packet.ChannelName))
+                    return;
+
+                Channel channel = cMgr.GetCustomChannel(packet.ChannelName);
+                if (channel != null)
+                    channel.JoinChannel(GetPlayer(), packet.Password);
                 else
                 {
-                    // custom channel
-                    if (packet.ChannelName.Length > 31)
-                    {
-                        Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a name more than 31 characters long - blocked");
-                        return;
-                    }
-
-                    Channel channel = cMgr.GetCustomChannel(packet.ChannelName);
+                    channel = cMgr.CreateCustomChannel(packet.ChannelName);
                     if (channel != null)
-                        channel.JoinChannel(GetPlayer(), packet.Password);
-                    else
                     {
-                        channel = cMgr.CreateCustomChannel(packet.ChannelName);
-                        if (channel != null)
-                        {
-                            channel.SetPassword(packet.Password);
-                            channel.JoinChannel(GetPlayer(), packet.Password);
-                        }
+                        channel.SetPassword(packet.Password);
+                        channel.JoinChannel(GetPlayer(), packet.Password);
                     }
                 }
             }

@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Framework.Dynamic;
@@ -318,6 +304,8 @@ namespace Game.Spells
 
             m_caster.m_Events.AddEventAtOffset(() =>
             {
+                targets.Update(caster); // refresh pointers stored in targets
+
                 // original caster guid only for GO cast
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                 args.SetOriginalCaster(originalCaster);
@@ -1589,9 +1577,9 @@ namespace Game.Spells
                                         // randomize position for multiple summons
                                         pos = caster.GetRandomPoint(destTarget, radius);
 
-                                    summon = unitCaster.GetMap().SummonCreature(entry, pos, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
-                                    if (summon == null)
-                                        continue;
+                                summon = caster.GetMap().SummonCreature(entry, pos, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                                if (summon == null)
+                                    continue;
 
                                     summon.SetTempSummonType(summonType);
                                     if (properties.Control == SummonCategory.Ally)

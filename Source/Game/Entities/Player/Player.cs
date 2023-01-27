@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Framework.Database;
@@ -5689,13 +5675,13 @@ namespace Game.Entities
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
-        void SendMessageToSetInRange(ServerPacket data, float dist, bool self, bool own_team_only)
+        void SendMessageToSetInRange(ServerPacket data, float dist, bool self, bool own_team_only, bool required3dDist = false)
         {
             if (self)
                 SendPacket(data);
 
             PacketSenderRef sender = new(data);
-            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, dist, own_team_only);
+            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, dist, own_team_only, null, required3dDist);
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
@@ -5951,7 +5937,7 @@ namespace Game.Entities
             localizer.Invoke(this);
 
             // Send to players
-            MessageDistDeliverer<LocalizedDo> notifier = new(this, localizer, range);
+            MessageDistDeliverer<LocalizedDo> notifier = new(this, localizer, range, false, null, true);
             Cell.VisitWorldObjects(this, notifier, range);
         }
 
@@ -5977,7 +5963,7 @@ namespace Game.Entities
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Emote, Language.Universal, this, this, text);
-            SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), !GetSession().HasPermission(RBACPermissions.TwoSideInteractionChat));
+            SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), true, !GetSession().HasPermission(RBACPermissions.TwoSideInteractionChat), true);
         }
         public override void TextEmote(uint textId, WorldObject target = null, bool isBossEmote = false)
         {

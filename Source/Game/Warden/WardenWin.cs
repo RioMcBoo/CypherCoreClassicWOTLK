@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Framework.Cryptography;
@@ -95,7 +81,7 @@ namespace Game
             Request.Function1[1] = 0x000218C0;                      // 0x00400000 + 0x000218C0 SFileGetFileSize
             Request.Function1[2] = 0x00022530;                      // 0x00400000 + 0x00022530 SFileReadFile
             Request.Function1[3] = 0x00022910;                      // 0x00400000 + 0x00022910 SFileCloseFile
-            Request.CheckSumm1 = BuildChecksum(BitConverter.GetBytes(Request.Unk1), 20);
+            Request.CheckSumm1 = BuildChecksum(new byte[] { Request.Unk1 }, 20);
 
             Request.Command2 = WardenOpcodes.SmsgModuleInitialize;
             Request.Size2 = 8;
@@ -104,7 +90,7 @@ namespace Game
             Request.String_library2 = 0;
             Request.Function2 = 0x00419D40;                         // 0x00400000 + 0x00419D40 FrameScript::GetText
             Request.Function2_set = 1;
-            Request.CheckSumm2 = BuildChecksum(BitConverter.GetBytes(Request.Unk2), 8);
+            Request.CheckSumm2 = BuildChecksum(new byte[] { Request.Unk2 }, 8);
 
             Request.Command3 = WardenOpcodes.SmsgModuleInitialize;
             Request.Size3 = 8;
@@ -113,7 +99,7 @@ namespace Game
             Request.String_library3 = 0;
             Request.Function3 = 0x0046AE20;                         // 0x00400000 + 0x0046AE20 PerformanceCounter
             Request.Function3_set = 1;
-            Request.CheckSumm3 = BuildChecksum(BitConverter.GetBytes(Request.Unk5), 8);
+            Request.CheckSumm3 = BuildChecksum(new byte[] { Request.Unk5 }, 8);
 
             Warden3DataServer packet = new();
             packet.Data = EncryptData(Request);

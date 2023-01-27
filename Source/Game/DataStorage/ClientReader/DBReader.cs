@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Collections;
 using Framework.Constants;
@@ -152,11 +138,17 @@ namespace Game.DataStorage
                         // string data
                         stringsTable = new Dictionary<long, string>();
 
+                        long stringDataOffset = 0;
+                        if (sectionIndex == 0)
+                            stringDataOffset = (Header.RecordCount - sections[sectionIndex].NumRecords) * Header.RecordSize;
+                        else
+                            stringDataOffset = previousStringTableSize;
+
                         for (int i = 0; i < sections[sectionIndex].StringTableSize;)
                         {
                             long oldPos = reader.BaseStream.Position;
 
-                            stringsTable[i + previousStringTableSize] = reader.ReadCString();
+                            stringsTable[i + stringDataOffset] = reader.ReadCString();
 
                             i += (int)(reader.BaseStream.Position - oldPos);
                         }
@@ -200,8 +192,7 @@ namespace Game.DataStorage
                         refData.Entries = new Dictionary<int, int>();
                         ReferenceEntry[] entries = reader.ReadArray<ReferenceEntry>((uint)refData.NumRecords);
                         foreach (var entry in entries)
-                            if (!refData.Entries.ContainsKey(entry.Index))
-                                refData.Entries[entry.Index] = entry.Id;
+                            refData.Entries[entry.Index] = entry.Id;
                     }
                     else
                     {
@@ -243,9 +234,12 @@ namespace Game.DataStorage
 
                     foreach (var copyRow in copyData)
                     {
-                        var rec = _records[copyRow.Value].Clone();
-                        rec.Id = copyRow.Key;
-                        _records.Add(copyRow.Key, rec);
+                        if (copyRow.Key != 0)
+                        {
+                            var rec = _records[copyRow.Value].Clone();
+                            rec.Id = copyRow.Key;
+                            _records.Add(copyRow.Key, rec);
+                        }
                     }
 
                     previousStringTableSize += sections[sectionIndex].StringTableSize;

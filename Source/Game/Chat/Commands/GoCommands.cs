@@ -1,19 +1,5 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Framework.IO;
@@ -206,7 +192,7 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition(); // save only in non-flight case
 
             TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(mapId);
-            float z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            float z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, mapId, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, mapId, x, y));
 
             player.TeleportTo(mapId, x, y, z, player.GetOrientation());
             return true;
@@ -353,7 +339,7 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition(); // save only in non-flight case
 
             TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(mapId);
-            z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, mapId, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, mapId, x, y));
 
             player.TeleportTo(mapId, x, y, z, 0.0f);
             return true;
@@ -399,7 +385,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
                 TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(mapId);
-                z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+                z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, mapId, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, mapId, x, y));
             }
 
             return DoTeleport(handler, new Position(x, y, z.Value, o.Value), mapId);
@@ -446,7 +432,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition(); // save only in non-flight case
 
-            float z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            float z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, zoneEntry.ContinentID, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, zoneEntry.ContinentID, x, y));
 
             player.TeleportTo(zoneEntry.ContinentID, x, y, z, player.GetOrientation());
             return true;
