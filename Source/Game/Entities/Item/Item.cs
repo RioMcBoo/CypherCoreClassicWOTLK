@@ -9,14 +9,11 @@ using Game.Loots;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
-using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using static Game.AI.SmartTarget;
 
 namespace Game.Entities
 {
@@ -995,25 +992,12 @@ namespace Game.Entities
             return false;
         }
 
-        public InventoryResult CanBeMergedPartlyWith(ItemTemplate proto)
-        {
-            // not allow merge looting currently items
-            if (m_lootGenerated)
-                return InventoryResult.LootGone;
-
-            // check item Type
-            if (GetEntry() != proto.GetId())
-                return InventoryResult.CantStack;
-
-            // check free space (full stacks can't be target of merge
-            if (GetCount() >= proto.GetMaxStackSize())
-                return InventoryResult.CantStack;
-
-            return InventoryResult.Ok;
-        }
-
         public InventoryResult CanBeMergedWith(ItemTemplate proto)
         {
+            // not allow merge trading currently items
+            if (IsInTrade())
+                return InventoryResult.TradeBoundItem;
+
             // not allow merge looting currently items
             if (m_lootGenerated)
                 return InventoryResult.LootGone;
@@ -2644,8 +2628,10 @@ namespace Game.Entities
         public bool IsBroken() { return m_itemData.MaxDurability > 0 && m_itemData.Durability == 0; }
         public void SetDurability(uint durability) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Durability), durability); }
         public void SetMaxDurability(uint maxDurability) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.MaxDurability), maxDurability); }
-        public void SetInTrade(bool b = true) { mb_in_trade = b; }
-        public bool IsInTrade() { return mb_in_trade; }
+        public void SetInTrade(bool b = true) { if (b) mb_in_trade = -1; else mb_in_trade = 0; }
+        public void SetInTradeHolded() { if (mb_in_trade == -1) mb_in_trade = 1; }
+        public bool IsInTrade() { return mb_in_trade != 0; }
+        public bool IsInTradeHolded() { return mb_in_trade == 1; }
 
         public uint GetCount() { return m_itemData.StackCount; }
         public uint GetMaxStackCount() { return GetTemplate().GetMaxStackSize(); }
@@ -2823,7 +2809,8 @@ namespace Game.Entities
         Bag m_container;
         int uQueuePos;
         string m_text;
-        bool mb_in_trade;
+        /// <summary>[-1] - in trade non-holded<br/>[1] - in trade holded<br/>[0] - not in trade</summary>
+        int mb_in_trade;
         long m_lastPlayedTimeUpdate;
         List<ObjectGuid> allowedGUIDs = new();
         ItemRandomEnchantmentId m_randomEnchantment;        // store separately to easily find which bonus list is the one randomly given for stat rerolling
@@ -2861,6 +2848,7 @@ namespace Game.Entities
         public static implicit operator byte(ItemSlot slot) => slot.Value;
         public const byte Null = byte.MaxValue;
         public ItemSlot(byte slot) { Value = slot; }
+        public override int GetHashCode() => Value;
 
         /// <summary>Is the Slot clearly determined?</summary>
         public bool IsSpecific => Value != Null;
@@ -2885,6 +2873,11 @@ namespace Game.Entities
         public static implicit operator ItemPos(byte slot) => new(slot);
         public static implicit operator ItemPos(ItemSlot slot) => new(slot);
         public static readonly ItemPos Undefined = new(ItemSlot.Null, ItemSlot.Null);
+
+        public override int GetHashCode()
+        {
+            return Slot.GetHashCode() & BagSlot.GetHashCode() << 8 /*ItemSlot size is 1 byte*/;
+        }
 
         public ItemPos(byte slot, byte bagSlot = ItemSlot.Null)
         {
@@ -2986,10 +2979,15 @@ namespace Game.Entities
             Count = count;
         }
 
-        public ItemPosCount(byte slot, uint count = 1)
+        public ItemPosCount(byte slot, ushort count = 1)
         {
             Pos = new ItemPos(slot);
             Count = count;
+        }
+
+        public override int GetHashCode()
+        {
+            return Pos.GetHashCode() & ((int)(Count ^ (Count >> 16)) << 16); /*ItemPos size is 2 bytes*/
         }
 
         public bool IsContainedIn(List<ItemPosCount> vec)

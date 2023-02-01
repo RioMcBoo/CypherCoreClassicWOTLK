@@ -3743,7 +3743,7 @@ namespace Game.Guilds
 
             protected override InventoryResult CanStore(Item pItem, bool swap)
             {
-                return m_pPlayer.CanStoreItem(Position, swap ? Player.ItemStoringRule.IgnoreUnfree: Player.ItemStoringRule.IncludePosition, out m_vec, pItem);
+                return m_pPlayer.CanStoreItem(Position, out m_vec, pItem, forSwap: swap);
             }
         }
 

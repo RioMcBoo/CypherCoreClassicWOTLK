@@ -1343,7 +1343,7 @@ namespace Game.Spells
 
             if (pos.IsInventoryPos)
             {
-                InventoryResult msg = player.CanStoreItem(pos, Player.ItemStoringRule.IgnoreUnfree, out List<ItemPosCount> dest, pNewItem);
+                InventoryResult msg = player.CanStoreItem(pos, out List<ItemPosCount> dest, pNewItem, forSwap: true);
                 if (msg == InventoryResult.Ok)
                 {
                     player.DestroyItem(pos, true);

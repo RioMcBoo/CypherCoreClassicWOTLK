@@ -18,16 +18,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static Game.AI.SmartAction;
 
 namespace Game.Entities
 {
     public partial class Player
     {
-        void _LoadInventory(SQLResult result, SQLResult artifactsResult, uint timeDiff)
+        void _LoadInventory(SQLResult result, uint timeDiff)
         {
-            Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
-            ItemAdditionalLoadInfo.Init(additionalData, artifactsResult);
-
             if (!result.IsEmpty())
             {
                 uint zoneId = GetZoneId();
@@ -43,14 +41,6 @@ namespace Game.Entities
                     Item item = _LoadItem(trans, zoneId, timeDiff, result.GetFields());
                     if (item != null)
                     {
-                        var addionalData = additionalData.LookupByKey(item.GetGUID().GetCounter());
-                        if (addionalData != null)
-                        {
-                            if (item.GetTemplate().GetArtifactID() != 0 && addionalData.Artifact != null)
-                                item.LoadArtifactData(this, addionalData.Artifact.Xp, addionalData.Artifact.ArtifactAppearanceId, addionalData.Artifact.ArtifactTierId, addionalData.Artifact.ArtifactPowers);
-                        }
-
-
                         ulong counter = result.Read<ulong>(52);
                         ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;
                         byte slot = result.Read<byte>(53);
@@ -85,7 +75,7 @@ namespace Game.Entities
                             List<ItemPosCount> dest;
                             if (itemPos.IsInventoryPos)
                             {
-                                err = CanStoreItem(itemPos, ItemStoringRule.IncludePosition, out dest, item);
+                                err = CanStoreItem(itemPos, out dest, item);
                                 if (err == InventoryResult.Ok)
                                     item = StoreItem(dest, item, true);
                             }
@@ -123,7 +113,7 @@ namespace Game.Entities
                             var bag = bagMap.LookupByKey(bagGuid);
                             if (bag != null)
                             {
-                                err = CanStoreItem(new(slot, bag.InventorySlot), ItemStoringRule.IncludePosition, out List<ItemPosCount> dest, item);
+                                err = CanStoreItem(new(slot, bag.InventorySlot), out List<ItemPosCount> dest, item);
                                 if (err == InventoryResult.Ok)
                                     item = StoreItem(dest, item, true);
                             }
@@ -1105,7 +1095,7 @@ namespace Game.Entities
             while (result.NextRow());
         }
 
-        public void _LoadMail(SQLResult mailsResult, SQLResult mailItemsResult, SQLResult artifactResult)
+        public void _LoadMail(SQLResult mailsResult, SQLResult mailItemsResult)
         {
             m_mail.Clear();
 
@@ -1147,13 +1137,14 @@ namespace Game.Entities
 
             if (!mailItemsResult.IsEmpty())
             {
-                Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
-                ItemAdditionalLoadInfo.Init(additionalData, artifactResult);
-
                 do
                 {
                     uint mailId = mailItemsResult.Read<uint>(52);
-                    _LoadMailedItem(GetGUID(), this, mailId, mailById[mailId], mailItemsResult.GetFields(), additionalData.LookupByKey(mailItemsResult.Read<ulong>(0)));
+                    if (mailById.ContainsKey(mailId))
+                        _LoadMailedItem(GetGUID(), this, mailId, mailById[mailId], mailItemsResult.GetFields());
+                    else
+                    Log.outError(LogFilter.Player, $"Player:_LoadMail - Mail Items have invalid \"mailID\" ({mailId}), remove at load");
+
                 }
                 while (mailItemsResult.NextRow());
             }
@@ -1161,7 +1152,7 @@ namespace Game.Entities
             UpdateNextMailTimeAndUnreads();
         }
 
-        static Item _LoadMailedItem(ObjectGuid playerGuid, Player player, uint mailId, Mail mail, SQLFields fields, ItemAdditionalLoadInfo addionalData)
+        static Item _LoadMailedItem(ObjectGuid playerGuid, Player player, uint mailId, Mail mail, SQLFields fields)
         {
             ulong itemGuid = fields.Read<ulong>(0);
             uint itemEntry = fields.Read<uint>(1);
@@ -1197,13 +1188,6 @@ namespace Game.Entities
 
                 item.SaveToDB(null);                               // it also deletes item object !
                 return null;
-            }
-
-            if (addionalData != null)
-            {
-                if (item.GetTemplate().GetArtifactID() != 0 && addionalData.Artifact != null)
-                    item.LoadArtifactData(player, addionalData.Artifact.Xp, addionalData.Artifact.ArtifactAppearanceId,
-                        addionalData.Artifact.ArtifactTierId, addionalData.Artifact.ArtifactPowers);
             }
 
             if (mail != null)
@@ -3067,7 +3051,7 @@ namespace Game.Entities
             // must be before inventory (some items required reputation check)
             reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));
 
-            _LoadInventory(holder.GetResult(PlayerLoginQueryLoad.Inventory), holder.GetResult(PlayerLoginQueryLoad.Artifacts), time_diff);
+            _LoadInventory(holder.GetResult(PlayerLoginQueryLoad.Inventory), time_diff);
 
             if (IsVoidStorageUnlocked())
                 _LoadVoidStorage(holder.GetResult(PlayerLoginQueryLoad.VoidStorage));
@@ -3078,9 +3062,7 @@ namespace Game.Entities
             _LoadActions(holder.GetResult(PlayerLoginQueryLoad.Actions));
 
             // unread mails and next delivery time, actual mails not loaded
-            _LoadMail(holder.GetResult(PlayerLoginQueryLoad.Mails),
-                holder.GetResult(PlayerLoginQueryLoad.MailItems),
-                holder.GetResult(PlayerLoginQueryLoad.MailItemsArtifact));
+            _LoadMail(holder.GetResult(PlayerLoginQueryLoad.Mails), holder.GetResult(PlayerLoginQueryLoad.MailItems));
 
             m_social = Global.SocialMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.SocialList), GetGUID());
 
@@ -3778,17 +3760,11 @@ namespace Game.Entities
                         SQLResult resultItems = DB.Characters.Query(stmt);
 
                         if (!resultItems.IsEmpty())
-                        {
-                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_ARTIFACT);
-                            stmt.AddValue(0, guid);
-                            SQLResult artifactResult = DB.Characters.Query(stmt);
-
-                            Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
-                            ItemAdditionalLoadInfo.Init(additionalData, artifactResult);
+                        {                            
                             do
                             {
                                 uint mailId = resultItems.Read<uint>(44);
-                                Item mailItem = _LoadMailedItem(playerGuid, null, mailId, null, resultItems.GetFields(), additionalData.LookupByKey(resultItems.Read<ulong>(0)));
+                                Item mailItem = _LoadMailedItem(playerGuid, null, mailId, null, resultItems.GetFields());
                                 if (mailItem != null)
                                     itemsByMail.Add(mailId, mailItem);
 

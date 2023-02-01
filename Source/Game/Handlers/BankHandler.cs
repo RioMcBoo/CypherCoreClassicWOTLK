@@ -76,7 +76,7 @@ namespace Game
 
             if (itemPos.IsBankPos)                 // moving from bank to inventory
             {
-                InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, Player.ItemStoringRule.IncludePosition, out List<ItemPosCount> dest, item);
+                InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, item);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);

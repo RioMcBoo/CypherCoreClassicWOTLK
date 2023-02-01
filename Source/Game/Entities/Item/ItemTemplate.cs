@@ -11,6 +11,27 @@ namespace Game.Entities
 {
     public class ItemTemplate
     {
+        public override int GetHashCode()
+        {
+            return (int)BasicData.Id;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ItemTemplate other)
+                return BasicData.Id == other.BasicData.Id;
+
+            return ReferenceEquals(this, obj);
+        }
+
+        public bool Equals(ItemTemplate other)
+        {
+            if (other is not null)
+                return BasicData.Id == other.BasicData.Id;
+
+            return ReferenceEquals(this, other);
+        }
+
         public ItemTemplate(ItemRecord item, ItemSparseRecord sparse)
         {
             BasicData = item;
@@ -314,7 +335,7 @@ namespace Game.Entities
 
         public uint GetMaxStackSize()
         {
-            return (ExtendedData.Stackable == 2147483647 || ExtendedData.Stackable <= 0) ? (0x7FFFFFFF - 1) : (uint)ExtendedData.Stackable;
+            return (ExtendedData.Stackable == int.MaxValue || ExtendedData.Stackable <= 0) ? (0x7FFFFFFF - 1) : (uint)ExtendedData.Stackable;
         }
 
         public bool IsPotion() { return GetClass() == ItemClass.Consumable && GetSubClass() == (uint)ItemSubClassConsumable.Potion; }

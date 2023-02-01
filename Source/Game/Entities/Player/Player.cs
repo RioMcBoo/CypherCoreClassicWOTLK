@@ -304,7 +304,7 @@ namespace Game.Entities
                     // move other items to more appropriate slots
                     else
                     {
-                        msg = CanStoreItem(ItemPos.Undefined, ItemStoringRule.IncludePosition, out destList, pItem);
+                        msg = CanStoreItem(ItemPos.Undefined, out destList, pItem);
                         if (msg == InventoryResult.Ok)
                         {
                             RemoveItem(new(i), true);
@@ -326,6 +326,7 @@ namespace Game.Entities
 
             return true;
         }
+
         public override void Update(uint diff)
         {
             if (!IsInWorld)
@@ -6978,7 +6979,7 @@ namespace Game.Entities
                 return;
 
             List<ItemPosCount> off_dest;
-            InventoryResult off_msg = CanStoreItem(ItemPos.Undefined, ItemStoringRule.IncludePosition, out off_dest, offItem);
+            InventoryResult off_msg = CanStoreItem(ItemPos.Undefined, out off_dest, offItem);
             if (off_msg == InventoryResult.Ok)
             {
                 RemoveItem(new(EquipmentSlot.OffHand), true);
