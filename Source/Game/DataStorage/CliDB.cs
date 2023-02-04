@@ -17,7 +17,7 @@ namespace Game.DataStorage
         {
             uint oldMSTime = Time.GetMSTime();
 
-            string db2Path = dataPath + "/dbc";
+            string db2Path = $"{dataPath}/dbc";
 
             BitSet availableDb2Locales = new((int)Locale.Total);
             foreach (var dir in Directory.GetDirectories(db2Path))
@@ -33,7 +33,13 @@ namespace Game.DataStorage
             uint loadedFileCount = 0;
             DB6Storage<T> ReadDB2<T>(string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale = 0) where T : new()
             {
-                return DBReader.Read<T>(availableDb2Locales, $"{db2Path}/{defaultLocale}/", fileName, preparedStatement, preparedStatementLocale, ref loadedFileCount);
+                DB6Storage<T> storage = new();
+                storage.LoadData($"{db2Path}/{defaultLocale}/{fileName}");
+                storage.LoadHotfixData(availableDb2Locales, preparedStatement, preparedStatementLocale);
+
+                Global.DB2Mgr.AddDB2(storage.GetTableHash(), storage);
+                loadedFileCount++;
+                return storage;
             }
 
             AchievementStorage = ReadDB2<AchievementRecord>("Achievement.db2", HotfixStatements.SEL_ACHIEVEMENT, HotfixStatements.SEL_ACHIEVEMENT_LOCALE);
