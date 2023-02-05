@@ -844,7 +844,7 @@ namespace Game.Chat
         static bool HandleListFreezeCommand(CommandHandler handler)
         {
             // Get names from DB
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_FROZEN);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_FROZEN);
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
@@ -1001,7 +1001,7 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, player.GetGUID(), true))
                 return false;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
             string muteBy;
             Player gmPlayer = handler.GetPlayer();
             if (gmPlayer != null)
@@ -1026,7 +1026,7 @@ namespace Game.Chat
             stmt.AddValue(3, accountId);
             DB.Login.Execute(stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_ACCOUNT_MUTE);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ACCOUNT_MUTE);
             stmt.AddValue(0, accountId);
             stmt.AddValue(1, muteTime);
             stmt.AddValue(2, muteBy);
@@ -1061,7 +1061,7 @@ namespace Game.Chat
                 return false;
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_MUTE_INFO);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_MUTE_INFO);
             stmt.AddValue(0, accountId);
 
             SQLResult result = DB.Login.Query(stmt);
@@ -1279,7 +1279,7 @@ namespace Game.Chat
                     return false;
 
                 // Query informations from the DB
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PINFO);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_PINFO);
                 stmt.AddValue(0, lowguid);
                 SQLResult result = DB.Characters.Query(stmt);
 
@@ -1305,7 +1305,7 @@ namespace Game.Chat
             }
 
             // Query the prepared statement for login data
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_PINFO);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_PINFO);
             stmt.AddValue(0, Global.WorldMgr.GetRealm().Id.Index);
             stmt.AddValue(1, accId);
             SQLResult result0 = DB.Login.Query(stmt);
@@ -1343,13 +1343,13 @@ namespace Game.Chat
             string nameLink = handler.PlayerLink(targetName);
 
             // Returns banType, banTime, bannedBy, banreason
-            PreparedStatement stmt2 = DB.Login.GetPreparedStatement(LoginStatements.SEL_PINFO_BANS);
+            PreparedStatement stmt2 = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_PINFO_BANS);
             stmt2.AddValue(0, accId);
             SQLResult result2 = DB.Login.Query(stmt2);
             if (result2.IsEmpty())
             {
                 banType = handler.GetCypherString(CypherStrings.Character);
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PINFO_BANS);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PINFO_BANS);
                 stmt.AddValue(0, lowguid);
                 result2 = DB.Characters.Query(stmt);
             }
@@ -1365,7 +1365,7 @@ namespace Game.Chat
             }
 
             // Can be used to query data from Characters database
-            stmt2 = DB.Characters.GetPreparedStatement(CharStatements.SEL_PINFO_XP);
+            stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PINFO_XP);
             stmt2.AddValue(0, lowguid);
             SQLResult result4 = DB.Characters.Query(stmt2);
 
@@ -1378,7 +1378,7 @@ namespace Game.Chat
                 if (gguid != 0)
                 {
                     // Guild Data - an own query, because it may not happen.
-                    PreparedStatement stmt3 = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER_EXTENDED);
+                    PreparedStatement stmt3 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER_EXTENDED);
                     stmt3.AddValue(0, lowguid);
                     SQLResult result5 = DB.Characters.Query(stmt3);
                     if (!result5.IsEmpty())
@@ -1486,7 +1486,7 @@ namespace Game.Chat
 
             // Mail Data - an own query, because it may or may not be useful.
             // SQL: "SELECT SUM(CASE WHEN (checked & 1) THEN 1 ELSE 0 END) AS 'readmail', COUNT(*) AS 'totalmail' FROM mail WHERE `receiver` = ?"
-            PreparedStatement stmt4 = DB.Characters.GetPreparedStatement(CharStatements.SEL_PINFO_MAILS);
+            PreparedStatement stmt4 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PINFO_MAILS);
             stmt4.AddValue(0, lowguid);
             SQLResult result6 = DB.Characters.Query(stmt4);
             if (!result6.IsEmpty())
@@ -1533,7 +1533,7 @@ namespace Game.Chat
         {
             if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PVPSTATS_FACTIONS_OVERALL);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PVPSTATS_FACTIONS_OVERALL);
                 SQLResult result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
@@ -1898,7 +1898,7 @@ namespace Game.Chat
                     }
 
                     // If player found: delete his freeze aura    
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_AURA_FROZEN);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_AURA_FROZEN);
                     stmt.AddValue(0, guid.GetCounter());
                     DB.Characters.Execute(stmt);
 
@@ -1950,7 +1950,7 @@ namespace Game.Chat
                 target.GetSession().m_muteTime = 0;
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
             stmt.AddValue(0, 0);
             stmt.AddValue(1, "");
             stmt.AddValue(2, "");
@@ -2010,7 +2010,7 @@ namespace Game.Chat
 
             if (!player)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
                 stmt.AddValue(0, targetGUID.GetCounter());
                 SQLResult result = DB.Characters.Query(stmt);
                 if (!result.IsEmpty())

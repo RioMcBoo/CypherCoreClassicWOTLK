@@ -98,7 +98,7 @@ namespace Game.Entities
             PreparedStatement stmt;
             foreach (var pair in _toys)
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_ACCOUNT_TOYS);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.REP_ACCOUNT_TOYS);
                 stmt.AddValue(0, _owner.GetBattlenetAccountId());
                 stmt.AddValue(1, pair.Key);
                 stmt.AddValue(2, pair.Value.HasAnyFlag(ToyFlags.Favorite));
@@ -189,7 +189,7 @@ namespace Game.Entities
             PreparedStatement stmt;
             foreach (var heirloom in _heirlooms)
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_ACCOUNT_HEIRLOOMS);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.REP_ACCOUNT_HEIRLOOMS);
                 stmt.AddValue(0, _owner.GetBattlenetAccountId());
                 stmt.AddValue(1, heirloom.Key);
                 stmt.AddValue(2, (uint)heirloom.Value.flags);
@@ -354,7 +354,7 @@ namespace Game.Entities
         {
             foreach (var mount in _mounts)
             {
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_ACCOUNT_MOUNTS);
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.REP_ACCOUNT_MOUNTS);
                 stmt.AddValue(0, _owner.GetBattlenetAccountId());
                 stmt.AddValue(1, mount.Key);
                 stmt.AddValue(2, (byte)mount.Value);
@@ -467,7 +467,7 @@ namespace Game.Entities
             {
                 if (blockValue != 0) // this table is only appended/bits are set (never cleared) so don't save empty blocks
                 {
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BNET_ITEM_APPEARANCES);
+                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_ITEM_APPEARANCES);
                     stmt.AddValue(0, _owner.GetBattlenetAccountId());
                     stmt.AddValue(1, blockIndex);
                     stmt.AddValue(2, blockValue);
@@ -483,14 +483,14 @@ namespace Game.Entities
                 switch (appearanceState)
                 {
                     case FavoriteAppearanceState.New:
-                        stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BNET_ITEM_FAVORITE_APPEARANCE);
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_ITEM_FAVORITE_APPEARANCE);
                         stmt.AddValue(0, _owner.GetBattlenetAccountId());
                         stmt.AddValue(1, key);
                         trans.Append(stmt);
                         appearanceState = FavoriteAppearanceState.Unchanged;
                         break;
                     case FavoriteAppearanceState.Removed:
-                        stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BNET_ITEM_FAVORITE_APPEARANCE);
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BNET_ITEM_FAVORITE_APPEARANCE);
                         stmt.AddValue(0, _owner.GetBattlenetAccountId());
                         stmt.AddValue(1, key);
                         trans.Append(stmt);

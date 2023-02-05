@@ -408,7 +408,7 @@ namespace Game.Entities
 
             InitTalentForLevel();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC);
             stmt.AddValue(0, GetGUID().GetCounter());
             stmt.AddValue(1, GetActiveTalentGroup());
 
