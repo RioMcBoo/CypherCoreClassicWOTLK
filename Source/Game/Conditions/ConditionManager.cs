@@ -2963,7 +2963,8 @@ namespace Game
             "ConversationLine",
             "AreaTrigger Client Triggered",
             "Trainer Spell",
-            "Object Visibility (by ID)"
+            "Object Visibility (by ID)",
+            "Spawn Group"
         };
 
         public ConditionTypeInfo[] StaticConditionTypeData =
