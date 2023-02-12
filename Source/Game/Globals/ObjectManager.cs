@@ -10501,7 +10501,7 @@ namespace Game
 
         public uint GenerateMailID()
         {
-            if (_mailId >= 0xFFFFFFFFFFFFFFFE)
+            if (_mailId >= uint.MaxValue - 1)
             {
                 Log.outError(LogFilter.Server, "Mail ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
