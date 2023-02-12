@@ -83,7 +83,7 @@ namespace Game.Spells
 
             m_castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, m_caster.GetMapId(), m_spellInfo.Id, m_caster.GetMap().GenerateLowGuid(HighGuid.Cast));
             m_originalCastId = originalCastId;
-            m_SpellVisual.SpellXSpellVisualID = caster.GetCastSpellXSpellVisualId(m_spellInfo);
+            m_SpellVisual.SpellXSpellVisualID = (int)caster.GetCastSpellXSpellVisualId(m_spellInfo);
 
             //Auto Shot & Shoot (wand)
             m_autoRepeat = m_spellInfo.IsAutoRepeatRangedSpell();
