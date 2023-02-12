@@ -928,6 +928,12 @@ namespace Game.Entities
 
             return false;
         }
+
+        public virtual void Update(uint diff)
+        {
+            m_Events.Update(diff);
+        }
+
         public void SetWorldObject(bool on)
         {
             if (!IsInWorld)
@@ -935,6 +941,7 @@ namespace Game.Entities
 
             GetMap().AddObjectToSwitchList(this, on);
         }
+
         public void SetActive(bool on)
         {
             if (m_isActive == on)
@@ -1007,6 +1014,8 @@ namespace Game.Entities
             ITransport transport = GetTransport();
             if (transport != null)
                 transport.RemovePassenger(this);
+
+            m_Events.KillAllEvents(false);                      // non-delatable (currently cast spells) will not deleted now but it will deleted at call in Map::RemoveAllObjectsInRemoveList
         }
 
         public uint GetZoneId() { return m_zoneId; }
@@ -3050,8 +3059,6 @@ namespace Game.Entities
         public AreaTrigger ToAreaTrigger() { return IsAreaTrigger() ? (this as AreaTrigger) : null; }
         public Conversation ToConversation() { return IsConversation() ? (this as Conversation) : null; }
         public SceneObject ToSceneObject() { return IsSceneObject() ? (this as SceneObject) : null; }
-
-        public virtual void Update(uint diff) { }
 
         public virtual uint GetLevelForTarget(WorldObject target) { return 1; }
 
