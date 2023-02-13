@@ -267,6 +267,7 @@ namespace Framework.Constants
         GmTicketGetCaseStatus = 0x368e,
         GmTicketGetSystemStatus = 0x368d,
         GossipSelectOption = 0x3494,
+        GroupDefaultRole = 0x32fc,
         GuildAddRank = 0x3064,
         GuildAssignMemberRank = 0x305f,
         GuildAutoDeclineInvitation = 0x3061,
