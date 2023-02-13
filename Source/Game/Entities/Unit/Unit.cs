@@ -2299,12 +2299,12 @@ namespace Game.Entities
 
         public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            UpdateMask valuesMask = new(14);
+            UpdateMask valuesMask = new((int)TypeId.Max);
             valuesMask.Set((int)TypeId.Unit);
 
             WorldPacket buffer = new();
 
-            UpdateMask mask = new(194);
+            UpdateMask mask = new(207);
             m_unitData.AppendAllowedFieldsMaskForFlag(mask, flags);
             m_unitData.WriteUpdate(buffer, mask, true, this, target);
 
