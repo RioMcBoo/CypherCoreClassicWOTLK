@@ -1097,8 +1097,6 @@ namespace Game.Entities
 
         public void _LoadMail(SQLResult mailsResult, SQLResult mailItemsResult)
         {
-            m_mail.Clear();
-
             Dictionary<uint, Mail> mailById = new();
 
             if (!mailsResult.IsEmpty())
