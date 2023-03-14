@@ -150,7 +150,7 @@ namespace Game
             _player.PlayerTalkClass.ClearMenus();
             if (!unit.GetAI().OnGossipHello(_player))
             {
-                GetPlayer().PrepareGossipMenu(unit, unit.GetCreatureTemplate().GossipMenuId, true);
+                GetPlayer().PrepareGossipMenu(unit, unit.GetGossipMenuId(), true);
                 GetPlayer().SendPreparedGossip(unit);
             }
         }
