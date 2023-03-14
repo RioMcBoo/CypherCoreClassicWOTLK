@@ -1140,6 +1140,15 @@ namespace Game.Entities
             SetHomePosition(GetPosition());
         }
 
+        public bool HasFlag(CreatureStaticFlags flag) { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags2 flag) { return _staticFlags2.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags3 flag) { return _staticFlags3.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags4 flag) { return _staticFlags4.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags5 flag) { return _staticFlags5.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags6 flag) { return _staticFlags6.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags7 flag) { return _staticFlags7.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags8 flag) { return _staticFlags8.HasFlag(flag); }
+
         public uint GetTrainerId()
         {
             if (_trainerId.HasValue)
@@ -1152,7 +1161,7 @@ namespace Game.Entities
         {
             _trainerId = trainerId;
         }
-        
+
         public override bool IsMovementPreventedByCasting()
         {
             // first check if currently a movement allowed channel is active and we're not casting
@@ -1161,7 +1170,7 @@ namespace Game.Entities
             {
                 if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
                     if (spell.CheckMovement() != SpellCastResult.SpellCastOk)
-                            return true;
+                        return true;
             }
 
             if (HasSpellFocus())
@@ -1626,7 +1635,7 @@ namespace Game.Entities
 
         public void SetSpawnHealth()
         {
-            if (_regenerateHealthLock)
+            if (_staticFlags5.HasFlag(CreatureStaticFlags5.NoHealthRegen))
                 return;
 
             ulong curhealth;
@@ -2773,7 +2782,7 @@ namespace Game.Entities
         }
 
         public string[] GetStringIds() { return m_stringIds; }
-        
+
         public VendorItemData GetVendorItems()
         {
             return Global.ObjectMgr.GetNpcVendorItemList(GetEntry());
@@ -3353,8 +3362,14 @@ namespace Game.Entities
                 m_combatPulseTime = delay;
         }
 
-        public bool CanRegenerateHealth() { return !_regenerateHealthLock && _regenerateHealth; }
-        public void SetRegenerateHealth(bool value) { _regenerateHealthLock = !value; }
+        public bool CanRegenerateHealth() { return !_staticFlags5.HasFlag(CreatureStaticFlags5.NoHealthRegen) && _regenerateHealth; }
+        public void SetRegenerateHealth(bool value)
+        {
+            if (!value)
+                _staticFlags5 |= CreatureStaticFlags5.NoHealthRegen;
+            else
+                _staticFlags5 &= ~CreatureStaticFlags5.NoHealthRegen;
+        }
 
         public void SetHomePosition(float x, float y, float z, float o)
         {
