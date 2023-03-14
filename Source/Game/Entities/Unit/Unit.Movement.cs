@@ -1342,7 +1342,7 @@ namespace Game.Entities
                     caster = Global.ObjAccessor.GetUnit(this, fearAuras[0].GetCasterGUID());
                 if (caster == null)
                     caster = GetAttackerForHelper();
-                GetMotionMaster().MoveFleeing(caster, (uint)(fearAuras.Empty() ? WorldConfig.GetIntValue(WorldCfg.CreatureFamilyFleeDelay) : 0)); // caster == NULL processed in MoveFleeing
+                GetMotionMaster().MoveFleeing(caster, TimeSpan.FromMilliseconds(fearAuras.Empty() ? WorldConfig.GetIntValue(WorldCfg.CreatureFamilyFleeDelay) : 0)); // caster == NULL processed in MoveFleeing
             }
             else
             {
