@@ -1140,6 +1140,19 @@ namespace Game.Entities
             SetHomePosition(GetPosition());
         }
 
+        public uint GetTrainerId()
+        {
+            if (_trainerId.HasValue)
+                return _trainerId.Value;
+
+            return Global.ObjectMgr.GetCreatureDefaultTrainer(GetEntry());
+        }
+
+        public void SetTrainerId(uint? trainerId)
+        {
+            _trainerId = trainerId;
+        }
+        
         public override bool IsMovementPreventedByCasting()
         {
             // first check if currently a movement allowed channel is active and we're not casting
