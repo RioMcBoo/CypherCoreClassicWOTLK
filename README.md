@@ -3,7 +3,7 @@ CypherCore is an open source server project for World of Warcraft written in C#.
 The current support game version is: 3.4.0.47168
 
 ### Prerequisites
-* .NET 7.0 SDK [Download](https://dotnet.microsoft.com/en-us/download/dotnet)
+* .NET 8.0 SDK [Download](https://dotnet.microsoft.com/en-us/download/dotnet)
 * MariaDB 10.6 or higher [Download](https://mariadb.org/download/)
 * Optional: Visual Studio 2022, Visual Studio Code or Jetbrains Rider
 

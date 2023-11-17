@@ -1,9 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  
   <Import Project="..\..\default.props" />
+  
   <PropertyGroup>
-	<OutputType>Exe</OutputType>
+	  <OutputType>Exe</OutputType>
     <ApplicationIcon>Blue.ico</ApplicationIcon>
-    <StartupObject>WorldServer.Server</StartupObject>
+    <StartupObject>WorldServer.Server</StartupObject>            
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,5 +18,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
+  
 </Project>
