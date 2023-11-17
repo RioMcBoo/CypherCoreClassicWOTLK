@@ -8,13 +8,14 @@ namespace Framework.Cryptography
 {
     public sealed class WorldCrypt : IDisposable
     {
+        private const int countOfTagsWowUses = 12;
         public void Initialize(byte[] key)
         {
             if (IsInitialized)
                 throw new InvalidOperationException("PacketCrypt already initialized!");
 
-            _serverEncrypt = new AesGcm(key);
-            _clientDecrypt = new AesGcm(key);
+            _serverEncrypt = new AesGcm(key, countOfTagsWowUses);
+            _clientDecrypt = new AesGcm(key, countOfTagsWowUses);
 
             IsInitialized = true;
         }
