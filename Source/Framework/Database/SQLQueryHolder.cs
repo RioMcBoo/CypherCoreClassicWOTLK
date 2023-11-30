@@ -54,7 +54,10 @@ namespace Framework.Database
 
             // execute all queries in the holder and pass the results
             foreach (var pair in m_holder.m_queries)
-                m_holder.SetResult(pair.Key, mySqlBase.Query(pair.Value));
+            {
+                var result = mySqlBase.Query(pair.Value);
+                m_holder.SetResult(pair.Key, result);
+            }
 
             return m_result.TrySetResult(m_holder);
         }

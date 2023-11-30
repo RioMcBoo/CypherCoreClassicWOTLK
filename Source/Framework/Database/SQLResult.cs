@@ -19,11 +19,6 @@ namespace Framework.Database
             NextRow();
         }
 
-        ~SQLResult()
-        {
-            _reader = null;
-        }
-
         public T Read<T>(int column)
         {
             if (_reader.IsDBNull(column))
@@ -107,10 +102,7 @@ namespace Framework.Database
         public int GetFieldCount() { return _reader.FieldCount; }
 
         public bool IsEmpty()
-        {
-            if (_reader == null)
-                return true;
-            
+        {            
             return _reader.IsClosed || !_reader.HasRows;
         }
 
@@ -123,9 +115,6 @@ namespace Framework.Database
 
         public bool NextRow()
         {
-            if (_reader == null)
-                return false;
-
             if (_reader.Read())
                 return true;
 
