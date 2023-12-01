@@ -99,7 +99,7 @@ namespace Game.DungeonFinding
             RewardMapStore.Clear();
 
             // ORDER BY is very important for GetRandomDungeonReward!
-            SQLResult result = DB.World.Query("SELECT dungeonId, maxLevel, firstQuestId, otherQuestId FROM lfg_dungeon_rewards ORDER BY dungeonId, maxLevel ASC");
+            using var result = DB.World.Query("SELECT dungeonId, maxLevel, firstQuestId, otherQuestId FROM lfg_dungeon_rewards ORDER BY dungeonId, maxLevel ASC");
 
             if (result.IsEmpty())
             {
@@ -177,7 +177,7 @@ namespace Game.DungeonFinding
             }
 
             // Fill teleport locations from DB
-            SQLResult result = DB.World.Query("SELECT dungeonId, position_x, position_y, position_z, orientation, requiredItemLevel FROM lfg_dungeon_template");
+            using var result = DB.World.Query("SELECT dungeonId, position_x, position_y, position_z, orientation, requiredItemLevel FROM lfg_dungeon_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 lfg dungeon templates. DB table `lfg_dungeon_template` is empty!");

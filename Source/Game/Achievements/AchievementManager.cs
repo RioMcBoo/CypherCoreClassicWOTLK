@@ -1162,7 +1162,7 @@ namespace Game.Achievements
 
             _achievementScripts.Clear();                            // need for reload case
 
-            SQLResult result = DB.World.Query("SELECT AchievementId, ScriptName FROM achievement_scripts");
+            using var result = DB.World.Query("SELECT AchievementId, ScriptName FROM achievement_scripts");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 achievement scripts. DB table `achievement_scripts` is empty.");
@@ -1198,7 +1198,7 @@ namespace Game.Achievements
                 if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
                     _allCompletedAchievements[achievement.Id] = DateTime.MinValue;
 
-            SQLResult result = DB.Characters.Query("SELECT achievement FROM character_achievement GROUP BY achievement");
+            using var result = DB.Characters.Query("SELECT achievement FROM character_achievement GROUP BY achievement");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 realm first completed achievements. DB table `character_achievement` is empty.");
@@ -1235,7 +1235,7 @@ namespace Game.Achievements
             _achievementRewards.Clear();                           // need for reload case
 
             //                                         0   1       2       3       4       5        6     7
-            SQLResult result = DB.World.Query("SELECT ID, TitleA, TitleH, ItemID, Sender, Subject, Body, MailTemplateID FROM achievement_reward");
+            using var result = DB.World.Query("SELECT ID, TitleA, TitleH, ItemID, Sender, Subject, Body, MailTemplateID FROM achievement_reward");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, ">> Loaded 0 achievement rewards. DB table `achievement_reward` is empty.");
@@ -1349,7 +1349,7 @@ namespace Game.Achievements
             _achievementRewardLocales.Clear();                       // need for reload case
 
             //                                         0   1       2        3
-            SQLResult result = DB.World.Query("SELECT ID, Locale, Subject, Body FROM achievement_reward_locale");
+            using var result = DB.World.Query("SELECT ID, Locale, Subject, Body FROM achievement_reward_locale");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 achievement reward locale strings.  DB table `achievement_reward_locale` is empty.");

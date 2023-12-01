@@ -80,7 +80,7 @@ namespace Game
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
             stmt.AddValue(0, (int)_realm.Id.Index);
-            SQLResult result = DB.Login.Query(stmt);
+            using var result = DB.Login.Query(stmt);
 
             if (!result.IsEmpty())
                 SetPlayerSecurityLimit((AccountTypes)result.Read<byte>(0));
@@ -1272,7 +1272,7 @@ namespace Game
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_AUTOBROADCAST);
             stmt.AddValue(0, _realm.Id.Index);
 
-            SQLResult result = DB.Login.Query(stmt);
+            using var result = DB.Login.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 autobroadcasts definitions. DB table `autobroadcast` is empty for this realm!");
@@ -1629,8 +1629,9 @@ namespace Game
             if (mode == BanMode.Account && Global.AccountMgr.IsBannedAccount(nameOrIP))
                 return BanReturn.Exists;
 
-            SQLResult resultAccounts;
+            
             PreparedStatement stmt;
+            IDataBase dataBase = null;
 
             // Update the database with ban information
             switch (mode)
@@ -1639,31 +1640,34 @@ namespace Game
                     // No SQL injection with prepared statements
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
                     stmt.AddValue(0, nameOrIP);
-                    resultAccounts = DB.Login.Query(stmt);
-                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_IP_BANNED);
-                    stmt.AddValue(0, nameOrIP);
-                    stmt.AddValue(1, duration_secs);
-                    stmt.AddValue(2, author);
-                    stmt.AddValue(3, reason);
-                    DB.Login.Execute(stmt);
+                    dataBase = DB.Login;
+
+                    var stmt2 = LoginDatabase.GetPreparedStatement(LoginStatements.INS_IP_BANNED);
+                    stmt2.AddValue(0, nameOrIP);
+                    stmt2.AddValue(1, duration_secs);
+                    stmt2.AddValue(2, author);
+                    stmt2.AddValue(3, reason);
+                    DB.Login.Execute(stmt2);
                     break;
                 case BanMode.Account:
                     // No SQL injection with prepared statements
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME);
                     stmt.AddValue(0, nameOrIP);
-                    resultAccounts = DB.Login.Query(stmt);
+                    dataBase = DB.Login;
                     break;
                 case BanMode.Character:
                     // No SQL injection with prepared statements
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ACCOUNT_BY_NAME);
                     stmt.AddValue(0, nameOrIP);
-                    resultAccounts = DB.Characters.Query(stmt);
+                    dataBase = DB.Characters;
                     break;
                 default:
                     return BanReturn.SyntaxError;
             }
 
-            if (resultAccounts == null)
+            using var resultAccounts = dataBase.Query(stmt);
+
+            if (resultAccounts.IsEmpty())
             {
                 if (mode == BanMode.IP)
                     return BanReturn.Success;                             // ip correctly banned but nobody affected (yet)
@@ -2267,7 +2271,7 @@ namespace Game
         {
             var DBVersion = "Unknown world database.";
 
-            SQLResult result = DB.World.Query("SELECT db_version, cache_id FROM version LIMIT 1");
+            using var result = DB.World.Query("SELECT db_version, cache_id FROM version LIMIT 1");
             if (!result.IsEmpty())
             {
                 DBVersion = result.Read<string>(0);
@@ -2318,7 +2322,7 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.Characters.Query("SELECT ID, Value FROM world_variable");
+            using var result = DB.Characters.Query("SELECT ID, Value FROM world_variable");
             if (!result.IsEmpty())
             {
                 do
@@ -2413,7 +2417,7 @@ namespace Game
 
         public bool LoadRealmInfo()
         {
-            SQLResult result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
+            using var result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
             if (result.IsEmpty())
                 return false;
 
@@ -2450,7 +2454,7 @@ namespace Game
             stmt.AddValue(0, (uint)PlayerFlags.WarModeDesired);
             stmt.AddValue(1, (uint)PlayerFlags.WarModeDesired);
 
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
                 do

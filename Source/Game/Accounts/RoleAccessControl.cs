@@ -166,8 +166,8 @@ namespace Game.Accounts
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, GetRealmId());
-
-            LoadFromDBCallback(DB.Login.Query(stmt));
+            using var result = DB.Login.Query(stmt);
+            LoadFromDBCallback(result);
         }
 
         public QueryCallback LoadFromDBAsync()

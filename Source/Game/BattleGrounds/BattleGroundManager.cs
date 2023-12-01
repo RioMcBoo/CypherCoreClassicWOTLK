@@ -344,7 +344,7 @@ namespace Game.BattleGrounds
             uint oldMSTime = Time.GetMSTime();
 
             //                                         0   1                 2              3             4       5
-            SQLResult result = DB.World.Query("SELECT ID, AllianceStartLoc, HordeStartLoc, StartMaxDist, Weight, ScriptName FROM battleground_template");
+            using var result = DB.World.Query("SELECT ID, AllianceStartLoc, HordeStartLoc, StartMaxDist, Weight, ScriptName FROM battleground_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Battlegrounds. DB table `Battleground_template` is empty.");
@@ -579,7 +579,7 @@ namespace Game.BattleGrounds
 
             mBattleMastersMap.Clear();                                  // need for reload case
 
-            SQLResult result = DB.World.Query("SELECT entry, bg_template FROM battlemaster_entry");
+            using var result = DB.World.Query("SELECT entry, bg_template FROM battlemaster_entry");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 battlemaster entries. DB table `battlemaster_entry` is empty!");

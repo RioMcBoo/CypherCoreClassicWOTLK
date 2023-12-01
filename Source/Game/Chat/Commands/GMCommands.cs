@@ -113,7 +113,7 @@ namespace Game.Chat
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_GM_ACCOUNTS);
             stmt.AddValue(0, (byte)AccountTypes.Moderator);
             stmt.AddValue(1, Global.WorldMgr.GetRealm().Id.Index);
-            SQLResult result = DB.Login.Query(stmt);
+            using var result = DB.Login.Query(stmt);
 
             if (!result.IsEmpty())
             {

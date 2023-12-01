@@ -26,7 +26,7 @@ namespace Game.Maps
         {
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT entry FROM gameobject_template WHERE Type = 15 ORDER BY entry ASC");
+            using var result = DB.World.Query("SELECT entry FROM gameobject_template WHERE Type = 15 ORDER BY entry ASC");
 
             if (result.IsEmpty())
             {
@@ -88,7 +88,7 @@ namespace Game.Maps
 
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT guid, entry, phaseUseFlags, phaseid, phasegroup FROM transports");
+            using var result = DB.World.Query("SELECT guid, entry, phaseUseFlags, phaseid, phasegroup FROM transports");
 
             uint count = 0;
             if (!result.IsEmpty())

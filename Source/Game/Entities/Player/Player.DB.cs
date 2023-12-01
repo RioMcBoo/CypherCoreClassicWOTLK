@@ -211,7 +211,7 @@ namespace Game.Entities
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_REFUNDS);
                             stmt.AddValue(0, item.GetGUID().GetCounter());
                             stmt.AddValue(1, GetGUID().GetCounter());
-                            SQLResult result = DB.Characters.Query(stmt);
+                            using var result = DB.Characters.Query(stmt);
                             if (!result.IsEmpty())
                             {
                                 item.SetRefundRecipient(GetGUID());
@@ -231,7 +231,7 @@ namespace Game.Entities
                     {
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_BOP_TRADE);
                         stmt.AddValue(0, item.GetGUID().ToString());
-                        SQLResult result = DB.Characters.Query(stmt);
+                        using var result = DB.Characters.Query(stmt);
                         if (!result.IsEmpty())
                         {
                             string strGUID = result.Read<string>(0);
@@ -906,7 +906,7 @@ namespace Game.Entities
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_MONTHLY);
             stmt.AddValue(0, GetGUID().GetCounter());
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
 
             m_monthlyquests.Clear();
 
@@ -3634,7 +3634,7 @@ namespace Game.Entities
             ulong guidLow = guid.GetCounter();
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_ZONE);
             stmt.AddValue(0, guidLow);
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
 
             if (result.IsEmpty())
                 return 0;
@@ -3645,15 +3645,15 @@ namespace Game.Entities
                 // stored zone is zero, use generic and slow zone detection
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_POSITION_XYZ);
                 stmt.AddValue(0, guidLow);
-                result = DB.Characters.Query(stmt);
+                using var posResult = DB.Characters.Query(stmt);
 
-                if (result.IsEmpty())
+                if (posResult.IsEmpty())
                     return 0;
 
-                uint map = result.Read<ushort>(0);
-                float posx = result.Read<float>(1);
-                float posy = result.Read<float>(2);
-                float posz = result.Read<float>(3);
+                uint map = posResult.Read<ushort>(0);
+                float posx = posResult.Read<float>(1);
+                float posy = posResult.Read<float>(2);
+                float posz = posResult.Read<float>(3);
 
                 if (!CliDB.MapStorage.ContainsKey(map))
                     return 0;
@@ -3673,11 +3673,13 @@ namespace Game.Entities
 
             return zone;
         }
+
         public static void RemovePetitionsAndSigns(ObjectGuid guid)
         {
             Global.PetitionMgr.RemoveSignaturesBySigner(guid);
             Global.PetitionMgr.RemovePetitionsByOwner(guid);
         }
+
         public static void DeleteFromDB(ObjectGuid playerGuid, uint accountId, bool updateRealmChars = true, bool deleteFinally = false)
         {
             // Avoid realm-update for non-existing account
@@ -3729,13 +3731,14 @@ namespace Game.Entities
             // the player was uninvited already on logout so just remove from group
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
             stmt.AddValue(0, guid);
-            SQLResult resultGroup = DB.Characters.Query(stmt);
-
-            if (!resultGroup.IsEmpty())
+            using (var resultGroup = DB.Characters.Query(stmt))
             {
-                Group group = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
-                if (group)
-                    RemoveFromGroup(group, playerGuid);
+                if (!resultGroup.IsEmpty())
+                {
+                    Group group = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
+                    if (group)
+                        RemoveFromGroup(group, playerGuid);
+                }
             }
 
             // Remove signs from petitions (also remove petitions if owner);
@@ -3748,115 +3751,122 @@ namespace Game.Entities
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_COD_ITEM_MAIL);
                     stmt.AddValue(0, guid);
-                    SQLResult resultMail = DB.Characters.Query(stmt);
-                    if (!resultMail.IsEmpty())
+                    using (var resultMail = DB.Characters.Query(stmt))
                     {
-                        MultiMap<uint, Item> itemsByMail = new();
+                        if (!resultMail.IsEmpty())
+                        {
+                            MultiMap<uint, Item> itemsByMail = new();
 
-                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
-                        stmt.AddValue(0, guid);
-                        SQLResult resultItems = DB.Characters.Query(stmt);
+                            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
+                            stmt.AddValue(0, guid);
+                            using (var resultItems = DB.Characters.Query(stmt))
+                            {
 
-                        if (!resultItems.IsEmpty())
-                        {                            
+                                if (!resultItems.IsEmpty())
+                                {
+                                    do
+                                    {
+                                        uint mailId = resultItems.Read<uint>(44);
+                                        Item mailItem = _LoadMailedItem(playerGuid, null, mailId, null, resultItems.GetFields());
+                                        if (mailItem != null)
+                                            itemsByMail.Add(mailId, mailItem);
+
+                                    } while (resultItems.NextRow());
+                                }
+                            }
+
                             do
                             {
-                                uint mailId = resultItems.Read<uint>(44);
-                                Item mailItem = _LoadMailedItem(playerGuid, null, mailId, null, resultItems.GetFields());
-                                if (mailItem != null)
-                                    itemsByMail.Add(mailId, mailItem);
+                                uint mail_id = resultMail.Read<uint>(0);
+                                MailMessageType mailType = (MailMessageType)resultMail.Read<byte>(1);
+                                ushort mailTemplateId = resultMail.Read<ushort>(2);
+                                uint sender = resultMail.Read<uint>(3);
+                                string subject = resultMail.Read<string>(4);
+                                string body = resultMail.Read<string>(5);
+                                ulong money = resultMail.Read<ulong>(6);
+                                bool has_items = resultMail.Read<bool>(7);
 
-                            } while (resultItems.NextRow());
-                        }
+                                // We can return mail now
+                                // So firstly delete the old one
+                                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
+                                stmt.AddValue(0, mail_id);
+                                trans.Append(stmt);
 
-                        do
-                        {
-                            uint mail_id = resultMail.Read<uint>(0);
-                            MailMessageType mailType = (MailMessageType)resultMail.Read<byte>(1);
-                            ushort mailTemplateId = resultMail.Read<ushort>(2);
-                            uint sender = resultMail.Read<uint>(3);
-                            string subject = resultMail.Read<string>(4);
-                            string body = resultMail.Read<string>(5);
-                            ulong money = resultMail.Read<ulong>(6);
-                            bool has_items = resultMail.Read<bool>(7);
-
-                            // We can return mail now
-                            // So firstly delete the old one
-                            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
-                            stmt.AddValue(0, mail_id);
-                            trans.Append(stmt);
-
-                            // Mail is not from player
-                            if (mailType != MailMessageType.Normal)
-                            {
-                                if (has_items)
+                                // Mail is not from player
+                                if (mailType != MailMessageType.Normal)
                                 {
-                                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
-                                    stmt.AddValue(0, mail_id);
-                                    trans.Append(stmt);
+                                    if (has_items)
+                                    {
+                                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
+                                        stmt.AddValue(0, mail_id);
+                                        trans.Append(stmt);
+                                    }
+                                    continue;
                                 }
-                                continue;
+
+                                MailDraft draft = new(subject, body);
+                                if (mailTemplateId != 0)
+                                    draft = new MailDraft(mailTemplateId, false);    // items are already included
+
+                                var itemsList = itemsByMail.LookupByKey(mail_id);
+                                if (itemsList != null)
+                                {
+                                    foreach (Item item in itemsList)
+                                        draft.AddItem(item);
+
+                                    itemsByMail.Remove(mail_id);
+                                }
+
+                                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
+                                stmt.AddValue(0, mail_id);
+                                trans.Append(stmt);
+
+                                uint pl_account = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ObjectGuid.Create(HighGuid.Player, guid));
+
+                                draft.AddMoney(money).SendReturnToSender(pl_account, guid, sender, trans);
                             }
+                            while (resultMail.NextRow());
 
-                            MailDraft draft = new(subject, body);
-                            if (mailTemplateId != 0)
-                                draft = new MailDraft(mailTemplateId, false);    // items are already included
-
-                            var itemsList = itemsByMail.LookupByKey(mail_id);
-                            if (itemsList != null)
-                            {
-                                foreach (Item item in itemsList)
-                                    draft.AddItem(item);
-
-                                itemsByMail.Remove(mail_id);
-                            }
-
-                            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
-                            stmt.AddValue(0, mail_id);
-                            trans.Append(stmt);
-
-                            uint pl_account = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ObjectGuid.Create(HighGuid.Player, guid));
-
-                            draft.AddMoney(money).SendReturnToSender(pl_account, guid, sender, trans);
+                            // Free remaining items
+                            foreach (var pair in itemsByMail)
+                                pair.Value.Dispose();
                         }
-                        while (resultMail.NextRow());
-
-                        // Free remaining items
-                        foreach (var pair in itemsByMail)
-                            pair.Value.Dispose();
                     }
 
                     // Unsummon and delete for pets in world is not required: player deleted from CLI or character list with not loaded pet.
                     // NOW we can finally clear other DB data related to character
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_PET_IDS);
                     stmt.AddValue(0, guid);
-                    SQLResult resultPets = DB.Characters.Query(stmt);
-
-                    if (!resultPets.IsEmpty())
+                    using (var resultPets = DB.Characters.Query(stmt))
                     {
-                        do
+
+                        if (!resultPets.IsEmpty())
                         {
-                            uint petguidlow = resultPets.Read<uint>(0);
-                            Pet.DeleteFromDB(petguidlow);
-                        } while (resultPets.NextRow());
+                            do
+                            {
+                                uint petguidlow = resultPets.Read<uint>(0);
+                                Pet.DeleteFromDB(petguidlow);
+                            } while (resultPets.NextRow());
+                        }
                     }
 
                     // Delete char from social list of online chars
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_SOCIAL);
                     stmt.AddValue(0, guid);
-                    SQLResult resultFriends = DB.Characters.Query(stmt);
-
-                    if (!resultFriends.IsEmpty())
+                    using (var resultFriends = DB.Characters.Query(stmt))
                     {
-                        do
+                        if (!resultFriends.IsEmpty())
                         {
-                            Player playerFriend = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, resultFriends.Read<ulong>(0)));
-                            if (playerFriend)
+                            do
                             {
-                                playerFriend.GetSocial().RemoveFromSocialList(playerGuid, SocialFlag.All);
-                                Global.SocialMgr.SendFriendStatus(playerFriend, FriendsResult.Removed, playerGuid);
-                            }
-                        } while (resultFriends.NextRow());
+                                Player playerFriend = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, resultFriends.Read<ulong>(0)));
+                                if (playerFriend)
+                                {
+                                    playerFriend.GetSocial().RemoveFromSocialList(playerGuid, SocialFlag.All);
+                                    Global.SocialMgr.SendFriendStatus(playerFriend, FriendsResult.Removed, playerGuid);
+                                }
+                            } while (resultFriends.NextRow());
+                        }
                     }
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER);
@@ -4083,6 +4093,7 @@ namespace Game.Entities
                     Global.CharacterCacheStorage.DeleteCharacterCacheEntry(playerGuid, name);
                     break;
                 }
+
                 // The character gets unlinked from the account, the name gets freed up and appears as deleted ingame
                 case CharDeleteMethod.Unlink:
                 {
@@ -4123,7 +4134,7 @@ namespace Game.Entities
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_OLD_CHARS);
             stmt.AddValue(0, (uint)(GameTime.GetGameTime() - keepDays * Time.Day));
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
 
             if (!result.IsEmpty())
             {
@@ -4155,7 +4166,7 @@ namespace Game.Entities
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_POSITION);
             stmt.AddValue(0, guid.GetCounter());
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
 
             loc = new WorldLocation();
             inFlight = false;

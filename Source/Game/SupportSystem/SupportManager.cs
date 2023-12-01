@@ -61,7 +61,7 @@ namespace Game.SupportSystem
             _openBugTicketCount = 0;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GM_BUGS);
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 GM bugs. DB table `gm_bug` is empty!");
@@ -97,16 +97,14 @@ namespace Game.SupportSystem
             _openComplaintTicketCount = 0;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GM_COMPLAINTS);
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 GM complaints. DB table `gm_complaint` is empty!");
                 return;
             }
 
-            uint count = 0;
-            PreparedStatement chatLogStmt;
-            SQLResult chatLogResult;
+            uint count = 0;         
             do
             {
                 ComplaintTicket complaint = new();
@@ -119,9 +117,9 @@ namespace Game.SupportSystem
                 if (_lastComplaintId < id)
                     _lastComplaintId = id;
 
-                chatLogStmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GM_COMPLAINT_CHATLINES);
+                PreparedStatement chatLogStmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GM_COMPLAINT_CHATLINES);
                 chatLogStmt.AddValue(0, id);
-                chatLogResult = DB.Characters.Query(stmt);
+                using var chatLogResult = DB.Characters.Query(stmt);
 
                 if (!chatLogResult.IsEmpty())
                 {
@@ -147,7 +145,7 @@ namespace Game.SupportSystem
             _openSuggestionTicketCount = 0;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GM_SUGGESTIONS);
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 GM suggestions. DB table `gm_suggestion` is empty!");

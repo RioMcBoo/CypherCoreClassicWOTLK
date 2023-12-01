@@ -13,6 +13,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Networking
 {
@@ -131,50 +132,59 @@ namespace Game.Networking
 
         bool CheckAccessLevelAndPassword(string email, string password)
         {
+            uint accountId;
+            string username;
+
             //"SELECT a.id, a.username FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id WHERE ba.email = ?"
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
             stmt.AddValue(0, email);
-            SQLResult result = DB.Login.Query(stmt);
-            if (result.IsEmpty())
+            using (var result = DB.Login.Query(stmt))
             {
-                Log.outInfo(LogFilter.CommandsRA, $"User {email} does not exist in database");
-                return false;
-            }
+                if (result.IsEmpty())
+                {
+                    Log.outInfo(LogFilter.CommandsRA, $"User {email} does not exist in database");
+                    return false;
+                }
 
-            uint accountId = result.Read<uint>(0);
-            string username = result.Read<string>(1);
+                accountId = result.Read<uint>(0);
+                username = result.Read<string>(1);
+            }
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS_BY_ID);
             stmt.AddValue(0, accountId);
-            result = DB.Login.Query(stmt);
-            if (result.IsEmpty())
+            using (var result = DB.Login.Query(stmt))
             {
-                Log.outInfo(LogFilter.CommandsRA, $"User {email} has no privilege to login");
-                return false;
-            }
+                if (result.IsEmpty())
+                {
+                    Log.outInfo(LogFilter.CommandsRA, $"User {email} has no privilege to login");
+                    return false;
+                }
 
-            //"SELECT SecurityLevel, RealmID FROM account_access WHERE AccountID = ? and (RealmID = ? OR RealmID = -1) ORDER BY SecurityLevel desc");
-            if (result.Read<byte>(0) < ConfigMgr.GetDefaultValue("Ra.MinLevel", (byte)AccountTypes.Administrator))
-            {
-                Log.outInfo(LogFilter.CommandsRA, $"User {email} has no privilege to login");
-                return false;
-            }
-            else if (result.Read<int>(1) != -1)
-            {
-                Log.outInfo(LogFilter.CommandsRA, $"User {email} has to be assigned on all realms (with RealmID = '-1')");
-                return false;
+                //"SELECT SecurityLevel, RealmID FROM account_access WHERE AccountID = ? and (RealmID = ? OR RealmID = -1) ORDER BY SecurityLevel desc");
+                if (result.Read<byte>(0) < ConfigMgr.GetDefaultValue("Ra.MinLevel", (byte)AccountTypes.Administrator))
+                {
+                    Log.outInfo(LogFilter.CommandsRA, $"User {email} has no privilege to login");
+                    return false;
+                }
+                else if (result.Read<int>(1) != -1)
+                {
+                    Log.outInfo(LogFilter.CommandsRA, $"User {email} has to be assigned on all realms (with RealmID = '-1')");
+                    return false;
+                }
             }
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_CHECK_PASSWORD);
             stmt.AddValue(0, accountId);
-            result = DB.Login.Query(stmt);
-            if (!result.IsEmpty())
+            using (var result = DB.Login.Query(stmt))
             {
-                var salt = result.Read<byte[]>(0);
-                var verifier = result.Read<byte[]>(1);
+                if (!result.IsEmpty())
+                {
+                    var salt = result.Read<byte[]>(0);
+                    var verifier = result.Read<byte[]>(1);
 
-                if (SRP6.CheckLogin(username, password, salt, verifier))
-                    return true;
+                    if (SRP6.CheckLogin(username, password, salt, verifier))
+                        return true;
+                }
             }
 
             Log.outInfo(LogFilter.CommandsRA, $"Wrong password for user: {email}");

@@ -51,7 +51,7 @@ namespace Game.Scenarios
 
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT map, difficulty, scenario_A, scenario_H FROM scenarios");
+            using var result = DB.World.Query("SELECT map, difficulty, scenario_A, scenario_H FROM scenarios");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 scenarios. DB table `scenarios` is empty!");
@@ -136,8 +136,9 @@ namespace Game.Scenarios
 
             uint count = 0;
 
-            //                                         0               1          2     3      4        5         6      7              8                  9
-            SQLResult result = DB.World.Query("SELECT CriteriaTreeID, BlobIndex, Idx1, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, NavigationPlayerConditionID FROM scenario_poi ORDER BY CriteriaTreeID, Idx1");
+            //                                            0               1          2     3      4        5         6      7              8                  9
+            using var result = DB.World.Query("SELECT CriteriaTreeID, BlobIndex, Idx1, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, NavigationPlayerConditionID FROM scenario_poi ORDER BY CriteriaTreeID, Idx1");
+
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 scenario POI definitions. DB table `scenario_poi` is empty.");
@@ -146,24 +147,26 @@ namespace Game.Scenarios
 
             Dictionary<uint, MultiMap<int, ScenarioPOIPoint>> allPoints = new();
 
-            //                                               0               1    2  3  4
-            SQLResult pointsResult = DB.World.Query("SELECT CriteriaTreeID, Idx1, X, Y, Z FROM scenario_poi_points ORDER BY CriteriaTreeID DESC, Idx1, Idx2");
-            if (!pointsResult.IsEmpty())
+            //                                                0               1    2  3  4
+            using (var pointsResult = DB.World.Query("SELECT CriteriaTreeID, Idx1, X, Y, Z FROM scenario_poi_points ORDER BY CriteriaTreeID DESC, Idx1, Idx2"))
             {
-                do
+                if (!pointsResult.IsEmpty())
                 {
-                    uint CriteriaTreeID = pointsResult.Read<uint>(0);
-                    int Idx1 = pointsResult.Read<int>(1);
-                    int X = pointsResult.Read<int>(2);
-                    int Y = pointsResult.Read<int>(3);
-                    int Z = pointsResult.Read<int>(4);
+                    do
+                    {
+                        uint CriteriaTreeID = pointsResult.Read<uint>(0);
+                        int Idx1 = pointsResult.Read<int>(1);
+                        int X = pointsResult.Read<int>(2);
+                        int Y = pointsResult.Read<int>(3);
+                        int Z = pointsResult.Read<int>(4);
 
-                    if (!allPoints.ContainsKey(CriteriaTreeID))
-                        allPoints[CriteriaTreeID] = new MultiMap<int, ScenarioPOIPoint>();
+                        if (!allPoints.ContainsKey(CriteriaTreeID))
+                            allPoints[CriteriaTreeID] = new MultiMap<int, ScenarioPOIPoint>();
 
-                    allPoints[CriteriaTreeID].Add(Idx1, new ScenarioPOIPoint(X, Y, Z));
+                        allPoints[CriteriaTreeID].Add(Idx1, new ScenarioPOIPoint(X, Y, Z));
 
-                } while (pointsResult.NextRow());
+                    } while (pointsResult.NextRow());
+                }
             }
 
             do

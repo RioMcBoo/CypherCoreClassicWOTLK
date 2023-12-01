@@ -69,7 +69,8 @@ namespace Game
             stmt.AddValue(0, accountId);
             stmt.AddValue(1, CalculateShaPassHash(username, password));
 
-            return !DB.Login.Query(stmt).IsEmpty();
+            using var result = DB.Login.Query(stmt);
+            return !result.IsEmpty();
         }
 
         public AccountOpResult LinkWithGameAccount(string email, string gameAccountName)
@@ -114,7 +115,7 @@ namespace Game
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_EMAIL);
             stmt.AddValue(0, username);
-            SQLResult result = DB.Login.Query(stmt);
+            using var result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
                 return result.Read<uint>(0);
 
@@ -126,7 +127,7 @@ namespace Game
             name = "";
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_EMAIL_BY_ID);
             stmt.AddValue(0, accountId);
-            SQLResult result = DB.Login.Query(stmt);
+            using var result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
             {
                 name = result.Read<string>(0);
@@ -140,7 +141,7 @@ namespace Game
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_GAME_ACCOUNT);
             stmt.AddValue(0, gameAccountId);
-            SQLResult result = DB.Login.Query(stmt);
+            using var result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
                 return result.Read<uint>(0);
 
@@ -158,7 +159,7 @@ namespace Game
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_MAX_ACCOUNT_INDEX);
             stmt.AddValue(0, accountId);
-            SQLResult result = DB.Login.Query(stmt);
+            using var result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
                 return result.Read<byte>(0);
 

@@ -23,67 +23,71 @@ namespace Game.Loots
             uint count = 0;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_ITEMS);
-            SQLResult result = DB.Characters.Query(stmt);
-            if (!result.IsEmpty())
+            using (var result = DB.Characters.Query(stmt))
             {
-                do
+                if (!result.IsEmpty())
                 {
-                    ulong key = result.Read<ulong>(0);
-                    if (!_lootItemStorage.ContainsKey(key))
-                        _lootItemStorage[key] = new StoredLootContainer(key);
+                    do
+                    {
+                        ulong key = result.Read<ulong>(0);
+                        if (!_lootItemStorage.ContainsKey(key))
+                            _lootItemStorage[key] = new StoredLootContainer(key);
 
-                    StoredLootContainer storedContainer = _lootItemStorage[key];
+                        StoredLootContainer storedContainer = _lootItemStorage[key];
 
-                    LootItem lootItem = new();
-                    lootItem.itemid = result.Read<uint>(1);
-                    lootItem.count = result.Read<byte>(2);
-                    lootItem.LootListId = result.Read<uint>(3);
-                    lootItem.follow_loot_rules = result.Read<bool>(4);
-                    lootItem.freeforall = result.Read<bool>(5);
-                    lootItem.is_blocked = result.Read<bool>(6);
-                    lootItem.is_counted = result.Read<bool>(7);
-                    lootItem.is_underthreshold = result.Read<bool>(8);
-                    lootItem.needs_quest = result.Read<bool>(9);                    
-                    lootItem.randomPropertyId.Type = (ItemRandomEnchantmentType)result.Read<byte>(10);
-                    lootItem.randomPropertyId.Id = result.Read<uint>(11);
-                    lootItem.randomSuffix = result.Read<uint>(12);
-                    lootItem.context = (ItemContext)result.Read<byte>(13);
-                    StringArray bonusLists = new(result.Read<string>(14), ' ');
+                        LootItem lootItem = new();
+                        lootItem.itemid = result.Read<uint>(1);
+                        lootItem.count = result.Read<byte>(2);
+                        lootItem.LootListId = result.Read<uint>(3);
+                        lootItem.follow_loot_rules = result.Read<bool>(4);
+                        lootItem.freeforall = result.Read<bool>(5);
+                        lootItem.is_blocked = result.Read<bool>(6);
+                        lootItem.is_counted = result.Read<bool>(7);
+                        lootItem.is_underthreshold = result.Read<bool>(8);
+                        lootItem.needs_quest = result.Read<bool>(9);
+                        lootItem.randomPropertyId.Type = (ItemRandomEnchantmentType)result.Read<byte>(10);
+                        lootItem.randomPropertyId.Id = result.Read<uint>(11);
+                        lootItem.randomSuffix = result.Read<uint>(12);
+                        lootItem.context = (ItemContext)result.Read<byte>(13);
+                        StringArray bonusLists = new(result.Read<string>(14), ' ');
 
-                    foreach (int str in bonusLists)
-                        lootItem.BonusListIDs.Add(str);
+                        foreach (int str in bonusLists)
+                            lootItem.BonusListIDs.Add(str);
 
-                    storedContainer.AddLootItem(lootItem, null);
+                        storedContainer.AddLootItem(lootItem, null);
 
-                    ++count;
-                } while (result.NextRow());
+                        ++count;
+                    } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item loots in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item loots in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                }
+                else
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item loots");
             }
-            else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item loots");
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_MONEY);
-            result = DB.Characters.Query(stmt);
-            if (!result.IsEmpty())
+            using (var result = DB.Characters.Query(stmt))
             {
-                count = 0;
-                do
+                if (!result.IsEmpty())
                 {
-                    ulong key = result.Read<ulong>(0);
-                    if (!_lootItemStorage.ContainsKey(key))  
-                         _lootItemStorage.TryAdd(key, new StoredLootContainer(key));
+                    count = 0;
+                    do
+                    {
+                        ulong key = result.Read<ulong>(0);
+                        if (!_lootItemStorage.ContainsKey(key))
+                            _lootItemStorage.TryAdd(key, new StoredLootContainer(key));
 
-                    StoredLootContainer storedContainer = _lootItemStorage[key];
-                    storedContainer.AddMoney(result.Read<uint>(1), null);
+                        StoredLootContainer storedContainer = _lootItemStorage[key];
+                        storedContainer.AddMoney(result.Read<uint>(1), null);
 
-                    ++count;
-                } while (result.NextRow());
+                        ++count;
+                    } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item money in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item money in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                }
+                else
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item money");
             }
-            else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item money");
         }
 
         public bool LoadStoredLoot(Item item, Player player)

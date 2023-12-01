@@ -20,7 +20,7 @@ namespace Game.PvP
             uint oldMSTime = Time.GetMSTime();
 
             //                                             0       1
-            SQLResult result = DB.World.Query("SELECT TypeId, ScriptName FROM outdoorpvp_template");
+            using var result = DB.World.Query("SELECT TypeId, ScriptName FROM outdoorpvp_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 outdoor PvP definitions. DB table `outdoorpvp_template` is empty.");

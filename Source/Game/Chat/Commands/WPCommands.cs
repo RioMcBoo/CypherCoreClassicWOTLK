@@ -30,7 +30,7 @@ namespace Game.Chat.Commands
                 else
                 {
                     stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_ID);
-                    SQLResult result1 = DB.World.Query(stmt);
+                    using var result1 = DB.World.Query(stmt);
 
                     uint maxpathid = result1.Read<uint>(0);
                     pathId = maxpathid + 1;
@@ -51,7 +51,7 @@ namespace Game.Chat.Commands
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_POINT);
             stmt.AddValue(0, pathId);
-            SQLResult result = DB.World.Query(stmt);
+            using var result = DB.World.Query(stmt);
 
             if (result.IsEmpty())
                 point = result.Read<uint>(0);
@@ -87,7 +87,7 @@ namespace Game.Chat.Commands
                 {
                     stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                     stmt.AddValue(0, id);
-                    SQLResult result = DB.World.Query(stmt);
+                    using var result = DB.World.Query(stmt);
 
                     if (result.IsEmpty())
                     {
@@ -103,7 +103,7 @@ namespace Game.Chat.Commands
                 else
                 {
                     stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPTS_MAX_ID);
-                    SQLResult result = DB.World.Query(stmt);
+                    using var result = DB.World.Query(stmt);
                     id = result.Read<uint>(0);
 
                     stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_WAYPOINT_SCRIPT);
@@ -130,7 +130,7 @@ namespace Game.Chat.Commands
 
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_BY_ID);
                 stmt.AddValue(0, id);
-                SQLResult result = DB.World.Query(stmt);
+                using var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -168,7 +168,7 @@ namespace Game.Chat.Commands
 
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                 stmt.AddValue(0, id);
-                SQLResult result = DB.World.Query(stmt);
+                using var result = DB.World.Query(stmt);
 
                 if (!result.IsEmpty())
                 {
@@ -230,7 +230,7 @@ namespace Game.Chat.Commands
                 {
                     stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                     stmt.AddValue(0, id);
-                    SQLResult result = DB.World.Query(stmt);
+                    using var result = DB.World.Query(stmt);
 
                     if (result.IsEmpty())
                     {
@@ -343,7 +343,7 @@ namespace Game.Chat.Commands
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_ADDON_BY_GUID);
             stmt.AddValue(0, guidLow);
-            SQLResult result = DB.World.Query(stmt);
+            using var result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
             {
@@ -406,40 +406,53 @@ namespace Game.Chat.Commands
             // Check the creature
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_WPGUID);
             stmt.AddValue(0, target.GetSpawnId());
-            SQLResult result = DB.World.Query(stmt);
-
-            if (result.IsEmpty())
+            using (var result = DB.World.Query(stmt))
             {
-                handler.SendSysMessage(CypherStrings.WaypointNotfoundsearch, target.GetGUID().ToString());
-                // Select waypoint number from database
-                // Since we compare float values, we have to deal with
-                // some difficulties.
-                // Here we search for all waypoints that only differ in one from 1 thousand
-                // See also: http://dev.mysql.com/doc/refman/5.0/en/problems-with-float.html
-                string maxDiff = "0.01";
-
-                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_POS);
-                stmt.AddValue(0, target.GetPositionX());
-                stmt.AddValue(1, maxDiff);
-                stmt.AddValue(2, target.GetPositionY());
-                stmt.AddValue(3, maxDiff);
-                stmt.AddValue(4, target.GetPositionZ());
-                stmt.AddValue(5, maxDiff);
-                result = DB.World.Query(stmt);
-
-                if (result.IsEmpty())
+                if (!result.IsEmpty())
                 {
-                    handler.SendSysMessage(CypherStrings.WaypointNotfounddbproblem, target.GetGUID().ToString());
-                    return true;
+                    do
+                    {
+                        pathid = result.Read<uint>(0);
+                        point = result.Read<uint>(1);
+                    }
+                    while (result.NextRow());
                 }
-            }
+                else
+                {
+                    handler.SendSysMessage(CypherStrings.WaypointNotfoundsearch, target.GetGUID().ToString());
+                    // Select waypoint number from database
+                    // Since we compare float values, we have to deal with
+                    // some difficulties.
+                    // Here we search for all waypoints that only differ in one from 1 thousand
+                    // See also: http://dev.mysql.com/doc/refman/5.0/en/problems-with-float.html
+                    string maxDiff = "0.01";
 
-            do
-            {
-                pathid = result.Read<uint>(0);
-                point = result.Read<uint>(1);
-            }
-            while (result.NextRow());
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_POS);
+                    stmt.AddValue(0, target.GetPositionX());
+                    stmt.AddValue(1, maxDiff);
+                    stmt.AddValue(2, target.GetPositionY());
+                    stmt.AddValue(3, maxDiff);
+                    stmt.AddValue(4, target.GetPositionZ());
+                    stmt.AddValue(5, maxDiff);
+                    using (var result2 = DB.World.Query(stmt))
+                    {
+                        if (!result2.IsEmpty())
+                        {
+                            do
+                            {
+                                pathid = result2.Read<uint>(0);
+                                point = result2.Read<uint>(1);
+                            }
+                            while (result.NextRow());
+                        }
+                        else
+                        {
+                            handler.SendSysMessage(CypherStrings.WaypointNotfounddbproblem, target.GetGUID().ToString());
+                            return true;
+                        }
+                    }
+                }
+            }            
 
             // We have the waypoint number and the GUID of the "master npc"
             // Text is enclosed in "<>", all other arguments not
@@ -606,7 +619,7 @@ namespace Game.Chat.Commands
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_ALL_BY_WPGUID);
                 stmt.AddValue(0, target.GetSpawnId());
-                SQLResult result = DB.World.Query(stmt);
+                using var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -639,7 +652,7 @@ namespace Game.Chat.Commands
             {
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_BY_ID);
                 stmt.AddValue(0, pathId);
-                SQLResult result = DB.World.Query(stmt);
+                using var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -652,29 +665,31 @@ namespace Game.Chat.Commands
                 // Delete all visuals for this NPC
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_WPGUID_BY_ID);
                 stmt.AddValue(0, pathId);
-                SQLResult result2 = DB.World.Query(stmt);
-
-                if (!result2.IsEmpty())
+                using (var result2 = DB.World.Query(stmt))
                 {
-                    bool hasError = false;
-                    do
-                    {
-                        ulong wpguid = result2.Read<ulong>(0);
 
-                        if (!Creature.DeleteFromDB(wpguid))
+                    if (!result2.IsEmpty())
+                    {
+                        bool hasError = false;
+                        do
                         {
-                            handler.SendSysMessage(CypherStrings.WaypointNotremoved, wpguid);
-                            hasError = true;
+                            ulong wpguid = result2.Read<ulong>(0);
+
+                            if (!Creature.DeleteFromDB(wpguid))
+                            {
+                                handler.SendSysMessage(CypherStrings.WaypointNotremoved, wpguid);
+                                hasError = true;
+                            }
+
                         }
+                        while (result2.NextRow());
 
-                    }
-                    while (result2.NextRow());
-
-                    if (hasError)
-                    {
-                        handler.SendSysMessage(CypherStrings.WaypointToofar1);
-                        handler.SendSysMessage(CypherStrings.WaypointToofar2);
-                        handler.SendSysMessage(CypherStrings.WaypointToofar3);
+                        if (hasError)
+                        {
+                            handler.SendSysMessage(CypherStrings.WaypointToofar1);
+                            handler.SendSysMessage(CypherStrings.WaypointToofar2);
+                            handler.SendSysMessage(CypherStrings.WaypointToofar3);
+                        }
                     }
                 }
 
@@ -741,51 +756,53 @@ namespace Game.Chat.Commands
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_FIRST_BY_ID);
                 stmt.AddValue(0, pathId);
-                SQLResult result = DB.World.Query(stmt);
-
-                if (result.IsEmpty())
+                using (var result = DB.World.Query(stmt))
                 {
-                    handler.SendSysMessage(CypherStrings.WaypointNotfound, pathId);    
-                    return false;
+                    if (result.IsEmpty())
+                    {
+                        handler.SendSysMessage(CypherStrings.WaypointNotfound, pathId);
+                        return false;
+                    }
+
+                    float x = result.Read<float>(0);
+                    float y = result.Read<float>(1);
+                    float z = result.Read<float>(2);
+                    float o = result.Read<float>(3);
+
+
+                    Player chr = handler.GetSession().GetPlayer();
+                    Map map = chr.GetMap();
+
+                    Creature creature = Creature.CreateCreature(1, map, new Position(x, y, z, 0));
+                    if (!creature)
+                    {
+                        handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
+                        return false;
+                    }
+
+
+                    PhasingHandler.InheritPhaseShift(creature, chr);
+                    creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
+
+                    ulong dbGuid = creature.GetSpawnId();
+
+                    // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
+                    creature.CleanupsBeforeDelete();
+                    creature.Dispose();
+
+                    creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
+                    if (!creature)
+                    {
+                        handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
+                        return false;
+                    }
+
+                    if (target)
+                    {
+                        creature.SetDisplayId(target.GetDisplayId());
+                        creature.SetObjectScale(0.5f);
+                    }
                 }
-
-                float x = result.Read<float>(0);
-                float y = result.Read<float>(1);
-                float z = result.Read<float>(2);
-                float o = result.Read<float>(3);
-
-                Player chr = handler.GetSession().GetPlayer();
-                Map map = chr.GetMap();
-
-                Creature creature = Creature.CreateCreature(1, map, new Position(x, y, z, 0));
-                if (!creature)
-                {
-                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
-                    return false;
-                }
-
-                PhasingHandler.InheritPhaseShift(creature, chr);
-                creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
-
-                ulong dbGuid = creature.GetSpawnId();
-
-                // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
-                creature.CleanupsBeforeDelete();
-                creature.Dispose();
-
-                creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
-                if (!creature)
-                {
-                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
-                    return false;
-                }
-
-                if (target)
-                {
-                    creature.SetDisplayId(target.GetDisplayId());
-                    creature.SetObjectScale(0.5f);
-                }
-
                 return true;
             }
 
@@ -795,7 +812,7 @@ namespace Game.Chat.Commands
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_LAST_BY_ID);
                 stmt.AddValue(0, pathId);
-                SQLResult result = DB.World.Query(stmt);
+                using var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -848,7 +865,7 @@ namespace Game.Chat.Commands
             {
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_BY_ID);
                 stmt.AddValue(0, 1);
-                SQLResult result = DB.World.Query(stmt);
+                using var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {

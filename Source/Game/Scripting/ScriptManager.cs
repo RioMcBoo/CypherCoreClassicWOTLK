@@ -194,54 +194,58 @@ namespace Game.Scripting
             ulong entryCount = 0;
 
             // Load Waypoints
-            SQLResult result = DB.World.Query("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry");
-            if (!result.IsEmpty())
-                entryCount = result.Read<uint>(0);
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loading Script Waypoints for {entryCount} creature(s)...");
-
-            //                                0       1         2           3           4           5
-            result = DB.World.Query("SELECT entry, pointid, location_x, location_y, location_z, waittime FROM script_waypoint ORDER BY pointid");
-
-            if (result.IsEmpty())
+            using (var result = DB.World.Query("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry"))
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Script Waypoints. DB table `script_waypoint` is empty.");
-                return;
+                if (!result.IsEmpty())
+                    entryCount = result.Read<uint>(0);
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loading Script Waypoints for {entryCount} creature(s)...");
             }
-
-            uint count = 0;
-
-            do
+            
+            //                                0       1         2           3           4           5
+            using (var result = DB.World.Query("SELECT entry, pointid, location_x, location_y, location_z, waittime FROM script_waypoint ORDER BY pointid"))
             {
-                uint entry = result.Read<uint>(0);
-                uint id = result.Read<uint>(1);
-                float x = result.Read<float>(2);
-                float y = result.Read<float>(3);
-                float z = result.Read<float>(4);
-                uint waitTime = result.Read<uint>(5);
 
-                CreatureTemplate info = Global.ObjectMgr.GetCreatureTemplate(entry);
-                if (info == null)
+                if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.Sql, $"SystemMgr: DB table script_waypoint has waypoint for non-existant creature entry {entry}");
-                    continue;
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Script Waypoints. DB table `script_waypoint` is empty.");
+                    return;
                 }
 
-                if (info.ScriptID == 0)
-                    Log.outError(LogFilter.Sql, $"SystemMgr: DB table script_waypoint has waypoint for creature entry {entry}, but creature does not have ScriptName defined and then useless.");
+                uint count = 0;
 
-                if (!_waypointStore.ContainsKey(entry))
-                    _waypointStore[entry] = new WaypointPath();
+                do
+                {
+                    uint entry = result.Read<uint>(0);
+                    uint id = result.Read<uint>(1);
+                    float x = result.Read<float>(2);
+                    float y = result.Read<float>(3);
+                    float z = result.Read<float>(4);
+                    uint waitTime = result.Read<uint>(5);
 
-                WaypointPath path = _waypointStore[entry];
-                path.id = entry;
-                path.nodes.Add(new WaypointNode(id, x, y, z, null, waitTime));
+                    CreatureTemplate info = Global.ObjectMgr.GetCreatureTemplate(entry);
+                    if (info == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SystemMgr: DB table script_waypoint has waypoint for non-existant creature entry {entry}");
+                        continue;
+                    }
 
-                ++count;
+                    if (info.ScriptID == 0)
+                        Log.outError(LogFilter.Sql, $"SystemMgr: DB table script_waypoint has waypoint for creature entry {entry}, but creature does not have ScriptName defined and then useless.");
+
+                    if (!_waypointStore.ContainsKey(entry))
+                        _waypointStore[entry] = new WaypointPath();
+
+                    WaypointPath path = _waypointStore[entry];
+                    path.id = entry;
+                    path.nodes.Add(new WaypointNode(id, x, y, z, null, waitTime));
+
+                    ++count;
+                }
+                while (result.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Script Waypoint nodes in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             }
-            while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Script Waypoint nodes in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
 
         }
 
@@ -252,9 +256,9 @@ namespace Game.Scripting
             m_mSplineChainsMap.Clear();
 
             //                                             0      1        2         3                 4            5
-            SQLResult resultMeta = DB.World.Query("SELECT entry, chainId, splineId, expectedDuration, msUntilNext, velocity FROM script_spline_chain_meta ORDER BY entry asc, chainId asc, splineId asc");
+            using var resultMeta = DB.World.Query("SELECT entry, chainId, splineId, expectedDuration, msUntilNext, velocity FROM script_spline_chain_meta ORDER BY entry asc, chainId asc, splineId asc");
             //                                           0      1        2         3    4  5  6
-            SQLResult resultWP = DB.World.Query("SELECT entry, chainId, splineId, wpId, x, y, z FROM script_spline_chain_waypoints ORDER BY entry asc, chainId asc, splineId asc, wpId asc");
+            using var resultWP = DB.World.Query("SELECT entry, chainId, splineId, wpId, x, y, z FROM script_spline_chain_waypoints ORDER BY entry asc, chainId asc, splineId asc, wpId asc");
             if (resultMeta.IsEmpty() || resultWP.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded spline chain data for 0 chains, consisting of 0 splines with 0 waypoints. DB tables `script_spline_chain_meta` and `script_spline_chain_waypoints` are empty.");

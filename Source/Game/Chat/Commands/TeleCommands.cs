@@ -240,7 +240,7 @@ namespace Game.Chat
                     {
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
                         stmt.AddValue(0, player.GetGUID().GetCounter());
-                        SQLResult result = DB.Characters.Query(stmt);
+                        using var result = DB.Characters.Query(stmt);
 
                         if (!result.IsEmpty())
                         {
@@ -322,7 +322,7 @@ namespace Game.Chat
 
                     WorldDatabase.EscapeString(ref normalizedName);
 
-                    SQLResult result = DB.World.Query($"SELECT c.position_x, c.position_y, c.position_z, c.orientation, c.map, ct.name FROM creature c INNER JOIN creature_template ct ON c.id = ct.entry WHERE ct.name LIKE '{normalizedName}'");
+                    using var result = DB.World.Query($"SELECT c.position_x, c.position_y, c.position_z, c.orientation, c.map, ct.name FROM creature c INNER JOIN creature_template ct ON c.id = ct.entry WHERE ct.name LIKE '{normalizedName}'");
                     if (result.IsEmpty())
                     {
                         handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);

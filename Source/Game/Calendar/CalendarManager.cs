@@ -24,72 +24,76 @@ namespace Game
 
         public void LoadFromDB()
         {
-            uint oldMSTime = Time.GetMSTime();
-
             uint count = 0;
+            uint oldMSTime = Time.GetMSTime();
+                        
             _maxEventId = 0;
             _maxInviteId = 0;
 
             //                                              0        1      2      3            4          5          6     7      8
-            SQLResult result = DB.Characters.Query("SELECT EventID, Owner, Title, Description, EventType, TextureID, Date, Flags, LockDate FROM calendar_events");
-            if (!result.IsEmpty())
+            using (var result = DB.Characters.Query("SELECT EventID, Owner, Title, Description, EventType, TextureID, Date, Flags, LockDate FROM calendar_events"))
             {
-                do
+                if (!result.IsEmpty())
                 {
-                    ulong eventID = result.Read<ulong>(0);
-                    ObjectGuid ownerGUID = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1));
-                    string title = result.Read<string>(2);
-                    string description = result.Read<string>(3);
-                    CalendarEventType type = (CalendarEventType)result.Read<byte>(4);
-                    int textureID = result.Read<int>(5);
-                    long date = result.Read<long>(6);
-                    CalendarFlags flags = (CalendarFlags)result.Read<uint>(7);
-                    long lockDate = result.Read<long>(8);
-                    ulong guildID = 0;
+                    do
+                    {
+                        ulong eventID = result.Read<ulong>(0);
+                        ObjectGuid ownerGUID = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1));
+                        string title = result.Read<string>(2);
+                        string description = result.Read<string>(3);
+                        CalendarEventType type = (CalendarEventType)result.Read<byte>(4);
+                        int textureID = result.Read<int>(5);
+                        long date = result.Read<long>(6);
+                        CalendarFlags flags = (CalendarFlags)result.Read<uint>(7);
+                        long lockDate = result.Read<long>(8);
+                        ulong guildID = 0;
 
-                    if (flags.HasAnyFlag(CalendarFlags.GuildEvent) || flags.HasAnyFlag(CalendarFlags.WithoutInvites))
-                        guildID = Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(ownerGUID);
+                        if (flags.HasAnyFlag(CalendarFlags.GuildEvent) || flags.HasAnyFlag(CalendarFlags.WithoutInvites))
+                            guildID = Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(ownerGUID);
 
-                    CalendarEvent calendarEvent = new(eventID, ownerGUID, guildID, type, textureID, date, flags, title, description, lockDate);
-                    _events.Add(calendarEvent);
+                        CalendarEvent calendarEvent = new(eventID, ownerGUID, guildID, type, textureID, date, flags, title, description, lockDate);
+                        _events.Add(calendarEvent);
 
-                    _maxEventId = Math.Max(_maxEventId, eventID);
+                        _maxEventId = Math.Max(_maxEventId, eventID);
 
-                    ++count;
+                        ++count;
+                    }
+                    while (result.NextRow());
                 }
-                while (result.NextRow());
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar events in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar events in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             count = 0;
             oldMSTime = Time.GetMSTime();
 
             //                                    0         1        2        3       4       5             6               7
-            result = DB.Characters.Query("SELECT InviteID, EventID, Invitee, Sender, Status, ResponseTime, ModerationRank, Note FROM calendar_invites");
-            if (!result.IsEmpty())
+            using (var result = DB.Characters.Query("SELECT InviteID, EventID, Invitee, Sender, Status, ResponseTime, ModerationRank, Note FROM calendar_invites"))
             {
-                do
+                if (!result.IsEmpty())
                 {
-                    ulong inviteId = result.Read<ulong>(0);
-                    ulong eventId = result.Read<ulong>(1);
-                    ObjectGuid invitee = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2));
-                    ObjectGuid senderGUID = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(3));
-                    CalendarInviteStatus status = (CalendarInviteStatus)result.Read<byte>(4);
-                    long responseTime = result.Read<long>(5);
-                    CalendarModerationRank rank = (CalendarModerationRank)result.Read<byte>(6);
-                    string note = result.Read<string>(7);
+                    do
+                    {
+                        ulong inviteId = result.Read<ulong>(0);
+                        ulong eventId = result.Read<ulong>(1);
+                        ObjectGuid invitee = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2));
+                        ObjectGuid senderGUID = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(3));
+                        CalendarInviteStatus status = (CalendarInviteStatus)result.Read<byte>(4);
+                        long responseTime = result.Read<long>(5);
+                        CalendarModerationRank rank = (CalendarModerationRank)result.Read<byte>(6);
+                        string note = result.Read<string>(7);
 
-                    CalendarInvite invite = new(inviteId, eventId, invitee, senderGUID, responseTime, status, rank, note);
-                    _invites.Add(eventId, invite);
+                        CalendarInvite invite = new(inviteId, eventId, invitee, senderGUID, responseTime, status, rank, note);
+                        _invites.Add(eventId, invite);
 
-                    _maxInviteId = Math.Max(_maxInviteId, inviteId);
+                        _maxInviteId = Math.Max(_maxInviteId, inviteId);
 
-                    ++count;
+                        ++count;
+                    }
+                    while (result.NextRow());
                 }
-                while (result.NextRow());
-            }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar invites in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar invites in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            }
 
             for (ulong i = 1; i < _maxEventId; ++i)
                 if (GetEvent(i) == null)

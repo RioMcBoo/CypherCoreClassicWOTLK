@@ -10,6 +10,7 @@ using Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Chat
 {
@@ -103,11 +104,13 @@ namespace Game.Chat
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
                 stmt.AddValue(0, newName);
-                SQLResult result = DB.Characters.Query(stmt);
-                if (!result.IsEmpty())
+                using (var result = DB.Characters.Query(stmt))
                 {
-                    handler.SendSysMessage(CypherStrings.RenamePlayerAlreadyExists, newName);
-                    return false;
+                    if (!result.IsEmpty())
+                    {
+                        handler.SendSysMessage(CypherStrings.RenamePlayerAlreadyExists, newName);
+                        return false;
+                    }
                 }
 
                 // Remove declined name from db
@@ -537,7 +540,6 @@ namespace Game.Chat
 
             static bool GetDeletedCharacterInfoList(List<DeletedInfo> foundList, string searchString)
             {
-                SQLResult result;
                 PreparedStatement stmt;
                 if (!searchString.IsEmpty())
                 {
@@ -548,8 +550,7 @@ namespace Game.Chat
                             return false;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_GUID);
-                        stmt.AddValue(0, guid);
-                        result = DB.Characters.Query(stmt);
+                        stmt.AddValue(0, guid);                        
                     }
                     // search by name
                     else
@@ -559,14 +560,14 @@ namespace Game.Chat
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_NAME);
                         stmt.AddValue(0, searchString);
-                        result = DB.Characters.Query(stmt);
                     }
                 }
                 else
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO);
-                    result = DB.Characters.Query(stmt);
                 }
+
+                using var result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                 {

@@ -194,7 +194,7 @@ namespace Game.Chat.Commands
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANINFO);
             stmt.AddValue(0, targetGuid.GetCounter());
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.CharNotBanned, name);
@@ -224,7 +224,7 @@ namespace Game.Chat.Commands
             if (ip.IsEmpty())
                 return false;
 
-            SQLResult result = DB.Login.Query("SELECT ip, FROM_UNIXTIME(bandate), FROM_UNIXTIME(unbandate), unbandate-UNIX_TIMESTAMP(), banreason, bannedby, unbandate-bandate FROM ip_banned WHERE ip = '{0}'", ip);
+            using var result = DB.Login.Query("SELECT ip, FROM_UNIXTIME(bandate), FROM_UNIXTIME(unbandate), unbandate-UNIX_TIMESTAMP(), banreason, bannedby, unbandate-bandate FROM ip_banned WHERE ip = '{0}'", ip);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.BaninfoNoip);
@@ -240,7 +240,7 @@ namespace Game.Chat.Commands
 
         static bool HandleBanInfoHelper(uint accountId, string accountName, CommandHandler handler)
         {
-            SQLResult result = DB.Login.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{0}' ORDER BY bandate ASC", accountId);
+            using var result = DB.Login.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{0}' ORDER BY bandate ASC", accountId);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.BaninfoNoaccountban, accountName);
@@ -274,26 +274,35 @@ namespace Game.Chat.Commands
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DelExpiredIpBans);
             DB.Login.Execute(stmt);
 
-            SQLResult result;
             if (filter.IsEmpty())
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_ALL);
-                result = DB.Login.Query(stmt);
+                using (var result = DB.Login.Query(stmt))
+                {
+                    if (result.IsEmpty())
+                    {
+                        handler.SendSysMessage(CypherStrings.BanlistNoaccount);
+                        return true;
+                    }
+
+                    return HandleBanListHelper(result, handler);
+                }
             }
             else
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_FILTER);
                 stmt.AddValue(0, filter);
-                result = DB.Login.Query(stmt);
-            }
+                using (var result = DB.Login.Query(stmt))
+                {
+                    if (result.IsEmpty())
+                    {
+                        handler.SendSysMessage(CypherStrings.BanlistNoaccount);
+                        return true;
+                    }
 
-            if (result.IsEmpty())
-            {
-                handler.SendSysMessage(CypherStrings.BanlistNoaccount);
-                return true;
-            }
-
-            return HandleBanListHelper(result, handler);
+                    return HandleBanListHelper(result, handler);
+                }    
+            }            
         }
 
         [Command("character", RBACPermissions.CommandBanlistCharacter, true)]
@@ -304,74 +313,78 @@ namespace Game.Chat.Commands
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUID_BY_NAME_FILTER);
             stmt.AddValue(0, filter);
-            SQLResult result = DB.Characters.Query(stmt);
-            if (result.IsEmpty())
+            using (var result = DB.Characters.Query(stmt))
             {
-                handler.SendSysMessage(CypherStrings.BanlistNocharacter);
-                return true;
-            }
-
-            handler.SendSysMessage(CypherStrings.BanlistMatchingcharacter);
-
-            // Chat short output
-            if (handler.GetSession())
-            {
-                do
+                if (result.IsEmpty())
                 {
-
-                    PreparedStatement stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANNED_NAME);
-                    stmt2.AddValue(0, result.Read<ulong>(0));
-                    SQLResult banResult = DB.Characters.Query(stmt2);
-                    if (!banResult.IsEmpty())
-                        handler.SendSysMessage(banResult.Read<string>(0));
+                    handler.SendSysMessage(CypherStrings.BanlistNocharacter);
+                    return true;
                 }
-                while (result.NextRow());
-            }
-            // Console wide output
-            else
-            {
-                handler.SendSysMessage(CypherStrings.BanlistCharacters);
-                handler.SendSysMessage(" =============================================================================== ");
-                handler.SendSysMessage(CypherStrings.BanlistCharactersHeader);
-                do
+
+                handler.SendSysMessage(CypherStrings.BanlistMatchingcharacter);
+
+
+                // Chat short output
+                if (handler.GetSession())
                 {
-                    handler.SendSysMessage("-------------------------------------------------------------------------------");
-
-                    string char_name = result.Read<string>(1);
-
-                    PreparedStatement stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANINFO_LIST);
-                    stmt2.AddValue(0, result.Read<ulong>(0));
-                    SQLResult banInfo = DB.Characters.Query(stmt2);
-                    if (!banInfo.IsEmpty())
+                    do
                     {
-                        do
+                        PreparedStatement stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANNED_NAME);
+                        stmt2.AddValue(0, result.Read<ulong>(0));
+                        using (var banResult = DB.Characters.Query(stmt2))
                         {
-                            long timeBan = banInfo.Read<long>(0);
-                            DateTime tmBan = Time.UnixTimeToDateTime(timeBan);
-                            string bannedby = banInfo.Read<string>(2).Substring(0, 15);
-                            string banreason = banInfo.Read<string>(3).Substring(0, 15);
-
-                            if (banInfo.Read<long>(0) == banInfo.Read<long>(1))
-                            {
-                                handler.SendSysMessage("|{0}|{1:D2}-{2:D2}-{3:D2} {4:D2}:{5:D2}|   permanent  |{6}|{7}|",
-                                    char_name, tmBan.Year % 100, tmBan.Month + 1, tmBan.Day, tmBan.Hour, tmBan.Minute,
-                                    bannedby, banreason);
-                            }
-                            else
-                            {
-                                long timeUnban = banInfo.Read<long>(1);
-                                DateTime tmUnban = Time.UnixTimeToDateTime(timeUnban);
-                                handler.SendSysMessage("|{0}|{1:D2}-{2:D2}-{3:D2} {4:D2}:{5:D2}|{6:D2}-{7:D2}-{8:D2} {9:D2}:{10:D2}|{11}|{12}|",
-                                    char_name, tmBan.Year % 100, tmBan.Month + 1, tmBan.Day, tmBan.Hour, tmBan.Minute,
-                                    tmUnban.Year % 100, tmUnban.Month + 1, tmUnban.Day, tmUnban.Hour, tmUnban.Minute,
-                                    bannedby, banreason);
-                            }
+                            if (!banResult.IsEmpty())
+                                handler.SendSysMessage(banResult.Read<string>(0));
                         }
-                        while (banInfo.NextRow());
                     }
+                    while (result.NextRow());
                 }
-                while (result.NextRow());
-                handler.SendSysMessage(" =============================================================================== ");
+                // Console wide output
+                else
+                {
+                    handler.SendSysMessage(CypherStrings.BanlistCharacters);
+                    handler.SendSysMessage(" =============================================================================== ");
+                    handler.SendSysMessage(CypherStrings.BanlistCharactersHeader);
+                    do
+                    {
+                        handler.SendSysMessage("-------------------------------------------------------------------------------");
+
+                        string char_name = result.Read<string>(1);
+
+                        PreparedStatement stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANINFO_LIST);
+                        stmt2.AddValue(0, result.Read<ulong>(0));
+                        using var banInfo = DB.Characters.Query(stmt2);
+                        if (!banInfo.IsEmpty())
+                        {
+                            do
+                            {
+                                long timeBan = banInfo.Read<long>(0);
+                                DateTime tmBan = Time.UnixTimeToDateTime(timeBan);
+                                string bannedby = banInfo.Read<string>(2).Substring(0, 15);
+                                string banreason = banInfo.Read<string>(3).Substring(0, 15);
+
+                                if (banInfo.Read<long>(0) == banInfo.Read<long>(1))
+                                {
+                                    handler.SendSysMessage("|{0}|{1:D2}-{2:D2}-{3:D2} {4:D2}:{5:D2}|   permanent  |{6}|{7}|",
+                                        char_name, tmBan.Year % 100, tmBan.Month + 1, tmBan.Day, tmBan.Hour, tmBan.Minute,
+                                        bannedby, banreason);
+                                }
+                                else
+                                {
+                                    long timeUnban = banInfo.Read<long>(1);
+                                    DateTime tmUnban = Time.UnixTimeToDateTime(timeUnban);
+                                    handler.SendSysMessage("|{0}|{1:D2}-{2:D2}-{3:D2} {4:D2}:{5:D2}|{6:D2}-{7:D2}-{8:D2} {9:D2}:{10:D2}|{11}|{12}|",
+                                        char_name, tmBan.Year % 100, tmBan.Month + 1, tmBan.Day, tmBan.Hour, tmBan.Minute,
+                                        tmUnban.Year % 100, tmUnban.Month + 1, tmUnban.Day, tmUnban.Hour, tmUnban.Minute,
+                                        bannedby, banreason);
+                                }
+                            }
+                            while (banInfo.NextRow());
+                        }
+                    }
+                    while (result.NextRow());
+                    handler.SendSysMessage(" =============================================================================== ");
+                }
             }
 
             return true;
@@ -383,19 +396,17 @@ namespace Game.Chat.Commands
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DelExpiredIpBans);
             DB.Login.Execute(stmt);
 
-            SQLResult result;
-
             if (filter.IsEmpty())
             {
-                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_BANNED_ALL);
-                result = DB.Login.Query(stmt);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_BANNED_ALL);               
             }
             else
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_BANNED_BY_IP);
                 stmt.AddValue(0, filter);
-                result = DB.Login.Query(stmt);
             }
+
+            using var result = DB.Login.Query(stmt);
 
             if (result.IsEmpty())
             {
@@ -462,13 +473,14 @@ namespace Game.Chat.Commands
             {
                 do
                 {
-
                     uint accountid = result.Read<uint>(0);
 
-                    SQLResult banResult = DB.Login.Query("SELECT account.username FROM account, account_banned WHERE account_banned.id='{0}' AND account_banned.id=account.id", accountid);
-                    if (!banResult.IsEmpty())
+                    using (var banResult = DB.Login.Query("SELECT account.username FROM account, account_banned WHERE account_banned.id='{0}' AND account_banned.id=account.id", accountid))
                     {
-                        handler.SendSysMessage(banResult.Read<string>(0));
+                        if (!banResult.IsEmpty())
+                        {
+                            handler.SendSysMessage(banResult.Read<string>(0));
+                        }
                     }
                 }
                 while (result.NextRow());
@@ -495,7 +507,7 @@ namespace Game.Chat.Commands
                         Global.AccountMgr.GetName(accountId, out accountName);
 
                     // No SQL injection. id is uint32.
-                    SQLResult banInfo = DB.Login.Query("SELECT bandate, unbandate, bannedby, banreason FROM account_banned WHERE id = {0} ORDER BY unbandate", accountId);
+                    using var banInfo = DB.Login.Query("SELECT bandate, unbandate, bannedby, banreason FROM account_banned WHERE id = {0} ORDER BY unbandate", accountId);
                     if (!banInfo.IsEmpty())
                     {
                         do

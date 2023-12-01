@@ -343,14 +343,16 @@ namespace Game
                 return;
             }
 
-            SQLResult result1 = DB.Characters.Query("SELECT flags FROM character_social WHERE guid = {0} AND friend = {1}", inviteeGuid, playerGuid);
-            if (!result1.IsEmpty())
+            using (var result1 = DB.Characters.Query("SELECT flags FROM character_social WHERE guid = {0} AND friend = {1}", inviteeGuid, playerGuid))
             {
-
-                if (Convert.ToBoolean(result1.Read<byte>(0) & (byte)SocialFlag.Ignored))
+                if (!result1.IsEmpty())
                 {
-                    Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.IgnoringYouS, calendarInvite.Name);
-                    return;
+
+                    if (Convert.ToBoolean(result1.Read<byte>(0) & (byte)SocialFlag.Ignored))
+                    {
+                        Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.IgnoringYouS, calendarInvite.Name);
+                        return;
+                    }
                 }
             }
 

@@ -670,7 +670,7 @@ namespace Game.BattleGrounds
             if (IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PVPSTATS_MAXID);
-                SQLResult result = DB.Characters.Query(stmt);
+                using var result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                     battlegroundId = result.Read<ulong>(0) + 1;

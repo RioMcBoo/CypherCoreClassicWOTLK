@@ -20,7 +20,7 @@ namespace Game.Cache
             _characterCacheStore.Clear();
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.Characters.Query("SELECT guid, name, account, race, gender, class, level, deleteDate FROM characters");
+            using var result = DB.Characters.Query("SELECT guid, name, account, race, gender, class, level, deleteDate FROM characters");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "No character name data loaded, empty query");

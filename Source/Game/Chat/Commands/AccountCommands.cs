@@ -42,7 +42,7 @@ namespace Game.Chat
 
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
                 stmt.AddValue(0, accountId);
-                SQLResult result = DB.Login.Query(stmt);
+                using var result = DB.Login.Query(stmt);
 
                 if (!result.IsEmpty())
                 {
@@ -69,7 +69,7 @@ namespace Game.Chat
             { // get current TOTP secret
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOTP_SECRET);
                 stmt.AddValue(0, accountId);
-                SQLResult result = DB.Login.Query(stmt);
+                using var result = DB.Login.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -132,7 +132,7 @@ namespace Game.Chat
             { // check if 2FA already enabled
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOTP_SECRET);
                 stmt.AddValue(0, accountId);
-                SQLResult result = DB.Login.Query(stmt);
+                using var result = DB.Login.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -401,7 +401,7 @@ namespace Game.Chat
                     PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_LOGON_COUNTRY);
                     stmt.AddValue(0, BitConverter.ToUInt32(ipBytes, 0));
 
-                    SQLResult result = DB.Login.Query(stmt);
+                    using var result = DB.Login.Query(stmt);
                     if (!result.IsEmpty())
                     {
                         string country = result.Read<string>(0);
@@ -747,7 +747,7 @@ namespace Game.Chat
                     stmt.AddValue(0, accountId);
                     stmt.AddValue(1, securityLevel);
 
-                    SQLResult result = DB.Login.Query(stmt);
+                    using var result = DB.Login.Query(stmt);
 
                     if (!result.IsEmpty())
                     {

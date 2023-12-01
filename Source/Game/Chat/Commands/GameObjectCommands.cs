@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Chat
 {
@@ -252,7 +253,7 @@ namespace Game.Chat
             stmt.AddValue(5, player.GetPositionY());
             stmt.AddValue(6, player.GetPositionZ());
             stmt.AddValue(7, distance * distance);
-            SQLResult result = DB.World.Query(stmt);
+            using var result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
             {
@@ -326,21 +327,24 @@ namespace Game.Chat
         static bool HandleGameObjectTargetCommand(CommandHandler handler, string objectIdStr)
         {
             Player player = handler.GetSession().GetPlayer();
-            SQLResult result;
+            
             var activeEventsList = Global.GameEventMgr.GetActiveEventList();
+            PreparedStatement stmt = null;
 
             if (objectIdStr.IsEmpty())
             {
+                
                 if (uint.TryParse(objectIdStr, out uint objectId))
-                    result = DB.World.Query("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE map = '{3}' AND id = '{4}' ORDER BY order_ ASC LIMIT 1",
-                    player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectId);
+                {
+                    stmt = new PreparedStatement(String.Format("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE map = '{3}' AND id = '{4}' ORDER BY order_ ASC LIMIT 1",
+                    player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectId));
+                }                    
                 else
                 {
-                    result = DB.World.Query(
-                        "SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - {0}, 2) + POW(position_y - {1}, 2) + POW(position_z - {2}, 2)) AS order_ " +
+                    stmt = new PreparedStatement(String.Format("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - {0}, 2) + POW(position_y - {1}, 2) + POW(position_z - {2}, 2)) AS order_ " +
                         "FROM gameobject LEFT JOIN gameobject_template ON gameobject_template.entry = gameobject.id WHERE map = {3} AND name LIKE CONCAT('%%', '{4}', '%%') ORDER BY order_ ASC LIMIT 1",
-                        player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectIdStr);
-                }
+                        player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectIdStr));                    
+                }                
             }
             else
             {
@@ -364,70 +368,75 @@ namespace Game.Chat
                 else
                     eventFilter.Append(')');
 
-                result = DB.World.Query("SELECT gameobject.guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, " +
+                stmt = new PreparedStatement(String.Format("SELECT gameobject.guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, " +
                     "(POW(position_x - {0}, 2) + POW(position_y - {1}, 2) + POW(position_z - {2}, 2)) AS order_ FROM gameobject " +
                     "LEFT OUTER JOIN game_event_gameobject on gameobject.guid = game_event_gameobject.guid WHERE map = '{3}' {4} ORDER BY order_ ASC LIMIT 10",
                     handler.GetSession().GetPlayer().GetPositionX(), handler.GetSession().GetPlayer().GetPositionY(), handler.GetSession().GetPlayer().GetPositionZ(),
-                    handler.GetSession().GetPlayer().GetMapId(), eventFilter.ToString());
+                    handler.GetSession().GetPlayer().GetMapId(), eventFilter.ToString()));
             }
 
-            if (result.IsEmpty())
+            using (var result = DB.World.Query(stmt))
             {
-                handler.SendSysMessage(CypherStrings.CommandTargetobjnotfound);
-                return true;
-            }
 
-            bool found = false;
-            float x, y, z, o;
-            ulong guidLow;
-            uint id, phaseId, phaseGroup;
-            ushort mapId;
-            uint poolId;
+                if (result.IsEmpty())
+                {
+                    handler.SendSysMessage(CypherStrings.CommandTargetobjnotfound);
+                    return true;
+                }
 
-            do
-            {
-                guidLow = result.Read<ulong>(0);
-                id = result.Read<uint>(1);
-                x = result.Read<float>(2);
-                y = result.Read<float>(3);
-                z = result.Read<float>(4);
-                o = result.Read<float>(5);
-                mapId = result.Read<ushort>(6);
-                phaseId = result.Read<uint>(7);
-                phaseGroup = result.Read<uint>(8);
-                poolId = Global.PoolMgr.IsPartOfAPool<GameObject>(guidLow);
-                if (poolId == 0 || Global.PoolMgr.IsSpawnedObject<GameObject>(guidLow))
-                    found = true;
-            } while (result.NextRow() && !found);
+                bool found = false;
+                float x, y, z, o;
+                ulong guidLow;
+                uint id, phaseId, phaseGroup;
+                ushort mapId;
+                uint poolId;
 
-            if (!found)
-            {
-                handler.SendSysMessage(CypherStrings.GameobjectNotExist, id);
-                return false;
-            }
+                do
+                {
+                    guidLow = result.Read<ulong>(0);
+                    id = result.Read<uint>(1);
+                    x = result.Read<float>(2);
+                    y = result.Read<float>(3);
+                    z = result.Read<float>(4);
+                    o = result.Read<float>(5);
+                    mapId = result.Read<ushort>(6);
+                    phaseId = result.Read<uint>(7);
+                    phaseGroup = result.Read<uint>(8);
+                    poolId = Global.PoolMgr.IsPartOfAPool<GameObject>(guidLow);
+                    if (poolId == 0 || Global.PoolMgr.IsSpawnedObject<GameObject>(guidLow))
+                        found = true;
+                } while (result.NextRow() && !found);
 
-            GameObjectTemplate objectInfo = Global.ObjectMgr.GetGameObjectTemplate(id);
+                if (!found)
+                {
+                    handler.SendSysMessage(CypherStrings.GameobjectNotExist, id);
+                    return false;
+                }
 
-            if (objectInfo == null)
-            {
-                handler.SendSysMessage(CypherStrings.GameobjectNotExist, id);
-                return false;
-            }
 
-            GameObject target = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+                GameObjectTemplate objectInfo = Global.ObjectMgr.GetGameObjectTemplate(id);
 
-            handler.SendSysMessage(CypherStrings.GameobjectDetail, guidLow, objectInfo.name, guidLow, id, x, y, z, mapId, o, phaseId, phaseGroup);
+                if (objectInfo == null)
+                {
+                    handler.SendSysMessage(CypherStrings.GameobjectNotExist, id);
+                    return false;
+                }
 
-            if (target)
-            {
-                int curRespawnDelay = (int)(target.GetRespawnTimeEx() - GameTime.GetGameTime());
-                if (curRespawnDelay < 0)
-                    curRespawnDelay = 0;
+                GameObject target = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
 
-                string curRespawnDelayStr = Time.secsToTimeString((uint)curRespawnDelay, TimeFormat.ShortText);
-                string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
+                handler.SendSysMessage(CypherStrings.GameobjectDetail, guidLow, objectInfo.name, guidLow, id, x, y, z, mapId, o, phaseId, phaseGroup);
 
-                handler.SendSysMessage(CypherStrings.CommandRawpawntimes, defRespawnDelayStr, curRespawnDelayStr);
+                if (target)
+                {
+                    int curRespawnDelay = (int)(target.GetRespawnTimeEx() - GameTime.GetGameTime());
+                    if (curRespawnDelay < 0)
+                        curRespawnDelay = 0;
+
+                    string curRespawnDelayStr = Time.secsToTimeString((uint)curRespawnDelay, TimeFormat.ShortText);
+                    string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
+
+                    handler.SendSysMessage(CypherStrings.CommandRawpawntimes, defRespawnDelayStr, curRespawnDelayStr);
+                }
             }
             return true;
         }

@@ -343,13 +343,17 @@ namespace Game.Entities
             _nextInstanceId = 1;
 
             ulong maxExistingInstanceId = 0;
-            SQLResult result = DB.Characters.Query("SELECT IFNULL(MAX(instanceId), 0) FROM instance");
-            if (!result.IsEmpty())
-                maxExistingInstanceId = Math.Max(maxExistingInstanceId, result.Read<ulong>(0));
+            using (var result = DB.Characters.Query("SELECT IFNULL(MAX(instanceId), 0) FROM instance"))
+            {
+                if (!result.IsEmpty())
+                    maxExistingInstanceId = Math.Max(maxExistingInstanceId, result.Read<ulong>(0));
+            }
 
-            result = DB.Characters.Query("SELECT IFNULL(MAX(instanceId), 0) FROM character_instance_lock");
-            if (!result.IsEmpty())
-                maxExistingInstanceId = Math.Max(maxExistingInstanceId, result.Read<ulong>(0));
+            using (var result = DB.Characters.Query("SELECT IFNULL(MAX(instanceId), 0) FROM character_instance_lock"))
+            {
+                if (!result.IsEmpty())
+                    maxExistingInstanceId = Math.Max(maxExistingInstanceId, result.Read<ulong>(0));
+            }
 
             _freeInstanceIds.Length = (int)(maxExistingInstanceId + 2); // make space for one extra to be able to access [_nextInstanceId] index in case all slots are taken
 

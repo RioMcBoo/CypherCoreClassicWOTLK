@@ -58,48 +58,54 @@ namespace BNetServer.Networking
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetAccountInfo);
             stmt.AddValue(0, verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
 
-            SQLResult result = DB.Login.Query(stmt);
-            if (result.IsEmpty())
-                return BattlenetRpcErrorCode.Denied;
+            using (var result = DB.Login.Query(stmt))
+            {
+                if (result.IsEmpty())
+                    return BattlenetRpcErrorCode.Denied;
 
-            accountInfo = new AccountInfo(result);
+                accountInfo = new AccountInfo(result);
 
-            if (accountInfo.LoginTicketExpiry < Time.UnixTime)
-                return BattlenetRpcErrorCode.TimedOut;
+                if (accountInfo.LoginTicketExpiry < Time.UnixTime)
+                    return BattlenetRpcErrorCode.TimedOut;
+            }
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_BNET_ID);
             stmt.AddValue(0, accountInfo.Id);
 
-            SQLResult characterCountsResult = DB.Login.Query(stmt);
-            if (!characterCountsResult.IsEmpty())
+            using (var characterCountsResult = DB.Login.Query(stmt))
             {
-                do
+                if (!characterCountsResult.IsEmpty())
                 {
-                    var realmId = new RealmId(characterCountsResult.Read<byte>(3), characterCountsResult.Read<byte>(4), characterCountsResult.Read<uint>(2));
-                    accountInfo.GameAccounts[characterCountsResult.Read<uint>(0)].CharacterCounts[realmId.GetAddress()] = characterCountsResult.Read<byte>(1);
+                    do
+                    {
+                        var realmId = new RealmId(characterCountsResult.Read<byte>(3), characterCountsResult.Read<byte>(4), characterCountsResult.Read<uint>(2));
+                        accountInfo.GameAccounts[characterCountsResult.Read<uint>(0)].CharacterCounts[realmId.GetAddress()] = characterCountsResult.Read<byte>(1);
 
-                } while (characterCountsResult.NextRow());
+                    } while (characterCountsResult.NextRow());
+                }
             }
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetLastPlayerCharacters);
             stmt.AddValue(0, accountInfo.Id);
 
-            SQLResult lastPlayerCharactersResult = DB.Login.Query(stmt);
-            if (!lastPlayerCharactersResult.IsEmpty())
+            using (var lastPlayerCharactersResult = DB.Login.Query(stmt))
             {
-                do
+                if (!lastPlayerCharactersResult.IsEmpty())
                 {
-                    var realmId = new RealmId(lastPlayerCharactersResult.Read<byte>(1), lastPlayerCharactersResult.Read<byte>(2), lastPlayerCharactersResult.Read<uint>(3));
+                    do
+                    {
+                        var realmId = new RealmId(lastPlayerCharactersResult.Read<byte>(1), lastPlayerCharactersResult.Read<byte>(2), lastPlayerCharactersResult.Read<uint>(3));
 
-                    LastPlayedCharacterInfo lastPlayedCharacter = new();
-                    lastPlayedCharacter.RealmId = realmId;
-                    lastPlayedCharacter.CharacterName = lastPlayerCharactersResult.Read<string>(4);
-                    lastPlayedCharacter.CharacterGUID = lastPlayerCharactersResult.Read<ulong>(5);
-                    lastPlayedCharacter.LastPlayedTime = lastPlayerCharactersResult.Read<uint>(6);
+                        LastPlayedCharacterInfo lastPlayedCharacter = new();
+                        lastPlayedCharacter.RealmId = realmId;
+                        lastPlayedCharacter.CharacterName = lastPlayerCharactersResult.Read<string>(4);
+                        lastPlayedCharacter.CharacterGUID = lastPlayerCharactersResult.Read<ulong>(5);
+                        lastPlayedCharacter.LastPlayedTime = lastPlayerCharactersResult.Read<uint>(6);
 
-                    accountInfo.GameAccounts[lastPlayerCharactersResult.Read<uint>(0)].LastPlayedCharacters[realmId.GetSubRegionAddress()] = lastPlayedCharacter;
+                        accountInfo.GameAccounts[lastPlayerCharactersResult.Read<uint>(0)].LastPlayedCharacters[realmId.GetSubRegionAddress()] = lastPlayedCharacter;
 
-                } while (lastPlayerCharactersResult.NextRow());
+                    } while (lastPlayerCharactersResult.NextRow());
+                }
             }
 
             string ip_address = GetRemoteIpEndPoint().ToString();

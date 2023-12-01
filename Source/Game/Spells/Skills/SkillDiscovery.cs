@@ -19,8 +19,8 @@ namespace Game.Spells
 
             SkillDiscoveryStorage.Clear();                            // need for reload
 
-            //                                                0        1         2              3
-            SQLResult result = DB.World.Query("SELECT spellId, reqSpell, reqSkillValue, Chance FROM skill_discovery_template");
+            //                                         0        1         2              3
+            using var result = DB.World.Query("SELECT spellId, reqSpell, reqSkillValue, Chance FROM skill_discovery_template");
 
             if (result.IsEmpty())
             {

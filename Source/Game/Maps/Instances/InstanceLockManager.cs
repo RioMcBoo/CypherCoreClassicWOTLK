@@ -28,7 +28,7 @@ namespace Game.Maps
             Dictionary<uint, SharedInstanceLockData> instanceLockDataById = new();
 
             //                                              0           1     2
-            SQLResult result = DB.Characters.Query("SELECT instanceId, data, completedEncountersMask FROM instance");
+            using var result = DB.Characters.Query("SELECT instanceId, data, completedEncountersMask FROM instance");
             if (!result.IsEmpty())
             {
                 do
@@ -46,7 +46,7 @@ namespace Game.Maps
             }
 
             //                                                  0     1      2       3           4           5     6                        7           8
-            SQLResult lockResult = DB.Characters.Query("SELECT guid, mapId, lockId, instanceId, difficulty, data, completedEncountersMask, expiryTime, extended FROM character_instance_lock");
+            using var lockResult = DB.Characters.Query("SELECT guid, mapId, lockId, instanceId, difficulty, data, completedEncountersMask, expiryTime, extended FROM character_instance_lock");
             if (!result.IsEmpty())
             {
                 do

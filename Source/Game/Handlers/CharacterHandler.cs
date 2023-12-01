@@ -2060,10 +2060,10 @@ namespace Game
                         stmt.AddValue(0, oldReputation);
                         stmt.AddValue(1, lowGuid);
 
-                        result = DB.Characters.Query(stmt);
-                        if (!result.IsEmpty())
+                        using var result1 = DB.Characters.Query(stmt);
+                        if (!result1.IsEmpty())
                         {
-                            int oldDBRep = result.Read<int>(0);
+                            int oldDBRep = result1.Read<int>(0);
                             FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(oldReputation);
 
                             // old base reputation

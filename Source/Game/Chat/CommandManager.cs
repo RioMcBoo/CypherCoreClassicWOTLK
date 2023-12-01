@@ -41,7 +41,7 @@ namespace Game.Chat
             }
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_COMMANDS);
-            SQLResult result = DB.World.Query(stmt);
+            using var result = DB.World.Query(stmt);
             if (!result.IsEmpty())
             {
                 do

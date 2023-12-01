@@ -672,7 +672,7 @@ namespace Game.Loots
             Clear();
 
             //                                            0     1      2        3         4             5          6        7         8
-            SQLResult result = DB.World.Query("SELECT Entry, Item, Reference, Chance, QuestRequired, LootMode, GroupId, MinCount, MaxCount FROM {0}", GetName());
+            using var result = DB.World.Query("SELECT Entry, Item, Reference, Chance, QuestRequired, LootMode, GroupId, MinCount, MaxCount FROM {0}", GetName());
             if (result.IsEmpty())
                 return 0;
 
@@ -715,6 +715,7 @@ namespace Game.Loots
 
             return count;
         }
+
         void Clear()
         {
             m_LootTemplates.Clear();

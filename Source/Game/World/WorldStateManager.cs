@@ -27,121 +27,85 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0   1             2       3        4
-            SQLResult result = DB.World.Query("SELECT ID, DefaultValue, MapIDs, AreaIDs, ScriptName FROM world_state");
-            if (result.IsEmpty())
-                return;
-
-            do
             {
-                int id = result.Read<int>(0);
-                WorldStateTemplate worldState = new();
-                worldState.Id = id;
-                worldState.DefaultValue = result.Read<int>(1);
+                //                                         0   1             2       3        4
+                using var result = DB.World.Query("SELECT ID, DefaultValue, MapIDs, AreaIDs, ScriptName FROM world_state");
+                if (result.IsEmpty())
+                    return;
 
-                string mapIds = result.Read<string>(2);
-                if (!mapIds.IsEmpty())
-                {
-                    foreach (string mapIdToken in new StringArray(mapIds, ','))
-                    {
-                        if (!int.TryParse(mapIdToken, out int mapId))
-                        {
-                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer MapID ({mapIdToken}), map ignored");
-                            continue;
-                        }
-
-                        if (mapId != AnyMap && !CliDB.MapStorage.ContainsKey(mapId))
-                        {
-                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid MapID ({mapId}), map ignored");
-                            continue;
-                        }
-
-                        worldState.MapIds.Add(mapId);
-                    }
-                }
-
-                if (!mapIds.IsEmpty() && worldState.MapIds.Empty())
-                {
-                    Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty MapIDs ({mapIds}) but no valid map id was found, ignored");
-                    continue;
-                }
-
-                string areaIds = result.Read<string>(3);
-                if (!areaIds.IsEmpty() && !worldState.MapIds.Empty())
-                {
-                    foreach (string areaIdToken in new StringArray(areaIds, ','))
-                    {
-                        if (!uint.TryParse(areaIdToken, out uint areaId))
-                        {
-                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer AreaID ({areaIdToken}), area ignored");
-                            continue;
-                        }
-
-                        var areaTableEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
-                        if (areaTableEntry == null)
-                        {
-                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid AreaID ({areaId}), area ignored");
-                            continue;
-                        }
-
-                        if (!worldState.MapIds.Contains(areaTableEntry.ContinentID))
-                        {
-                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with AreaID ({areaId}) not on any of required maps, area ignored");
-                            continue;
-                        }
-
-                        worldState.AreaIds.Add(areaId);
-                    }
-
-                    if (!areaIds.IsEmpty() && worldState.AreaIds.Empty())
-                    {
-                        Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty AreaIDs ({areaIds}) but no valid area id was found, ignored");
-                        continue;
-                    }
-                }
-                else if (!areaIds.IsEmpty())
-                {
-                    Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty AreaIDs ({areaIds}) but is a realm wide world state, area requirement ignored");
-                }
-
-                worldState.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(4));
-
-                if (!worldState.MapIds.Empty())
-                {
-                    foreach (int mapId in worldState.MapIds)
-                    {
-                        if (!_worldStatesByMap.ContainsKey(mapId))
-                            _worldStatesByMap[mapId] = new();
-
-                        _worldStatesByMap[mapId][id] = worldState.DefaultValue;
-                    }
-                }
-                else
-                    _realmWorldStateValues[id] = worldState.DefaultValue;
-
-                _worldStateTemplates[id] = worldState;
-
-            } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldStateTemplates.Count} world state templates {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-
-            oldMSTime = Time.GetMSTime();
-
-            result = DB.Characters.Query("SELECT Id, Value FROM world_state_value");
-            uint savedValueCount = 0;
-            if (!result.IsEmpty())
-            {
                 do
                 {
-                    int worldStateId = result.Read<int>(0);
-                    WorldStateTemplate worldState = _worldStateTemplates.LookupByKey(worldStateId);
-                    if (worldState == null)
+                    int id = result.Read<int>(0);
+                    WorldStateTemplate worldState = new();
+                    worldState.Id = id;
+                    worldState.DefaultValue = result.Read<int>(1);
+
+                    string mapIds = result.Read<string>(2);
+                    if (!mapIds.IsEmpty())
                     {
-                        Log.outError(LogFilter.Sql, $"Table `world_state_value` contains a value for unknown world state {worldStateId}, ignored");
+                        foreach (string mapIdToken in new StringArray(mapIds, ','))
+                        {
+                            if (!int.TryParse(mapIdToken, out int mapId))
+                            {
+                                Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer MapID ({mapIdToken}), map ignored");
+                                continue;
+                            }
+
+                            if (mapId != AnyMap && !CliDB.MapStorage.ContainsKey(mapId))
+                            {
+                                Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid MapID ({mapId}), map ignored");
+                                continue;
+                            }
+
+                            worldState.MapIds.Add(mapId);
+                        }
+                    }
+
+                    if (!mapIds.IsEmpty() && worldState.MapIds.Empty())
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty MapIDs ({mapIds}) but no valid map id was found, ignored");
                         continue;
                     }
 
-                    int value = result.Read<int>(1);
+                    string areaIds = result.Read<string>(3);
+                    if (!areaIds.IsEmpty() && !worldState.MapIds.Empty())
+                    {
+                        foreach (string areaIdToken in new StringArray(areaIds, ','))
+                        {
+                            if (!uint.TryParse(areaIdToken, out uint areaId))
+                            {
+                                Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer AreaID ({areaIdToken}), area ignored");
+                                continue;
+                            }
+
+                            var areaTableEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
+                            if (areaTableEntry == null)
+                            {
+                                Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with invalid AreaID ({areaId}), area ignored");
+                                continue;
+                            }
+
+                            if (!worldState.MapIds.Contains(areaTableEntry.ContinentID))
+                            {
+                                Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with AreaID ({areaId}) not on any of required maps, area ignored");
+                                continue;
+                            }
+
+                            worldState.AreaIds.Add(areaId);
+                        }
+
+                        if (!areaIds.IsEmpty() && worldState.AreaIds.Empty())
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty AreaIDs ({areaIds}) but no valid area id was found, ignored");
+                            continue;
+                        }
+                    }
+                    else if (!areaIds.IsEmpty())
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with nonempty AreaIDs ({areaIds}) but is a realm wide world state, area requirement ignored");
+                    }
+
+                    worldState.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(4));
 
                     if (!worldState.MapIds.Empty())
                     {
@@ -150,18 +114,58 @@ namespace Game
                             if (!_worldStatesByMap.ContainsKey(mapId))
                                 _worldStatesByMap[mapId] = new();
 
-                            _worldStatesByMap[mapId][worldStateId] = value;
+                            _worldStatesByMap[mapId][id] = worldState.DefaultValue;
                         }
                     }
                     else
-                        _realmWorldStateValues[worldStateId] = value;
+                        _realmWorldStateValues[id] = worldState.DefaultValue;
 
-                    ++savedValueCount;
-                }
-                while (result.NextRow());
+                    _worldStateTemplates[id] = worldState;
+
+                } while (result.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldStateTemplates.Count} world state templates {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {savedValueCount} saved world state values {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            oldMSTime = Time.GetMSTime();
+
+            {
+                using var result = DB.Characters.Query("SELECT Id, Value FROM world_state_value");
+                uint savedValueCount = 0;
+                if (!result.IsEmpty())
+                {
+                    do
+                    {
+                        int worldStateId = result.Read<int>(0);
+                        WorldStateTemplate worldState = _worldStateTemplates.LookupByKey(worldStateId);
+                        if (worldState == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `world_state_value` contains a value for unknown world state {worldStateId}, ignored");
+                            continue;
+                        }
+
+                        int value = result.Read<int>(1);
+
+                        if (!worldState.MapIds.Empty())
+                        {
+                            foreach (int mapId in worldState.MapIds)
+                            {
+                                if (!_worldStatesByMap.ContainsKey(mapId))
+                                    _worldStatesByMap[mapId] = new();
+
+                                _worldStatesByMap[mapId][worldStateId] = value;
+                            }
+                        }
+                        else
+                            _realmWorldStateValues[worldStateId] = value;
+
+                        ++savedValueCount;
+                    }
+                    while (result.NextRow());
+                }
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {savedValueCount} saved world state values {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            }
         }
 
         public WorldStateTemplate GetWorldStateTemplate(int worldStateId)

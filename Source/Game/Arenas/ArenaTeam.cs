@@ -109,7 +109,7 @@ namespace Game.Arenas
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MATCH_MAKER_RATING);
             stmt.AddValue(0, playerGuid.GetCounter());
             stmt.AddValue(1, GetSlot());
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
 
             uint matchMakerRating;
             if (!result.IsEmpty())

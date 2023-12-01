@@ -7,9 +7,10 @@ using System.Runtime.CompilerServices;
 
 namespace Framework.Database
 {
-    public class SQLResult
+    public class SQLResult : IDisposable
     {
         MySqlDataReader _reader;
+        private bool disposedValue;
 
         public SQLResult() { }
 
@@ -102,7 +103,10 @@ namespace Framework.Database
         public int GetFieldCount() { return _reader.FieldCount; }
 
         public bool IsEmpty()
-        {            
+        {
+            if (_reader is null)
+                return true;
+
             return _reader.IsClosed || !_reader.HasRows;
         }
 
@@ -120,6 +124,27 @@ namespace Framework.Database
 
             _reader.Close();
             return false;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (_reader is not null)
+                    _reader.Close();
+                disposedValue = true;
+            }
+        }
+
+        ~SQLResult()
+        {            
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 

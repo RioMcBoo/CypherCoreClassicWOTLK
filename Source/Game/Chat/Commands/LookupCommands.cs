@@ -10,6 +10,7 @@ using Game.Spells;
 using System;
 using System.Text;
 using System.Collections.Generic;
+using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Chat
 {
@@ -899,7 +900,8 @@ namespace Game.Chat
 
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
                 stmt.AddValue(0, ip);
-                return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
+                using var result = DB.Login.Query(stmt);
+                return LookupPlayerSearchCommand(result, limit, handler);
             }
 
             [Command("account", RBACPermissions.CommandLookupPlayerAccount)]
@@ -907,7 +909,8 @@ namespace Game.Chat
             {
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME);
                 stmt.AddValue(0, account);
-                return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
+                using var result = DB.Login.Query(stmt);
+                return LookupPlayerSearchCommand(result, limit, handler);
             }
 
             [Command("email", RBACPermissions.CommandLookupPlayerEmail)]
@@ -915,7 +918,8 @@ namespace Game.Chat
             {
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_EMAIL);
                 stmt.AddValue(0, email);
-                return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
+                using var result = DB.Login.Query(stmt);
+                return LookupPlayerSearchCommand(result, limit, handler);
             }
 
             static bool LookupPlayerSearchCommand(SQLResult result, int limit, CommandHandler handler)
@@ -940,22 +944,23 @@ namespace Game.Chat
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_GUID_NAME_BY_ACC);
                     stmt.AddValue(0, accountId);
-                    SQLResult result2 = DB.Characters.Query(stmt);
-
-                    if (!result2.IsEmpty())
+                    using (var result2 = DB.Characters.Query(stmt))
                     {
-                        handler.SendSysMessage(CypherStrings.LookupPlayerAccount, accountName, accountId);
-
-                        do
+                        if (!result2.IsEmpty())
                         {
-                            ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result2.Read<ulong>(0));
-                            string name = result2.Read<string>(1);
-                            bool online = result2.Read<bool>(2);
+                            handler.SendSysMessage(CypherStrings.LookupPlayerAccount, accountName, accountId);
 
-                            handler.SendSysMessage(CypherStrings.LookupPlayerCharacter, name, guid.ToString(), online ? handler.GetCypherString(CypherStrings.Online) : "");
-                            ++counter;
+                            do
+                            {
+                                ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result2.Read<ulong>(0));
+                                string name = result2.Read<string>(1);
+                                bool online = result2.Read<bool>(2);
+
+                                handler.SendSysMessage(CypherStrings.LookupPlayerCharacter, name, guid.ToString(), online ? handler.GetCypherString(CypherStrings.Online) : "");
+                                ++counter;
+                            }
+                            while (result2.NextRow() && (limit == -1 || counter < limit));
                         }
-                        while (result2.NextRow() && (limit == -1 || counter < limit));
                     }
                 }
                 while (result.NextRow());

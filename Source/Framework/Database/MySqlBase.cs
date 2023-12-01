@@ -14,11 +14,14 @@ using System.Transactions;
 
 namespace Framework.Database
 {
-    public class MySqlConnectionInfo
+    public record class MySqlConnectionInfo
     {
-        public MySqlConnection GetConnection()
+        public string ConnectionString            
         {
-            return new MySqlConnection($"Server={Host};Port={PortOrSocket};User Id={Username};Password={Password};Database={Database};Allow User Variables=True;Pooling=true;ConnectionIdleTimeout=1800;Command Timeout=0");
+            get
+            {
+                return $"Server={Host};Port={PortOrSocket};User Id={Username};Password={Password};Database={Database};Allow User Variables=True;Pooling=true;ConnectionIdleTimeout=1800;Command Timeout=0";
+            }
         }
 
         public string Host;
@@ -78,7 +81,7 @@ namespace Framework.Database
         }
     }
 
-    public abstract class MySqlBase<T>
+    public abstract class MySqlBase<T> : IDataBase
     {
         static Dictionary<T, string> _preparedQueries = new();
 
@@ -92,18 +95,16 @@ namespace Framework.Database
         {
             _connectionInfo = connectionInfo;
             _updater = new DatabaseUpdater<T>(this);
-            _worker = new DatabaseWorker<T>(_queue, this);
+            _worker = new DatabaseWorker<T>(_queue, this);            
 
             try
             {
-                using (var connection = _connectionInfo.GetConnection())
-                {
-                    connection.Open();
+                using var connection = new MySqlConnection(_connectionInfo.ConnectionString);
+                connection.Open();
 
-                    version = DBVersion.Parse(connection.ServerVersion);
-                    Log.outInfo(LogFilter.SqlDriver, $"Connected to DB: {_connectionInfo.Database} Server: {(version.IsMariaDB ? "MariaDB" : "MySQL")} Ver: {connection.ServerVersion}");
-                    return MySqlErrorCode.None;
-                }
+                version = DBVersion.Parse(connection.ServerVersion);
+                Log.outInfo(LogFilter.SqlDriver, $"Connected to DB: {_connectionInfo.Database} Server: {(version.IsMariaDB ? "MariaDB" : "MySQL")} Ver: {connection.ServerVersion}");
+                return MySqlErrorCode.None;
             }
             catch (MySqlException ex)
             {
@@ -117,22 +118,22 @@ namespace Framework.Database
         }
 
         public bool DirectExecute(PreparedStatement stmt)
-        {
+        {            
             try
             {
-                using (var Connection = _connectionInfo.GetConnection())
-                {
-                    Connection.Open();
-                    using (MySqlCommand cmd = Connection.CreateCommand())
-                    {
-                        cmd.CommandText = stmt.CommandText;
-                        foreach (var parameter in stmt.Parameters)
-                            cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
 
-                        cmd.ExecuteNonQuery();
-                        return true;
-                    }
-                }
+                using var connection = new MySqlConnection(_connectionInfo.ConnectionString); 
+                connection.Open();
+
+                using MySqlCommand cmd = connection.CreateCommand();
+
+                cmd.CommandText = stmt.CommandText;
+                foreach (var parameter in stmt.Parameters)
+                    cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
+
+                cmd.ExecuteNonQuery();
+                return true;
+
             }
             catch (MySqlException ex)
             {
@@ -169,10 +170,11 @@ namespace Framework.Database
         {
             try
             {
-                MySqlConnection Connection = _connectionInfo.GetConnection();
-                Connection.Open();
+                var connection = new MySqlConnection(_connectionInfo.ConnectionString); 
+                connection.Open();
 
-                MySqlCommand cmd = Connection.CreateCommand();
+                using MySqlCommand cmd = connection.CreateCommand();
+
                 cmd.CommandText = stmt.CommandText;
                 foreach (var parameter in stmt.Parameters)
                     cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
@@ -333,36 +335,34 @@ namespace Framework.Database
 
         public MySqlErrorCode DirectCommitTransaction(SQLTransaction transaction)
         {
-            using (var Connection = _connectionInfo.GetConnection())
+            using var connection = new MySqlConnection(_connectionInfo.ConnectionString);
+
+            string query = "";
+
+            connection.Open();
+            using var trans = connection.BeginTransaction();
+
+            try
             {
-                string query = "";
+                using var scope = new TransactionScope();
 
-                Connection.Open();
-                using (MySqlTransaction trans = Connection.BeginTransaction())
+                foreach (var cmd in transaction.commands)
                 {
-                    try
-                    {
-                        using (var scope = new TransactionScope())
-                        {
-                            foreach (var cmd in transaction.commands)
-                            {
-                                cmd.Transaction = trans;
-                                cmd.Connection = Connection;
-                                cmd.ExecuteNonQuery();
-                                query = cmd.CommandText;
-                            }
-
-                            trans.Commit();
-                            scope.Complete();
-                        }
-                        return  MySqlErrorCode.None;
-                    }
-                    catch (MySqlException ex) //error occurred
-                    {
-                        trans.Rollback();
-                        return HandleMySQLException(ex, query);
-                    }
+                    cmd.Transaction = trans;
+                    cmd.Connection = connection;
+                    cmd.ExecuteNonQuery();
+                    query = cmd.CommandText;
                 }
+
+                trans.Commit();
+                scope.Complete();
+
+                return MySqlErrorCode.None;
+            }
+            catch (MySqlException ex) //error occurred
+            {
+                trans.Rollback();
+                return HandleMySQLException(ex, query);
             }
         }
 

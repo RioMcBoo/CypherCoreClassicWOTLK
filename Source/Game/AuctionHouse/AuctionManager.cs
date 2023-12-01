@@ -134,124 +134,131 @@ namespace Game
 
         public void LoadAuctions()
         {
-            uint oldMSTime = Time.GetMSTime();
-
             // need to clear in case we are reloading
             _itemsByGuid.Clear();
 
-            SQLResult result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_ITEMS));
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 auctions. DB table `auctionhouse` is empty.");
-                return;
-            }
-
-            // data needs to be at first place for Item.LoadFromDB
-            uint count = 0;
+            // data needs to be at first place for Item.LoadFromDB                
             MultiMap<uint, Item> itemsByAuction = new();
             MultiMap<uint, ObjectGuid> biddersByAuction = new();
 
-            do
+            // perfomance and quantity counters
+            uint count = 0;
+            uint oldMSTime = Time.GetMSTime();            
+
+            using (var result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_ITEMS)))
             {
-                ulong itemGuid = result.Read<ulong>(0);
-                uint itemEntry = result.Read<uint>(1);
-
-                ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
-                if (proto == null)
+                if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.Misc, $"AuctionHouseMgr.LoadAuctionItems: Unknown item (GUID: {itemGuid} item entry: #{itemEntry}) in auction, skipped.");
-                    continue;
-                }
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 auctions. DB table `auctionhouse` is empty.");
+                    return;
+                }                
 
-                Item item = Item.NewItemOrBag(proto);
-                if (!item.LoadFromDB(itemGuid, ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(51)), result.GetFields(), itemEntry))
-                {
-                    item.Dispose();
-                    continue;
-                }
-
-                uint auctionId = result.Read<uint>(52);
-                itemsByAuction.Add(auctionId, item);
-
-                ++count;
-            } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction items in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-
-            oldMSTime = Time.GetMSTime();
-            count = 0;
-
-            result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_BIDDERS));
-            if (!result.IsEmpty())
-            {
                 do
                 {
-                    biddersByAuction.Add(result.Read<uint>(0), ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1)));
+                    ulong itemGuid = result.Read<ulong>(0);
+                    uint itemEntry = result.Read<uint>(1);
 
-                } while (result.NextRow());
-            }
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction bidders in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-
-            oldMSTime = Time.GetMSTime();
-            count = 0;
-
-            result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTIONS));
-            if (!result.IsEmpty())
-            {
-                SQLTransaction trans = new();
-                do
-                {
-                    AuctionPosting auction = new();
-                    auction.Id = result.Read<uint>(0);
-                    uint auctionHouseId = result.Read<uint>(1);
-
-                    AuctionHouseObject auctionHouse = GetAuctionsById(auctionHouseId);
-                    if (auctionHouse == null)
+                    ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
+                    if (proto == null)
                     {
-                        Log.outError(LogFilter.Misc, $"Auction {auction.Id} has wrong auctionHouseId {auctionHouseId}");
-                        PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION);
-                        stmt.AddValue(0, auction.Id);
-                        trans.Append(stmt);
+                        Log.outError(LogFilter.Misc, $"AuctionHouseMgr.LoadAuctionItems: Unknown item (GUID: {itemGuid} item entry: #{itemEntry}) in auction, skipped.");
                         continue;
                     }
 
-                    if (!itemsByAuction.ContainsKey(auction.Id))
+                    Item item = Item.NewItemOrBag(proto);
+                    if (!item.LoadFromDB(itemGuid, ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(51)), result.GetFields(), itemEntry))
                     {
-                        Log.outError(LogFilter.Misc, $"Auction {auction.Id} has no items");
-                        PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION);
-                        stmt.AddValue(0, auction.Id);
-                        trans.Append(stmt);
+                        item.Dispose();
                         continue;
                     }
 
-                    auction.Items = itemsByAuction[auction.Id];
-                    auction.Owner = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2));
-                    auction.OwnerAccount = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner));
-                    ulong bidder = result.Read<ulong>(3);
-                    if (bidder != 0)
-                        auction.Bidder = ObjectGuid.Create(HighGuid.Player, bidder);
-
-                    auction.MinBid = result.Read<ulong>(4);
-                    auction.BuyoutOrUnitPrice = result.Read<ulong>(5);
-                    auction.Deposit = result.Read<ulong>(6);
-                    auction.BidAmount = result.Read<ulong>(7);
-                    auction.StartTime = Time.UnixTimeToDateTime(result.Read<long>(8));
-                    auction.EndTime = Time.UnixTimeToDateTime(result.Read<long>(9));
-                    auction.ServerFlags = (AuctionPostingServerFlag)result.Read<byte>(10);
-
-                    if (biddersByAuction.ContainsKey(auction.Id))
-                        auction.BidderHistory = biddersByAuction[auction.Id];
-
-                    auctionHouse.AddAuction(null, auction);
+                    uint auctionId = result.Read<uint>(52);
+                    itemsByAuction.Add(auctionId, item);
 
                     ++count;
                 } while (result.NextRow());
 
-                DB.Characters.CommitTransaction(trans);
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction items in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            }            
+
+            oldMSTime = Time.GetMSTime();
+            count = 0;
+
+            using (var result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_BIDDERS)))
+            {
+                if (!result.IsEmpty())
+                {
+                    do
+                    {
+                        biddersByAuction.Add(result.Read<uint>(0), ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1)));
+
+                    } while (result.NextRow());
+                }
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction bidders in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auctions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            oldMSTime = Time.GetMSTime();
+            count = 0;
+
+            using (var result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTIONS)))
+            {
+                if (!result.IsEmpty())
+                {
+                    SQLTransaction trans = new();
+                    do
+                    {
+                        AuctionPosting auction = new();
+                        auction.Id = result.Read<uint>(0);
+                        uint auctionHouseId = result.Read<uint>(1);
+
+                        AuctionHouseObject auctionHouse = GetAuctionsById(auctionHouseId);
+                        if (auctionHouse == null)
+                        {
+                            Log.outError(LogFilter.Misc, $"Auction {auction.Id} has wrong auctionHouseId {auctionHouseId}");
+                            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION);
+                            stmt.AddValue(0, auction.Id);
+                            trans.Append(stmt);
+                            continue;
+                        }
+
+                        if (!itemsByAuction.ContainsKey(auction.Id))
+                        {
+                            Log.outError(LogFilter.Misc, $"Auction {auction.Id} has no items");
+                            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION);
+                            stmt.AddValue(0, auction.Id);
+                            trans.Append(stmt);
+                            continue;
+                        }
+
+                        auction.Items = itemsByAuction[auction.Id];
+                        auction.Owner = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2));
+                        auction.OwnerAccount = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner));
+                        ulong bidder = result.Read<ulong>(3);
+                        if (bidder != 0)
+                            auction.Bidder = ObjectGuid.Create(HighGuid.Player, bidder);
+
+                        auction.MinBid = result.Read<ulong>(4);
+                        auction.BuyoutOrUnitPrice = result.Read<ulong>(5);
+                        auction.Deposit = result.Read<ulong>(6);
+                        auction.BidAmount = result.Read<ulong>(7);
+                        auction.StartTime = Time.UnixTimeToDateTime(result.Read<long>(8));
+                        auction.EndTime = Time.UnixTimeToDateTime(result.Read<long>(9));
+                        auction.ServerFlags = (AuctionPostingServerFlag)result.Read<byte>(10);
+
+                        if (biddersByAuction.ContainsKey(auction.Id))
+                            auction.BidderHistory = biddersByAuction[auction.Id];
+
+                        auctionHouse.AddAuction(null, auction);
+
+                        ++count;
+                    } while (result.NextRow());
+
+                    DB.Characters.CommitTransaction(trans);
+                }
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auctions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            }
         }
 
         public void AddAItem(Item item)

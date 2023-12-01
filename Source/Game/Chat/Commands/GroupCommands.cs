@@ -167,7 +167,7 @@ namespace Game.Chat
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
                 stmt.AddValue(0, guidTarget.GetCounter());
-                SQLResult resultGroup = DB.Characters.Query(stmt);
+                using var resultGroup = DB.Characters.Query(stmt);
                 if (!resultGroup.IsEmpty())
                     groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
             }

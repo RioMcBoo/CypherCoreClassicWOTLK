@@ -27,6 +27,7 @@ namespace Game.Chat
                 return;
             }
 
+            uint count = 0;
             uint oldMSTime = Time.GetMSTime();
             uint days = WorldConfig.GetUIntValue(WorldCfg.PreserveCustomChannelDuration);
             if (days != 0)
@@ -36,47 +37,49 @@ namespace Game.Chat
                 DB.Characters.Execute(stmt);
             }
 
-            SQLResult result = DB.Characters.Query("SELECT name, team, announce, ownership, password, bannedList FROM channels");
-            if (result.IsEmpty())
+            using (var result = DB.Characters.Query("SELECT name, team, announce, ownership, password, bannedList FROM channels"))
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 custom chat channels. DB table `channels` is empty.");
-                return;
-            }
-
-            List<(string name, Team team)> toDelete = new();
-            uint count = 0;
-            do
-            {
-                string dbName = result.Read<string>(0); // may be different - channel names are case insensitive
-                Team team = (Team)result.Read<int>(1);
-                bool dbAnnounce = result.Read<bool>(2);
-                bool dbOwnership = result.Read<bool>(3);
-                string dbPass = result.Read<string>(4);
-                string dbBanned = result.Read<string>(5);
-
-                ChannelManager mgr = ForTeam(team);
-                if (mgr == null)
+                if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.ServerLoading, $"Failed to load custom chat channel '{dbName}' from database - invalid team {team}. Deleted.");
-                    toDelete.Add((dbName, team));
-                    continue;
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 custom chat channels. DB table `channels` is empty.");
+                    return;
                 }
 
-                Channel channel = new Channel(mgr.CreateCustomChannelGuid(), dbName, team, dbBanned);
-                channel.SetAnnounce(dbAnnounce);
-                channel.SetOwnership(dbOwnership);
-                channel.SetPassword(dbPass);
-                mgr._customChannels.Add(dbName, channel);
+                List<(string name, Team team)> toDelete = new();
+                do
+                {
+                    string dbName = result.Read<string>(0); // may be different - channel names are case insensitive
+                    Team team = (Team)result.Read<int>(1);
+                    bool dbAnnounce = result.Read<bool>(2);
+                    bool dbOwnership = result.Read<bool>(3);
+                    string dbPass = result.Read<string>(4);
+                    string dbBanned = result.Read<string>(5);
 
-                ++count;
-            } while (result.NextRow());
+                    ChannelManager mgr = ForTeam(team);
+                    if (mgr == null)
+                    {
+                        Log.outError(LogFilter.ServerLoading, $"Failed to load custom chat channel '{dbName}' from database - invalid team {team}. Deleted.");
+                        toDelete.Add((dbName, team));
+                        continue;
+                    }
 
-            foreach (var (name, team) in toDelete)
-            {
-                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHANNEL);
-                stmt.AddValue(0, name);
-                stmt.AddValue(1, (uint)team);
-                DB.Characters.Execute(stmt);
+                    Channel channel = new Channel(mgr.CreateCustomChannelGuid(), dbName, team, dbBanned);
+                    channel.SetAnnounce(dbAnnounce);
+                    channel.SetOwnership(dbOwnership);
+                    channel.SetPassword(dbPass);
+                    mgr._customChannels.Add(dbName, channel);
+
+                    ++count;
+                } while (result.NextRow());
+
+
+                foreach (var (name, team) in toDelete)
+                {
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHANNEL);
+                    stmt.AddValue(0, name);
+                    stmt.AddValue(1, (uint)team);
+                    DB.Characters.Execute(stmt);
+                }
             }
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} custom chat channels in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");

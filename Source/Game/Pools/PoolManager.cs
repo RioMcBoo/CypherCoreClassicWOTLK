@@ -27,7 +27,7 @@ namespace Game
             {
                 uint oldMSTime = Time.GetMSTime();
 
-                SQLResult result = DB.World.Query("SELECT entry, max_limit FROM pool_template");
+                using var result = DB.World.Query("SELECT entry, max_limit FROM pool_template");
                 if (result.IsEmpty())
                 {
                     mPoolTemplate.Clear();
@@ -58,7 +58,7 @@ namespace Game
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                         1        2            3
-                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 0");
+                using var result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 0");
 
                 if (result.IsEmpty())
                 {
@@ -125,7 +125,7 @@ namespace Game
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                         1        2            3
-                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 1");
+                using var result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 1");
 
                 if (result.IsEmpty())
                 {
@@ -194,7 +194,7 @@ namespace Game
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                         1        2            3
-                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 2");
+                using var result = DB.World.Query("SELECT spawnId, poolSpawnId, Chance FROM pool_members WHERE Type = 2");
 
                 if (result.IsEmpty())
                 {
@@ -304,7 +304,7 @@ namespace Game
             {
                 uint oldMSTime = Time.GetMSTime();
 
-                SQLResult result = DB.World.Query("SELECT DISTINCT pool_template.entry, pool_members.spawnId, pool_members.poolSpawnId FROM pool_template" +
+                using var result = DB.World.Query("SELECT DISTINCT pool_template.entry, pool_members.spawnId, pool_members.poolSpawnId FROM pool_template" +
                     " LEFT JOIN game_event_pool ON pool_template.entry=game_event_pool.pool_entry" +
                     " LEFT JOIN pool_members ON pool_members.Type = 2 AND pool_template.entry = pool_members.spawnId WHERE game_event_pool.pool_entry IS NULL");
 

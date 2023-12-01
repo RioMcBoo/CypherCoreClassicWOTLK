@@ -19,7 +19,7 @@ namespace Game.Entities
             RandomItemEnch[ItemRandomEnchantmentType.Suffix]?.Clear();
 
             //                                          0      1    2      3
-            SQLResult result = DB.World.Query("SELECT entry, Type, Id, Chance FROM item_enchantment_template");
+            using var result = DB.World.Query("SELECT entry, Type, Id, Chance FROM item_enchantment_template");
 
             if (result.IsEmpty())
             {

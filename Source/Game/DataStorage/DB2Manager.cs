@@ -664,7 +664,7 @@ namespace Game.DataStorage
         {
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.Hotfix.Query("SELECT Id, UniqueId, TableHash, RecordId, Status FROM hotfix_data ORDER BY Id");
+            using var result = DB.Hotfix.Query("SELECT Id, UniqueId, TableHash, RecordId, Status FROM hotfix_data ORDER BY Id");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 hotfix info entries.");
@@ -719,7 +719,7 @@ namespace Game.DataStorage
         {
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.Hotfix.Query("SELECT TableHash, RecordId, locale, `Blob` FROM hotfix_blob ORDER BY TableHash");
+            using var result = DB.Hotfix.Query("SELECT TableHash, RecordId, locale, `Blob` FROM hotfix_blob ORDER BY TableHash");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 hotfix blob entries.");
@@ -764,7 +764,7 @@ namespace Game.DataStorage
 
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.Hotfix.Query("SELECT TableHash, RecordId, locale, `Key`, `Data` FROM hotfix_optional_data ORDER BY TableHash");
+            using var result = DB.Hotfix.Query("SELECT TableHash, RecordId, locale, `Key`, `Data` FROM hotfix_optional_data ORDER BY TableHash");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 hotfix optional data records.");

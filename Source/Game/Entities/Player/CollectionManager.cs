@@ -28,7 +28,7 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT spellId, otherFactionSpellId FROM mount_definitions");
+            using var result = DB.World.Query("SELECT spellId, otherFactionSpellId FROM mount_definitions");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 mount definitions. DB table `mount_definitions` is empty.");

@@ -15,6 +15,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Chat
 {
@@ -845,7 +846,7 @@ namespace Game.Chat
         {
             // Get names from DB
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_FROZEN);
-            SQLResult result = DB.Characters.Query(stmt);
+            using var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.CommandNoFrozenPlayers);
@@ -1064,7 +1065,7 @@ namespace Game.Chat
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_MUTE_INFO);
             stmt.AddValue(0, accountId);
 
-            SQLResult result = DB.Login.Query(stmt);
+            using var result = DB.Login.Query(stmt);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.CommandMutehistoryEmpty, accountName);
@@ -1281,62 +1282,66 @@ namespace Game.Chat
                 // Query informations from the DB
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_PINFO);
                 stmt.AddValue(0, lowguid);
-                SQLResult result = DB.Characters.Query(stmt);
+                using (var result = DB.Characters.Query(stmt))
+                {
 
-                if (result.IsEmpty())
-                    return false;
+                    if (result.IsEmpty())
+                        return false;
 
-                totalPlayerTime = result.Read<uint>(0);
-                level = result.Read<byte>(1);
-                money = result.Read<ulong>(2);
-                accId = result.Read<uint>(3);
-                raceid = (Race)result.Read<byte>(4);
-                classid = (Class)result.Read<byte>(5);
-                mapId = result.Read<ushort>(6);
-                areaId = result.Read<ushort>(7);
-                gender = (Gender)result.Read<byte>(8);
-                uint health = result.Read<uint>(9);
-                PlayerFlags playerFlags = (PlayerFlags)result.Read<uint>(10);
+                    totalPlayerTime = result.Read<uint>(0);
+                    level = result.Read<byte>(1);
+                    money = result.Read<ulong>(2);
+                    accId = result.Read<uint>(3);
+                    raceid = (Race)result.Read<byte>(4);
+                    classid = (Class)result.Read<byte>(5);
+                    mapId = result.Read<ushort>(6);
+                    areaId = result.Read<ushort>(7);
+                    gender = (Gender)result.Read<byte>(8);
+                    uint health = result.Read<uint>(9);
+                    PlayerFlags playerFlags = (PlayerFlags)result.Read<uint>(10);
 
-                if (health == 0 || playerFlags.HasAnyFlag(PlayerFlags.Ghost))
-                    alive = handler.GetCypherString(CypherStrings.No);
-                else
-                    alive = handler.GetCypherString(CypherStrings.Yes);
+                    if (health == 0 || playerFlags.HasAnyFlag(PlayerFlags.Ghost))
+                        alive = handler.GetCypherString(CypherStrings.No);
+                    else
+                        alive = handler.GetCypherString(CypherStrings.Yes);
+                }
             }
 
             // Query the prepared statement for login data
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_PINFO);
             stmt.AddValue(0, Global.WorldMgr.GetRealm().Id.Index);
             stmt.AddValue(1, accId);
-            SQLResult result0 = DB.Login.Query(stmt);
-
-            if (!result0.IsEmpty())
+            using (var result0 = DB.Login.Query(stmt))
             {
-                userName = result0.Read<string>(0);
-                security = result0.Read<byte>(1);
 
-                // Only fetch these fields if commander has sufficient rights)
-                if (handler.HasPermission(RBACPermissions.CommandsPinfoCheckPersonalData) && // RBAC Perm. 48, Role 39
-                    (!handler.GetSession() || handler.GetSession().GetSecurity() >= (AccountTypes)security))
+                if (!result0.IsEmpty())
                 {
-                    eMail = result0.Read<string>(2);
-                    regMail = result0.Read<string>(3);
-                    lastIp = result0.Read<string>(4);
-                    lastLogin = result0.Read<string>(5);
+                    userName = result0.Read<string>(0);
+                    security = result0.Read<byte>(1);
+
+                    // Only fetch these fields if commander has sufficient rights)
+                    if (handler.HasPermission(RBACPermissions.CommandsPinfoCheckPersonalData) && // RBAC Perm. 48, Role 39
+                        (!handler.GetSession() || handler.GetSession().GetSecurity() >= (AccountTypes)security))
+                    {
+                        eMail = result0.Read<string>(2);
+                        regMail = result0.Read<string>(3);
+                        lastIp = result0.Read<string>(4);
+                        lastLogin = result0.Read<string>(5);
+                    }
+                    else
+                    {
+                        eMail = handler.GetCypherString(CypherStrings.Unauthorized);
+                        regMail = handler.GetCypherString(CypherStrings.Unauthorized);
+                        lastIp = handler.GetCypherString(CypherStrings.Unauthorized);
+                        lastLogin = handler.GetCypherString(CypherStrings.Unauthorized);
+                    }
+                    muteTime = (long)result0.Read<ulong>(6);
+                    muteReason = result0.Read<string>(7);
+                    muteBy = result0.Read<string>(8);
+                    failedLogins = result0.Read<uint>(9);
+                    locked = result0.Read<byte>(10);
+                    OS = result0.Read<string>(11);
                 }
-                else
-                {
-                    eMail = handler.GetCypherString(CypherStrings.Unauthorized);
-                    regMail = handler.GetCypherString(CypherStrings.Unauthorized);
-                    lastIp = handler.GetCypherString(CypherStrings.Unauthorized);
-                    lastLogin = handler.GetCypherString(CypherStrings.Unauthorized);
-                }
-                muteTime = (long)result0.Read<ulong>(6);
-                muteReason = result0.Read<string>(7);
-                muteBy = result0.Read<string>(8);
-                failedLogins = result0.Read<uint>(9);
-                locked = result0.Read<byte>(10);
-                OS = result0.Read<string>(11);
             }
 
             // Creates a chat link to the character. Returns nameLink
@@ -1345,50 +1350,65 @@ namespace Game.Chat
             // Returns banType, banTime, bannedBy, banreason
             PreparedStatement stmt2 = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_PINFO_BANS);
             stmt2.AddValue(0, accId);
-            SQLResult result2 = DB.Login.Query(stmt2);
-            if (result2.IsEmpty())
+            using (var result2 = DB.Login.Query(stmt2))
             {
-                banType = handler.GetCypherString(CypherStrings.Character);
+                var finalResult = result2;
+
+                if (!result2.IsEmpty())
+                {
+                    banType = handler.GetCypherString(CypherStrings.Account);
+                    bool permanent = result2.Read<ulong>(1) != 0;
+                    banTime = !permanent ? result2.Read<uint>(0) : 0;
+                    bannedBy = result2.Read<string>(2);
+                    banReason = result2.Read<string>(3);
+                }
+            }
+
+            if (banType == handler.GetCypherString(CypherStrings.Unknown))
+            {                
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PINFO_BANS);
                 stmt.AddValue(0, lowguid);
-                result2 = DB.Characters.Query(stmt);
-            }
-            else
-                banType = handler.GetCypherString(CypherStrings.Account);
-
-            if (!result2.IsEmpty())
-            {
-                bool permanent = result2.Read<ulong>(1) != 0;
-                banTime = !permanent ? result2.Read<uint>(0) : 0;
-                bannedBy = result2.Read<string>(2);
-                banReason = result2.Read<string>(3);
-            }
+                using (var result3 = DB.Characters.Query(stmt))
+                {
+                    if (!result3.IsEmpty())
+                    {
+                        banType = handler.GetCypherString(CypherStrings.Character);
+                        bool permanent = result3.Read<ulong>(1) != 0;
+                        banTime = !permanent ? result3.Read<uint>(0) : 0;
+                        bannedBy = result3.Read<string>(2);
+                        banReason = result3.Read<string>(3);
+                    }
+                }
+            }   
 
             // Can be used to query data from Characters database
             stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PINFO_XP);
             stmt2.AddValue(0, lowguid);
-            SQLResult result4 = DB.Characters.Query(stmt2);
-
-            if (!result4.IsEmpty())
+            using (var result4 = DB.Characters.Query(stmt2))
             {
-                xp = result4.Read<uint>(0); // Used for "current xp" output and "%u XP Left" calculation
-                ulong gguid = result4.Read<ulong>(1); // We check if have a guild for the person, so we might not require to query it at all
-                xptotal = Global.ObjectMgr.GetXPForLevel(level);
-
-                if (gguid != 0)
+                if (!result4.IsEmpty())
                 {
-                    // Guild Data - an own query, because it may not happen.
-                    PreparedStatement stmt3 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER_EXTENDED);
-                    stmt3.AddValue(0, lowguid);
-                    SQLResult result5 = DB.Characters.Query(stmt3);
-                    if (!result5.IsEmpty())
+                    xp = result4.Read<uint>(0); // Used for "current xp" output and "%u XP Left" calculation
+                    ulong gguid = result4.Read<ulong>(1); // We check if have a guild for the person, so we might not require to query it at all
+                    xptotal = Global.ObjectMgr.GetXPForLevel(level);
+
+                    if (gguid != 0)
                     {
-                        guildId = result5.Read<ulong>(0);
-                        guildName = result5.Read<string>(1);
-                        guildRank = result5.Read<string>(2);
-                        guildRankId = result5.Read<byte>(3);
-                        note = result5.Read<string>(4);
-                        officeNote = result5.Read<string>(5);
+                        // Guild Data - an own query, because it may not happen.
+                        PreparedStatement stmt3 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER_EXTENDED);
+                        stmt3.AddValue(0, lowguid);
+                        using (var result5 = DB.Characters.Query(stmt3))
+                        {
+                            if (!result5.IsEmpty())
+                            {
+                                guildId = result5.Read<ulong>(0);
+                                guildName = result5.Read<string>(1);
+                                guildRank = result5.Read<string>(2);
+                                guildRankId = result5.Read<byte>(3);
+                                note = result5.Read<string>(4);
+                                officeNote = result5.Read<string>(5);
+                            }
+                        }
                     }
                 }
             }
@@ -1488,15 +1508,17 @@ namespace Game.Chat
             // SQL: "SELECT SUM(CASE WHEN (checked & 1) THEN 1 ELSE 0 END) AS 'readmail', COUNT(*) AS 'totalmail' FROM mail WHERE `receiver` = ?"
             PreparedStatement stmt4 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PINFO_MAILS);
             stmt4.AddValue(0, lowguid);
-            SQLResult result6 = DB.Characters.Query(stmt4);
-            if (!result6.IsEmpty())
+            using (var result6 = DB.Characters.Query(stmt4))
             {
-                uint readmail = (uint)result6.Read<double>(0);
-                uint totalmail = (uint)result6.Read<ulong>(1);
+                if (!result6.IsEmpty())
+                {
+                    uint readmail = (uint)result6.Read<double>(0);
+                    uint totalmail = (uint)result6.Read<ulong>(1);
 
-                // Output XXI. LANG_INFO_CHR_MAILS if at least one mail is given
-                if (totalmail >= 1)
-                    handler.SendSysMessage(CypherStrings.PinfoChrMails, readmail, totalmail);
+                    // Output XXI. LANG_INFO_CHR_MAILS if at least one mail is given
+                    if (totalmail >= 1)
+                        handler.SendSysMessage(CypherStrings.PinfoChrMails, readmail, totalmail);
+                }
             }
 
             return true;
@@ -1534,7 +1556,7 @@ namespace Game.Chat
             if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PVPSTATS_FACTIONS_OVERALL);
-                SQLResult result = DB.Characters.Query(stmt);
+                using var result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                 {
@@ -2012,7 +2034,7 @@ namespace Game.Chat
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
                 stmt.AddValue(0, targetGUID.GetCounter());
-                SQLResult result = DB.Characters.Query(stmt);
+                using var result = DB.Characters.Query(stmt);
                 if (!result.IsEmpty())
                 {
                     Player.SavePositionInDB(new WorldLocation(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f), result.Read<ushort>(1), targetGUID);

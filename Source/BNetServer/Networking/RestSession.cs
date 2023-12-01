@@ -75,7 +75,7 @@ namespace BNetServer.Networking
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetAuthentication);
             stmt.AddValue(0, login);
 
-            SQLResult result = DB.Login.Query(stmt);
+            using var result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
             {
                 uint accountId = result.Read<uint>(0);
