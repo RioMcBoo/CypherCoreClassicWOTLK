@@ -11,7 +11,6 @@ namespace Framework.Database
     {
         public Dictionary<T, PreparedStatement> m_queries = new();
         Dictionary<T, SQLResult> _results = new();
-        private bool disposedValue;
 
         public void SetQuery(T index, string sql, params object[] args)
         {
@@ -36,28 +35,12 @@ namespace Framework.Database
             return _results[index];
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                foreach (var res in _results.Values)
-                {
-                    res.Dispose();
-                }
-
-                disposedValue = true;
-            }
-        }
-
-        ~SQLQueryHolder()
-        {
-            Dispose(disposing: false);
-        }
-
         public void Dispose()
         {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            foreach (var res in _results.Values)
+            {
+                res.Dispose();
+            }
         }
     }
 

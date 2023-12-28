@@ -10,14 +10,16 @@ namespace Framework.Database
     public class SQLResult : IDisposable
     {
         MySqlDataReader _reader;
-        private bool disposedValue;
 
         public SQLResult() { }
 
         public SQLResult(MySqlDataReader reader)
         {
             _reader = reader;
-            NextRow();
+            if (!NextRow())
+            {
+                Dispose();
+            }
         }
 
         public T Read<T>(int column)
@@ -126,25 +128,13 @@ namespace Framework.Database
             return false;
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (_reader is not null)
-                    _reader.Close();
-                disposedValue = true;
-            }
-        }
-
-        ~SQLResult()
-        {            
-            Dispose(false);
-        }
-
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            if (_reader != null)
+            {
+                _reader.Close();
+                _reader = null;
+            }
         }
     }
 
