@@ -121,11 +121,7 @@ namespace Framework.Database
 
         public bool NextRow()
         {
-            if (_reader.Read())
-                return true;
-
-            _reader.Close();
-            return false;
+            return _reader.Read();
         }
 
         public void Dispose()
