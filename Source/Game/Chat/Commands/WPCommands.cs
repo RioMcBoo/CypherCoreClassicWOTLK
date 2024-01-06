@@ -25,7 +25,7 @@ namespace Game.Chat.Commands
 
             if (!optionalPathId.HasValue)
             {
-                if (target)
+                if (target != null)
                     pathId = target.GetWaypointPath();
                 else
                 {
@@ -321,7 +321,7 @@ namespace Game.Chat.Commands
 
             uint pathId = optionalPathId.Value;
 
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
@@ -397,7 +397,7 @@ namespace Game.Chat.Commands
             Creature target = handler.GetSelectedCreature();
 
             // User did select a visual waypoint?
-            if (!target || target.GetEntry() != 1)
+            if (target == null || target.GetEntry() != 1)
             {
                 handler.SendSysMessage("|cffff33ffERROR: You must select a waypoint.|r");
                 return false;
@@ -500,7 +500,7 @@ namespace Game.Chat.Commands
                 // What to do:
                 // Move the visual spawnpoint
                 // Respawn the owner of the waypoints
-                if (!Creature.DeleteFromDB(target.GetSpawnId()))
+                if (Creature.DeleteFromDB(target.GetSpawnId()))
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
                     return false;
@@ -508,7 +508,7 @@ namespace Game.Chat.Commands
 
                 // re-create
                 Creature creature = Creature.CreateCreature(1, map, chr.GetPosition());
-                if (!creature)
+                if (creature == null)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
                     return false;
@@ -525,7 +525,7 @@ namespace Game.Chat.Commands
 
                 // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
                 creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
-                if (!creature)
+                if (creature == null)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
                     return false;
@@ -588,7 +588,7 @@ namespace Game.Chat.Commands
                 // No PathID provided
                 // . Player must have selected a creature
 
-                if (!target)
+                if (target == null)
                 {
                     handler.SendSysMessage(CypherStrings.SelectCreature);    
                     return false;
@@ -601,7 +601,7 @@ namespace Game.Chat.Commands
                 // PathID provided
                 // Warn if player also selected a creature
                 // . Creature selection is ignored <-
-                if (target)
+                if (target != null)
                     handler.SendSysMessage(CypherStrings.WaypointCreatselected);
 
                 pathId = optionalPathId.Value;
@@ -611,7 +611,7 @@ namespace Game.Chat.Commands
             if (subCommand == "info")
             {
                 // Check if the user did specify a visual waypoint
-                if (!target || target.GetEntry() != 1)
+                if (target == null || target.GetEntry() != 1)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpSelect);    
                     return false;
@@ -707,7 +707,7 @@ namespace Game.Chat.Commands
                     Map map = chr.GetMap();
 
                     Creature creature = Creature.CreateCreature(id, map, new Position(x, y, z, o));
-                    if (!creature)
+                    if (creature == null)
                     {
                         handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
                         return false;
@@ -724,13 +724,13 @@ namespace Game.Chat.Commands
 
                     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
                     creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
-                    if (!creature)
+                    if (creature == null)
                     {
                         handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
                         return false;
                     }
 
-                    if (target)
+                    if (target != null)
                     {
                         creature.SetDisplayId(target.GetDisplayId());
                         creature.SetObjectScale(0.5f);
@@ -773,12 +773,12 @@ namespace Game.Chat.Commands
                     Player chr = handler.GetSession().GetPlayer();
                     Map map = chr.GetMap();
 
-                    Creature creature = Creature.CreateCreature(1, map, new Position(x, y, z, 0));
-                    if (!creature)
-                    {
-                        handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
-                        return false;
-                    }
+                Creature creature = Creature.CreateCreature(1, map, new Position(x, y, z, 0));
+                if (creature == null)
+                {
+                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
+                    return false;
+                }
 
 
                     PhasingHandler.InheritPhaseShift(creature, chr);
@@ -790,14 +790,14 @@ namespace Game.Chat.Commands
                     creature.CleanupsBeforeDelete();
                     creature.Dispose();
 
-                    creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
-                    if (!creature)
-                    {
-                        handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
-                        return false;
-                    }
+                creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
+                if (creature == null)
+                {
+                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
+                    return false;
+                }
 
-                    if (target)
+                    if (target != null)
                     {
                         creature.SetDisplayId(target.GetDisplayId());
                         creature.SetObjectScale(0.5f);
@@ -830,7 +830,7 @@ namespace Game.Chat.Commands
                 Position pos = new(x, y, z, o);
 
                 Creature creature = Creature.CreateCreature(1, map, pos);
-                if (!creature)
+                if (creature == null)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointNotcreated, 1);
                     return false;
@@ -846,13 +846,13 @@ namespace Game.Chat.Commands
                 creature.Dispose();
 
                 creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
-                if (!creature)
+                if (creature == null)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointNotcreated, 1);
                     return false;
                 }
 
-                if (target)
+                if (target != null)
                 {
                     creature.SetDisplayId(target.GetDisplayId());
                     creature.SetObjectScale(0.5f);
@@ -877,7 +877,7 @@ namespace Game.Chat.Commands
                 {
                     ulong lowguid = result.Read<ulong>(0);
 
-                    if (!Creature.DeleteFromDB(lowguid))
+                    if (Creature.DeleteFromDB(lowguid))
                     {
                         handler.SendSysMessage(CypherStrings.WaypointNotremoved, lowguid);
                         hasError = true;
@@ -909,7 +909,7 @@ namespace Game.Chat.Commands
         static bool HandleWpUnLoadCommand(CommandHandler handler)
         {
             Creature target = handler.GetSelectedCreature();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage("|cff33ffffYou must select a target.|r");
                 return true;

@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
+using Game.Miscellaneous;
 using Game.Networking;
 using System;
 using System.Collections;
@@ -102,11 +103,9 @@ namespace Game.DataStorage
                 if (battlemaster.MaxPlayers < battlemaster.MinPlayers)
                 {
                     Log.outError(LogFilter.ServerLoading, $"Battlemaster ({battlemaster.Id}) contains bad values for MinPlayers ({battlemaster.MinPlayers}) and MaxPlayers ({battlemaster.MaxPlayers}). Swapping values.");
-                    int oldMaxPlayers = battlemaster.MaxPlayers;
-                    int oldMinPlayers = battlemaster.MinPlayers;
-
-                    battlemaster.MaxPlayers = oldMinPlayers;
-                    battlemaster.MinPlayers = (byte)oldMaxPlayers;
+                    sbyte minPlayers = battlemaster.MinPlayers;
+                    battlemaster.MinPlayers = (sbyte)battlemaster.MaxPlayers;
+                    battlemaster.MaxPlayers = minPlayers;
                 }
             }
 
@@ -180,16 +179,16 @@ namespace Game.DataStorage
                 ChrModelRecord model = ChrModelStorage.LookupByKey(raceModel.ChrModelID);
                 if (model != null)
                 {
-                    _chrModelsByRaceAndGender[Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex)] = model;
+                    _chrModelsByRaceAndGender[Tuple.Create((byte)raceModel.ChrRacesID, (byte)raceModel.Sex)] = model;
 
                     var customizationOptionsForModel = customizationOptionsByModel.LookupByKey(model.Id);
                     if (customizationOptionsForModel != null)
                     {
-                        _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex), customizationOptionsForModel);
+                        _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)raceModel.ChrRacesID, (byte)raceModel.Sex), customizationOptionsForModel);
 
                         uint parentRace = parentRaces.LookupByKey(raceModel.ChrRacesID);
                         if (parentRace != 0)
-                            _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)parentRace, (byte)model.Sex), customizationOptionsForModel);
+                            _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)parentRace, (byte)raceModel.Sex), customizationOptionsForModel);
                     }
 
                     // link shapeshift displays to race/gender/form
@@ -204,7 +203,7 @@ namespace Game.DataStorage
                                 data.Displays.Add(displayInfoByCustomizationChoice.LookupByKey(data.Choices[i].Id));
                         }
 
-                        _chrCustomizationChoicesForShapeshifts[Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex, shapeshiftOptionsForModel.Item2)] = data;
+                        _chrCustomizationChoicesForShapeshifts[Tuple.Create((byte)raceModel.ChrRacesID, (byte)raceModel.Sex, shapeshiftOptionsForModel.Item2)] = data;
                     }
                 }
             }
@@ -215,7 +214,7 @@ namespace Game.DataStorage
                 //ASSERT(chrSpec.OrderIndex < MAX_SPECIALIZATIONS);
 
                 uint storageIndex = chrSpec.ClassID;
-                if (chrSpec.Flags.HasAnyFlag(ChrSpecializationFlag.PetOverrideSpec))
+                if (chrSpec.GetFlags().HasFlag(ChrSpecializationFlag.PetOverrideSpec))
                 {
                     //ASSERT(!chrSpec.ClassID);
                     storageIndex = (int)Class.Max;
@@ -226,17 +225,33 @@ namespace Game.DataStorage
                 _chrSpecializationsByIndex[storageIndex][chrSpec.OrderIndex] = chrSpec;
             }
 
+            foreach (ConditionalContentTuningRecord conditionalContentTuning in ConditionalContentTuningStorage.Values)
+                _conditionalContentTuning.Add(conditionalContentTuning.ParentContentTuningID, conditionalContentTuning);
+
+            foreach (ContentTuningXExpectedRecord contentTuningXExpectedStat in ContentTuningXExpectedStorage.Values)
+            {
+                if (ExpectedStatModStorage.ContainsKey(contentTuningXExpectedStat.ExpectedStatModID))
+                    _expectedStatModsByContentTuning.Add(contentTuningXExpectedStat.ContentTuningID, contentTuningXExpectedStat);
+            }
+
+            foreach (ContentTuningXLabelRecord contentTuningXLabel in ContentTuningXLabelStorage.Values)
+                _contentTuningLabels.Add((contentTuningXLabel.ContentTuningID, contentTuningXLabel.LabelID));
+
             foreach (CurrencyContainerRecord currencyContainer in CurrencyContainerStorage.Values)
                 _currencyContainers.Add(currencyContainer.CurrencyTypesID, currencyContainer);
 
-            foreach (CurvePointRecord curvePoint in CurvePointStorage.Values)
-            {
+            MultiMap<uint, CurvePointRecord> unsortedPoints = new();
+            foreach (var curvePoint in CurvePointStorage.Values)
                 if (CurveStorage.ContainsKey(curvePoint.CurveID))
-                    _curvePoints.Add(curvePoint.CurveID, curvePoint);
+                    unsortedPoints.Add(curvePoint.CurveID, curvePoint);
+
+            foreach (var curveId in unsortedPoints.Keys)
+            {
+                var curvePoints = unsortedPoints[curveId];
+                curvePoints.Sort((point1, point2) => point1.OrderIndex.CompareTo(point2.OrderIndex));
+                _curvePoints.AddRange(curveId, curvePoints.Select(p => p.Pos));
             }
 
-            foreach (var key in _curvePoints.Keys.ToList())
-                _curvePoints[key] = _curvePoints[key].OrderBy(point => point.OrderIndex).ToList();
 
             foreach (EmotesTextSoundRecord emoteTextSound in EmotesTextSoundStorage.Values)
                 _emoteTextSounds[Tuple.Create(emoteTextSound.EmotesTextId, emoteTextSound.RaceId, emoteTextSound.SexId, emoteTextSound.ClassId)] = emoteTextSound;
@@ -271,16 +286,7 @@ namespace Game.DataStorage
                 _glyphBindableSpells.Add(glyphBindableSpell.GlyphPropertiesID, (uint)glyphBindableSpell.SpellID);
 
             foreach (GlyphRequiredSpecRecord glyphRequiredSpec in GlyphRequiredSpecStorage.Values)
-                _glyphRequiredSpecs.Add(glyphRequiredSpec.GlyphPropertiesID, glyphRequiredSpec.ChrSpecializationID);
-
-            foreach (var bonus in ItemBonusStorage.Values)
-                _itemBonusLists.Add(bonus.ParentItemBonusListID, bonus);
-
-            foreach (ItemBonusListLevelDeltaRecord itemBonusListLevelDelta in ItemBonusListLevelDeltaStorage.Values)
-                _itemLevelDeltaToBonusListContainer[itemBonusListLevelDelta.ItemLevelDelta] = itemBonusListLevelDelta.Id;
-
-            foreach (var bonusTreeNode in ItemBonusTreeNodeStorage.Values)
-                _itemBonusTrees.Add(bonusTreeNode.ParentItemBonusTreeID, bonusTreeNode);
+                _glyphRequiredSpecs.Add(glyphRequiredSpec.GlyphPropertiesID, (ChrSpecialization)glyphRequiredSpec.ChrSpecializationID);
 
             foreach (ItemChildEquipmentRecord itemChildEquipment in ItemChildEquipmentStorage.Values)
             {
@@ -301,9 +307,6 @@ namespace Game.DataStorage
             foreach (ItemLimitCategoryConditionRecord condition in ItemLimitCategoryConditionStorage.Values)
                 _itemCategoryConditions.Add(condition.ParentItemLimitCategoryID, condition);
 
-            foreach (ItemLevelSelectorQualityRecord itemLevelSelectorQuality in ItemLevelSelectorQualityStorage.Values)
-                _itemLevelQualitySelectorQualities.Add(itemLevelSelectorQuality.ParentILSQualitySetID, itemLevelSelectorQuality);
-
             foreach (var appearanceMod in ItemModifiedAppearanceStorage.Values)
             {
                 //ASSERT(appearanceMod.ItemID <= 0xFFFFFF);
@@ -318,6 +321,12 @@ namespace Game.DataStorage
 
             foreach (var itemBonusTreeAssignment in ItemXBonusTreeStorage.Values)
                 _itemToBonusTree.Add(itemBonusTreeAssignment.ItemID, itemBonusTreeAssignment.ItemBonusTreeID);
+
+            foreach (var pair in _azeriteEmpoweredItems)
+                LoadAzeriteEmpoweredItemUnlockMappings(azeriteUnlockMappings, pair.Key);
+
+            foreach (var pair in _azeriteEmpoweredItems)
+                LoadAzeriteEmpoweredItemUnlockMappings(azeriteUnlockMappings, pair.Key);
 
             foreach (JournalTierRecord journalTier in JournalTierStorage.Values)
                 _journalTiersByIndex.Add(journalTier);
@@ -878,6 +887,24 @@ namespace Game.DataStorage
             return false;
         }
 
+        public ContentTuningRecord GetContentTuningForArea(AreaTableRecord areaEntry)
+        {
+            if (areaEntry == null)
+                return null;
+
+            // Get ContentTuning for the area
+            var contentTuning = ContentTuningStorage.LookupByKey(areaEntry.ContentTuningID);
+            if (contentTuning != null)
+                return contentTuning;
+
+            // If there is no data for the current area and it has a parent area, get data from the last (recursive)
+            var parentAreaEntry = AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
+            if (parentAreaEntry != null)
+                return GetContentTuningForArea(parentAreaEntry);
+
+            return null;
+        }
+
         public List<ArtifactPowerRecord> GetArtifactPowers(byte artifactId)
         {
             return _artifactPowers.LookupByKey(artifactId);
@@ -1040,9 +1067,18 @@ namespace Game.DataStorage
             return GetChrSpecializationByIndex(class_, PlayerConst.InitialSpecializationIndex);
         }
 
-        public ContentTuningLevels? GetContentTuningData(uint contentTuningId, uint replacementConditionMask, bool forItem = false)
+        public uint GetRedirectedContentTuningId(uint contentTuningId, uint redirectFlag)
         {
-            ContentTuningRecord contentTuning = ContentTuningStorage.LookupByKey(contentTuningId);
+            foreach (var conditionalContentTuning in _conditionalContentTuning.LookupByKey(contentTuningId))
+                if ((conditionalContentTuning.RedirectFlag & redirectFlag) != 0)
+                    return (uint)conditionalContentTuning.RedirectContentTuningID;
+
+            return contentTuningId;
+        }
+        
+        public ContentTuningLevels? GetContentTuningData(uint contentTuningId, uint redirectFlag, bool forItem = false)
+        {
+            ContentTuningRecord contentTuning = ContentTuningStorage.LookupByKey(GetRedirectedContentTuningId(contentTuningId, redirectFlag));
             if (contentTuning == null)
                 return null;
 
@@ -1069,6 +1105,11 @@ namespace Game.DataStorage
             return levels;
         }
 
+        public bool HasContentTuningLabel(uint contentTuningId, int label)
+        {
+            return _contentTuningLabels.Contains((contentTuningId, label));
+        }
+        
         public string GetCreatureFamilyPetName(CreatureFamily petfamily, Locale locale)
         {
             if (petfamily == CreatureFamily.None)
@@ -1094,12 +1135,12 @@ namespace Game.DataStorage
         {
             var points = _curvePoints.LookupByKey(curveId);
             if (!points.Empty())
-                return Tuple.Create(points.First().Pos.X, points.Last().Pos.X);
+                return Tuple.Create(points.First().X, points.Last().X);
 
             return Tuple.Create(0.0f, 0.0f);
         }
 
-        static CurveInterpolationMode DetermineCurveType(CurveRecord curve, List<CurvePointRecord> points)
+        static CurveInterpolationMode DetermineCurveType(CurveRecord curve, List<Vector2> points)
         {
             switch (curve.Type)
             {
@@ -1133,92 +1174,97 @@ namespace Game.DataStorage
 
         public float GetCurveValueAt(uint curveId, float x)
         {
+            var curve = CurveStorage.LookupByKey(curveId);
             var points = _curvePoints.LookupByKey(curveId);
             if (points.Empty())
                 return 0.0f;
 
-            CurveRecord curve = CurveStorage.LookupByKey(curveId);
-            switch (DetermineCurveType(curve, points))
+            return GetCurveValueAt(DetermineCurveType(curve, points), points, x);
+        }
+
+        public float GetCurveValueAt(CurveInterpolationMode mode, IList<Vector2> points, float x)
+        {
+            switch (mode)
             {
                 case CurveInterpolationMode.Linear:
                 {
                     int pointIndex = 0;
-                    while (pointIndex < points.Count && points[pointIndex].Pos.X <= x)
+                    while (pointIndex < points.Count && points[pointIndex].X <= x)
                         ++pointIndex;
                     if (pointIndex == 0)
-                        return points[0].Pos.Y;
+                        return points[0].Y;
                     if (pointIndex >= points.Count)
-                        return points.Last().Pos.Y;
-                    float xDiff = points[pointIndex].Pos.X - points[pointIndex - 1].Pos.X;
+                        return points[points.Count - 1].Y;
+                    float xDiff = points[pointIndex].X - points[pointIndex - 1].X;
                     if (xDiff == 0.0)
-                        return points[pointIndex].Pos.Y;
-                    return (((x - points[pointIndex - 1].Pos.X) / xDiff) * (points[pointIndex].Pos.Y - points[pointIndex - 1].Pos.Y)) + points[pointIndex - 1].Pos.Y;
+                        return points[pointIndex].Y;
+                    return (((x - points[pointIndex - 1].X) / xDiff) * (points[pointIndex].Y - points[pointIndex - 1].Y)) + points[pointIndex - 1].Y;
                 }
                 case CurveInterpolationMode.Cosine:
                 {
                     int pointIndex = 0;
-                    while (pointIndex < points.Count && points[pointIndex].Pos.X <= x)
+                    while (pointIndex < points.Count && points[pointIndex].X <= x)
                         ++pointIndex;
                     if (pointIndex == 0)
-                        return points[0].Pos.Y;
+                        return points[0].Y;
                     if (pointIndex >= points.Count)
-                        return points.Last().Pos.Y;
-                    float xDiff = points[pointIndex].Pos.X - points[pointIndex - 1].Pos.X;
+                        return points[points.Count - 1].Y;
+                    float xDiff = points[pointIndex].X - points[pointIndex - 1].X;
                     if (xDiff == 0.0)
-                        return points[pointIndex].Pos.Y;
-                    return (float)((points[pointIndex].Pos.Y - points[pointIndex - 1].Pos.Y) * (1.0f - Math.Cos((x - points[pointIndex - 1].Pos.X) / xDiff * Math.PI)) * 0.5f) + points[pointIndex - 1].Pos.Y;
+                        return points[pointIndex].Y;
+                    return (float)((points[pointIndex].Y - points[pointIndex - 1].Y) * (1.0f - Math.Cos((x - points[pointIndex - 1].X) / xDiff * Math.PI)) * 0.5f) + points[pointIndex - 1].Y;
                 }
                 case CurveInterpolationMode.CatmullRom:
                 {
                     int pointIndex = 1;
-                    while (pointIndex < points.Count && points[pointIndex].Pos.X <= x)
+                    while (pointIndex < points.Count && points[pointIndex].X <= x)
                         ++pointIndex;
                     if (pointIndex == 1)
-                        return points[1].Pos.Y;
+                        return points[1].Y;
                     if (pointIndex >= points.Count - 1)
-                        return points[^2].Pos.Y;
-                    float xDiff = points[pointIndex].Pos.X - points[pointIndex - 1].Pos.X;
+                        return points[^2].Y;
+                    float xDiff = points[pointIndex].X - points[pointIndex - 1].X;
                     if (xDiff == 0.0)
-                        return points[pointIndex].Pos.Y;
+                        return points[pointIndex].Y;
 
-                    float mu = (x - points[pointIndex - 1].Pos.X) / xDiff;
-                    float a0 = -0.5f * points[pointIndex - 2].Pos.Y + 1.5f * points[pointIndex - 1].Pos.Y - 1.5f * points[pointIndex].Pos.Y + 0.5f * points[pointIndex + 1].Pos.Y;
-                    float a1 = points[pointIndex - 2].Pos.Y - 2.5f * points[pointIndex - 1].Pos.Y + 2.0f * points[pointIndex].Pos.Y - 0.5f * points[pointIndex + 1].Pos.Y;
-                    float a2 = -0.5f * points[pointIndex - 2].Pos.Y + 0.5f * points[pointIndex].Pos.Y;
-                    float a3 = points[pointIndex - 1].Pos.Y;
+                    float mu = (x - points[pointIndex - 1].X) / xDiff;
+                    float a0 = -0.5f * points[pointIndex - 2].Y + 1.5f * points[pointIndex - 1].Y - 1.5f * points[pointIndex].Y + 0.5f * points[pointIndex + 1].Y;
+                    float a1 = points[pointIndex - 2].Y - 2.5f * points[pointIndex - 1].Y + 2.0f * points[pointIndex].Y - 0.5f * points[pointIndex + 1].Y;
+                    float a2 = -0.5f * points[pointIndex - 2].Y + 0.5f * points[pointIndex].Y;
+                    float a3 = points[pointIndex - 1].Y;
 
                     return a0 * mu * mu * mu + a1 * mu * mu + a2 * mu + a3;
                 }
                 case CurveInterpolationMode.Bezier3:
                 {
-                    float xDiff = points[2].Pos.X - points[0].Pos.X;
+                    float xDiff = points[2].X - points[0].X;
                     if (xDiff == 0.0)
-                        return points[1].Pos.Y;
-                    float mu = (x - points[0].Pos.X) / xDiff;
-                    return ((1.0f - mu) * (1.0f - mu) * points[0].Pos.Y) + (1.0f - mu) * 2.0f * mu * points[1].Pos.Y + mu * mu * points[2].Pos.Y;
+                        return points[1].Y;
+                    float mu = (x - points[0].X) / xDiff;
+                    return ((1.0f - mu) * (1.0f - mu) * points[0].Y) + (1.0f - mu) * 2.0f * mu * points[1].Y + mu * mu * points[2].Y;
                 }
                 case CurveInterpolationMode.Bezier4:
                 {
-                    float xDiff = points[3].Pos.X - points[0].Pos.X;
+                    float xDiff = points[3].X - points[0].X;
                     if (xDiff == 0.0)
-                        return points[1].Pos.Y;
-                    float mu = (x - points[0].Pos.X) / xDiff;
-                    return (1.0f - mu) * (1.0f - mu) * (1.0f - mu) * points[0].Pos.Y
-                        + 3.0f * mu * (1.0f - mu) * (1.0f - mu) * points[1].Pos.Y
-                        + 3.0f * mu * mu * (1.0f - mu) * points[2].Pos.Y
-                        + mu * mu * mu * points[3].Pos.Y;
+                        return points[1].Y;
+                    float mu = (x - points[0].X) / xDiff;
+                    return (1.0f - mu) * (1.0f - mu) * (1.0f - mu) * points[0].Y
+                        + 3.0f * mu * (1.0f - mu) * (1.0f - mu) * points[1].Y
+                        + 3.0f * mu * mu * (1.0f - mu) * points[2].Y
+                        + mu * mu * mu * points[3].Y;
                 }
                 case CurveInterpolationMode.Bezier:
                 {
-                    float xDiff = points.Last().Pos.X - points[0].Pos.X;
+                    float xDiff = points[points.Count - 1].X - points[0].X;
                     if (xDiff == 0.0f)
-                        return points.Last().Pos.Y;
+                        return points[points.Count - 1].Y;
 
                     float[] tmp = new float[points.Count];
                     for (int c = 0; c < points.Count; ++c)
-                        tmp[c] = points[c].Pos.Y;
+                        tmp[c] = points[c].Y;
 
-                    float mu = (x - points[0].Pos.X) / xDiff;
+                    float mu = (x - points[0].X) / xDiff;
                     int i = points.Count - 1;
                     while (i > 0)
                     {
@@ -1232,7 +1278,7 @@ namespace Game.DataStorage
                     return tmp[0];
                 }
                 case CurveInterpolationMode.Constant:
-                    return points[0].Pos.Y;
+                    return points[0].Y;
                 default:
                     break;
             }
@@ -1247,10 +1293,57 @@ namespace Game.DataStorage
                 return emoteTextSound;
 
             emoteTextSound = _emoteTextSounds.LookupByKey(Tuple.Create(emote, (byte)race, (byte)gender, 0));
-            if (emoteTextSound != null)
-                return emoteTextSound;
+        float ExpectedStatModReducer(float mod, ContentTuningXExpectedRecord contentTuningXExpected, ExpectedStatType stat, int ActiveMilestoneSeason)
+        {
+            if (contentTuningXExpected == null)
+                return mod;
 
-            return null;
+            if (contentTuningXExpected.MinMythicPlusSeasonID != 0)
+            {
+                var mythicPlusSeason = MythicPlusSeasonStorage.LookupByKey(contentTuningXExpected.MinMythicPlusSeasonID);
+                if (mythicPlusSeason != null)
+                if (ActiveMilestoneSeason < mythicPlusSeason.MilestoneSeason)
+                    return mod;
+            }
+
+            if (contentTuningXExpected.MaxMythicPlusSeasonID != 0)
+            {
+                var mythicPlusSeason = MythicPlusSeasonStorage.LookupByKey(contentTuningXExpected.MaxMythicPlusSeasonID);
+                if (mythicPlusSeason != null)
+                if (ActiveMilestoneSeason >= mythicPlusSeason.MilestoneSeason)
+                    return mod;
+            }
+
+            var expectedStatMod = ExpectedStatModStorage.LookupByKey(contentTuningXExpected.ExpectedStatModID);
+            switch (stat)
+            {
+                case ExpectedStatType.CreatureHealth:
+                    return mod * expectedStatMod.CreatureHealthMod;
+                case ExpectedStatType.PlayerHealth:
+                    return mod * expectedStatMod.PlayerHealthMod;
+                case ExpectedStatType.CreatureAutoAttackDps:
+                    return mod * expectedStatMod.CreatureAutoAttackDPSMod;
+                case ExpectedStatType.CreatureArmor:
+                    return mod * expectedStatMod.CreatureArmorMod;
+                case ExpectedStatType.PlayerMana:
+                    return mod * expectedStatMod.PlayerManaMod;
+                case ExpectedStatType.PlayerPrimaryStat:
+                    return mod * expectedStatMod.PlayerPrimaryStatMod;
+                case ExpectedStatType.PlayerSecondaryStat:
+                    return mod * expectedStatMod.PlayerSecondaryStatMod;
+                case ExpectedStatType.ArmorConstant:
+                    return mod * expectedStatMod.ArmorConstantMod;
+                case ExpectedStatType.CreatureSpellDamage:
+                    return mod * expectedStatMod.CreatureSpellDamageMod;
+            }
+
+            return mod;
+        }
+
+        public float EvaluateExpectedStat(ExpectedStatType stat, uint level, int expansion, uint contentTuningId, Class unitClass, int mythicPlusMilestoneSeason)
+            return mod;
+
+            // int32 MythicPlusSubSeason = 0;
         }
 
         public float EvaluateExpectedStat(ExpectedStatType stat, uint level, int expansion, uint contentTuningId, Class unitClass)
@@ -1351,7 +1444,7 @@ namespace Game.DataStorage
             return _glyphBindableSpells.LookupByKey(glyphPropertiesId);
         }
 
-        public List<uint> GetGlyphRequiredSpecs(uint glyphPropertiesId)
+        public List<ChrSpecialization> GetGlyphRequiredSpecs(uint glyphPropertiesId)
         {
             return _glyphRequiredSpecs.LookupByKey(glyphPropertiesId);
         }
@@ -1360,114 +1453,6 @@ namespace Game.DataStorage
         {
             return _heirlooms.LookupByKey(itemId);
         }
-
-        public List<ItemBonusRecord> GetItemBonusList(uint bonusListId)
-        {
-            return _itemBonusLists.LookupByKey(bonusListId);
-        }
-
-        public uint GetItemBonusListForItemLevelDelta(short delta)
-        {
-            return _itemLevelDeltaToBonusListContainer.LookupByKey(delta);
-        }
-
-        void VisitItemBonusTree(uint itemBonusTreeId, bool visitChildren, Action<ItemBonusTreeNodeRecord> visitor)
-        {
-            var bonusTreeNodeList = _itemBonusTrees.LookupByKey(itemBonusTreeId);
-            if (bonusTreeNodeList.Empty())
-                return;
-
-            foreach (var bonusTreeNode in bonusTreeNodeList)
-            {
-                visitor(bonusTreeNode);
-                if (visitChildren && bonusTreeNode.ChildItemBonusTreeID != 0)
-                    VisitItemBonusTree(bonusTreeNode.ChildItemBonusTreeID, true, visitor);
-            }
-        }
-
-        public List<int> GetDefaultItemBonusTree(uint itemId, ItemContext itemContext)
-        {
-            List<int> bonusListIDs = new();
-
-            ItemSparseRecord proto = ItemSparseStorage.LookupByKey(itemId);
-            if (proto == null)
-                return bonusListIDs;
-
-            var itemIdRange = _itemToBonusTree.LookupByKey(itemId);
-            if (itemIdRange == null)
-                return bonusListIDs;
-
-            ushort itemLevelSelectorId = 0;
-            foreach (var itemBonusTreeId in itemIdRange)
-            {
-                uint matchingNodes = 0;
-                VisitItemBonusTree(itemBonusTreeId, false, bonusTreeNode =>
-                {
-                    if ((ItemContext)bonusTreeNode.ItemContext == ItemContext.None || itemContext == (ItemContext)bonusTreeNode.ItemContext)
-                        ++matchingNodes;
-                });
-
-                if (matchingNodes != 1)
-                    continue;
-
-                VisitItemBonusTree(itemBonusTreeId, true, bonusTreeNode =>
-                {
-                    ItemContext requiredContext = (ItemContext)bonusTreeNode.ItemContext != ItemContext.ForceToNone ? (ItemContext)bonusTreeNode.ItemContext : ItemContext.None;
-                    if ((ItemContext)bonusTreeNode.ItemContext != ItemContext.None && itemContext != requiredContext)
-                        return;
-
-                    if (bonusTreeNode.ChildItemBonusListID != 0)
-                    {
-                        bonusListIDs.Add(bonusTreeNode.ChildItemBonusListID);
-                    }
-                    else if (bonusTreeNode.ChildItemLevelSelectorID != 0)
-                    {
-                        itemLevelSelectorId = bonusTreeNode.ChildItemLevelSelectorID;
-                    }
-                });
-            }
-            ItemLevelSelectorRecord selector = ItemLevelSelectorStorage.LookupByKey(itemLevelSelectorId);
-            if (selector != null)
-            {
-                short delta = (short)(selector.MinItemLevel - proto.ItemLevel);
-
-                uint bonus = GetItemBonusListForItemLevelDelta(delta);
-                if (bonus != 0)
-                    bonusListIDs.Add((int)bonus);
-
-                ItemLevelSelectorQualitySetRecord selectorQualitySet = ItemLevelSelectorQualitySetStorage.LookupByKey(selector.ItemLevelSelectorQualitySetID);
-                if (selectorQualitySet != null)
-                {
-                    var itemSelectorQualities = _itemLevelQualitySelectorQualities.LookupByKey(selector.ItemLevelSelectorQualitySetID);
-                    if (itemSelectorQualities != null)
-                    {
-                        ItemQuality quality = ItemQuality.Uncommon;
-                        if (selector.MinItemLevel >= selectorQualitySet.IlvlEpic)
-                            quality = ItemQuality.Epic;
-                        else if (selector.MinItemLevel >= selectorQualitySet.IlvlRare)
-                            quality = ItemQuality.Rare;
-
-                        var itemSelectorQuality = itemSelectorQualities.Find(p => p.Quality < (sbyte)quality);
-
-                        if (itemSelectorQuality != null)
-                            bonusListIDs.Add((int)itemSelectorQuality.QualityItemBonusListID);
-                    }
-                }
-            }
-
-            return bonusListIDs;
-        }
-
-        public List<uint> GetAllItemBonusTreeBonuses(uint itemBonusTreeId)
-        {
-            List<uint> bonusListIDs = new();
-            VisitItemBonusTree(itemBonusTreeId, true, bonusTreeNode =>
-            {
-                if (bonusTreeNode.ChildItemBonusListID != 0)
-                    bonusListIDs.Add(bonusTreeNode.ChildItemBonusListID);
-            });
-            return bonusListIDs;
-        }        
 
         public ItemChildEquipmentRecord GetItemChildEquipment(uint itemId)
         {
@@ -1690,6 +1675,23 @@ namespace Game.DataStorage
             return ResponseCodes.CharNameSuccess;
         }
 
+        public uint GetNumTalentsAtLevel(uint level, Class playerClass)
+        {
+            NumTalentsAtLevelRecord numTalentsAtLevel = NumTalentsAtLevelStorage.LookupByKey(level);
+            if (numTalentsAtLevel == null)
+                numTalentsAtLevel = NumTalentsAtLevelStorage.LastOrDefault().Value;
+            if (numTalentsAtLevel != null)
+            {
+                return playerClass switch
+                {
+                    Class.Deathknight => numTalentsAtLevel.NumTalentsDeathKnight,
+                    Class.DemonHunter => numTalentsAtLevel.NumTalentsDemonHunter,
+                    _ => numTalentsAtLevel.NumTalents,
+                };
+            }
+            return 0;
+        }
+
         public ParagonReputationRecord GetParagonReputation(uint factionId)
         {
             return _paragonReputations.LookupByKey(factionId);
@@ -1843,17 +1845,23 @@ namespace Game.DataStorage
         public SkillRaceClassInfoRecord GetSkillRaceClassInfo(SkillType skill, Race race, Class class_)
         {
             var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
-            foreach (var record in bounds)
+            foreach (var skllRaceClassInfo in bounds)
             {
-                if (record.RaceMask != 0 && !Convert.ToBoolean(record.RaceMask & SharedConst.GetMaskForRace(race)))
+                var raceMask = new RaceMask<long>(skllRaceClassInfo.RaceMask);
+                if (!raceMask.IsEmpty() && !raceMask.HasRace(race))
                     continue;
-                if (record.ClassMask != 0 && !Convert.ToBoolean(record.ClassMask & (1 << ((byte)class_ - 1))))
+                if (skllRaceClassInfo.ClassMask != 0 && !Convert.ToBoolean(skllRaceClassInfo.ClassMask & (1 << ((byte)class_ - 1))))
                     continue;
 
-                return record;
+                return skllRaceClassInfo;
             }
 
             return null;
+        }
+
+        public List<SkillRaceClassInfoRecord> GetSkillRaceClassInfo(uint skill)
+        {
+            return _skillRaceClassInfoBySkill.LookupByKey(skill);
         }
 
         public List<SpecializationSpellsRecord> GetSpecializationSpells(uint specId)
@@ -1886,7 +1894,7 @@ namespace Game.DataStorage
             return _talentsByPosition[(int)class_][tier][column];
         }
 
-        public bool IsTotemCategoryCompatibleWith(uint itemTotemCategoryId, uint requiredTotemCategoryId)
+        public bool IsTotemCategoryCompatibleWith(uint itemTotemCategoryId, uint requiredTotemCategoryId, bool requireAllTotems = true)
         {
             if (requiredTotemCategoryId == 0)
                 return true;
@@ -1903,7 +1911,8 @@ namespace Game.DataStorage
             if (itemEntry.TotemCategoryType != reqEntry.TotemCategoryType)
                 return false;
 
-            return (itemEntry.TotemCategoryMask & reqEntry.TotemCategoryMask) == reqEntry.TotemCategoryMask;
+            int sharedMask = itemEntry.TotemCategoryMask & reqEntry.TotemCategoryMask;
+            return requireAllTotems ? sharedMask == reqEntry.TotemCategoryMask : sharedMask != 0;
         }
 
         public bool IsToyItem(uint toy)
@@ -2284,25 +2293,22 @@ namespace Game.DataStorage
         MultiMap<Tuple<byte, byte>, ChrCustomizationOptionRecord> _chrCustomizationOptionsByRaceAndGender = new();
         Dictionary<uint, MultiMap<uint, uint>> _chrCustomizationRequiredChoices = new();
         ChrSpecializationRecord[][] _chrSpecializationsByIndex = new ChrSpecializationRecord[(int)Class.Max + 1][];
+        MultiMap<uint, ConditionalContentTuningRecord> _conditionalContentTuning = new();
+        List<(uint, int)> _contentTuningLabels = new();
         MultiMap<uint, CurrencyContainerRecord> _currencyContainers = new();
-        MultiMap<uint, CurvePointRecord> _curvePoints = new();
+        MultiMap<uint, Vector2> _curvePoints = new();
         Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord> _emoteTextSounds = new();
         Dictionary<Tuple<uint, int>, ExpectedStatRecord> _expectedStatsByLevel = new();
         MultiMap<uint, uint> _factionTeams = new();
         MultiMap<uint, FriendshipRepReactionRecord> _friendshipRepReactions = new();
         Dictionary<uint, HeirloomRecord> _heirlooms = new();
         MultiMap<uint, uint> _glyphBindableSpells = new();
-        MultiMap<uint, uint> _glyphRequiredSpecs = new();
-        MultiMap<uint, ItemBonusRecord> _itemBonusLists = new();
-        Dictionary<short, uint> _itemLevelDeltaToBonusListContainer = new();
-        MultiMap<uint, ItemBonusTreeNodeRecord> _itemBonusTrees = new();
+        MultiMap<uint, ChrSpecialization> _glyphRequiredSpecs = new();
         Dictionary<uint, ItemChildEquipmentRecord> _itemChildEquipment = new();
-        ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[19];
+        ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[20];
         List<uint> _itemsWithCurrencyCost = new();
         MultiMap<uint, ItemLimitCategoryConditionRecord> _itemCategoryConditions = new();
-        MultiMap<uint, ItemLevelSelectorQualityRecord> _itemLevelQualitySelectorQualities = new();
         Dictionary<uint, ItemModifiedAppearanceRecord> _itemModifiedAppearancesByItem = new();
-        MultiMap<uint, uint> _itemToBonusTree = new();
         MultiMap<uint, ItemSetSpellRecord> _itemSetSpells = new();
         MultiMap<uint, ItemSpecOverrideRecord> _itemSpecOverrides = new();
         List<JournalTierRecord> _journalTiersByIndex = new();

@@ -10,6 +10,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
+using Game.Miscellaneous;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -148,6 +149,7 @@ namespace Game
                     sourceType == ConditionSourceType.SmartEvent ||
                     sourceType == ConditionSourceType.NpcVendor ||
                     sourceType == ConditionSourceType.Phase ||
+                    sourceType == ConditionSourceType.Graveyard ||
                     sourceType == ConditionSourceType.AreaTrigger ||
                     sourceType == ConditionSourceType.TrainerSpell ||
                     sourceType == ConditionSourceType.ObjectIdVisibility;
@@ -561,6 +563,9 @@ namespace Game
                         case ConditionSourceType.Phase:
                             valid = AddToPhases(cond);
                             break;
+                        case ConditionSourceType.Graveyard:
+                            valid = AddToGraveyardData(cond);
+                            break;
                         case ConditionSourceType.AreaTrigger:
                             areaTriggerConditionContainerStorage.Add(Tuple.Create(cond.SourceGroup, cond.SourceEntry != 0), cond);
                             ++count;
@@ -623,17 +628,18 @@ namespace Game
         bool AddToGossipMenus(Condition cond)
         {
             var pMenuBounds = Global.ObjectMgr.GetGossipMenusMapBounds(cond.SourceGroup);
-
-            foreach (var menu in pMenuBounds)
+            if (!pMenuBounds.Empty())
             {
-                if (menu.MenuId == cond.SourceGroup && menu.TextId == cond.SourceEntry)
+                foreach (var menu in pMenuBounds)
                 {
-                    menu.Conditions.Add(cond);
-                    return true;
+                    if (menu.MenuId == cond.SourceGroup && (menu.TextId == cond.SourceEntry || cond.SourceEntry == 0))
+                        menu.Conditions.Add(cond);
                 }
+
+                return true;
             }
 
-            Log.outError(LogFilter.Sql, "{0} GossipMenu {1} not found.", cond.ToString(), cond.SourceGroup);
+            Log.outError(LogFilter.Sql, $"{cond} GossipMenu {cond.SourceGroup} not found.");
             return false;
         }
 
@@ -642,7 +648,7 @@ namespace Game
             var pMenuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(cond.SourceGroup);
             foreach (var gossipMenuItem in pMenuItemBounds)
             {
-                if (gossipMenuItem.MenuId == cond.SourceGroup && gossipMenuItem.OptionId == cond.SourceEntry)
+                if (gossipMenuItem.MenuID == cond.SourceGroup && gossipMenuItem.OrderIndex == cond.SourceEntry)
                 {
                     gossipMenuItem.Conditions.Add(cond);
                     return true;
@@ -802,10 +808,23 @@ namespace Game
                 }
             }
 
-            Log.outError(LogFilter.Sql, "{0} Area {1} does not have phase {2}.", cond.ToString(), cond.SourceGroup, cond.SourceEntry);
+            Log.outError(LogFilter.Sql, $"{cond} Area {cond.SourceEntry} does not have phase {cond.SourceGroup}.");
             return false;
         }
 
+        bool AddToGraveyardData(Condition cond)
+        {
+            GraveyardData graveyard = Global.ObjectMgr.FindGraveyardData((uint)cond.SourceEntry, cond.SourceGroup);
+            if (graveyard != null)
+            {
+                graveyard.Conditions.Add(cond);
+                return true;
+            }
+
+            Log.outError(LogFilter.Sql, $"{cond}, Graveyard {cond.SourceEntry} does not have ghostzone {cond.SourceGroup}.");
+            return false;
+        }
+        
         bool IsSourceTypeValid(Condition cond)
         {
             switch (cond.SourceType)
@@ -1175,9 +1194,9 @@ namespace Game
                 case ConditionSourceType.SmartEvent:
                     break;
                 case ConditionSourceType.Graveyard:
-                    if (Global.ObjectMgr.GetWorldSafeLoc((uint)cond.SourceEntry) == null)
+                    if (Global.ObjectMgr.FindGraveyardData((uint)cond.SourceEntry, cond.SourceGroup) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table, does not exist in WorldSafeLocs.db2, ignoring.");
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table, does not exist in `graveyard_zone`, ignoring.");
                         return false;
                     }
                     break;
@@ -1427,9 +1446,10 @@ namespace Game
                 }
                 case ConditionTypes.Race:
                 {
-                    if (Convert.ToBoolean(cond.ConditionValue1 & ~SharedConst.RaceMaskAllPlayable))
+                    RaceMask<ulong> invalidRaceMask = new RaceMask<ulong>(cond.ConditionValue1 & ~RaceMask.AllPlayable.RawValue);
+                    if (!invalidRaceMask.IsEmpty()) // uint32 works thanks to weird index remapping in racemask
                     {
-                        Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~SharedConst.RaceMaskAllPlayable);
+                        Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~RaceMask.AllPlayable.RawValue);
                         return false;
                     }
                     break;
@@ -1498,6 +1518,12 @@ namespace Game
                     }
                     break;
                 }
+                case ConditionTypes.ObjectEntryGuidLegacy:
+                {
+                    cond.ConditionType = ConditionTypes.ObjectEntryGuid;
+                    cond.ConditionValue1 = Legacy.ConvertLegacyTypeID(cond.ConditionValue1);
+                    goto case ConditionTypes.ObjectEntryGuid;
+                }
                 case ConditionTypes.ObjectEntryGuid:
                 {
                     switch ((TypeId)cond.ConditionValue1)
@@ -1563,6 +1589,10 @@ namespace Game
                     }
                     break;
                 }
+                case ConditionTypes.TypeMaskLegacy:
+                    cond.ConditionType = ConditionTypes.TypeMask;
+                    cond.ConditionValue1 = Legacy.ConvertLegacyTypeMask(cond.ConditionValue1);
+                    goto case ConditionTypes.TypeMask;
                 case ConditionTypes.TypeMask:
                 {
                     if (cond.ConditionValue1 == 0 || Convert.ToBoolean(cond.ConditionValue1 & ~(uint)(TypeMask.Unit | TypeMask.Player | TypeMask.GameObject | TypeMask.Corpse)))
@@ -1766,6 +1796,7 @@ namespace Game
                 case ConditionTypes.Charmed:
                 case ConditionTypes.Taxi:
                 case ConditionTypes.Gamemaster:
+                case ConditionTypes.PrivateObject:
                     break;
                 case ConditionTypes.DifficultyId:
                     if (!CliDB.DifficultyStorage.ContainsKey(cond.ConditionValue1))
@@ -1990,7 +2021,7 @@ namespace Game
 
             if (condition.ChrSpecializationIndex >= 0 || condition.ChrSpecializationRole >= 0)
             {
-                ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(player.GetPrimarySpecialization());
+                ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey((uint)player.GetPrimarySpecialization());
                 if (spec != null)
                 {
                     if (condition.ChrSpecializationIndex >= 0 && spec.OrderIndex != condition.ChrSpecializationIndex)
@@ -2108,7 +2139,7 @@ namespace Game
             if (condition.WeaponSubclassMask != 0)
             {
                 Item mainHand = player.GetItemByPos(EquipmentSlot.MainHand);
-                if (!mainHand || !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.WeaponSubclassMask))
+                if (mainHand == null || !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.WeaponSubclassMask))
                     return false;
             }
 
@@ -2118,23 +2149,23 @@ namespace Game
                 switch (condition.PartyStatus)
                 {
                     case 1:
-                        if (group)
+                        if (group != null)
                             return false;
                         break;
                     case 2:
-                        if (!group)
+                        if (group == null)
                             return false;
                         break;
                     case 3:
-                        if (!group || group.IsRaidGroup())
+                        if (group == null || group.IsRaidGroup())
                             return false;
                         break;
                     case 4:
-                        if (!group || !group.IsRaidGroup())
+                        if (group == null || !group.IsRaidGroup())
                             return false;
                         break;
                     case 5:
-                        if (group && group.IsRaidGroup())
+                        if (group != null && group.IsRaidGroup())
                             return false;
                         break;
                     default:
@@ -2233,7 +2264,7 @@ namespace Game
                 for (var i = 0; i < condition.CurrencyID.Length; ++i)
                 {
                     if (condition.CurrencyID[i] != 0)
-                        results[i] = player.GetCurrency(condition.CurrencyID[i]) >= condition.CurrencyCount[i];
+                        results[i] = player.GetCurrencyQuantity(condition.CurrencyID[i]) >= condition.CurrencyCount[i];
                 }
 
                 if (!PlayerConditionLogic(condition.CurrencyLogic, results))
@@ -2287,7 +2318,7 @@ namespace Game
                 if (worldStateExpression == null)
                     return false;
 
-                if (!IsPlayerMeetingExpression(player, worldStateExpression))
+                if (!IsMeetingWorldStateExpression(player.GetMap(), worldStateExpression))
                     return false;
             }
 
@@ -2403,7 +2434,7 @@ namespace Game
             return true;
         }
 
-        public static bool IsPlayerMeetingExpression(Player player, WorldStateExpressionRecord expression)
+        public static bool IsMeetingWorldStateExpression(Map map, WorldStateExpressionRecord expression)
         {
             ByteBuffer buffer = new(expression.Expression.ToByteArray());
             if (buffer.GetSize() == 0)
@@ -2413,12 +2444,12 @@ namespace Game
             if (!enabled)
                 return false;
 
-            bool finalResult = EvalRelOp(buffer, player);
+            bool finalResult = EvalRelOp(buffer, map);
             WorldStateExpressionLogic resultLogic = (WorldStateExpressionLogic)buffer.ReadUInt8();
 
             while (resultLogic != WorldStateExpressionLogic.None)
             {
-                bool secondResult = EvalRelOp(buffer, player);
+                bool secondResult = EvalRelOp(buffer, map);
 
                 switch (resultLogic)
                 {
@@ -2459,19 +2490,19 @@ namespace Game
                 case UnitConditionVariable.IsMyPet:
                     return (otherUnit != null && unit.GetCharmerOrOwnerGUID() == otherUnit.GetGUID()) ? 1 : 0;
                 case UnitConditionVariable.IsMaster:
-                    return (otherUnit && otherUnit.GetCharmerOrOwnerGUID() == unit.GetGUID()) ? 1 : 0;
+                    return (otherUnit != null && otherUnit.GetCharmerOrOwnerGUID() == unit.GetGUID()) ? 1 : 0;
                 case UnitConditionVariable.IsTarget:
-                    return (otherUnit && otherUnit.GetTarget() == unit.GetGUID()) ? 1 : 0;
+                    return (otherUnit != null && otherUnit.GetTarget() == unit.GetGUID()) ? 1 : 0;
                 case UnitConditionVariable.CanAssist:
-                    return (otherUnit && unit.IsValidAssistTarget(otherUnit)) ? 1 : 0;
+                    return (otherUnit != null && unit.IsValidAssistTarget(otherUnit)) ? 1 : 0;
                 case UnitConditionVariable.CanAttack:
-                    return (otherUnit && unit.IsValidAttackTarget(otherUnit)) ? 1 : 0;
+                    return (otherUnit != null && unit.IsValidAttackTarget(otherUnit)) ? 1 : 0;
                 case UnitConditionVariable.HasPet:
                     return (!unit.GetCharmedGUID().IsEmpty() || !unit.GetMinionGUID().IsEmpty()) ? 1 : 0;
                 case UnitConditionVariable.HasWeapon:
                     Player player = unit.ToPlayer();
                     if (player != null)
-                        return (player.GetWeaponForAttack(WeaponAttackType.BaseAttack) || player.GetWeaponForAttack(WeaponAttackType.OffAttack)) ? 1 : 0;
+                        return (player.GetWeaponForAttack(WeaponAttackType.BaseAttack) != null || player.GetWeaponForAttack(WeaponAttackType.OffAttack) != null) ? 1 : 0;
                     return (unit.GetVirtualItemId(0) != 0 || unit.GetVirtualItemId(1) != 0) ? 1 : 0;
                 case UnitConditionVariable.HealthPct:
                     return (int)unit.GetHealthPct();
@@ -2488,13 +2519,13 @@ namespace Game
                 case UnitConditionVariable.HasHelpfulAuraDispelType:
                     return unit.GetAuraApplication(aurApp => !aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (int)aurApp.GetBase().GetSpellInfo().Dispel == value) != null ? value : 0;
                 case UnitConditionVariable.HasHelpfulAuraMechanic:
-                    return unit.GetAuraApplication(aurApp => !aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (aurApp.GetBase().GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask()) & (1 << value)) != 0) != null ? value : 0;
+                    return unit.GetAuraApplication(aurApp => !aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (aurApp.GetBase().GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask()) & (1ul << value)) != 0) != null ? value : 0;
                 case UnitConditionVariable.HasHarmfulAuraSpell:
                     return unit.GetAuraApplication((uint)value, aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative)) != null ? value : 0;
                 case UnitConditionVariable.HasHarmfulAuraDispelType:
                     return unit.GetAuraApplication(aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (int)aurApp.GetBase().GetSpellInfo().Dispel == value) != null ? value : 0;
                 case UnitConditionVariable.HasHarmfulAuraMechanic:
-                    return unit.GetAuraApplication(aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (aurApp.GetBase().GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask()) & (1 << value)) != 0) != null ? value : 0;
+                    return unit.GetAuraApplication(aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (aurApp.GetBase().GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask()) & (1ul << value)) != 0) != null ? value : 0;
                 case UnitConditionVariable.HasHarmfulAuraSchool:
                     return unit.GetAuraApplication(aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative) && ((int)aurApp.GetBase().GetSpellInfo().GetSchoolMask() & (1 << value)) != 0) != null ? value : 0;
                 case UnitConditionVariable.DamagePhysicalPct:
@@ -2532,9 +2563,9 @@ namespace Game
                 case UnitConditionVariable.IsAttackingMe:
                     return (otherUnit != null && unit.GetTarget() == otherUnit.GetGUID()) ? 1:0;
                 case UnitConditionVariable.Range:
-                    return otherUnit ? (int)unit.GetExactDist(otherUnit) : 0;
+                    return otherUnit != null ? (int)unit.GetExactDist(otherUnit) : 0;
                 case UnitConditionVariable.InMeleeRange:
-                    if (otherUnit)
+                    if (otherUnit != null)
                     {
                         float distance = Math.Max(unit.GetCombatReach() + otherUnit.GetCombatReach() + 1.3333334f, 5.0f);
                         if (unit.HasUnitFlag(UnitFlags.PlayerControlled) || otherUnit.HasUnitFlag(UnitFlags.PlayerControlled))
@@ -2641,15 +2672,15 @@ namespace Game
                 case UnitConditionVariable.HasAura:
                     return unit.HasAura((uint)value) ? value : 0;
                 case UnitConditionVariable.IsEnemy:
-                    return (otherUnit && unit.GetReactionTo(otherUnit) <= ReputationRank.Hostile) ? 1 : 0;
+                    return (otherUnit != null && unit.GetReactionTo(otherUnit) <= ReputationRank.Hostile) ? 1 : 0;
                 case UnitConditionVariable.IsSpecMelee:
-                    return (unit.IsPlayer() && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).Flags.HasFlag(ChrSpecializationFlag.Melee)) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetFlags().HasFlag(ChrSpecializationFlag.Melee) ? 1 : 0;
                 case UnitConditionVariable.IsSpecTank:
-                    return (unit.IsPlayer() && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).Role == 0) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetRole() == ChrSpecializationRole.Tank ? 1 : 0;
                 case UnitConditionVariable.IsSpecRanged:
-                    return (unit.IsPlayer() && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).Flags.HasFlag(ChrSpecializationFlag.Ranged)) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetFlags().HasFlag(ChrSpecializationFlag.Ranged) ? 1 : 0;
                 case UnitConditionVariable.IsSpecHealer:
-                    return (unit.IsPlayer() && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).Role == 1) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry()?.GetRole() == ChrSpecializationRole.Healer ? 1 : 0;
                 case UnitConditionVariable.IsPlayerControlledNPC:
                     return unit.IsCreature() && unit.HasUnitFlag(UnitFlags.PlayerControlled) ? 1 : 0;
                 case UnitConditionVariable.IsDying:
@@ -2661,11 +2692,11 @@ namespace Game
                 case UnitConditionVariable.Label:
                     break;
                 case UnitConditionVariable.IsMySummon:
-                    return (otherUnit && (otherUnit.GetCharmerGUID() == unit.GetGUID() || otherUnit.GetCreatorGUID() == unit.GetGUID())) ? 1 : 0;
+                    return (otherUnit != null && (otherUnit.GetCharmerGUID() == unit.GetGUID() || otherUnit.GetCreatorGUID() == unit.GetGUID())) ? 1 : 0;
                 case UnitConditionVariable.IsSummoner:
-                    return (otherUnit && (unit.GetCharmerGUID() == otherUnit.GetGUID() || unit.GetCreatorGUID() == otherUnit.GetGUID())) ? 1 : 0;
+                    return (otherUnit != null && (unit.GetCharmerGUID() == otherUnit.GetGUID() || unit.GetCreatorGUID() == otherUnit.GetGUID())) ? 1 : 0;
                 case UnitConditionVariable.IsMyTarget:
-                    return (otherUnit && unit.GetTarget() == otherUnit.GetGUID()) ? 1 : 0;
+                    return (otherUnit != null && unit.GetTarget() == otherUnit.GetGUID()) ? 1 : 0;
                 case UnitConditionVariable.Sex:
                     return (int)unit.GetGender();
                 case UnitConditionVariable.LevelWithinContentTuning:
@@ -2736,7 +2767,7 @@ namespace Game
             return !condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr);
         }
         
-        static int EvalSingleValue(ByteBuffer buffer, Player player)
+        static int EvalSingleValue(ByteBuffer buffer, Map map)
         {
             WorldStateExpressionValueType valueType = (WorldStateExpressionValueType)buffer.ReadUInt8();
             int value = 0;
@@ -2751,19 +2782,19 @@ namespace Game
                 case WorldStateExpressionValueType.WorldState:
                 {
                     uint worldStateId = buffer.ReadUInt32();
-                    value = Global.WorldStateMgr.GetValue((int)worldStateId, player.GetMap());
+                    value = Global.WorldStateMgr.GetValue((int)worldStateId, map);
                     break;
                 }
                 case WorldStateExpressionValueType.Function:
                 {
                     var functionType = (WorldStateExpressionFunctions)buffer.ReadUInt32();
-                    int arg1 = EvalSingleValue(buffer, player);
-                    int arg2 = EvalSingleValue(buffer, player);
+                    int arg1 = EvalSingleValue(buffer, map);
+                    int arg2 = EvalSingleValue(buffer, map);
 
                     if (functionType >= WorldStateExpressionFunctions.Max)
                         return 0;
 
-                    value = WorldStateExpressionFunction(functionType, player, arg1, arg2);
+                    value = WorldStateExpressionFunction(functionType, map, arg1, arg2);
                     break;
                 }
                 default:
@@ -2773,7 +2804,7 @@ namespace Game
             return value;
         }
 
-        static int WorldStateExpressionFunction(WorldStateExpressionFunctions functionType, Player player, int arg1, int arg2)
+        static int WorldStateExpressionFunction(WorldStateExpressionFunctions functionType, Map map, int arg1, int arg2)
         {
             switch (functionType)
             {
@@ -2792,7 +2823,7 @@ namespace Game
                     int currentHour = GameTime.GetDateAndTime().Hour + 1;
                     return currentHour <= 12 ? (currentHour != 0 ? currentHour : 12) : currentHour - 12;
                 case WorldStateExpressionFunctions.OldDifficultyId:
-                    var difficulty = CliDB.DifficultyStorage.LookupByKey(player.GetMap().GetDifficultyID());
+                    var difficulty = CliDB.DifficultyStorage.LookupByKey(map.GetDifficultyID());
                     if (difficulty != null)
                         return difficulty.OldEnumValue;
 
@@ -2810,13 +2841,14 @@ namespace Game
 
                     return (int)(now - raidOrigin) / Time.Week;
                 case WorldStateExpressionFunctions.DifficultyId:
-                    return (int)player.GetMap().GetDifficultyID();
+                    return (int)map.GetDifficultyID();
                 case WorldStateExpressionFunctions.WarModeActive:
-                    return player.HasPlayerFlag(PlayerFlags.WarModeActive) ? 1 : 0;
+                    // check if current zone/map is bound to war mode
+                    return 0;
                 case WorldStateExpressionFunctions.WorldStateExpression:
                     var worldStateExpression = CliDB.WorldStateExpressionStorage.LookupByKey(arg1);
                     if (worldStateExpression != null)
-                        return IsPlayerMeetingExpression(player, worldStateExpression) ? 1 : 0;
+                        return IsMeetingWorldStateExpression(map, worldStateExpression) ? 1 : 0;
 
                     return 0;
                 case WorldStateExpressionFunctions.MersenneRandom:
@@ -2858,15 +2890,15 @@ namespace Game
             }
         }
 
-        static int EvalValue(ByteBuffer buffer, Player player)
+        static int EvalValue(ByteBuffer buffer, Map map)
         {
-            int leftValue = EvalSingleValue(buffer, player);
+            int leftValue = EvalSingleValue(buffer, map);
 
             WorldStateExpressionOperatorType operatorType = (WorldStateExpressionOperatorType)buffer.ReadUInt8();
             if (operatorType == WorldStateExpressionOperatorType.None)
                 return leftValue;
 
-            int rightValue = EvalSingleValue(buffer, player);
+            int rightValue = EvalSingleValue(buffer, map);
 
             switch (operatorType)
             {
@@ -2887,15 +2919,15 @@ namespace Game
             return leftValue;
         }
 
-        static bool EvalRelOp(ByteBuffer buffer, Player player)
+        static bool EvalRelOp(ByteBuffer buffer, Map map)
         {
-            int leftValue = EvalValue(buffer, player);
+            int leftValue = EvalValue(buffer, map);
 
             WorldStateExpressionComparisonType compareLogic = (WorldStateExpressionComparisonType)buffer.ReadUInt8();
             if (compareLogic == WorldStateExpressionComparisonType.None)
                 return leftValue != 0;
 
-            int rightValue = EvalValue(buffer, player);
+            int rightValue = EvalValue(buffer, map);
 
             switch (compareLogic)
             {

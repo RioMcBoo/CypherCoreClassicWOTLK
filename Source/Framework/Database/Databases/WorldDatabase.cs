@@ -11,12 +11,11 @@ namespace Framework.Database
             PrepareStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER, "DELETE FROM linked_respawn WHERE linkedGuid = ? AND linkType = ?");
             PrepareStatement(WorldStatements.REP_LINKED_RESPAWN, "REPLACE INTO linked_respawn (guid, linkedGuid, linkType) VALUES (?, ?, ?)");
             PrepareStatement(WorldStatements.SEL_CREATURE_TEXT, "SELECT CreatureID, GroupID, ID, Text, Type, Language, Probability, Emote, Duration, Sound, SoundPlayType, BroadcastTextId, TextRange FROM creature_text");
-            PrepareStatement(WorldStatements.SEL_SMART_SCRIPTS, "SELECT entryorguid, source_type, id, link, event_type, event_phase_mask, event_chance, event_flags, event_param1, event_param2, event_param3, event_param4, event_param5, event_param_string, action_type, action_param1, action_param2, action_param3, action_param4, action_param5, action_param6, target_type, target_param1, target_param2, target_param3, target_param4, target_x, target_y, target_z, target_o FROM smart_scripts ORDER BY entryorguid, source_type, id, link");
-            PrepareStatement(WorldStatements.SEL_SMARTAI_WP, "SELECT entry, pointid, position_x, position_y, position_z, orientation, delay FROM waypoints ORDER BY entry, pointid");
+            PrepareStatement(WorldStatements.SEL_SMART_SCRIPTS, "SELECT entryorguid, source_type, id, link, event_type, event_phase_mask, event_chance, event_flags, event_param1, event_param2, event_param3, event_param4, event_param5, event_param_string, action_type, action_param1, action_param2, action_param3, action_param4, action_param5, action_param6, action_param7, target_type, target_param1, target_param2, target_param3, target_param4, target_x, target_y, target_z, target_o FROM smart_scripts ORDER BY entryorguid, source_type, id, link");
             PrepareStatement(WorldStatements.DEL_GAMEOBJECT, "DELETE FROM gameobject WHERE guid = ?");
             PrepareStatement(WorldStatements.DEL_EVENT_GAMEOBJECT, "DELETE FROM game_event_gameobject WHERE guid = ?");
-            PrepareStatement(WorldStatements.INS_GRAVEYARD_ZONE, "INSERT INTO graveyard_zone (ID, GhostZone, faction) VALUES (?, ?, ?)");
-            PrepareStatement(WorldStatements.DEL_GRAVEYARD_ZONE, "DELETE FROM graveyard_zone WHERE ID = ? AND GhostZone = ? AND faction = ?");
+            PrepareStatement(WorldStatements.INS_GRAVEYARD_ZONE, "INSERT INTO graveyard_zone (ID, GhostZone) VALUES (?, ?)");
+            PrepareStatement(WorldStatements.DEL_GRAVEYARD_ZONE, "DELETE FROM graveyard_zone WHERE ID = ? AND GhostZone = ?");
             PrepareStatement(WorldStatements.INS_GAME_TELE, "INSERT INTO game_tele (id, position_x, position_y, position_z, orientation, map, name) VALUES (?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(WorldStatements.DEL_GAME_TELE, "DELETE FROM game_tele WHERE name = ?");
             PrepareStatement(WorldStatements.INS_NPC_VENDOR, "INSERT INTO npc_vendor (entry, item, maxcount, incrtime, extendedcost, type) VALUES(?, ?, ?, ?, ?, ?)");
@@ -61,12 +60,12 @@ namespace Framework.Database
             PrepareStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID, "SELECT id FROM waypoint_scripts WHERE guid = ?");
             PrepareStatement(WorldStatements.DEL_CREATURE, "DELETE FROM creature WHERE guid = ?");
             PrepareStatement(WorldStatements.SEL_COMMANDS, "SELECT name, help FROM command");
-            PrepareStatement(WorldStatements.SEL_CREATURE_TEMPLATE, "SELECT entry, difficulty_entry_1, difficulty_entry_2, difficulty_entry_3, KillCredit1, KillCredit2, name, femaleName, subname, TitleAlt, IconName, gossip_menu_id, minlevel, maxlevel, HealthScalingExpansion, RequiredExpansion, VignetteID, faction, npcflag, speed_walk, speed_run, scale, `rank`, dmgschool, BaseAttackTime, RangeAttackTime, BaseVariance, RangeVariance, unit_class, unit_flags, unit_flags2, unit_flags3, dynamicflags, family, trainer_class, type, type_flags, type_flags2, lootid, pickpocketloot, skinloot, VehicleId, mingold, maxgold, AIName, MovementType, ctm.Ground, ctm.Swim, ctm.Flight, ctm.Rooted, ctm.Chase, ctm.Random, ctm.InteractionPauseTimer, HoverHeight, HealthModifier, HealthModifierExtra, ManaModifier, ManaModifierExtra, ArmorModifier, DamageModifier, ExperienceModifier, RacialLeader, movementId, CreatureDifficultyID, WidgetSetID, WidgetSetUnitConditionID, RegenHealth, Civilian, PetSpellDataId, mechanic_immune_mask, spell_school_immune_mask, flags_extra, ScriptName, StringId FROM creature_template ct LEFT JOIN creature_template_movement ctm ON ct.entry = ctm.CreatureId WHERE entry = ? OR 1 = ?");
+            PrepareStatement(WorldStatements.SEL_CREATURE_TEMPLATE, "SELECT entry, KillCredit1, KillCredit2, name, femaleName, subname, TitleAlt, IconName, RequiredExpansion, VignetteID, faction, npcflag, speed_walk, speed_run, scale, `rank`, dmgschool, BaseAttackTime, RangeAttackTime, BaseVariance, RangeVariance, unit_class, unit_flags, unit_flags2, unit_flags3, family, trainer_class, type, VehicleId, AIName, MovementType, ctm.Ground, ctm.Swim, ctm.Flight, ctm.Rooted, ctm.Chase, ctm.Random, ctm.InteractionPauseTimer, ExperienceModifier, RacialLeader, movementId, WidgetSetID, WidgetSetUnitConditionID, RegenHealth, mechanic_immune_mask, spell_school_immune_mask, flags_extra, ScriptName, StringId FROM creature_template ct LEFT JOIN creature_template_movement ctm ON ct.entry = ctm.CreatureId WHERE entry = ? OR 1 = ?");
             PrepareStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_BY_ID, "SELECT guid, delay, command, datalong, datalong2, dataint, x, y, z, o FROM waypoint_scripts WHERE id = ?");
             PrepareStatement(WorldStatements.SEL_CREATURE_BY_ID, "SELECT guid FROM creature WHERE id = ?");
             PrepareStatement(WorldStatements.SEL_GAMEOBJECT_NEAREST, "SELECT guid, id, position_x, position_y, position_z, map, (POW(position_x - ?, 2) + POW(position_y - ?, 2) + POW(position_z - ?, 2)) AS order_ FROM gameobject WHERE map = ? AND (POW(position_x - ?, 2) + POW(position_y - ?, 2) + POW(position_z - ?, 2)) <= ? ORDER BY order_");
             PrepareStatement(WorldStatements.SEL_CREATURE_NEAREST, "SELECT guid, id, position_x, position_y, position_z, map, (POW(position_x - ?, 2) + POW(position_y - ?, 2) + POW(position_z - ?, 2)) AS order_ FROM creature WHERE map = ? AND (POW(position_x - ?, 2) + POW(position_y - ?, 2) + POW(position_z - ?, 2)) <= ? ORDER BY order_");
-            PrepareStatement(WorldStatements.INS_CREATURE, "INSERT INTO creature (guid, id , map, spawnDifficulties, PhaseId, PhaseGroup, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, wander_distance, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, unit_flags2, unit_flags3, dynamicflags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PrepareStatement(WorldStatements.INS_CREATURE, "INSERT INTO creature (guid, id , map, spawnDifficulties, PhaseId, PhaseGroup, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, wander_distance, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, unit_flags2, unit_flags3) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(WorldStatements.DEL_GAME_EVENT_CREATURE, "DELETE FROM game_event_creature WHERE guid = ?");
             PrepareStatement(WorldStatements.DEL_GAME_EVENT_MODEL_EQUIP, "DELETE FROM game_event_model_equip WHERE guid = ?");
             PrepareStatement(WorldStatements.INS_GAMEOBJECT, "INSERT INTO gameobject (guid, id, map, spawnDifficulties, PhaseId, PhaseGroup, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -78,6 +77,7 @@ namespace Framework.Database
             PrepareStatement(WorldStatements.DEL_SPAWNGROUP_MEMBER, "DELETE FROM spawn_group WHERE spawnType = ? AND spawnId = ?");
             PrepareStatement(WorldStatements.DEL_GAMEOBJECT_ADDON, "DELETE FROM gameobject_addon WHERE guid = ?");
             PrepareStatement(WorldStatements.SEL_GUILD_REWARDS_REQ_ACHIEVEMENTS, "SELECT AchievementRequired FROM guild_rewards_req_achievements WHERE ItemID = ?");
+            PrepareStatement(WorldStatements.INS_CONDITION, "INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ErrorTextId, ScriptName, Comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         }
     }
 
@@ -88,7 +88,6 @@ namespace Framework.Database
         REP_LINKED_RESPAWN,
         SEL_CREATURE_TEXT,
         SEL_SMART_SCRIPTS,
-        SEL_SMARTAI_WP,
         DEL_GAMEOBJECT,
         DEL_EVENT_GAMEOBJECT,
         INS_GRAVEYARD_ZONE,
@@ -155,6 +154,7 @@ namespace Framework.Database
         DEL_SPAWNGROUP_MEMBER,
         DEL_GAMEOBJECT_ADDON,
         SEL_GUILD_REWARDS_REQ_ACHIEVEMENTS,
+        INS_CONDITION,
 
         MAX_WORLDDATABASE_STATEMENTS
     }

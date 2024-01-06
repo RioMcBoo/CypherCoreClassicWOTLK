@@ -195,7 +195,7 @@ namespace Framework.Constants
         ModAttackerRangedHitChance = 185,
         ModAttackerSpellHitChance = 186,
         ModAttackerMeleeCritChance = 187,
-        ModAttackerRangedCritChance = 188,
+        ModUIHealingRange = 188,
         ModRating = 189,
         ModFactionReputationGain = 190,
         UseNormalMovementSpeed = 191,
@@ -256,7 +256,7 @@ namespace Framework.Constants
         ModAuraDurationByDispelNotStack = 246,
         CloneCaster = 247,
         ModCombatResultChance = 248,
-        ConvertRune = 249,
+        ModDamagePercentDoneByTargetAuraMechanic = 249,
         ModIncreaseHealth2 = 250,
         ModEnemyDodge = 251,
         ModSpeedSlowAll = 252,
@@ -358,7 +358,7 @@ namespace Framework.Constants
         ModMoneyGain = 348,  // Modifies gold gains from source: [Misc = 0, Quests][Misc = 1, Loot]
         ModCurrencyGain = 349,
         Unk350 = 350,
-        ModCurrencyCategoryGainPct = 351, //NYI
+        ModCurrencyCategoryGainPct = 351,
         Unk352 = 352,
         ModCamouflage = 353,  // Nyi
         ModHealingDonePctVersusTargetHealth = 354,  // Restoration Shaman Mastery - Mod Healing Based On Target'S Health (Less = More Healing)
@@ -413,7 +413,7 @@ namespace Framework.Constants
         OverrideSpellVisual = 403,
         OverrideAttackPowerBySpPct = 404,
         ModRatingPct = 405,
-        KeyboundOverride = 406,  // NYI
+        KeyboundOverride = 406,
         ModFear2 = 407,
         SetActionButtonSpellCount = 408,
         CanTurnWhileFalling = 409,
@@ -514,12 +514,43 @@ namespace Framework.Constants
         ModHealingTakenFromCaster = 504,
         ModPlayerChoiceRerolls = 505, // NYI
         DisableInertia = 506, // NYI
-        Unk507 = 507,
+        ModDamageTakenFromCasterByLabel = 507,
         Unk508 = 508,
         Unk509 = 509,
-        ModifiedRaidInstance = 510, // Related to "Fated" raid affixes
-        Unk511 = 511,
+        ModifiedRaidInstance = 510, // NYI; Related to "Fated" raid affixes
+        ApplyProfessionEffect = 511, // Nyi; Miscvalue[0] = Professioneffectid
         Unk512 = 512,
+        Unk513 = 513,
+        Unk514 = 514,
+        Unk515 = 515,
+        Unk516 = 516,
+        Unk517 = 517,
+        Unk518 = 518,
+        ModCooldownRecoveryRateAll = 519, // Nyi; Applies To All Spells, Not Filtered By Familyflags Or Label
+        Unk520 = 520,
+        Unk521 = 521,
+        Unk522 = 522,
+        Unk523 = 523,
+        Unk524 = 524,
+        DisplayProfessionEquipment = 525, // Nyi; Miscvalue[0] = Profession (Enum, Not Id)
+        Unk526 = 526,
+        Unk527 = 527,
+        AllowBlockingSpells = 528, // Nyi
+        ModSpellBlockChance = 529, // Nyi
+        Unk530 = 530,
+        Unk531 = 531,
+        Unk532 = 532,
+        DisableNavigation = 533, // Disables Map Pins
+        Unk534 = 534,
+        Unk535 = 535,
+        IgnoreSpellCreatureTypeRequirements = 536,
+        Unk537 = 537,
+        ModFakeInebriationMovementOnly = 538,
+        AllowMountInCombat = 539,
+        ModSupportStat = 540, // NYI
+        ModRequiredMountCapabilityFlags = 541,
+        Unk542 = 542,
+        Unk543 = 543,
         Total
     }
 

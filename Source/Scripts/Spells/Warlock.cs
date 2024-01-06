@@ -1,4 +1,4 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
@@ -6,8 +6,8 @@ using Framework.Dynamic;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
 using System.Collections.Generic;
+using static Global;
 
 namespace Scripts.Spells.Warlock
 {
@@ -32,7 +32,7 @@ namespace Scripts.Spells.Warlock
         public const uint SeedOfCorruptionDamage = 27285;
         public const uint SeedOfCorruptionGeneric = 32865;
         public const uint ShadowBoltEnergize = 194192;
-        public const uint Soulshatter = 32835;
+        public const uint SoulshatterEffect = 32835;
         public const uint SoulSwapCdMarker = 94229;
         public const uint SoulSwapOverride = 86211;
         public const uint SoulSwapModCost = 92794;
@@ -41,6 +41,12 @@ namespace Scripts.Spells.Warlock
         public const uint UnstableAfflictionDispel = 31117;
         public const uint Shadowflame = 37378;
         public const uint Flameshadow = 37379;
+        public const uint SummonSuccubus = 712;
+        public const uint SummonIncubus = 365349;
+        public const uint StrengthenPactSuccubus = 366323;
+        public const uint StrengthenPactIncubus = 366325;
+        public const uint SuccubusPact = 365360;
+        public const uint IncubusPact = 365355;
 
         public const uint GenReplenishment = 57669;
         public const uint PriestShadowWordDeath = 32409;
@@ -49,13 +55,15 @@ namespace Scripts.Spells.Warlock
     [Script] // 710 - Banish
     class spell_warl_banish : SpellScript
     {
+        public spell_warl_banish() { }
+
         void HandleBanish(SpellMissInfo missInfo)
         {
             if (missInfo != SpellMissInfo.Immune)
                 return;
 
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
             {
                 // Casting Banish on a banished target will Remove applied aura
                 Aura banishAura = target.GetAura(GetSpellInfo().Id, GetCaster().GetGUID());
@@ -66,7 +74,52 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            BeforeHit.Add(new BeforeHitHandler(HandleBanish));
+            BeforeHit.Add(new(HandleBanish));
+        }
+    }
+
+    [Script] // 111400 - Burning Rush
+    class spell_warl_burning_rush : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((spellInfo.Id, 1));
+        }
+
+        SpellCastResult CheckApplyAura()
+        {
+            Unit caster = GetCaster();
+
+            if (caster.GetHealthPct() <= (float)(GetEffectInfo(1).CalcValue(caster)))
+            {
+                SetCustomCastResultMessage(SpellCustomErrors.YouDontHaveEnoughHealth);
+                return SpellCastResult.CustomError;
+            }
+
+            return SpellCastResult.SpellCastOk;
+        }
+
+        public override void Register()
+        {
+            OnCheckCast.Add(new(CheckApplyAura));
+        }
+    }
+
+    [Script] // 111400 - Burning Rush
+    class spell_warl_burning_rush_AuraScript : AuraScript
+    {
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            if (GetTarget().GetHealthPct() <= (float)(aurEff.GetAmount()))
+            {
+                PreventDefaultAction();
+                Remove();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new(PeriodicTick, 1, AuraType.PeriodicDamagePercent));
         }
     }
 
@@ -90,25 +143,25 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.SchoolDamage));
-            OnCalcCritChance.Add(new OnCalcCritChanceHandler(CalcCritChance));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.SchoolDamage));
+            OnCalcCritChance.Add(new(CalcCritChance));
         }
     }
-    
+
     [Script] // 77220 - Mastery: Chaotic Energies
     class spell_warl_chaotic_energies : AuraScript
     {
         void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
-            AuraEffect auraEffect = GetEffect(1);
-            if (auraEffect == null || !GetTargetApplication().HasEffect(1))
+            AuraEffect effect1 = GetEffect(1);
+            if (effect1 == null || !GetTargetApplication().HasEffect(1))
             {
                 PreventDefaultAction();
                 return;
             }
 
             // You take ${$s2/3}% reduced damage
-            float damageReductionPct = (float)auraEffect.GetAmount() / 3;
+            float damageReductionPct = (float)(effect1.GetAmount()) / 3;
             // plus a random amount of up to ${$s2/3}% additional reduced damage
             damageReductionPct += RandomHelper.FRand(0.0f, damageReductionPct);
 
@@ -117,7 +170,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectAbsorb.Add(new EffectAbsorbHandler(HandleAbsorb, 2));
+            OnEffectAbsorb.Add(new(HandleAbsorb, 2));
         }
     }
 
@@ -131,7 +184,7 @@ namespace Scripts.Spells.Warlock
 
         public override bool Load()
         {
-            return GetCaster().IsTypeId(TypeId.Player);
+            return GetCaster().IsPlayer();
         }
 
         void HandleScriptEffect(uint effIndex)
@@ -141,7 +194,34 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script] // 108416 - Dark Pact
+    class spell_warl_dark_pact : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((spellInfo.Id, 1), (spellInfo.Id, 2));
+        }
+
+        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            canBeRecalculated = false;
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                float extraAmount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 2.5f;
+                ulong absorb = caster.CountPctFromCurHealth(GetEffectInfo(1).CalcValue(caster));
+                caster.SetHealth(caster.GetHealth() - absorb);
+                amount = (int)(MathFunctions.CalculatePct(absorb, GetEffectInfo(2).CalcValue(caster)) + extraAmount);
+            }
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcAmount.Add(new(CalculateAmount, 0, AuraType.SchoolAbsorb));
         }
     }
 
@@ -151,7 +231,7 @@ namespace Scripts.Spells.Warlock
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // If effect is Removed by expire Remove the summoned demonic circle too.
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.Reapply))
+            if (!mode.HasFlag(AuraEffectHandleModes.Reapply))
                 GetTarget().RemoveGameObject(GetId(), true);
 
             GetTarget().RemoveAura(SpellIds.DemonicCircleAllowCast);
@@ -160,13 +240,13 @@ namespace Scripts.Spells.Warlock
         void HandleDummyTick(AuraEffect aurEff)
         {
             GameObject circle = GetTarget().GetGameObject(GetId());
-            if (circle)
+            if (circle != null)
             {
                 // Here we check if player is in demonic circle teleport range, if so add
-                // WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST; allowing him to cast the WARLOCK_DEMONIC_CIRCLE_TELEPORT.
-                // If not in range Remove the WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST.
+                // WarlockDemonicCircleAllowCast; allowing him to cast the WarlockDemonicCircleTeleport.
+                // If not in range Remove the WarlockDemonicCircleAllowCast.
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DemonicCircleTeleport, GetCastDifficulty());
+                SpellInfo spellInfo = SpellMgr.GetSpellInfo(SpellIds.DemonicCircleTeleport, GetCastDifficulty());
 
                 if (GetTarget().IsWithinDist(circle, spellInfo.GetMaxRange(true)))
                 {
@@ -180,8 +260,8 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask));
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
+            OnEffectRemove.Add(new(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask));
+            OnEffectPeriodic.Add(new(HandleDummyTick, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -191,10 +271,10 @@ namespace Scripts.Spells.Warlock
         void HandleTeleport(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Player player = GetTarget().ToPlayer();
-            if (player)
+            if (player != null)
             {
                 GameObject circle = player.GetGameObject(SpellIds.DemonicCircleSummon);
-                if (circle)
+                if (circle != null)
                 {
                     player.NearTeleportTo(circle.GetPositionX(), circle.GetPositionY(), circle.GetPositionZ(), circle.GetOrientation());
                     player.RemoveMovementImpairingAuras(false);
@@ -204,7 +284,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(HandleTeleport, 0, AuraType.MechanicImmunity, AuraEffectHandleModes.Real));
+            OnEffectApply.Add(new(HandleTeleport, 0, AuraType.MechanicImmunity, AuraEffectHandleModes.Real));
         }
     }
 
@@ -213,7 +293,8 @@ namespace Scripts.Spells.Warlock
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GlyphOfDemonTraining, SpellIds.DevourMagicHeal) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(SpellIds.GlyphOfDemonTraining, SpellIds.DevourMagicHeal)
+            && ValidateSpellEffect((spellInfo.Id, 1));
         }
 
         void OnSuccessfulDispel(uint effIndex)
@@ -226,14 +307,13 @@ namespace Scripts.Spells.Warlock
 
             // Glyph of Felhunter
             Unit owner = caster.GetOwner();
-            if (owner)
-                if (owner.GetAura(SpellIds.GlyphOfDemonTraining) != null)
-                    owner.CastSpell(owner, SpellIds.DevourMagicHeal, args);
+            if (owner?.GetAura(SpellIds.GlyphOfDemonTraining) != null)
+                owner.CastSpell(owner, SpellIds.DevourMagicHeal, args);
         }
 
         public override void Register()
         {
-            OnEffectSuccessfulDispel.Add(new EffectHandler(OnSuccessfulDispel, 0, SpellEffectName.Dispel));
+            OnEffectSuccessfulDispel.Add(new(OnSuccessfulDispel, 0, SpellEffectName.Dispel));
         }
     }
 
@@ -257,10 +337,10 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new(HandleRemove, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 48181 - Haunt
     class spell_warl_haunt : SpellScript
     {
@@ -277,7 +357,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            AfterHit.Add(new HitHandler(HandleAfterHit));
+            AfterHit.Add(new(HandleAfterHit));
         }
     }
 
@@ -287,7 +367,7 @@ namespace Scripts.Spells.Warlock
         void ApplyEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit caster = GetCaster();
-            if (!caster)
+            if (caster == null)
                 return;
 
             Unit target = GetTarget();
@@ -307,13 +387,13 @@ namespace Scripts.Spells.Warlock
         void OnPeriodic(AuraEffect aurEff)
         {
             Unit caster = GetCaster();
-            if (!caster)
+            if (caster == null)
                 return;
-            //! HACK for self damage, is not blizz :/
+            //! Hack for self damage, is not blizz :/
             uint damage = (uint)caster.CountPctFromMaxHealth(aurEff.GetBaseAmount());
 
             Player modOwner = caster.GetSpellModOwner();
-            if (modOwner)
+            if (modOwner != null)
                 modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.PowerCost0, ref damage);
 
             SpellNonMeleeDamage damageInfo = new(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastId());
@@ -325,9 +405,9 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(ApplyEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real));
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.ObsModHealth));
+            OnEffectApply.Add(new(ApplyEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new(RemoveEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real));
+            OnEffectPeriodic.Add(new(OnPeriodic, 0, AuraType.ObsModHealth));
         }
     }
 
@@ -342,7 +422,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnHit.Add(new HitHandler(HandleOnHit));
+            OnHit.Add(new(HandleOnHit));
         }
     }
 
@@ -361,10 +441,70 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleOnEffectHit, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(HandleOnEffectHit, 0, SpellEffectName.SchoolDamage));
         }
     }
-    
+
+    [Script] // 366330 - Random Sayaad
+    class spell_warl_random_sayaad : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SuccubusPact, SpellIds.IncubusPact);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            caster.RemoveAurasDueToSpell(SpellIds.SuccubusPact);
+            caster.RemoveAurasDueToSpell(SpellIds.IncubusPact);
+
+            Player player = GetCaster().ToPlayer();
+            if (player == null)
+                return;
+
+            Pet pet = player.GetPet();
+            if (pet != null)
+            {
+                if (pet.IsPetSayaad())
+                    pet.DespawnOrUnsummon();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    // 366323 - Strengthen Pact - Succubus
+    // 366325 - Strengthen Pact - Incubus
+    [Script] // 366222 - Summon Sayaad
+    class spell_warl_sayaad_precast_disorientation : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SharedConst.SpellPetSummoningDisorientation);
+        }
+
+        // Note: this is a special case in which the warlock's minion pet must also cast Summon Disorientation at the beginning Math.Since this is only handled by SpellEffectSummonPet in Spell.CheckCast.
+        public override void OnPrecast()
+        {
+            Player player = GetCaster().ToPlayer();
+            if (player == null)
+                return;
+
+            Pet pet = player.GetPet();
+            if (pet != null)
+                pet.CastSpell(pet, SharedConst.SpellPetSummoningDisorientation, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                    .SetOriginalCaster(pet.GetGUID())
+                    .SetTriggeringSpell(GetSpell()));
+        }
+
+        public override void Register() { }
+    }
+
     [Script] // 6358 - Seduction (Special Ability)
     class spell_warl_seduction : SpellScript
     {
@@ -377,11 +517,11 @@ namespace Scripts.Spells.Warlock
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
             {
-                if (caster.GetOwner() && caster.GetOwner().HasAura(SpellIds.GlyphOfSuccubus))
+                if (caster.GetOwner() != null && caster.GetOwner().HasAura(SpellIds.GlyphOfSuccubus))
                 {
-                    target.RemoveAurasByType(AuraType.PeriodicDamage, ObjectGuid.Empty, target.GetAura(SpellIds.PriestShadowWordDeath)); // SW:D shall not be Removed.
+                    target.RemoveAurasByType(AuraType.PeriodicDamage, ObjectGuid.Empty, target.GetAura(SpellIds.PriestShadowWordDeath)); // Sw:D shall not be Removed.
                     target.RemoveAurasByType(AuraType.PeriodicDamagePercent);
                     target.RemoveAurasByType(AuraType.PeriodicLeech);
                 }
@@ -390,7 +530,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ApplyAura));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ApplyAura));
         }
     }
 
@@ -399,13 +539,13 @@ namespace Scripts.Spells.Warlock
     {
         void FilterTargets(List<WorldObject> targets)
         {
-            if (GetExplTargetUnit())
+            if (GetExplTargetUnit() != null)
                 targets.Remove(GetExplTargetUnit());
         }
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
+            OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEnemy));
         }
     }
 
@@ -425,7 +565,7 @@ namespace Scripts.Spells.Warlock
 
             amount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * GetEffectInfo(0).CalcValue(caster) / 100;
         }
-        
+
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
@@ -444,16 +584,16 @@ namespace Scripts.Spells.Warlock
             Remove();
 
             Unit caster = GetCaster();
-            if (!caster)
+            if (caster == null)
                 return;
 
-            caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.SeedOfCorruptionDamage, true);
+            caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.SeedOfCorruptionDamage, aurEff);
         }
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateBuffer, 2, AuraType.Dummy));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 2, AuraType.Dummy));
+            DoEffectCalcAmount.Add(new(CalculateBuffer, 2, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 2, AuraType.Dummy));
         }
     }
 
@@ -478,7 +618,7 @@ namespace Scripts.Spells.Warlock
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int amount = aurEff.GetAmount() - (int)damageInfo.GetDamage();
+            int amount = (int)(aurEff.GetAmount() - damageInfo.GetDamage());
             if (amount > 0)
             {
                 aurEff.SetAmount(amount);
@@ -488,15 +628,15 @@ namespace Scripts.Spells.Warlock
             Remove();
 
             Unit caster = GetCaster();
-            if (!caster)
+            if (caster == null)
                 return;
 
-            caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.SeedOfCorruptionGeneric, new CastSpellExtraArgs(aurEff));
+            caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.SeedOfCorruptionGeneric, aurEff);
         }
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 1, AuraType.Dummy));
         }
     }
 
@@ -515,10 +655,10 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            AfterCast.Add(new CastHandler(HandleAfterCast));
+            AfterCast.Add(new(HandleAfterCast));
         }
     }
-    
+
     [Script] // 86121 - Soul Swap
     class spell_warl_soul_swap : SpellScript
     {
@@ -535,22 +675,26 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.SchoolDamage));
         }
     }
 
-    [Script] // 86211 - Soul Swap - Also acts as a dot container
-    public class spell_warl_soul_swap_override : AuraScript
+    [Script] // 86211 - Soul Swap Override - Also acts as a dot container
+    class spell_warl_soul_swap_override : AuraScript
     {
+        List<uint> _dotList = new();
+        Unit _swapCaster;
+
         //! Forced to, pure virtual functions must have a body when linking
         public override void Register() { }
 
         public void AddDot(uint id) { _dotList.Add(id); }
+
         public List<uint> GetDotList() { return _dotList; }
+
         public Unit GetOriginalSwapSource() { return _swapCaster; }
+
         public void SetOriginalSwapSource(Unit victim) { _swapCaster = victim; }
-        List<uint> _dotList = new();
-        Unit _swapCaster;
     }
 
     [Script] //! Soul Swap Copy Spells - 92795 - Simply copies spell IDs.
@@ -560,7 +704,7 @@ namespace Scripts.Spells.Warlock
         {
             Unit swapVictim = GetCaster();
             Unit warlock = GetHitUnit();
-            if (!warlock || !swapVictim)
+            if (warlock == null || swapVictim == null)
                 return;
 
             var appliedAuras = swapVictim.GetAppliedAuras();
@@ -574,12 +718,12 @@ namespace Scripts.Spells.Warlock
 
             FlagArray128 classMask = GetEffectInfo().SpellClassMask;
 
-            foreach (var itr in appliedAuras)
+            foreach (var (id, aurApp) in appliedAuras)
             {
-                SpellInfo spellProto = itr.Value.GetBase().GetSpellInfo();
-                if (itr.Value.GetBase().GetCaster() == warlock)
+                SpellInfo spellProto = aurApp.GetBase().GetSpellInfo();
+                if (aurApp.GetBase().GetCaster() == warlock)
                     if (spellProto.SpellFamilyName == SpellFamilyNames.Warlock && (spellProto.SpellFamilyFlags & classMask))
-                        swapSpellScript.AddDot(itr.Key);
+                        swapSpellScript.AddDot(id);
             }
 
             swapSpellScript.SetOriginalSwapSource(swapVictim);
@@ -587,7 +731,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -612,13 +756,13 @@ namespace Scripts.Spells.Warlock
             }
 
             // Soul Swap Exhale can't be cast on the same target than Soul Swap
-            if (swapTarget && currentTarget && swapTarget == currentTarget)
+            if (swapTarget != null && currentTarget != null && swapTarget == currentTarget)
                 return SpellCastResult.BadTargets;
 
             return SpellCastResult.SpellCastOk;
         }
 
-        void onEffectHit(uint effIndex)
+        void OnEffectHitTargetTemp(uint effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.SoulSwapModCost, true);
             bool hasGlyph = GetCaster().HasAura(SpellIds.GlyphOfSoulSwap);
@@ -638,11 +782,11 @@ namespace Scripts.Spells.Warlock
             if (dotList.Empty())
                 return;
 
-            foreach (var itr in dotList)
+            foreach (var spellId in dotList)
             {
-                GetCaster().AddAura(itr, GetHitUnit());
-                if (!hasGlyph && swapSource)
-                    swapSource.RemoveAurasDueToSpell(itr);
+                GetCaster().AddAura(spellId, GetHitUnit());
+                if (!hasGlyph && swapSource != null)
+                    swapSource.RemoveAurasDueToSpell(spellId);
             }
 
             // Remove Soul Swap Exhale buff
@@ -654,8 +798,8 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-            OnEffectHitTarget.Add(new EffectHandler(onEffectHit, 0, SpellEffectName.SchoolDamage));
+            OnCheckCast.Add(new(CheckCast));
+            OnEffectHitTarget.Add(new(OnEffectHitTargetTemp, 0, SpellEffectName.SchoolDamage));
         }
     }
 
@@ -664,51 +808,116 @@ namespace Scripts.Spells.Warlock
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Soulshatter);
+            return ValidateSpellInfo(SpellIds.SoulshatterEffect);
         }
 
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            if (target)
-                if (target.CanHaveThreatList() && target.GetThreatManager().GetThreat(caster) > 0.0f)
-                    caster.CastSpell(target, SpellIds.Soulshatter, true);
+            if (target != null)
+                if (target.GetThreatManager().IsThreatenedBy(caster, true))
+                    caster.CastSpell(target, SpellIds.SoulshatterEffect, true);
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
-    [Script("spell_warl_t4_2p_bonus_shadow", SpellIds.Flameshadow)]// 37377 - Shadowflame
-    [Script("spell_warl_t4_2p_bonus_fire", SpellIds.Shadowflame)]// 39437 - Shadowflame Hellfire and RoF
+    [Script] // 366323 - Strengthen Pact - Succubus
+    class spell_warl_strengthen_pact_succubus : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SuccubusPact, SpellIds.SummonSuccubus);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            caster.CastSpell(null, SpellIds.SuccubusPact, TriggerCastFlags.FullMask);
+            caster.CastSpell(null, SpellIds.SummonSuccubus, TriggerCastFlags.FullMask);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 366325 - Strengthen Pact - Incubus
+    class spell_warl_strengthen_pact_incubus : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.IncubusPact, SpellIds.SummonIncubus);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            caster.CastSpell(null, SpellIds.IncubusPact, TriggerCastFlags.FullMask);
+            caster.CastSpell(null, SpellIds.SummonIncubus, TriggerCastFlags.FullMask);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 366222 - Summon Sayaad
+    class spell_warl_summon_sayaad : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SummonSuccubus, SpellIds.SummonIncubus);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell(null, RandomHelper.randChance(50) ? SpellIds.SummonSuccubus : SpellIds.SummonIncubus, TriggerCastFlags.FullMask);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    // 37377 - Shadowflame
+    // 39437 - Shadowflame Hellfire and RoF
+    [Script("spell_warl_t4_2p_bonus_shadow", SpellIds.Flameshadow)]
+    [Script("spell_warl_t4_2p_bonus_fire", SpellIds.Shadowflame)]
     class spell_warl_t4_2p_bonus : AuraScript
     {
-        public spell_warl_t4_2p_bonus(uint triggerSpell)
+        uint _triggerId;
+
+        public spell_warl_t4_2p_bonus(uint triggerId)
         {
-            _triggerSpell = triggerSpell;
+            _triggerId = triggerId;
         }
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(_triggerSpell);
+            return ValidateSpellInfo(_triggerId);
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
-            caster.CastSpell(caster, _triggerSpell, new CastSpellExtraArgs(aurEff));
+            caster.CastSpell(caster, _triggerId, aurEff);
         }
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
-
-        uint _triggerSpell;
     }
 
     [Script] // 30108, 34438, 34439, 35183 - Unstable Affliction
@@ -722,26 +931,35 @@ namespace Scripts.Spells.Warlock
         void HandleDispel(DispelInfo dispelInfo)
         {
             Unit caster = GetCaster();
-            if (caster)
+            if (caster != null)
             {
                 AuraEffect aurEff = GetEffect(1);
                 if (aurEff != null)
                 {
-                    // backfire damage and silence
-                    CastSpellExtraArgs args = new(aurEff);
-                    args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount() * 9);
-                    caster.CastSpell(dispelInfo.GetDispeller(), SpellIds.UnstableAfflictionDispel, args);
+                    Unit target = dispelInfo.GetDispeller().ToUnit();
+                    if (target != null)
+                    {
+                        int bp = aurEff.GetAmount();
+                        bp = target.SpellDamageBonusTaken(caster, aurEff.GetSpellInfo(), bp, DamageEffectType.DOT);
+                        bp *= 9;
+
+                        // backfire damage and silence
+                        CastSpellExtraArgs args = new(aurEff);
+                        args.AddSpellMod(SpellValueMod.BasePoint0, bp);
+                        caster.CastSpell(target, SpellIds.UnstableAfflictionDispel, args);
+                    }
                 }
             }
         }
 
         public override void Register()
         {
-            AfterDispel.Add(new AuraDispelHandler(HandleDispel));
+            AfterDispel.Add(new(HandleDispel));
         }
     }
 
-    [Script] // 5740 - Rain of Fire Updated 7.1.5
+    // 5740 - Rain of Fire
+    [Script] /// Updated 7.1.5
     class spell_warl_rain_of_fire : AuraScript
     {
         void HandleDummyTick(AuraEffect aurEff)
@@ -751,14 +969,14 @@ namespace Scripts.Spells.Warlock
 
             foreach (AreaTrigger rainOfFireAreaTrigger in rainOfFireAreaTriggers)
             {
-                var insideTargets = rainOfFireAreaTrigger.GetInsideUnits();
+                List<ObjectGuid> insideTargets = rainOfFireAreaTrigger.GetInsideUnits();
                 targetsInRainOfFire.AddRange(insideTargets);
             }
 
             foreach (ObjectGuid insideTargetGuid in targetsInRainOfFire)
             {
-                Unit insideTarget = Global.ObjAccessor.GetUnit(GetTarget(), insideTargetGuid);
-                if (insideTarget)
+                Unit insideTarget = ObjAccessor.GetUnit(GetTarget(), insideTargetGuid);
+                if (insideTarget != null)
                     if (!GetTarget().IsFriendlyTo(insideTarget))
                         GetTarget().CastSpell(insideTarget, SpellIds.RainOfFireDamage, true);
             }
@@ -766,7 +984,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 3, AuraType.PeriodicDummy));
+            OnEffectPeriodic.Add(new(HandleDummyTick, 3, AuraType.PeriodicDummy));
         }
     }
 }

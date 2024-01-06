@@ -17,7 +17,7 @@ namespace Game.Chat
             Player player = handler.GetSession().GetPlayer();
             Creature creatureTarget = handler.GetSelectedCreature();
 
-            if (!creatureTarget || creatureTarget.IsPet() || creatureTarget.IsTypeId(TypeId.Player))
+            if (creatureTarget == null || creatureTarget.IsPet() || creatureTarget.IsTypeId(TypeId.Player))
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
@@ -62,17 +62,16 @@ namespace Game.Chat
         }
 
         [Command("learn", RBACPermissions.CommandPetLearn)]
-        static bool HandlePetLearnCommand(CommandHandler handler, uint spellId)
+        static bool HandlePetLearnCommand(CommandHandler handler, SpellInfo spellInfo)
         {
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
-            if (!pet)
+            if (pet == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectPlayerOrPet);
                 return false;
             }
 
-            if (spellId == 0 || !Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
-                return false;
+            uint spellId = spellInfo.Id;
 
             // Check if pet already has it
             if (pet.HasSpell(spellId))
@@ -82,8 +81,7 @@ namespace Game.Chat
             }
 
             // Check if spell is valid
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
-            if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo))
+            if (!Global.SpellMgr.IsSpellValid(spellInfo))
             {
                 handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellId);
                 return false;
@@ -96,14 +94,16 @@ namespace Game.Chat
         }
 
         [Command("unlearn", RBACPermissions.CommandPetUnlearn)]
-        static bool HandlePetUnlearnCommand(CommandHandler handler, uint spellId)
+        static bool HandlePetUnlearnCommand(CommandHandler handler, SpellInfo spellInfo)
         {
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
-            if (!pet)
+            if (pet == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectPlayerOrPet);
                 return false;
             }
+
+            uint spellId = spellInfo.Id;
 
             if (pet.HasSpell(spellId))
                 pet.RemoveSpell(spellId, false);
@@ -114,25 +114,26 @@ namespace Game.Chat
         }
 
         [Command("level", RBACPermissions.CommandPetLevel)]
-        static bool HandlePetLevelCommand(CommandHandler handler, int level)
+        static bool HandlePetLevelCommand(CommandHandler handler, int? level)
         {
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
-            Player owner = pet ? pet.GetOwner() : null;
-            if (!pet || !owner)
+            Player owner = pet != null ? pet.GetOwner() : null;
+            if (pet == null || owner == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectPlayerOrPet);
                 return false;
             }
 
-            if (level == 0)
+            if (!level.HasValue)
                 level = (int)(owner.GetLevel() - pet.GetLevel());
+
             if (level == 0 || level < -SharedConst.StrongMaxLevel || level > SharedConst.StrongMaxLevel)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
-            int newLevel = (int)pet.GetLevel() + level;
+            int newLevel = (int)pet.GetLevel() + level.Value;
             if (newLevel < 1)
                 newLevel = 1;
             else if (newLevel > owner.GetLevel())
@@ -145,7 +146,7 @@ namespace Game.Chat
         static Pet GetSelectedPlayerPetOrOwn(CommandHandler handler)
         {
             Unit target = handler.GetSelectedUnit();
-            if (target)
+            if (target != null)
             {
                 if (target.IsTypeId(TypeId.Player))
                     return target.ToPlayer().GetPet();
@@ -155,7 +156,7 @@ namespace Game.Chat
             }
 
             Player player = handler.GetSession().GetPlayer();
-            return player ? player.GetPet() : null;
+            return player != null ? player.GetPet() : null;
         }
     }
 }

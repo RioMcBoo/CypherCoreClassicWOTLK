@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Spells;
 using System;
@@ -376,7 +377,7 @@ namespace Game.AI
     public class PlayerAI : UnitAI
     {
         protected new Player me;
-        uint _selfSpec;
+        ChrSpecialization _selfSpec;
         bool _isSelfHealer;
         bool _isSelfRangedAttacker;
 
@@ -390,55 +391,20 @@ namespace Game.AI
 
         bool IsPlayerHealer(Player who)
         {
-            if (!who)
+            if (who == null)
                 return false;
 
-            return who.GetClass() switch
-            {
-                Class.Paladin => who.GetPrimarySpecialization() == (uint)TalentSpecialization.PaladinHoly,
-                Class.Priest => who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestDiscipline || who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestHoly,
-                Class.Shaman => who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanRestoration,
-                Class.Monk => who.GetPrimarySpecialization() == (uint)TalentSpecialization.MonkMistweaver,
-                Class.Druid => who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidRestoration,
-                _ => false,
-            };
+            var chrSpec = who.GetPrimarySpecializationEntry();
+            return chrSpec != null && chrSpec.GetRole() == ChrSpecializationRole.Healer;
         }
 
         bool IsPlayerRangedAttacker(Player who)
         {
-            if (!who)
+            if (who == null)
                 return false;
 
-            switch (who.GetClass())
-            {
-                case Class.Warrior:
-                case Class.Paladin:
-                case Class.Rogue:
-                case Class.Deathknight:
-                default:
-                    return false;
-                case Class.Mage:
-                case Class.Warlock:
-                    return true;
-                case Class.Hunter:
-                {
-                    // check if we have a ranged weapon equipped
-                    Item rangedSlot = who.GetItemByPos(EquipmentSlot.Ranged);
-
-                    ItemTemplate rangedTemplate = rangedSlot ? rangedSlot.GetTemplate() : null;
-                    if (rangedTemplate != null)
-                        if (Convert.ToBoolean((1 << (int)rangedTemplate.GetSubClass()) & (int)ItemSubClassWeapon.MaskRanged))
-                            return true;
-
-                    return false;
-                }
-                case Class.Priest:
-                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestShadow;
-                case Class.Shaman:
-                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanElemental;
-                case Class.Druid:
-                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidBalance;
-            }
+            var chrSpec = who.GetPrimarySpecializationEntry();
+            return chrSpec != null && chrSpec.GetFlags().HasFlag(ChrSpecializationFlag.Ranged);
         }
 
         Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)
@@ -489,12 +455,12 @@ namespace Game.AI
                     break;
                 case SpellTarget.Victim:
                     pTarget = me.GetVictim();
-                    if (!pTarget)
+                    if (pTarget == null)
                         return null;
                     break;
                 case SpellTarget.Charmer:
                     pTarget = me.GetCharmer();
-                    if (!pTarget)
+                    if (pTarget == null)
                         return null;
                     break;
                 case SpellTarget.Self:
@@ -560,13 +526,13 @@ namespace Game.AI
                 return;
 
             Unit victim = me.GetVictim();
-            if (!victim)
+            if (victim == null) 
                 return;
 
             uint rangedAttackSpell = 0;
 
             Item rangedItem = me.GetItemByPos(EquipmentSlot.Ranged);
-            ItemTemplate rangedTemplate = rangedItem ? rangedItem.GetTemplate() : null;
+            ItemTemplate rangedTemplate = rangedItem != null? rangedItem.GetTemplate() : null;
             if (rangedTemplate != null)
             {
                 switch ((ItemSubClassWeapon)rangedTemplate.GetSubClass())
@@ -644,13 +610,13 @@ namespace Game.AI
         // helper functions to determine player info
         public bool IsHealer(Player who = null)
         {
-            return (!who || who == me) ? _isSelfHealer : IsPlayerHealer(who);
+            return (who == null || who == me) ? _isSelfHealer : IsPlayerHealer(who);
         }
-        public bool IsRangedAttacker(Player who = null) { return (!who || who == me) ? _isSelfRangedAttacker : IsPlayerRangedAttacker(who); }
-        public uint GetSpec(Player who = null) { return (!who || who == me) ? _selfSpec : who.GetPrimarySpecialization(); }
+        public bool IsRangedAttacker(Player who = null) { return (who == null || who == me) ? _isSelfRangedAttacker : IsPlayerRangedAttacker(who); }
+        public ChrSpecialization GetSpec(Player who = null) { return (who == null || who == me) ? _selfSpec : who.GetPrimarySpecialization(); }
         public void SetIsRangedAttacker(bool state) { _isSelfRangedAttacker = state; } // this allows overriding of the default ranged attacker detection
 
-        public virtual Unit SelectAttackTarget() { return me.GetCharmer() ? me.GetCharmer().GetVictim() : null; }
+        public virtual Unit SelectAttackTarget() { return me.GetCharmer() != null ? me.GetCharmer().GetVictim() : null; }
 
         public enum SpellTarget
         {
@@ -693,7 +659,7 @@ namespace Game.AI
         public override Unit SelectAttackTarget()
         {
             Unit charmer = me.GetCharmer();
-            if (charmer)
+            if (charmer != null)
             {
                 UnitAI charmerAI = charmer.GetAI();
                 if (charmerAI != null)
@@ -959,7 +925,7 @@ namespace Game.AI
                             VerifyAndPushSpellCast(spells, SPELL_RUNE_TAP, TARGET_NONE, 2);
                             VerifyAndPushSpellCast(spells, SPELL_HYSTERIA, TARGET_SELF, 5);
                             if (Creature* creatureCharmer = GetCharmer())
-                                if (!creatureCharmer.IsDungeonBoss() && !creatureCharmer.isWorldBoss())
+                                if (creature == nullCharmer.IsDungeonBoss() && !creatureCharmer.isWorldBoss())
                                     VerifyAndPushSpellCast(spells, SPELL_HYSTERIA, creatureCharmer, 15);
                             VerifyAndPushSpellCast(spells, SPELL_HEART_STRIKE, TARGET_VICTIM, 2);
                             if (hasFF && hasBP)
@@ -1149,9 +1115,9 @@ namespace Game.AI
                             {
                                 VerifyAndPushSpellCast(spells, SPELL_NOURISH, creatureCharmer, 5);
                                 VerifyAndPushSpellCast(spells, SPELL_WILD_GROWTH, creatureCharmer, 5);
-                                if (!creatureCharmer.GetAuraApplicationOfRankedSpell(SPELL_REJUVENATION, me.GetGUID()))
+                                if (creature == nullCharmer.GetAuraApplicationOfRankedSpell(SPELL_REJUVENATION, me.GetGUID()))
                                     VerifyAndPushSpellCast(spells, SPELL_REJUVENATION, creatureCharmer, 8);
-                                if (!creatureCharmer.GetAuraApplicationOfRankedSpell(SPELL_REGROWTH, me.GetGUID()))
+                                if (creature == nullCharmer.GetAuraApplicationOfRankedSpell(SPELL_REGROWTH, me.GetGUID()))
                                     VerifyAndPushSpellCast(spells, SPELL_REGROWTH, creatureCharmer, 8);
                                 uint8 lifebloomStacks = 0;
                                 if (Aura const* lifebloom = creatureCharmer.GetAura(SPELL_LIFEBLOOM, me.GetGUID()))
@@ -1234,7 +1200,7 @@ namespace Game.AI
         public override void UpdateAI(uint diff)
         {
             Creature charmer = GetCharmer();
-            if (!charmer)
+            if (charmer == null)
                 return;
 
             //kill self if charm aura has infinite duration
@@ -1254,10 +1220,10 @@ namespace Game.AI
             if (charmer.IsEngaged())
             {
                 Unit target = me.GetVictim();
-                if (!target || !CanAIAttack(target))
+                if (target == null || !CanAIAttack(target))
                 {
                     target = SelectAttackTarget();
-                    if (!target || !CanAIAttack(target))
+                    if (target == null || !CanAIAttack(target))
                     {
                         if (!_isFollowing)
                         {

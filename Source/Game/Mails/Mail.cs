@@ -18,11 +18,11 @@ namespace Game.Mails
             items.Add(mii);
         }
 
-        public bool RemoveItem(uint item_guid)
+        public bool RemoveItem(ulong itemGuid)
         {
             foreach (var item in items)
             {
-                if (item.item_guid == item_guid)
+                if (item.item_guid == itemGuid)
                 {
                     items.Remove(item);
                     return true;
@@ -33,7 +33,7 @@ namespace Game.Mails
 
         public bool HasItems() { return !items.Empty(); }
 
-        public uint messageID;
+        public ulong messageID;
         public MailMessageType messageType;
         public MailStationery stationery;
         public uint mailTemplateId;
@@ -42,7 +42,7 @@ namespace Game.Mails
         public string subject;
         public string body;
         public List<MailItemInfo> items = new();
-        public List<uint> removedItems = new();
+        public List<ulong> removedItems = new();
         public long expire_time;
         public long deliver_time;
         public ulong money;
@@ -76,7 +76,7 @@ namespace Game.Mails
             m_receiver = receiver;
             m_receiver_lowguid = receiver_lowguid;
 
-            Cypher.Assert(!receiver || receiver.GetGUID().GetCounter() == receiver_lowguid);
+            Cypher.Assert(receiver == null || receiver.GetGUID().GetCounter() == receiver_lowguid);
         }
 
         public MailReceiver(Player receiver, ObjectGuid receiverGuid)
@@ -84,7 +84,7 @@ namespace Game.Mails
             m_receiver = receiver;
             m_receiver_lowguid = receiverGuid.GetCounter();
 
-            Cypher.Assert(!receiver || receiver.GetGUID() == receiverGuid);
+            Cypher.Assert(receiver == null || receiver.GetGUID() == receiverGuid);
         }
 
         public Player GetPlayer() { return m_receiver; }

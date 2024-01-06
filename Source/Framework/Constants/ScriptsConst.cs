@@ -31,6 +31,8 @@ namespace Framework.Constants
         OnResistAbsorbCalculation,
         AfterCast,
         CalcCritChance,
+        CalcDamage,
+        CalcHealing,
         OnPrecast,
         CalcCastTime
     }
@@ -48,6 +50,7 @@ namespace Framework.Constants
         EffectCalcPeriodic,
         EffectCalcSpellmod,
         EffectCalcCritChance,
+        EffectCalcDamageAndHealing,
         EffectAbsorb,
         EffectAfterAbsorb,
         EffectManaShield,
@@ -67,5 +70,12 @@ namespace Framework.Constants
         AfterProc,
         //Apply,
         //Remove
+    }
+
+    public enum EncounterType
+    {
+        DungeonEncounter,
+        Battleground,
+        MythicPlusRun
     }
 }

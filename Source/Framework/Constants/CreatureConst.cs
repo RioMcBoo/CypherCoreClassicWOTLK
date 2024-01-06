@@ -48,7 +48,7 @@ namespace Framework.Constants
         Looting = 0x400,
         PetInCombat = 0x800,
         PvpEnabling = 0x1000,
-        Silenced = 0x2000,
+        ForceNameplate = 0x2000,
         CantSwim = 0x4000,
         CanSwim = 0x8000, // shows swim animation in water
         NonAttackable2 = 0x10000,
@@ -71,7 +71,7 @@ namespace Framework.Constants
         Disallowed = (ServerControlled | NonAttackable | RemoveClientControl |
                                    PlayerControlled | Rename | Preparation | /* UNIT_FLAG_UNK_6 | */
                                    NotAttackable1 | Looting | PetInCombat | PvpEnabling |
-                                   Silenced | NonAttackable2 | Pacified | Stunned |
+                                   NonAttackable2 | Pacified | Stunned |
                                    InCombat | OnTaxi | Disarmed | Confused | Fleeing |
                                    Possessed | Skinnable | Mount | Unk28 |
                                    PreventEmotesFromChatText | Sheathe | Immune),
@@ -190,8 +190,8 @@ namespace Framework.Constants
         VendorReagent = 0x800,     // 100%
         Repair = 0x1000,     // 100%
         FlightMaster = 0x2000,     // 100%
-        SpiritHealer = 0x4000,     // Guessed
-        SpiritGuide = 0x8000,     // Guessed
+        SpiritHealer = 0x4000,     // 100%
+        AreaSpiritHealer = 0x8000,     // 100%
         Innkeeper = 0x10000,     // 100%
         Banker = 0x20000,     // 100%
         Petitioner = 0x40000,     // 100% 0xc0000 = Guild Petitions, 0x40000 = Arena Team Petitions
@@ -216,6 +216,7 @@ namespace Framework.Constants
         ItemUpgradeMaster = 0x01,
         GarrisonArchitect = 0x02,
         Steering = 0x04,
+        AreaSpiritHealerIndividual = 0x08,
         ShipmentCrafter = 0x10,
         GarrisonMissionNpc = 0x20,
         TradeskillNpc = 0x40,
@@ -287,7 +288,7 @@ namespace Framework.Constants
         CombatPing = 0x00020000,
         Aquatic = 0x00040000, // Aka Water Only, CreatureTemplateMovement.Ground = 0
         Amphibious = 0x00080000, // CreatureTemplateMovement.Swim = 1
-        NoMeleeFlee = 0x00100000, // Prevents Melee(Does Not Prevent Chasing, Does Not Make Creature Passive). Not Sure What 'Flee' Means But Another Flag Is Named NoMeleeApproach
+        NoMelee = 0x00100000, // Prevents Melee(Does Not Prevent Chasing, Does Not Make Creature Passive). Not Sure What 'Flee' Means But Another Flag Is Named NoMeleeApproach
         VisibleToGhosts = 0x00200000, // CreatureTypeFlagVisibleToGhosts
         PvpEnabling = 0x00400000, // Old UnitFlagPvpEnabling, Now UnitBytes2OffsetPvpFlag From UnitFieldBytes2
         DoNotPlayWoundAnim = 0x00800000, // CreatureTypeFlagDoNotPlayWoundAnim

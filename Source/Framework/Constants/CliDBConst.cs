@@ -19,11 +19,11 @@ namespace Framework.Constants
     public enum HeaderFlags : short
     {
         None = 0x0,
-        OffsetMap = 0x1,
-        SecondIndex = 0x2,
-        IndexMap = 0x4,
-        Unknown = 0x8,
-        Compressed = 0x10,
+        Sparse = 0x1,
+        SecondaryKey = 0x2,
+        Index = 0x4,
+        Unknown1 = 0x8,
+        BitPacked = 0x10,
     }
 
     [Flags]
@@ -887,45 +887,69 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum AreaFlags
+    public enum AreaFlags : uint
     {
-        Snow = 0x01,                // Snow (Only Dun Morogh, Naxxramas, Razorfen Downs And Winterspring)
-        Unk1 = 0x02,                // Razorfen Downs, Naxxramas And Acherus: The Ebon Hold (3.3.5a)
-        Unk2 = 0x04,                // Only Used For Areas On Map 571 (Development Before)
-        SlaveCapital = 0x08,                // City And City Subzones
-        Unk3 = 0x10,                // Can'T Find Common Meaning
-        SlaveCapital2 = 0x20,                // Slave Capital City Flag?
-        AllowDuels = 0x40,                // Allow To Duel Here
-        Arena = 0x80,                // Arena, Both Instanced And World Arenas
-        Capital = 0x100,                // Main Capital City Flag
-        City = 0x200,                // Only For One Zone Named "City" (Where It Located?)
-        Outland = 0x400,                // Expansion Zones? (Only Eye Of The Storm Not Have This Flag, But Have 0x4000 Flag)
-        Sanctuary = 0x800,                // Sanctuary Area (Pvp Disabled)
-        NeedFly = 0x1000,                // Unknown
-        Unused1 = 0x2000,                // Unused In 3.3.5a
-        Outland2 = 0x4000,                // Expansion Zones? (Only Circle Of Blood Arena Not Have This Flag, But Have 0x400 Flag)
-        OutdoorPvp = 0x8000,                // Pvp Objective Area? (Death'S Door Also Has This Flag Although It'S No Pvp Object Area)
-        ArenaInstance = 0x10000,                // Used By Instanced Arenas Only
-        Unused2 = 0x20000,                // Unused In 3.3.5a
-        ContestedArea = 0x40000,                // On Pvp Servers These Areas Are Considered Contested, Even Though The Zone It Is Contained In Is A Horde/Alliance Territory.
-        Unk6 = 0x80000,                // Valgarde And Acherus: The Ebon Hold
-        Lowlevel = 0x100000,                // Used For Some Starting Areas With AreaLevel <= 15
-        Town = 0x200000,                // Small Towns With Inn
-        RestZoneHorde = 0x400000,                // Warsong Hold, Acherus: The Ebon Hold, New Agamand Inn, Vengeance Landing Inn, Sunreaver Pavilion (Something To Do With Team?)
-        RestZoneAlliance = 0x800000,                // Valgarde, Acherus: The Ebon Hold, Westguard Inn, Silver Covenant Pavilion (Something To Do With Team?)
-        Combat = 0x1000000,                // "combat" area (Script_GetZonePVPInfo), used
-        Inside = 0x2000000,                // Used For Determinating Spell Related Inside/Outside Questions In Map.Isoutdoors
-        Outside = 0x4000000,                // Used For Determinating Spell Related Inside/Outside Questions In Map.Isoutdoors
-        CanHearthAndResurrect = 0x8000000,                // Can Hearth And Resurrect From Area
-        NoFlyZone = 0x20000000,                // Marks Zones Where You Cannot Fly
-        Unk9 = 0x40000000,
+        EmitBreathParticles = 0x01,
+        BreathParticlesOverrideParent = 0x02,
+        OnMapDungeon = 0x04,
+        AllowTradeChannel = 0x08,
+        EnemiesPvPFlagged = 0x10,
+        AllowResting = 0x20,
+        AllowDueling = 0x40,
+        FreeForAllPvP = 0x80,
+        LinkedChat = 0x100, // Set in cities
+        LinkedChatSpecialArea = 0x200,
+        ForceThisAreaWhenOnDynamicTransport = 0x400,
+        NoPvP = 0x800,
+        NoGhostOnRelease = 0x1000,
+        SubZoneAmbientMultiplier = 0x2000,
+        EnableFlightBoundsOnMap = 0x4000,
+        PVPPOI = 0x8000,
+        NoChatChannels = 0x10000,
+        AreaNotInUse = 0x20000,
+        Contested = 0x40000,
+        NoPlayerSummoning = 0x80000,
+        NoDuelingIfTournamentRealm = 0x100000,
+        PlayersCallGuards = 0x200000,
+        HordeResting = 0x400000,
+        AllianceResting = 0x800000,
+        CombatZone = 0x1000000,
+        ForceIndoors = 0x2000000,
+        ForceOutdoors = 0x4000000,
+        AllowHearthAndRessurectFromArea = 0x08000000,
+        NoLocalDefenseChannel = 0x10000000,
+        OnlyEvaluateGhostBindOnce = 0x20000000,
+        IsSubzone = 0x40000000,
+        DontEvaluateGraveyardFromClient = 0x80000000
     }
 
     [Flags]
     public enum AreaFlags2
     {
-        DontShowSanctuary = 0x200,                // Hides sanctuary status from zone text color (Script_GetZonePVPInfo)
-        CanEnableWarMode = 0x1000,                // Allows enabling war mode
+        ForceMicroDungeonArtMap = 0x01, // Ask Programmer
+        UseSubzonePlayerLoot = 0x02,
+        AllowPetBattleDuelingEvenIfNoDuelingAllowed = 0x04,
+        UseMapTransferLocsForCemeteries = 0x08,
+        IsGarrison = 0x10,
+        UseSubzoneForChatChannel = 0x20,
+        DontRealmCoalesceChatChannel = 0x40,
+        NotExplorable = 0x80, // Don't assign area bit
+        DontUseParentMapForCemeteries = 0x100,
+        DontShowSanctuaryText = 0x200,
+        CrossFactionZoneChat = 0x400,
+        ForceNoResting = 0x800,
+        AllowWarModeToggle = 0x1000
+    }
+
+    [Flags]
+    public enum AreaMountFlags
+    {
+        None = 0x0,
+        AllowGroundMounts = 0x1,
+        AllowFlyingMounts = 0x2,
+        AllowSurfaceSwimmingMounts = 0x4,
+        AllowUnderwaterSwimmingMounts = 0x8,
+        ClientEnforcesMount = 0x10
     }
 
     public enum ArtifactCategory
@@ -998,7 +1022,53 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum BattlemasterListFlags : byte
+    public enum CurrencyTypesFlags : uint
+    {
+        Tradable = 0x00000001, // NYI
+        AppearsInLootWindow = 0x00000002, // NYI
+        ComputedWeeklyMaximum = 0x00000004, // NYI
+        _100_Scaler = 0x00000008,
+        NoLowLevelDrop = 0x00000010, // NYI
+        IgnoreMaxQtyOnLoad = 0x00000020,
+        LogOnWorldChange = 0x00000040, // NYI
+        TrackQuantity = 0x00000080,
+        ResetTrackedQuantity = 0x00000100, // NYI
+        UpdateVersionIgnoreMax = 0x00000200,
+        SuppressChatMessageOnVersionChange = 0x00000400,
+        SingleDropInLoot = 0x00000800, // NYI
+        HasWeeklyCatchup = 0x00001000, // NYI
+        DoNotCompressChat = 0x00002000, // NYI
+        DoNotLogAcquisitionToBi = 0x00004000, // NYI
+        NoRaidDrop = 0x00008000, // NYI
+        NotPersistent = 0x00010000, // NYI
+        Deprecated = 0x00020000, // NYI
+        DynamicMaximum = 0x00040000,
+        SuppressChatMessages = 0x00080000,
+        DoNotToast = 0x00100000, // NYI
+        DestroyExtraOnLoot = 0x00200000, // NYI
+        DontShowTotalInTooltip = 0x00400000, // NYI
+        DontCoalesceInLootWindow = 0x00800000, // NYI
+        AccountWide = 0x01000000, // NYI
+        AllowOverflowMailer = 0x02000000, // NYI
+        HideAsReward = 0x04000000, // NYI
+        HasWarmodeBonus = 0x08000000, // NYI
+        IsAllianceOnly = 0x10000000,
+        IsHordeOnly = 0x20000000,
+        LimitWarmodeBonusOncePerTooltip = 0x40000000, // NYI
+        DeprecatedCurrencyFlag = 0x80000000  // this flag itself is deprecated, not currency that has it
+    }
+
+    [Flags]
+    public enum CurrencyTypesFlagsB
+    {
+        UseTotalEarnedForEarned = 0x01,
+        ShowQuestXPGainInTooltip = 0x02, // NYI
+        NoNotificationMailOnOfflineProgress = 0x04, // NYI
+        BattlenetVirtualCurrency = 0x08  // NYI
+    }
+
+    [Flags]
+    public enum BattlemasterListFlags : int
     {
         Disabled = 0x01,
         SkipRoleCheck = 0x02,
@@ -1044,10 +1114,60 @@ namespace Framework.Constants
         Caster = 0x01,
         Ranged = 0x02,
         Melee = 0x04,
-        Unknown = 0x08,
         DualWieldTwoHanded = 0x10,     // Used For Cunitdisplay::Setsheatheinvertedfordualwield
         PetOverrideSpec = 0x20,
         Recommended = 0x40,
+    }
+
+    public enum ChrSpecializationRole
+    {
+        Tank = 0,
+        Healer = 1,
+        Dps = 2
+    }
+
+    public enum ChrSpecialization
+    {
+        None = 0,
+        MageArcane = 62,
+        MageFire = 63,
+        MageFrost = 64,
+        PaladinHoly = 65,
+        PaladinProtection = 66,
+        PaladinRetribution = 70,
+        WarriorArms = 71,
+        WarriorFury = 72,
+        WarriorProtection = 73,
+        DruidBalance = 102,
+        DruidFeral = 103,
+        DruidGuardian = 104,
+        DruidRestoration = 105,
+        DeathKnightBlood = 250,
+        DeathKnightFrost = 251,
+        DeathKnightUnholy = 252,
+        HunterBeastMastery = 253,
+        HunterMarksmanship = 254,
+        HunterSurvival = 255,
+        PriestDiscipline = 256,
+        PriestHoly = 257,
+        PriestShadow = 258,
+        RogueAssassination = 259,
+        RogueOutlaw = 260,
+        RogueSubtely = 261,
+        ShamanElemental = 262,
+        ShamanEnhancement = 263,
+        ShamanRestoration = 264,
+        WarlockAffliction = 265,
+        WarlockDemonology = 266,
+        WarlockDestruction = 267,
+        MonkBrewmaster = 268,
+        MonkWindwalker = 269,
+        MonkMistweaver = 270,
+        DemonHunterHavoc = 577,
+        DemonHunterVengeance = 581,
+        EvokerDevastation = 1467,
+        EvokerPreservation = 1468,
+        EvokerAugmentation = 1473
     }
 
     public enum ContentTuningCalcType
@@ -1478,7 +1598,21 @@ namespace Framework.Constants
         OneshotStandVar0 = 991,
         OneshotFlycustomspell01 = 992,
         OneshotSpelleffectDecay = 993,
-        CreatureSpecial = 994,
+        StateCreatureSpecial = 994,
+        OneshotWareact01 = 1001,
+        OneshotFlycustomspell04 = 1004,
+        OneshotTalkSubdued = 1005,
+        StateEmotetalk = 1006,
+        StateWainteraction = 1007,
+        OneshotTakeOffStart = 1009,
+        OneshotBattleroarNoSound = 1010,
+        StateWaweaponsharpen = 1011,
+        OneshotRollstart = 1012,
+        OneshotRollend = 1013,
+        OneshotWareact02 = 1014,
+        OneshotWathreaten = 1015,
+        Artoffloop = 1016,
+        StateReadyspellomniNosheath = 1017,
     }
 
     public enum GlyphSlotType
@@ -1592,17 +1726,36 @@ namespace Framework.Constants
         DraenorMining = 45,
         LegionMining = 46,
         KulTiranMining = 47,
-        Skinning2 = 48,
-        Open2 = 149,
+        LegionSkinning = 48,
+        OpenItem = 149,
         Foraging = 150,
         JellyDeposit = 152,
-        ShadowlandHerbalism = 153,
-        ShadowlandMining = 155,
+        ShadowlandsHerbalism = 153,
+        ShadowlandsMining = 155,
         CovenantNightFae = 157,
         CovenantVenthyr = 158,
         CovenantKyrian = 159,
         CovenantNecrolord = 160,
-        ProfessionEngineering = 161
+        Engineering = 161,
+        DragonIslesHerbalism = 162,
+        Mining2 = 163,
+        ElusiveHerbalism = 166,
+        ElusiveMining = 167,
+        Enchanting = 169,
+        DragonIslesTreasure = 170,
+        DragonIslesAlchemy25 = 172,
+        DragonIslesBlacksmithing25 = 173,
+        DragonIslesEnchanting25 = 174,
+        DragonIslesEngineering25 = 175,
+        DragonIslesHerbalism25 = 176,
+        DragonIslesInscription25 = 177,
+        DragonIslesJewelcrafting25 = 178,
+        DragonIslesLeatherworking25 = 179,
+        DragonIslesMining25 = 180,
+        DragonIslesSkinning25 = 181,
+        DragonIslesTailoring25 = 182,
+        OpenKneelingPlant = 186,
+        DragonIslesMining = 188
     }
 
     public enum MapTypes : byte
@@ -1629,14 +1782,6 @@ namespace Framework.Constants
         Anytime = 0,
         Daily = 1,
         Weekly = 2
-    }
-
-    public enum AreaMountFlags
-    {
-        GroundAllowed = 0x1,
-        FlyingAllowed = 0x2,
-        FloatAllowed = 0x4,
-        UnderwaterAllowed = 0x8
     }
 
     public enum ModifierTreeOperator
@@ -1702,6 +1847,92 @@ namespace Framework.Constants
         GearDiff = 8
     }
 
+    public enum PlayerInteractionType
+    {
+        None = 0,
+        TradePartner = 1,
+        Item = 2,
+        Gossip = 3,
+        QuestGiver = 4,
+        Merchant = 5,
+        TaxiNode = 6,
+        Trainer = 7,
+        Banker = 8,
+        AlliedRaceDetailsGiver = 9,
+        GuildBanker = 10,
+        Registrar = 11,
+        Vendor = 12,
+        PetitionVendor = 13,
+        TabardVendor = 14,
+        TalentMaster = 15,
+        SpecializationMaster = 16,
+        MailInfo = 17,
+        SpiritHealer = 18,
+        AreaSpiritHealer = 19,
+        Binder = 20,
+        Auctioneer = 21,
+        StableMaster = 22,
+        BattleMaster = 23,
+        Transmogrifier = 24,
+        LFGDungeon = 25,
+        VoidStorageBanker = 26,
+        BlackMarketAuctioneer = 27,
+        AdventureMap = 28,
+        WorldMap = 29,
+        GarrArchitect = 30,
+        GarrTradeskill = 31,
+        GarrMission = 32,
+        ShipmentCrafter = 33,
+        GarrRecruitment = 34,
+        GarrTalent = 35,
+        Trophy = 36,
+        PlayerChoice = 37,
+        ArtifactForge = 38,
+        ObliterumForge = 39,
+        ScrappingMachine = 40,
+        ContributionCollector = 41,
+        AzeriteRespec = 42,
+        IslandQueue = 43,
+        ItemInteraction = 44,
+        ChromieTime = 45,
+        CovenantPreview = 46,
+        AnimaDiversion = 47,
+        LegendaryCrafting = 48,
+        WeeklyRewards = 49,
+        Soulbind = 50,
+        CovenantSanctum = 51,
+        NewPlayerGuide = 52,
+        ItemUpgrade = 53,
+        AdventureJournal = 54,
+        Renown = 55,
+        AzeriteForge = 56,
+        PerksProgramVendor = 57,
+        ProfessionsCraftingOrder = 58,
+        Professions = 59,
+        ProfessionsCustomerOrder = 60,
+        TraitSystem = 61,
+        BarbersChoice = 62,
+        JailersTowerBuffs = 63,
+        MajorFactionRenown = 64
+    }
+
+    [Flags]
+    public enum PowerTypeFlags
+    {
+        StopRegenWhileCasting = 0x01,
+        UseRegenInterrupt = 0x02,
+        FillFractionalPowerOnEnergize = 0x08,
+        NoClientPrediction = 0x10,
+        UnitsUseDefaultPowerOnInit = 0x20,
+        NotSetToDefaultOnResurrect = 0x40,
+        IsUsedByNPCs = 0x80,
+        ContinueRegenWhileFatigued = 0x200,
+        RegenAffectedByHaste = 0x400,
+        SetToMaxOnLevelUp = 0x1000,
+        SetToMaxLevelOnInitialLogIn = 0x2000,
+        AllowCostModsForPlayers = 0x4000
+    }
+
     public enum PrestigeLevelInfoFlags : byte
     {
         Disabled = 0x01                      // Prestige levels with this flag won't be included to calculate max prestigelevel.
@@ -1731,7 +1962,7 @@ namespace Framework.Constants
         MonoValue = 0x400     // Skill always has value 1
     }
 
-    public enum SpellCategoryFlags : sbyte
+    public enum SpellCategoryFlags : int
     {
         CooldownScalesWithWeaponSpeed = 0x01, // unused
         CooldownStartsOnEvent = 0x04,
@@ -1819,14 +2050,14 @@ namespace Framework.Constants
         DontDismissWhenEncounterIsAborted = 0x80000000  // NYI
     }
 
-    public enum TaxiNodeFlags : ushort
+    public enum TaxiNodeFlags : int
     {
         Alliance = 0x1,
         Horde = 0x2,
         UseFavoriteMount = 0x10
     }
 
-    public enum TaxiPathNodeFlags : byte
+    public enum TaxiPathNodeFlags : int
     {
         Teleport = 0x1,
         Stop = 0x2
@@ -2116,6 +2347,100 @@ namespace Framework.Constants
         CreatureSpellDamage = 9
     }
 
+    [Flags]
+    public enum TraitCombatConfigFlags
+    {
+        None = 0x0,
+        ActiveForSpec = 0x1,
+        StarterBuild = 0x2,
+        SharedActionBars = 0x4
+    }
+
+    [Flags]
+    public enum TraitCondFlags
+    {
+        None = 0x0,
+        IsGate = 0x1,
+        IsAlwaysMet = 0x2,
+        IsSufficient = 0x4,
+    }
+
+    public enum TraitConditionType
+    {
+        Available = 0,
+        Visible = 1,
+        Granted = 2,
+        Increased = 3
+    }
+
+    public enum TraitConfigType
+    {
+        Invalid = 0,
+        Combat = 1,
+        Profession = 2,
+        Generic = 3
+    }
+
+    public enum TraitCurrencyType
+    {
+        Gold = 0,
+        CurrencyTypesBased = 1,
+        TraitSourced = 2
+    }
+
+    public enum TraitEdgeType
+    {
+        VisualOnly = 0,
+        DeprecatedRankConnection = 1,
+        SufficientForAvailability = 2,
+        RequiredForAvailability = 3,
+        MutuallyExclusive = 4,
+        DeprecatedSelectionOption = 5
+    }
+
+    public enum TraitNodeEntryType
+    {
+        SpendHex = 0,
+        SpendSquare = 1,
+        SpendCircle = 2,
+        SpendSmallCircle = 3,
+        DeprecatedSelect = 4,
+        DragAndDrop = 5,
+        SpendDiamond = 6,
+        ProfPath = 7,
+        ProfPerk = 8,
+        ProfPathUnlock = 9
+    }
+
+    [Flags]
+    public enum TraitNodeGroupFlag
+    {
+        None = 0x0,
+        AvailableByDefault = 0x1
+    }
+
+    public enum TraitNodeType
+    {
+        Single = 0,
+        Tiered = 1,
+        Selection = 2
+    }
+
+    public enum TraitPointsOperationType
+    {
+        None = -1,
+        Set = 0,
+        Multiply = 1
+    }
+
+    [Flags]
+    public enum TraitTreeFlag
+    {
+        None = 0x0,
+        CannotRefund = 0x1,
+        HideSingleRankNumbers = 0x2
+    }
+
     public enum UiMapFlag
     {
         None = 0x00,
@@ -2146,7 +2471,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum UiMapType : uint
+    public enum UiMapType : byte
     {
         Cosmic = 0,
         World = 1,
@@ -2407,7 +2732,7 @@ namespace Framework.Constants
     //    ContentTuningPvpItemLevelDamageScaling = 15,
     //}
 
-    public enum BattlePetSpeciesFlags : ushort
+    public enum BattlePetSpeciesFlags : int
     {
         NoRename = 0x01,
         WellKnown = 0x02,
@@ -2424,7 +2749,8 @@ namespace Framework.Constants
         NoLicenseRequired = 0x1000,
         AddsAllowedWithBoss = 0x2000,
         HideUntilLearned = 0x4000,
-        MatchPlayerHighPetLevel = 0x8000
+        MatchPlayerHighPetLevel = 0x8000,
+        NoWildPetAddsAllowed = 0x10000,
     }
 
     public enum SpellVisualEffectNameType

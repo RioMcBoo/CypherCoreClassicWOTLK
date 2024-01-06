@@ -66,7 +66,10 @@ namespace Framework.Constants
         GarrTalentTree = 58,
         WeeklyRewardChest = 59,
         ClientModel = 60,
-        Max = 61
+        CraftingTable = 61,
+        PerksProgramChest = 62,
+
+        Max
     }
 
     public enum GameObjectState
@@ -191,5 +194,15 @@ namespace Framework.Constants
     {
         Moving,
         WaitingOnPauseWaypoint
+    }
+
+    // enum for GAMEOBJECT_TYPE_NEW_FLAG
+    // values taken from world state
+    public enum FlagState
+    {
+        InBase = 1,
+        Taken,
+        Dropped,
+        Respawning
     }
 }

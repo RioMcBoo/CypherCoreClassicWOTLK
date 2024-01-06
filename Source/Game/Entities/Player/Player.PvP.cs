@@ -50,7 +50,7 @@ namespace Game.Entities
             // do not reward honor in arenas, but enable onkill spellproc
             if (InArena())
             {
-                if (!victim || victim == this || !victim.IsTypeId(TypeId.Player))
+                if (victim == null || victim == this || !victim.IsTypeId(TypeId.Player))
                     return false;
 
                 if (GetBGTeam() == victim.ToPlayer().GetBGTeam())
@@ -70,7 +70,7 @@ namespace Game.Entities
             UpdateHonorFields();
 
             // do not reward honor in arenas, but return true to enable onkill spellproc
-            if (InBattleground() && GetBattleground() && GetBattleground().IsArena())
+            if (InBattleground() && GetBattleground() != null && GetBattleground().IsArena())
                 return true;
 
             // Promote to float for calculations
@@ -78,12 +78,12 @@ namespace Game.Entities
 
             if (honor_f <= 0)
             {
-                if (!victim || victim == this || victim.HasAuraType(AuraType.NoPvpCredit))
+                if (victim == null || victim == this || victim.HasAuraType(AuraType.NoPvpCredit))
                     return false;
 
                 victim_guid = victim.GetGUID();
                 Player plrVictim = victim.ToPlayer();
-                if (plrVictim)
+                if (plrVictim != null)
                 {
                     if (GetEffectiveTeam() == plrVictim.GetEffectiveTeam() && !Global.WorldMgr.IsFFAPvPRealm())
                         return false;
@@ -179,7 +179,7 @@ namespace Game.Entities
 
             if (WorldConfig.GetBoolValue(WorldCfg.PvpTokenEnable) && pvptoken)
             {
-                if (!victim || victim == this || victim.HasAuraType(AuraType.NoPvpCredit))
+                if (victim == null || victim == this || victim.HasAuraType(AuraType.NoPvpCredit))
                     return true;
 
                 if (victim.IsTypeId(TypeId.Player))
@@ -235,7 +235,7 @@ namespace Game.Entities
 
             var rewardCurrencyTypes = Global.DB2Mgr.GetRewardPackCurrencyTypesByRewardID(rewardPackEntry.Id);
             foreach (RewardPackXCurrencyTypeRecord currency in rewardCurrencyTypes)
-                ModifyCurrency((CurrencyTypes)currency.CurrencyTypeID, currency.Quantity);
+                AddCurrency(currency.CurrencyTypeID, (uint)currency.Quantity/* TODO: CurrencyGainSource */);
 
             var rewardPackXItems = Global.DB2Mgr.GetRewardPackItemsByRewardID(rewardPackEntry.Id);
             foreach (RewardPackXItemRecord rewardPackXItem in rewardPackXItems)
@@ -356,7 +356,7 @@ namespace Game.Entities
                     if (area.IsSanctuary())
                         return false;
 
-                    if (area.HasFlag(AreaFlags.Arena))
+                    if (area.GetFlags().HasFlag(AreaFlags.FreeForAllPvP))
                         return true;
 
                     if (Global.BattleFieldMgr.IsWorldPvpArea(area.Id))
@@ -418,10 +418,11 @@ namespace Game.Entities
             return GetBattlegroundQueueIndex(bgQueueTypeId) < SharedConst.MaxPlayerBGQueues;
         }
 
-        public void SetBattlegroundId(uint val, BattlegroundTypeId bgTypeId)
+        public void SetBattlegroundId(uint val, BattlegroundTypeId bgTypeId, BattlegroundQueueTypeId queueId = default)
         {
             m_bgData.bgInstanceID = val;
             m_bgData.bgTypeID = bgTypeId;
+            m_bgData.queueId = queueId;
         }
 
         public uint AddBattlegroundQueueId(BattlegroundQueueTypeId val)
@@ -510,7 +511,7 @@ namespace Game.Entities
         public bool CanUseBattlegroundObject(GameObject gameobject)
         {
             // It is possible to call this method with a null pointer, only skipping faction check.
-            if (gameobject)
+            if (gameobject != null)
             {
                 FactionTemplateRecord playerFaction = GetFactionTemplateEntry();
                 FactionTemplateRecord faction = CliDB.FactionTemplateStorage.LookupByKey(gameobject.GetFaction());
@@ -562,7 +563,7 @@ namespace Game.Entities
                 // If map is dungeon find linked graveyard
                 if (GetMap().IsDungeon())
                 {
-                    WorldSafeLocsEntry entry = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
+                    WorldSafeLocsEntry entry = Global.ObjectMgr.GetClosestGraveyard(this, GetTeam(), this);
                     if (entry != null)
                         m_bgData.joinPos = entry.Loc;
                     else
@@ -591,7 +592,7 @@ namespace Game.Entities
         public void LeaveBattleground(bool teleportToEntryPoint = true)
         {
             Battleground bg = GetBattleground();
-            if (bg)
+            if (bg != null)
             {
                 bg.RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
@@ -615,12 +616,12 @@ namespace Game.Entities
 
         public bool IsDeserter() { return HasAura(26013); }
         
-        public bool CanJoinToBattleground(Battleground bg)
+        public bool CanJoinToBattleground(BattlegroundTemplate bg)
         {
             RBACPermissions perm = RBACPermissions.JoinNormalBg;
             if (bg.IsArena())
                 perm = RBACPermissions.JoinArenas;
-            else if (bg.IsRandom())
+            else if (Global.BattlegroundMgr.IsRandomBattleground(bg.Id))
                 perm = RBACPermissions.JoinRandomBg;
 
             return GetSession().HasPermission(perm);
@@ -647,7 +648,7 @@ namespace Game.Entities
             reportAfkResult.Offender = GetGUID();
             Battleground bg = GetBattleground();
             // Battleground also must be in progress!
-            if (!bg || bg != reporter.GetBattleground() || GetEffectiveTeam() != reporter.GetEffectiveTeam() || bg.GetStatus() != BattlegroundStatus.InProgress)
+            if (bg == null || bg != reporter.GetBattleground() || GetEffectiveTeam() != reporter.GetEffectiveTeam() || bg.GetStatus() != BattlegroundStatus.InProgress)
             {
                 reporter.SendPacket(reportAfkResult);
                 return;
@@ -687,8 +688,8 @@ namespace Game.Entities
         public bool GetBGAccessByLevel(BattlegroundTypeId bgTypeId)
         {
             // get a template bg instead of running one
-            Battleground bg = Global.BattlegroundMgr.GetBattlegroundTemplate(bgTypeId);
-            if (!bg)
+            BattlegroundTemplate bg = Global.BattlegroundMgr.GetBattlegroundTemplateByTypeId(bgTypeId);
+            if (bg == null)
                 return false;
 
             // limit check leel to dbc compatible level range
@@ -742,7 +743,7 @@ namespace Game.Entities
         public uint GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
         public uint GetRBGPersonalRating() { return GetArenaPersonalRating(3); }
 
-        public uint GetArenaPersonalRating(int slot)
+        public uint GetArenaPersonalRating(byte slot)
         {
             PVPInfo pvpInfo = GetPvpInfoForBracket(slot);
             if (pvpInfo != null)
@@ -751,13 +752,14 @@ namespace Game.Entities
             return 0;
         }
 
-        public PVPInfo GetPvpInfoForBracket(int bracket)
+        public PVPInfo GetPvpInfoForBracket(byte bracket)
         {
-            if (bracket < m_activePlayerData.PvpInfo.GetSize())
+            int index = m_activePlayerData.PvpInfo.FindIndexIf(pvpInfo =>
             {
-                if (!m_activePlayerData.PvpInfo[bracket].Disqualified)
-                    return m_activePlayerData.PvpInfo[bracket];
-            }
+                return pvpInfo.Bracket == bracket && !pvpInfo.Disqualified;
+            });
+            if (index >= 0)
+                return m_activePlayerData.PvpInfo[index];
 
             return null;
         }

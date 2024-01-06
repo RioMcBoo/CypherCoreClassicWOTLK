@@ -328,7 +328,7 @@ namespace Game.Networking.Packets
         {
             public void Read(WorldPacket data)
             {
-                MailID = data.ReadInt32();
+                MailID = data.ReadUInt64();
                 uint bodyLength = data.ReadBits<uint>(13);
                 uint subjectLength = data.ReadBits<uint>(9);
 
@@ -336,7 +336,7 @@ namespace Game.Networking.Packets
                 MailSubject = data.ReadString(subjectLength);
             }
 
-            public int MailID;
+            public ulong MailID;
             public string MailSubject;
             public string MailBody;
         }
@@ -391,6 +391,7 @@ namespace Game.Networking.Packets
                 RideTicket.Read(data);
 
                 GroupFinderActivityID = data.ReadUInt32();
+                Unknown1007 = data.ReadUInt8();
                 LastTitleAuthorGuid = data.ReadPackedGuid();
                 LastDescriptionAuthorGuid = data.ReadPackedGuid();
                 LastVoiceChatAuthorGuid = data.ReadPackedGuid();
@@ -408,6 +409,7 @@ namespace Game.Networking.Packets
 
             public RideTicket RideTicket;
             public uint GroupFinderActivityID;
+            public byte Unknown1007;
             public ObjectGuid LastTitleAuthorGuid;
             public ObjectGuid LastDescriptionAuthorGuid;
             public ObjectGuid LastVoiceChatAuthorGuid;
@@ -479,7 +481,7 @@ namespace Game.Networking.Packets
             switch (ComplaintType)
             {
                 case SupportSpamType.Mail:
-                    MailID = _worldPacket.ReadUInt32();
+                    MailID = _worldPacket.ReadUInt64();
                     break;
                 case SupportSpamType.Chat:
                     Chat.Read(_worldPacket);
@@ -492,14 +494,14 @@ namespace Game.Networking.Packets
         }
 
         public SupportSpamType ComplaintType;
-        ComplaintOffender Offender;
-        uint MailID;
-        ComplaintChat Chat;
+        public ComplaintOffender Offender;
+        public ulong MailID;
+        public ComplaintChat Chat;
 
-        ulong EventGuid;
-        ulong InviteGuid;
+        public ulong EventGuid;
+        public ulong InviteGuid;
 
-        struct ComplaintOffender
+        public struct ComplaintOffender
         {
             public void Read(WorldPacket data)
             {
@@ -513,7 +515,7 @@ namespace Game.Networking.Packets
             public uint TimeSinceOffence;
         }
 
-        struct ComplaintChat
+        public struct ComplaintChat
         {
             public void Read(WorldPacket data)
             {

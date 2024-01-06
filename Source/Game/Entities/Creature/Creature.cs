@@ -212,61 +212,37 @@ namespace Game.Entities
 
         public bool InitEntry(uint entry, CreatureData data = null)
         {
-            CreatureTemplate normalInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
-            if (normalInfo == null)
+            CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
+            if (creatureInfo == null)
             {
                 Log.outError(LogFilter.Sql, "Creature.InitEntry creature entry {0} does not exist.", entry);
                 return false;
             }
 
-            // get difficulty 1 mode entry
-            CreatureTemplate cInfo = null;
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(GetMap().GetDifficultyID());
-            while (cInfo == null && difficultyEntry != null)
-            {
-                int idx = CreatureTemplate.DifficultyIDToDifficultyEntryIndex(difficultyEntry.Id);
-                if (idx == -1)
-                    break;
-
-                if (normalInfo.DifficultyEntry[idx] != 0)
-                {
-                    cInfo = Global.ObjectMgr.GetCreatureTemplate(normalInfo.DifficultyEntry[idx]);
-                    break;
-                }
-
-                if (difficultyEntry.FallbackDifficultyID == 0)
-                    break;
-
-                difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
-            }
-
-            if (cInfo == null)
-                cInfo = normalInfo;
-
-            SetEntry(entry);                                        // normal entry always
-            m_creatureInfo = cInfo;                                 // map mode related always
+            m_creatureInfo = creatureInfo;
+            SetEntry(entry);
+            m_creatureDifficulty = creatureInfo.GetDifficulty(!IsPet() ? GetMap().GetDifficultyID() : Difficulty.None);
 
             // equal to player Race field, but creature does not have race
             SetRace(0);
-            SetClass((Class)cInfo.UnitClass);
+            SetClass((Class)creatureInfo.UnitClass);
 
             // Cancel load if no model defined
-            if (cInfo.GetFirstValidModel() == null)
+            if (creatureInfo.GetFirstValidModel() == null)
             {
                 Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has no model defined in table `creature_template`, can't load. ", entry);
                 return false;
             }
 
-            CreatureModel model = ObjectManager.ChooseDisplayId(cInfo, data);
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, cInfo);
+            CreatureModel model = ObjectManager.ChooseDisplayId(creatureInfo, data);
+            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, creatureInfo);
             if (minfo == null)                                             // Cancel load if no model defined
             {
                 Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid model {1} defined in table `creature_template`, can't load.", entry, model.CreatureDisplayID);
                 return false;
             }
 
-            SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
-            SetNativeDisplayId(model.CreatureDisplayID, model.DisplayScale);
+            SetDisplayId(model.CreatureDisplayID, true);
 
             // Load creature equipment
             if (data == null)
@@ -279,7 +255,7 @@ namespace Game.Entities
                 LoadEquipment(data.equipmentId);
             }
 
-            SetName(normalInfo.Name);                              // at normal entry always
+            SetName(creatureInfo.Name);                              // at normal entry always
 
             SetModCastingSpeed(1.0f);
             SetModSpellHaste(1.0f);
@@ -288,24 +264,27 @@ namespace Game.Entities
             SetModHasteRegen(1.0f);
             SetModTimeRate(1.0f);
 
-            SetSpeedRate(UnitMoveType.Walk, cInfo.SpeedWalk);
-            SetSpeedRate(UnitMoveType.Run, cInfo.SpeedRun);
+            SetSpeedRate(UnitMoveType.Walk, creatureInfo.SpeedWalk);
+            SetSpeedRate(UnitMoveType.Run, creatureInfo.SpeedRun);
             SetSpeedRate(UnitMoveType.Swim, 1.0f);      // using 1.0 rate
             SetSpeedRate(UnitMoveType.Flight, 1.0f);    // using 1.0 rate
 
             SetObjectScale(GetNativeObjectScale());
 
-            SetHoverHeight(cInfo.HoverHeight);
-
-            SetCanDualWield(cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.UseOffhandAttack));
+            SetCanDualWield(creatureInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.UseOffhandAttack));
 
             // checked at loading
-            DefaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : cInfo.MovementType);
+            DefaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : creatureInfo.MovementType);
             if (m_wanderDistance == 0 && DefaultMovementType == MovementGeneratorType.Random)
                 DefaultMovementType = MovementGeneratorType.Idle;
 
             for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 m_spells[i] = GetCreatureTemplate().Spells[i];
+
+            ApplyAllStaticFlags(m_creatureDifficulty.StaticFlags);
+
+            _staticFlags.ApplyFlag(CreatureStaticFlags.NoXp, creatureInfo.CreatureType == CreatureType.Critter || IsPet() || IsTotem() || creatureInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.NoXP));
+            _staticFlags.ApplyFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit));
 
             return true;
         }
@@ -325,9 +304,7 @@ namespace Game.Entities
 
             SetFaction(cInfo.Faction);
 
-            ulong npcFlags;
-            uint unitFlags, unitFlags2, unitFlags3, dynamicFlags;
-            ObjectManager.ChooseCreatureFlags(cInfo, out npcFlags, out unitFlags, out unitFlags2, out unitFlags3, out dynamicFlags, data);
+            ObjectManager.ChooseCreatureFlags(cInfo, out ulong npcFlags, out uint unitFlags, out uint unitFlags2, out uint unitFlags3, data);
 
             if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
                 npcFlags |= Global.GameEventMgr.GetNPCFlag(this);
@@ -344,7 +321,7 @@ namespace Game.Entities
             ReplaceAllUnitFlags2((UnitFlags2)unitFlags2);
             ReplaceAllUnitFlags3((UnitFlags3)unitFlags3);
 
-            ReplaceAllDynamicFlags((UnitDynFlags)dynamicFlags);
+            ReplaceAllDynamicFlags(UnitDynFlags.None);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
 
@@ -397,7 +374,7 @@ namespace Game.Entities
 
             // trigger creature is always not selectable and can not be attacked
             if (IsTrigger())
-                SetUnitFlag(UnitFlags.Uninteractible);
+                SetUninteractible(true);
 
             InitializeReactState();
 
@@ -409,11 +386,10 @@ namespace Game.Entities
 
             SetIsCombatDisallowed(cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.CannotEnterCombat));
 
-            LoadTemplateRoot();
             InitializeMovementFlags();
 
             LoadCreaturesAddon();
-
+            LoadCreaturesSparringHealth();
             LoadTemplateImmunities();
             GetThreatManager().EvaluateSuppressed();
 
@@ -425,10 +401,21 @@ namespace Game.Entities
             return true;
         }
 
+        void ApplyAllStaticFlags(CreatureStaticFlagsHolder flags)
+        {
+            _staticFlags = flags;
+
+            // Apply all other side effects of flag changes
+            SetTemplateRooted(flags.HasFlag(CreatureStaticFlags.Sessile));
+        }
+        
         public override void Update(uint diff)
         {
             if (IsAIEnabled() && triggerJustAppeared && m_deathState != DeathState.Dead)
             {
+                if (IsAreaSpiritHealer() && !IsAreaSpiritHealerIndividual())
+                    CastSpell(null, BattlegroundConst.SpellSpiritHealChannelAoE, false);
+
                 if (m_respawnCompatibilityMode && VehicleKit != null)
                     VehicleKit.Reset();
 
@@ -706,7 +693,7 @@ namespace Game.Entities
 
         public void DoFleeToGetAssistance()
         {
-            if (!GetVictim())
+            if (GetVictim() == null)
                 return;
 
             if (HasAuraType(AuraType.PreventsFleeing))
@@ -723,7 +710,7 @@ namespace Game.Entities
 
                 SetNoSearchAssistance(true);
 
-                if (!creature)
+                if (creature == null)
                     SetControlled(true, UnitState.Fleeing);
                 else
                     GetMotionMaster().MoveSeekAssistance(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ());
@@ -781,7 +768,7 @@ namespace Game.Entities
                 lowGuid = map.GenerateLowGuid(HighGuid.Creature);
 
             Creature creature = new();
-            if (!creature.Create(lowGuid, map, entry, pos, null, vehId))
+            if (creature.Create(lowGuid, map, entry, pos, null, vehId))
                 return null;
 
             return creature;
@@ -790,7 +777,7 @@ namespace Game.Entities
         public static Creature CreateCreatureFromDB(ulong spawnId, Map map, bool addToMap = true, bool allowDuplicate = false)
         {
             Creature creature = new();
-            if (!creature.LoadFromDB(spawnId, map, addToMap, allowDuplicate))
+            if (creature.LoadFromDB(spawnId, map, addToMap, allowDuplicate))
                 return null;
 
             return creature;
@@ -817,6 +804,8 @@ namespace Game.Entities
                 return false;
             }
 
+            CreatureDifficulty creatureDifficulty = cinfo.GetDifficulty(GetMap().GetDifficultyID());
+
             //! Relocate before CreateFromProto, to initialize coords and allow
             //! returning correct zone id for selecting OutdoorPvP/Battlefield script
             Relocate(pos);
@@ -837,7 +826,7 @@ namespace Game.Entities
             }
 
             // Allow players to see those units while dead, do it here (mayby altered by addon auras)
-            if (cinfo.TypeFlags.HasAnyFlag(CreatureTypeFlags.VisibleToGhosts))
+            if (creatureDifficulty.TypeFlags.HasAnyFlag(CreatureTypeFlags.VisibleToGhosts))
                 m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
 
             if (!CreateFromProto(guidlow, entry, data, vehId))
@@ -865,14 +854,16 @@ namespace Game.Entities
                     m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayNormal);
                     break;
             }
+
             LoadCreaturesAddon();
+            LoadCreaturesSparringHealth();
 
             //! Need to be called after LoadCreaturesAddon - MOVEMENTFLAG_HOVER is set there
             posZ += GetHoverOffset();
 
             LastUsedScriptID = GetScriptId();
 
-            if (IsSpiritHealer() || IsSpiritGuide() || GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.GhostVisibility))
+            if (IsSpiritHealer() || IsAreaSpiritHealer() || GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.GhostVisibility))
             {
                 m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
                 m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
@@ -902,21 +893,21 @@ namespace Game.Entities
             {
                 // We're a player pet, probably
                 target = GetAttackerForHelper();
-                if (!target && IsSummon())
+                if (target == null && IsSummon())
                 {
                     Unit owner = ToTempSummon().GetOwner();
                     if (owner != null)
                     {
                         if (owner.IsInCombat())
                             target = owner.GetAttackerForHelper();
-                        if (!target)
+                        if (target == null)
                         {
                             foreach (var itr in owner.m_Controlled)
                             {
                                 if (itr.IsInCombat())
                                 {
                                     target = itr.GetAttackerForHelper();
-                                    if (target)
+                                    if (target != null)
                                         break;
                                 }
                             }
@@ -927,7 +918,7 @@ namespace Game.Entities
             else
                 return null;
 
-            if (target && _IsTargetAcceptable(target) && CanCreatureAttack(target))
+            if (target != null && _IsTargetAcceptable(target) && CanCreatureAttack(target))
             {
                 if (!HasSpellFocus())
                     SetInFront(target);
@@ -935,7 +926,7 @@ namespace Game.Entities
             }
 
             /// @todo a vehicle may eat some mob, so mob should not evade
-            if (GetVehicle())
+            if (GetVehicle() != null)
                 return null;
 
             var iAuras = GetAuraEffectsByType(AuraType.ModInvisibility);
@@ -1040,11 +1031,10 @@ namespace Game.Entities
 
         public bool CanGiveExperience()
         {
-            return !IsCritter()
-                && !IsPet()
-                && !IsTotem()
-                && !GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoXP);
+            return !_staticFlags.HasFlag(CreatureStaticFlags.NoXp);
         }
+
+        public void SetCanGiveExperience(bool xpEnabled) { _staticFlags.ApplyFlag(CreatureStaticFlags.NoXp, !xpEnabled); }
 
         public override bool IsEngaged()
         {
@@ -1058,7 +1048,7 @@ namespace Game.Entities
         {
             base.AtEngage(target);
 
-            if (!GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.AllowMountedCombat))
+            if (!GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.AllowMountedCombat))
                 Dismount();
 
             RefreshCanSwimFlag();
@@ -1107,7 +1097,7 @@ namespace Game.Entities
 
             ClearUnitState(UnitState.AttackPlayer);
             if (IsAlive() && HasDynamicFlag(UnitDynFlags.Tapped))
-                ReplaceAllDynamicFlags((UnitDynFlags)GetCreatureTemplate().DynamicFlags);
+                RemoveDynamicFlag(UnitDynFlags.Tapped);
 
             if (IsPet() || IsGuardian()) // update pets' speed for catchup OOC speed
             {
@@ -1140,6 +1130,19 @@ namespace Game.Entities
             SetHomePosition(GetPosition());
         }
 
+        public void SummonGraveyardTeleporter()
+        {
+            if (!IsAreaSpiritHealer())
+                return;
+
+            uint npcEntry = GetFaction() == (uint)FactionTemplates.AllianceGeneric ? 26350 : 26351u;
+
+            // maybe NPC is summoned with these spells:
+            // ID - 24237 Summon Alliance Graveyard Teleporter (SERVERSIDE)
+            // ID - 46894 Summon Horde Graveyard Teleporter (SERVERSIDE)
+            SummonCreature(npcEntry, GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(1), 0, 0);
+        }
+
         public bool HasFlag(CreatureStaticFlags flag)  { return _staticFlags.HasFlag(flag); }
         public bool HasFlag(CreatureStaticFlags2 flag)  { return _staticFlags.HasFlag(flag); }
         public bool HasFlag(CreatureStaticFlags3 flag)  { return _staticFlags.HasFlag(flag); }
@@ -1151,13 +1154,10 @@ namespace Game.Entities
 
         public uint GetGossipMenuId()
         {
-            if (_gossipMenuId.HasValue)
-                return _gossipMenuId.Value;
-
-            return GetCreatureTemplate().GossipMenuId;
+            return _gossipMenuId;
         }
 
-        public void SetGossipMenuId(uint? gossipMenuId)
+        public void SetGossipMenuId(uint gossipMenuId)
         {
             _gossipMenuId = gossipMenuId;
         }
@@ -1177,31 +1177,43 @@ namespace Game.Entities
 
         public override bool IsMovementPreventedByCasting()
         {
-            // first check if currently a movement allowed channel is active and we're not casting
-            Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
-            if (spell != null)
-            {
-                if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
-                    if (spell.CheckMovement() != SpellCastResult.SpellCastOk)
-                        return true;
-            }
+            if (!base.IsMovementPreventedByCasting() && !HasSpellFocus())
+                return false;
 
-            if (HasSpellFocus())
-                return true;
-
-            if (HasUnitState(UnitState.Casting))
-                return true;
-
-            return false;
+            return true;
         }
 
         public void StartPickPocketRefillTimer()
         {
             _pickpocketLootRestore = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.CreaturePickpocketRefill);
         }
+
         public void ResetPickPocketRefillTimer() { _pickpocketLootRestore = 0; }
+
         public bool CanGeneratePickPocketLoot() { return _pickpocketLootRestore <= GameTime.GetGameTime(); }
 
+        public uint GetLootId()
+        {
+            if (_lootId.HasValue)
+                return _lootId.Value;
+
+            return GetCreatureDifficulty().LootID;
+        }
+
+        public void SetLootId(uint? lootId)
+        {
+            _lootId = lootId;
+        }
+
+        public void SetDontClearTapListOnEvade(bool dontClear)
+        {
+            // only temporary summons are allowed to not clear their tap list
+            if (m_spawnId == 0)
+                m_dontClearTapListOnEvade = dontClear;
+        }
+
+        public bool IsTapListNotClearedOnEvade() { return m_dontClearTapListOnEvade; }
+        
         public void SetTappedBy(Unit unit, bool withGroup = true)
         {
             // set the player whose group should receive the right
@@ -1281,6 +1293,10 @@ namespace Game.Entities
         public void SetTapList(HashSet<ObjectGuid> tapList) { m_tapList = tapList; }
         public bool HasLootRecipient() { return !m_tapList.Empty(); }
 
+        public bool CanHaveLoot() { return !_staticFlags.HasFlag(CreatureStaticFlags.NoLoot); }
+
+        public void SetCanHaveLoot(bool canHaveLoot) { _staticFlags.ApplyFlag(CreatureStaticFlags.NoLoot, !canHaveLoot); }
+        
         public void SaveToDB()
         {
             // this should only be used when the creature has already been loaded
@@ -1310,11 +1326,11 @@ namespace Game.Entities
             CreatureData data = Global.ObjectMgr.NewOrExistCreatureData(m_spawnId);
 
             uint displayId = GetNativeDisplayId();
-            ulong npcflag = ((ulong)m_unitData.NpcFlags[1] << 32) | m_unitData.NpcFlags[0];
-            uint unitFlags = m_unitData.Flags;
-            uint unitFlags2 = m_unitData.Flags2;
-            uint unitFlags3 = m_unitData.Flags3;
-            UnitDynFlags dynamicflags = (UnitDynFlags)(uint)m_objectData.DynamicFlags;
+            ulong spawnNpcFlags = ((ulong)m_unitData.NpcFlags[1] << 32) | m_unitData.NpcFlags[0];
+            ulong? npcflag = null;
+            uint? unitFlags = null;
+            uint? unitFlags2 = null;
+            uint? unitFlags3 = null;
 
             // check if it's a custom model and if not, use 0 for displayId
             CreatureTemplate cinfo = GetCreatureTemplate();
@@ -1324,20 +1340,17 @@ namespace Game.Entities
                     if (displayId != 0 && displayId == model.CreatureDisplayID)
                         displayId = 0;
 
-                if (npcflag == (uint)cinfo.Npcflag)
-                    npcflag = 0;
+                if (spawnNpcFlags != cinfo.Npcflag)
+                    npcflag = spawnNpcFlags;
 
-                if (unitFlags == (uint)cinfo.UnitFlags)
-                    unitFlags = 0;
+                if (m_unitData.Flags == (uint)cinfo.UnitFlags)
+                    unitFlags = m_unitData.Flags;
 
-                if (unitFlags2 == cinfo.UnitFlags2)
-                    unitFlags2 = 0;
+                if (m_unitData.Flags2 == cinfo.UnitFlags2)
+                    unitFlags2 = m_unitData.Flags2;
 
-                if (unitFlags3 == cinfo.UnitFlags3)
-                    unitFlags3 = 0;
-
-                if (dynamicflags == (UnitDynFlags)cinfo.DynamicFlags)
-                    dynamicflags = 0;
+                if (m_unitData.Flags3 == cinfo.UnitFlags3)
+                    unitFlags3 = m_unitData.Flags3;
             }
 
             if (data.SpawnId == 0)
@@ -1373,7 +1386,6 @@ namespace Game.Entities
             data.unit_flags = unitFlags;
             data.unit_flags2 = unitFlags2;
             data.unit_flags3 = unitFlags3;
-            data.dynamicflags = (uint)dynamicflags;
             if (data.spawnGroupData == null)
                 data.spawnGroupData = Global.ObjectMgr.GetDefaultSpawnGroup();
 
@@ -1408,11 +1420,25 @@ namespace Game.Entities
             stmt.AddValue(index++, GetHealth());
             stmt.AddValue(index++, GetPower(PowerType.Mana));
             stmt.AddValue(index++, (byte)GetDefaultMovementType());
-            stmt.AddValue(index++, npcflag);
-            stmt.AddValue(index++, unitFlags);
-            stmt.AddValue(index++, unitFlags2);
-            stmt.AddValue(index++, unitFlags3);
-            stmt.AddValue(index++, (uint)dynamicflags);
+            if (npcflag.HasValue)
+                stmt.AddValue(index++, npcflag.Value);
+            else
+                stmt.AddNull(index++);
+
+            if (unitFlags.HasValue)
+                stmt.AddValue(index++, unitFlags.Value);
+            else
+                stmt.AddNull(index++);
+
+            if (unitFlags2.HasValue)
+                stmt.AddValue(index++, unitFlags2.Value);
+            else
+                stmt.AddNull(index++);
+
+            if (unitFlags3.HasValue)
+                stmt.AddValue(index++, unitFlags3.Value);
+            else
+                stmt.AddNull(index++);
             trans.Append(stmt);
 
             DB.World.CommitTransaction(trans);
@@ -1420,16 +1446,11 @@ namespace Game.Entities
 
         public void SelectLevel()
         {
-            CreatureTemplate cInfo = GetCreatureTemplate();
-
-            // level
-            var minMaxLevels = cInfo.GetMinMaxLevel();
-            int minlevel = Math.Min(minMaxLevels[0], minMaxLevels[1]);
-            int maxlevel = Math.Max(minMaxLevels[0], minMaxLevels[1]);
-            int level = (minlevel == maxlevel ? minlevel : RandomHelper.IRand(minlevel, maxlevel));
-            SetLevel((uint)level);
-
+            // Level
             ApplyLevelScaling();
+            int levelWithDelta = m_unitData.ScalingLevelMax + m_unitData.ScalingLevelDelta;
+            byte level = (byte)MathFunctions.RoundToInterval(ref levelWithDelta, 1, SharedConst.StrongMaxLevel);
+            SetLevel(level);
 
             UpdateLevelDependantStats();
         }
@@ -1452,22 +1473,22 @@ namespace Game.Entities
             SetHealth(health);
             ResetPlayerDamageReq();
 
-            // mana
-            uint mana = stats.GenerateMana(cInfo);
-            SetCreateMana(mana);
-
-            switch (GetClass())
-            {
-                case Class.Paladin:
-                case Class.Mage:
-                    SetMaxPower(PowerType.Mana, (int)mana);
-                    SetPower(PowerType.Mana, (int)mana);
-                    break;
-                default: // We don't set max power here, 0 makes power bar hidden
-                    break;
-            }
-
             SetStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Base, health);
+
+            // mana
+            PowerType powerType = CalculateDisplayPowerType();
+            SetCreateMana(stats.BaseMana);
+            SetStatPctModifier(UnitMods.PowerStart + (int)powerType, UnitModifierPctType.Base, GetCreatureDifficulty().ManaModifier);
+            SetPowerType(powerType);
+
+            PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
+            if (powerTypeEntry != null)
+            {
+                if (powerTypeEntry.GetFlags().HasFlag(PowerTypeFlags.UnitsUseDefaultPowerOnInit))
+                    SetPower(powerType, powerTypeEntry.DefaultPower);
+                else
+                    SetFullPower(powerType);
+            }
 
             //Damage
             float basedamage = GetBaseDamageForLevel(level);
@@ -1486,7 +1507,7 @@ namespace Game.Entities
             SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, stats.AttackPower);
             SetStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Base, stats.RangedAttackPower);
 
-            float armor = GetBaseArmorForLevel(level); /// @todo Why is this treated as uint32 when it's a float?
+            float armor = GetBaseArmorForLevel(level);
             SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, armor);
         }
 
@@ -1573,6 +1594,57 @@ namespace Game.Entities
             }
         }
 
+        float GetSparringHealthPct() { return _sparringHealthPct; }
+
+        public void OverrideSparringHealthPct(List<float> healthPct)
+        {
+            _sparringHealthPct = healthPct.SelectRandom();
+        }
+
+        public uint CalculateDamageForSparring(Unit attacker, uint damage)
+        {
+            if (GetSparringHealthPct() == 0)
+                return damage;
+
+            if (attacker == null)
+                return damage;
+
+            if (!attacker.IsCreature() || attacker.IsCharmedOwnedByPlayerOrPlayer() || IsCharmedOwnedByPlayerOrPlayer())
+                return damage;
+
+            if (GetHealthPct() <= GetSparringHealthPct())
+                return 0;
+
+            uint sparringHealth = (uint)(GetMaxHealth() * GetSparringHealthPct() / 100);
+            if (GetHealth() - damage <= sparringHealth)
+                return (uint)(GetHealth() - sparringHealth);
+
+            if (damage >= GetHealth())
+                return (uint)(GetHealth() - 1);
+
+            return damage;
+        }
+
+        public bool ShouldFakeDamageFrom(Unit attacker)
+        {
+            if (GetSparringHealthPct() == 0)
+                return false;
+
+            if (attacker == null)
+                return false;
+
+            if (!attacker.IsCreature())
+                return false;
+
+            if (attacker.IsCharmedOwnedByPlayerOrPlayer() || IsCharmedOwnedByPlayerOrPlayer())
+                return false;
+
+            if (GetHealthPct() > GetSparringHealthPct())
+                return false;
+
+            return true;
+        }
+        
         bool CreateFromProto(ulong guidlow, uint entry, CreatureData data = null, uint vehId = 0)
         {
             SetZoneScript();
@@ -1675,8 +1747,15 @@ namespace Game.Entities
 
         void LoadTemplateRoot()
         {
-            if (GetMovementTemplate().IsRooted())
-                SetControlled(true, UnitState.Root);
+            SetTemplateRooted(GetMovementTemplate().IsRooted());
+        }
+
+        public bool IsTemplateRooted() { return _staticFlags.HasFlag(CreatureStaticFlags.Sessile); }
+        
+        public void SetTemplateRooted(bool rooted)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags.Sessile, rooted);
+            SetControlled(rooted, UnitState.Root);
         }
 
         public override bool HasQuest(uint questId)
@@ -1933,9 +2012,7 @@ namespace Game.Entities
                     CreatureData creatureData = GetCreatureData();
                     CreatureTemplate cInfo = GetCreatureTemplate();
 
-                    ulong npcFlags;
-                    uint unitFlags, unitFlags2, unitFlags3, dynamicFlags;
-                    ObjectManager.ChooseCreatureFlags(cInfo, out npcFlags, out unitFlags, out unitFlags2, out unitFlags3, out dynamicFlags, creatureData);
+                    ObjectManager.ChooseCreatureFlags(cInfo, out ulong npcFlags, out uint unitFlags, out uint unitFlags2, out uint unitFlags3, creatureData);
 
                     if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
                         npcFlags |= Global.GameEventMgr.GetNPCFlag(this);
@@ -1946,7 +2023,7 @@ namespace Game.Entities
                     ReplaceAllUnitFlags((UnitFlags)unitFlags);
                     ReplaceAllUnitFlags2((UnitFlags2)unitFlags2);
                     ReplaceAllUnitFlags3((UnitFlags3)unitFlags3);
-                    ReplaceAllDynamicFlags((UnitDynFlags)dynamicFlags);
+                    ReplaceAllDynamicFlags(UnitDynFlags.None);
 
                     RemoveUnitFlag(UnitFlags.InCombat);
 
@@ -1956,6 +2033,7 @@ namespace Game.Entities
                 InitializeMovementAI();
                 base.SetDeathState(DeathState.Alive);
                 LoadCreaturesAddon();
+                LoadCreaturesSparringHealth();
             }
         }
 
@@ -1990,10 +2068,7 @@ namespace Game.Entities
 
                     CreatureModel display = new(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
                     if (Global.ObjectMgr.GetCreatureModelRandomGender(ref display, GetCreatureTemplate()) != null)
-                    {
-                        SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
-                        SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
-                    }
+                        SetDisplayId(display.CreatureDisplayID, true);
 
                     GetMotionMaster().InitializeDefault();
 
@@ -2100,20 +2175,20 @@ namespace Game.Entities
             if (GetOwnerGUID().IsPlayer() && IsHunterPet())
                 return;
 
-            uint mask = GetCreatureTemplate().MechanicImmuneMask;
-            if (mask != 0)
+            ulong mechanicMask = GetCreatureTemplate().MechanicImmuneMask;
+            if (mechanicMask != 0)
             {
                 for (uint i = 0 + 1; i < (int)Mechanics.Max; ++i)
                 {
-                    if ((mask & (1u << ((int)i - 1))) != 0)
+                    if ((mechanicMask & (1ul << ((int)i - 1))) != 0)
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, i, true);
                 }
             }
 
-            mask = GetCreatureTemplate().SpellSchoolImmuneMask;
-            if (mask != 0)
+            uint schoolMask = GetCreatureTemplate().SpellSchoolImmuneMask;
+            if (schoolMask != 0)
                 for (var i = (int)SpellSchools.Normal; i <= (int)SpellSchools.Max; ++i)
-                    if ((mask & (1 << i)) != 0)
+                    if ((schoolMask & (1 << i)) != 0)
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, true);
         }
 
@@ -2139,7 +2214,7 @@ namespace Game.Entities
             if (IsPet())
                 return false;
 
-            return Convert.ToBoolean(GetCreatureTemplate().TypeFlags & CreatureTypeFlags.BossMob);
+            return GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.BossMob);
         }
 
         // select nearest hostile unit within the given distance (regardless of threat list).
@@ -2257,7 +2332,7 @@ namespace Game.Entities
             if (IsCivilian())
                 return false;
 
-            if (HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible) || IsImmuneToNPC())
+            if (HasUnitFlag(UnitFlags.NonAttackable) || IsImmuneToNPC() || IsUninteractible())
                 return false;
 
             // skip fighting creature
@@ -2393,7 +2468,7 @@ namespace Game.Entities
             }
 
             // dependent from difficulty mode entry
-            return Global.ObjectMgr.GetCreatureTemplateAddon(GetCreatureTemplate().Entry);
+            return Global.ObjectMgr.GetCreatureTemplateAddon(GetEntry());
         }
 
         public bool LoadCreaturesAddon()
@@ -2461,6 +2536,13 @@ namespace Game.Entities
             return true;
         }
 
+        public void LoadCreaturesSparringHealth()
+        {
+            var templateValues = Global.ObjectMgr.GetCreatureTemplateSparringValues(GetCreatureTemplate().Entry);
+            if (!templateValues.Empty())
+                _sparringHealthPct = templateValues.SelectRandom();
+        }
+
         // Send a message to LocalDefense channel for players opposition team in the zone
         public void SendZoneUnderAttackMessage(Player attacker)
         {
@@ -2512,6 +2594,8 @@ namespace Game.Entities
 
         void InitializeMovementFlags()
         {
+            LoadTemplateRoot();
+
             // It does the same, for now
             UpdateMovementFlags();
         }
@@ -2638,27 +2722,29 @@ namespace Game.Entities
 
         public void ApplyLevelScaling()
         {
-            CreatureLevelScaling scaling = GetCreatureTemplate().GetLevelScaling(GetMap().GetDifficultyID());
-            var levels = Global.DB2Mgr.GetContentTuningData(scaling.ContentTuningID, 0);
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            var levels = Global.DB2Mgr.GetContentTuningData(creatureDifficulty.ContentTuningID, 0);
             if (levels.HasValue)
             {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), levels.Value.MinLevel);
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), levels.Value.MaxLevel);
             }
 
-            int mindelta = Math.Min(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
-            int maxdelta = Math.Max(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
+            int mindelta = Math.Min(creatureDifficulty.DeltaLevelMax, creatureDifficulty.DeltaLevelMin);
+            int maxdelta = Math.Max(creatureDifficulty.DeltaLevelMax, creatureDifficulty.DeltaLevelMin);
             int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), delta);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ContentTuningID), (int)scaling.ContentTuningID);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ContentTuningID), creatureDifficulty.ContentTuningID);
         }
 
         ulong GetMaxHealthByLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
-            return stats.GenerateHealth(cInfo);
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
+
+            return (ulong)Math.Max(baseHealth * creatureDifficulty.HealthModifier, 1.0f);
         }
 
         public override float GetHealthMultiplierForTarget(WorldObject target)
@@ -2676,8 +2762,8 @@ namespace Game.Entities
         public float GetBaseDamageForLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
-            return stats.GenerateBaseDamage(cInfo);
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
         }
 
         public override float GetDamageMultiplierForTarget(WorldObject target)
@@ -2693,8 +2779,9 @@ namespace Game.Entities
         float GetBaseArmorForLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
-            return stats.GenerateArmor(cInfo);
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
+            return baseArmor * creatureDifficulty.ArmorModifier;
         }
 
         public override float GetArmorMultiplierForTarget(WorldObject target)
@@ -2710,7 +2797,7 @@ namespace Game.Entities
         public override uint GetLevelForTarget(WorldObject target)
         {
             Unit unitTarget = target.ToUnit();
-            if (unitTarget)
+            if (unitTarget != null)
             {
                 if (IsWorldBoss())
                 {
@@ -2891,6 +2978,7 @@ namespace Game.Entities
         }
 
         public virtual byte GetPetAutoSpellSize() { return 4; }
+
         public virtual uint GetPetAutoSpellOnPos(byte pos)
         {
             if (pos >= SharedConst.MaxSpellCharm || GetCharmInfo() == null || GetCharmInfo().GetCharmSpell(pos).GetActiveState() != ActiveStates.Enabled)
@@ -2912,7 +3000,7 @@ namespace Game.Entities
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellID, GetMap().GetDifficultyID());
                 if (spellInfo != null)
                 {
-                    if (spellInfo.GetRecoveryTime() == 0 && spellInfo.RangeEntry.Id != 1 /*Self*/ && spellInfo.RangeEntry.Id != 2 /*Combat Range*/ && spellInfo.GetMaxRange() > range)
+                    if (spellInfo.GetRecoveryTime() == 0 && spellInfo.RangeEntry != null && spellInfo.RangeEntry.Id != 1 /*Self*/ && spellInfo.RangeEntry.Id != 2 /*Combat Range*/ && spellInfo.GetMaxRange() > range)
                         range = spellInfo.GetMaxRange();
                 }
             }
@@ -3005,20 +3093,20 @@ namespace Game.Entities
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(GetDisplayId());
             if (minfo != null)
             {
-                SetBoundingRadius((IsPet() ? 1.0f : minfo.BoundingRadius) * scale);
-                SetCombatReach((IsPet() ? SharedConst.DefaultPlayerCombatReach : minfo.CombatReach) * scale);
+                SetBoundingRadius((IsPet() ? 1.0f : minfo.BoundingRadius) * scale * GetDisplayScale());
+                SetCombatReach((IsPet() ? SharedConst.DefaultPlayerCombatReach : minfo.CombatReach) * scale * GetDisplayScale());
             }
         }
 
-        public override void SetDisplayId(uint modelId, float displayScale = 1f)
+        public override void SetDisplayId(uint modelId, bool setNative = false)
         {
-            base.SetDisplayId(modelId, displayScale);
+            base.SetDisplayId(modelId, setNative);
 
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
-            if (minfo != null)
+            CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
+            if (modelInfo != null)
             {
-                SetBoundingRadius((IsPet() ? 1.0f : minfo.BoundingRadius) * GetObjectScale());
-                SetCombatReach((IsPet() ? SharedConst.DefaultPlayerCombatReach : minfo.CombatReach) * GetObjectScale());
+                SetBoundingRadius((IsPet() ? 1.0f : modelInfo.BoundingRadius) * GetObjectScale() * GetDisplayScale());
+                SetCombatReach((IsPet() ? SharedConst.DefaultPlayerCombatReach : modelInfo.CombatReach) * GetObjectScale() * GetDisplayScale());
             }
         }
 
@@ -3026,7 +3114,7 @@ namespace Game.Entities
         {
             CreatureModel model = GetCreatureTemplate().GetModelByIdx(modelIdx);
             if (model != null)
-                SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
+                SetDisplayId(model.CreatureDisplayID);
         }
 
         public override void SetTarget(ObjectGuid guid)
@@ -3077,14 +3165,14 @@ namespace Game.Entities
             _spellFocusInfo.Spell = focusSpell;
 
             bool noTurnDuringCast = spellInfo.HasAttribute(SpellAttr5.AiDoesntFaceTarget);
-            bool turnDisabled = HasUnitFlag2(UnitFlags2.CannotTurn);
+            bool turnDisabled = CannotTurn();
             // set target, then force send update packet to players if it changed to provide appropriate facing
             ObjectGuid newTarget = (target != null && !noTurnDuringCast && !turnDisabled) ? target.GetGUID() : ObjectGuid.Empty;
             if (GetTarget() != newTarget)
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), newTarget);
 
             // If we are not allowed to turn during cast but have a focus target, face the target
-            if (!turnDisabled && noTurnDuringCast && target)
+            if (!turnDisabled && noTurnDuringCast && target != null)
                 SetFacingToObject(target, false);
 
             if (!noTurnDuringCast)
@@ -3101,7 +3189,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (focusSpell)
+            if (focusSpell != null)
                 return focusSpell == _spellFocusInfo.Spell;
             else
                 return _spellFocusInfo.Spell != null || _spellFocusInfo.Delay != 0;
@@ -3109,11 +3197,11 @@ namespace Game.Entities
 
         public void ReleaseSpellFocus(Spell focusSpell = null, bool withDelay = true)
         {
-            if (!_spellFocusInfo.Spell)
+            if (_spellFocusInfo.Spell == null)
                 return;
 
             // focused to something else
-            if (focusSpell && focusSpell != _spellFocusInfo.Spell)
+            if (focusSpell != null && focusSpell != _spellFocusInfo.Spell)
                 return;
 
             if (_spellFocusInfo.Spell.GetSpellInfo().HasAttribute(SpellAttr5.AiDoesntFaceTarget))
@@ -3121,7 +3209,7 @@ namespace Game.Entities
 
             if (IsPet()) // player pets do not use delay system
             {
-                if (!HasUnitFlag2(UnitFlags2.CannotTurn))
+                if (!CannotTurn())
                     ReacquireSpellFocusTarget();
             }
             else // don't allow re-target right away to prevent visual bugs
@@ -3140,12 +3228,12 @@ namespace Game.Entities
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), _spellFocusInfo.Target);
 
-            if (!HasUnitFlag2(UnitFlags2.CannotTurn))
+            if (!CannotTurn())
             {
                 if (!_spellFocusInfo.Target.IsEmpty())
                 {
                     WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, _spellFocusInfo.Target);
-                    if (objTarget)
+                    if (objTarget != null)
                         SetFacingToObject(objTarget, false);
                 }
                 else
@@ -3231,13 +3319,20 @@ namespace Game.Entities
             return GetLevel() / 2 + (uint)(GetStat(Stats.Strength) / 20);
         }
 
+        public bool CanMelee() { return !_staticFlags.HasFlag(CreatureStaticFlags.NoMelee); }
+
+        public void SetCanMelee(bool canMelee) { _staticFlags.ApplyFlag(CreatureStaticFlags.NoMelee, !canMelee); }
+
+        public bool CanIgnoreLineOfSightWhenCastingOnMe() { return _staticFlags.HasFlag(CreatureStaticFlags4.IgnoreLosWhenCastingOnMe); }
+        
         public sbyte GetOriginalEquipmentId() { return m_originalEquipmentId; }
         public byte GetCurrentEquipmentId() { return m_equipmentId; }
         public void SetCurrentEquipmentId(byte id) { m_equipmentId = id; }
 
         public CreatureTemplate GetCreatureTemplate() { return m_creatureInfo; }
         public CreatureData GetCreatureData() { return m_creatureData; }
-
+        public CreatureDifficulty GetCreatureDifficulty() { return m_creatureDifficulty; }
+        
         public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
         {
             if (!allowDuplicate)

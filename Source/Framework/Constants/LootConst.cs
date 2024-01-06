@@ -19,6 +19,7 @@ namespace Framework.Constants
         Need = 0x02,
         Greed = 0x04,
         Disenchant = 0x08,
+        Transmog = 0x10,
 
         AllNoDisenchant = 0x07,
         AllMask = 0x0f
@@ -96,5 +97,16 @@ namespace Framework.Constants
         Locked = 2,                        // Item Is Shown In Red. Player Cannot Loot.
         Master = 3,                        // Item Can Only Be Distributed By Group Loot Master.
         Owner = 4                         // Ignore Binding Confirmation And Etc, For Single Player Looting
+    }
+
+    public enum LootRollIneligibilityReason
+    {
+        None = 0,
+        UnusableByClass = 1, // Your class may not roll need on this item.
+        MaxUniqueItemCount = 2, // You already have the maximum amount of this item.
+        CannotBeDisenchanted = 3, // This item may not be disenchanted.
+        EnchantingSkillTooLow = 4, // You do not have an Enchanter of skill %d in your group.
+        NeedDisabled = 5, // Need rolls are disabled for this item.
+        OwnBetterItem = 6  // You already have a powerful version of this item.
     }
 }

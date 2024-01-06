@@ -154,10 +154,13 @@ namespace Framework.Constants
         ArcaneCharges,
         Fury,
         Pain,
-        Unused_19,
+        Essence,
         RuneBlood,
         RuneFrost,
         RuneUnholy,
+        AlternateQuest,
+        AlternateEncounter,
+        AlternateMount,
         Armor, // ARMOR..RESISTANCE_ARCANE must be in existed order, it's accessed by index values of SpellSchools enum.
         ResistanceHoly,
         ResistanceFire,
@@ -179,6 +182,7 @@ namespace Framework.Constants
         PowerStart = Mana,
         PowerEnd = RuneUnholy + 1
     }
+
     public enum UnitModifierFlatType
     {
         Base = 0,
@@ -186,12 +190,14 @@ namespace Framework.Constants
         Total = 2,
         End = 3
     }
+
     public enum UnitModifierPctType
     {
         Base = 0,
         Total = 1,
         End = 2
     }
+
     public enum VictimState
     {
         Intact = 0, // set when attacker misses
@@ -265,8 +271,8 @@ namespace Framework.Constants
 
     public enum UnitVisFlags
     {
-        Unk1 = 0x01,
-        Creep = 0x02,
+        Invisible = 0x01,
+        Stealthed = 0x02,
         Untrackable = 0x04,
         Unk4 = 0x08,
         Unk5 = 0x10,
@@ -401,7 +407,9 @@ namespace Framework.Constants
         AuraStack,
         CritChance,
         DurationPct,
-        Duration
+        Duration,
+        ParentSpellTargetCount,
+        ParentSpellTargetIndex
     }
 
     public enum CombatRating

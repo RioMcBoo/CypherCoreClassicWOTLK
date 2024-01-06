@@ -565,7 +565,7 @@ namespace Game.BattlePets
                 return;
 
             Item item = _owner.GetPlayer().StoreNewItem(dest, SharedConst.BattlePetCageItemId, true, new ItemRandomEnchantmentId());
-            if (!item)
+            if (item == null)
                 return;
 
             item.SetModifier(ItemModifier.BattlePetSpeciesId, pet.PacketInfo.Species);
@@ -762,6 +762,17 @@ namespace Game.BattlePets
                 args.AddSpellMod(SpellValueMod.BasePoint0, (int)speciesEntry.CreatureID);
             }
             player.CastSpell(_owner.GetPlayer(), summonSpellId, args);
+        }
+
+        public void DismissPet()
+        {
+            Player player = _owner.GetPlayer();
+            Creature summonedBattlePet = player.GetSummonedBattlePet();
+            if (summonedBattlePet != null)
+            {
+                summonedBattlePet.DespawnOrUnsummon();
+                player.SetBattlePetData(null);
+            }
         }
 
         public void SendJournal()

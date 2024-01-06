@@ -22,7 +22,7 @@ namespace Game.Chat
         static bool HandleGameObjectActivateCommand(CommandHandler handler, ulong guidLow)
         {
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-            if (!obj)
+            if (obj == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                 return false;
@@ -49,7 +49,7 @@ namespace Game.Chat
                 if (!ownerGuid.IsEmpty())
                 {
                     Unit owner = Global.ObjAccessor.GetUnit(player, ownerGuid);
-                    if (!owner || !ownerGuid.IsPlayer())
+                    if (owner == null || !ownerGuid.IsPlayer())
                     {
                         handler.SendSysMessage(CypherStrings.CommandDelobjrefercreature, ownerGuid.ToString(), obj.GetGUID().ToString());
                         return false;
@@ -190,7 +190,7 @@ namespace Game.Chat
         static bool HandleGameObjectMoveCommand(CommandHandler handler, ulong guidLow, float[] xyz)
         {
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-            if (!obj)
+            if (obj == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                 return false;
@@ -228,7 +228,7 @@ namespace Game.Chat
             obj.Delete();
 
             obj = GameObject.CreateGameObjectFromDB(guidLow, map);
-            if (!obj)
+            if (obj == null)
                 return false;
 
             handler.SendSysMessage(CypherStrings.CommandMoveobjmessage, obj.GetSpawnId(), obj.GetGoInfo().name, obj.GetGUID().ToString());
@@ -426,11 +426,11 @@ namespace Game.Chat
 
                 handler.SendSysMessage(CypherStrings.GameobjectDetail, guidLow, objectInfo.name, guidLow, id, x, y, z, mapId, o, phaseId, phaseGroup);
 
-                if (target)
-                {
-                    int curRespawnDelay = (int)(target.GetRespawnTimeEx() - GameTime.GetGameTime());
-                    if (curRespawnDelay < 0)
-                        curRespawnDelay = 0;
+            if (target != null)
+            {
+                int curRespawnDelay = (int)(target.GetRespawnTimeEx() - GameTime.GetGameTime());
+                if (curRespawnDelay < 0)
+                    curRespawnDelay = 0;
 
                     string curRespawnDelayStr = Time.secsToTimeString((uint)curRespawnDelay, TimeFormat.ShortText);
                     string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
@@ -445,7 +445,7 @@ namespace Game.Chat
         static bool HandleGameObjectTurnCommand(CommandHandler handler, ulong guidLow, float? oz, float? oy, float? ox)
         {
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-            if (!obj)
+            if (obj == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                 return false;
@@ -467,7 +467,7 @@ namespace Game.Chat
             obj.Delete();
 
             obj = GameObject.CreateGameObjectFromDB(guidLow, map);
-            if (!obj)
+            if (obj == null)
                 return false;
 
             handler.SendSysMessage(CypherStrings.CommandTurnobjmessage, obj.GetSpawnId(), obj.GetGoInfo().name, obj.GetGUID().ToString(), obj.GetOrientation());
@@ -503,7 +503,7 @@ namespace Game.Chat
                 Map map = player.GetMap();
 
                 GameObject obj = GameObject.CreateGameObject(objectInfo.entry, map, player, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f)), 255, GameObjectState.Ready);
-                if (!obj)
+                if (obj == null)
                     return false;
 
                 PhasingHandler.InheritPhaseShift(obj, player);
@@ -517,7 +517,7 @@ namespace Game.Chat
 
                 // this will generate a new guid if the object is in an instance
                 obj = GameObject.CreateGameObjectFromDB(spawnId, map);
-                if (!obj)
+                if (obj == null)
                     return false;
 
                 // TODO: is it really necessary to add both the real and DB table guid here ?
@@ -555,7 +555,7 @@ namespace Game.Chat
                     return false;
 
                 GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-                if (!obj)
+                if (obj == null)
                 {
                     handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                     return false;
@@ -579,7 +579,7 @@ namespace Game.Chat
                     return false;
 
                 GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-                if (!obj)
+                if (obj == null)
                 {
                     handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                     return false;

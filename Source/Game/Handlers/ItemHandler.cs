@@ -254,7 +254,7 @@ namespace Game
                 else
                 {
                     Item parentItem = _player.GetItemByGuid(dstItem.GetCreator());
-                    if (parentItem)
+                    if (parentItem != null)
                     {
                         if (dest.IsEquipmentPos)
                         {
@@ -628,7 +628,7 @@ namespace Game
             ItemPos itemPos = new(packet.Inv.Items[1].Slot, packet.Inv.Items[1].BagSlot);
 
             Item gift = GetPlayer().GetItemByPos(giftPos);
-            if (!gift)
+            if (gift == null)
             {
                 GetPlayer().SendEquipError(InventoryResult.ItemNotFound, gift);
                 return;
@@ -641,7 +641,7 @@ namespace Game
             }
 
             Item item = GetPlayer().GetItemByPos(itemPos);
-            if (!item)
+            if (item == null)
             {
                 GetPlayer().SendEquipError(InventoryResult.ItemNotFound, item);
                 return;
@@ -751,7 +751,7 @@ namespace Game
                 return;
 
             Item itemTarget = GetPlayer().GetItemByGuid(socketGems.ItemGuid);
-            if (!itemTarget)                                         //missing item to socket
+            if (itemTarget == null)                                         //missing item to socket
                 return;
 
             ItemTemplate itemProto = itemTarget.GetTemplate();
@@ -770,13 +770,13 @@ namespace Game
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
                 Item gem = _player.GetItemByGuid(socketGems.GemItem[i]);
-                if (gem)
+                if (gem != null)
                 {
                     gems[i] = gem;
                     gemData[i].ItemId = gem.GetEntry();
                     gemData[i].Context = (byte)gem.m_itemData.Context;
-                    for (int b = 0; b < ((List<int>)gem.m_itemData.BonusListIDs).Count && b < 16; ++b)
-                        gemData[i].BonusListIDs[b] = (ushort)((List<int>)gem.m_itemData.BonusListIDs)[b];
+                    for (int b = 0; b < gem.GetBonusListIDs().Count && b < 16; ++b)
+                        gemData[i].BonusListIDs[b] = (ushort)gem.GetBonusListIDs()[b];
 
                     gemProperties[i] = CliDB.GemPropertiesStorage.LookupByKey(gem.GetTemplate().GetGemProperties());
                 }
@@ -817,7 +817,7 @@ namespace Game
             // check unique-equipped conditions
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
-                if (!gems[i])
+                if (gems[i] == null)
                     continue;
 
                 // continue check for case when attempt add 2 similar unique equipped gems in one item.
@@ -831,7 +831,7 @@ namespace Game
                         if (i == j)                                    // skip self
                             continue;
 
-                        if (gems[j])
+                        if (gems[j] != null)
                         {
                             if (iGemProto.GetId() == gems[j].GetEntry())
                             {
@@ -860,7 +860,7 @@ namespace Game
                         // NOTE: limitEntry.mode is not checked because if item has limit then it is applied in equip case
                         for (int j = 0; j < ItemConst.MaxGemSockets; ++j)
                         {
-                            if (gems[j])
+                            if (gems[j] != null)
                             {
                                 // new gem
                                 if (iGemProto.GetItemLimitCategory() == gems[j].GetTemplate().GetItemLimitCategory())
@@ -907,7 +907,7 @@ namespace Game
 
             for (ushort i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
-                if (gems[i])
+                if (gems[i] != null)
                 {
                     uint gemScalingLevel = _player.GetLevel();
                     uint fixedLevel = gems[i].GetModifier(ItemModifier.TimewalkerLevel);
@@ -928,7 +928,7 @@ namespace Game
                 _player._ApplyItemMods(itemTarget, itemTarget.InventorySlot, true);
 
             Item childItem = _player.GetChildItemByGuid(itemTarget.GetChildItem());
-            if (childItem)
+            if (childItem != null)
             {
                 if (childItem.IsEquipped())
                     _player._ApplyItemMods(childItem, childItem.InventorySlot, false);
@@ -963,7 +963,7 @@ namespace Game
                 return;
 
             Item item = GetPlayer().GetItemByPos(itemWithEnch);
-            if (!item)
+            if (item == null)
                 return;
 
             if (item.GetEnchantmentId(EnchantmentSlot.EnhancementTemporary) == 0)
@@ -977,7 +977,7 @@ namespace Game
         void HandleGetItemPurchaseData(GetItemPurchaseData packet)
         {
             Item item = GetPlayer().GetItemByGuid(packet.ItemGUID);
-            if (!item)
+            if (item == null)
             {
                 Log.outDebug(LogFilter.Network, "HandleGetItemPurchaseData: Item {0} not found!", packet.ItemGUID.ToString());
                 return;
@@ -990,7 +990,7 @@ namespace Game
         void HandleItemRefund(ItemPurchaseRefund packet)
         {
             Item item = GetPlayer().GetItemByGuid(packet.ItemGUID);
-            if (!item)
+            if (item == null)
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleItemRefund: Item {0} not found!", packet.ItemGUID.ToString());
                 return;
@@ -1014,7 +1014,7 @@ namespace Game
             if (!isUsingBankCommand)
             {
                 Creature creature = GetPlayer().GetNPCIfCanInteractWith(bankerGUID, NPCFlags.Banker, NPCFlags2.None);
-                if (!creature)
+                if (creature == null)
                     return false;
             }
 
@@ -1025,7 +1025,7 @@ namespace Game
         void HandleUseCritterItem(UseCritterItem useCritterItem)
         {
             Item item = GetPlayer().GetItemByGuid(useCritterItem.ItemGuid);
-            if (!item)
+            if (item == null)
                 return;
 
             foreach (var itemEffect in item.GetEffects())
@@ -1038,14 +1038,38 @@ namespace Game
                     GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
             }
 
-            GetPlayer().DestroyItem(item.InventoryPosition, true);
+            GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SortBags, Processing = PacketProcessing.Inplace)]
+        void HandleSortBags(SortBags sortBags)
+        {
+            // TODO: Implement sorting
+            // Placeholder to prevent completely locking out bags clientside
+            SendPacket(new BagCleanupFinished());
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SortBankBags, Processing = PacketProcessing.Inplace)]
+        void HandleSortBankBags(SortBankBags sortBankBags)
+        {
+            // TODO: Implement sorting
+            // Placeholder to prevent completely locking out bags clientside
+            SendPacket(new BagCleanupFinished());
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SortReagentBankBags, Processing = PacketProcessing.Inplace)]
+        void HandleSortReagentBankBags(SortReagentBankBags sortReagentBankBags)
+        {
+            // TODO: Implement sorting
+            // Placeholder to prevent completely locking out bags clientside
+            SendPacket(new BagCleanupFinished());
         }
 
         [WorldPacketHandler(ClientOpcodes.RemoveNewItem, Processing = PacketProcessing.Inplace)]
         void HandleRemoveNewItem(RemoveNewItem removeNewItem)
         {
             Item item = _player.GetItemByGuid(removeNewItem.ItemGuid);
-            if (!item)
+            if (item == null)
             {
                 Log.outDebug(LogFilter.Network, $"WorldSession.HandleRemoveNewItem: Item ({removeNewItem.ItemGuid}) not found for {GetPlayerInfo()}!");
                 return;

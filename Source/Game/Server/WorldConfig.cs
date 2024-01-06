@@ -54,6 +54,7 @@ namespace Game
             SetRegenRate(WorldCfg.RatePowerArcaneCharges, "Rate.ArcaneCharges.Loss");
             SetRegenRate(WorldCfg.RatePowerFury, "Rate.Fury.Loss");
             SetRegenRate(WorldCfg.RatePowerPain, "Rate.Pain.Loss");
+            SetRegenRate(WorldCfg.RatePowerEssence, "Rate.Essence.Loss");
 
             Values[WorldCfg.RateSkillDiscovery] = GetDefaultValue("Rate.Skill.Discovery", 1.0f);
             Values[WorldCfg.RateDropItemPoor] = GetDefaultValue("Rate.Drop.Item.Poor", 1.0f);
@@ -358,7 +359,7 @@ namespace Game
             Values[WorldCfg.CharacterCreatingDisabledRacemask] = GetDefaultValue("CharacterCreating.Disabled.RaceMask", 0);
             Values[WorldCfg.CharacterCreatingDisabledClassmask] = GetDefaultValue("CharacterCreating.Disabled.ClassMask", 0);
 
-            Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 50);
+            Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 60);
             if ((int)Values[WorldCfg.CharactersPerRealm] < 1 || (int)Values[WorldCfg.CharactersPerRealm] > 200)
             {
                 Log.outError(LogFilter.ServerLoading, "CharactersPerRealm ({0}) must be in range 1..200. Set to 200.", Values[WorldCfg.CharactersPerRealm]);
@@ -366,14 +367,22 @@ namespace Game
             }
 
             // must be after CharactersPerRealm
-            Values[WorldCfg.CharactersPerAccount] = GetDefaultValue("CharactersPerAccount", 50);
+            Values[WorldCfg.CharactersPerAccount] = GetDefaultValue("CharactersPerAccount", 60);
             if ((int)Values[WorldCfg.CharactersPerAccount] < (int)Values[WorldCfg.CharactersPerRealm])
             {
                 Log.outError(LogFilter.ServerLoading, "CharactersPerAccount ({0}) can't be less than CharactersPerRealm ({1}).", Values[WorldCfg.CharactersPerAccount], Values[WorldCfg.CharactersPerRealm]);
                 Values[WorldCfg.CharactersPerAccount] = Values[WorldCfg.CharactersPerRealm];
             }
 
+            Values[WorldCfg.CharacterCreatingEvokersPerRealm] = GetDefaultValue("CharacterCreating.EvokersPerRealm", 1);
+            if ((int)Values[WorldCfg.CharacterCreatingEvokersPerRealm] < 0 || (int)Values[WorldCfg.CharacterCreatingEvokersPerRealm] > 10)
+            {
+                Log.outError(LogFilter.ServerLoading, $"CharacterCreating.EvokersPerRealm ({Values[WorldCfg.CharacterCreatingEvokersPerRealm]}) must be in range 0..10. Set to 1.");
+                Values[WorldCfg.CharacterCreatingEvokersPerRealm] = 1;
+            }
+
             Values[WorldCfg.CharacterCreatingMinLevelForDemonHunter] = GetDefaultValue("CharacterCreating.MinLevelForDemonHunter", 0);
+            Values[WorldCfg.CharacterCreatingMinLevelForEvoker] = GetDefaultValue("CharacterCreating.MinLevelForEvoker", 50);
             Values[WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement] = GetDefaultValue("CharacterCreating.DisableAlliedRaceAchievementRequirement", false);
 
             Values[WorldCfg.SkipCinematics] = GetDefaultValue("SkipCinematics", 0);
@@ -440,6 +449,18 @@ namespace Game
                 Values[WorldCfg.StartDemonHunterPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
+            Values[WorldCfg.StartEvokerPlayerLevel] = GetDefaultValue("StartEvokerPlayerLevel", 58);
+            if ((int)Values[WorldCfg.StartEvokerPlayerLevel] < 1)
+            {
+                Log.outError(LogFilter.ServerLoading, $"StartEvokerPlayerLevel ({Values[WorldCfg.StartEvokerPlayerLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to 1.");
+                Values[WorldCfg.StartEvokerPlayerLevel] = 1;
+            }
+            else if ((int)Values[WorldCfg.StartEvokerPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
+            {
+                Log.outError(LogFilter.ServerLoading, $"StartEvokerPlayerLevel ({Values[WorldCfg.StartEvokerPlayerLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to {Values[WorldCfg.MaxPlayerLevel]}.");
+                Values[WorldCfg.StartEvokerPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
+            }
+
             Values[WorldCfg.StartAlliedRaceLevel] = GetDefaultValue("StartAlliedRacePlayerLevel", 10);
             if ((int)Values[WorldCfg.StartAlliedRaceLevel] < 1)
             {
@@ -482,34 +503,6 @@ namespace Game
                 Log.outError(LogFilter.ServerLoading, "Currency.ResetInterval ({0}) must be > 0, set to default 7.", Values[WorldCfg.CurrencyResetInterval]);
                 Values[WorldCfg.CurrencyResetInterval] = 7;
             }
-
-            Values[WorldCfg.CurrencyStartApexisCrystals] = GetDefaultValue("Currency.StartApexisCrystals", 0);
-            if ((int)Values[WorldCfg.CurrencyStartApexisCrystals] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.StartApexisCrystals ({0}) must be >= 0, set to default 0.", Values[WorldCfg.CurrencyStartApexisCrystals]);
-                Values[WorldCfg.CurrencyStartApexisCrystals] = 0;
-            }
-            Values[WorldCfg.CurrencyMaxApexisCrystals] = GetDefaultValue("Currency.MaxApexisCrystals", 20000);
-            if ((int)Values[WorldCfg.CurrencyMaxApexisCrystals] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.MaxApexisCrystals ({0}) can't be negative. Set to default 20000.", Values[WorldCfg.CurrencyMaxApexisCrystals]);
-                Values[WorldCfg.CurrencyMaxApexisCrystals] = 20000;
-            }
-            Values[WorldCfg.CurrencyMaxApexisCrystals] = (int)Values[WorldCfg.CurrencyMaxApexisCrystals] * 100;     //precision mod
-
-            Values[WorldCfg.CurrencyStartJusticePoints] = GetDefaultValue("Currency.StartJusticePoints", 0);
-            if ((int)Values[WorldCfg.CurrencyStartJusticePoints] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.StartJusticePoints ({0}) must be >= 0, set to default 0.", Values[WorldCfg.CurrencyStartJusticePoints]);
-                Values[WorldCfg.CurrencyStartJusticePoints] = 0;
-            }
-            Values[WorldCfg.CurrencyMaxJusticePoints] = GetDefaultValue("Currency.MaxJusticePoints", 4000);
-            if ((int)Values[WorldCfg.CurrencyMaxJusticePoints] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.MaxJusticePoints ({0}) can't be negative. Set to default 4000.", Values[WorldCfg.CurrencyMaxJusticePoints]);
-                Values[WorldCfg.CurrencyMaxJusticePoints] = 4000;
-            }
-            Values[WorldCfg.CurrencyMaxJusticePoints] = (int)Values[WorldCfg.CurrencyMaxJusticePoints] * 100;     //precision mod
 
             Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = GetDefaultValue("RecruitAFriend.MaxLevel", 60);
             if ((int)Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])

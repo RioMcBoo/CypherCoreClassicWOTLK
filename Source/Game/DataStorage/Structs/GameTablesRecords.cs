@@ -33,6 +33,8 @@ namespace Game.DataStorage
         public float DeathKnight;
         public float Monk;
         public float DemonHunter;
+        public float Evoker;
+        public float Adventurer;
     }
 
     public sealed class GtBattlePetXPRecord
@@ -159,12 +161,17 @@ namespace Game.DataStorage
         public float DeathKnight;
         public float Monk;
         public float DemonHunter;
+        public float Evoker;
+        public float Adventurer;
         public float Item;
         public float Consumable;
         public float Gem1;
         public float Gem2;
         public float Gem3;
         public float Health;
+        public float DamageReplaceStat;
+        public float DamageSecondary;
+        public float ManaConsumable;
     }
 
     public sealed class GtXpRecord

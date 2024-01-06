@@ -336,12 +336,12 @@ namespace Game.Spells
             m_castItemGuid = createInfo.CastItemGUID;
             m_castItemId = createInfo.CastItemId;
             m_castItemLevel = createInfo.CastItemLevel;
-            m_spellVisual = new SpellCastVisual(createInfo.Caster ? createInfo.Caster.GetCastSpellXSpellVisualId(createInfo._spellInfo) : createInfo._spellInfo.GetSpellXSpellVisualId(), 0);
+            m_spellVisual = new SpellCastVisual(createInfo.Caster != null ? createInfo.Caster.GetCastSpellXSpellVisualId(createInfo._spellInfo) : createInfo._spellInfo.GetSpellXSpellVisualId(), 0);
             m_applyTime = GameTime.GetGameTime();
             m_owner = createInfo._owner;
             m_timeCla = 0;
             m_updateTargetMapInterval = 0;
-            m_casterLevel = createInfo.Caster ? createInfo.Caster.GetLevel() : m_spellInfo.SpellLevel;
+            m_casterLevel = createInfo.Caster != null ? createInfo.Caster.GetLevel() : m_spellInfo.SpellLevel;
             m_procCharges = 0;
             m_stackAmount = 1;
             m_isRemoved = false;
@@ -452,7 +452,7 @@ namespace Game.Spells
             if (app == null)
             {
                 Log.outError(LogFilter.Spells, "Aura._UnapplyForTarget, target: {0}, caster: {1}, spell: {2} was not found in owners application map!",
-                target.GetGUID().ToString(), caster ? caster.GetGUID().ToString() : "", auraApp.GetBase().GetSpellInfo().Id);
+                target.GetGUID().ToString(), caster != null ? caster.GetGUID().ToString() : "", auraApp.GetBase().GetSpellInfo().Id);
                 Cypher.Assert(false);
             }
 
@@ -577,7 +577,7 @@ namespace Game.Spells
                             }
                         }
                     }
-                    
+
                 }
 
                 if (!addUnit)
@@ -742,10 +742,10 @@ namespace Game.Spells
 
         public int CalcMaxDuration(Unit caster)
         {
-            return CalcMaxDuration(GetSpellInfo(), caster);
+            return CalcMaxDuration(GetSpellInfo(), caster, null);
         }
 
-        public static int CalcMaxDuration(SpellInfo spellInfo, WorldObject caster)
+        public static int CalcMaxDuration(SpellInfo spellInfo, WorldObject caster, List<SpellPowerCost> powerCosts)
         {
             Player modOwner = null;
             int maxDuration;
@@ -753,7 +753,7 @@ namespace Game.Spells
             if (caster != null)
             {
                 modOwner = caster.GetSpellModOwner();
-                maxDuration = caster.CalcSpellDuration(spellInfo);
+                maxDuration = caster.CalcSpellDuration(spellInfo, powerCosts);
             }
             else
                 maxDuration = spellInfo.GetDuration();
@@ -773,10 +773,10 @@ namespace Game.Spells
             if (withMods)
             {
                 Unit caster = GetCaster();
-                if (caster)
+                if (caster != null)
                 {
                     Player modOwner = caster.GetSpellModOwner();
-                    if (modOwner)
+                    if (modOwner != null)
                         modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Duration, ref duration);
                 }
             }
@@ -788,7 +788,7 @@ namespace Game.Spells
         public void RefreshDuration(bool withMods = false)
         {
             Unit caster = GetCaster();
-            if (withMods && caster)
+            if (withMods && caster != null)
             {
                 int duration = m_spellInfo.GetMaxDuration();
                 // Calculate duration of periodics affected by haste.
@@ -816,27 +816,6 @@ namespace Game.Spells
         void RefreshTimers(bool resetPeriodicTimer)
         {
             m_maxDuration = CalcMaxDuration();
-            if (m_spellInfo.HasAttribute(SpellAttr8.DontResetPeriodicTimer))
-            {
-                int minPeriod = m_maxDuration;
-                for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                {
-                    AuraEffect eff = GetEffect(i);
-                    if (eff != null)
-                    {
-                        int period = eff.GetPeriod();
-                        if (period != 0)
-                            minPeriod = Math.Min(period, minPeriod);
-                    }
-                }
-
-                // If only one tick remaining, roll it over into new duration
-                if (GetDuration() <= minPeriod)
-                {
-                    m_maxDuration += GetDuration();
-                    resetPeriodicTimer = false;
-                }
-            }
 
             RefreshDuration();
             Unit caster = GetCaster();
@@ -893,7 +872,7 @@ namespace Game.Spells
 
             // only units have events
             Unit owner = m_owner.ToUnit();
-            if (!owner)
+            if (owner == null)
                 return;
 
             m_dropEvent = new ChargeDropEvent(this, removeMode);
@@ -923,7 +902,7 @@ namespace Game.Spells
 
         public bool IsUsingStacks()
         {
-            return m_spellInfo.StackAmount > 0;
+            return m_spellInfo.StackAmount > 0 || m_stackAmount > 1;
         }
 
         public uint CalcMaxStackAmount()
@@ -1015,7 +994,7 @@ namespace Game.Spells
                 && !m_spellInfo.HasAttribute(SpellAttr2.AllowWhileNotShapeshiftedCasterForm)
                 && !m_spellInfo.HasAttribute(SpellAttr0.NotShapeshifted);
         }
-        
+
         public bool CanBeSaved()
         {
             if (IsPassive())
@@ -1610,10 +1589,10 @@ namespace Game.Spells
             if (HasEffectType(AuraType.ControlVehicle) && existingAura.HasEffectType(AuraType.ControlVehicle))
             {
                 Vehicle veh = null;
-                if (GetOwner().ToUnit())
+                if (GetOwner().ToUnit() != null)
                     veh = GetOwner().ToUnit().GetVehicleKit();
 
-                if (!veh)           // We should probably just let it stack. Vehicle system will prevent undefined behaviour later
+                if (veh == null)           // We should probably just let it stack. Vehicle system will prevent undefined behaviour later
                     return true;
 
                 if (veh.GetAvailableSeatCount() == 0)
@@ -1717,7 +1696,7 @@ namespace Game.Spells
 
             // check spell triggering us
             Spell spell = eventInfo.GetProcSpell();
-            if (spell)
+            if (spell != null)
             {
                 // Do not allow auras to proc from effect triggered from itself
                 if (spell.IsTriggeredByAura(m_spellInfo))
@@ -1732,6 +1711,9 @@ namespace Game.Spells
                     return 0;
 
                 if (spell.GetSpellInfo().HasAttribute(SpellAttr4.SuppressWeaponProcs) && GetSpellInfo().HasAttribute(SpellAttr6.AuraIsWeaponProc))
+                    return 0;
+
+                if (GetSpellInfo().HasAttribute(SpellAttr12.OnlyProcFromClassAbilities) && !spell.GetSpellInfo().HasAttribute(SpellAttr13.AllowClassAbilityProcs))
                     return 0;
             }
 
@@ -1821,7 +1803,7 @@ namespace Game.Spells
                         item = target.ToPlayer().GetUseableItemByPos(EquipmentSlot.OffHand);
                     }
 
-                    if (!item || item.IsBroken() || !item.IsFitToSpellRequirements(GetSpellInfo()))
+                    if (item == null || item.IsBroken() || !item.IsFitToSpellRequirements(GetSpellInfo()))
                         return 0;
                 }
             }
@@ -1881,20 +1863,23 @@ namespace Game.Spells
 
         public void TriggerProcOnEvent(uint procEffectMask, AuraApplication aurApp, ProcEventInfo eventInfo)
         {
-            bool prevented = CallScriptProcHandlers(aurApp, eventInfo);
-            if (!prevented)
+            if (procEffectMask != 0)
             {
-                for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                bool prevented = CallScriptProcHandlers(aurApp, eventInfo);
+                if (!prevented)
                 {
-                    if (!Convert.ToBoolean(procEffectMask & (1 << i)))
-                        continue;
+                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                    {
+                        if (!Convert.ToBoolean(procEffectMask & (1 << i)))
+                            continue;
 
-                    // OnEffectProc / AfterEffectProc hooks handled in AuraEffect.HandleProc()
-                    if (aurApp.HasEffect(i))
-                        GetEffect(i).HandleProc(aurApp, eventInfo);
+                        // OnEffectProc / AfterEffectProc hooks handled in AuraEffect.HandleProc()
+                        if (aurApp.HasEffect(i))
+                            GetEffect(i).HandleProc(aurApp, eventInfo);
+                    }
+
+                    CallScriptAfterProcHandlers(aurApp, eventInfo);
                 }
-
-                CallScriptAfterProcHandlers(aurApp, eventInfo);
             }
 
             ConsumeProcCharges(Global.SpellMgr.GetSpellProcEntry(GetSpellInfo()));
@@ -1925,7 +1910,7 @@ namespace Game.Spells
             m_loadedScripts = Global.ScriptMgr.CreateAuraScripts(m_spellInfo.Id, this);
             foreach (var script in m_loadedScripts)
             {
-                Log.outDebug(LogFilter.Spells, "Aura.LoadScripts: Script `{0}` for aura `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
+                Log.outDebug(LogFilter.Spells, "Aura.LoadScripts: Script `{0}` for aura `{1}` is loaded now", script.GetScriptName(), m_spellInfo.Id);
                 script.Register();
             }
         }
@@ -2128,6 +2113,19 @@ namespace Game.Spells
                         hook.Call(aurEff, victim, ref critChance);
 
                 loadedScript._FinishScriptCall();
+            }
+        }
+
+        public void CallScriptCalcDamageAndHealingHandlers(AuraEffect aurEff, AuraApplication aurApp, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod)
+        {
+            foreach (AuraScript script in m_loadedScripts)
+            {
+                script._PrepareScriptCall(AuraScriptHookType.EffectCalcDamageAndHealing, aurApp);
+                foreach (var effectCalcDamageAndHealing in script.DoEffectCalcDamageAndHealing)
+                    if (effectCalcDamageAndHealing.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
+                        effectCalcDamageAndHealing.Call(aurEff, victim, ref damageOrHealing, ref flatMod, ref pctMod);
+
+                script._FinishScriptCall();
             }
         }
         
@@ -2719,7 +2717,7 @@ namespace Game.Spells
                 if (target == null && targetPair.Key == GetUnitOwner().GetGUID())
                     target = GetUnitOwner();
 
-                if (target)
+                if (target != null)
                     targets.Add(target, targetPair.Value);
             }
 

@@ -52,7 +52,7 @@ namespace Game.Loots
         }
 
         public static Dictionary<ObjectGuid, Loot> GenerateDungeonEncounterPersonalLoot(uint dungeonEncounterId, uint lootId, LootStore store,
-            LootType type, WorldObject lootOwner, uint minMoney, uint maxMoney, ushort lootMode, ItemContext context, List<Player> tappers)
+            LootType type, WorldObject lootOwner, uint minMoney, uint maxMoney, ushort lootMode, MapDifficultyRecord mapDifficulty, List<Player> tappers)
         {
             Dictionary<Player, Loot> tempLoot = new();
 
@@ -62,7 +62,7 @@ namespace Game.Loots
                     continue;
 
                 Loot loot = new(lootOwner.GetMap(), lootOwner.GetGUID(), type, null);
-                loot.SetItemContext(context);
+                loot.SetItemContext(ItemBonusMgr.GetContextForPlayer(mapDifficulty, tapper));
                 loot.SetDungeonEncounterId(dungeonEncounterId);
                 loot.GenerateMoneyLoot(minMoney, maxMoney);
 
@@ -97,16 +97,18 @@ namespace Game.Loots
             uint count = Creature.LoadAndCollectLootIds(out lootIdSet);
 
             // Remove real entries and check loot existence
-            var ctc = Global.ObjectMgr.GetCreatureTemplates();
-            foreach (var pair in ctc)
+            var templates = Global.ObjectMgr.GetCreatureTemplates();
+            foreach (var creatureTemplate in templates.Values)
             {
-                uint lootid = pair.Value.LootId;
-                if (lootid != 0)
+                foreach (var (_, creatureDifficulty) in creatureTemplate.difficultyStorage)
                 {
-                    if (!lootIdSet.Contains(lootid))
-                        Creature.ReportNonExistingId(lootid, pair.Value.Entry);
-                    else
-                        lootIdSetUsed.Add(lootid);
+                    if (creatureDifficulty.LootID != 0)
+                    {
+                        if (!lootIdSet.Contains(creatureDifficulty.LootID))
+                            Creature.ReportNonExistingId(creatureDifficulty.LootID, creatureTemplate.Entry);
+                        else
+                            lootIdSetUsed.Add(creatureDifficulty.LootID);
+                    }
                 }
             }
 
@@ -289,16 +291,18 @@ namespace Game.Loots
             uint count = Pickpocketing.LoadAndCollectLootIds(out lootIdSet);
 
             // Remove real entries and check loot existence
-            var ctc = Global.ObjectMgr.GetCreatureTemplates();
-            foreach (var pair in ctc)
+            var templates = Global.ObjectMgr.GetCreatureTemplates();
+            foreach (var creatureTemplate in templates.Values)
             {
-                uint lootid = pair.Value.PickPocketId;
-                if (lootid != 0)
+                foreach (var (_, creatureDifficulty) in creatureTemplate.difficultyStorage)
                 {
-                    if (!lootIdSet.Contains(lootid))
-                        Pickpocketing.ReportNonExistingId(lootid, pair.Value.Entry);
-                    else
-                        lootIdSetUsed.Add(lootid);
+                    if (creatureDifficulty.PickPocketLootID != 0)
+                    {
+                        if (!lootIdSet.Contains(creatureDifficulty.PickPocketLootID))
+                            Pickpocketing.ReportNonExistingId(creatureDifficulty.PickPocketLootID, creatureTemplate.Entry);
+                        else
+                            lootIdSetUsed.Add(creatureDifficulty.PickPocketLootID);
+                    }
                 }
             }
 
@@ -377,16 +381,18 @@ namespace Game.Loots
             uint count = Skinning.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
-            var ctc = Global.ObjectMgr.GetCreatureTemplates();
-            foreach (var pair in ctc)
+            var templates = Global.ObjectMgr.GetCreatureTemplates();
+            foreach (var creatureTemplate in templates.Values)
             {
-                uint lootid = pair.Value.SkinLootId;
-                if (lootid != 0)
+                foreach (var (_, creatureDifficulty) in creatureTemplate.difficultyStorage)
                 {
-                    if (!lootIdSet.Contains(lootid))
-                        Skinning.ReportNonExistingId(lootid, pair.Value.Entry);
-                    else
-                        lootIdSetUsed.Add(lootid);
+                    if (creatureDifficulty.SkinLootID != 0)
+                    {
+                        if (!lootIdSet.Contains(creatureDifficulty.SkinLootID))
+                            Skinning.ReportNonExistingId(creatureDifficulty.SkinLootID, creatureTemplate.Entry);
+                        else
+                            lootIdSetUsed.Add(creatureDifficulty.SkinLootID);
+                    }
                 }
             }
 
@@ -1277,7 +1283,7 @@ namespace Game.Loots
             if ((item.lootmode & _lootMode) == 0)
                 return true;
 
-            if (_personalLooter && !LootItem.AllowedForPlayer(_personalLooter, null, item.itemid, item.needs_quest,
+            if (_personalLooter != null && !LootItem.AllowedForPlayer(_personalLooter, null, item.itemid, item.needs_quest,
                 !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
                 true, item.conditions))
                 return true;

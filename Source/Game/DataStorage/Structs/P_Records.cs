@@ -86,6 +86,9 @@ namespace Game.DataStorage
         public sbyte MinExpansionTier;
         public byte MinPVPRank;
         public byte MaxPVPRank;
+        public uint ContentTuningID;
+        public int CovenantID;
+        public uint TraitNodeEntryLogic;
         public ushort[] SkillID = new ushort[4];
         public ushort[] MinSkill = new ushort[4];
         public ushort[] MaxSkill = new ushort[4];
@@ -110,6 +113,9 @@ namespace Game.DataStorage
         public uint[] CurrencyCount = new uint[4];
         public uint[] QuestKillMonster = new uint[6];
         public int[] MovementFlags = new int[2];
+        public int[]TraitNodeEntryID = new int[4];
+        public ushort[]TraitNodeEntryMinRank = new ushort[4];
+        public ushort[]TraitNodeEntryMaxRank = new ushort[4];
     }
 
     public sealed class PowerDisplayRecord
@@ -128,15 +134,17 @@ namespace Game.DataStorage
         public string NameGlobalStringTag;
         public string CostGlobalStringTag;        
         public PowerType PowerTypeEnum;
-        public sbyte MinPower;
-        public uint MaxBasePower;
-        public sbyte CenterPower;
-        public sbyte DefaultPower;
-        public ushort DisplayModifier;
-        public short RegenInterruptTimeMS;
+        public int MinPower;
+        public int MaxBasePower;
+        public int CenterPower;
+        public int DefaultPower;
+        public int DisplayModifier;
+        public int RegenInterruptTimeMS;
         public float RegenPeace;
         public float RegenCombat;
         public short Flags;
+
+        public PowerTypeFlags GetFlags() { return (PowerTypeFlags)Flags; }
     }
 
     public sealed class PrestigeLevelInfoRecord
@@ -173,6 +181,14 @@ namespace Game.DataStorage
         public byte ItemLevelDelta;
     }
 
+    public sealed class PvpSeasonRecord
+    {
+        public uint Id;
+        public int MilestoneSeason;
+        public int AllianceAchievementID;
+        public int HordeAchievementID;
+    }
+
     public sealed class PvpTalentRecord
     {
         public LocalizedString Description;
@@ -184,6 +200,7 @@ namespace Game.DataStorage
         public int ActionBarSpellID;
         public int PvpTalentCategoryID;
         public int LevelRequired;
+        public int PlayerConditionID;
     }
 
     public sealed class PvpTalentCategoryRecord

@@ -20,7 +20,9 @@ namespace Framework.Constants
 
         public const float TrajectoryMissileSize = 3.0f;
 
-        public const int MaxPowersPerSpell = 4;
+        public const int AoeDamageTargetCap = 20;
+
+        public const int MaxPowersPerSpell = 5;
 
         public const uint VisualKitFood = 406;
         public const uint VisualKitDrink = 438;
@@ -167,7 +169,10 @@ namespace Framework.Constants
         TouchingGround = 0x40000, // NYI
         ChromieTime = 0x80000, // NYI
         SplineFlightOrFreeFlight = 0x100000, // NYI
-        ProcOrPeriodicAttacking = 0x200000  // NYI
+        ProcOrPeriodicAttacking = 0x200000,  // NYI
+        StartOfMythicPlusRun = 0x400000, // Implemented in Unit::AtStartOfEncounter
+        StartOfDungeonEncounter = 0x800000, // Implemented in Unit::AtStartOfEncounter - Similar to StartOfEncounter (but only with bosses, not m+ run or battleground)
+        EndOfDungeonEncounter = 0x1000000, // Implemented in Unit::AtEndOfEncounter - Similar to EndOfEncounter (but only with bosses, not m+ run or battleground)
     }
 
     // Enum with EffectRadiusIndex and their actual radius
@@ -324,7 +329,11 @@ namespace Framework.Constants
         Sapped = 30,
         Enraged = 31,
         Wounded = 32,
-        Max = 33,
+        Infected2 = 33,
+        Infected3 = 34,
+        Infected4 = 35,
+        Taunted = 36,
+        Max = 37,
 
         ImmuneToMovementImpairmentAndLossControlMask = ((1 << Charm) | (1 << Disoriented) |
             (1 << Fear) | (1 << Root) | (1 << Sleep) | (1 << Snare) | (1 << Stun) |
@@ -456,8 +465,8 @@ namespace Framework.Constants
         BadTargets = 13,
         PvpTargetWhileUnflagged = 14,
         CantBeCharmed = 15,
-        CantBeDisenchanted = 16,
-        CantBeDisenchantedSkill = 17,
+        CantBeSalvaged = 16,
+        CantBeSalvagedSkill = 17,
         CantBeEnchanted = 18,
         CantBeMilled = 19,
         CantBeProspected = 20,
@@ -750,13 +759,18 @@ namespace Framework.Constants
         IneligibleWeaponAppearance = 307,
         PlayerCondition = 308,
         NotWhileChromieTimed = 309,
-        OptionalReagents = 310,
+        CraftingReagents = 310,
         SpectatorOrCommentator = 311,
         SoulbindConduitLearnFailedInvalidCovenant = 312,
         ShadowlandsRidingRequirement = 313,
         NotInMageTower = 314,
         GarrisonFollowerAtMinLevel = 315,
-        Unknown = 316,
+        CantBeRecrafted = 316,
+        PassiveReplaced = 317,
+        CantFlyHere = 318,
+        DragonridingRidingRequirement = 319,
+        ItemModAppearanceGroupAlreadyKnown = 320,
+        Unknown = 321,
 
         // Ok Cast Value - Here In Case A Future Version Removes Success And We Need To Use A Custom Value (Not Sent To Client Either Way)
         SpellCastOk = Success
@@ -1340,7 +1354,66 @@ namespace Framework.Constants
         YouHaveOtherWaysToSummonPocopoc = 635, // You Have Other Ways To Summon Pocopoc While In Zereth Mortis.
         RequiresMoreSyllabicRecall = 636, // Requires More Syllabic Recall.
         ThisBattlePetCannotRideOnMagicSaucer = 637, // This Battle Pet Is Unable To Ride On The Magic Saucer.
+        YouCanOnlyDoThisWhileMidair = 638, // You Can Only Do This While Midair.
+        YouCannotDoThatWhileAirborne = 639, // You Cannot Do That While Airborne.
         PocopocIsUnavailableOnQuestline = 640, // Pocopoc Is Unavailable To Summon During The Questline A Means To An End.
+        CannontCastThatWithAuraOfReckoningTalent = 650, // You cannot cast that while Aura of Reckoning is talented.
+        RequiresSulfuronSlammer = 711, // Requires Sulfuron Slammer
+        NotReadyYet = 788, // Not Ready Yet.
+        QualityOfTieredMedallionSettingIsTooLow = 789, // The Quality Of Your Tiered Medallion Setting Is Too Low To Add Another Socket To This Item.
+        YouHaveNotLearnedBarrelRoll = 790, // You Have Not Learned Barrel Roll.
+        TargetMustBeAnEliteElemental = 791, // Target Must Be An Elite Elemental.
+        SkillCheckAlreadyFailed = 792, // Skill Check Already Failed.
+        YourTargetWasRecentlyFed = 793, // Your Target Was Recently Fed.
+        CannotLureElusiveCreatureTowardsTown = 794, // You Cannot Lure An Elusive Creature Towards A Town.
+        NoWorthwhileCreaturesInAreaToLureOut = 795, // There Are No Worthwhile Creatures In This Area To Lure Out.
+        CannotLureWildBeast = 796, // This Is A Daycare For Whelps. Why Would You Try To Lure A Wild Beast Here...?
+        YouHaveNoArcaneEssencesInYourInventory = 797, // You Have No Arcane Essences In Your Inventory.
+        ThatPlayerIsCurrentlyNotInterestedInEngagingWithYourShenanigans = 798, // That Player Is Currently Not Interested In Engaging With Your Shenanigans.
+        CantBeCastOnNonPlayerCharacters = 799, // Can'T Be Cast On Non Player Characters.
+        ASignalFlareWasRecentlyFiredAtThisLocation = 800, // A Signal Flare Was Recently Fired At This Location.
+        ThisTinkerIsTooComplicatedForYou = 801, // This Tinker Is Too Complicated For You.
+        TheDuckRefusesToPlayWhileAnotherMaestroIsNearby = 802, // The Duck Refuses To Play While Another Maestro Is Nearby.
+        YouHaveStudiedTheseNotesExtensivelyandThereIsNothingNewToLearnFromThem = 803, // You Have Studied These Notes Extensively And There Is Nothing New To Learn From Them.
+        YouDontHaveEnoughGold = 804, // You Don'T Have Enough Gold.
+        YouDoNotKnowHowToTameOttuk = 805, // You Do Not Know How To Tame Ottuk.
+        ClanAylaagIsCurrentlyTravellingandCannotBeTeleportedTo = 806, // Clan Aylaag Is Currently Travelling And Cannot Be Teleported To.
+        NotEnoughInsanity = 807, // Not Enough Insanity
+        YouMustWaitToAccessThisAgain = 808, // You Must Wait To Access This Again.
+        YouDoNotKnowHowToTameDragonkin = 809, // You Do Not Know How To Tame Dragonkin.
+        RequiresAnEmptySoulCage = 810, // Requires An Empty Soul Cage.
+        YouAlreadyHaveACagedSoulOfThatType = 811, // You Already Have A Caged Soul Of That Type.
+        YouCantDoThatHere = 812, // You Can'T Do That Here.
+        YouDoNotHaveAnyElementalGemsSocketed = 813, // You Do Not Have Any Elemental Gems Socketed.
+        YouMustBeInTheDragonIsles = 814, // You Must Be In The Dragon Isles.
+        YouCannotDoThatWhileUnderwater = 815, // You Cannot Do That While Underwater.
+        YouMustBeRidingAStolenTameMagmammoth = 816, // You Must Be Riding A Stolen Tame Magmammoth.
+        YouMustBeFlyingAboveWaterInsideAnActiveTuskarrFishingHole = 817, // You Must Be Flying Above Water Inside An Active Tuskarr Fishing Hole.
+        YouAreAlreadyBraveEnoughToContinueWithYourExperimentation = 818, // You Are Already Brave Enough To Continue With Your Experimentation.
+        YouDontKnowHowToRepairThisItem = 819, // You Don'T Know How To Repair This Item.
+        ThereIsNoMoreRoomOnThatHandhold = 820, // There Is No More Room On That Handhold.
+        YouMustUnblockThisSpotByCompletingADailyQuest = 821, // You Must Unblock This Spot By Completing A Daily Quest.
+        YouMustBeCloserToAnIceHoleToDoThat = 822, // You Must Be Closer To An Ice Hole To Do That.
+        ShadowflameIsTooStrongToBear = 823, // The Shadowflame Is Too Strong To Bear.
+        SomeoneHasAlreadyOverloadedThis = 824, // Someone Has Already Overloaded This.
+        RequiresNokhudTrainingCourse = 825, // Requires Nokhud Training Course.
+        ThisRecipeIsCurrentlyDisabled = 826, // This Recipe Is Currently Disabled. Please Try Again Later.
+        YouDoNotHaveTheCorrectBattlePetSummoned = 827, // You Do Not Have The Correct Battle Pet Summoned.
+        YouAlreadyHaveAtLeastOneConjuredPhial = 828, // You Already Have At Least One Conjured Phial.
+        MarkedTooManyTreasuresInTheForbiddenReach = 830, // You Have Already Marked Too Many Treasures In The Forbidden Reach. Collect A Few Before Unsealing More Forbidden Reach Treasure Scrolls.
+        RequiresADjaradinPillarShard = 831, // Requires A Djaradin Pillar Shard.
+        RequiresAResilientStone = 832, // Requires A Resilient Stone.
+        MyrritCannotCarryAnyMoreMaps = 835, // Myrrit Cannot Carry Any More Maps. Go On A Dig With Him!
+        SomeGiftsAreBetterLeftUndelivered = 836, // Some gifts are better left undelivered.
+        RequiresNiffenCaveDiveKeyandShieldDisabled = 850, // Requires Niffen Cave Dive Key And Shield Disabled.
+        ElusiveCreatureBaitWasRecentlyUsed = 851, // You Cannot Lure Anything In This Area For A Few Minutes. Elusive Creature Bait Was Recently Used.
+        MustBeInQuietPlaceWithinCaerDarrow = 852, // Must be in a suitably quiet place within Caer Darrow.
+        YouDontHaveAnyGlimmerOfLightsActive = 856, // You don't have any Glimmer of Lights active.
+        YouDontHaveTheSwirlingMojoStone = 999, // You Don'T Have The Swirling Mojo Stone Equipped.
+        YouMustBeNearADragonflightOathstone = 1000, // You Must Be Near One Of The Five Dragonflight Oathstones In The Dragon Isles.
+        CanOnlyUseThisItemWhileAirborne = 1001, // You Can Only Use This Item While Airborne.
+        YouMustBeInVisageForm = 2222, // You Must Be In Visage Form To Do This.
+        TooCloseToAnotherMoltenRitual = 2424, // You Can'T Begin A Molten Ritual This Close To Another One.
     }
 
     public enum SpellMissInfo
@@ -1451,7 +1524,8 @@ namespace Framework.Constants
         Unk78 = 78,
         Unk91 = 91,
         Unk100 = 100,
-        DemonHunter = 107
+        DemonHunter = 107,
+        Evoker = 224
     }
 
     [Flags]
@@ -1464,12 +1538,12 @@ namespace Framework.Constants
         IgnoreCastItem = 0x08,   //! Will Not Take Away Cast Item Or Update Related Achievement Criteria
         IgnoreAuraScaling = 0x10,   //! Will Ignore Aura Scaling
         IgnoreCastInProgress = 0x20,   //! Will Not Check If A Current Cast Is In Progress
-        IgnoreComboPoints = 0x40,   //! Will Ignore Combo Point Requirement
+        // reuse = 0x40,   //
         CastDirectly = 0x80,   //! In Spell.Prepare, Will Be Cast Directly Without Setting Containers For Executed Spell
-        IgnoreAuraInterruptFlags = 0x100,   //! Will Ignore Interruptible Aura'S At Cast
+        // reuse = 0x100,   //
         IgnoreSetFacing = 0x200,   //! Will Not Adjust Facing To Target (If Any)
         IgnoreShapeshift = 0x400,   //! Will Ignore Shapeshift Checks
-        IgnoreCasterAurastate = 0x800,   //! Will Ignore Caster Aura States Including Combat Requirements And Death State
+        // reuse = 0x800,   //
         DisallowProcEvents = 0x1000,   //! Disallows proc events from triggered spell (default)
         IgnoreCasterMountedOrOnVehicle = 0x2000,   //! Will Ignore Mounted/On Vehicle Restrictions
         // reuse                                        = 0x4000,
@@ -1482,6 +1556,7 @@ namespace Framework.Constants
         // debug flags (used with .cast triggered commands)
         IgnoreEquippedItemRequirement = 0x80000, //! Will ignore equipped item requirements
         IgnoreTargetCheck = 0x100000, //! Will ignore most target checks (mostly DBC target checks)
+        IgnoreCasterAurastate = 0x200000,   //! Will Ignore Caster Aura States Including Combat Requirements And Death State
         FullDebugMask = 0xFFFFFFFF
     }
 
@@ -1527,7 +1602,7 @@ namespace Framework.Constants
         Unk16 = 0x8000,
         Unk17 = 0x10000,
         AdjustMissile = 0x20000,
-        NoGCD = 0x40000,
+        NoGCD = 0x40000, // no GCD for spell casts from charm/summon (vehicle spells is an example)
         VisualChain = 0x80000,
         Unk21 = 0x100000,
         RuneList = 0x200000,
@@ -1540,22 +1615,22 @@ namespace Framework.Constants
         Unk29 = 0x10000000,
         Unk30 = 0x20000000,
         HealPrediction = 0x40000000,
-        Unk32 = 0x80000000
+        TriggerPetCooldown = 0x80000000 // causes the cooldown to be stored in pets SpellHistory on client
     }
 
     [System.Flags]
     public enum SpellCastFlagsEx
     {
         None = 0x0,
-        Unknown1 = 0x01,
+        TriggerCooldownOnSpellStart = 0x01,
         Unknown2 = 0x02,
-        Unknown3 = 0x04,
+        DontConsumeCharges = 0x04,
         Unknown4 = 0x08,
-        Unknown5 = 0x10,
+        DelayStartingCooldowns = 0x10, // makes client start cooldown after precalculated delay instead of immediately after SPELL_GO (used by empower spells)
         Unknown6 = 0x20,
         Unknown7 = 0x40,
         Unknown8 = 0x80,
-        Unknown9 = 0x100,
+        IgnorePetCooldown = 0x100, // makes client not automatically start cooldown for pets after SPELL_GO
         IgnoreCooldown = 0x200, // makes client not automatically start cooldown after SPELL_GO
         Unknown11 = 0x400,
         Unknown12 = 0x800,
@@ -1861,7 +1936,7 @@ namespace Framework.Constants
         Unk6 = 0x40, // 6
         Unk7 = 0x80, // 7
         AffectPartyAndRaid = 0x100, // 8
-        DontResetPeriodicTimer = 0x200, // 9 Periodic Auras With This Flag Keep Old Periodic Timer When Refreshing At Close To One Tick Remaining (Kind Of Anti Dot Clipping)
+        PeriodicCanCrit = 0x200, // 9
         NameChangedDuringTransofrm = 0x400, // 10
         Unk11 = 0x800, // 11
         AuraSendAmount = 0x1000, // 12 Aura Must Have Flag AflagAnyEffectAmountSent To Send Amount
@@ -2023,11 +2098,11 @@ namespace Framework.Constants
         Unk28 = 0x10000000, // 28
         Unk29 = 0x20000000, // 29
         Unk30 = 0x40000000, // 30
-        Unk31 = 0x80000000  // 31
+        OnlyProcFromClassAbilities = 0x80000000  // 31 Only Proc From Class Abilities
     }
     public enum SpellAttr13 : uint
     {
-        Unk0 = 0x01, //  0
+        AllowClassAbilityProcs = 0x01, //  0 Allow Class Ability Procs
         Unk1 = 0x02, //  1
         PassiveIsUpgrade = 0x04, //  2 Displays "Upgrade" in spell tooltip instead of "Passive"
         Unk3 = 0x08, //  3
@@ -2383,8 +2458,35 @@ namespace Framework.Constants
         ModifyKeystone2 = 285,
         GrantBattlepetExperience = 286,
         SetGarrisonFollowerLevel = 287,
-        Unk288 = 288,
-        Unk289 = 289,
+        CraftItem = 288, // Miscvalue[0] = Craftingdataid
+        ModifyAuraStacks = 289, // Miscvalue[0] = 0 Means Add, = 1 Means Set
+        ModifyCooldown = 290,
+        ModifyCooldowns = 291, // Miscvalue[0] = Spellfamily, Miscvalue[1] = Maybe Bit Index For Family Flags? Off By 1 For The Only Spell Using This Effect
+        ModifyCooldownsByCategory = 292, // Miscvalue[0] = Category
+        ModifyCharges = 293, // Miscvalue[0] = Charge Category
+        CraftLoot = 294, // Miscvalue[0] = Craftingdataid
+        SalvageItem = 295, // Miscvalue[0] = Itemsalvageid
+        CraftSalvageItem = 296, // Miscvalue[0] = Itemsalvageid, Miscvalue[1] = Craftingdataid
+        RecraftItem = 297,
+        CancelAllPrivateConversations = 298,
+        Unk299 = 299, // Something With Items, As Of 10.0.2 All Spells Are Named "Downgrading"
+        Unk300 = 300,
+        CraftEnchant = 301, // Miscvalue[0] = Craftingdataid, Miscvalue[1] = ?
+        Gathering = 302,
+        CreateTraitTreeConfig = 303, // Miscvalue[0] = Traittreeid
+        ChangeActiveCombatTraitConfig = 304,
+        Unk305 = 305,
+        UpdateInteractions = 306,
+        Unk307 = 307,
+        CancelPreloadWorld = 308,
+        PreloadWorld = 309,
+        Unk310 = 310,
+        EnsureWorldLoaded = 311,
+        Unk312 = 312,
+        ChangeItemBonuses2 = 313, // MiscValue[0] = ItemBonusTreeID to preserve
+        AddSocketBonus = 314, // MiscValue[0] = required ItemBonusTreeID
+        LearnTransmogAppearanceFromItemModAppearanceGroup = 315, // MiscValue[0] = ItemModAppearanceGroupID (not in db2)
+
         TotalSpellEffects
     }
 
@@ -2513,7 +2615,8 @@ namespace Framework.Constants
         Reflect = 0x800,
         Interrupt = 0x1000,
         FullBlock = 0x2000,
-        MaskAll = 0x0003FFF
+        Dispel = 0x4000,
+        MaskAll = 0x0007FFF
     }
 
     [Flags]
@@ -2704,13 +2807,13 @@ namespace Framework.Constants
         Unk139 = 139,
         DestCasterClumpCentroid = 140, // NYI
         Unk141 = 141,
-        Unk142 = 142,
+        DestNearbyEntryOrDB = 142,
         Unk143 = 143,
         Unk144 = 144,
         Unk145 = 145,
         Unk146 = 146,
         Unk147 = 147,
-        Unk148 = 148,
+        DestDestTargetTowardsCaster = 148,
         Unk149 = 149,
         UnitOwnCritter = 150, // own battle pet from UNIT_FIELD_CRITTER
         Unk151 = 151,
@@ -2829,5 +2932,11 @@ namespace Framework.Constants
         Shapeshifted = 8,
         ForcedDismount = 9,
         Ok = 10 // never sent
+    }
+
+    public enum SpellTargetIndex
+    {
+        TargetA = 0,
+        TargetB = 1
     }
 }

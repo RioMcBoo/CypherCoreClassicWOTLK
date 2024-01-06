@@ -6,6 +6,7 @@ using Framework.Database;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
@@ -19,7 +20,7 @@ namespace Game
         void HandleTabardVendorActivate(Hello packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.TabardDesigner, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleTabardVendorActivateOpcode - {0} not found or you can not interact with him.", packet.Unit.ToString());
                 return;
@@ -34,16 +35,18 @@ namespace Game
 
         public void SendTabardVendorActivate(ObjectGuid guid)
         {
-            PlayerTabardVendorActivate packet = new();
-            packet.Vendor = guid;
-            SendPacket(packet);
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.TabardVendor;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
         }
 
         [WorldPacketHandler(ClientOpcodes.TrainerList, Processing = PacketProcessing.Inplace)]
         void HandleTrainerList(Hello packet)
         {
             Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer, NPCFlags2.None);
-            if (!npc)
+            if (npc == null)
             {
                 Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - {packet.Unit} not found or you can not interact with him.");
                 return;
@@ -135,22 +138,16 @@ namespace Game
                 unit.PauseMovement(pause);
             unit.SetHomePosition(unit.GetPosition());
 
-            // If spiritguide, no need for gossip menu, just put player into resurrect queue
-            if (unit.IsSpiritGuide())
+            if (unit.IsAreaSpiritHealer())
             {
-                Battleground bg = GetPlayer().GetBattleground();
-                if (bg)
-                {
-                    bg.AddPlayerToResurrectQueue(unit.GetGUID(), GetPlayer().GetGUID());
-                    Global.BattlegroundMgr.SendAreaSpiritHealerQuery(GetPlayer(), bg, unit.GetGUID());
-                    return;
-                }
+                _player.SetAreaSpiritHealer(unit);
+                _player.SendAreaSpiritHealerTime(unit);
             }
 
             _player.PlayerTalkClass.ClearMenus();
             if (!unit.GetAI().OnGossipHello(_player))
             {
-                GetPlayer().PrepareGossipMenu(unit, unit.GetGossipMenuId(), true);
+                GetPlayer().PrepareGossipMenu(unit, _player.GetGossipMenuForSource(unit), true);
                 GetPlayer().SendPreparedGossip(unit);
             }
         }
@@ -158,7 +155,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GossipSelectOption)]
         void HandleGossipSelectOption(GossipSelectOption packet)
         {
-            if (GetPlayer().PlayerTalkClass.GetGossipMenu().GetItem(packet.GossipIndex) == null)
+            GossipMenuItem gossipMenuItem = _player.PlayerTalkClass.GetGossipMenu().GetItem(packet.GossipOptionID);
+            if (gossipMenuItem == null)
                 return;
 
             // Prevent cheating on C# scripted menus
@@ -195,7 +193,7 @@ namespace Game
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            if ((unit && unit.GetScriptId() != unit.LastUsedScriptID) || (go != null && go.GetScriptId() != go.LastUsedScriptID))
+            if ((unit != null && unit.GetScriptId() != unit.LastUsedScriptID) || (go != null && go.GetScriptId() != go.LastUsedScriptID))
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleGossipSelectOption - Script reloaded while in use, ignoring and set new scipt id");
                 if (unit != null)
@@ -210,26 +208,26 @@ namespace Game
             {
                 if (unit != null)
                 {
-                    if (!unit.GetAI().OnGossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode))
-                        GetPlayer().OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
+                    if (!unit.GetAI().OnGossipSelectCode(_player, packet.GossipID, gossipMenuItem.OrderIndex, packet.PromotionCode))
+                        GetPlayer().OnGossipSelect(unit, packet.GossipOptionID, packet.GossipID);
                 }
                 else
                 {
-                    if (!go.GetAI().OnGossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode))
-                        _player.OnGossipSelect(go, packet.GossipIndex, packet.GossipID);
+                    if (!go.GetAI().OnGossipSelectCode(_player, packet.GossipID, gossipMenuItem.OrderIndex, packet.PromotionCode))
+                        _player.OnGossipSelect(go, packet.GossipOptionID, packet.GossipID);
                 }
             }
             else
             {
                 if (unit != null)
                 {
-                    if (!unit.GetAI().OnGossipSelect(_player, packet.GossipID, packet.GossipIndex))
-                        GetPlayer().OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
+                    if (!unit.GetAI().OnGossipSelect(_player, packet.GossipID, gossipMenuItem.OrderIndex))
+                        GetPlayer().OnGossipSelect(unit, packet.GossipOptionID, packet.GossipID);
                 }
                 else
                 {
-                    if (!go.GetAI().OnGossipSelect(_player, packet.GossipID, packet.GossipIndex))
-                        GetPlayer().OnGossipSelect(go, packet.GossipIndex, packet.GossipID);
+                    if (!go.GetAI().OnGossipSelect(_player, packet.GossipID, gossipMenuItem.OrderIndex))
+                        GetPlayer().OnGossipSelect(go, packet.GossipOptionID, packet.GossipID);
                 }
             }
         }
@@ -238,7 +236,7 @@ namespace Game
         void HandleSpiritHealerActivate(SpiritHealerActivate packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Healer, NPCFlags.SpiritHealer, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleSpiritHealerActivateOpcode - {0} not found or you can not interact with him.", packet.Healer.ToString());
                 return;
@@ -262,7 +260,7 @@ namespace Game
             WorldLocation corpseLocation = GetPlayer().GetCorpseLocation();
             if (GetPlayer().HasCorpse())
             {
-                corpseGrave = Global.ObjectMgr.GetClosestGraveYard(corpseLocation, GetPlayer().GetTeam(), GetPlayer());
+                corpseGrave = Global.ObjectMgr.GetClosestGraveyard(corpseLocation, GetPlayer().GetTeam(), GetPlayer());
             }
 
             // now can spawn bones
@@ -271,7 +269,7 @@ namespace Game
             // teleport to nearest from corpse graveyard, if different from nearest to player ghost
             if (corpseGrave != null)
             {
-                WorldSafeLocsEntry ghostGrave = Global.ObjectMgr.GetClosestGraveYard(GetPlayer(), GetPlayer().GetTeam(), GetPlayer());
+                WorldSafeLocsEntry ghostGrave = Global.ObjectMgr.GetClosestGraveyard(GetPlayer(), GetPlayer().GetTeam(), GetPlayer());
 
                 if (corpseGrave != ghostGrave)
                     GetPlayer().TeleportTo(corpseGrave.Loc);
@@ -285,7 +283,7 @@ namespace Game
                 return;
 
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Innkeeper, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBinderActivate - {0} not found or you can not interact with him.", packet.Unit.ToString());
                 return;
@@ -326,72 +324,33 @@ namespace Game
             if (GetPlayer().IsMounted())
                 GetPlayer().RemoveAurasByType(AuraType.Mounted);
 
-            SendStablePet(packet.StableMaster);
+            _player.SetStableMaster(packet.StableMaster);
         }
 
-        public void SendStablePet(ObjectGuid guid)
-        {
-            PetStableList packet = new();
-            packet.StableMaster = guid;
-
-            PetStable petStable = GetPlayer().GetPetStable();
-            if (petStable == null)
-            {
-                SendPacket(packet);
-                return;
-            }
-
-            for (uint petSlot = 0; petSlot < petStable.ActivePets.Length; ++petSlot)
-            {
-                if (petStable.ActivePets[petSlot] == null)
-                    continue;
-
-                PetStable.PetInfo pet = petStable.ActivePets[petSlot];
-                PetStableInfo stableEntry;
-                stableEntry.PetSlot = petSlot + (int)PetSaveMode.FirstActiveSlot;
-                stableEntry.PetNumber = pet.PetNumber;
-                stableEntry.CreatureID = pet.CreatureId;
-                stableEntry.DisplayID = pet.DisplayId;
-                stableEntry.ExperienceLevel = pet.Level;
-                stableEntry.PetFlags = PetStableinfo.Active;
-                stableEntry.PetName = pet.Name;
-
-                packet.Pets.Add(stableEntry);
-            }
-
-            for (uint petSlot = 0; petSlot < petStable.StabledPets.Length; ++petSlot)
-            {
-                if (petStable.StabledPets[petSlot] == null)
-                    continue;
-
-                PetStable.PetInfo pet = petStable.StabledPets[petSlot];
-                PetStableInfo stableEntry;
-                stableEntry.PetSlot = petSlot + (int)PetSaveMode.FirstStableSlot;
-                stableEntry.PetNumber = pet.PetNumber;
-                stableEntry.CreatureID = pet.CreatureId;
-                stableEntry.DisplayID = pet.DisplayId;
-                stableEntry.ExperienceLevel = pet.Level;
-                stableEntry.PetFlags = PetStableinfo.Inactive;
-                stableEntry.PetName = pet.Name;
-
-                packet.Pets.Add(stableEntry);
-            }
-
-            SendPacket(packet);
-        }
-
-        void SendPetStableResult(StableResult result)
+        public void SendPetStableResult(StableResult result)
         {
             PetStableResult petStableResult = new();
             petStableResult.Result = result;
             SendPacket(petStableResult);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SetPetSlot)]
+        void HandleSetPetSlot(SetPetSlot setPetSlot)
+        {
+            if (!CheckStableMaster(setPetSlot.StableMaster) || setPetSlot.DestSlot >= (byte)PetSaveMode.LastStableSlot)
+            {
+                SendPetStableResult(StableResult.InternalError);
+                return;
+            }
+
+            _player.SetPetSlot(setPetSlot.PetNumber, (PetSaveMode)setPetSlot.DestSlot);
         }
         
         [WorldPacketHandler(ClientOpcodes.RepairItem, Processing = PacketProcessing.Inplace)]
         void HandleRepairItem(RepairItem packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.NpcGUID, NPCFlags.Repair, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleRepairItemOpcode - {0} not found or you can not interact with him.", packet.NpcGUID.ToString());
                 return;
@@ -409,7 +368,7 @@ namespace Game
                 Log.outDebug(LogFilter.Network, "ITEM: Repair {0}, at {1}", packet.ItemGUID.ToString(), packet.NpcGUID.ToString());
 
                 Item item = GetPlayer().GetItemByGuid(packet.ItemGUID);
-                if (item)
+                if (item != null)
                     GetPlayer().DurabilityRepair(item.InventoryPosition, true, discountMod);
             }
             else
@@ -495,7 +454,8 @@ namespace Game
                         continue;
                     }
 
-                    int price = (int)(vendorItem.IsGoldRequired(itemTemplate) ? Math.Floor(itemTemplate.GetBuyPrice() * discountMod) : 0);
+                    ulong price = (ulong)Math.Floor(itemTemplate.GetBuyPrice() * discountMod);
+                    price = itemTemplate.GetBuyPrice() > 0 ? Math.Max(1ul, price) : price;
 
                     int priceMod = GetPlayer().GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
                     if (priceMod != 0)

@@ -20,6 +20,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Game
 {
@@ -269,7 +270,7 @@ namespace Game
             key.Raw = linkInfo.Item2;
 
             WorldSession session = FindSession(key.AccountId);
-            if (!session || session.GetConnectToInstanceKey() != linkInfo.Item2)
+            if (session == null || session.GetConnectToInstanceKey() != linkInfo.Item2)
             {
                 linkInfo.Item1.SendAuthResponseError(BattlenetRpcErrorCode.TimedOut);
                 linkInfo.Item1.CloseSocket();
@@ -494,6 +495,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell Totem models...");
             Global.SpellMgr.LoadSpellTotemModel();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Traits...");
+            TraitMgr.Load();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading languages...");
             Global.LanguageMgr.LoadLanguages();
 
@@ -576,6 +580,11 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Enchant Spells Proc datas...");
             Global.SpellMgr.LoadSpellEnchantProcData();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading item bonus data...");
+            ItemBonusMgr.Load();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Random item bonus list definitions...");
+            ItemEnchantmentManager.LoadItemRandomBonusListTemplates();
             Log.outInfo(LogFilter.ServerLoading, "Loading Item Random Enchantments Table...");
             ItemEnchantmentManager.LoadRandomEnchantmentsTable();
 
@@ -603,8 +612,11 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature template addons...");
             Global.ObjectMgr.LoadCreatureTemplateAddons();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Creature template scaling...");
-            Global.ObjectMgr.LoadCreatureScalingData();
+            Log.outInfo(LogFilter.ServerLoading, "Loading Creature template difficulty...");
+            Global.ObjectMgr.LoadCreatureTemplateDifficulty();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Creature template sparring...");
+            Global.ObjectMgr.LoadCreatureTemplateSparring();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Reputation Reward Rates...");
             Global.ObjectMgr.LoadReputationRewardRate();
@@ -715,7 +727,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading World locations...");
             Global.ObjectMgr.LoadWorldSafeLocs();                            // must be before LoadAreaTriggerTeleports and LoadGraveyardZones
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading AreaTrigger definitions...");
+            Log.outInfo(LogFilter.ServerLoading, "Loading Area Trigger Teleports definitions...");
             Global.ObjectMgr.LoadAreaTriggerTeleports();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Access Requirements...");
@@ -881,8 +893,8 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Gossip menu addon...");
             Global.ObjectMgr.LoadGossipMenuAddon();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Gossip menu item addon...");
-            Global.ObjectMgr.LoadGossipMenuItemAddon();
+            Log.outInfo(LogFilter.ServerLoading, "Loading Creature Template Gossip...");
+            Global.ObjectMgr.LoadCreatureTemplateGossip();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature trainers...");
             Global.ObjectMgr.LoadCreatureTrainers();                         // must be after LoadGossipMenuItems
@@ -892,9 +904,6 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Waypoints...");
             Global.WaypointMgr.Load();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading SmartAI Waypoints...");
-            Global.SmartAIMgr.LoadWaypointFromDB();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Formations...");
             FormationMgr.LoadCreatureFormations();
@@ -1097,9 +1106,6 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading character templates...");
             Global.CharacterTemplateDataStorage.LoadCharacterTemplates();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading realm names...");
-            Global.ObjectMgr.LoadRealmNames();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading battle pets info...");
             BattlePetMgr.Initialize();
@@ -1546,7 +1552,7 @@ namespace Game
             var wt_do = new LocalizedDo(wt_builder);
             foreach (var session in m_sessions.Values)
             {
-                if (session == null || !session.GetPlayer() || !session.GetPlayer().IsInWorld)
+                if (session == null || session.GetPlayer() == null || !session.GetPlayer().IsInWorld)
                     continue;
 
                 wt_do.Invoke(session.GetPlayer());
@@ -1566,7 +1572,7 @@ namespace Game
 
                 // Player should be in world
                 Player player = session.GetPlayer();
-                if (!player || !player.IsInWorld)
+                if (player == null || !player.IsInWorld)
                     continue;
 
                 wt_do.Invoke(player);
@@ -1579,7 +1585,7 @@ namespace Game
             bool foundPlayerToSend = false;
             foreach (var session in m_sessions.Values)
             {
-                if (session != null && session.GetPlayer() && session.GetPlayer().IsInWorld &&
+                if (session != null && session.GetPlayer() != null && session.GetPlayer().IsInWorld &&
                     session.GetPlayer().GetZoneId() == zone && session != self && (team == 0 || (uint)session.GetPlayer().GetTeam() == team))
                 {
                     session.SendPacket(packet);
@@ -1640,14 +1646,13 @@ namespace Game
                     // No SQL injection with prepared statements
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
                     stmt.AddValue(0, nameOrIP);
-                    dataBase = DB.Login;
-
-                    var stmt2 = LoginDatabase.GetPreparedStatement(LoginStatements.INS_IP_BANNED);
-                    stmt2.AddValue(0, nameOrIP);
-                    stmt2.AddValue(1, duration_secs);
-                    stmt2.AddValue(2, author);
-                    stmt2.AddValue(3, reason);
-                    DB.Login.Execute(stmt2);
+                    resultAccounts = DB.Login.Query(stmt);
+                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_IP_BANNED);
+                    stmt.AddValue(0, nameOrIP);
+                    stmt.AddValue(1, duration_secs);
+                    stmt.AddValue(2, author);
+                    stmt.AddValue(3, reason);
+                    DB.Login.Execute(stmt);
                     break;
                 case BanMode.Account:
                     // No SQL injection with prepared statements
@@ -1697,7 +1702,7 @@ namespace Game
                 }
 
                 WorldSession sess = FindSession(account);
-                if (sess)
+                if (sess != null)
                 {
                     if (sess.GetPlayerName() != author)
                         sess.KickPlayer("World::BanAccount Banning account");
@@ -1751,7 +1756,7 @@ namespace Game
             ObjectGuid guid;
 
             // Pick a player to ban if not online
-            if (!pBanned)
+            if (pBanned == null)
             {
                 guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
                 if (guid.IsEmpty())
@@ -1776,7 +1781,7 @@ namespace Game
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
 
-            if (pBanned)
+            if (pBanned != null)
                 pBanned.GetSession().KickPlayer("World::BanCharacter Banning character");
 
             return BanReturn.Success;
@@ -1789,7 +1794,7 @@ namespace Game
             ObjectGuid guid;
 
             // Pick a player to ban if not online
-            if (!pBanned)
+            if (pBanned == null)
             {
                 guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
                 if (guid.IsEmpty())
@@ -1907,7 +1912,7 @@ namespace Game
             if (messageID <= ServerMessageType.String)
                 packet.StringParam = stringParam;
 
-            if (player)
+            if (player != null)
                 player.SendPacket(packet);
             else
                 SendGlobalMessage(packet);
@@ -2016,6 +2021,17 @@ namespace Game
                     player.DailyReset();
             }
 
+            StringBuilder questIds = new StringBuilder("DELETE cq, cqo FROM character_queststatus cq LEFT JOIN character_queststatus_objectives cqo ON cq.quest = cqo.quest WHERE cq.quest IN (");
+            foreach (var (questId, quest) in Global.ObjectMgr.GetQuestTemplates())
+            {
+                if (quest.IsDaily() && quest.HasFlagEx(QuestFlagsEx.RemoveOnPeriodicReset))
+                    questIds.Append($"{questId},");
+            }
+            questIds.Append("0)");
+
+            DB.Characters.Execute(questIds.ToString());
+
+
             // reselect pools
             Global.QuestPoolMgr.ChangeDailyQuests();
 
@@ -2057,6 +2073,16 @@ namespace Game
                 if (player != null)
                     player.ResetWeeklyQuestStatus();
             }
+
+            StringBuilder questIds = new StringBuilder("DELETE cq, cqo FROM character_queststatus cq LEFT JOIN character_queststatus_objectives cqo ON cq.quest = cqo.quest WHERE cq.quest IN (");
+            foreach (var (questId, quest) in Global.ObjectMgr.GetQuestTemplates())
+            {
+                if (quest.IsWeekly() && quest.HasFlagEx(QuestFlagsEx.RemoveOnWeeklyReset))
+                    questIds.Append($"{questId},");
+            }
+            questIds.Append("0)");
+
+            DB.Characters.Execute(questIds.ToString());
 
             // reselect pools
             Global.QuestPoolMgr.ChangeWeeklyQuests();
@@ -2232,7 +2258,7 @@ namespace Game
             DB.Characters.Execute(stmt);
 
             foreach (var session in m_sessions.Values)
-                if (session.GetPlayer())
+                if (session.GetPlayer() != null)
                     session.GetPlayer().SetRandomWinner(false);
 
             m_NextRandomBGReset += Time.Day;
@@ -2421,18 +2447,17 @@ namespace Game
                 return false;
 
             _realm.SetName(result.Read<string>(1));
-            _realm.ExternalAddress = System.Net.IPAddress.Parse(result.Read<string>(2));
-            _realm.LocalAddress = System.Net.IPAddress.Parse(result.Read<string>(3));
-            _realm.LocalSubnetMask = System.Net.IPAddress.Parse(result.Read<string>(4));
-            _realm.Port = result.Read<ushort>(5);
-            _realm.Type = result.Read<byte>(6);
-            _realm.Flags = (RealmFlags)result.Read<byte>(7);
-            _realm.Timezone = result.Read<byte>(8);
-            _realm.AllowedSecurityLevel = (AccountTypes)result.Read<byte>(9);
-            _realm.PopulationLevel = result.Read<float>(10);
-            _realm.Id.Region = result.Read<byte>(12);
-            _realm.Id.Site = result.Read<byte>(13);
-            _realm.Build = result.Read<uint>(11);
+            _realm.Addresses.Add(System.Net.IPAddress.Parse(result.Read<string>(2)));
+            _realm.Addresses.Add(System.Net.IPAddress.Parse(result.Read<string>(3)));
+            _realm.Port = result.Read<ushort>(4);
+            _realm.Type = result.Read<byte>(5);
+            _realm.Flags = (RealmFlags)result.Read<byte>(6);
+            _realm.Timezone = result.Read<byte>(7);
+            _realm.AllowedSecurityLevel = (AccountTypes)result.Read<byte>(8);
+            _realm.PopulationLevel = result.Read<float>(9);
+            _realm.Build = result.Read<uint>(10);
+            _realm.Id.Region = result.Read<byte>(11);
+            _realm.Id.Site = result.Read<byte>(12);
             return true;
         }
 

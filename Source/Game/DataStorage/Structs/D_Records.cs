@@ -45,9 +45,9 @@ namespace Game.DataStorage
         public DifficultyFlags Flags;
         public byte ItemContext;
         public byte ToggleDifficultyID;
-        public ushort GroupSizeHealthCurveID;
-        public ushort GroupSizeDmgCurveID;
-        public ushort GroupSizeSpellPointsCurveID;
+        public uint GroupSizeHealthCurveID;
+        public uint GroupSizeDmgCurveID;
+        public uint GroupSizeSpellPointsCurveID;
     }
 
     public sealed class DungeonEncounterRecord
@@ -58,7 +58,6 @@ namespace Game.DataStorage
         public int DifficultyID;
         public int OrderIndex;
         public sbyte Bit;
-        public int CreatureDisplayID;
         public int Flags;
     }
 

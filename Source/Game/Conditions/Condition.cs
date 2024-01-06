@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Miscellaneous;
 using Game.Scenarios;
 using System;
 using System.Collections.Generic;
@@ -159,7 +160,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Race:
                     if (unit != null)
-                        condMeets = Convert.ToBoolean(SharedConst.GetMaskForRace(unit.GetRace()) & ConditionValue1);
+                        condMeets = new RaceMask<uint>(ConditionValue1).HasRace(unit.GetRace());
                     break;
                 case ConditionTypes.Gender:
                     if (player != null)
@@ -314,12 +315,12 @@ namespace Game.Conditions
                 case ConditionTypes.CreatureType:
                 {
                     Creature creature = obj.ToCreature();
-                    if (creature)
+                    if (creature != null)
                         condMeets = (uint)creature.GetCreatureTemplate().CreatureType == ConditionValue1;
                     break;
                 }
                 case ConditionTypes.InWater:
-                    if (unit)
+                    if (unit != null)
                         condMeets = unit.IsInWater();
                     break;
                 case ConditionTypes.TerrainSwap:
@@ -327,7 +328,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.StandState:
                 {
-                    if (unit)
+                    if (unit != null)
                     {
                         if (ConditionValue1 == 0)
                             condMeets = (unit.GetStandState() == (UnitStandStateType)ConditionValue2);
@@ -340,35 +341,35 @@ namespace Game.Conditions
                 }
                 case ConditionTypes.DailyQuestDone:
                 {
-                    if (player)
+                    if (player != null)
                         condMeets = player.IsDailyQuestDone(ConditionValue1);
                     break;
                 }
                 case ConditionTypes.Charmed:
                 {
-                    if (unit)
+                    if (unit != null)
                         condMeets = unit.IsCharmed();
                     break;
                 }
                 case ConditionTypes.PetType:
                 {
-                    if (player)
+                    if (player != null)
                     {
                         Pet pet = player.GetPet();
-                        if (pet)
+                        if (pet != null)
                             condMeets = (((1 << (int)pet.GetPetType()) & ConditionValue1) != 0);
                     }
                     break;
                 }
                 case ConditionTypes.Taxi:
                 {
-                    if (player)
+                    if (player != null)
                         condMeets = player.IsInFlight();
                     break;
                 }
                 case ConditionTypes.Queststate:
                 {
-                    if (player)
+                    if (player != null)
                     {
                         if (
                             (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.None)) && (player.GetQuestStatus(ConditionValue1) == QuestStatus.None)) ||
@@ -383,7 +384,7 @@ namespace Game.Conditions
                 }
                 case ConditionTypes.ObjectiveProgress:
                 {
-                    if (player)
+                    if (player != null)
                     {
                         QuestObjective questObj = Global.ObjectMgr.GetQuestObjective(ConditionValue1);
                         if (questObj == null)
@@ -432,6 +433,11 @@ namespace Game.Conditions
                         if (playerCondition != null)
                             condMeets = ConditionManager.IsPlayerMeetingCondition(player, playerCondition);
                     }
+                    break;
+                }
+                case ConditionTypes.PrivateObject:
+                {
+                    condMeets = !obj.GetPrivateObjectOwner().IsEmpty();
                     break;
                 }
                 default:
@@ -554,6 +560,9 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.PlayerCondition:
                     mask |= GridMapTypeMask.Player;
+                    break;
+                case ConditionTypes.PrivateObject:
+                    mask |= GridMapTypeMask.All & ~GridMapTypeMask.Player;
                     break;
                 default:
                     Cypher.Assert(false, "Condition.GetSearcherTypeMaskForCondition - missing condition handling!");

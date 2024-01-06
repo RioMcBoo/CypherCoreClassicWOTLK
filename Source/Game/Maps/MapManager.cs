@@ -69,7 +69,7 @@ namespace Game.Entities
             // some instances only have one difficulty
             Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty);
 
-            Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateInstance: {(instanceLock?.GetInstanceId() != 0 ? "" : "new ")}map instance {instanceId} for {mapId} created with difficulty {difficulty}");
+            Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateInstance: {(instanceLock?.IsNew() == true ? "new" : " ")} map instance {instanceId} for {mapId} created with difficulty {difficulty}");
 
             InstanceMap map = new InstanceMap(mapId, i_gridCleanUpDelay, instanceId, difficulty, team, instanceLock);
             Cypher.Assert(map.IsDungeon());
@@ -109,7 +109,7 @@ namespace Game.Entities
         /// <returns>the right instance for the object, based on its InstanceId</returns>
         public Map CreateMap(uint mapId, Player player)
         {
-            if (!player)
+            if (player == null)
                 return null;
 
             var entry = CliDB.MapStorage.LookupByKey(mapId);
@@ -130,7 +130,7 @@ namespace Game.Entities
                         return null;
 
                     map = FindMap_i(mapId, newInstanceId);
-                    if (!map)
+                    if (map == null)
                     {
                         Battleground bg = player.GetBattleground();
                         if (bg != null)
@@ -161,7 +161,7 @@ namespace Game.Entities
                     {
                         // Try finding instance id for normal dungeon
                         if (!entries.MapDifficulty.HasResetSchedule())
-                            newInstanceId = group ? group.GetRecentInstanceId(mapId) : player.GetRecentInstanceId(mapId);
+                            newInstanceId = group != null ? group.GetRecentInstanceId(mapId) : player.GetRecentInstanceId(mapId);
 
                         // If not found or instance is not a normal dungeon, generate new one
                         if (newInstanceId == 0)
@@ -180,10 +180,10 @@ namespace Game.Entities
                         map = null;
                     }
 
-                    if (!map)
+                    if (map == null)
                     {
                         map = CreateInstance(mapId, newInstanceId, instanceLock, difficulty, player.GetTeamId(), group);
-                        if (group)
+                        if (group != null)
                             group.SetRecentInstance(mapId, instanceOwnerGuid, newInstanceId);
                         else
                             player.SetRecentInstance(mapId, newInstanceId);
@@ -196,11 +196,11 @@ namespace Game.Entities
                         newInstanceId = (uint)player.GetTeamId();
 
                     map = FindMap_i(mapId, newInstanceId);
-                    if (!map)
+                    if (map == null)
                         map = CreateWorldMap(mapId, newInstanceId);
                 }
 
-                if (map)
+                if (map != null)
                     i_maps[(map.GetId(), map.GetInstanceId())] = map;
 
                 return map;
@@ -227,13 +227,13 @@ namespace Game.Entities
                 Difficulty difficulty = group != null ? group.GetDifficultyID(entry) : player.GetDifficultyID(entry);
                 MapDb2Entries entries = new(entry, Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty));
 
-                ObjectGuid instanceOwnerGuid = group ? group.GetRecentInstanceOwner(mapId) : player.GetGUID();
+                ObjectGuid instanceOwnerGuid = group != null ? group.GetRecentInstanceOwner(mapId) : player.GetGUID();
                 InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(instanceOwnerGuid, entries);
                 uint newInstanceId = 0;
                 if (instanceLock != null)
                     newInstanceId = instanceLock.GetInstanceId();
                 else if (!entries.MapDifficulty.HasResetSchedule()) // Try finding instance id for normal dungeon
-                    newInstanceId = group ? group.GetRecentInstanceId(mapId) : player.GetRecentInstanceId(mapId);
+                    newInstanceId = group != null ? group.GetRecentInstanceId(mapId) : player.GetRecentInstanceId(mapId);
 
                 if (newInstanceId == 0)
                     return 0;

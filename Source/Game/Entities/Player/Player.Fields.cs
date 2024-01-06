@@ -21,7 +21,7 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        public WorldSession GetSession() { return Session; }
+        public WorldSession GetSession() { return _session; }
         public PlayerSocial GetSocial() { return m_social; }
 
         //Gossip
@@ -48,13 +48,14 @@ namespace Game.Entities
 
         //PVP
         BgBattlegroundQueueID_Rec[] m_bgBattlegroundQueueID = new BgBattlegroundQueueID_Rec[SharedConst.MaxPlayerBGQueues];
-        BGData m_bgData;
+        public BGData m_bgData;
         bool m_IsBGRandomWinner;
         public PvPInfo pvpInfo;
         uint m_ArenaTeamIdInvited;
         long m_lastHonorUpdateTime;
         uint m_contestedPvPTimer;
         bool _usePvpItemLevels;
+        ObjectGuid _areaSpiritHealerGUID;
 
         //Groups/Raids
         GroupReference m_group = new();
@@ -120,6 +121,7 @@ namespace Game.Entities
         PetStable m_petStable;
         public List<PetAura> m_petAuras = new();
         uint m_temporaryUnsummonedPetNumber;
+        ReactStates? m_temporaryPetReactState;
         uint m_lastpetnumber;
 
         // Player summoning
@@ -141,7 +143,7 @@ namespace Game.Entities
         uint m_deathTimer;
         long m_deathExpireTime;
         byte m_swingErrorMsg;
-        uint m_combatExitTime;
+        DateTime m_regenInterruptTimestamp;
         uint m_regenTimerCount;
         uint m_foodEmoteTimerCount;
         uint m_weaponChangeTimer;
@@ -175,7 +177,7 @@ namespace Game.Entities
         WorldLocation _corpseLocation;
 
         //Core
-        WorldSession Session;
+        WorldSession _session;
 
         public PlayerData m_playerData;
         public ActivePlayerData m_activePlayerData;
@@ -241,6 +243,8 @@ namespace Game.Entities
         uint m_PlayedTimeTotal;
         uint m_PlayedTimeLevel;
 
+        Dictionary<int, PlayerSpellState> m_traitConfigStates = new();
+
         Dictionary<byte, ActionButton> m_actionButtons = new();
         ObjectGuid m_playerSharingQuest;
         uint m_sharedQuestId;
@@ -278,6 +282,7 @@ namespace Game.Entities
         public CreatePosition createPosition;
         public CreatePosition? createPositionNPE;
 
+        public ItemContext itemContext;
         public List<PlayerCreateInfoItem> item = new();
         public List<uint> customSpells = new();
         public List<uint>[] castSpells = new List<uint>[(int)PlayerCreateMode.Max];
@@ -293,7 +298,10 @@ namespace Game.Entities
         public PlayerInfo()
         {
             for (var i = 0; i < castSpells.Length; ++i)
-                castSpells[i] = new List<uint>();
+                castSpells[i] = new();
+
+            for (var i = 0; i < levelInfo.Length; ++i)
+                levelInfo[i] = new();
         }
 
         public struct CreatePosition
@@ -341,7 +349,9 @@ namespace Game.Entities
         public uint Quantity;
         public uint WeeklyQuantity;
         public uint TrackedQuantity;
-        public byte Flags;
+        public uint IncreasedCapQuantity;
+        public uint EarnedQuantity;
+        public CurrencyDbFlags Flags;
     }
 
     public class SpecializationInfo
@@ -577,6 +587,7 @@ namespace Game.Entities
         public uint[] taxiPath = new uint[2];
 
         public WorldLocation joinPos;                  //< From where player entered BG
+        public BattlegroundQueueTypeId queueId;
 
         public void ClearTaxiPath() { taxiPath[0] = taxiPath[1] = 0; }
         public bool HasTaxiPath() { return taxiPath[0] != 0 && taxiPath[1] != 0; }

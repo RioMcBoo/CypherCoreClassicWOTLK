@@ -55,6 +55,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public ushort UniqueBitFlag;
+        public int UiQuestDetailsTheme;
     }
 
     public sealed class QuestXPRecord

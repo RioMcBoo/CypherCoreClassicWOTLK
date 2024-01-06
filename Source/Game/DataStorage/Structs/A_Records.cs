@@ -121,7 +121,7 @@ namespace Game.DataStorage
         public uint UwIntroSound;
         public byte FactionGroupMask;
         public float AmbientMultiplier;
-        public byte MountFlags;
+        public int MountFlags;
         public short PvpCombatWorldStateID;
         public byte WildBattlePetLevelMin;
         public byte WildBattlePetLevelMax;
@@ -129,25 +129,14 @@ namespace Game.DataStorage
         public uint[] Flags = new uint[2];
         public ushort[] LiquidTypeID = new ushort[4];
 
+        public AreaFlags GetFlags() { return (AreaFlags)Flags[0]; }
+        public AreaFlags2 GetFlags2() { return (AreaFlags2)Flags[1]; }
+        public AreaMountFlags GetMountFlags() { return (AreaMountFlags)MountFlags; }
+
         public bool IsSanctuary()
         {
-            return HasFlag(AreaFlags.Sanctuary);
+            return GetFlags().HasFlag(AreaFlags.NoPvP);
         }
-
-        public bool IsFlyable()
-        {
-            if (HasFlag(AreaFlags.Outland))
-            {
-                if (!HasFlag(AreaFlags.NoFlyZone))
-                    return true;
-            }
-
-            return false;
-        }
-
-        public bool HasFlag(AreaFlags flag) { return Flags[0].HasAnyFlag((uint)flag); }
-
-        public bool HasFlag2(AreaFlags2 flag) { return Flags[1].HasAnyFlag((uint)flag); }
     }
 
     public sealed class AreaTriggerRecord
@@ -166,7 +155,7 @@ namespace Game.DataStorage
         public float BoxYaw;
         public sbyte ShapeType;
         public short ShapeID;
-        public short AreaTriggerActionSetID;
+        public int AreaTriggerActionSetID;
         public sbyte Flags;
     }
 

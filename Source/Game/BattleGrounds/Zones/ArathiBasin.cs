@@ -14,7 +14,6 @@ namespace Game.BattleGrounds.Zones
         public BgArathiBasin(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             m_IsInformedNearVictory = false;
-            m_BuffChange = true;
             BgObjects = new ObjectGuid[ABObjectTypes.Max];
             BgCreatures = new ObjectGuid[ABBattlegroundNodes.AllCount + 5];//+5 for aura triggers
 
@@ -209,10 +208,10 @@ namespace Game.BattleGrounds.Zones
             TriggerGameEvent(EventStartBattle);
         }
 
-        public override void AddPlayer(Player player)
+        public override void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
         {
             bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
-            base.AddPlayer(player);
+            base.AddPlayer(player, queueId);
             if (!isInBattleground)
                 PlayerScores[player.GetGUID()] = new BattlegroundABScore(player.GetGUID(), player.GetBGTeam());
         }
@@ -355,13 +354,13 @@ namespace Game.BattleGrounds.Zones
                 CastSpellOnTeam(BattlegroundConst.AbQuestReward4Bases, team);
 
             Creature trigger = !BgCreatures[node + 7].IsEmpty() ? GetBGCreature(node + 7) : null; // 0-6 spirit guides
-            if (!trigger)
+            if (trigger == null)
                 trigger = AddCreature(SharedConst.WorldTrigger, node + 7, NodePositions[node], GetTeamIndexByTeamId(team));
 
             //add bonus honor aura trigger creature when node is accupied
             //cast bonus aura (+50% honor in 25yards)
             //aura should only apply to players who have accupied the node, set correct faction for trigger
-            if (trigger)
+            if (trigger != null)
             {
                 trigger.SetFaction(team == Team.Alliance ? 84u : 83u);
                 trigger.CastSpell(trigger, BattlegroundConst.SpellHonorableDefender25y, false);
@@ -377,8 +376,6 @@ namespace Game.BattleGrounds.Zones
             //remove bonus honor aura trigger creature when node is lost
             DelCreature(node + 7);//null checks are in DelCreature! 0-6 spirit guides
 
-            RelocateDeadPlayers(BgCreatures[node]);
-
             DelCreature(node);
 
             // buff object isn't despawned
@@ -392,7 +389,7 @@ namespace Game.BattleGrounds.Zones
 
             byte node = ABBattlegroundNodes.NodeStables;
             GameObject obj = GetBgMap().GetGameObject(BgObjects[node * 8 + 7]);
-            while ((node < ABBattlegroundNodes.DynamicNodesCount) && ((!obj) || (!source.IsWithinDistInMap(obj, 10))))
+            while ((node < ABBattlegroundNodes.DynamicNodesCount) && ((obj == null) || (!source.IsWithinDistInMap(obj, 10))))
             {
                 ++node;
                 obj = GetBgMap().GetGameObject(BgObjects[node * 8 + ABObjectTypes.AuraContested]);
@@ -616,7 +613,7 @@ namespace Game.BattleGrounds.Zones
             base.EndBattleground(winner);
         }
 
-        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
             int teamIndex = GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID()));
 

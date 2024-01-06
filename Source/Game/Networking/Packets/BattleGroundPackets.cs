@@ -461,7 +461,7 @@ namespace Game.Networking.Packets
                 bracket.Write(_worldPacket);
         }
 
-        BracketInfo[] Bracket = new BracketInfo[6];
+        BracketInfo[] Bracket = new BracketInfo[7];
     }
 
     class PVPMatchInitialize : ServerPacket
@@ -478,26 +478,39 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(BattlemasterListID);
             _worldPacket.WriteBit(Registered);
             _worldPacket.WriteBit(AffectsRating);
+            _worldPacket.WriteBit(DeserterPenalty != null);
             _worldPacket.FlushBits();
-        }
 
-        public enum MatchState
-        {
-            InProgress = 1,
-            Complete = 3,
-            Inactive = 4
+            if (DeserterPenalty != null)
+                DeserterPenalty.Write(_worldPacket);
         }
 
         public uint MapID;
-        public MatchState State = MatchState.Inactive;
+        public PVPMatchState State = PVPMatchState.Inactive;
         public long StartTime;
         public int Duration;
+        public RatedMatchDeserterPenalty DeserterPenalty;
         public byte ArenaFaction;
         public uint BattlemasterListID;
         public bool Registered;
         public bool AffectsRating;
     }
 
+    class PVPMatchSetState : ServerPacket
+    {
+        public PVPMatchSetState(PVPMatchState state) : base(ServerOpcodes.PvpMatchSetState)
+        {
+            State = state;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)State);
+        }
+
+        PVPMatchState State;
+    }
+    
     class PVPMatchComplete : ServerPacket
     {
         public PVPMatchComplete() : base(ServerOpcodes.PvpMatchComplete, ConnectionType.Instance) { }
@@ -557,6 +570,10 @@ namespace Game.Networking.Packets
         public int SeasonWon;
         public int WeeklyPlayed;
         public int WeeklyWon;
+        public int RoundsSeasonPlayed;
+        public int RoundsSeasonWon;
+        public int RoundsWeeklyPlayed;
+        public int RoundsWeeklyWon;
         public int BestWeeklyRating;
         public int BestSeasonRating;
         public int LastWeeksBestRating;
@@ -576,6 +593,10 @@ namespace Game.Networking.Packets
             data.WriteInt32(SeasonWon);
             data.WriteInt32(WeeklyPlayed);
             data.WriteInt32(WeeklyWon);
+            data.WriteInt32(RoundsSeasonPlayed);
+            data.WriteInt32(RoundsSeasonWon);
+            data.WriteInt32(RoundsWeeklyPlayed);
+            data.WriteInt32(RoundsWeeklyWon);
             data.WriteInt32(BestWeeklyRating);
             data.WriteInt32(BestSeasonRating);
             data.WriteInt32(LastWeeksBestRating);            
@@ -587,6 +608,20 @@ namespace Game.Networking.Packets
             data.WriteInt32(Unused5);
             data.WriteBit(Disqualified);
             data.FlushBits();
+        }
+    }
+
+    class RatedMatchDeserterPenalty
+    {
+        public int PersonalRatingChange;
+        public int QueuePenaltySpellID;
+        public int QueuePenaltyDuration;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(PersonalRatingChange);
+            data.WriteInt32(QueuePenaltySpellID);
+            data.WriteInt32(QueuePenaltyDuration);
         }
     }
 
@@ -658,7 +693,7 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(HealingDone);
                 data.WriteInt32(Stats.Count);
                 data.WriteInt32(PrimaryTalentTree);
-                data.WriteInt32(Sex);
+                data.WriteInt8(Sex);
                 data.WriteUInt32((uint)PlayerRace);
                 data.WriteInt32(PlayerClass);
                 data.WriteInt32(CreatureID);
@@ -675,6 +710,7 @@ namespace Game.Networking.Packets
                 data.WriteBit(RatingChange.HasValue);
                 data.WriteBit(PreMatchMMR.HasValue);
                 data.WriteBit(MmrChange.HasValue);
+                data.WriteBit(PostMatchMMR.HasValue);
                 data.FlushBits();
 
                 if (Honor.HasValue)
@@ -691,6 +727,9 @@ namespace Game.Networking.Packets
 
                 if (MmrChange.HasValue)
                     data.WriteInt32(MmrChange.Value);
+
+                if (PostMatchMMR.HasValue)
+                    data.WriteUInt32(PostMatchMMR.Value);
             }
 
             public ObjectGuid PlayerGUID;
@@ -704,9 +743,10 @@ namespace Game.Networking.Packets
             public int? RatingChange;
             public uint? PreMatchMMR;
             public int? MmrChange;
+            public uint? PostMatchMMR;
             public List<PVPMatchPlayerPVPStat> Stats = new();
             public int PrimaryTalentTree;
-            public int Sex;
+            public sbyte Sex;
             public Race PlayerRace;
             public int PlayerClass;
             public int CreatureID;

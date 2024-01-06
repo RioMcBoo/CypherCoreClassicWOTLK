@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Achievements;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
@@ -14,9 +15,11 @@ namespace Game.Scenarios
 {
     public class Scenario : CriteriaHandler
     {
-        public Scenario(ScenarioData scenarioData)
+        public Scenario(Map map, ScenarioData scenarioData)
         {
+            _map = map;
             _data = scenarioData;
+            _guid = ObjectGuid.Create(HighGuid.Scenario, map.GetId(), scenarioData.Entry.Id, map.GenerateLowGuid(HighGuid.Scenario));
             _currentstep = null;
 
             //ASSERT(_data);
@@ -35,8 +38,8 @@ namespace Game.Scenarios
         {
             foreach (ObjectGuid guid in _players)
             {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                Player player = Global.ObjAccessor.GetPlayer(_map, guid);
+                if (player != null)
                     SendBootPlayer(player);
             }
 
@@ -56,8 +59,8 @@ namespace Game.Scenarios
             {
                 foreach (ObjectGuid guid in _players)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    Player player = Global.ObjAccessor.GetPlayer(_map, guid);
+                    if (player != null)
                         player.RewardQuest(quest, LootItemType.Item, 0, null, false);
                 }
             }
@@ -219,14 +222,15 @@ namespace Game.Scenarios
         {
             foreach (ObjectGuid guid in _players)
             {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                Player player = Global.ObjAccessor.GetPlayer(_map, guid);
+                if (player != null)
                     player.SendPacket(data);
             }
         }
 
         void BuildScenarioState(ScenarioState scenarioState)
         {
+            scenarioState.ScenarioGUID = _guid;
             scenarioState.ScenarioID = (int)_data.Entry.Id;
             ScenarioStepRecord step = GetStep();
             if (step != null)
@@ -341,6 +345,7 @@ namespace Game.Scenarios
         void SendBootPlayer(Player player)
         {
             ScenarioVacate scenarioBoot = new();
+            scenarioBoot.ScenarioGUID = _guid;
             scenarioBoot.ScenarioID = (int)_data.Entry.Id;
             player.SendPacket(scenarioBoot);
         }
@@ -357,8 +362,10 @@ namespace Game.Scenarios
         public override void AfterCriteriaTreeUpdate(CriteriaTree tree, Player referencePlayer) { }
         public override void SendAllData(Player receiver) { }
 
+        protected Map _map;
         List<ObjectGuid> _players = new();
         protected ScenarioData _data;
+        ObjectGuid _guid;
         ScenarioStepRecord _currentstep;
         Dictionary<ScenarioStepRecord, ScenarioStepState> _stepStates = new();
     }

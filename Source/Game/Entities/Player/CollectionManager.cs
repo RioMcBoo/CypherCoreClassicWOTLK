@@ -227,10 +227,15 @@ namespace Game.Entities
                 _owner.GetPlayer().AddHeirloom(itemId, (uint)flags);
         }
 
+        public bool HasHeirloom(uint itemId)
+        {
+            return _heirlooms.ContainsKey(itemId);
+        }
+        
         public void UpgradeHeirloom(uint itemId, uint castItem)
         {
             Player player = _owner.GetPlayer();
-            if (!player)
+            if (player == null)
                 return;
 
             HeirloomRecord heirloom = Global.DB2Mgr.GetHeirloomByItemId(itemId);
@@ -268,7 +273,7 @@ namespace Game.Entities
         public void CheckHeirloomUpgrades(Item item)
         {
             Player player = _owner.GetPlayer();
-            if (!player)
+            if (player == null)
                 return;
 
             // Check already owned heirloom for upgrade kits
@@ -285,7 +290,7 @@ namespace Game.Entities
                 HeirloomRecord heirloomDiff;
                 while ((heirloomDiff = Global.DB2Mgr.GetHeirloomByItemId(heirloomItemId)) != null)
                 {
-                    if (player.GetItemByEntry(heirloomDiff.ItemID))
+                    if (player.GetItemByEntry(heirloomDiff.ItemID) != null)
                         newItemId = heirloomDiff.ItemID;
 
                     HeirloomRecord heirloomSub = Global.DB2Mgr.GetHeirloomByItemId(heirloomDiff.StaticUpgradedItemID);
@@ -312,7 +317,7 @@ namespace Game.Entities
                     return;
                 }
 
-                List<int> bonusListIDs = item.m_itemData.BonusListIDs;
+                List<uint> bonusListIDs = item.GetBonusListIDs();
                 foreach (uint bonusId in bonusListIDs)
                 {
                     if (bonusId != data.bonusId)
@@ -365,7 +370,7 @@ namespace Game.Entities
         public bool AddMount(uint spellId, MountStatusFlags flags, bool factionMount = false, bool learned = false)
         {
             Player player = _owner.GetPlayer();
-            if (!player)
+            if (player == null)
                 return false;
 
             MountRecord mount = Global.DB2Mgr.GetMount(spellId);
@@ -413,7 +418,7 @@ namespace Game.Entities
         void SendSingleMountUpdate(uint spellId, MountStatusFlags mountStatusFlags)
         {
             Player player = _owner.GetPlayer();
-            if (!player)
+            if (player == null)
                 return;
 
             AccountMountUpdate mountUpdate = new();
@@ -557,7 +562,7 @@ namespace Game.Entities
             if (itemTemplate == null)
                 return false;
 
-            if (!_owner.GetPlayer())
+            if (_owner.GetPlayer() == null)
                 return false;
 
             if (_owner.GetPlayer().CanUseItem(itemTemplate) != InventoryResult.Ok)

@@ -11,14 +11,16 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.LogoutRequest)]
-        void HandleLogoutRequest(LogoutRequest packet)
+        void HandleLogoutRequest(LogoutRequest logoutRequest)
         {
             Player pl = GetPlayer();
             if (!GetPlayer().GetLootGUID().IsEmpty())
                 GetPlayer().SendLootReleaseAll();
 
-            bool instantLogout = (pl.HasPlayerFlag(PlayerFlags.Resting) && !pl.IsInCombat() ||
-                pl.IsInFlight() || HasPermission(RBACPermissions.InstantLogout));
+            bool instantLogout = GetPlayer().IsInFlight();
+            if (!logoutRequest.IdleLogout)
+                instantLogout |= (GetPlayer().HasPlayerFlag(PlayerFlags.Resting) && !GetPlayer().IsInCombat())
+                    || HasPermission(RBACPermissions.InstantLogout);
 
             bool canLogoutInCombat = pl.HasPlayerFlag(PlayerFlags.Resting);
 
@@ -64,7 +66,7 @@ namespace Game
         void HandleLogoutCancel(LogoutCancel packet)
         {
             // Player have already logged out serverside, too late to cancel
-            if (!GetPlayer())
+            if (GetPlayer() == null)
                 return;
 
             SetLogoutStartTime(0);

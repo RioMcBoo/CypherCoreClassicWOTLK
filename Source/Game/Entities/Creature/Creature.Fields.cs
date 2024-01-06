@@ -12,6 +12,7 @@ namespace Game.Entities
     {
         CreatureTemplate m_creatureInfo;
         CreatureData m_creatureData;
+        CreatureDifficulty m_creatureDifficulty;
 
         string[] m_stringIds = new string[3];
         string m_scriptStringId;
@@ -28,8 +29,9 @@ namespace Game.Entities
 
         bool _isMissingCanSwimFlagOutOfCombat;
 
-        uint? _gossipMenuId;
+        uint _gossipMenuId;
         uint? _trainerId;
+        float _sparringHealthPct;
 
         public ulong m_PlayerDamageReq;
         public float m_SightDistance;
@@ -55,6 +57,7 @@ namespace Game.Entities
 
         bool DisableReputationGain;
 
+        uint? _lootId;
         LootModes m_LootMode;                                  // Bitmask (default: LOOT_MODE_DEFAULT) that determines what loot will be lootable
 
         // Waypoint path
@@ -86,6 +89,7 @@ namespace Game.Entities
         internal Dictionary<ObjectGuid, Loot> m_personalLoot = new();
         public Loot _loot;
         HashSet<ObjectGuid> m_tapList = new();
+        bool m_dontClearTapListOnEvade;
     }
 
     public enum ObjectCellMoveState
@@ -103,7 +107,7 @@ namespace Game.Entities
         public float Orientation; // the creature's "real" orientation while casting
     }
 
-    struct CreatureStaticFlagsHolder
+    public struct CreatureStaticFlagsHolder
     {
         CreatureStaticFlags _flags;
         CreatureStaticFlags2 _flags2;
@@ -113,6 +117,18 @@ namespace Game.Entities
         CreatureStaticFlags6 _flags6;
         CreatureStaticFlags7 _flags7;
         CreatureStaticFlags8 _flags8;
+
+        public CreatureStaticFlagsHolder(uint flags, uint flags2, uint flags3, uint flags4, uint flags5, uint flags6, uint flags7, uint flags8)
+        {
+            _flags = (CreatureStaticFlags)flags;
+            _flags2 = (CreatureStaticFlags2)flags2;
+            _flags3 = (CreatureStaticFlags3)flags3;
+            _flags4 = (CreatureStaticFlags4)flags4;
+            _flags5 = (CreatureStaticFlags5)flags5;
+            _flags6 = (CreatureStaticFlags6)flags6;
+            _flags7 = (CreatureStaticFlags7)flags7;
+            _flags8 = (CreatureStaticFlags8)flags8;
+        }
 
         public bool HasFlag(CreatureStaticFlags flag) { return _flags.HasFlag(flag); }
         public bool HasFlag(CreatureStaticFlags2 flag) { return _flags2.HasFlag(flag); }

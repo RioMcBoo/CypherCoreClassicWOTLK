@@ -18,7 +18,7 @@ namespace Game
         {
             // prevent cheating
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Petitioner, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandlePetitionBuyOpcode - {0} not found or you can't interact with him.", packet.Unit.ToString());
                 return;
@@ -35,7 +35,7 @@ namespace Game
             if (GetPlayer().GetGuildId() != 0)
                 return;
 
-            if (Global.GuildMgr.GetGuildByName(packet.Title))
+            if (Global.GuildMgr.GetGuildByName(packet.Title) != null)
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NameExists_S, packet.Title);
                 return;
@@ -69,7 +69,7 @@ namespace Game
 
             GetPlayer().ModifyMoney(-cost);
             Item charter = GetPlayer().StoreNewItem(dest, charterItemID, true, new ItemRandomEnchantmentId());
-            if (!charter)
+            if (charter == null)
                 return;
 
             charter.SetPetitionId((uint)charter.GetGUID().GetCounter());
@@ -166,7 +166,7 @@ namespace Game
         void HandlePetitionRenameGuild(PetitionRenameGuild packet)
         {
             Item item = GetPlayer().GetItemByGuid(packet.PetitionGuid);
-            if (!item)
+            if (item == null)
                 return;
 
             Petition petition = Global.PetitionMgr.GetPetition(packet.PetitionGuid);
@@ -176,7 +176,7 @@ namespace Game
                 return;
             }
 
-            if (Global.GuildMgr.GetGuildByName(packet.NewGuildName))
+            if (Global.GuildMgr.GetGuildByName(packet.NewGuildName) != null)
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NameExists_S, packet.NewGuildName);
                 return;
@@ -273,7 +273,7 @@ namespace Game
 
             // update for owner if online
             Player owner1 = Global.ObjAccessor.FindPlayer(ownerGuid);
-            if (owner1)
+            if (owner1 != null)
                 owner1.SendPacket(signResult);
         }
 
@@ -301,7 +301,7 @@ namespace Game
         void HandleOfferPetition(OfferPetition packet)
         {
             Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetPlayer);
-            if (!player)
+            if (player == null)
                 return;
 
             Petition petition = Global.PetitionMgr.GetPetition(packet.ItemGUID);
@@ -334,7 +334,7 @@ namespace Game
         {
             // Check if player really has the required petition charter
             Item item = GetPlayer().GetItemByGuid(packet.Item);
-            if (!item)
+            if (item == null)
                 return;
 
             Petition petition = Global.PetitionMgr.GetPetition(packet.Item);
@@ -361,7 +361,7 @@ namespace Game
             }
 
             // Check if guild name is already taken
-            if (Global.GuildMgr.GetGuildByName(name))
+            if (Global.GuildMgr.GetGuildByName(name) != null)
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NameExists_S, name);
                 return;
@@ -418,7 +418,7 @@ namespace Game
         public void SendPetitionShowList(ObjectGuid guid)
         {
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Petitioner, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandlePetitionShowListOpcode - {guid} not found or you can't interact with him.");
                 return;

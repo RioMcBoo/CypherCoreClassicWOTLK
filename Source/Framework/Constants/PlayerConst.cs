@@ -27,7 +27,7 @@ namespace Framework.Constants
         public const int ReqPrimaryTreeTalents = 31;
         public const int ExploredZonesSize = 192;
         public const ulong MaxMoneyAmount = 99999999999UL;
-        public const int MaxActionButtons = 132;
+        public const int MaxActionButtons = 180;
         public const int MaxActionButtonActionValue = 0x00FFFFFF + 1;
 
         public const int MaxDailyQuests = 25;
@@ -68,6 +68,10 @@ namespace Framework.Constants
         public const uint WarmodeEnlistedSpellOutside = 269083;
 
         public const uint SpellExperienceEliminated = 206662;
+
+        public const uint CurrencyMaxCapAncientMana = 2000;
+
+        public const float MaxAreaSpiritHealerRange = 20.0f;
     }
 
     public struct MoneyConstants
@@ -144,7 +148,10 @@ namespace Framework.Constants
         Com = 0x08, // Commentator
         Dev = 0x10,
         BossSound = 0x20, // Plays "RaidBossEmoteWarning" sound on raid boss emote/whisper
-        Mobile = 0x40
+        Mobile = 0x40,
+        Guide = 0x1000,
+        Newcomer = 0x2000,
+        Censored = 0x4000
     }
 
     public enum DrunkenState
@@ -330,8 +337,10 @@ namespace Framework.Constants
         Item = 0x80
     }
 
+    [Flags]
     public enum TeleportToOptions
     {
+        None = 0x00,
         GMMode = 0x01,
         NotLeaveTransport = 0x02,
         NotLeaveCombat = 0x04,
@@ -497,9 +506,9 @@ namespace Framework.Constants
 
     public enum PlayerRestState
     {
-        Rested = 0x01,
-        NotRAFLinked = 0x02,
-        RAFLinked = 0x06
+        Rested = 1,
+        Normal = 2,
+        RAFLinked = 6
     }
 
     public enum CharacterCustomizeFlags
@@ -745,7 +754,9 @@ namespace Framework.Constants
         FailedAffectingCombat = 5,
         FailedCantRemoveTalent = 6,
         FailedCantDoThatChallengeModeActive = 7,
-        FailedRestArea = 8
+        FailedRestArea = 8,
+        UnspentTalentPoints = 9,
+        InPvpMatch = 10
     }
 
     public enum TutorialsFlag
@@ -821,5 +832,111 @@ namespace Framework.Constants
         QuestComplete = 16,
         RatedPvPReward = 17,
         CorruptedLoot = 19
+    }
+
+    [Flags]
+    public enum CurrencyDbFlags
+    {
+        None = 0x00,
+        IgnoreMaxQtyOnload = 0x01,
+        Reuse1 = 0x02,
+        InBackpack = 0x04,
+        UnusedInUI = 0x08,
+        Reuse2 = 0x10,
+
+        UnusedFlags = (IgnoreMaxQtyOnload | Reuse1 | Reuse2),
+        ClientFlags = (0x1F & ~UnusedFlags)
+    }
+
+    public enum CurrencyDestroyReason
+    {
+        Cheat = 0,
+        Spell = 1,
+        VersionUpdate = 2,
+        QuestTurnin = 3,
+        Vendor = 4,
+        Trade = 5,
+        Capped = 6,
+        Garrison = 7,
+        DroppedToCorpse = 8,
+        BonusRoll = 9,
+        FactionConversion = 10,
+        FulfillCraftingOrder = 11,
+        Last = 12
+    }
+
+    public enum CurrencyGainSource
+    {
+        ConvertOldItem = 0,
+        ConvertOldPvPCurrency = 1,
+        ItemRefund = 2,
+        QuestReward = 3,
+        Cheat = 4,
+        Vendor = 5,
+        PvPKillCredit = 6,
+        PvPMetaCredit = 7,
+        PvPScriptedAward = 8,
+        Loot = 9,
+        UpdatingVersion = 10,
+        LFGReward = 11,
+        Trade = 12,
+        Spell = 13,
+        ItemDeletion = 14,
+        RatedBattleground = 15,
+        RandomBattleground = 16,
+        Arena = 17,
+        ExceededMaxQty = 18,
+        PvPCompletionBonus = 19,
+        Script = 20,
+        GuildBankWithdrawal = 21,
+        Pushloot = 22,
+        GarrisonBuilding = 23,
+        PvPDrop = 24,
+        GarrisonFollowerActivation = 25,
+        GarrisonBuildingRefund = 26,
+        GarrisonMissionReward = 27,
+        GarrisonResourceOverTime = 28,
+        QuestRewardIgnoreCaps = 29,
+        GarrisonTalent = 30,
+        GarrisonWorldQuestBonus = 31,
+        PvPHonorReward = 32,
+        BonusRoll = 33,
+        AzeriteRespec = 34,
+        WorldQuestReward = 35,
+        WorldQuestRewardIgnoreCaps = 36,
+        FactionConversion = 37,
+        DailyQuestReward = 38,
+        DailyQuestWarModeReward = 39,
+        WeeklyQuestReward = 40,
+        WeeklyQuestWarModeReward = 41,
+        AccountCopy = 42,
+        WeeklyRewardChest = 43,
+        GarrisonTalentTreeReset = 44,
+        DailyReset = 45,
+        AddConduitToCollection = 46,
+        Barbershop = 47,
+        ConvertItemsToCurrencyValue = 48,
+        PvPTeamContribution = 49,
+        Transmogrify = 50,
+        AuctionDeposit = 51,
+        PlayerTrait = 52,
+        PhBuffer_53 = 53,
+        PhBuffer_54 = 54,
+        RenownRepGain = 55,
+        CraftingOrder = 56,
+        CatalystBalancing = 57,
+        CatalystCraft = 58,
+        ProfessionInitialAward = 59,
+        PlayerTraitRefund = 60,
+        Last = 61
+    }
+
+    [Flags]
+    public enum CurrencyGainFlags
+    {
+        None = 0x00,
+        BonusAward = 0x01,
+        DroppedFromDeath = 0x02,
+        FromAccountServer = 0x04
     }
 }

@@ -97,11 +97,11 @@ namespace Game.BattleGrounds.Zones
                     {
                         // Apply Stage 1 (Focused Assault)
                         Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
-                        if (player)
+                        if (player != null)
                             player.CastSpell(player, WSGSpellId.FocusedAssault, true);
 
                         player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[1]);
-                        if (player)
+                        if (player != null)
                             player.CastSpell(player, WSGSpellId.FocusedAssault, true);
 
                         _flagDebuffState = 1;
@@ -110,14 +110,14 @@ namespace Game.BattleGrounds.Zones
                     {
                         // Apply Stage 2 (Brutal Assault)
                         Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
-                        if (player)
+                        if (player != null)
                         {
                             player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
                             player.CastSpell(player, WSGSpellId.BrutalAssault, true);
                         }
 
                         player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[1]);
-                        if (player)
+                        if (player != null)
                         {
                             player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
                             player.CastSpell(player, WSGSpellId.BrutalAssault, true);
@@ -132,14 +132,14 @@ namespace Game.BattleGrounds.Zones
                     // Remove assault debuffs, reset timers
 
                     Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
-                    if (player)
+                    if (player != null)
                     {
                         player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
                         player.RemoveAurasDueToSpell(WSGSpellId.BrutalAssault);
                     }
 
                     player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[1]);
-                    if (player)
+                    if (player != null)
                     {
                         player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
                         player.RemoveAurasDueToSpell(WSGSpellId.BrutalAssault);
@@ -184,10 +184,10 @@ namespace Game.BattleGrounds.Zones
             TriggerGameEvent(8563);
         }
 
-        public override void AddPlayer(Player player)
+        public override void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
         {
             bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
-            base.AddPlayer(player);
+            base.AddPlayer(player, queueId);
             if (!isInBattleground)
                 PlayerScores[player.GetGUID()] = new BattlegroundWGScore(player.GetGUID(), player.GetBGTeam());
         }
@@ -231,7 +231,7 @@ namespace Game.BattleGrounds.Zones
             PlaySoundToAll(WSGSound.FlagsRespawned);
 
             GameObject obj = GetBgMap().GetGameObject(GetDroppedFlagGUID(team));
-            if (obj)
+            if (obj != null)
                 obj.Delete();
             else
                 Log.outError(LogFilter.Battleground, "unknown droped flag ({0})", GetDroppedFlagGUID(team).ToString());
@@ -320,7 +320,7 @@ namespace Game.BattleGrounds.Zones
                 UpdateWorldState(WSGWorldStates.FlagStateHorde, 1);
                 UpdateWorldState(WSGWorldStates.StateTimerActive, 0);
 
-                RewardHonorToTeam(Honor[(int)m_HonorMode][(int)WSGRewards.Win], winner);
+                RewardHonorToTeam(Honor[Global.BattlegroundMgr.IsBGWeekend(BattlegroundTypeId.WS) ? 1 : 0][(int)WSGRewards.Win], winner);
                 EndBattleground(winner);
             }
             else
@@ -547,7 +547,7 @@ namespace Game.BattleGrounds.Zones
             // sometimes flag aura not removed :(
             if (IsAllianceFlagPickedup() && m_FlagKeepers[TeamId.Alliance] == guid)
             {
-                if (!player)
+                if (player == null)
                 {
                     Log.outError(LogFilter.Battleground, "BattlegroundWS: Removing offline player who has the FLAG!!");
                     SetAllianceFlagPicker(ObjectGuid.Empty);
@@ -558,7 +558,7 @@ namespace Game.BattleGrounds.Zones
             }
             if (IsHordeFlagPickedup() && m_FlagKeepers[TeamId.Horde] == guid)
             {
-                if (!player)
+                if (player == null)
                 {
                     Log.outError(LogFilter.Battleground, "BattlegroundWS: Removing offline player who has the FLAG!!");
                     SetHordeFlagPicker(ObjectGuid.Empty);
@@ -797,7 +797,7 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
-        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
             //if status in progress, it returns main graveyards with spiritguides
             //else it will return the graveyard in the flagroom - this is especially good

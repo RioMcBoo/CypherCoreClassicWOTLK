@@ -22,8 +22,8 @@ namespace Game.DataStorage
 
     public sealed class BarberShopStyleRecord
     {        
-        public string DisplayName;
-        public string Description;
+        public LocalizedString DisplayName;
+        public LocalizedString Description;
         public uint Id;
         public byte Type;                                                     // value 0 . hair, value 2 . facialhair
         public float CostModifier;
@@ -36,7 +36,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public float StateMultiplier;
-        public sbyte QualityEnum;
+        public byte QualityEnum;
     }
 
     public sealed class BattlePetBreedStateRecord
@@ -44,19 +44,19 @@ namespace Game.DataStorage
         public uint Id;
         public byte BattlePetStateID;
         public ushort Value;
-        public int BattlePetBreedID;
+        public uint BattlePetBreedID;
     }
 
     public sealed class BattlePetSpeciesRecord
     {
-        public string Description;
-        public string SourceText;
+        public LocalizedString Description;
+        public LocalizedString SourceText;
         public uint Id;
-        public uint CreatureID;
-        public uint SummonSpellID;
+        public int CreatureID;
+        public int SummonSpellID;
         public int IconFileDataID;
         public byte PetTypeEnum;
-        public ushort Flags;
+        public int Flags;
         public sbyte SourceTypeEnum;
         public int CardUIModelSceneID;
         public int LoadoutUIModelSceneID;
@@ -69,7 +69,7 @@ namespace Game.DataStorage
         public uint Id;
         public byte BattlePetStateID;
         public int Value;
-        public int BattlePetSpeciesID;
+        public uint BattlePetSpeciesID;
     }
 
     public sealed class BattlemasterListRecord
@@ -80,14 +80,14 @@ namespace Game.DataStorage
         public LocalizedString ShortDescription;
         public LocalizedString LongDescription;
         public sbyte InstanceType;
-        public byte MinLevel;
-        public byte MaxLevel;
+        public sbyte MinLevel;
+        public sbyte MaxLevel;
         public sbyte RatedPlayers;
-        public byte MinPlayers;
+        public sbyte MinPlayers;
         public int MaxPlayers;
         public sbyte GroupsAllowed;
         public sbyte MaxGroupSize;
-        public ushort HolidayWorldState;
+        public short HolidayWorldState;
         public BattlemasterListFlags Flags;
         public int IconFileDataID;
         public int RequiredPlayerConditionID;
@@ -106,7 +106,7 @@ namespace Game.DataStorage
         public uint ChatBubbleDurationMs;
         public int VoiceOverPriorityID;
         public uint[] SoundKitID = new uint[2];
-        public ushort[] EmoteID = new ushort[3];
-        public ushort[] EmoteDelay = new ushort[3];
+        public ushort[] EmoteID = new ushort[3];        //MAX_BROADCAST_TEXT_EMOTES = 3
+        public ushort[] EmoteDelay = new ushort[3];     //MAX_BROADCAST_TEXT_EMOTES = 3
     }
 }

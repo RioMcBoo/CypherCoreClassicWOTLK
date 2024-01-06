@@ -39,7 +39,7 @@ namespace Game.Entities
         protected float[][] m_weaponDamage = new float[(int)WeaponAttackType.Max][];
 
         uint[] m_baseAttackSpeed = new uint[(int)WeaponAttackType.Max];
-        internal float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
+        public float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
         protected uint[] m_attackTimer = new uint[(int)WeaponAttackType.Max];
         bool _isCombatDisallowed;
 
@@ -77,7 +77,8 @@ namespace Game.Entities
         MultiMap<uint, uint>[] m_spellImmune = new MultiMap<uint, uint>[(int)SpellImmunity.Max];
         SpellAuraInterruptFlags m_interruptMask;
         SpellAuraInterruptFlags2 m_interruptMask2;
-        protected int m_procDeep;
+        int m_procDeep;               // tracked for proc system correctness (what spells should proc what)
+        int m_procChainLength;        // tracked to protect against infinite proc loops (hard limit, will disallow procs even if they should happen)
         SpellHistory _spellHistory;
 
         //Auras
@@ -198,7 +199,7 @@ namespace Game.Entities
 
         public SpellInfo GetSpellInfo()
         {
-            if (_spell)
+            if (_spell != null)
                 return _spell.GetSpellInfo();
             if (_damageInfo != null)
                 return _damageInfo.GetSpellInfo();
@@ -209,7 +210,7 @@ namespace Game.Entities
         }
         public SpellSchoolMask GetSchoolMask()
         {
-            if (_spell)
+            if (_spell != null)
                 return _spell.GetSpellInfo().GetSchoolMask();
             if (_damageInfo != null)
                 return _damageInfo.GetSchoolMask();

@@ -27,8 +27,8 @@ namespace Game.Movement
             uint mapId = PhasingHandler.GetTerrainMapId(_source.GetPhaseShift(), _source.GetMapId(), _source.GetMap().GetTerrain(), _source.GetPositionX(), _source.GetPositionY());
             if (Global.DisableMgr.IsPathfindingEnabled(_source.GetMapId()))
             {
-                _navMesh = Global.MMapMgr.GetNavMesh(mapId);
-                _navMeshQuery = Global.MMapMgr.GetNavMeshQuery(mapId, _source.GetInstanceId());
+                _navMeshQuery = Global.MMapMgr.GetNavMeshQuery(mapId, _source.GetMapId(), _source.GetInstanceId());
+                _navMesh = _navMeshQuery?.getAttachedNavMesh() ?? Global.MMapMgr.GetNavMesh(mapId);
             }
             CreateFilter();
         }
@@ -920,6 +920,15 @@ namespace Game.Movement
             return (p1 - p2).LengthSquared();
         }
 
+        public float GetPathLength()
+        {
+            float length = 0.0f;
+            for (var i = 0; i < _pathPoints.Length - 1; ++i)
+                length += (_pathPoints[i + 1] - _pathPoints[i]).Length();
+
+            return length;
+        }
+        
         public void ShortenPathUntilDist(Position pos, float dist) { ShortenPathUntilDist(new Vector3(pos.posX, pos.posY, pos.posZ), dist); }
 
         public void ShortenPathUntilDist(Vector3 target, float dist)

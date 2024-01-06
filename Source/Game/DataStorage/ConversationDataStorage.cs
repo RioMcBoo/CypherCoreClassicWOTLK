@@ -36,11 +36,12 @@ namespace Game.DataStorage
                             continue;
                         }
 
-                        ConversationLineTemplate conversationLine = new();
-                        conversationLine.Id = id;
-                        conversationLine.UiCameraID = lineTemplates.Read<uint>(1);
-                        conversationLine.ActorIdx = lineTemplates.Read<byte>(2);
-                        conversationLine.Flags = lineTemplates.Read<byte>(3);
+                    ConversationLineTemplate conversationLine = new();
+                    conversationLine.Id = id;
+                    conversationLine.UiCameraID = lineTemplates.Read<uint>(1);
+                    conversationLine.ActorIdx = lineTemplates.Read<byte>(2);
+                    conversationLine.Flags = lineTemplates.Read<byte>(3);
+                    conversationLine.ChatType = lineTemplates.Read<byte>(4);
 
                         _conversationLineTemplateStorage[id] = conversationLine;
                     }
@@ -196,16 +197,16 @@ namespace Game.DataStorage
 
             public bool Invoke(ConversationActorTemplate template)
             {
-                if (template.WorldObjectTemplate == null)
+                if (template.WorldObjectTemplate != null)
                     return Invoke(template.WorldObjectTemplate);
 
-                if (template.NoObjectTemplate == null)
+                if (template.NoObjectTemplate != null)
                     return Invoke(template.NoObjectTemplate);
 
-                if (template.ActivePlayerTemplate == null)
+                if (template.ActivePlayerTemplate != null)
                     return Invoke(template.ActivePlayerTemplate);
 
-                if (template.TalkingHeadTemplate == null)
+                if (template.TalkingHeadTemplate != null)
                     return Invoke(template.TalkingHeadTemplate);
 
                 return false;
@@ -324,6 +325,7 @@ namespace Game.DataStorage
         public uint UiCameraID;  // Link to UiCamera.db2
         public byte ActorIdx;    // Index from conversation_actors
         public byte Flags;
+        public byte ChatType;
     }
 
     public class ConversationTemplate

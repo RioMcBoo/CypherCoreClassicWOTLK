@@ -270,6 +270,14 @@ namespace Game.Maps
                 LoadMapAndVMapImpl(gx, gy);
         }
 
+        public void LoadMMapInstance(uint mapId, uint instanceId)
+        {
+            LoadMMapInstanceImpl(mapId, instanceId);
+
+            foreach (var childTerrain in _childTerrain)
+                childTerrain.LoadMMapInstanceImpl(mapId, instanceId);
+        }
+
         public void LoadMapAndVMapImpl(int gx, int gy)
         {
             LoadMap(gx, gy);
@@ -280,6 +288,11 @@ namespace Game.Maps
                 childTerrain.LoadMapAndVMapImpl(gx, gy);
 
             _loadedGrids[GetBitsetIndex(gx, gy)] = true;
+        }
+
+        void LoadMMapInstanceImpl(uint mapId, uint instanceId)
+        {
+            Global.MMapMgr.LoadMapInstance(Global.WorldMgr.GetDataPath(), _mapId, mapId, instanceId);
         }
 
         public void LoadMap(int gx, int gy)
@@ -346,6 +359,14 @@ namespace Game.Maps
             // unload later
         }
 
+        public void UnloadMMapInstance(uint mapId, uint instanceId)
+        {
+            UnloadMMapInstanceImpl(mapId, instanceId);
+
+            foreach (var childTerrain in _childTerrain)
+                childTerrain.UnloadMMapInstanceImpl(mapId, instanceId);
+        }
+
         public void UnloadMapImpl(int gx, int gy)
         {
             _gridMap[gx][gy] = null;
@@ -356,6 +377,11 @@ namespace Game.Maps
                 childTerrain.UnloadMapImpl(gx, gy);
 
             _loadedGrids[GetBitsetIndex(gx, gy)] = false;
+        }
+
+        void UnloadMMapInstanceImpl(uint mapId, uint instanceId)
+        {
+            Global.MMapMgr.UnloadMapInstance(_mapId, mapId, instanceId);
         }
 
         public GridMap GetGrid(uint mapId, float x, float y, bool loadIfMissing = true)
@@ -479,7 +505,7 @@ namespace Game.Maps
                 data.AreaId = gridAreaId;
                 var areaEntry1 = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
                 if (areaEntry1 != null)
-                    data.outdoors = ((AreaFlags)areaEntry1.Flags[0] & (AreaFlags.Inside | AreaFlags.Outside)) != AreaFlags.Inside;
+                    data.outdoors = areaEntry1.GetFlags().HasFlag(AreaFlags.ForceOutdoors) || !areaEntry1.GetFlags().HasFlag(AreaFlags.ForceIndoors);
             }
 
             if (data.AreaId == 0)

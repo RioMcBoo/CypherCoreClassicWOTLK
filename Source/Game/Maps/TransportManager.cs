@@ -361,21 +361,8 @@ namespace Game.Maps
             if (transport.MapIds.Count > 1)
             {
                 foreach (uint mapId in transport.MapIds)
-                {
-                    if (CliDB.MapStorage.TryGetValue(transport.MapIds.First(), out MapRecord mapRecord))
-                        Cypher.Assert(!CliDB.MapStorage.LookupByKey(mapId).Instanceable());
-                    else
-                        return false;
-                }
-
-                transport.InInstance = false;
+                    Cypher.Assert(!CliDB.MapStorage.LookupByKey(mapId).Instanceable());
             }
-            else if (CliDB.MapStorage.TryGetValue(transport.MapIds.First(), out MapRecord mapRecord))
-            {
-                transport.InInstance = mapRecord.Instanceable();
-            }
-            else
-                return false;
 
             transport.TotalPathTime = totalTime;
 
@@ -427,6 +414,12 @@ namespace Game.Maps
                 return null;
             }
 
+            if (!tInfo.MapIds.Contains(map.GetId()))
+            {
+                Log.outError(LogFilter.Transport, $"Transport {entry} attempted creation on map it has no path for {map.GetId()}!");
+                return null;
+            }
+
             Position startingPosition = tInfo.ComputePosition(0, out _, out _);
             if (startingPosition == null)
             {
@@ -438,7 +431,6 @@ namespace Game.Maps
             Transport trans = new();
 
             // ...at first waypoint
-            uint mapId = tInfo.PathLegs.First().MapId;
             float x = startingPosition.GetPositionX();
             float y = startingPosition.GetPositionY();
             float z = startingPosition.GetPositionZ();
@@ -450,16 +442,6 @@ namespace Game.Maps
                 return null;
 
             PhasingHandler.InitDbPhaseShift(trans.GetPhaseShift(), phaseUseFlags, phaseId, phaseGroupId);
-
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
-            if (mapEntry != null)
-            {
-                if (mapEntry.Instanceable() != tInfo.InInstance)
-                {
-                    Log.outError(LogFilter.Transport, "Transport {0} (name: {1}) attempted creation in instance map (id: {2}) but it is not an instanced transport!", entry, trans.GetName(), mapId);
-                    //return null;
-                }
-            }
 
             // use preset map for instances (need to know which instance)
             trans.SetMap(map);
@@ -539,7 +521,6 @@ namespace Game.Maps
         public List<TransportPathEvent> Events = new();
 
         public HashSet<uint> MapIds = new();
-        public bool InInstance;
 
         public Position ComputePosition(uint time, out TransportMovementState moveState, out int legIndex)
         {
@@ -705,8 +686,8 @@ namespace Game.Maps
 
     public class TransportAnimation
     {
-        public Dictionary<uint, TransportAnimationRecord> Path = new();
-        public Dictionary<uint, TransportRotationRecord> Rotations = new();
+        public SortedList<uint, TransportAnimationRecord> Path = new();
+        public SortedList<uint, TransportRotationRecord> Rotations = new();
         public uint TotalTime;
 
         public TransportAnimationRecord GetPrevAnimNode(uint time)
@@ -714,11 +695,9 @@ namespace Game.Maps
             if (Path.Empty())
                 return null;
 
-            List<uint> lKeys = Path.Keys.ToList();
-            int reqIndex = lKeys.IndexOf(time);
-
+            int reqIndex = Path.IndexOfKey(time);
             if (reqIndex != -1)
-                return Path[lKeys[reqIndex - 1]];
+                return Path.GetValueAtIndex(reqIndex - 1);
 
             return Path.LastOrDefault().Value;
         }
@@ -728,11 +707,9 @@ namespace Game.Maps
             if (Rotations.Empty())
                 return null;
 
-            List<uint> lKeys = Rotations.Keys.ToList();
-            int reqIndex = lKeys.IndexOf(time) - 1;
-
+            int reqIndex = Rotations.IndexOfKey(time);
             if (reqIndex != -1)
-                return Rotations[lKeys[reqIndex]];
+                return Rotations.GetValueAtIndex(reqIndex - 1);
 
             return Rotations.LastOrDefault().Value;
         }

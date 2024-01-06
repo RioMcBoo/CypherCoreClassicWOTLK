@@ -31,7 +31,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (Global.GuildMgr.GetGuildByName(guildName))
+            if (Global.GuildMgr.GetGuildByName(guildName) != null)
             {
                 handler.SendSysMessage(CypherStrings.GuildRenameAlreadyExists);
                 return false;
@@ -90,7 +90,7 @@ namespace Game.Chat
         }
 
         [Command("uninvite", RBACPermissions.CommandGuildUninvite, true)]
-        static bool HandleGuildUninviteCommand(CommandHandler handler, PlayerIdentifier targetIdentifier, QuotedString guildName)
+        static bool HandleGuildUninviteCommand(CommandHandler handler, PlayerIdentifier targetIdentifier)
         {
             if (targetIdentifier == null)
                 targetIdentifier = PlayerIdentifier.FromTargetOrSelf(handler);
@@ -122,7 +122,7 @@ namespace Game.Chat
                 return false;
 
             Guild targetGuild = Global.GuildMgr.GetGuildById(guildId);
-            if (!targetGuild)
+            if (targetGuild == null)
                 return false;
 
             return targetGuild.ChangeMemberRank(null, player.GetGUID(), (GuildRankId)rank);
@@ -144,13 +144,13 @@ namespace Game.Chat
             }
 
             Guild guild = Global.GuildMgr.GetGuildByName(oldGuildName);
-            if (!guild)
+            if (guild == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandCouldnotfind, oldGuildName);
                 return false;
             }
 
-            if (Global.GuildMgr.GetGuildByName(newGuildName))
+            if (Global.GuildMgr.GetGuildByName(newGuildName) != null)
             {
                 handler.SendSysMessage(CypherStrings.GuildRenameAlreadyExists, newGuildName);
                 return false;
@@ -167,22 +167,25 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandGuildInfo, true)]
-        static bool HandleGuildInfoCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGuildInfoCommand(CommandHandler handler, [OptionalArg][VariantArg<ulong, string>] dynamic guildIdentifier)
         {
             Guild guild = null;
-            Player target = handler.GetSelectedPlayerOrSelf();
 
-            if (!args.Empty() && args[0] != '\0')
+            if (guildIdentifier != null)
             {
-                if (char.IsDigit(args[0]))
-                    guild = Global.GuildMgr.GetGuildById(args.NextUInt64());
+                if (guildIdentifier is ulong)
+                    guild = Global.GuildMgr.GetGuildById(guildIdentifier);
                 else
-                    guild = Global.GuildMgr.GetGuildByName(args.NextString());
+                    guild = Global.GuildMgr.GetGuildByName(guildIdentifier);
             }
-            else if (target)
-                guild = target.GetGuild();
+            else
+            {
+                PlayerIdentifier target = PlayerIdentifier.FromTargetOrSelf(handler);
+                if (target != null && target.IsConnected())
+                    guild = target.GetConnectedPlayer().GetGuild();
+            }
 
-            if (!guild)
+            if (guild == null)
                 return false;
 
             // Display Guild Information

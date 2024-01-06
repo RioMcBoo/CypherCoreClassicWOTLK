@@ -38,7 +38,7 @@ namespace Game.Entities
             SetEntry(itemId);
             SetObjectScale(1.0f);
 
-            if (owner)
+            if (owner != null)
             {
                 SetOwnerGUID(owner.GetGUID());
                 SetContainedIn(owner.GetGUID());
@@ -74,7 +74,7 @@ namespace Game.Entities
 
                         PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactAppearance.UnlockPlayerConditionID);
                         if (playerCondition != null)
-                            if (!owner || !ConditionManager.IsPlayerMeetingCondition(owner, playerCondition))
+                            if (owner == null || !ConditionManager.IsPlayerMeetingCondition(owner, playerCondition))
                                 continue;
 
                         SetModifier(ItemModifier.ArtifactAppearanceId, artifactAppearance.Id);
@@ -174,7 +174,7 @@ namespace Game.Entities
 
                     ss.Clear();
 
-                    foreach (int bonusListID in (List<int>)m_itemData.BonusListIDs)
+                    foreach (int bonusListID in GetBonusListIDs())
                         ss.Append($"{bonusListID} ");
 
                     stmt.AddValue(++index, ss.ToString());
@@ -634,7 +634,7 @@ namespace Game.Entities
 
         public void CheckArtifactRelicSlotUnlock(Player owner)
         {
-            if (!owner)
+            if (owner == null)
                 return;
 
             byte artifactId = GetTemplate().GetArtifactID();
@@ -786,7 +786,7 @@ namespace Game.Entities
             if (uState == ItemUpdateState.New && state == ItemUpdateState.Removed)
             {
                 // pretend the item never existed
-                if (forplayer)
+                if (forplayer != null)
                 {
                     RemoveItemFromUpdateQueueOf(this, forplayer);
                     forplayer.DeleteRefundReference(GetGUID());
@@ -799,7 +799,7 @@ namespace Game.Entities
                 if (uState != ItemUpdateState.New)
                     uState = state;
 
-                if (forplayer)
+                if (forplayer != null)
                     AddItemToUpdateQueueOf(this, forplayer);
             }
             else
@@ -851,7 +851,8 @@ namespace Game.Entities
             item.uQueuePos = -1;
         }
 
-        public bool IsEquipped() { return !IsInBag() && m_slot < EquipmentSlot.End; }
+        public bool IsEquipped() { return !IsInBag() && m_slot < EquipmentSlot.End
+                || (m_slot >= ProfessionSlots.Start && m_slot < ProfessionSlots.End); }
 
         public bool CanBeTraded(bool mail = false, bool trade = false)
         {
@@ -884,7 +885,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.StackCount), value);
 
             Player player = GetOwner();
-            if (player)
+            if (player != null)
             {
                 TradeData tradeData = player.GetTradeData();
                 if (tradeData != null)
@@ -1144,26 +1145,19 @@ namespace Game.Entities
                             {
                                 case ItemEnchantmentType.BonusListID:
                                 {
-                                    var bonusesEffect = Global.DB2Mgr.GetItemBonusList(gemEnchant.EffectArg[i]);
-                                    if (bonusesEffect != null)
-                                    {
-                                        foreach (ItemBonusRecord itemBonus in bonusesEffect)
-                                            if (itemBonus.BonusType == ItemBonusType.ItemLevel)
-
-                                                _bonusData.GemItemLevelBonus[slot] += (uint)itemBonus.Value[0];
-                                    }
+                                    foreach (var itemBonus in ItemBonusMgr.GetItemBonuses(gemEnchant.EffectArg[i]))
+                                        if (itemBonus.BonusType == ItemBonusType.ItemLevel)
+                                            _bonusData.GemItemLevelBonus[slot] += (uint)itemBonus.Value[0];
                                     break;
                                 }
                                 case ItemEnchantmentType.BonusListCurve:
                                 {
-                                    uint artifactrBonusListId = Global.DB2Mgr.GetItemBonusListForItemLevelDelta((short)Global.DB2Mgr.GetCurveValueAt((uint)Curves.ArtifactRelicItemLevelBonus, gemBaseItemLevel + gemBonus.ItemLevelBonus));
-                                    if (artifactrBonusListId != 0)
+                                    uint bonusListId = ItemBonusMgr.GetItemBonusListForItemLevelDelta((short)Global.DB2Mgr.GetCurveValueAt((uint)Curves.ArtifactRelicItemLevelBonus, gemBaseItemLevel + gemBonus.ItemLevelBonus));
+                                    if (bonusListId != 0)
                                     {
-                                        var bonusesEffect = Global.DB2Mgr.GetItemBonusList(artifactrBonusListId);
-                                        if (bonusesEffect != null)
-                                            foreach (ItemBonusRecord itemBonus in bonusesEffect)
-                                                if (itemBonus.BonusType == ItemBonusType.ItemLevel)
-                                                    _bonusData.GemItemLevelBonus[slot] += (uint)itemBonus.Value[0];
+                                        foreach (var itemBonus in ItemBonusMgr.GetItemBonuses(bonusListId))
+                                            if (itemBonus.BonusType == ItemBonusType.ItemLevel)
+                                                _bonusData.GemItemLevelBonus[slot] += (uint)itemBonus.Value[0];
                                     }
                                     break;
                                 }
@@ -1253,22 +1247,25 @@ namespace Game.Entities
             owner.SendPacket(itemTimeUpdate);
         }
 
-        public static Item CreateItem(uint item, uint count, ItemContext context, Player player = null)
+        public static Item CreateItem(uint itemEntry, uint count, ItemContext context, Player player = null, bool addDefaultBonuses = true)
         {
             if (count < 1)
                 return null;                                        //don't create item at zero count
 
-            var pProto = Global.ObjectMgr.GetItemTemplate(item);
+            var pProto = Global.ObjectMgr.GetItemTemplate(itemEntry);
             if (pProto != null)
             {
                 if (count > pProto.GetMaxStackSize())
                     count = pProto.GetMaxStackSize();
 
-                Item pItem = Bag.NewItemOrBag(pProto);
-                if (pItem.Create(Global.ObjectMgr.GetGenerator(HighGuid.Item).Generate(), item, context, player))
+                Item item = Bag.NewItemOrBag(pProto);
+                if (item.Create(Global.ObjectMgr.GetGenerator(HighGuid.Item).Generate(), itemEntry, context, player))
                 {
-                    pItem.SetCount(count);
-                    return pItem;
+                    item.SetCount(count);
+                    if (addDefaultBonuses)
+                        item.SetBonuses(ItemBonusMgr.GetBonusListsForItem(itemEntry, new(context)));
+
+                    return item;
                 }
             }
 
@@ -1277,7 +1274,7 @@ namespace Game.Entities
 
         public Item CloneItem(uint count, Player player = null)
         {
-            Item newItem = CreateItem(GetEntry(), count, GetContext(), player);
+            Item newItem = CreateItem(GetEntry(), count, GetContext(), player, false);
             if (newItem == null)
                 return null;
 
@@ -1285,6 +1282,7 @@ namespace Game.Entities
             newItem.SetGiftCreator(GetGiftCreator());
             newItem.ReplaceAllItemFlags((ItemFieldFlags)(m_itemData.DynamicFlags & ~(uint)(ItemFieldFlags.Refundable | ItemFieldFlags.BopTradeable)));
             newItem.SetExpiration(m_itemData.Expiration);
+            newItem.SetBonuses(m_itemData.ItemBonusKey.GetValue().BonusListIDs);
             // player CAN be NULL in which case we must not update random properties because that accesses player's item update queue
             if (player != null)
                 newItem.SetItemRandomProperties(GetItemRandomEnchantmentId());
@@ -1412,7 +1410,7 @@ namespace Game.Entities
         public override bool AddToObjectUpdate()
         {
             Player owner = GetOwner();
-            if (owner)
+            if (owner != null)
             {
                 owner.GetMap().AddUpdateObject(this);
                 return true;
@@ -1424,7 +1422,7 @@ namespace Game.Entities
         public override void RemoveFromObjectUpdate()
         {
             Player owner = GetOwner();
-            if (owner)
+            if (owner != null)
                 owner.GetMap().RemoveUpdateObject(this);
         }
 
@@ -1573,7 +1571,7 @@ namespace Game.Entities
             Player owner = GetOwner();
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
             {
-                if ((owner ? GetItemStatValue(i, owner) : proto.GetStatPercentEditor(i)) != 0)
+                if ((owner != null ? GetItemStatValue(i, owner) : proto.GetStatPercentEditor(i)) != 0)
                     return true;
             }
 
@@ -1654,7 +1652,13 @@ namespace Game.Entities
             -1,                                                     // INVTYPE_THROWN
             EquipmentSlot.MainHand,                                // INVTYPE_RANGEDRIGHT
             -1,                                                     // INVTYPE_QUIVER
-            -1                                                      // INVTYPE_RELIC
+            -1,                                                      // INVTYPE_RELIC
+            -1,                                                     // INVTYPE_PROFESSION_TOOL
+            -1,                                                     // INVTYPE_PROFESSION_GEAR
+            -1,                                                     // INVTYPE_EQUIPABLE_SPELL_OFFENSIVE
+            -1,                                                     // INVTYPE_EQUIPABLE_SPELL_UTILITY
+            -1,                                                     // INVTYPE_EQUIPABLE_SPELL_DEFENSIVE
+            -1                                                      // INVTYPE_EQUIPABLE_SPELL_MOBILITY
         };
 
         public static bool CanTransmogrifyItemWithItem(Item item, ItemModifiedAppearanceRecord itemModifiedAppearance)
@@ -2088,6 +2092,22 @@ namespace Game.Entities
             return (ushort)GetAppearanceModId();
         }
 
+        uint GetVisibleModifiedAppearanceId(Player owner)
+        {
+            uint itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            if (itemModifiedAppearanceId == 0)
+                itemModifiedAppearanceId = GetModifier(ItemModifier.TransmogAppearanceAllSpecs);
+
+            if (itemModifiedAppearanceId == 0)
+            {
+                var itemModifiedAppearance = GetItemModifiedAppearance();
+                if (itemModifiedAppearance != null)
+                    itemModifiedAppearanceId = itemModifiedAppearance.Id;
+            }
+
+            return itemModifiedAppearanceId;
+        }
+        
         public uint GetVisibleSecondaryModifiedAppearanceId(Player owner)
         {
             uint itemModifiedAppearanceId = GetModifier(ItemConst.SecondaryAppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
@@ -2118,22 +2138,22 @@ namespace Game.Entities
             return 0;
         }
 
+        public List<uint> GetBonusListIDs() { return m_itemData.ItemBonusKey.GetValue().BonusListIDs; }
+
         public void AddBonuses(uint bonusListID)
         {
-            var bonusListIDs = (List<int>)m_itemData.BonusListIDs;
-            if (bonusListIDs.Contains((int)bonusListID))
+            var bonusListIDs = GetBonusListIDs();
+            if (bonusListIDs.Contains(bonusListID))
                 return;
 
-            var bonuses = Global.DB2Mgr.GetItemBonusList(bonusListID);
-            if (bonuses != null)
-            {
-                bonusListIDs.Add((int)bonusListID);
-                SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), bonusListIDs);
-                foreach (ItemBonusRecord bonus in bonuses)
-                    _bonusData.AddBonus(bonus.BonusType, bonus.Value);
-
-                SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
-            }
+            ItemBonusKey itemBonusKey = new();
+            itemBonusKey.ItemID = GetEntry();
+            itemBonusKey.BonusListIDs = GetBonusListIDs();
+            itemBonusKey.BonusListIDs.Add(bonusListID);
+            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemBonusKey), itemBonusKey);
+            foreach (var bonus in ItemBonusMgr.GetItemBonuses(bonusListID))
+                _bonusData.AddBonus(bonus.BonusType, bonus.Value);
+            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
         }
 
         public void SetBonuses(List<int> bonusListIDs)
@@ -2141,9 +2161,12 @@ namespace Game.Entities
             if (bonusListIDs == null)
                 bonusListIDs = new List<int>();
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), bonusListIDs);
+            ItemBonusKey itemBonusKey = new();
+            itemBonusKey.ItemID = GetEntry();
+            itemBonusKey.BonusListIDs = bonusListIDs;
+            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemBonusKey), itemBonusKey);
 
-            foreach (uint bonusListID in (List<int>)m_itemData.BonusListIDs)
+            foreach (uint bonusListID in GetBonusListIDs())
                 _bonusData.AddBonusList(bonusListID);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
@@ -2151,7 +2174,9 @@ namespace Game.Entities
 
         public void ClearBonuses()
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), new List<int>());
+            ItemBonusKey itemBonusKey = new();
+            itemBonusKey.ItemID = GetEntry();
+            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemBonusKey), itemBonusKey);
             _bonusData = new BonusData(GetTemplate());
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
         }
@@ -2360,7 +2385,7 @@ namespace Game.Entities
         public void GiveArtifactXp(ulong amount, Item sourceItem, ArtifactCategory artifactCategoryId)
         {
             Player owner = GetOwner();
-            if (!owner)
+            if (owner == null)
                 return;
 
             if (artifactCategoryId != 0)
@@ -2526,7 +2551,7 @@ namespace Game.Entities
 
                 eff.SetBonuses.Add(itemSetSpell);
                 // spell cast only if fit form requirement, in other case will cast at form change
-                if (itemSetSpell.ChrSpecID == 0 || itemSetSpell.ChrSpecID == player.GetPrimarySpecialization())
+                if (itemSetSpell.ChrSpecID == 0 || (ChrSpecialization)itemSetSpell.ChrSpecID == player.GetPrimarySpecialization())
                     player.ApplyEquipSpell(spellInfo, null, true);
             }
         }
@@ -2762,6 +2787,8 @@ namespace Game.Entities
                             if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.CookingSupp))
                                 return false;
                             return true;
+                        case ItemSubClassContainer.ReagentContainer:
+                            return pProto.IsCraftingReagent();
                         default:
                             return false;
                     }
@@ -3074,10 +3101,8 @@ namespace Game.Entities
 
         public void AddBonusList(uint bonusListId)
         {
-            var bonuses = Global.DB2Mgr.GetItemBonusList(bonusListId);
-            if (bonuses != null)
-                foreach (ItemBonusRecord bonus in bonuses)
-                    AddBonus(bonus.BonusType, bonus.Value);
+            foreach (var bonus in ItemBonusMgr.GetItemBonuses(bonusListId))
+                AddBonus(bonus.BonusType, bonus.Value);
         }
 
         public void AddBonus(ItemBonusType type, int[] values)

@@ -17,7 +17,7 @@ namespace Game
         {
             info.Clear();   // reuse packet
             Player trader = GetPlayer().GetTrader();
-            info.PartnerIsSameBnetAccount = trader && trader.GetSession().GetBattlenetAccountId() == GetBattlenetAccountId();
+            info.PartnerIsSameBnetAccount = trader != null && trader.GetSession().GetBattlenetAccountId() == GetBattlenetAccountId();
             SendPacket(info);
         }
 
@@ -41,7 +41,7 @@ namespace Game
             for (byte i = 0; i < (byte)TradeSlots.Count; ++i)
             {
                 Item item = view_trade.GetItem((TradeSlots)i);
-                if (item)
+                if (item != null)
                 {
                     TradeUpdated.TradeItem tradeItem = new();
                     tradeItem.Slot = i;
@@ -84,7 +84,7 @@ namespace Game
         void MoveTradeItems(Item[] myItems, Item[] hisItems, List<ItemPosCount>[] myDest, List<ItemPosCount>[] hisDest)
         {
             Player trader = GetPlayer().GetTrader();
-            if (!trader)
+            if (trader == null)
                 return;
 
             for (byte i = 0; i < myItems.Length; ++i)
@@ -141,7 +141,7 @@ namespace Game
             for (byte i = 0; i < myItems.Length; ++i)
             {
                 Item item = myTrade.GetItem((TradeSlots)i);
-                if (item)
+                if (item != null)
                 {
                     Log.outDebug(LogFilter.Network, $"player trade item {item.GetGUID()} bag: {item.InventoryBagSlot} slot: {item.InventorySlot}");
                     //Can return null
@@ -149,7 +149,7 @@ namespace Game
                     myItems[i].SetInTrade();
                 }
                 item = hisTrade.GetItem((TradeSlots)i);
-                if (item)
+                if (item != null)
                 {
                     Log.outDebug(LogFilter.Network, $"partner trade item {item.GetGUID()} bag: {item.InventoryBagSlot} slot: {item.InventorySlot}");
                     hisItems[i] = item;
@@ -252,7 +252,7 @@ namespace Game
             for (int i = 0; i < (int)TradeSlots.TradedCount; ++i)
             {
                 Item item = my_trade.GetItem((TradeSlots)i);
-                if (item)
+                if (item != null)
                 {
                     if (!item.CanBeTraded(false, true))
                     {
@@ -270,7 +270,7 @@ namespace Game
                     }
                 }
                 item = his_trade.GetItem((TradeSlots)i);
-                if (item)
+                if (item != null)
                 {
                     if (!item.CanBeTraded(false, true))
                     {
@@ -298,8 +298,8 @@ namespace Game
                     SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(my_spell_id, _player.GetMap().GetDifficultyID());
                     Item castItem = my_trade.GetSpellCastItem();
 
-                    if (spellEntry == null || !his_trade.GetItem(TradeSlots.NonTraded) ||
-                        (my_trade.HasSpellCastItem() && !castItem))
+                    if (spellEntry == null || his_trade.GetItem(TradeSlots.NonTraded) == null ||
+                        (my_trade.HasSpellCastItem() && castItem == null))
                     {
                         ClearAcceptTradeMode(my_trade, his_trade);
                         ClearAcceptTradeMode(myItems, hisItems);
@@ -334,7 +334,7 @@ namespace Game
                     SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(his_spell_id, trader.GetMap().GetDifficultyID());
                     Item castItem = his_trade.GetSpellCastItem();
 
-                    if (spellEntry == null || !my_trade.GetItem(TradeSlots.NonTraded) || (his_trade.HasSpellCastItem() && !castItem))
+                    if (spellEntry == null || my_trade.GetItem(TradeSlots.NonTraded) == null || (his_trade.HasSpellCastItem() && castItem == null))
                     {
                         his_trade.SetSpell(0);
 
@@ -405,12 +405,12 @@ namespace Game
                 // execute trade: 1. remove
                 for (byte i = 0; i < myItems.Length; ++i)
                 {
-                    if (myItems[i])
+                    if (myItems[i] != null)
                     {
                         myItems[i].SetGiftCreator(GetPlayer().GetGUID());
                         GetPlayer().MoveItemFromInventory(myItems[i].InventoryPosition, true);
                     }
-                    if (hisItems[i])
+                    if (hisItems[i] != null)
                     {
                         hisItems[i].SetGiftCreator(trader.GetGUID());
                         trader.MoveItemFromInventory(hisItems[i].InventoryPosition, true);
@@ -442,10 +442,10 @@ namespace Game
                 trader.ModifyMoney(-(long)his_trade.GetMoney());
                 trader.ModifyMoney((long)my_trade.GetMoney());
 
-                if (my_spell)
+                if (my_spell != null)
                     my_spell.Prepare(my_targets);
 
-                if (his_spell)
+                if (his_spell != null)
                     his_spell.Prepare(his_targets);
 
                 // cleanup
@@ -506,7 +506,7 @@ namespace Game
         void HandleCancelTrade(CancelTrade cancelTrade)
         {
             // sent also after LOGOUT COMPLETE
-            if (GetPlayer())                                             // needed because STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT
+            if (GetPlayer() != null)                                             // needed because STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT
                 GetPlayer().TradeCancel(true);
         }
 
@@ -555,7 +555,7 @@ namespace Game
 
 
             Player pOther = Global.ObjAccessor.FindPlayer(initiateTrade.Guid);
-            if (!pOther)
+            if (pOther == null)
             {
                 info.Status = TradeStatus.NoTarget;
                 SendTradeStatus(info);
@@ -668,7 +668,7 @@ namespace Game
 
             // check cheating, can't fail with correct client operations
             Item item = GetPlayer().GetItemByPos(new(setTradeItem.ItemSlotInPack, setTradeItem.PackSlot));
-            if (!item || (setTradeItem.TradeSlot != (byte)TradeSlots.NonTraded && !item.CanBeTraded(false, true)))
+            if (item == null || (setTradeItem.TradeSlot != (byte)TradeSlots.NonTraded && !item.CanBeTraded(false, true)))
             {
                 info.Status = TradeStatus.Cancelled;
                 SendTradeStatus(info);

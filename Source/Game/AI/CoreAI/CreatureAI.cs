@@ -119,7 +119,7 @@ namespace Game.AI
         public void TriggerAlert(Unit who)
         {
             // If there's no target, or target isn't a player do nothing
-            if (!who || !who.IsTypeId(TypeId.Player))
+            if (who == null || !who.IsTypeId(TypeId.Player))
                 return;
 
             // If this unit isn't an NPC, is already distracted, is fighting, is confused, stunned or fleeing, do nothing
@@ -178,7 +178,7 @@ namespace Game.AI
                 if (summon != null)
                 {
                     // Only apply this to specific types of summons
-                    if (!summon.GetVehicle() && ShouldFollowOnSpawn(summon.m_Properties) && summon.CanFollowOwner())
+                    if (summon.GetVehicle() == null && ShouldFollowOnSpawn(summon.m_Properties) && summon.CanFollowOwner())
                     {
                         Unit owner = summon.GetCharmerOrOwner();
                         if (owner != null)
@@ -294,7 +294,10 @@ namespace Game.AI
 
             // sometimes bosses stuck in combat?
             me.CombatStop(true);
-            me.SetTappedBy(null);
+
+            if (!me.IsTapListNotClearedOnEvade())
+                me.SetTappedBy(null);
+            
             me.ResetPlayerDamageReq();
             me.SetLastDamagedTime(0);
             me.SetCannotReachTarget(false);
@@ -308,7 +311,7 @@ namespace Game.AI
 
         public CypherStrings VisualizeBoundary(TimeSpan duration, Unit owner = null, bool fill = false)
         {
-            if (!owner)
+            if (owner == null)
                 return 0;
 
             if (_boundary.Empty())
@@ -365,13 +368,13 @@ namespace Game.AI
                 {
                     var pos = new Position(startPosition.GetPositionX() + front.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + front.Value * SharedConst.BoundaryVisualizeStepSize, spawnZ);
                     TempSummon point = owner.SummonCreature(SharedConst.BoundaryVisualizeCreature, pos, TempSummonType.TimedDespawn, duration);
-                    if (point)
+                    if (point != null)
                     {
                         point.SetObjectScale(SharedConst.BoundaryVisualizeCreatureScale);
                         point.SetUnitFlag(UnitFlags.Stunned);
                         point.SetImmuneToAll(true);
                         if (!hasOutOfBoundsNeighbor)
-                            point.SetUnitFlag(UnitFlags.Uninteractible);
+                            point.SetUninteractible(true);
                     }
                     Q.Remove(front);
                 }
@@ -444,6 +447,9 @@ namespace Game.AI
 
         // Called for reaction when initially engaged - this will always happen _after_ JustEnteredCombat
         public virtual void JustEngagedWith(Unit who) { }
+
+        // Called when the creature reaches 0 health (or 1 if unkillable).
+        public virtual void OnHealthDepleted(Unit attacker, bool isKill) { }
 
         // Called when the creature is killed
         public virtual void JustDied(Unit killer) { }

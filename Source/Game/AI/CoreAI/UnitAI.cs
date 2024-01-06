@@ -54,12 +54,23 @@ namespace Game.AI
 
         public void DoMeleeAttackIfReady()
         {
-            if (me.HasUnitState(UnitState.Casting))
+            if (me.IsCreature() && !me.ToCreature().CanMelee())
                 return;
+
+            if (me.HasUnitState(UnitState.Casting))
+            {
+                Spell channeledSpell = me.GetCurrentSpell(CurrentSpellTypes.Channeled);
+                if (channeledSpell == null || !channeledSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
+                    return;
+            }
 
             Unit victim = me.GetVictim();
 
             if (!me.IsWithinMeleeRange(victim))
+                return;
+
+            // Check that the victim is in front of the unit
+            if (!me.HasInArc(2 * MathF.PI / 3, victim))
                 return;
 
             //Make sure our attack is ready and we aren't currently casting before checking distance
@@ -489,8 +500,6 @@ namespace Game.AI
             if (!isNew)
                 me.ScheduleAIChange();
         }
-
-        public virtual bool ShouldSparWith(Unit target) { return false; }
 
         public virtual void DoAction(int action) { }
         public virtual uint GetData(uint id = 0) { return 0; }

@@ -83,14 +83,14 @@ namespace Game
                     {
                         ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
 
-                        // Kick if player is online
-                        Player p = Global.ObjAccessor.FindPlayer(guid);
-                        if (p)
-                        {
-                            WorldSession s = p.GetSession();
-                            s.KickPlayer("AccountMgr::DeleteAccount Deleting the account");                            // mark session to remove at next session list update
-                            s.LogoutPlayer(false);                     // logout player without waiting next session list update
-                        }
+                    // Kick if player is online
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    if (player != null)
+                    {
+                        WorldSession s = player.GetSession();
+                        s.KickPlayer("AccountMgr::DeleteAccount Deleting the account");                            // mark session to remove at next session list update
+                        s.LogoutPlayer(false);                     // logout player without waiting next session list update
+                    }
 
                         Player.DeleteFromDB(guid, accountId, false);       // no need to update realm characters
                     } while (result.NextRow());
@@ -172,10 +172,16 @@ namespace Game
             string username;
 
             if (!GetName(accountId, out username))
+            {
+                Global.ScriptMgr.OnFailedPasswordChange(accountId);
                 return AccountOpResult.NameNotExist;                          // account doesn't exist
+            }
 
             if (newPassword.Length > MaxAccountLength)
+            {
+                Global.ScriptMgr.OnFailedPasswordChange(accountId);
                 return AccountOpResult.PassTooLong;
+            }
 
             (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(username, newPassword);
 
@@ -185,38 +191,53 @@ namespace Game
             stmt.AddValue(2, accountId);
             DB.Login.Execute(stmt);
 
+            Global.ScriptMgr.OnPasswordChange(accountId);
             return AccountOpResult.Ok;
         }
 
         public AccountOpResult ChangeEmail(uint accountId, string newEmail)
         {
             if (!GetName(accountId, out _))
+            {
+                Global.ScriptMgr.OnFailedEmailChange(accountId);
                 return AccountOpResult.NameNotExist;                          // account doesn't exist
+            }
 
             if (newEmail.Length > MaxEmailLength)
+            {
+                Global.ScriptMgr.OnFailedEmailChange(accountId);
                 return AccountOpResult.EmailTooLong;
+            }
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_EMAIL);
             stmt.AddValue(0, newEmail);
             stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
 
+            Global.ScriptMgr.OnEmailChange(accountId);
             return AccountOpResult.Ok;
         }
 
         public AccountOpResult ChangeRegEmail(uint accountId, string newEmail)
         {
             if (!GetName(accountId, out _))
+            {
+                Global.ScriptMgr.OnFailedEmailChange(accountId);
                 return AccountOpResult.NameNotExist;                          // account doesn't exist
+            }
 
             if (newEmail.Length > MaxEmailLength)
+            {
+                Global.ScriptMgr.OnFailedEmailChange(accountId);
                 return AccountOpResult.EmailTooLong;
+            }
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_REG_EMAIL);
             stmt.AddValue(0, newEmail);
             stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
 
+            Global.ScriptMgr.OnEmailChange(accountId);
             return AccountOpResult.Ok;
         }
 

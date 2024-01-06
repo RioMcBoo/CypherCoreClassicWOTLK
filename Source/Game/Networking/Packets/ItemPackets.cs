@@ -7,6 +7,7 @@ using Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Game.Networking.Packets
 {
@@ -38,8 +39,8 @@ namespace Game.Networking.Packets
             Quantity = _worldPacket.ReadInt32();
             Muid = _worldPacket.ReadUInt32();
             Slot = _worldPacket.ReadUInt32();
+            ItemType = (ItemVendorType)_worldPacket.ReadInt32();
             Item.Read(_worldPacket);
-            ItemType = (ItemVendorType)_worldPacket.ReadBits<int>(3);
         }
 
         public ObjectGuid VendorGUID;
@@ -224,7 +225,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt8((sbyte)BagResult);
+            _worldPacket.WriteInt32((int)BagResult);
             _worldPacket.WritePackedGuid(Item[0]);
             _worldPacket.WritePackedGuid(Item[1]);
             _worldPacket.WriteUInt8(ContainerBSlot); // bag Type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_WRONG_BAG_TYPE_2
@@ -389,12 +390,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(VendorGUID);
-            _worldPacket.WritePackedGuid(ItemGUID);
-            _worldPacket.WriteUInt8((byte)Reason);
+            _worldPacket.WriteInt32(ItemGUIDs.Count);
+            _worldPacket.WriteInt32((int)Reason);
+            foreach (ObjectGuid itemGuid in ItemGUIDs)
+                _worldPacket.WritePackedGuid(itemGuid);
         }
 
         public ObjectGuid VendorGUID;
-        public ObjectGuid ItemGUID;
+        public List<ObjectGuid> ItemGUIDs = new();
         public SellResult Reason = SellResult.Unk;
     }
 
@@ -416,14 +419,26 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(BattlePetBreedQuality);
             _worldPacket.WriteInt32(BattlePetLevel);
             _worldPacket.WritePackedGuid(ItemGUID);
+            _worldPacket.WriteInt32(Toasts.Count);
+            foreach (UiEventToast uiEventToast in Toasts)
+                uiEventToast.Write(_worldPacket);
+
             _worldPacket.WriteBit(Pushed);
             _worldPacket.WriteBit(Created);
             _worldPacket.WriteBits((uint)DisplayText, 3);
             _worldPacket.WriteBit(IsBonusRoll);
             _worldPacket.WriteBit(IsEncounterLoot);
+            _worldPacket.WriteBit(CraftingData != null);
+            _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
             _worldPacket.FlushBits();
 
             Item.Write(_worldPacket);
+
+            if (FirstCraftOperationID.HasValue)
+                _worldPacket.WriteUInt32(FirstCraftOperationID.Value);
+
+            if (CraftingData != null)
+                CraftingData.Write(_worldPacket);
         }
 
         public ObjectGuid PlayerGUID;
@@ -440,6 +455,9 @@ namespace Game.Networking.Packets
         public uint BattlePetBreedQuality;
         public int BattlePetLevel;
         public ObjectGuid ItemGUID;
+        public List<UiEventToast> Toasts = new();
+        public CraftingData CraftingData;
+        public uint? FirstCraftOperationID;
         public bool Pushed;
         public DisplayType DisplayText;
         public bool Created;
@@ -840,7 +858,7 @@ namespace Game.Networking.Packets
         public ItemInstance(Item item)
         {
             ItemID = item.GetEntry();
-            List<int> bonusListIds = item.m_itemData.BonusListIDs;
+            List<uint> bonusListIds = item.GetBonusListIDs();
             if (!bonusListIds.Empty())
             {
                 ItemBonus = new();
@@ -979,8 +997,44 @@ namespace Game.Networking.Packets
         }
     }
 
+    public class ItemBonusKey : IEquatable<ItemBonusKey>
+    {
+        public uint ItemID;
+        public List<uint> BonusListIDs = new();
+        public List<ItemMod> Modifications = new();
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(ItemID);
+            data.WriteInt32(BonusListIDs.Count);
+            data.WriteInt32(Modifications.Count);
+
+            if (!BonusListIDs.Empty())
+                foreach (var id in BonusListIDs)
+                    data.WriteUInt32(id);
+
+            foreach (ItemMod modification in Modifications)
+                modification.Write(data);
+        }
+
+        public bool Equals(ItemBonusKey right)
+        {
+            if (ItemID != right.ItemID)
+                return false;
+
+            if (BonusListIDs != right.BonusListIDs)
+                return false;
+
+            if (Modifications != right.Modifications)
+                return false;
+
+            return true;
+        }
+    }
+
     public class ItemEnchantData
     {
+        public ItemEnchantData() { }
         public ItemEnchantData(uint id, uint expiration, int charges, byte slot)
         {
             ID = id;
@@ -1079,5 +1133,17 @@ namespace Game.Networking.Packets
         public ulong Money;
         public ItemPurchaseRefundItem[] Items = new ItemPurchaseRefundItem[5];
         public ItemPurchaseRefundCurrency[] Currencies = new ItemPurchaseRefundCurrency[5];
+    }
+
+    public struct UiEventToast
+    {
+        public int UiEventToastID;
+        public int Asset;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(UiEventToastID);
+            data.WriteInt32(Asset);
+        }
     }
 }

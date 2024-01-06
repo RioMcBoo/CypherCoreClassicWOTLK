@@ -44,21 +44,6 @@ namespace Game.Networking.Packets
         uint AreaID;
     }
 
-    public class BinderConfirm : ServerPacket
-    {
-        public BinderConfirm(ObjectGuid unit) : base(ServerOpcodes.BinderConfirm)
-        {
-            Unit = unit;
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(Unit);
-        }
-
-        ObjectGuid Unit;
-    }
-
     public class InvalidatePlayer : ServerPacket
     {
         public InvalidatePlayer() : base(ServerOpcodes.InvalidatePlayer) { }
@@ -106,15 +91,23 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(Type);
             _worldPacket.WriteInt32(Quantity);
-            _worldPacket.WriteUInt32(Flags);
+            _worldPacket.WriteUInt32((uint)Flags);
+            _worldPacket.WriteInt32(Toasts.Count);
+
+            foreach (var toast in Toasts)
+                toast.Write(_worldPacket);
+
             _worldPacket.WriteBit(WeeklyQuantity.HasValue);
             _worldPacket.WriteBit(TrackedQuantity.HasValue);
             _worldPacket.WriteBit(MaxQuantity.HasValue);
-            _worldPacket.WriteBit(Unused901.HasValue);
+            _worldPacket.WriteBit(TotalEarned.HasValue);
             _worldPacket.WriteBit(SuppressChatLog);
             _worldPacket.WriteBit(QuantityChange.HasValue);
             _worldPacket.WriteBit(QuantityGainSource.HasValue);
             _worldPacket.WriteBit(QuantityLostSource.HasValue);
+            _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
+            _worldPacket.WriteBit(NextRechargeTime.HasValue);
+            _worldPacket.WriteBit(RechargeCycleStartTime.HasValue);
             _worldPacket.FlushBits();
 
             if (WeeklyQuantity.HasValue)
@@ -126,29 +119,42 @@ namespace Game.Networking.Packets
             if (MaxQuantity.HasValue)
                 _worldPacket.WriteInt32(MaxQuantity.Value);
 
-            if (Unused901.HasValue)
-                _worldPacket.WriteInt32(Unused901.Value);
+            if (TotalEarned.HasValue)
+                _worldPacket.WriteInt32(TotalEarned.Value);
 
             if (QuantityChange.HasValue)
                 _worldPacket.WriteInt32(QuantityChange.Value);
 
             if (QuantityGainSource.HasValue)
-                _worldPacket.WriteInt32(QuantityGainSource.Value);
+                _worldPacket.WriteInt32((int)QuantityGainSource.Value);
 
             if (QuantityLostSource.HasValue)
-                _worldPacket.WriteInt32(QuantityLostSource.Value);
+                _worldPacket.WriteInt32((int)QuantityLostSource.Value);
+
+            if (FirstCraftOperationID.HasValue)
+                _worldPacket.WriteUInt32(FirstCraftOperationID.Value);
+
+            if (NextRechargeTime.HasValue)
+                _worldPacket.WriteInt64(NextRechargeTime.Value);
+
+            if (RechargeCycleStartTime.HasValue)
+                _worldPacket.WriteInt64(RechargeCycleStartTime.Value);
         }
 
         public uint Type;
         public int Quantity;
-        public uint Flags;
+        public CurrencyGainFlags Flags;
+        public List<UiEventToast> Toasts = new();
         public int? WeeklyQuantity;
         public int? TrackedQuantity;
         public int? MaxQuantity;
-        public int? Unused901;
+        public int? TotalEarned;
         public int? QuantityChange;
-        public int? QuantityGainSource;
-        public int? QuantityLostSource;
+        public CurrencyGainSource? QuantityGainSource;
+        public CurrencyDestroyReason? QuantityLostSource;
+        public uint? FirstCraftOperationID;
+        public long? NextRechargeTime;
+        public long? RechargeCycleStartTime;
         public bool SuppressChatLog;
     }
 
@@ -195,7 +201,9 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(data.MaxWeeklyQuantity.HasValue);
                 _worldPacket.WriteBit(data.TrackedQuantity.HasValue);
                 _worldPacket.WriteBit(data.MaxQuantity.HasValue);
-                _worldPacket.WriteBit(data.Unused901.HasValue);
+                _worldPacket.WriteBit(data.TotalEarned.HasValue);
+                _worldPacket.WriteBit(data.NextRechargeTime.HasValue);
+                _worldPacket.WriteBit(data.RechargeCycleStartTime.HasValue);
                 _worldPacket.WriteBits(data.Flags, 5);
                 _worldPacket.FlushBits();
 
@@ -207,8 +215,12 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteUInt32(data.TrackedQuantity.Value);
                 if (data.MaxQuantity.HasValue)
                     _worldPacket.WriteInt32(data.MaxQuantity.Value);
-                if (data.Unused901.HasValue)
-                    _worldPacket.WriteInt32(data.Unused901.Value);
+                if (data.TotalEarned.HasValue)
+                    _worldPacket.WriteInt32(data.TotalEarned.Value);
+                if (data.NextRechargeTime.HasValue)
+                    _worldPacket.WriteInt64(data.NextRechargeTime.Value);
+                if (data.RechargeCycleStartTime.HasValue)
+                    _worldPacket.WriteInt64(data.RechargeCycleStartTime.Value);
             }
         }
 
@@ -222,8 +234,10 @@ namespace Game.Networking.Packets
             public uint? MaxWeeklyQuantity;    // Weekly Currency cap.
             public uint? TrackedQuantity;
             public int? MaxQuantity;
-            public int? Unused901;
-            public byte Flags;                      // 0 = none, 
+            public int? TotalEarned;
+            public long? NextRechargeTime;
+            public long? RechargeCycleStartTime;
+            public byte Flags;
         }
     }
 
@@ -738,14 +752,16 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
+            bool hasPartyIndex = _worldPacket.HasBit();
             Min = _worldPacket.ReadUInt32();
             Max = _worldPacket.ReadUInt32();
-            PartyIndex = _worldPacket.ReadUInt8();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
         public uint Min;
         public uint Max;
-        public byte PartyIndex;
+        public byte? PartyIndex;
     }
 
     public class RandomRoll : ServerPacket
@@ -770,9 +786,14 @@ namespace Game.Networking.Packets
 
     public class EnableBarberShop : ServerPacket
     {
+        public byte CustomizationScope;
+
         public EnableBarberShop() : base(ServerOpcodes.EnableBarberShop) { }
 
-        public override void Write() { }
+        public override void Write() 
+        {
+            _worldPacket.WriteUInt8(CustomizationScope);
+        }
     }
 
     class PhaseShiftChange : ServerPacket
@@ -1317,7 +1338,7 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteBit(BonusRoll);
                     Item.Write(_worldPacket);
                     _worldPacket.WriteInt32(LootSpec);
-                    _worldPacket.WriteInt32((int)Gender);
+                    _worldPacket.WriteInt8((sbyte)Gender);
                     break;
                 case DisplayToastType.NewCurrency:
                     _worldPacket.WriteUInt32(CurrencyID);
@@ -1375,10 +1396,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsFullUpdate);
             _worldPacket.WriteInt32(Mounts.Count);
 
-            foreach (var spell in Mounts)
+            foreach (var (spellId, flags) in Mounts)
             {
-                _worldPacket.WriteUInt32(spell.Key);
-                _worldPacket.WriteBits(spell.Value, 2);
+                _worldPacket.WriteUInt32(spellId);
+                _worldPacket.WriteBits(flags, 4);
             }
 
             _worldPacket.FlushBits();

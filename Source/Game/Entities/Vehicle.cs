@@ -188,6 +188,15 @@ namespace Game.Entities
             // We just remove the aura and the unapply handler will make the target leave the vehicle.
             // We don't need to iterate over Seats
             _me.RemoveAurasByType(AuraType.ControlVehicle);
+
+            // Aura script might cause the vehicle to be despawned in the middle of handling SPELL_AURA_CONTROL_VEHICLE removal
+            // In that case, aura effect has already been unregistered but passenger may still be found in Seats
+            foreach (var (_, seat) in Seats)
+            {
+                Unit passenger = Global.ObjAccessor.GetUnit(_me, seat.Passenger.Guid);
+                if (passenger != null)
+                    passenger._ExitVehicle();
+            }
         }
 
         public bool HasEmptySeat(sbyte seatId)
@@ -266,7 +275,7 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Vehicle, "Vehicle ({0}, Entry {1}): installing accessory (Entry: {2}) on seat: {3}", _me.GetGUID().ToString(), GetCreatureEntry(), entry, seatId);
 
             TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, TimeSpan.FromMilliseconds(summonTime));
-            Cypher.Assert(accessory);
+            Cypher.Assert(accessory != null);
 
             if (minion)
                 accessory.AddUnitTypeMask(UnitTypeMask.Accessory);
@@ -365,7 +374,7 @@ namespace Game.Entities
 
             // Remove UNIT_FLAG_NOT_SELECTABLE if passenger did not have it before entering vehicle
             if (seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.PassengerNotSelectable) && !seat.Value.Passenger.IsUninteractible)
-                unit.RemoveUnitFlag(UnitFlags.Uninteractible);
+                unit.SetUninteractible(false);
 
             seat.Value.Passenger.Reset();
 
@@ -591,11 +600,6 @@ namespace Game.Entities
         public Dictionary<sbyte, VehicleSeat> Seats = new();
         public uint UsableSeatNum;    //< Number of seats that match VehicleSeatEntry.UsableByPlayer, used for proper display flags
 
-        public static implicit operator bool(Vehicle vehicle)
-        {
-            return vehicle != null;
-        }
-
         public enum Status
         {
             None,
@@ -642,7 +646,7 @@ namespace Game.Entities
 
             Passenger.SetVehicle(Target);
             Seat.Value.Passenger.Guid = Passenger.GetGUID();
-            Seat.Value.Passenger.IsUninteractible = Passenger.HasUnitFlag(UnitFlags.Uninteractible);
+            Seat.Value.Passenger.IsUninteractible = Passenger.IsUninteractible();
             Seat.Value.Passenger.IsGravityDisabled = Passenger.HasUnitMovementFlag(MovementFlag.DisableGravity);
             if (Seat.Value.SeatInfo.CanEnterOrExit())
             {
@@ -668,7 +672,7 @@ namespace Game.Entities
             {
                 // drop flag
                 Battleground bg = player.GetBattleground();
-                if (bg)
+                if (bg != null)
                     bg.EventPlayerDroppedFlag(player);
 
                 player.StopCastingCharm();

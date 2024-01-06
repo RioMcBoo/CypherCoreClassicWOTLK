@@ -407,10 +407,46 @@ namespace Framework.Constants
         PlayerBestWeeklyWinPvpTierInBracketEqualOrGreaterThan = 325, // (Mainline) Player has best weekly win at or above "{@PVP_TIER_ENUM}" for "{@PVP_BRACKET}"
         PlayerHasVanillaCollectorsEdition = 326, // Player has Vanilla Collector's Edition
         PlayerHasItemWithKeystoneLevelModifierEqualOrGreaterThan = 327,
-
         PlayerMythicPlusRatingInDisplaySeasonEqualOrGreaterThan = 329, /*NYI*/ // Player has Mythic+ Rating of at least "{#DungeonScore}" in {DisplaySeason}
+        PlayerMythicPlusLadderRatingInDisplaySeasonEqualOrGreaterThan = 333, /*NYI*/ // Player has Mythic+ Ladder Rating of at least "{#DungeonScore}" in {DisplaySeason}
+        MythicPlusRatingIsInTop01Percent = 334, /*NYI*/ // top 0.1% rating
+        PlayerAuraWithLabelStackCountEqualOrGreaterThan = 335, // Player has at least {#Stacks} stacks of aura "{Label}"
+        PlayerAuraWithLabelStackCountEqual = 336, // Target has exactly {#Stacks} stacks of aura with label "{Label}"
+        PlayerAuraWithLabelStackCountEqualOrLessThan = 337, // Player has at most {#Stacks} stacks of aura "{Label}"
+        PlayerIsInCrossFactionGroup = 338, // Player is in a cross faction group
+        PlayerHasTraitNodeEntryInActiveConfig = 340, // Player has {TraitNodeEntry} node in currently active config
+        PlayerHasTraitNodeEntryInActiveConfigRankGreaterOrEqualThan = 341, // Player has at least {#Rank} for {TraitNodeEntry} node in currently active config
+        PlayerHasPurchasedCombatTraitRanks = 342, /*NYI*/ // Player has purchased at least {#Count} talent points in active combat config
+        PlayerHasPurchasedTraitRanksInTraitTree = 343, /*NYI*/ // Player has purchased at least {#Count} ranks in {#TraitTree}
+        PlayerDaysSinceLogout = 344,
+        CraftingOrderSkillLineAbility = 347, /*NYI*/
+        CraftingOrderProfession = 348, /*NYI*/ // ProfessionEnum
 
-        MythicPlusRatingIsInTop01Percent = 334, // top 0.1% rating
+        PlayerHasPerksProgramPendingReward = 350,
+        PlayerCanUseItem = 351, // Player can use item {#Item}
+        PlayerSummonedBattlePetSpecies = 352,
+        PlayerSummonedBattlePetIsMaxLevel = 353,
+
+        PlayerHasAtLeastProfPathRanks = 355, // Player has purchased or granted at least {#Count} ranks in {SkillLine} config
+        PlayerHasAtLeastMissingProfPathRanks = 356, /*NYI*/ // Player is missing least {#Count} ranks in {SkillLine} config
+
+        PlayerHasItemTransmogrifiedToItemModifiedAppearance = 358, // Player has item with {ItemModifiedAppearance} transmog
+        ItemHasBonusList = 359, /*NYI*/ // Item has {ItemBonusList} (used by ItemCondition)
+        ItemHasBonusListFromGroup = 360, /*NYI*/ // Item has a bonus list from {ItemBonusListGroup} (used by ItemCondition)
+        ItemHasContext = 361, /*NYI*/ // Item has {ItemContext}
+        ItemHasItemLevelBetween = 362, /*NYI*/ // Item has item level between {#Min} and {#Max}
+        ItemHasContentTuningID = 363, /*NYI*/ // Item has {ContentTuning} (modifier 28)
+        ItemHasInventoryType = 364, /*NYI*/ // Item has inventory type
+        ItemWasCraftedWithReagentInSlot = 365, /*NYI*/ // Item was crafted with reagent item {Item} in slot {ModifiedCraftingReagentSlot}
+        PlayerHasCompletedDungeonEncounterInDifficulty = 366, // Player has completed {DungeonEncounter} on {Difficulty}
+        PlayerCurrencyIsRelOpFromMax = 367, /*NYI*/ // Player {CurrencyTypes} is {RelOp} {#Amount} from currency limit
+        ItemHasModifiedCraftingReagentSlot = 368, /*NYI*/ // Item has {ModifiedCraftingReagentSlot}
+        PlayerIsBetweenQuests = 369, // Player has previously completed quest or is on "{QuestV2}" but not "{QuestV2}" (SecondaryAsset)
+        PlayerIsOnQuestWithLabel = 370, /*NYI*/ // Player is on quest with {QuestLabel}
+        PlayerScenarioStepID = 371, // Player is on scenario step number {ScenarioStep}
+        PlayerHasCompletedQuestWithLabel = 372, /*NYI*/ // Player has previously completed quest with {QuestLabel}
+        LegacyLootIsEnabled = 373, /*NYI*/
+        PlayerZPositionBelow = 374,
     }
 
     public enum CriteriaFailEvent : byte
@@ -700,6 +736,14 @@ namespace Framework.Constants
         MythicPlusRatingAttained = 230, /*NYI*/ // (Player) Mythic+ Rating "{#DungeonScore}" attained
         SpentTalentPoint = 231, /*NYI*/ // (Player) spent talent point
         MythicPlusDisplaySeasonEnded = 234, /*NYI*/ // {DisplaySeason}
+        WinRatedSoloShuffleRound = 239, /*NYI*/
+        ParticipateInRatedSoloShuffleRound = 240, /*NYI*/
+        ReputationAmountGained = 243, /*NYI*/ // Gain reputation amount with {FactionID}; accumulate, not highest
+        FulfillAnyCraftingOrder = 245, /*NYI*/
+        FulfillCraftingOrderType = 246, /*NYI*/ // {CraftingOrderType}
+
+        PerksProgramMonthComplete = 249, /*NYI*/
+        CompleteTrackingQuest = 250, /*NYI*/
 
         Count
     }

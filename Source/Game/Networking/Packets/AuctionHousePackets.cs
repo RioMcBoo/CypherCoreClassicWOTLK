@@ -14,6 +14,8 @@ namespace Game.Networking.Packets
         public uint Offset;
         public byte MinLevel = 1;
         public byte MaxLevel = SharedConst.MaxLevel;
+        public byte Unused1007_1;
+        public byte Unused1007_2;
         public AuctionHouseFilterMask Filters;
         public byte[] KnownPets;
         public sbyte MaxPetLevel;
@@ -30,6 +32,8 @@ namespace Game.Networking.Packets
             Offset = _worldPacket.ReadUInt32();
             MinLevel = _worldPacket.ReadUInt8();
             MaxLevel = _worldPacket.ReadUInt8();
+            Unused1007_1 = _worldPacket.ReadUInt8();
+            Unused1007_2= _worldPacket.ReadUInt8();
             Filters = (AuctionHouseFilterMask)_worldPacket.ReadUInt32();
             uint knownPetSize = _worldPacket.ReadUInt32();
             MaxPetLevel = _worldPacket.ReadInt8();
@@ -484,7 +488,8 @@ namespace Game.Networking.Packets
     class AuctionHelloResponse : ServerPacket
     {
         public ObjectGuid Guid;
-        public uint DeliveryDelay;
+        public uint PurchasedItemDeliveryDelay;
+        public uint CancelledItemDeliveryDelay;
         public bool OpenForBusiness = true;
 
         public AuctionHelloResponse() : base(ServerOpcodes.AuctionHelloResponse) { }
@@ -492,7 +497,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteUInt32(DeliveryDelay);
+            _worldPacket.WriteUInt32(PurchasedItemDeliveryDelay);
+            _worldPacket.WriteUInt32(CancelledItemDeliveryDelay);
             _worldPacket.WriteBit(OpenForBusiness);
             _worldPacket.FlushBits();
         }
@@ -741,12 +747,12 @@ namespace Game.Networking.Packets
     public struct AuctionListFilterSubClass
     {
         public int ItemSubclass;
-        public uint InvTypeMask;
+        public ulong InvTypeMask;
 
         public AuctionListFilterSubClass(WorldPacket data)
         {
+            InvTypeMask = data.ReadUInt64();
             ItemSubclass = data.ReadInt32();
-            InvTypeMask = data.ReadUInt32();
         }
     }
 

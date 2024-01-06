@@ -1,25 +1,10 @@
-﻿/*
- * Copyright (C) 2012-2016 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Game.Entities;
 using Framework.Constants;
-using System.Collections.Generic;
+using Game.Entities;
 using Game.Networking.Packets;
-using Game.DataStorage;
+using System.Collections.Generic;
 
 namespace Game.BattleGrounds.Zones
 {
@@ -27,7 +12,6 @@ namespace Game.BattleGrounds.Zones
     {
         public BgEyeofStorm(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
-            m_BuffChange = true;
             BgObjects = new ObjectGuid[EotSObjectTypes.Max];
             BgCreatures= new ObjectGuid[EotSCreaturesTypes.Max];
             m_Points_Trigger[EotSPoints.FelReaver] = EotSPointsTrigger.FelReaverBuff;
@@ -169,13 +153,13 @@ namespace Game.BattleGrounds.Zones
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {
                 obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TowerCapFelReaver + i]);
-                if (obj)
+                if (obj != null)
                 {
                     byte j = 0;
                     while (j < m_PlayersNearPoint[EotSPoints.PointsMax].Count)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[EotSPoints.PointsMax][j]);
-                        if (!player)
+                        if (player == null)
                         {
                             Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneJoinedPoint: Player ({0}) could not be found!", m_PlayersNearPoint[EotSPoints.PointsMax][j].ToString());
                             ++j;
@@ -210,13 +194,13 @@ namespace Game.BattleGrounds.Zones
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {
                 obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TowerCapFelReaver + i]);
-                if (obj)
+                if (obj != null)
                 {
                     byte j = 0;
                     while (j < m_PlayersNearPoint[i].Count)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[i][j]);
-                        if (!player)
+                        if (player == null)
                         {
                             Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneLeftPoint Player ({0}) could not be found!", m_PlayersNearPoint[i][j].ToString());
                             //move non-existing players to "free space" - this will cause many errors showing in log, but it is a very important bug
@@ -272,7 +256,7 @@ namespace Game.BattleGrounds.Zones
                     for (byte i = 0; i < m_PlayersNearPoint[point].Count; ++i)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[point][i]);
-                        if (player)
+                        if (player != null)
                         {
                             player.SendUpdateWorldState(EotSWorldStateIds.ProgressBarStatus, (uint)m_PointBarStatus[point]);
                             Team team = GetPlayerTeam(player.GetGUID());
@@ -368,10 +352,10 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        public override void AddPlayer(Player player)
+        public override void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
         {
             bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
-            base.AddPlayer(player);
+            base.AddPlayer(player, queueId);
             if (!isInBattleground)
                 PlayerScores[player.GetGUID()] = new BgEyeOfStormScore(player.GetGUID(), player.GetBGTeam());
 
@@ -391,7 +375,7 @@ namespace Game.BattleGrounds.Zones
             {
                 if (m_FlagKeeper == guid)
                 {
-                    if (player)
+                    if (player != null)
                         EventPlayerDroppedFlag(player);
                     else
                     {
@@ -594,7 +578,7 @@ namespace Game.BattleGrounds.Zones
             RespawnFlag(true);
 
             GameObject obj = GetBgMap().GetGameObject(GetDroppedFlagGUID());
-            if (obj)
+            if (obj != null)
                 obj.Delete();
             else
                 Log.outError(LogFilter.Battleground, "BattlegroundEY: Unknown dropped flag ({0}).", GetDroppedFlagGUID().ToString());
@@ -766,10 +750,10 @@ namespace Game.BattleGrounds.Zones
             if (!BgCreatures[Point].IsEmpty())
                 DelCreature(Point);
 
-            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
+            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[Point].GraveyardId);
             if (sg == null || !AddSpiritGuide(Point, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.124139f, GetTeamIndexByTeamId(Team)))
                 Log.outError(LogFilter.Battleground, "BatteGroundEY: Failed to spawn spirit guide. point: {0}, team: {1}, graveyard_id: {2}",
-                    Point, Team, EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
+                    Point, Team, EotSMisc.m_CapturingPointTypes[Point].GraveyardId);
 
             //    SpawnBGCreature(Point, RESPAWN_IMMEDIATELY);
 
@@ -780,13 +764,13 @@ namespace Game.BattleGrounds.Zones
                 return;
 
             Creature trigger = GetBGCreature(Point + 6);//0-5 spirit guides
-            if (!trigger)
+            if (trigger == null)
                 trigger = AddCreature(SharedConst.WorldTrigger, Point + 6, EotSMisc.TriggerPositions[Point], GetTeamIndexByTeamId(Team));
 
             //add bonus honor aura trigger creature when node is accupied
             //cast bonus aura (+50% honor in 25yards)
             //aura should only apply to players who have accupied the node, set correct faction for trigger
-            if (trigger)
+            if (trigger != null)
             {
                 trigger.SetFaction(Team == Team.Alliance ? 84u : 83);
                 trigger.CastSpell(trigger, BattlegroundConst.SpellHonorableDefender25y, false);
@@ -847,7 +831,7 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
-        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
             uint g_id;
             Team team = GetPlayerTeam(player.GetGUID());
@@ -881,9 +865,9 @@ namespace Game.BattleGrounds.Zones
             {
                 if (m_PointOwnedByTeam[i] == team && m_PointState[i] == EotSPointState.UnderControl)
                 {
-                    entry = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[i].GraveYardId);
+                    entry = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[i].GraveyardId);
                     if (entry == null)
-                        Log.outError(LogFilter.Battleground, "BattlegroundEY: Graveyard {0} could not be found.", EotSMisc.m_CapturingPointTypes[i].GraveYardId);
+                        Log.outError(LogFilter.Battleground, "BattlegroundEY: Graveyard {0} could not be found.", EotSMisc.m_CapturingPointTypes[i].GraveyardId);
                     else
                     {
                         distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
@@ -1011,14 +995,14 @@ namespace Game.BattleGrounds.Zones
 
     struct BattlegroundEYCapturingPointStruct
     {
-        public BattlegroundEYCapturingPointStruct(int _DespawnNeutralObjectType, int _SpawnObjectTypeAlliance, uint _MessageIdAlliance, int _SpawnObjectTypeHorde, uint _MessageIdHorde, uint _GraveYardId)
+        public BattlegroundEYCapturingPointStruct(int _DespawnNeutralObjectType, int _SpawnObjectTypeAlliance, uint _MessageIdAlliance, int _SpawnObjectTypeHorde, uint _MessageIdHorde, uint _GraveyardId)
         {
             DespawnNeutralObjectType = _DespawnNeutralObjectType;
             SpawnObjectTypeAlliance = _SpawnObjectTypeAlliance;
             MessageIdAlliance = _MessageIdAlliance;
             SpawnObjectTypeHorde = _SpawnObjectTypeHorde;
             MessageIdHorde = _MessageIdHorde;
-            GraveYardId = _GraveYardId;
+            GraveyardId = _GraveyardId;
         }
 
         public int DespawnNeutralObjectType;
@@ -1026,7 +1010,7 @@ namespace Game.BattleGrounds.Zones
         public uint MessageIdAlliance;
         public int SpawnObjectTypeHorde;
         public uint MessageIdHorde;
-        public uint GraveYardId;
+        public uint GraveyardId;
     }
 
     struct EotSMisc

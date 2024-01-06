@@ -99,31 +99,16 @@ namespace Game
             CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(packet.CreatureID);
             if (ci != null)
             {
-                if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
-                    ci.InitializeQueryData();
+                Difficulty difficulty = _player.GetMap().GetDifficultyID();
 
-                QueryCreatureResponse queryCreatureResponse = ci.QueryData;
-
-                Locale loc = GetSessionDbLocaleIndex();
-                if (loc != Locale.enUS)
+                // Cache only exists for difficulty base
+                if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries) && difficulty == Difficulty.None)
+                    SendPacket(ci.QueryData[(int)GetSessionDbLocaleIndex()]);
+                else
                 {
-                    CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(ci.Entry);
-                    if (creatureLocale != null)
-                    {
-                        string name = queryCreatureResponse.Stats.Name[0];
-                        string nameAlt = queryCreatureResponse.Stats.NameAlt[0];
-
-                        ObjectManager.GetLocaleString(creatureLocale.Name, loc, ref name);
-                        ObjectManager.GetLocaleString(creatureLocale.NameAlt, loc, ref nameAlt);
-                        ObjectManager.GetLocaleString(creatureLocale.Title, loc, ref queryCreatureResponse.Stats.Title);
-                        ObjectManager.GetLocaleString(creatureLocale.TitleAlt, loc, ref queryCreatureResponse.Stats.TitleAlt);
-
-                        queryCreatureResponse.Stats.Name[0] = name;
-                        queryCreatureResponse.Stats.NameAlt[0] = nameAlt;
-                    }
+                    var response = ci.BuildQueryData(GetSessionDbLocaleIndex(), difficulty);
+                    SendPacket(response);
                 }
-
-                SendPacket(queryCreatureResponse);
             }
             else
             {
@@ -202,7 +187,7 @@ namespace Game
         {
             CorpseLocation packet = new();
             Player player = Global.ObjAccessor.FindConnectedPlayer(queryCorpseLocation.Player);
-            if (!player || !player.HasCorpse() || !_player.IsInSameRaidWith(player))
+            if (player == null || !player.HasCorpse() || !_player.IsInSameRaidWith(player))
             {
                 packet.Valid = false;                               // corpse not found
                 packet.Player = queryCorpseLocation.Player;
@@ -253,10 +238,10 @@ namespace Game
             response.Player = queryCorpseTransport.Player;
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(queryCorpseTransport.Player);
-            if (player)
+            if (player != null)
             {
                 Corpse corpse = player.GetCorpse();
-                if (_player.IsInSameRaidWith(player) && corpse && !corpse.GetTransGUID().IsEmpty() && corpse.GetTransGUID() == queryCorpseTransport.Transport)
+                if (_player.IsInSameRaidWith(player) && corpse != null && !corpse.GetTransGUID().IsEmpty() && corpse.GetTransGUID() == queryCorpseTransport.Transport)
                 {
                     response.Position = new Vector3(corpse.GetTransOffsetX(), corpse.GetTransOffsetY(), corpse.GetTransOffsetZ());
                     response.Facing = corpse.GetTransOffsetO();
@@ -302,7 +287,7 @@ namespace Game
             queryItemTextResponse.Id = packet.Id;
 
             Item item = GetPlayer().GetItemByGuid(packet.Id);
-            if (item)
+            if (item != null)
             {
                 queryItemTextResponse.Valid = true;
                 queryItemTextResponse.Text = item.GetText();
@@ -318,11 +303,11 @@ namespace Game
             realmQueryResponse.VirtualRealmAddress = queryRealmName.VirtualRealmAddress;
 
             RealmId realmHandle = new(queryRealmName.VirtualRealmAddress);
-            if (Global.ObjectMgr.GetRealmName(realmHandle.Index, ref realmQueryResponse.NameInfo.RealmNameActual, ref realmQueryResponse.NameInfo.RealmNameNormalized))
+            if (Global.RealmMgr.GetRealmNames(realmHandle, out realmQueryResponse.NameInfo.RealmNameActual, out realmQueryResponse.NameInfo.RealmNameNormalized))
             {
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Success;
                 realmQueryResponse.NameInfo.IsInternalRealm = false;
-                realmQueryResponse.NameInfo.IsLocal = queryRealmName.VirtualRealmAddress == Global.WorldMgr.GetRealm().Id.GetAddress();
+                realmQueryResponse.NameInfo.IsLocal = queryRealmName.VirtualRealmAddress == Global.WorldMgr.GetVirtualRealmAddress();
             }
             else
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Failure;

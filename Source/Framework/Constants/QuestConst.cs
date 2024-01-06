@@ -40,7 +40,22 @@ namespace Framework.Constants
         HideCreditMsg = 0x10, // Skip Showing Item Objective Progress
         PreserveQuestItems = 0x20,
         PartOfProgressBar = 0x40, // Hidden Objective Used To Calculate Progress Bar Percent (Quests Are Limited To A Single Progress Bar Objective)
-        KillPlayersSameFaction = 0x80
+        KillPlayersSameFaction = 0x80,
+        NoShareProgress = 0x0100,
+        IgnoreSoulboundItems = 0x0200,
+    }
+
+    public enum QuestCompleteSpellType
+    {
+        LegacyBehavior = 0,
+        Follower = 1,
+        Tradeskill = 2,
+        Ability = 3,
+        Aura = 4,
+        Spell = 5,
+        Unlock = 6,
+        Companion = 7,
+        Max
     }
 
     public struct QuestSlotOffsets
@@ -54,18 +69,22 @@ namespace Framework.Constants
 
     public enum QuestSlotStateMask
     {
-        None = 0x0000,
-        Complete = 0x0001,
-        Fail = 0x0002
+        None = 0x00,
+        Complete = 0x1,
+        Fail = 0x2
     }
 
     public enum QuestType
     {
-        AutoComplete= 0,
-        Disabled = 1,
+        TurnIn= 0,
+        WithMaxLevel = 1,
         Normal = 2,
         Task = 3,
-        Max = 4
+        MaxDBAllowedQuestTypes = 4,
+
+        // values used in quest menu packets
+        InProgress = 4,
+        TaskInProgress = 5
     }
 
     public enum QuestInfos
@@ -385,7 +404,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum QuestGiverStatus : uint
+    public enum QuestGiverStatus : ulong
     {
         None = 0x00,
         Future = 0x02,
@@ -409,88 +428,99 @@ namespace Framework.Constants
         CovenantCallingQuest = 0x80000,
         CovenantCallingRewardCompleteNoPOI = 0x100000,
         CovenantCallingRewardCompletePOI = 0x200000,
+        TrivialLegendaryQuest = 0x400000,
+        FutureLegendaryQuest = 0x800000,
+        LegendaryReward = 0x1000000,
+        ImportantQuest = 0x2000000,
+        ImportantReward = 0x4000000,
+        TrivialImportantQuest = 0x8000000,
+        FutureImportantQuest = 0x010000000,
+        ImportantQuestRewardCompleteNoPOI = 0x20000000,
+        ImportantQuestRewardCompletePOI = 0x40000000,
+        TrivialJourneyQuest = 0x80000000,
+        FutureJourneyQuest = 0x100000000,
     }
 
     [Flags]
     public enum QuestFlags : uint
     {
         None = 0x00,
-        StayAlive = 0x01,               // Not Used Currently
-        PartyAccept = 0x02,             // Not Used Currently. If Player In Party, All Players That Can Accept This Quest Will Receive Confirmation Box To Accept Quest Cmsg_Quest_Confirm_Accept/Smsg_Quest_Confirm_Accept
-        Exploration = 0x04,             // Not Used Currently
+        CompletionNoDeath = 0x01,
+        CompletionEvent = 0x02,
+        CompletionAreaTrigger = 0x04,
         Sharable = 0x08,                // Can Be Shared: Player.Cansharequest()
         HasCondition = 0x10,            // Not Used Currently
-        HideRewardPoi = 0x20,           // Not Used Currently: Unsure Of Content
-        Raid = 0x40,                    // Can be completed while in raid
+        HideRewardPoi = 0x20,   // Hides questgiver turn-in minimap icon
+        RaidGroupOk = 0x40,   // Can be completed while in raid
         WarModeRewardsOptIn = 0x80,     // Not Used Currently
-        NoMoneyFromXp = 0x100,          // Not Used Currently: Experience Is Not Converted To Gold At Max Level
-        HiddenRewards = 0x200,          // Items And Money Rewarded Only Sent In Smsg_Questgiver_Offer_Reward (Not In Smsg_Questgiver_Quest_Details Or In Client Quest Log(Smsg_Quest_Query_Response))
-        Tracking = 0x400,               // These Quests Are Automatically Rewarded On Quest Complete And They Will Never Appear In Quest Log Client Side.
+        NoMoneyForXp = 0x100,   // Experience is not converted to gold at max level
+        HideReward = 0x200,   // Items and money rewarded only sent in SMSG_QUESTGIVER_OFFER_REWARD (not in SMSG_QUEST_GIVER_QUEST_DETAILS or in client quest log(SMSG_QUEST_QUERY_RESPONSE))
+        TrackingEvent = 0x400,   // These quests are automatically rewarded on quest complete and they will never appear in quest log client side.
         DeprecateReputation = 0x800,    // Not Used Currently
         Daily = 0x1000,                 // Used To Know Quest Is Daily One
         Pvp = 0x2000,                   // Having This Quest In Log Forces Pvp Flag
-        Unavailable = 0x4000,           // Used On Quests That Are Not Generically Available
+        Deprecated = 0x4000,   // Used on quests that are not generally available
         Weekly = 0x8000,
         AutoComplete = 0x10000,         // Quests with this flag player submit automatically by special button in player gui
         DisplayItemInTracker = 0x20000, // Displays Usable Item In Quest Tracker
-        ObjText = 0x40000,              // Use Objective Text As Complete Text
+        DisableCompletionText = 0x40000,              // Use Objective Text As Complete Text
         AutoAccept = 0x80000,           // The client recognizes this flag as auto-accept.
-        PlayerCastOnAccept = 0x100000,
-        PlayerCastOnComplete = 0x200000,
-        UpdatePhaseShift = 0x400000,
-        SorWhitelist = 0x800000,
-        LaunchGossipComplete = 0x1000000,
-        RemoveExtraGetItems = 0x2000000,
-        HideUntilDiscovered = 0x4000000,
-        PortraitInQuestLog = 0x8000000,
-        ShowItemWhenCompleted = 0x10000000,
-        LaunchGossipAccept = 0x20000000,
-        ItemsGlowWhenDone = 0x40000000,
-        FailOnLogout = 0x80000000
+        PlayerCastAccept = 0x100000, // Accept Spell Player Cast
+        PlayerCastComplete = 0x200000, // Complete Spell Player Cast
+        UpdatePhaseshift = 0x400000, // Update Phase Shift
+        SorWhitelist = 0x800000, // Scroll of Resurrection Whitelist
+        LaunchGossipComplete = 0x1000000, // Gossip on Quest Completion - Force Gossip
+        RemoveSurplusItems = 0x2000000,   // Remove all items from inventory that have the same id as the objective, not just the amount required by quest
+        WellKnown = 0x04000000, // Well-Known
+        PortraitInQuestLog = 0x8000000, // Portrait from Log
+        ShowItemWhenCompleted = 0x10000000, // Show Item When Completed
+        LaunchGossipAccept = 0x20000000, // Gossip on Quest Accept - Force Gossip
+        ItemsGlowWhenComplete = 0x40000000, // Items Glow When Done
+        FailOnLogout = 0x80000000 // Fail on Logout
     }
 
     [Flags]
     public enum QuestFlagsEx : uint
     {
         None = 0x00,
-        KeepAdditionalItems = 0x01,
-        SuppressGossipComplete = 0x02,
-        SuppressGossipAccept = 0x04,
-        DisallowPlayerAsQuestgiver = 0x08,
-        DisplayClassChoiceRewards = 0x10,
-        DisplaySpecChoiceRewards = 0x20,
-        RemoveFromLogOnPeriodicReset = 0x40,
-        AccountLevelQuest = 0x80,
-        LegendaryQuest = 0x100,
-        NoGuildXp = 0x200,
-        ResetCacheOnAccept = 0x400,
-        NoAbandonOnceAnyObjectiveComplete = 0x800,
-        RecastAcceptSpellOnLogin = 0x1000,
-        UpdateZoneAuras = 0x2000,
-        NoCreditForProxy = 0x4000,
-        DisplayAsDailyQuest = 0x8000,
-        PartOfQuestLine = 0x10000,
-        QuestForInternalBuildsOnly = 0x20000,
-        SuppressSpellLearnTextLine = 0x40000,
-        DisplayHeaderAsObjectiveForTasks = 0x80000,
-        GarrisonNonOwnersAllowed = 0x100000,
-        RemoveQuestOnWeeklyReset = 0x200000,
-        SuppressFarewellAudioAfterQuestAccept = 0x400000,
-        RewardsBypassWeeklyCapsAndSeasonTotal = 0x800000,
-        IsWorldQuest = 0x1000000,
-        NotIgnorable = 0x2000000,
-        AutoPush = 0x4000000,
-        NoSpellCompleteEffects = 0x8000000,
-        DoNotToastHonorReward = 0x10000000,
-        KeepRepeatableQuestOnFactionChange = 0x20000000,
-        KeepProgressOnFactionChange = 0x40000000,
+        NoItemRemoval = 0x01,   // Keep Additional Items
+        SuppressGossipComplete = 0x02,   // Gossip On Quest Completion - Suppress Gossip
+        SuppressGossipAccept = 0x04,   // Gossip On Quest Accept - Suppress Gossip
+        DenyPlayerQuestgiver = 0x08,   // Disallow Player As Questgiver (Advanced)
+        DisplayClassChoiceRewards = 0x10,   // Choice Reward Filter - Matches Class
+        DisplaySpecChoiceRewards = 0x20,   // Choice Reward Filter - Matches Spec
+        RemoveOnPeriodicReset = 0x40,   // Remove From Log On Periodic Reset
+        Account = 0x80,   // Account-Level Quest
+        Legendary = 0x100,   // Legendary Quest
+        NoGuildXp = 0x200,   // No Guild Xp
+        ResetCacheOnAccept = 0x400,   // Reset Cache On Accept (Internal)
+        NoAbandonOnceBegun = 0x800,   // No Abandon Once Any Objective Complete
+        RecastAcceptSpellOnLogin = 0x1000,   // Recast Accept Spell On Login
+        UpdateZoneAuras = 0x2000,   // Update Zone Auras
+        NoCreditForProxy = 0x4000,   // No Credit For Proxy Creatures
+        DisplayAsDaily = 0x8000,   // Display As Daily Quest
+        DisplayQuestLine = 0x10000,
+        InternalBuildsOnly = 0x20000,   // Quest For Internal Builds Only
+        SuppressSpellLearnText = 0x40000,   // Suppress Spell Learn Text Line (For Followers)
+        DisplayAsObjective = 0x80000,   // Display Header As Objective For Tasks
+        AllowAllInGarrison = 0x100000,   // Garrison Non-Owners Allowed
+        RemoveOnWeeklyReset = 0x200000,   // Remove Quest On Weekly Reset
+        SuppressGreetingsOnAccept = 0x400000,   // Suppress Farewell Audio After Quest Accept
+        RewardsIgnoreCaps = 0x800000,   // Rewards Bypass Weekly Caps And Season Total
+        IsWorldQuest = 0x1000000,   // Is A World Quest
+        NotIgnorable = 0x2000000,   // Not Ignorable
+        AutoPush = 0x4000000,   // Auto Push
+        NoSpellCompleteEffects = 0x8000000,   // No Complete Quest Spell Effect
+        DoNotToastHonorReward = 0x10000000,   // Do Not Toast Honor Reward
+        KeepRepeatableQuestOnFactionChange = 0x20000000,   // Keep Repeatable Quest On Faction Change
+        KeepProgressOnFactionChange = 0x40000000,   // Keep Quest Progress On Faction Change
         PushTeamQuestUsingMapController = 0x80000000
     }
 
     public enum QuestFlagsEx2
     {
         ResetOnGameMilestone = 0x01,
-        NoWarModeBonus = 0x02,
+        WarModeRewardsOptOut = 0x02,
         AwardHighestProfession = 0x04,
         NotReplayable = 0x08,
         NoReplayRewards = 0x10,
@@ -504,21 +534,29 @@ namespace Framework.Constants
         HideTaskOnMainMap = 0x1000,
         HideTaskInTracker = 0x2000,
         SkipDisabledCheck = 0x4000,
-        EnforceMaximumQuestLevel = 0x8000
+        EnforceMaximumQuestLevel = 0x8000,
+        ContentAlert = 0x10000,
+        DisplayTimeRemaining = 0x20000,
+        ClearTaskProgressWhenAbandoned = 0x40000,
+        SuppressGreetingsOnComplete = 0x80000,
+        HideRequiredItemsOnTurnIn = 0x100000,
+        IgnoreSoulboundItems = 0x00200000,
+        DontDeferStartEffects = 0x00400000,
+        HideRequiredItemsPreTurnIn = 0x00800000,
     }
 
     public enum QuestSpecialFlags
     {
         None = 0x00,
         // Flags For Set Specialflags In Db If Required But Used Only At Server
-        Repeatable = 0x001,
-        ExplorationOrEvent = 0x002, // If Required Area Explore, Spell Spell_Effect_Quest_Complete Casting, Table `*_Script` Command Script_Command_Quest_Explored Use, Set From Script)
-        AutoAccept = 0x004, // Quest Is To Be Auto-Accepted.
-        DfQuest = 0x008, // Quest Is Used By Dungeon Finder.
-        Monthly = 0x010, // Quest Is Reset At The Begining Of The Month
+        Repeatable = 0x01, // Set by 1 in SpecialFlags from DB
+        AutoPushToParty = 0x02, // Set by 2 in SpecialFlags from DB will make quest be pushed to entire party when one member accepts it
+        AutoAccept = 0x04, // Set by 4 in SpecialFlags in DB if the quest is to be auto-accepted.
+        DfQuest = 0x08, // Set by 8 in SpecialFlags in DB if the quest is used by Dungeon Finder.
+        Monthly = 0x010, // Set by 16 in SpecialFlags in DB if the quest is reset at the begining of the month
         // Room For More Custom Flags
 
-        DbAllowed = Repeatable | ExplorationOrEvent | AutoAccept | DfQuest | Monthly,
+        DbAllowed = Repeatable | AutoPushToParty | AutoAccept | DfQuest | Monthly,
 
         SequencedObjectives = 0x20 // Internal flag computed only
     }

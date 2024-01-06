@@ -91,7 +91,7 @@ namespace Game.Maps
             // at this moment i_clientGUIDs have guids that not iterate at grid level checks
             // but exist one case when this possible and object not out of range: transports
             Transport transport = i_player.GetTransport<Transport>();
-            if (transport)
+            if (transport != null)
             {
                 foreach (var obj in transport.GetPassengers())
                 {
@@ -197,10 +197,10 @@ namespace Game.Maps
             {
                 DynamicObject dynamicObject = objs[i];
                 Unit caster = dynamicObject.GetCaster();
-                if (caster)
+                if (caster != null)
                 {
                     Player pl = caster.ToPlayer();
-                    if (pl && pl.seerView == dynamicObject)
+                    if (pl != null && pl.seerView == dynamicObject)
                         pl.UpdateVisibilityOf(i_objects);
                 }
             }
@@ -277,7 +277,7 @@ namespace Game.Maps
                 Creature creature = objs[i];
                 CreatureUnitRelocationWorker(i_creature, creature);
 
-                if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
+                if (creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     CreatureUnitRelocationWorker(creature, i_creature);
             }
         }
@@ -320,7 +320,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
+                if (creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
 
                 CreatureRelocationNotifier relocate = new(creature);
@@ -439,7 +439,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if ((!required3dDist ? creature.GetExactDist2dSq(i_source) : creature.GetExactDistSq(i_source)) > i_distSq)
@@ -468,10 +468,10 @@ namespace Game.Maps
 
                 // Send packet back to the caster if the caster has vision of dynamic object
                 Unit caster = dynamicObject.GetCaster();
-                if (caster)
+                if (caster != null)
                 {
                     Player player = caster.ToPlayer();
-                    if (player && player.seerView == dynamicObject)
+                    if (player != null && player.seerView == dynamicObject)
                         SendPacket(player);
                 }
             }
@@ -524,7 +524,7 @@ namespace Game.Maps
                             SendPacket(visionPlayer);
                 }
 
-                if (player.seerView == player || player.GetVehicle())
+                if (player.seerView == player || player.GetVehicle() != null)
                     SendPacket(player);
             }
         }
@@ -534,7 +534,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (creature.GetExactDist2dSq(i_source) > i_distSq)
@@ -566,7 +566,7 @@ namespace Game.Maps
                 {
                     // Send packet back to the caster if the caster has vision of dynamic object
                     Player player = caster.ToPlayer();
-                    if (player && player.seerView == dynamicObject)
+                    if (player != null && player.seerView == dynamicObject)
                         SendPacket(player);
                 }
             }
@@ -839,7 +839,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.GetSharedVisionList().Empty())
+                if (creature.GetSharedVisionList().Empty())
                 {
                     foreach (var visionPlayer in creature.GetSharedVisionList())
                         BuildPacket(visionPlayer);
@@ -1007,7 +1007,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1030,7 +1030,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1053,13 +1053,13 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1076,7 +1076,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1099,7 +1099,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1122,7 +1122,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1145,7 +1145,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1168,7 +1168,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1242,7 +1242,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1468,7 +1468,7 @@ namespace Game.Maps
         public override void Visit(IList<GameObject> objs)
         {
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1490,7 +1490,7 @@ namespace Game.Maps
 
     public class GameObjectLastSearcher : Notifier
     {
-        PhaseShift i_phaseShift;
+        public PhaseShift i_phaseShift;
         GameObject i_object;
         ICheck<GameObject> i_check;
 
@@ -1518,7 +1518,7 @@ namespace Game.Maps
 
     public class GameObjectListSearcher : Notifier
     {
-        PhaseShift i_phaseShift;
+        public PhaseShift i_phaseShift;
         List<GameObject> i_objects;
         ICheck<GameObject> i_check;
 
@@ -1574,7 +1574,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1618,7 +1618,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1680,13 +1680,13 @@ namespace Game.Maps
         public override void Visit(IList<Creature> objs)
         {
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1717,7 +1717,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1768,7 +1768,7 @@ namespace Game.Maps
         public override void Visit(IList<Player> objs)
         {
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -2422,7 +2422,7 @@ namespace Game.Maps
         float i_range;
     }
 
-    public class CreatureWithOptionsInObjectRangeCheck<T> : ICheck<Creature> where T : NoopCheckCustomizer
+    public class CreatureWithOptionsInObjectRangeCheck<T> : ICheck<Creature> where T : InRangeCheckCustomizer
     {
         WorldObject i_obj;
         FindCreatureOptions i_args;
@@ -2478,6 +2478,54 @@ namespace Game.Maps
                 return false;
 
             i_customizer.Update(u);
+            return true;
+        }
+    }
+
+    class GameObjectWithOptionsInObjectRangeCheck<T> : ICheck<GameObject> where T : InRangeCheckCustomizer
+    {
+        WorldObject _obj;
+        FindGameObjectOptions _args;
+        T _customizer;
+
+        public GameObjectWithOptionsInObjectRangeCheck(WorldObject obj, T customizer, FindGameObjectOptions args)
+        {
+            _obj = obj;
+            _args = args;
+            _customizer = customizer;
+        }
+
+        public bool Invoke(GameObject go)
+        {
+            if (_args.IsSpawned.HasValue && _args.IsSpawned != go.IsSpawned()) // Despawned
+                return false;
+
+            if (go.GetGUID() == _obj.GetGUID())
+                return false;
+
+            if (!_customizer.Test(go))
+                return false;
+
+            if (_args.GameObjectId.HasValue && go.GetEntry() != _args.GameObjectId)
+                return false;
+
+            if (!_args.StringId.IsEmpty() && !go.HasStringId(_args.StringId))
+                return false;
+
+            if (_args.IsSummon.HasValue && (go.GetSpawnId() == 0) != _args.IsSummon)
+                return false;
+
+            if ((_args.OwnerGuid.HasValue && go.GetOwnerGUID() != _args.OwnerGuid)
+                || (_args.PrivateObjectOwnerGuid.HasValue && go.GetPrivateObjectOwner() != _args.PrivateObjectOwnerGuid))
+                return false;
+
+            if (_args.IgnorePrivateObjects && go.IsPrivateObject())
+                return false;
+
+            if (_args.IgnoreNotOwnedPrivateObjects && !go.CheckPrivateObjectOwnerVisibility(_obj))
+                return false;
+
+            _customizer.Update(go);
             return true;
         }
     }
@@ -2745,7 +2793,7 @@ namespace Game.Maps
         bool _reverse;
     }
 
-    public class UnitAuraCheck<T> : ICheck<T> where T : WorldObject
+    public class UnitAuraCheck : ICheck<WorldObject>
     {
         public UnitAuraCheck(bool present, uint spellId, ObjectGuid casterGUID = default)
         {
@@ -2754,12 +2802,12 @@ namespace Game.Maps
             _casterGUID = casterGUID;
         }
 
-        public bool Invoke(T obj)
+        public bool Invoke(WorldObject obj)
         {
-            return obj.ToUnit() && obj.ToUnit().HasAura(_spellId, _casterGUID) == _present;
+            return obj.ToUnit() != null && obj.ToUnit().HasAura(_spellId, _casterGUID) == _present;
         }
 
-        public static implicit operator Predicate<T>(UnitAuraCheck<T> unit)
+        public static implicit operator Predicate<WorldObject>(UnitAuraCheck unit)
         {
             return unit.Invoke;
         }
@@ -2906,8 +2954,8 @@ namespace Game.Maps
             return false;
         }
     }
-    
-    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain Type)
+
+    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain type)
     class NearestGameObjectTypeInObjectRangeCheck : ICheck<GameObject>
     {
         public NearestGameObjectTypeInObjectRangeCheck(WorldObject obj, GameObjectTypes type, float range)
@@ -2933,32 +2981,44 @@ namespace Game.Maps
     }
 
     // CHECK modifiers
-    public class NoopCheckCustomizer
+    public class InRangeCheckCustomizer
     {
-        public virtual bool Test(WorldObject o) { return true; }
+        WorldObject _obj;
+        float _range;
+
+        public InRangeCheckCustomizer(WorldObject obj, float range)
+        {
+            _obj = obj;
+            _range = range;
+        }
+
+        public virtual bool Test(WorldObject obj)
+        {
+            return _obj.IsWithinDist(obj, _range);
+        }
 
         public virtual void Update(WorldObject o) { }
     }
 
-    class NearestCheckCustomizer : NoopCheckCustomizer
+    class NearestCheckCustomizer : InRangeCheckCustomizer
     {
         WorldObject i_obj;
         float i_range;
 
-        public NearestCheckCustomizer(WorldObject obj, float range)
+        public NearestCheckCustomizer(WorldObject obj, float range) : base(obj, range)
         {
             i_obj = obj;
             i_range = range;
         }
 
-        public override bool Test(WorldObject o)
+        public override bool Test(WorldObject obj)
         {
-            return i_obj.IsWithinDist(o, i_range);
+            return i_obj.IsWithinDist(obj, i_range);
         }
 
-        public override void Update(WorldObject o)
+        public override void Update(WorldObject obj)
         {
-            i_range = i_obj.GetDistance(o);
+            i_range = i_obj.GetDistance(obj);
         }
     }
     
@@ -2973,15 +3033,15 @@ namespace Game.Maps
         public virtual bool Invoke(T obj)
         {
             Player player = obj.ToPlayer();
-            if (player)
+            if (player != null)
                 return !player.IsAlive() && !player.HasAuraType(AuraType.Ghost) && i_searchObj.IsWithinDistInMap(player, i_range);
 
             Creature creature = obj.ToCreature();
-            if (creature)
+            if (creature != null)
                 return !creature.IsAlive() && i_searchObj.IsWithinDistInMap(creature, i_range);
 
             Corpse corpse = obj.ToCorpse();
-            if (corpse)
+            if (corpse != null)
                 return corpse.GetCorpseType() != CorpseType.Bones && i_searchObj.IsWithinDistInMap(corpse, i_range);
 
             return false;
@@ -3014,7 +3074,7 @@ namespace Game.Maps
                 return false;
 
             Creature creature = obj.ToCreature();
-            if (creature)
+            if (creature != null)
                 return !creature.IsPet();
 
             return true;

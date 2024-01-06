@@ -18,7 +18,6 @@ namespace Game.AI
     public class SmartAIManager : Singleton<SmartAIManager>
     {
         MultiMap<int, SmartScriptHolder>[] _eventMap = new MultiMap<int, SmartScriptHolder>[(int)SmartScriptType.Max];
-        Dictionary<uint, WaypointPath> _waypointStore = new();
 
         SmartAIManager()
         {
@@ -94,6 +93,15 @@ namespace Game.AI
                             if (Global.ObjectMgr.GetSceneTemplate((uint)temp.EntryOrGuid) == null)
                             {
                                 Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: Scene id ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
+                                continue;
+                            }
+                            break;
+                        }
+                        case SmartScriptType.Event:
+                        {
+                            if (!Global.ObjectMgr.IsValidEvent((uint)temp.EntryOrGuid))
+                            {
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr::LoadSmartAIFromDB: Event id ({temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
                             break;
@@ -210,16 +218,17 @@ namespace Game.AI
                 temp.Action.raw.param4 = result.Read<uint>(18);
                 temp.Action.raw.param5 = result.Read<uint>(19);
                 temp.Action.raw.param6 = result.Read<uint>(20);
+                temp.Action.raw.param7 = result.Read<uint>(21);
 
-                temp.Target.type = (SmartTargets)result.Read<byte>(21);
-                temp.Target.raw.param1 = result.Read<uint>(22);
-                temp.Target.raw.param2 = result.Read<uint>(23);
-                temp.Target.raw.param3 = result.Read<uint>(24);
-                temp.Target.raw.param4 = result.Read<uint>(25);
-                temp.Target.x = result.Read<float>(26);
-                temp.Target.y = result.Read<float>(27);
-                temp.Target.z = result.Read<float>(28);
-                temp.Target.o = result.Read<float>(29);
+                temp.Target.type = (SmartTargets)result.Read<byte>(22);
+                temp.Target.raw.param1 = result.Read<uint>(23);
+                temp.Target.raw.param2 = result.Read<uint>(24);
+                temp.Target.raw.param3 = result.Read<uint>(25);
+                temp.Target.raw.param4 = result.Read<uint>(26);
+                temp.Target.x = result.Read<float>(27);
+                temp.Target.y = result.Read<float>(28);
+                temp.Target.z = result.Read<float>(29);
+                temp.Target.o = result.Read<float>(30);
 
                 //check target
                 if (!IsTargetValid(temp))
@@ -311,65 +320,6 @@ namespace Game.AI
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} SmartAI scripts in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public void LoadWaypointFromDB()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            _waypointStore.Clear();
-
-            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_SMARTAI_WP);
-            using var result = DB.World.Query(stmt);
-
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 SmartAI Waypoint Paths. DB table `waypoints` is empty.");
-
-                return;
-            }
-
-            uint count = 0;
-            uint total = 0;
-            uint lastEntry = 0;
-            uint lastId = 1;
-
-            do
-            {
-                uint entry = result.Read<uint>(0);
-                uint id = result.Read<uint>(1);
-                float x = result.Read<float>(2);
-                float y = result.Read<float>(3);
-                float z = result.Read<float>(4);
-                float? o = null;
-                if (!result.IsNull(5))
-                    o = result.Read<float>(5);
-                uint delay = result.Read<uint>(6);
-
-                if (lastEntry != entry)
-                {
-                    lastId = 1;
-                    ++count;
-                }
-
-                if (lastId != id)
-                    Log.outError(LogFilter.Sql, $"SmartWaypointMgr.LoadFromDB: Path entry {entry}, unexpected point id {id}, expected {lastId}.");
-
-                ++lastId;
-
-                if (!_waypointStore.ContainsKey(entry))
-                    _waypointStore[entry] = new WaypointPath();
-
-                WaypointPath path = _waypointStore[entry];
-                path.id = entry;
-                path.nodes.Add(new WaypointNode(id, x, y, z, o, delay));
-
-                lastEntry = entry;
-                ++total;
-            }
-            while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} SmartAI waypoint paths (total {total} waypoints) in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-        }
-
         static bool EventHasInvoker(SmartEvents smartEvent)
         {
             switch (smartEvent)
@@ -419,6 +369,7 @@ namespace Game.AI
                 case SmartEvents.SceneTrigger:
                 case SmartEvents.SceneCancel:
                 case SmartEvents.SceneComplete:
+                case SmartEvents.SendEventTrigger:
                     return true;
                 default:
                     return false;
@@ -648,7 +599,8 @@ namespace Game.AI
                 SmartEvents.OnSpellFailed => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnSpellStart => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnDespawn => 0,
-            _ => Marshal.SizeOf(typeof(SmartEvent.Raw)),
+                SmartEvents.SendEventTrigger => 0,
+                _ => Marshal.SizeOf(typeof(SmartEvent.Raw)),
             };
 
             int rawCount = Marshal.SizeOf(typeof(SmartEvent.Raw)) / sizeof(uint);
@@ -1315,6 +1267,7 @@ namespace Game.AI
                     case SmartEvents.SceneCancel:
                     case SmartEvents.SceneComplete:
                     case SmartEvents.SceneTrigger:
+                    case SmartEvents.SendEventTrigger:
                         break;
 
                     //Unused
@@ -1520,9 +1473,9 @@ namespace Game.AI
                     Quest qid = Global.ObjectMgr.GetQuestTemplate(e.Action.quest.questId);
                     if (qid != null)
                     {
-                        if (!qid.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent))
+                        if (!qid.HasFlag(QuestFlags.CompletionEvent) && !qid.HasFlag(QuestFlags.CompletionAreaTrigger))
                         {
-                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} SpecialFlags for Quest entry {e.Action.quest.questId} does not include FLAGS_EXPLORATION_OR_EVENT(2), skipped.");
+                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} Flags for Quest entry {e.Action.quest.questId} does not include QUEST_FLAGS_COMPLETION_EVENT or QUEST_FLAGS_COMPLETION_AREA_TRIGGER, skipped.");
                             return false;
                         }
                     }
@@ -1661,7 +1614,7 @@ namespace Game.AI
                     break;
                 case SmartActions.WpStart:
                 {
-                    WaypointPath path = GetPath(e.Action.wpStart.pathID);
+                    WaypointPath path = Global.WaypointMgr.GetPath(e.Action.wpStart.pathID);
                     if (path == null || path.nodes.Empty())
                     {
                         Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent WaypointPath id {e.Action.wpStart.pathID}, skipped.");
@@ -2335,11 +2288,6 @@ namespace Game.AI
             return temp;
         }
 
-        public WaypointPath GetPath(uint id)
-        {
-            return _waypointStore.LookupByKey(id);
-        }
-
         public static SmartScriptHolder FindLinkedSourceEvent(List<SmartScriptHolder> list, uint eventId)
         {
             var sch = list.Find(p => p.Link == eventId);
@@ -2467,6 +2415,7 @@ namespace Game.AI
                 SmartEvents.OnSpellFailed => SmartScriptTypeMaskId.Creature,
                 SmartEvents.OnSpellStart => SmartScriptTypeMaskId.Creature,
                 SmartEvents.OnDespawn => SmartScriptTypeMaskId.Creature,
+                SmartEvents.SendEventTrigger => SmartScriptTypeMaskId.Event,
                 _ => 0,
             };
 
@@ -3746,6 +3695,7 @@ namespace Game.AI
             public uint param4;
             public uint param5;
             public uint param6;
+            public uint param7;
         }
         #endregion
     }

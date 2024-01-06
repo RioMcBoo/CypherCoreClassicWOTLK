@@ -12,17 +12,30 @@ namespace Game.Networking.Packets
 {
     public class ChatMessage : ClientPacket
     {
+        public string Text;
+        public Language Language = Language.Universal;
+        public bool IsSecure = true;
+
         public ChatMessage(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Language = (Language)_worldPacket.ReadInt32();
-            uint len = _worldPacket.ReadBits<uint>(9);
+            uint len = _worldPacket.ReadBits<uint>(11);
+            switch (GetOpcode())
+            {
+                case ClientOpcodes.ChatMessageSay:
+                case ClientOpcodes.ChatMessageParty:
+                case ClientOpcodes.ChatMessageRaid:
+                case ClientOpcodes.ChatMessageRaidWarning:
+                case ClientOpcodes.ChatMessageInstanceChat:
+                    IsSecure = _worldPacket.HasBit();
+                    break;
+                default:
+                    break;
+            }
             Text = _worldPacket.ReadString(len);
         }
-
-        public string Text;
-        public Language Language = Language.Universal;
     }
 
     public class ChatMessageWhisper : ClientPacket
@@ -33,7 +46,7 @@ namespace Game.Networking.Packets
         {
             Language = (Language)_worldPacket.ReadInt32();
             uint targetLen = _worldPacket.ReadBits<uint>(9);
-            uint textLen = _worldPacket.ReadBits<uint>(9);
+            uint textLen = _worldPacket.ReadBits<uint>(11);
             Target = _worldPacket.ReadString(targetLen);
             Text = _worldPacket.ReadString(textLen);
         }
@@ -45,6 +58,12 @@ namespace Game.Networking.Packets
 
     public class ChatMessageChannel : ClientPacket
     {
+        public Language Language = Language.Universal;
+        public ObjectGuid ChannelGUID;
+        public string Text;
+        public string Target;
+        public bool? IsSecure;
+
         public ChatMessageChannel(WorldPacket packet) : base(packet) { }
 
         public override void Read()
@@ -52,15 +71,13 @@ namespace Game.Networking.Packets
             Language = (Language)_worldPacket.ReadInt32();
             ChannelGUID = _worldPacket.ReadPackedGuid();
             uint targetLen = _worldPacket.ReadBits<uint>(9);
-            uint textLen = _worldPacket.ReadBits<uint>(9);
+            uint textLen = _worldPacket.ReadBits<uint>(11);
+            if (_worldPacket.HasBit())
+                IsSecure = _worldPacket.HasBit();
+
             Target = _worldPacket.ReadString(targetLen);
             Text = _worldPacket.ReadString(textLen);
         }
-
-        public Language Language = Language.Universal;
-        public ObjectGuid ChannelGUID;
-        public string Text;
-        public string Target;
     }
 
     public class ChatAddonMessage : ClientPacket
@@ -98,7 +115,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(9);
+            uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -111,7 +128,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(9);
+            uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -124,7 +141,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(9);
+            uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -143,7 +160,6 @@ namespace Game.Networking.Packets
             SenderGUID.Clear();
             SenderAccountGUID.Clear();
             SenderGuildGUID.Clear();
-            PartyGUID.Clear();
             TargetGUID.Clear();
             SenderName = "";
             TargetName = "";
@@ -152,10 +168,10 @@ namespace Game.Networking.Packets
             SlashCmd = chatType;
             _Language = language;
 
-            if (sender)
+            if (sender != null)
                 SetSender(sender, locale);
 
-            if (receiver)
+            if (receiver != null)
                 SetReceiver(receiver, locale);
 
             SenderVirtualAddress = Global.WorldMgr.GetVirtualRealmAddress();
@@ -171,20 +187,16 @@ namespace Game.Networking.Packets
             SenderGUID = sender.GetGUID();
 
             Creature creatureSender = sender.ToCreature();
-            if (creatureSender)
+            if (creatureSender != null)
                 SenderName = creatureSender.GetName(locale);
 
             Player playerSender = sender.ToPlayer();
-            if (playerSender)
+            if (playerSender != null)
             {
                 SenderAccountGUID = playerSender.GetSession().GetAccountGUID();
                 _ChatFlags = playerSender.GetChatFlags();
 
                 SenderGuildGUID = ObjectGuid.Create(HighGuid.Guild, playerSender.GetGuildId());
-
-                Group group = playerSender.GetGroup();
-                if (group)
-                    PartyGUID = group.GetGUID();
             }
         }
 
@@ -193,7 +205,7 @@ namespace Game.Networking.Packets
             TargetGUID = receiver.GetGUID();
 
             Creature creatureReceiver = receiver.ToCreature();
-            if (creatureReceiver)
+            if (creatureReceiver != null)
                 TargetName = creatureReceiver.GetName(locale);
         }
 
@@ -207,15 +219,15 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(TargetGUID);
             _worldPacket.WriteUInt32(TargetVirtualAddress);
             _worldPacket.WriteUInt32(SenderVirtualAddress);
-            _worldPacket.WritePackedGuid(PartyGUID);
             _worldPacket.WriteUInt32(AchievementID);
             _worldPacket.WriteFloat(DisplayTime);
+            _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteBits(SenderName.GetByteCount(), 11);
             _worldPacket.WriteBits(TargetName.GetByteCount(), 11);
             _worldPacket.WriteBits(Prefix.GetByteCount(), 5);
             _worldPacket.WriteBits(Channel.GetByteCount(), 7);
             _worldPacket.WriteBits(ChatText.GetByteCount(), 12);
-            _worldPacket.WriteBits((byte)_ChatFlags, 14);
+            _worldPacket.WriteBits((ushort)_ChatFlags, 15);
             _worldPacket.WriteBit(HideChatLog);
             _worldPacket.WriteBit(FakeSenderName);
             _worldPacket.WriteBit(Unused_801.HasValue);
@@ -241,7 +253,6 @@ namespace Game.Networking.Packets
         public ObjectGuid SenderGuildGUID;
         public ObjectGuid SenderAccountGUID;
         public ObjectGuid TargetGUID;
-        public ObjectGuid PartyGUID;
         public uint SenderVirtualAddress;
         public uint TargetVirtualAddress;
         public string SenderName = "";
@@ -252,6 +263,7 @@ namespace Game.Networking.Packets
         public uint AchievementID;
         public ChatFlags _ChatFlags;
         public float DisplayTime;
+        public uint SpellID;
         public uint? Unused_801;
         public bool HideChatLog;
         public bool FakeSenderName;
@@ -460,6 +472,32 @@ namespace Game.Networking.Packets
         public byte Reason;
     }
 
+    class CanLocalWhisperTargetRequest : ClientPacket
+    {
+        public ObjectGuid WhisperTarget;
+
+        public CanLocalWhisperTargetRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            WhisperTarget = _worldPacket.ReadPackedGuid();
+        }
+    }
+
+    class CanLocalWhisperTargetResponse : ServerPacket
+    {
+        public ObjectGuid WhisperTarget;
+        public ChatWhisperTargetStatus Status;
+
+        public CanLocalWhisperTargetResponse() : base(ServerOpcodes.ChatCanLocalWhisperTargetResponse) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(WhisperTarget);
+            _worldPacket.WriteInt32((int)Status);
+        }
+    }
+    
     public class ChatAddonMessageParams
     {
         public void Read(WorldPacket data)

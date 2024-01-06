@@ -11,7 +11,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public VehicleFlags Flags;
-        public byte FlagsB;
+        public int FlagsB;
         public float TurnSpeed;
         public float PitchSpeed;
         public float PitchMin;
@@ -25,7 +25,8 @@ namespace Game.DataStorage
         public float CameraYawOffset;
         public ushort VehicleUIIndicatorID;
         public int MissileTargetingID;
-        public byte UiLocomotionType;
+        public ushort VehiclePOITypeID;
+        public int UiLocomotionType;
         public ushort[] SeatID = new ushort[8];
         public ushort[] PowerDisplayID = new ushort[3];
     }

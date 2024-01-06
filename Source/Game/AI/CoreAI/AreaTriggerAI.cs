@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Game.Entities;
+using Game.Spells;
 
 namespace Game.AI
 {
@@ -18,7 +19,7 @@ namespace Game.AI
         public virtual void OnInitialize() { }
 
         // Called when the AreaTrigger has just been created
-        public virtual void OnCreate() { }
+        public virtual void OnCreate(Spell creatingSpell) { }
 
         // Called on each AreaTrigger update
         public virtual void OnUpdate(uint diff) { }
@@ -37,6 +38,13 @@ namespace Game.AI
 
         // Called when the AreaTrigger is removed
         public virtual void OnRemove() { }
+
+        // Pass parameters between AI
+        public virtual void DoAction(int param) { }
+        public virtual uint GetData(uint id = 0) { return 0; }
+        public virtual void SetData(uint id, uint value) { }
+        public virtual void SetGUID(ObjectGuid guid, int id = 0) { }
+        public virtual ObjectGuid GetGUID(int id = 0) { return ObjectGuid.Empty; }
     }
 
     class NullAreaTriggerAI : AreaTriggerAI

@@ -24,6 +24,9 @@ namespace Game.DataStorage
         public short ObjectEffectPackageID;
         public float OverrideLootEffectScale;
         public float OverrideNameScale;
+        public int AlternateDisplayType;
+        public int ClientCreatureDisplayInfoID;
+        public int ClientItemID;
 
         public Vector3 GeoBoxMin
         {
@@ -72,8 +75,8 @@ namespace Game.DataStorage
         public string AllianceName;
         public string Description;
         public string Tooltip;
-        public byte GarrTypeID;
-        public byte BuildingType;
+        public sbyte GarrTypeID;
+        public sbyte BuildingType;
         public uint HordeGameObjectID;
         public uint AllianceGameObjectID;
         public byte GarrSiteID;
@@ -120,9 +123,8 @@ namespace Game.DataStorage
         public string HordeSourceText;
         public string AllianceSourceText;
         public string TitleName;
-        public uint Id;
-        public byte GarrTypeID;
-        public byte GarrFollowerTypeID;
+        public sbyte GarrTypeID;
+        public sbyte GarrFollowerTypeID;
         public int HordeCreatureID;
         public int AllianceCreatureID;
         public byte HordeGarrFollRaceID;
@@ -167,8 +169,7 @@ namespace Game.DataStorage
         public LocalizedString Description;
         public Vector2 MapPos;
         public Vector2 WorldPos;
-        public uint Id;
-        public byte GarrTypeID;
+        public sbyte GarrTypeID;
         public byte GarrMissionTypeID;
         public byte GarrFollowerTypeID;
         public byte MaxFollowers;
@@ -246,7 +247,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string Name;
-        public byte GarrTypeID;
+        public sbyte GarrTypeID;
         public int ClassID;
         public sbyte MaxTiers;
         public sbyte UiOrder;
@@ -254,7 +255,7 @@ namespace Game.DataStorage
         public ushort UiTextureKitID;
         public int GarrTalentTreeType;
         public int PlayerConditionID;
-        public sbyte FeatureTypeIndex;
+        public byte FeatureTypeIndex;
         public sbyte FeatureSubtypeIndex;
         public int CurrencyID;
     }
@@ -297,6 +298,26 @@ namespace Game.DataStorage
         public int ToolTip;
         public uint Type;
     };
+
+    public sealed class GossipNPCOptionRecord
+    {
+        public uint Id;
+        public int GossipNpcOption;
+        public int LFGDungeonsID;
+        public int TrainerID;
+        public int GarrFollowerTypeID;
+        public int CharShipmentID;
+        public int GarrTalentTreeID;
+        public int UiMapID;
+        public int UiItemInteractionID;
+        public int Unknown_1000_8;
+        public int Unknown_1000_9;
+        public int CovenantID;
+        public int GossipOptionID;
+        public int TraitTreeID;
+        public int ProfessionID;
+        public int Unknown_1002_14;
+    }
 
     public sealed class GuildColorBackgroundRecord
     {

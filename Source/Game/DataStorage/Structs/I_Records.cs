@@ -57,6 +57,8 @@ namespace Game.DataStorage
         public short[] Resistances = new short[7];
         public ushort[] MinDamage = new ushort[5];
         public ushort[] MaxDamage = new ushort[5];
+        public int ModifiedCraftingReagentItemID;
+        public int CraftingQualityID;
     }
 
     public sealed class ItemAppearanceRecord
@@ -109,18 +111,34 @@ namespace Game.DataStorage
     public sealed class ItemBonusListGroupEntryRecord
     {
         public uint Id;
-        public uint ItemBonusListGroupID;
+        public int ItemBonusListGroupID;
         public int ItemBonusListID;
         public int ItemLevelSelectorID;
-        public int OrderIndex;
+        public int SequenceValue;
         public int ItemExtendedCostID;
         public int PlayerConditionID;
+        public int Flags;
+        public int ItemLogicalCostGroupID;
     }
 
     public sealed class ItemBonusListLevelDeltaRecord
     {
         public short ItemLevelDelta;
         public uint Id;
+    }
+
+    public sealed class ItemBonusSequenceSpellRecord
+    {
+        public uint Id;
+        public int SpellID;
+        public int ItemID;
+    }
+
+    public sealed class ItemBonusTreeRecord
+    {
+        public uint Id;
+        public int Flags;
+        public int InventoryTypeSlotMask;
     }
 
     public sealed class ItemBonusTreeNodeRecord
@@ -130,6 +148,10 @@ namespace Game.DataStorage
         public ushort ChildItemBonusTreeID;
         public ushort ChildItemBonusListID;
         public ushort ChildItemLevelSelectorID;
+        public uint ChildItemBonusListGroupID;
+        public uint IblGroupPointsModSetID;
+        public int MinMythicPlusLevel;
+        public int MaxMythicPlusLevel;
         public uint ParentItemBonusTreeID;
     }
 
@@ -150,11 +172,24 @@ namespace Game.DataStorage
         public byte Flags;
     }
 
+    public sealed class ItemContextPickerEntryRecord
+    {
+        public uint Id;
+        public byte ItemCreationContext;
+        public byte OrderIndex;
+        public int PVal;
+        public int LabelID;
+        public uint Flags;
+        public uint PlayerConditionID;
+        public uint ItemContextPickerID;
+    }
+
     public sealed class ItemCurrencyCostRecord
     {
         public uint Id;
         public uint ItemID;
     }
+
     // common struct for:
     // ItemDamageAmmo.dbc
     // ItemDamageOneHand.dbc
@@ -204,7 +239,7 @@ namespace Game.DataStorage
         public byte ArenaBracket;                                             // arena slot restrictions (min slot value)
         public byte Flags;
         public byte MinFactionID;
-        public byte MinReputation;
+        public int MinReputation;
         public byte RequiredAchievement;                                      // required personal arena rating
         public uint[] ItemID = new uint[ItemConst.MaxItemExtCostItems];                          // required item id
         public ushort[] ItemCount = new ushort[ItemConst.MaxItemExtCostItems];                      // required count of 1st item
@@ -219,12 +254,16 @@ namespace Game.DataStorage
         public ushort ItemLevelSelectorQualitySetID;
     }
 
-    public sealed class ItemLevelSelectorQualityRecord
+    public sealed class ItemLevelSelectorQualityRecord : IEquatable<ItemLevelSelectorQualityRecord>, IEquatable<ItemQuality>
     {
         public uint Id;
         public uint QualityItemBonusListID;
         public sbyte Quality;
         public uint ParentILSQualitySetID;
+
+        public bool Equals(ItemLevelSelectorQualityRecord other) { return Quality < other.Quality; }
+
+        public bool Equals(ItemQuality quality) { return Quality < (sbyte)quality; }
     }
 
     public sealed class ItemLevelSelectorQualitySetRecord
@@ -336,8 +375,9 @@ namespace Game.DataStorage
         public float ItemRange;
         public float[] StatPercentageOfSocket = new float[ItemConst.MaxStats];
         public int[] StatPercentEditor = new int[ItemConst.MaxStats];
-        public int Stackable;
-        public int MaxCount;
+        public uint Stackable;
+        public uint MaxCount;
+        public uint MinReputation;
         public uint RequiredAbility;
         public uint SellPrice;
         public uint BuyPrice;
@@ -389,7 +429,6 @@ namespace Game.DataStorage
         public byte DamageType;
         public sbyte[] StatModifierBonusStat = new sbyte[ItemConst.MaxStats];
         public byte ContainerSlots;
-        public byte MinReputation;
         public byte RequiredPVPMedal;
         public byte RequiredPVPRank;
         public InventoryType inventoryType;

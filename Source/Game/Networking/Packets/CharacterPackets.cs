@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
@@ -30,18 +31,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsNewPlayerRestrictionSkipped);
             _worldPacket.WriteBit(IsNewPlayerRestricted);
             _worldPacket.WriteBit(IsNewPlayer);
+            _worldPacket.WriteBit(IsTrialAccountRestricted);
             _worldPacket.WriteBit(DisabledClassesMask.HasValue);
             _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
             _worldPacket.WriteInt32(Characters.Count);
             _worldPacket.WriteInt32(MaxCharacterLevel);
             _worldPacket.WriteInt32(RaceUnlockData.Count);
             _worldPacket.WriteInt32(UnlockedConditionalAppearances.Count);
+            _worldPacket.WriteInt32(RaceLimitDisables.Count);
 
             if (DisabledClassesMask.HasValue)
                 _worldPacket.WriteUInt32(DisabledClassesMask.Value);
 
             foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
                 unlockedConditionalAppearance.Write(_worldPacket);
+
+            foreach (RaceLimitDisableInfo raceLimitDisableInfo in RaceLimitDisables)
+                raceLimitDisableInfo.Write(_worldPacket);
 
             foreach (CharacterInfo charInfo in Characters)
                 charInfo.Write(_worldPacket);
@@ -55,6 +61,7 @@ namespace Game.Networking.Packets
         public bool IsNewPlayerRestrictionSkipped; // allows client to skip new player restrictions
         public bool IsNewPlayerRestricted; // forbids using level boost and class trials
         public bool IsNewPlayer; // forbids hero classes and allied races
+        public bool IsTrialAccountRestricted;
         public bool IsAlliedRacesCreationAllowed;
 
         public int MaxCharacterLevel = 1;
@@ -63,6 +70,7 @@ namespace Game.Networking.Packets
         public List<CharacterInfo> Characters = new(); // all characters on the list
         public List<RaceUnlock> RaceUnlockData = new(); //
         public List<UnlockedConditionalAppearance> UnlockedConditionalAppearances = new();
+        public List<RaceLimitDisableInfo> RaceLimitDisables = new();
 
         public class CharacterInfo
         {
@@ -127,23 +135,26 @@ namespace Game.Networking.Packets
                 ProfessionIds[0] = 0;
                 ProfessionIds[1] = 0;
 
-                StringArguments equipment = new(fields.Read<string>(17));
+                StringArray equipment = new(fields.Read<string>(17), ' ');
                 ListPosition = fields.Read<byte>(19);
                 LastPlayedTime = fields.Read<long>(20);
 
                 var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(21));
                 if (spec != null)
-                    SpecID = (ushort)spec.Id;
+                    SpecID = (short)spec.Id;
 
-                LastLoginVersion = fields.Read<uint>(22);
+                LastLoginVersion = fields.Read<int>(22);
 
-                for (byte slot = 0; slot < InventorySlots.BagEnd; ++slot)
+                int equipmentFieldsPerSlot = 5;
+
+                for (var slot = 0; slot < VisualItems.Length && (slot + 1) * equipmentFieldsPerSlot <= equipment.Length; ++slot)
                 {
-                    VisualItems[slot].InvType = (byte)equipment.NextUInt32();
-                    VisualItems[slot].DisplayId = equipment.NextUInt32();
-                    VisualItems[slot].DisplayEnchantId = equipment.NextUInt32();
-                    VisualItems[slot].Subclass = (byte)equipment.NextUInt32();
-                    VisualItems[slot].SecondaryItemModifiedAppearanceID = equipment.NextUInt32();
+                    int visualBase = slot * equipmentFieldsPerSlot;
+                    VisualItems[slot].InvType = byte.Parse(equipment[visualBase + 0]);
+                    VisualItems[slot].DisplayId = uint.Parse(equipment[visualBase + 1]);
+                    VisualItems[slot].DisplayEnchantId = uint.Parse(equipment[visualBase + 2]);
+                    VisualItems[slot].Subclass = byte.Parse(equipment[visualBase + 3]);
+                    VisualItems[slot].SecondaryItemModifiedAppearanceID = uint.Parse(equipment[visualBase + 4]);
                 }
             }
 
@@ -176,9 +187,9 @@ namespace Game.Networking.Packets
                     visualItem.Write(data);
 
                 data.WriteInt64(LastPlayedTime);
-                data.WriteUInt16(SpecID);
-                data.WriteUInt32(Unknown703);
-                data.WriteUInt32(LastLoginVersion);
+                data.WriteInt16(SpecID);
+                data.WriteInt32(Unknown703);
+                data.WriteInt32(LastLoginVersion);
                 data.WriteUInt32(Flags4);
                 data.WriteInt32(MailSenders.Count);
                 data.WriteInt32(MailSenderTypes.Count);
@@ -217,7 +228,7 @@ namespace Game.Networking.Packets
             public byte RaceId;
             public Class ClassId;
             public byte SexId;
-            public Array<ChrCustomizationChoice> Customizations = new(50);
+            public Array<ChrCustomizationChoice> Customizations = new(125);
             public byte ExperienceLevel;
             public uint ZoneId;
             public uint MapId;
@@ -230,16 +241,16 @@ namespace Game.Networking.Packets
             public bool FirstLogin;
             public byte unkWod61x;
             public long LastPlayedTime;
-            public ushort SpecID;
-            public uint Unknown703;
-            public uint LastLoginVersion;
+            public short SpecID;
+            public int Unknown703;
+            public int LastLoginVersion;
             public uint OverrideSelectScreenFileDataID;
             public uint PetCreatureDisplayId;
             public uint PetExperienceLevel;
             public uint PetCreatureFamilyId;
             public bool BoostInProgress; // @todo
             public uint[] ProfessionIds = new uint[2];      // @todo
-            public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.BagEnd];
+            public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.ReagentBagEnd];
             public List<string> MailSenders = new();
             public List<uint> MailSenderTypes = new();
 
@@ -296,6 +307,24 @@ namespace Game.Networking.Packets
 
             public int AchievementID;
             public int Unused;
+        }
+
+        public struct RaceLimitDisableInfo
+        {
+            enum blah
+            {
+                Server,
+                Level
+            }
+
+            public int RaceID;
+            public int BlockReason;
+
+            public void Write(WorldPacket data)
+            {
+                data.WriteInt32(RaceID);
+                data.WriteInt32(BlockReason);
+            }
         }
     }
 
@@ -486,6 +515,7 @@ namespace Game.Networking.Packets
             RaceOrFactionChangeInfo.Guid = _worldPacket.ReadPackedGuid();
             RaceOrFactionChangeInfo.SexID = (Gender)_worldPacket.ReadUInt8();
             RaceOrFactionChangeInfo.RaceID = (Race)_worldPacket.ReadUInt8();
+            RaceOrFactionChangeInfo.InitialRaceID = (Race)_worldPacket.ReadUInt8();
             var customizationCount = _worldPacket.ReadUInt32();
             RaceOrFactionChangeInfo.Name = _worldPacket.ReadString(nameLength);
 
@@ -540,7 +570,7 @@ namespace Game.Networking.Packets
             public string Name;
             public byte SexID;
             public byte RaceID;
-            public Array<ChrCustomizationChoice> Customizations = new(50);
+            public Array<ChrCustomizationChoice> Customizations = new(125);
         }
     }
 
@@ -837,6 +867,8 @@ namespace Game.Networking.Packets
         {
             var customizationCount = _worldPacket.ReadUInt32();
             NewSex = _worldPacket.ReadUInt8();
+            CustomizedRace = _worldPacket.ReadInt32();
+            CustomizedChrModelID = _worldPacket.ReadInt32();
 
             for (var i = 0; i < customizationCount; ++i)
             {
@@ -851,7 +883,9 @@ namespace Game.Networking.Packets
         }
 
         public byte NewSex;
-        public Array<ChrCustomizationChoice> Customizations = new(50);
+        public Array<ChrCustomizationChoice> Customizations = new(125);
+        public int CustomizedRace;
+        public int CustomizedChrModelID;
     }
 
     public class BarberShopResult : ServerPacket
@@ -888,7 +922,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)Reason);
             _worldPacket.WriteInt32(Amount);
             _worldPacket.WriteFloat(GroupBonus);
-            _worldPacket.WriteUInt8(ReferAFriendBonusType);
         }
 
         public ObjectGuid Victim;
@@ -896,7 +929,6 @@ namespace Game.Networking.Packets
         public PlayerLogXPReason Reason;
         public int Amount;
         public float GroupBonus;
-        public byte ReferAFriendBonusType; // 1 - 300% of normal XP; 2 - 150% of normal XP
     }
 
     class TitleEarned : ServerPacket
@@ -1002,7 +1034,7 @@ namespace Game.Networking.Packets
         ObjectGuid CharGUID;
         string CharName = "";
         byte SexID;
-        Array<ChrCustomizationChoice> Customizations = new(50);
+        Array<ChrCustomizationChoice> Customizations = new(125);
     }
 
     class CharCustomizeFailure : ServerPacket
@@ -1064,7 +1096,7 @@ namespace Game.Networking.Packets
         public Race RaceId = Race.None;
         public Class ClassId = Class.None;
         public Gender Sex = Gender.None;
-        public Array<ChrCustomizationChoice> Customizations = new(50);
+        public Array<ChrCustomizationChoice> Customizations = new(125);
         public uint? TemplateSet;
         public bool IsTrialBoost;
         public bool UseNPE;
@@ -1085,17 +1117,18 @@ namespace Game.Networking.Packets
         public ObjectGuid CharGUID;
         public Gender SexID = Gender.None;
         public string CharName;
-        public Array<ChrCustomizationChoice> Customizations = new(50);
+        public Array<ChrCustomizationChoice> Customizations = new(125);
     }
 
     public class CharRaceOrFactionChangeInfo
     {
         public Race RaceID = Race.None;
+        public Race InitialRaceID = Race.None;
         public Gender SexID = Gender.None;
         public ObjectGuid Guid;
         public bool FactionChange;
         public string Name;
-        public Array<ChrCustomizationChoice> Customizations = new(50);
+        public Array<ChrCustomizationChoice> Customizations = new(125);
     }
 
     public class CharacterUndeleteInfo

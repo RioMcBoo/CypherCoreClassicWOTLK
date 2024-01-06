@@ -393,7 +393,7 @@ namespace Game.Networking.Packets
         }
 
         public int MissingQuestCount;
-        public uint[] MissingQuestPOIs = new uint[125];
+        public uint[] MissingQuestPOIs = new uint[175];
     }
 
     public class QuestPOIQueryResponse : ServerPacket
@@ -591,7 +591,7 @@ namespace Game.Networking.Packets
             if (characterInfo == null)
                 return false;
 
-            if (player)
+            if (player != null)
             {
                 Cypher.Assert(player.GetGUID() == guid);
 

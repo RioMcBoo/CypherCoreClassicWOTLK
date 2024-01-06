@@ -498,7 +498,7 @@ namespace Game.Achievements
             if (achievement.Flags.HasAnyFlag(AchievementFlags.ShowInGuildNews))
             {
                 Guild guild = referencePlayer.GetGuild();
-                if (guild)
+                if (guild != null)
                     guild.AddGuildNews(GuildNews.PlayerAchievement, referencePlayer.GetGUID(), (uint)(achievement.Flags & AchievementFlags.ShowInGuildHeader), achievement.Id);
             }
 
@@ -571,7 +571,7 @@ namespace Game.Achievements
                 SQLTransaction trans = new();
 
                 Item item = reward.ItemId != 0 ? Item.CreateItem(reward.ItemId, 1, ItemContext.None, _owner) : null;
-                if (item)
+                if (item != null)
                 {
                     // save new item before send
                     item.SaveToDB(trans);                               // save for prevent lost at next mail load, if send fail then item will deleted
@@ -648,7 +648,7 @@ namespace Game.Achievements
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
             {
                 Guild guild = Global.GuildMgr.GetGuildById(_owner.GetGuildId());
-                if (guild)
+                if (guild != null)
                 {
                     BroadcastTextBuilder say_builder = new(_owner, ChatMsg.GuildAchievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetNativeGender(), _owner, achievement.Id);
                     var say_do = new LocalizedDo(say_builder);
@@ -761,7 +761,7 @@ namespace Game.Achievements
 
                     CompletedAchievementData ca = _completedAchievements[achievementid];
                     ca.Date = achievementResult.Read<long>(1);
-                    var guids = new StringArray(achievementResult.Read<string>(2), ' ');
+                    var guids = new StringArray(achievementResult.Read<string>(2), ',');
                     if (!guids.IsEmpty())
                     {
                         for (int i = 0; i < guids.Length; ++i)
@@ -966,7 +966,7 @@ namespace Game.Achievements
             if (achievement.Flags.HasAnyFlag(AchievementFlags.ShowInGuildNews))
             {
                 Guild guild = referencePlayer.GetGuild();
-                if (guild)
+                if (guild != null)
                     guild.AddGuildNews(GuildNews.Achievement, ObjectGuid.Empty, (uint)(achievement.Flags & AchievementFlags.ShowInGuildHeader), achievement.Id);
             }
 
@@ -981,12 +981,12 @@ namespace Game.Achievements
                     ca.CompletingPlayers.Add(referencePlayer.GetGUID());
 
                 Group group = referencePlayer.GetGroup();
-                if (group)
+                if (group != null)
                 {
                     for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player groupMember = refe.GetSource();
-                        if (groupMember)
+                        if (groupMember != null)
                             if (groupMember.GetGuildId() == _owner.GetId())
                                 ca.CompletingPlayers.Add(groupMember.GetGUID());
                     }

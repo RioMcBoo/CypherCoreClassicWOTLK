@@ -69,8 +69,9 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHARACTER, "SELECT c.guid, account, name, race, class, gender, level, xp, money, inventorySlots, bankSlots, restState, playerFlags, playerFlagsEx, " +
                 "position_x, position_y, position_z, map, orientation, taximask, createTime, createMode, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, " +
                 "resettalents_time, primarySpecialization, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, summonedPetNumber, at_login, zone, online, death_expire_time, taxi_path, dungeonDifficulty, " +
-                "totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, power1, power2, power3, power4, power5, power6, power7, instance_id, activeTalentGroup, lootSpecId, exploredZones, " +
-                "knownTitles, actionBars, raidDifficulty, legacyRaidDifficulty, fishingSteps, honor, honorLevel, honorRestState, honorRestBonus, numRespecs " +
+                "totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, " +
+                "health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, instance_id, activeTalentGroup, lootSpecId, exploredZones, knownTitles, actionBars, " +
+                "raidDifficulty, legacyRaidDifficulty, fishingSteps, honor, honorLevel, honorRestState, honorRestBonus, numRespecs " +
                 "FROM characters c LEFT JOIN character_fishingsteps cfs ON c.guid = cfs.guid WHERE c.guid = ?");
 
             PrepareStatement(CharStatements.SEL_CHARACTER_CUSTOMIZATIONS, "SELECT chrCustomizationOptionID, chrCustomizationChoiceID FROM character_customizations WHERE guid = ? ORDER BY chrCustomizationOptionID");
@@ -78,6 +79,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHARACTER_AURAS, "SELECT casterGuid, itemGuid, spell, effectMask, recalculateMask, difficulty, stackCount, maxDuration, remainTime, remainCharges, castItemId, castItemLevel FROM character_aura WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_AURA_EFFECTS, "SELECT casterGuid, itemGuid, spell, effectMask, effectIndex, amount, baseAmount FROM character_aura_effect WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_SPELL, "SELECT spell, active, disabled FROM character_spell WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_SPELL_FAVORITES, "SELECT spell FROM character_spell_favorite WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS, "SELECT quest, status, explored, acceptTime, endTime FROM character_queststatus WHERE guid = ? AND status <> 0");
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES, "SELECT quest, objective, data FROM character_queststatus_objectives WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES_CRITERIA, "SELECT questObjectiveId FROM character_queststatus_objectives_criteria WHERE guid = ?");
@@ -102,7 +104,6 @@ namespace Framework.Database
 
             PrepareStatement(CharStatements.SEL_CHARACTER_REPUTATION, "SELECT faction, standing, flags FROM character_reputation WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_INVENTORY, "SELECT " + SelectItemInstanceContent + ", bag, slot FROM character_inventory ci JOIN item_instance ii ON ci.item = ii.guid LEFT JOIN item_instance_gems ig ON ii.guid = ig.itemGuid LEFT JOIN item_instance_transmog iit ON ii.guid = iit.itemGuid LEFT JOIN item_instance_modifiers im ON ii.guid = im.itemGuid WHERE ci.guid = ? ORDER BY (ii.flags & 0x80000) ASC, bag ASC, slot ASC");
-            PrepareStatement(CharStatements.SEL_CHARACTER_ACTIONS, "SELECT a.button, a.action, a.type FROM character_action as a, characters as c WHERE a.guid = c.guid AND a.spec = c.activeTalentGroup AND a.guid = ? ORDER BY button");
             PrepareStatement(CharStatements.SEL_MAIL_COUNT, "SELECT COUNT(*) FROM mail WHERE receiver = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_SOCIALLIST, "SELECT cs.friend, c.account, cs.flags, cs.note FROM character_social cs JOIN characters c ON c.guid = cs.friend WHERE cs.guid = ? AND c.deleteinfos_name IS NULL LIMIT 255");
             PrepareStatement(CharStatements.SEL_CHARACTER_HOMEBIND, "SELECT mapId, zoneId, posX, posY, posZ, orientation FROM character_homebind WHERE guid = ?");
@@ -120,11 +121,11 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHARACTER_TRANSMOG_OUTFITS, "SELECT setguid, setindex, name, iconname, ignore_mask, appearance0, appearance1, appearance2, appearance3, appearance4, " +
                 "appearance5, appearance6, appearance7, appearance8, appearance9, appearance10, appearance11, appearance12, appearance13, appearance14, appearance15, appearance16, " +
                 "appearance17, appearance18, mainHandEnchant, offHandEnchant FROM character_transmog_outfits WHERE guid = ? ORDER BY setindex");
-            PrepareStatement(CharStatements.SEL_CHARACTER_BGDATA, "SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell FROM character_battleground_data WHERE guid = ?");
-            PrepareStatement(CharStatements.SEL_CHARACTER_GLYPHS, "SELECT talentGroup, glyph1, glyph2, glyph3, glyph4, glyph5, glyph6 from character_glyphs WHERE guid = ?");
-            PrepareStatement(CharStatements.SEL_CHARACTER_TALENTS, "SELECT spell, talentGroup FROM character_talent WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_BGDATA, "SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell, queueId FROM character_battleground_data WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_GLYPHS, "SELECT talentGroup, glyphId FROM character_glyphs WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_TALENTS, "SELECT talentId, talentGroup FROM character_talent WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_PVP_TALENTS, "SELECT talentId0, talentId1, talentId2, talentId3, talentGroup FROM character_pvp_talent WHERE guid = ?");
-            PrepareStatement(CharStatements.SEL_CHARACTER_SKILLS, "SELECT skill, value, max FROM character_skills WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_SKILLS, "SELECT skill, value, max, professionSlot FROM character_skills WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_RANDOMBG, "SELECT guid FROM character_battleground_random WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_BANNED, "SELECT guid FROM character_banned WHERE guid = ? AND active = 1");
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUSREW, "SELECT quest FROM character_queststatus_rewarded WHERE guid = ? AND active = 1");
@@ -134,7 +135,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CHARACTER_FAVORITE_AUCTIONS_BY_CHAR, "DELETE FROM character_favorite_auctions WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_ACCOUNT_INSTANCELOCKTIMES, "SELECT instanceId, releaseTime FROM account_instance_times WHERE accountId = ?");
 
-            PrepareStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC, "SELECT button, action, type FROM character_action WHERE guid = ? AND spec = ? ORDER BY button");
+            PrepareStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC, "SELECT button, action, type FROM character_action WHERE guid = ? AND spec = ? AND traitConfigId = ? ORDER BY button");
             PrepareStatement(CharStatements.SEL_MAILITEMS, "SELECT " + SelectItemInstanceContent + ", ii.owner_guid, m.id FROM mail_items mi INNER JOIN mail m ON mi.mail_id = m.id LEFT JOIN item_instance ii ON mi.item_guid = ii.guid LEFT JOIN item_instance_gems ig ON ii.guid = ig.itemGuid LEFT JOIN item_instance_transmog iit ON ii.guid = iit.itemGuid LEFT JOIN item_instance_modifiers im ON ii.guid = im.itemGuid WHERE m.receiver = ?");
             PrepareStatement(CharStatements.SEL_MAILITEMS_ARTIFACT, "SELECT a.itemGuid, a.xp, a.artifactAppearanceId, a.artifactTierId, ap.artifactPowerId, ap.purchasedRank FROM item_instance_artifact_powers ap LEFT JOIN item_instance_artifact a ON ap.itemGuid = a.itemGuid INNER JOIN mail_items mi ON a.itemGuid = mi.item_guid INNER JOIN mail m ON mi.mail_id = m.id WHERE m.receiver = ?");
             PrepareStatement(CharStatements.SEL_AUCTION_ITEMS, "SELECT " + SelectItemInstanceContent + ", ii.owner_guid, ai.auctionId FROM auction_items ai INNER JOIN item_instance ii ON ai.itemGuid = ii.guid LEFT JOIN item_instance_gems ig ON ii.guid = ig.itemGuid LEFT JOIN item_instance_transmog iit ON ii.guid = iit.itemGuid LEFT JOIN item_instance_modifiers im ON ii.guid = im.itemGuid");
@@ -298,9 +299,9 @@ namespace Framework.Database
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
             // Currency
-            PrepareStatement(CharStatements.SEL_PLAYER_CURRENCY, "SELECT Currency, Quantity, WeeklyQuantity, TrackedQuantity, Flags FROM character_currency WHERE CharacterGuid = ?");
-            PrepareStatement(CharStatements.UPD_PLAYER_CURRENCY, "UPDATE character_currency SET Quantity = ?, WeeklyQuantity = ?, TrackedQuantity = ?, Flags = ? WHERE CharacterGuid = ? AND Currency = ?");
-            PrepareStatement(CharStatements.REP_PLAYER_CURRENCY, "REPLACE INTO character_currency (CharacterGuid, Currency, Quantity, WeeklyQuantity, TrackedQuantity, Flags) VALUES (?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.SEL_PLAYER_CURRENCY, "SELECT Currency, Quantity, WeeklyQuantity, TrackedQuantity, IncreasedCapQuantity, EarnedQuantity, Flags FROM character_currency WHERE CharacterGuid = ?");
+            PrepareStatement(CharStatements.UPD_PLAYER_CURRENCY, "UPDATE character_currency SET Quantity = ?, WeeklyQuantity = ?, TrackedQuantity = ?, IncreasedCapQuantity = ?, EarnedQuantity = ?, Flags = ? WHERE CharacterGuid = ? AND Currency = ?");
+            PrepareStatement(CharStatements.REP_PLAYER_CURRENCY, "REPLACE INTO character_currency (CharacterGuid, Currency, Quantity, WeeklyQuantity, TrackedQuantity, IncreasedCapQuantity, EarnedQuantity, Flags) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_PLAYER_CURRENCY, "DELETE FROM character_currency WHERE CharacterGuid = ?");
 
             // Account data
@@ -351,7 +352,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_ARENA_TEAM_NAME, "UPDATE arena_team SET name = ? WHERE arenaTeamId = ?");
 
             // Character battleground data
-            PrepareStatement(CharStatements.INS_PLAYER_BGDATA, "INSERT INTO character_battleground_data (guid, instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.INS_PLAYER_BGDATA, "INSERT INTO character_battleground_data (guid, instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell, queueId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_PLAYER_BGDATA, "DELETE FROM character_battleground_data WHERE guid = ?");
 
             // Character homebind
@@ -409,13 +410,13 @@ namespace Framework.Database
                 "map, instance_id, dungeonDifficulty, raidDifficulty, legacyRaidDifficulty, position_x, position_y, position_z, orientation, trans_x, trans_y, trans_z, trans_o, transguid, " +
                 "taximask, createTime, createMode, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, primarySpecialization, " +
                 "extra_flags, summonedPetNumber, at_login, death_expire_time, taxi_path, totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, power1, power2, power3, " +
-                "power4, power5, power6, power7, latency, activeTalentGroup, lootSpecId, exploredZones, equipmentCache, knownTitles, actionBars, lastLoginBuild) VALUES " +
-                "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                "power4, power5, power6, power7, power8, power9, power10, latency, activeTalentGroup, lootSpecId, exploredZones, equipmentCache, knownTitles, actionBars, lastLoginBuild) VALUES " +
+                "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             PrepareStatement(CharStatements.UPD_CHARACTER, "UPDATE characters SET name=?,race=?,class=?,gender=?,level=?,xp=?,money=?,inventorySlots=?,bankSlots=?,restState=?,playerFlags=?,playerFlagsEx=?," +
                 "map=?,instance_id=?,dungeonDifficulty=?,raidDifficulty=?,legacyRaidDifficulty=?,position_x=?,position_y=?,position_z=?,orientation=?,trans_x=?,trans_y=?,trans_z=?,trans_o=?,transguid=?,taximask=?,cinematic=?,totaltime=?,leveltime=?,rest_bonus=?," +
                 "logout_time=?,is_logout_resting=?,resettalents_cost=?,resettalents_time=?,numRespecs=?,primarySpecialization=?,extra_flags=?,summonedPetNumber=?,at_login=?,zone=?,death_expire_time=?,taxi_path=?," +
                 "totalKills=?,todayKills=?,yesterdayKills=?,chosenTitle=?," +
-                "watchedFaction=?,drunk=?,health=?,power1=?,power2=?,power3=?,power4=?,power5=?,power6=?,power7=?,latency=?,activeTalentGroup=?,lootSpecId=?,exploredZones=?," +
+                "watchedFaction=?,drunk=?,health=?,power1=?,power2=?,power3=?,power4=?,power5=?,power6=?,power7=?,power8=?,power9=?,power10=?,latency=?,activeTalentGroup=?,lootSpecId=?,exploredZones=?," +
                 "equipmentCache=?,knownTitles=?,actionBars=?,online=?,honor=?,honorLevel=?,honorRestState=?,honorRestBonus=?,lastLoginBuild=? WHERE guid=?");
 
             PrepareStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG, "UPDATE characters SET at_login = at_login | ? WHERE guid = ?");
@@ -472,7 +473,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHAR_HOMEBIND, "SELECT mapId, zoneId, posX, posY, posZ, orientation FROM character_homebind WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHAR_GUID_NAME_BY_ACC, "SELECT guid, name, online FROM characters WHERE account = ?");
             PrepareStatement(CharStatements.SEL_CHAR_CUSTOMIZE_INFO, "SELECT name, race, class, gender, at_login FROM characters WHERE guid = ?");
-            PrepareStatement(CharStatements.SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS, "SELECT at_login, knownTitles FROM characters WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS, "SELECT c.at_login, c.knownTitles, gm.guid FROM characters c LEFT JOIN group_member gm ON c.guid = gm.memberGuid WHERE c.guid = ?");
             PrepareStatement(CharStatements.SEL_CHAR_COD_ITEM_MAIL, "SELECT id, messageType, mailTemplateId, sender, subject, body, money, has_items FROM mail WHERE receiver = ? AND has_items <> 0 AND cod <> 0");
             PrepareStatement(CharStatements.SEL_CHAR_SOCIAL, "SELECT DISTINCT guid FROM character_social WHERE friend = ?");
             PrepareStatement(CharStatements.SEL_CHAR_OLD_CHARS, "SELECT guid, deleteInfos_Account FROM characters WHERE deleteDate IS NOT NULL AND deleteDate < ?");
@@ -556,9 +557,10 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CHAR_PVP_TALENT, "DELETE FROM character_pvp_talent WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_SKILLS, "DELETE FROM character_skills WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_CHAR_MONEY, "UPDATE characters SET money = ? WHERE guid = ?");
-            PrepareStatement(CharStatements.INS_CHAR_ACTION, "INSERT INTO character_action (guid, spec, button, action, type) VALUES (?, ?, ?, ?, ?)");
-            PrepareStatement(CharStatements.UPD_CHAR_ACTION, "UPDATE character_action SET action = ?, type = ? WHERE guid = ? AND button = ? AND spec = ?");
-            PrepareStatement(CharStatements.DEL_CHAR_ACTION_BY_BUTTON_SPEC, "DELETE FROM character_action WHERE guid = ? and button = ? and spec = ?");
+            PrepareStatement(CharStatements.INS_CHAR_ACTION, "INSERT INTO character_action (guid, spec, traitConfigId, button, action, type) VALUES (?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.UPD_CHAR_ACTION, "UPDATE character_action SET action = ?, type = ? WHERE guid = ? AND button = ? AND spec = ? AND traitConfigId = ?");
+            PrepareStatement(CharStatements.DEL_CHAR_ACTION_BY_BUTTON_SPEC, "DELETE FROM character_action WHERE guid = ? and button = ? and spec = ? AND traitConfigId = ?");
+            PrepareStatement(CharStatements.DEL_CHAR_ACTION_BY_TRAIT_CONFIG, "DELETE FROM character_action WHERE guid = ? AND traitConfigId = ?");
             PrepareStatement(CharStatements.DEL_CHAR_INVENTORY_BY_ITEM, "DELETE FROM character_inventory WHERE item = ?");
             PrepareStatement(CharStatements.DEL_CHAR_INVENTORY_BY_BAG_SLOT, "DELETE FROM character_inventory WHERE bag = ? AND slot = ? AND guid = ?");
             PrepareStatement(CharStatements.UPD_MAIL, "UPDATE mail SET has_items = ?, expire_time = ?, deliver_time = ?, money = ?, cod = ?, checked = ? WHERE id = ?");
@@ -575,13 +577,16 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST, "UPDATE character_queststatus_rewarded SET active = 0 WHERE quest = ? AND guid = ?");
             PrepareStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA, "DELETE FROM character_queststatus_objectives_criteria WHERE questObjectiveId = ?");
             PrepareStatement(CharStatements.DEL_CHAR_SKILL_BY_SKILL, "DELETE FROM character_skills WHERE guid = ? AND skill = ?");
-            PrepareStatement(CharStatements.INS_CHAR_SKILLS, "INSERT INTO character_skills (guid, skill, value, max) VALUES (?, ?, ?, ?)");
-            PrepareStatement(CharStatements.UPD_CHAR_SKILLS, "UPDATE character_skills SET value = ?, max = ? WHERE guid = ? AND skill = ?");
+            PrepareStatement(CharStatements.INS_CHAR_SKILLS, "INSERT INTO character_skills (guid, skill, value, max, professionSlot) VALUES (?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.UPD_CHAR_SKILLS, "UPDATE character_skills SET value = ?, max = ?, professionSlot = ? WHERE guid = ? AND skill = ?");
             PrepareStatement(CharStatements.INS_CHAR_SPELL, "INSERT INTO character_spell (guid, spell, active, disabled) VALUES (?, ?, ?, ?)");
+            PrepareStatement(CharStatements.DEL_CHAR_SPELL_FAVORITE, "DELETE FROM character_spell_favorite WHERE guid = ? AND spell = ?");
+            PrepareStatement(CharStatements.DEL_CHAR_SPELL_FAVORITE_BY_CHAR, "DELETE FROM character_spell_favorite WHERE guid = ?");
+            PrepareStatement(CharStatements.INS_CHAR_SPELL_FAVORITE, "INSERT INTO character_spell_favorite (guid, spell) VALUES (?, ?)");
             PrepareStatement(CharStatements.DEL_CHAR_STATS, "DELETE FROM character_stats WHERE guid = ?");
-            PrepareStatement(CharStatements.INS_CHAR_STATS, "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, strength, agility, stamina, intellect, " +
-                "armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, " +
-                "spellPower, resilience) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.INS_CHAR_STATS, "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, maxpower8, maxpower9, maxpower10, " +
+                "strength, agility, stamina, intellect, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, " +
+                "attackPower, rangedAttackPower, spellPower, resilience) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_PETITION_BY_OWNER, "DELETE FROM petition WHERE ownerguid = ?");
             PrepareStatement(CharStatements.DEL_PETITION_SIGNATURE_BY_OWNER, "DELETE FROM petition_sign WHERE ownerguid = ?");
             PrepareStatement(CharStatements.INS_CHAR_GLYPHS, "INSERT INTO character_glyphs VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
@@ -590,6 +595,14 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_CHAR_LIST_SLOT, "UPDATE characters SET slot = ? WHERE guid = ? AND account = ?");
             PrepareStatement(CharStatements.INS_CHAR_FISHINGSTEPS, "INSERT INTO character_fishingsteps (guid, fishingSteps) VALUES (?, ?)");
             PrepareStatement(CharStatements.DEL_CHAR_FISHINGSTEPS, "DELETE FROM character_fishingsteps WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHAR_TRAIT_ENTRIES, "SELECT traitConfigId, traitNodeId, traitNodeEntryId, `rank`, grantedRanks FROM character_trait_entry WHERE guid = ?");
+            PrepareStatement(CharStatements.INS_CHAR_TRAIT_ENTRIES, "INSERT INTO character_trait_entry (guid, traitConfigId, traitNodeId, traitNodeEntryId, `rank`, grantedRanks) VALUES (?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.DEL_CHAR_TRAIT_ENTRIES, "DELETE FROM character_trait_entry WHERE guid = ? AND traitConfigId = ?");
+            PrepareStatement(CharStatements.DEL_CHAR_TRAIT_ENTRIES_BY_CHAR, "DELETE FROM character_trait_entry WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHAR_TRAIT_CONFIGS, "SELECT traitConfigId, type, chrSpecializationId, combatConfigFlags, localIdentifier, skillLineId, traitSystemId, `name` FROM character_trait_config WHERE guid = ?");
+            PrepareStatement(CharStatements.INS_CHAR_TRAIT_CONFIGS, "INSERT INTO character_trait_config (guid, traitConfigId, type, chrSpecializationId, combatConfigFlags, localIdentifier, skillLineId, traitSystemId, `name`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.DEL_CHAR_TRAIT_CONFIGS, "DELETE FROM character_trait_config WHERE guid = ? AND traitConfigId = ?");
+            PrepareStatement(CharStatements.DEL_CHAR_TRAIT_CONFIGS_BY_CHAR, "DELETE FROM character_trait_config WHERE guid = ?");
 
             // Void Storage
             PrepareStatement(CharStatements.SEL_CHAR_VOID_STORAGE, "SELECT itemId, itemEntry, slot, creatorGuid, randomPropertyType, randomProperty, suffixFactor, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs FROM character_void_storage WHERE playerGuid = ?");
@@ -748,6 +761,7 @@ namespace Framework.Database
         SEL_CHARACTER_AURAS,
         SEL_CHARACTER_AURA_EFFECTS,
         SEL_CHARACTER_SPELL,
+        SEL_CHARACTER_SPELL_FAVORITES,
 
         SEL_CHARACTER_QUESTSTATUS,
         SEL_CHARACTER_QUESTSTATUS_OBJECTIVES,
@@ -772,7 +786,6 @@ namespace Framework.Database
 
         SEL_CHARACTER_REPUTATION,
         SEL_CHARACTER_INVENTORY,
-        SEL_CHARACTER_ACTIONS,
         SEL_CHARACTER_ACTIONS_SPEC,
         SEL_MAIL_COUNT,
         SEL_CHARACTER_SOCIALLIST,
@@ -1162,6 +1175,7 @@ namespace Framework.Database
         INS_CHAR_ACTION,
         UPD_CHAR_ACTION,
         DEL_CHAR_ACTION_BY_BUTTON_SPEC,
+        DEL_CHAR_ACTION_BY_TRAIT_CONFIG,
         DEL_CHAR_INVENTORY_BY_ITEM,
         DEL_CHAR_INVENTORY_BY_BAG_SLOT,
         UPD_MAIL,
@@ -1181,6 +1195,9 @@ namespace Framework.Database
         INS_CHAR_SKILLS,
         UPD_CHAR_SKILLS,
         INS_CHAR_SPELL,
+        DEL_CHAR_SPELL_FAVORITE,
+        DEL_CHAR_SPELL_FAVORITE_BY_CHAR,
+        INS_CHAR_SPELL_FAVORITE,
         DEL_CHAR_STATS,
         INS_CHAR_STATS,
         DEL_PETITION_BY_OWNER,
@@ -1191,6 +1208,14 @@ namespace Framework.Database
         UPD_CHAR_LIST_SLOT,
         INS_CHAR_FISHINGSTEPS,
         DEL_CHAR_FISHINGSTEPS,
+        SEL_CHAR_TRAIT_ENTRIES,
+        INS_CHAR_TRAIT_ENTRIES,
+        DEL_CHAR_TRAIT_ENTRIES,
+        DEL_CHAR_TRAIT_ENTRIES_BY_CHAR,
+        SEL_CHAR_TRAIT_CONFIGS,
+        INS_CHAR_TRAIT_CONFIGS,
+        DEL_CHAR_TRAIT_CONFIGS,
+        DEL_CHAR_TRAIT_CONFIGS_BY_CHAR,
 
         SEL_CHAR_VOID_STORAGE,
         REP_CHAR_VOID_STORAGE_ITEM,

@@ -18,6 +18,18 @@ namespace Game.DataStorage
         public uint ChallengeOrigin;
     }
 
+    public sealed class ChallengeModeItemBonusOverrideRecord
+    {
+        public uint Id;
+        public int ItemBonusTreeGroupID;
+        public int DstItemBonusTreeID;
+        public sbyte Type;
+        public int Value;
+        public int MythicPlusSeasonID;
+        public int PvPSeasonID;
+        public uint SrcItemBonusTreeID;
+    }
+
     public sealed class CharTitlesRecord
     {
         public uint Id;
@@ -33,7 +45,7 @@ namespace Game.DataStorage
         public uint Id;
         public sbyte ChrClassID;
         public int Purpose;
-        public sbyte ModID;
+        public sbyte ItemContext;
 
         public bool IsForNewCharacter() { return Purpose == 9; }
     }
@@ -78,6 +90,7 @@ namespace Game.DataStorage
         public int Flags;
         public int StartingLevel;
         public uint RolesMask;
+        public uint SpellTextureBlobFileDataID;
         public uint ArmorTypeMask;
         public ushort CinematicSequenceID;
         public ushort DefaultSpec;
@@ -88,6 +101,10 @@ namespace Game.DataStorage
         public byte AttackPowerPerAgility;
         public byte AttackPowerPerStrength;
         public byte SpellClassSet;
+        public byte ClassColorR;
+        public byte ClassColorG;
+        public byte ClassColorB;
+        public byte RolesMask;
         public byte DamageBonusStat;
         public byte HasRelicSlot;
     }
@@ -105,10 +122,12 @@ namespace Game.DataStorage
         public uint Id;
         public uint ChrCustomizationOptionID;
         public uint ChrCustomizationReqID;
+        public int ChrCustomizationVisReqID;
         public ushort SortOrder;
         public ushort UiOrderIndex;
         public int Flags;
         public int AddedInPatch;
+        public int SoundKitID;
         public int[] SwatchColor = new int[2];
     }
 
@@ -133,6 +152,9 @@ namespace Game.DataStorage
         public int ChrCustomizationCondModelID;
         public int ChrCustomizationDisplayInfoID;
         public int ChrCustItemGeoModifyID;
+        public int ChrCustomizationVoiceID;
+        public int AnimKitID;
+        public int ParticleColorID;
     }
 
     public sealed class ChrCustomizationOptionRecord
@@ -154,9 +176,12 @@ namespace Game.DataStorage
     public sealed class ChrCustomizationReqRecord
     {
         public uint Id;
+        public long RaceMask;
+        public string ReqSource;
         public int Flags;
         public int ClassMask;
         public int AchievementID;
+        public int QuestID;
         public int OverrideArchive;                                          // -1: allow any, otherwise must match OverrideArchive cvar
         public uint ItemModifiedAppearanceID;
 
@@ -196,6 +221,8 @@ namespace Game.DataStorage
         public uint Id;
         public int ChrRacesID;
         public int ChrModelID;
+        public int Sex;
+        public int AllowedTransmogSlots;
     }
 
     public sealed class ChrRacesRecord
@@ -242,6 +269,7 @@ namespace Game.DataStorage
         public float[] Unknown910_2 = new float[3];
         public short FactionID;
         public short CinematicSequenceID;
+        public int Unknown1000;
         public sbyte BaseLanguage;
         public sbyte CreatureType;
         public sbyte Alliance;
@@ -272,11 +300,14 @@ namespace Game.DataStorage
         public sbyte OrderIndex;
         public sbyte PetTalentType;
         public sbyte Role;
-        public ChrSpecializationFlag Flags;
+        public uint Flags;
         public int SpellIconFileID;
         public sbyte PrimaryStatPriority;
         public int AnimReplacements;
         public int[] MasterySpellID = new int[PlayerConst.MaxMasterySpells];
+
+        public ChrSpecializationFlag GetFlags() { return (ChrSpecializationFlag)Flags; }
+        public ChrSpecializationRole GetRole() { return (ChrSpecializationRole)Role; }
 
         public bool IsPetSpecialization()
         {
@@ -290,7 +321,8 @@ namespace Game.DataStorage
         public Vector3 Origin;                                   // Position in map used for basis for M2 co-ordinates
         public uint SoundID;                                         // Sound ID       (voiceover for cinematic)
         public float OriginFacing;                                     // Orientation in map used for basis for M2 co
-        public uint FileDataID;   
+        public uint FileDataID;                                      // Model
+        public uint ConversationID;
     }
 
     public sealed class CinematicSequencesRecord
@@ -300,11 +332,38 @@ namespace Game.DataStorage
         public ushort[] Camera = new ushort[8];
     }
 
+    public sealed class ConditionalChrModelRecord
+    {
+        public uint Id;
+        public uint ChrModelID;                                      // This is the PK
+        public int ChrCustomizationReqID;
+        public int PlayerConditionID;
+        public int Flags;
+        public int ChrCustomizationCategoryID;
+    }
+
+    public sealed class ConditionalContentTuningRecord
+    {
+        public uint Id;
+        public int OrderIndex;
+        public int RedirectContentTuningID;
+        public int RedirectFlag;
+        public uint ParentContentTuningID;
+    }
+
     public sealed class ContentTuningRecord
     {
         public uint Id;
         public int MinLevel;
         public int MaxLevel;
+        public int MinLevelType;
+        public int MaxLevelType;
+        public int TargetLevelDelta;
+        public int TargetLevelMaxDelta;
+        public int TargetLevelMin;
+        public int TargetLevelMax;
+        public int MinItemLevel;
+        public float QuestXpMultiplier;
         public int Flags;
         public int ExpectedStatModID;
         public int DifficultyESMID;
@@ -322,6 +381,13 @@ namespace Game.DataStorage
 
             return 0;
         }
+    }
+
+    public sealed class ContentTuningXLabelRecord
+    {
+        public uint Id;
+        public int LabelID;
+        public uint ContentTuningID;
     }
 
     public sealed class ConversationLineRecord
@@ -363,7 +429,7 @@ namespace Game.DataStorage
         public sbyte Gender;
         public int DissolveOutEffectID;
         public sbyte CreatureModelMinLod;
-        public int[] TextureVariationFileDataID = new int[3];
+        public int[] TextureVariationFileDataID = new int[4];
     }
 
     public sealed class CreatureDisplayInfoExtraRecord
@@ -404,6 +470,8 @@ namespace Game.DataStorage
         public float[] GeoBox = new float[6];
         public uint Flags;
         public uint FileDataID;
+        public float WalkSpeed;
+        public float RunSpeed;
         public uint BloodID;
         public uint FootprintTextureID;
         public float FootprintTextureLength;
@@ -446,12 +514,12 @@ namespace Game.DataStorage
         public CriteriaType Type;
         public uint Asset;
         public uint ModifierTreeId;
-        public byte StartEvent;
+        public int StartEvent;
         public uint StartAsset;
         public ushort StartTimer;
-        public byte FailEvent;
+        public int FailEvent;
         public uint FailAsset;
-        public byte Flags;
+        public int Flags;
         public ushort EligibilityWorldStateID;
         public byte EligibilityWorldStateValue;
 
@@ -464,7 +532,7 @@ namespace Game.DataStorage
         public string Description;
         public uint Parent;
         public uint Amount;
-        public sbyte Operator;
+        public int Operator;
         public uint CriteriaID;
         public int OrderIndex;
         public CriteriaTreeFlags Flags;
@@ -478,7 +546,7 @@ namespace Game.DataStorage
         public int MinAmount;
         public int MaxAmount;
         public int ContainerIconID;
-        public int ContainerQuality;
+        public sbyte ContainerQuality;
         public int OnLootSpellVisualKitID;
         public uint CurrencyTypesID;
     }
@@ -496,7 +564,67 @@ namespace Game.DataStorage
         public uint MaxEarnablePerWeek;
         public sbyte Quality;
         public int FactionID;
+        public int ItemGroupSoundsID;
+        public int XpQuestDifficulty;
+        public int AwardConditionID;
+        public int MaxQtyWorldStateID;
+        public uint RechargingAmountPerCycle;
+        public uint RechargingCycleDurationMS;
         public int[] Flags = new int[2];
+
+        public CurrencyTypesFlags GetFlags() { return (CurrencyTypesFlags)Flags[0]; }
+        public CurrencyTypesFlagsB GetFlagsB() { return (CurrencyTypesFlagsB)Flags[1]; }
+
+        // Helpers
+        public int GetScaler()
+        {
+            return GetFlags().HasFlag(CurrencyTypesFlags._100_Scaler) ? 100 : 1;
+        }
+
+        public bool HasMaxEarnablePerWeek()
+        {
+            return MaxEarnablePerWeek != 0 || GetFlags().HasFlag(CurrencyTypesFlags.ComputedWeeklyMaximum);
+        }
+
+        public bool HasMaxQuantity(bool onLoad = false, bool onUpdateVersion = false)
+        {
+            if (onLoad && GetFlags().HasFlag(CurrencyTypesFlags.IgnoreMaxQtyOnLoad))
+                return false;
+
+            if (onUpdateVersion && GetFlags().HasFlag(CurrencyTypesFlags.UpdateVersionIgnoreMax))
+                return false;
+
+            return MaxQty != 0 || MaxQtyWorldStateID != 0 || GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum);
+        }
+
+        public bool HasTotalEarned()
+        {
+            return GetFlagsB().HasFlag(CurrencyTypesFlagsB.UseTotalEarnedForEarned);
+        }
+
+        public bool IsAlliance()
+        {
+            return GetFlags().HasFlag(CurrencyTypesFlags.IsAllianceOnly);
+        }
+
+        public bool IsHorde()
+        {
+            return GetFlags().HasFlag(CurrencyTypesFlags.IsHordeOnly);
+        }
+
+        public bool IsSuppressingChatLog(bool onUpdateVersion = false)
+        {
+            if ((onUpdateVersion && GetFlags().HasFlag(CurrencyTypesFlags.SuppressChatMessageOnVersionChange)) ||
+                GetFlags().HasFlag(CurrencyTypesFlags.SuppressChatMessages))
+                return true;
+
+            return false;
+        }
+
+        public bool IsTrackingQuantity()
+        {
+            return GetFlags().HasFlag(CurrencyTypesFlags.TrackQuantity);
+        }
     }
 
     public sealed class CurveRecord
@@ -508,9 +636,10 @@ namespace Game.DataStorage
 
     public sealed class CurvePointRecord
     {
-        public uint Id;
         public Vector2 Pos;
-        public ushort CurveID;
+        public Vector2 PreSLSquishPos;
+        public uint Id;
+        public uint CurveID;
         public byte OrderIndex;
     }
 }

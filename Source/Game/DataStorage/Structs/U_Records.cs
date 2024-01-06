@@ -13,11 +13,12 @@ namespace Game.DataStorage
         public uint Id;
         public int ParentUiMapID;
         public int Flags;
-        public uint System;
+        public byte System;
         public UiMapType Type;
         public int BountySetID;
         public uint BountyDisplayLocation;
-        public int VisibilityPlayerConditionID;
+        public int VisibilityPlayerConditionID2; // if not met then map is skipped when evaluating UiMapAssignment
+        public int VisibilityPlayerConditionID;  // if not met then client checks other maps with the same AlternateUiMapGroup, not re-evaluating UiMapAssignment for them
         public sbyte HelpTextPosition;
         public int BkgAtlasID;
         public uint LevelRangeMin;
@@ -48,6 +49,7 @@ namespace Game.DataStorage
         public int ParentUiMapID;
         public int OrderIndex;
         public int ChildUiMapID;
+        public int PlayerConditionID;
         public int OverrideHighlightFileDataID;
         public int OverrideHighlightAtlasID;
         public int Flags;

@@ -438,7 +438,7 @@ namespace Game
             ObjectGuid invitee = invite.InviteeGuid;
             Player player = Global.ObjAccessor.FindPlayer(invitee);
 
-            uint level = player ? player.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(invitee);
+            uint level = player != null ? player.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(invitee);
 
             CalendarInviteAdded packet = new();
             packet.EventID = calendarEvent != null ? calendarEvent.EventId : 0;
@@ -453,7 +453,7 @@ namespace Game
             if (calendarEvent == null) // Pre-invite
             {
                 player = Global.ObjAccessor.FindPlayer(invite.SenderGuid);
-                if (player)
+                if (player != null)
                     player.SendPacket(packet);
             }
             else
@@ -542,18 +542,18 @@ namespace Game
             packet.TextureID = calendarEvent.TextureId;
 
             Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
-            packet.EventGuildID = guild ? guild.GetGUID() : ObjectGuid.Empty;
+            packet.EventGuildID = guild != null ? guild.GetGUID() : ObjectGuid.Empty;
 
             if (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement())
             {
                 guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
-                if (guild)
+                if (guild != null)
                     guild.BroadcastPacket(packet);
             }
             else
             {
                 Player player = Global.ObjAccessor.FindPlayer(invite.InviteeGuid);
-                if (player)
+                if (player != null)
                     player.SendPacket(packet);
             }
         }
@@ -561,7 +561,7 @@ namespace Game
         public void SendCalendarEvent(ObjectGuid guid, CalendarEvent calendarEvent, CalendarSendEventType sendType)
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
-            if (!player)
+            if (player == null)
                 return;
 
             List<CalendarInvite> eventInviteeList = _invites[calendarEvent.EventId];
@@ -579,15 +579,15 @@ namespace Game
             packet.TextureID = calendarEvent.TextureId;
 
             Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
-            packet.EventGuildID = (guild ? guild.GetGUID() : ObjectGuid.Empty);
+            packet.EventGuildID = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
 
             foreach (var calendarInvite in eventInviteeList)
             {
                 ObjectGuid inviteeGuid = calendarInvite.InviteeGuid;
                 Player invitee = Global.ObjAccessor.FindPlayer(inviteeGuid);
 
-                uint inviteeLevel = invitee ? invitee.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(inviteeGuid);
-                ulong inviteeGuildId = invitee ? invitee.GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(inviteeGuid);
+                uint inviteeLevel = invitee != null ? invitee.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(inviteeGuid);
+                ulong inviteeGuildId = invitee != null ? invitee.GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(inviteeGuid);
 
                 CalendarEventInviteInfo inviteInfo = new();
                 inviteInfo.Guid = inviteeGuid;
@@ -608,7 +608,7 @@ namespace Game
         void SendCalendarEventInviteRemoveAlert(ObjectGuid guid, CalendarEvent calendarEvent, CalendarInviteStatus status)
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
-            if (player)
+            if (player != null)
             {
                 CalendarInviteRemovedAlert packet = new();
                 packet.Date = calendarEvent.Date;
@@ -623,14 +623,14 @@ namespace Game
         public void SendCalendarClearPendingAction(ObjectGuid guid)
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
-            if (player)
+            if (player != null)
                player.SendPacket(new CalendarClearPendingAction());
         }
 
         public void SendCalendarCommandResult(ObjectGuid guid, CalendarError err, string param = null)
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
-            if (player)
+            if (player != null)
             {
                 CalendarCommandResult packet = new();
                 packet.Command = 1; // FIXME
@@ -655,7 +655,7 @@ namespace Game
             if (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement())
             {
                 Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
-                if (guild)
+                if (guild != null)
                     guild.BroadcastPacket(packet);
             }
 
@@ -664,7 +664,7 @@ namespace Game
             foreach (var playerCalendarEvent in invites)
             {
                 Player player = Global.ObjAccessor.FindPlayer(playerCalendarEvent.InviteeGuid);
-                if (player)
+                if (player != null)
                     if (!calendarEvent.IsGuildEvent() || player.GetGuildId() != calendarEvent.GuildId)
                         player.SendPacket(packet);
             }
