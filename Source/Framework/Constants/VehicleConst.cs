@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.﻿
 
+using System;
+
 namespace Framework.Constants
 {
     public enum VehiclePowerType
@@ -35,6 +37,7 @@ namespace Framework.Constants
         Flashfire = 179,
     }
 
+    [Flags]
     public enum VehicleFlags
     {
         NoStrafe = 0x01,           // Sets Moveflag2NoStrafe
@@ -48,7 +51,7 @@ namespace Framework.Constants
         FixedPosition = 0x200000            // Used for cannons, when they should be rooted
     }
 
-    public enum VehicleExitParameters
+    public enum VehicleExitParameters : byte
     {
         VehicleExitParamNone = 0, // provided parameters will be ignored
         VehicleExitParamOffset = 1, // provided parameters will be used as offset values

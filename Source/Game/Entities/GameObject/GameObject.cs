@@ -2807,17 +2807,17 @@ namespace Game.Entities
 
             for (byte i = 0; i < SharedConst.MaxLockCase; ++i)
             {
-                if (lockEntry.LockType[i] == 0)
+                if (lockEntry.Type[i] == 0)
                     continue;
 
-                if (lockEntry.LockType[i] == (byte)LockKeyType.Spell)
+                if (lockEntry.Type[i] == (byte)LockKeyType.Spell)
                 {
                     SpellInfo spell = Global.SpellMgr.GetSpellInfo((uint)lockEntry.Index[i], GetMap().GetDifficultyID());
                     if (spell != null)
                         return spell;
                 }
 
-                if (lockEntry.LockType[i] != (byte)LockKeyType.Skill)
+                if (lockEntry.Type[i] != (byte)LockKeyType.Skill)
                     break;
 
                 foreach (var playerSpell in player.GetSpellMap())

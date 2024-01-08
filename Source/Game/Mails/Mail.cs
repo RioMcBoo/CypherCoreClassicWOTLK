@@ -47,7 +47,7 @@ namespace Game.Mails
         public long deliver_time;
         public ulong money;
         public ulong COD;
-        public MailCheckMask checkMask;
+        public MailCheckFlags checkMask;
         public MailState state;
     }
 

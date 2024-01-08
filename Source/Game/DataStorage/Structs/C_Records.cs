@@ -3,31 +3,53 @@
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Miscellaneous;
 using System;
 using System.Numerics;
+using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
+    public sealed class Cfg_CategoriesRecord
+    {
+        public uint Id;
+        public LocalizedString Name;
+        public ushort LocaleMask;
+        private sbyte _createCharsetMask;
+        private sbyte _existingCharsetMask;
+        private sbyte _flags;
+        public sbyte Order;
+
+        #region Properties
+        public CfgCategoriesCharsets CreateCharsetMask => (CfgCategoriesCharsets)_createCharsetMask;
+        public CfgCategoriesCharsets ExistingCharsetMask => (CfgCategoriesCharsets)_existingCharsetMask;
+        public CfgCategoriesFlags Flags => (CfgCategoriesFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(CfgCategoriesFlags flag)
+        {
+            return _flags.HasFlag((sbyte)flag);
+        }
+
+        public bool HasAnyFlag(CfgCategoriesFlags flag)
+        {
+            return _flags.HasAnyFlag((sbyte)flag);
+        }
+        #endregion
+    }
+
     public sealed class Cfg_RegionsRecord
     {
         public uint Id;
         public string Tag;
         public ushort RegionID;
-        public uint Raidorigin;                                              // Date of first raid reset, all other resets are calculated as this date plus interval
+        /// <summary>
+        /// Date of first raid reset, all other resets are calculated as this date plus interval
+        /// </summary>
+        public uint Raidorigin;
         public byte RegionGroupMask;
         public uint ChallengeOrigin;
-    }
-
-    public sealed class ChallengeModeItemBonusOverrideRecord
-    {
-        public uint Id;
-        public int ItemBonusTreeGroupID;
-        public int DstItemBonusTreeID;
-        public sbyte Type;
-        public int Value;
-        public int MythicPlusSeasonID;
-        public int PvPSeasonID;
-        public uint SrcItemBonusTreeID;
     }
 
     public sealed class CharTitlesRecord
@@ -35,44 +57,73 @@ namespace Game.DataStorage
         public uint Id;
         public LocalizedString Name;
         public LocalizedString Name1;
-        public ushort MaskID;
+        public short MaskID;
         public sbyte Flags;
     }
 
     public sealed class CharacterLoadoutRecord
-    {        
-        public long RaceMask;
+    {
+        private long _raceMask;
         public uint Id;
-        public sbyte ChrClassID;
+        private sbyte _chrClassID;
         public int Purpose;
-        public sbyte ItemContext;
+        private sbyte _itemContext;
 
-        public bool IsForNewCharacter() { return Purpose == 9; }
+        #region Properties
+        public RaceMask RaceMask => (RaceMask)_raceMask;
+        public Class ChrClassID => (Class)_chrClassID;
+        public ItemContext ItemContext => (ItemContext)_itemContext;
+        #endregion
+
+        #region Helpers
+        public bool IsForNewCharacter => Purpose == 9;
+        #endregion
     }
 
     public sealed class CharacterLoadoutItemRecord
     {
         public uint Id;
         public ushort CharacterLoadoutID;
-        public uint ItemID;
+        public int ItemID;
     }
 
     public sealed class ChatChannelsRecord
     {        
         public LocalizedString Name;
-        public string Shortcut;
+        public LocalizedString Shortcut;
         public uint Id;
-        public ChannelDBCFlags Flags;
+        private int _flags;
         public sbyte FactionGroup;
-        public int Ruleset;
+        private int _ruleset;
+
+        #region Properties
+        public ChannelDBCFlags Flags => (ChannelDBCFlags)_flags;
+        public ChatChannelRuleset Ruleset => (ChatChannelRuleset)_ruleset;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(ChannelDBCFlags flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(ChannelDBCFlags flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
     }
 
     public sealed class ChrClassUIDisplayRecord
     {
         public uint Id;
-        public byte ChrClassesID;
+        private byte _chrClassesID;
         public uint AdvGuidePlayerConditionID;
         public uint SplashPlayerConditionID;
+
+        #region Properties
+        public Class ChrClassesID => (Class)_chrClassesID;
+        #endregion
     }
 
     public sealed class ChrClassesRecord
@@ -89,39 +140,54 @@ namespace Game.DataStorage
         public uint LowResScreenFileDataID;
         public int Flags;
         public int StartingLevel;
-        public uint RolesMask;
-        public uint SpellTextureBlobFileDataID;
         public uint ArmorTypeMask;
         public ushort CinematicSequenceID;
         public ushort DefaultSpec;
         public byte HasStrengthAttackBonus;
         public byte PrimaryStatPriority;
-        public PowerType DisplayPower;
+        private byte _displayPower;
         public byte RangedAttackPowerPerAgility;
         public byte AttackPowerPerAgility;
         public byte AttackPowerPerStrength;
         public byte SpellClassSet;
-        public byte ClassColorR;
-        public byte ClassColorG;
-        public byte ClassColorB;
         public byte RolesMask;
         public byte DamageBonusStat;
         public byte HasRelicSlot;
+
+        #region Properties
+        public PowerType DisplayPower => (PowerType)_displayPower;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(int flag)
+        {
+            return Flags.HasFlag(flag);
+        }
+
+        public bool HasAnyFlag(int flag)
+        {
+            return Flags.HasAnyFlag(flag);
+        }
+        #endregion
     }
 
     public sealed class ChrClassesXPowerTypesRecord
     {
         public uint Id;
-        public sbyte PowerType;
+        public sbyte _powerType;
         public uint ClassID;
+
+        #region Properties
+        public PowerType PowerType => (PowerType)_powerType;
+        #endregion
     }
 
     public sealed class ChrCustomizationChoiceRecord
     {
         public LocalizedString Name;
         public uint Id;
-        public uint ChrCustomizationOptionID;
-        public uint ChrCustomizationReqID;
+        private int _chrCustomizationOptionID;
+        public int ChrCustomizationReqID;
         public int ChrCustomizationVisReqID;
         public ushort SortOrder;
         public ushort UiOrderIndex;
@@ -129,32 +195,45 @@ namespace Game.DataStorage
         public int AddedInPatch;
         public int SoundKitID;
         public int[] SwatchColor = new int[2];
+
+        #region Properties
+        public uint ChrCustomizationOptionID => (uint)_chrCustomizationOptionID;
+        #endregion
     }
 
     public sealed class ChrCustomizationDisplayInfoRecord
     {
         public uint Id;
-        public int ShapeshiftFormID;
-        public uint DisplayID;
+        private int _shapeshiftFormID;
+        public int DisplayID;
         public float BarberShopMinCameraDistance;
         public float BarberShopHeightOffset;
+
+        #region Properties
+        public byte ShapeshiftFormID => (byte)_shapeshiftFormID;
+        #endregion
     }
 
     public sealed class ChrCustomizationElementRecord
     {
         public uint Id;
-        public uint ChrCustomizationChoiceID;
+        private int _chrCustomizationChoiceID;
         public int RelatedChrCustomizationChoiceID;
         public int ChrCustomizationGeosetID;
         public int ChrCustomizationSkinnedModelID;
         public int ChrCustomizationMaterialID;
         public int ChrCustomizationBoneSetID;
         public int ChrCustomizationCondModelID;
-        public int ChrCustomizationDisplayInfoID;
+        private int _chrCustomizationDisplayInfoID;
         public int ChrCustItemGeoModifyID;
         public int ChrCustomizationVoiceID;
         public int AnimKitID;
         public int ParticleColorID;
+
+        #region Properties
+        public uint ChrCustomizationDisplayInfoID => (uint)_chrCustomizationDisplayInfoID;
+        public uint ChrCustomizationChoiceID => (uint)_chrCustomizationChoiceID;
+        #endregion
     }
 
     public sealed class ChrCustomizationOptionRecord
@@ -163,7 +242,7 @@ namespace Game.DataStorage
         public uint Id;
         public ushort SecondaryID;
         public int Flags;
-        public uint ChrModelID;
+        private int _chrModelID;
         public int SortIndex;
         public int ChrCustomizationCategoryID;
         public int OptionType;
@@ -171,28 +250,54 @@ namespace Game.DataStorage
         public int ChrCustomizationID;
         public int ChrCustomizationReqID;
         public int UiOrderIndex;
+
+        #region Properties
+        public uint ChrModelID => (uint)_chrModelID;
+        #endregion
     }
 
     public sealed class ChrCustomizationReqRecord
     {
+        private long _raceMask;
+        public LocalizedString ReqSource;
         public uint Id;
-        public long RaceMask;
-        public string ReqSource;
-        public int Flags;
+        private int _flags;
         public int ClassMask;
         public int AchievementID;
         public int QuestID;
-        public int OverrideArchive;                                          // -1: allow any, otherwise must match OverrideArchive cvar
-        public uint ItemModifiedAppearanceID;
+        /// <summary>
+        /// -1: allow any, otherwise must match OverrideArchive cvar
+        /// </summary>
+        public int OverrideArchive;
+        public int ItemModifiedAppearanceID;
 
-        public ChrCustomizationReqFlag GetFlags() { return (ChrCustomizationReqFlag)Flags; }
+        #region Properties
+        public RaceMask RaceMask => (RaceMask)_raceMask;
+        public ChrCustomizationReqFlag Flags => (ChrCustomizationReqFlag)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(ChrCustomizationReqFlag flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(ChrCustomizationReqFlag flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
     }
 
     public sealed class ChrCustomizationReqChoiceRecord
     {
         public uint Id;
-        public uint ChrCustomizationChoiceID;
+        private int _chrCustomizationChoiceID;
         public uint ChrCustomizationReqID;
+
+        #region Properties
+        public uint ChrCustomizationChoiceID => (uint)_chrCustomizationChoiceID;
+        #endregion
     }
 
     public sealed class ChrModelRecord
@@ -201,7 +306,7 @@ namespace Game.DataStorage
         public float[] CustomizeOffset = new float[3];
         public uint Id;
         public sbyte Sex;
-        public uint DisplayID;
+        public int DisplayID;
         public int CharComponentTextureLayoutID;
         public int Flags;
         public int SkeletonFileDataID;
@@ -212,17 +317,25 @@ namespace Game.DataStorage
         public float CustomizeFacing;
         public float CameraDistanceOffset;
         public float BarberShopCameraOffsetScale;
-        public float BarberShopCameraHeightOffsetScale; // applied after BarberShopCameraOffsetScale
+        /// <summary>
+        /// applied after BarberShopCameraOffsetScale
+        /// </summary>
+        public float BarberShopCameraHeightOffsetScale;
         public float BarberShopCameraRotationOffset;
     }
 
     public sealed class ChrRaceXChrModelRecord
     {
         public uint Id;
-        public int ChrRacesID;
-        public int ChrModelID;
+        private int _chrRacesID;
+        private int _chrModelID;
         public int Sex;
         public int AllowedTransmogSlots;
+
+        #region Properties
+        public uint ChrRacesID => (uint)_chrRacesID;
+        public uint ChrModelID => (uint)_chrModelID;
+        #endregion
     }
 
     public sealed class ChrRacesRecord
@@ -231,24 +344,24 @@ namespace Game.DataStorage
         public string ClientPrefix;
         public string ClientFileString;
         public LocalizedString Name;
-        public string NameFemale;
-        public string NameLowercase;
-        public string NameFemaleLowercase;
-        public string LoreName;
-        public string LoreNameFemale;
-        public string LoreNameLower;
-        public string LoreNameLowerFemale;
-        public string LoreDescription;
-        public string ShortName;
-        public string ShortNameFemale;
-        public string ShortNameLower;
-        public string ShortNameLowerFemale;
-        public int Flags;
+        public LocalizedString NameFemale;
+        public LocalizedString NameLowercase;
+        public LocalizedString NameFemaleLowercase;
+        public LocalizedString LoreName;
+        public LocalizedString LoreNameFemale;
+        public LocalizedString LoreNameLower;
+        public LocalizedString LoreNameLowerFemale;
+        public LocalizedString LoreDescription;
+        public LocalizedString ShortName;
+        public LocalizedString ShortNameFemale;
+        public LocalizedString ShortNameLower;
+        public LocalizedString ShortNameLowerFemale;
+        private int _flags;
         public uint MaleDisplayID;
         public uint FemaleDisplayID;
         public uint HighResMaleDisplayID;
         public uint HighResFemaleDisplayID;
-        public uint ResSicknessSpellID;
+        public int ResSicknessSpellID;
         public int SplashSoundID;
         public int CreateScreenFileDataID;
         public int SelectScreenFileDataID;
@@ -269,7 +382,6 @@ namespace Game.DataStorage
         public float[] Unknown910_2 = new float[3];
         public short FactionID;
         public short CinematicSequenceID;
-        public int Unknown1000;
         public sbyte BaseLanguage;
         public sbyte CreatureType;
         public sbyte Alliance;
@@ -287,7 +399,21 @@ namespace Game.DataStorage
         public sbyte FemaleTextureFallbackSex;
         public sbyte UnalteredVisualCustomizationRaceID;
 
-        public ChrRacesFlag GetFlags() { return (ChrRacesFlag)Flags; }
+        #region Properties
+        public ChrRacesFlag Flags => (ChrRacesFlag)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(ChrRacesFlag flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(ChrRacesFlag flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
     }
 
     public sealed class ChrSpecializationRecord
@@ -296,33 +422,56 @@ namespace Game.DataStorage
         public LocalizedString FemaleName;
         public LocalizedString Description;
         public uint Id;
-        public byte ClassID;
+        private byte _classID;
         public sbyte OrderIndex;
         public sbyte PetTalentType;
-        public sbyte Role;
-        public uint Flags;
+        private sbyte _role;
+        private uint _flags;
         public int SpellIconFileID;
         public sbyte PrimaryStatPriority;
         public int AnimReplacements;
         public int[] MasterySpellID = new int[PlayerConst.MaxMasterySpells];
 
-        public ChrSpecializationFlag GetFlags() { return (ChrSpecializationFlag)Flags; }
-        public ChrSpecializationRole GetRole() { return (ChrSpecializationRole)Role; }
+        #region Properties
+        public Class ClassID => (Class)_classID;
+        public ChrSpecializationFlag Flags => (ChrSpecializationFlag)_flags;
+        public ChrSpecializationRole Role => (ChrSpecializationRole)_role;        
+        #endregion
 
-        public bool IsPetSpecialization()
+        #region Helpers
+        public bool HasFlag(ChrSpecializationFlag flag)
         {
-            return ClassID == 0;
+            return _flags.HasFlag((uint)flag);
         }
+
+        public bool HasAnyFlag(ChrSpecializationFlag flag)
+        {
+            return _flags.HasAnyFlag((uint)flag);
+        }
+
+        public bool IsPetSpecialization => ClassID == 0;
+        #endregion
     }
 
     public sealed class CinematicCameraRecord
     {
         public uint Id;
-        public Vector3 Origin;                                   // Position in map used for basis for M2 co-ordinates
-        public uint SoundID;                                         // Sound ID       (voiceover for cinematic)
-        public float OriginFacing;                                     // Orientation in map used for basis for M2 co
-        public uint FileDataID;                                      // Model
-        public uint ConversationID;
+        /// <summary>
+        /// Position in map used for basis for M2 co-ordinates
+        /// </summary>
+        public Vector3 Origin;
+        /// <summary>
+        /// Sound ID (voiceover for cinematic)
+        /// </summary>
+        public uint SoundID;
+        /// <summary>
+        /// Orientation in map used for basis for M2 co
+        /// </summary>
+        public float OriginFacing;
+        /// <summary>
+        /// Model
+        /// </summary>
+        public uint FileDataID;
     }
 
     public sealed class CinematicSequencesRecord
@@ -334,7 +483,7 @@ namespace Game.DataStorage
 
     public sealed class ConditionalChrModelRecord
     {
-        public uint Id;
+        public int Id;
         public uint ChrModelID;                                      // This is the PK
         public int ChrCustomizationReqID;
         public int PlayerConditionID;
@@ -356,40 +505,40 @@ namespace Game.DataStorage
         public uint Id;
         public int MinLevel;
         public int MaxLevel;
-        public int MinLevelType;
-        public int MaxLevelType;
-        public int TargetLevelDelta;
-        public int TargetLevelMaxDelta;
-        public int TargetLevelMin;
-        public int TargetLevelMax;
-        public int MinItemLevel;
-        public float QuestXpMultiplier;
-        public int Flags;
+        private int _flags;
         public int ExpectedStatModID;
         public int DifficultyESMID;
 
-        public ContentTuningFlag GetFlags() { return (ContentTuningFlag)Flags; }
+        #region Properties
+        public ContentTuningFlag Flags => (ContentTuningFlag)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(ContentTuningFlag flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(ContentTuningFlag flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
 
         public int GetScalingFactionGroup()
         {
-            ContentTuningFlag flags = GetFlags();
-            if (flags.HasFlag(ContentTuningFlag.Horde))
+            if (HasFlag(ContentTuningFlag.Horde))
                 return 5;
 
-            if (flags.HasFlag(ContentTuningFlag.Alliance))
+            if (HasFlag(ContentTuningFlag.Alliance))
                 return 3;
 
             return 0;
         }
-    }
+        #endregion
 
-    public sealed class ContentTuningXLabelRecord
-    {
-        public uint Id;
-        public int LabelID;
-        public uint ContentTuningID;
-    }
 
+    }
+    
     public sealed class ConversationLineRecord
     {
         public uint Id;
@@ -422,7 +571,10 @@ namespace Game.DataStorage
         public byte Flags;
         public int StateSpellVisualKitID;
         public float PlayerOverrideScale;
-        public float PetInstanceScale;                                         // scale of not own player pets inside dungeons/raids/scenarios
+        /// <summary>
+        /// scale of not own player pets inside dungeons/raids/scenarios
+        /// </summary>
+        public float PetInstanceScale;
         public sbyte UnarmedWeaponType;
         public int MountPoofSpellVisualKitID;
         public int DissolveEffectID;
@@ -468,10 +620,8 @@ namespace Game.DataStorage
     {
         public uint Id;
         public float[] GeoBox = new float[6];
-        public uint Flags;
+        private uint _flags;
         public uint FileDataID;
-        public float WalkSpeed;
-        public float RunSpeed;
         public uint BloodID;
         public uint FootprintTextureID;
         public float FootprintTextureLength;
@@ -498,44 +648,89 @@ namespace Game.DataStorage
         public float OverrideSelectionRadius;
         public float TamedPetBaseScale;
 
-        public CreatureModelDataFlags GetFlags() { return (CreatureModelDataFlags)Flags; }
+        #region Properties
+        public CreatureModelDataFlags Flags => (CreatureModelDataFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(CreatureModelDataFlags flag)
+        {
+            return _flags.HasFlag((uint)flag);
+        }
+
+        public bool HasAnyFlag(CreatureModelDataFlags flag)
+        {
+            return _flags.HasAnyFlag((uint)flag);
+        }
+        #endregion
     }
 
     public sealed class CreatureTypeRecord
     {
         public uint Id;
-        public string Name;
+        public LocalizedString Name;
         public byte Flags;
     }
 
     public sealed class CriteriaRecord
     {
         public uint Id;
-        public CriteriaType Type;
-        public uint Asset;
+        private short _type;
+        public int Asset;
         public uint ModifierTreeId;
         public int StartEvent;
-        public uint StartAsset;
+        public int StartAsset;
         public ushort StartTimer;
         public int FailEvent;
-        public uint FailAsset;
-        public int Flags;
-        public ushort EligibilityWorldStateID;
-        public byte EligibilityWorldStateValue;
+        public int FailAsset;
+        private int _flags;
+        public short EligibilityWorldStateID;
+        public sbyte EligibilityWorldStateValue;
 
-        public CriteriaFlags GetFlags() => (CriteriaFlags)Flags;
+        #region Properties
+        public CriteriaType Type => (CriteriaType)_type;
+        public CriteriaFlags Flags => (CriteriaFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(CriteriaFlags flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(CriteriaFlags flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
     }
 
     public sealed class CriteriaTreeRecord
     {
         public uint Id;
-        public string Description;
+        public LocalizedString Description;
         public uint Parent;
         public uint Amount;
         public int Operator;
         public uint CriteriaID;
         public int OrderIndex;
-        public CriteriaTreeFlags Flags;
+        private int _flags;
+
+        #region Properties
+        public CriteriaTreeFlags Flags => (CriteriaTreeFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(CriteriaTreeFlags flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(CriteriaTreeFlags flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
     }
 
     public sealed class CurrencyContainerRecord
@@ -546,7 +741,7 @@ namespace Game.DataStorage
         public int MinAmount;
         public int MaxAmount;
         public int ContainerIconID;
-        public sbyte ContainerQuality;
+        public int ContainerQuality;
         public int OnLootSpellVisualKitID;
         public uint CurrencyTypesID;
     }
@@ -554,8 +749,8 @@ namespace Game.DataStorage
     public sealed class CurrencyTypesRecord
     {
         public uint Id;
-        public string Name;
-        public string Description;
+        public LocalizedString Name;
+        public LocalizedString Description;
         public byte CategoryID;
         public int InventoryIconFileID;
         public uint SpellWeight;
@@ -564,67 +759,65 @@ namespace Game.DataStorage
         public uint MaxEarnablePerWeek;
         public sbyte Quality;
         public int FactionID;
-        public int ItemGroupSoundsID;
-        public int XpQuestDifficulty;
         public int AwardConditionID;
-        public int MaxQtyWorldStateID;
-        public uint RechargingAmountPerCycle;
-        public uint RechargingCycleDurationMS;
-        public int[] Flags = new int[2];
+        private int[] _flags = new int[2];
 
-        public CurrencyTypesFlags GetFlags() { return (CurrencyTypesFlags)Flags[0]; }
-        public CurrencyTypesFlagsB GetFlagsB() { return (CurrencyTypesFlagsB)Flags[1]; }
+        #region Properties
+        public CurrencyTypesFlags Flags => (CurrencyTypesFlags)_flags[0];
+        public CurrencyTypesFlagsB FlagsB => (CurrencyTypesFlagsB)_flags[1];        
+        #endregion
 
-        // Helpers
-        public int GetScaler()
+        #region Helpers
+        public bool HasFlag(CurrencyTypesFlags flag)
         {
-            return GetFlags().HasFlag(CurrencyTypesFlags._100_Scaler) ? 100 : 1;
+            return _flags[0].HasFlag((int)flag);
         }
 
-        public bool HasMaxEarnablePerWeek()
+        public bool HasAnyFlag(CurrencyTypesFlags flag)
         {
-            return MaxEarnablePerWeek != 0 || GetFlags().HasFlag(CurrencyTypesFlags.ComputedWeeklyMaximum);
+            return _flags[0].HasAnyFlag((int)flag);
         }
+
+        public bool HasFlag(CurrencyTypesFlagsB flag)
+        {
+            return _flags[1].HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(CurrencyTypesFlagsB flag)
+        {
+            return _flags[1].HasAnyFlag((int)flag);
+        }
+
+        public int Scaler => HasFlag(CurrencyTypesFlags._100_Scaler) ? 100 : 1;
+        public bool HasMaxEarnablePerWeek => MaxEarnablePerWeek != 0 || HasFlag(CurrencyTypesFlags.ComputedWeeklyMaximum);
 
         public bool HasMaxQuantity(bool onLoad = false, bool onUpdateVersion = false)
         {
-            if (onLoad && GetFlags().HasFlag(CurrencyTypesFlags.IgnoreMaxQtyOnLoad))
+            if (onLoad && HasFlag(CurrencyTypesFlags.IgnoreMaxQtyOnLoad))
                 return false;
 
-            if (onUpdateVersion && GetFlags().HasFlag(CurrencyTypesFlags.UpdateVersionIgnoreMax))
+            if (onUpdateVersion && HasFlag(CurrencyTypesFlags.UpdateVersionIgnoreMax))
                 return false;
 
-            return MaxQty != 0 || MaxQtyWorldStateID != 0 || GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum);
+            return MaxQty != 0 || HasFlag(CurrencyTypesFlags.DynamicMaximum);
         }
 
-        public bool HasTotalEarned()
-        {
-            return GetFlagsB().HasFlag(CurrencyTypesFlagsB.UseTotalEarnedForEarned);
-        }
+        public bool HasTotalEarned => HasFlag(CurrencyTypesFlagsB.UseTotalEarnedForEarned);
 
-        public bool IsAlliance()
-        {
-            return GetFlags().HasFlag(CurrencyTypesFlags.IsAllianceOnly);
-        }
-
-        public bool IsHorde()
-        {
-            return GetFlags().HasFlag(CurrencyTypesFlags.IsHordeOnly);
-        }
+        public bool IsAlliance => HasFlag(CurrencyTypesFlags.IsAllianceOnly);
+        public bool IsHorde => HasFlag(CurrencyTypesFlags.IsHordeOnly);
 
         public bool IsSuppressingChatLog(bool onUpdateVersion = false)
         {
-            if ((onUpdateVersion && GetFlags().HasFlag(CurrencyTypesFlags.SuppressChatMessageOnVersionChange)) ||
-                GetFlags().HasFlag(CurrencyTypesFlags.SuppressChatMessages))
+            if ((onUpdateVersion && HasFlag(CurrencyTypesFlags.SuppressChatMessageOnVersionChange)) ||
+                HasFlag(CurrencyTypesFlags.SuppressChatMessages))
                 return true;
 
             return false;
         }
 
-        public bool IsTrackingQuantity()
-        {
-            return GetFlags().HasFlag(CurrencyTypesFlags.TrackQuantity);
-        }
+        public bool IsTrackingQuantity => HasFlag(CurrencyTypesFlags.TrackQuantity);
+        #endregion
     }
 
     public sealed class CurveRecord
@@ -639,7 +832,11 @@ namespace Game.DataStorage
         public Vector2 Pos;
         public Vector2 PreSLSquishPos;
         public uint Id;
-        public uint CurveID;
+        private int _curveID;
         public byte OrderIndex;
+
+        #region Properties
+        public uint CurveID => (uint)_curveID;
+        #endregion
     }
 }

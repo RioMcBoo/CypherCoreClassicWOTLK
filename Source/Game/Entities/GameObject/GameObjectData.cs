@@ -15,13 +15,13 @@ namespace Game.Entities
     public class GameObjectTemplate
     {
         [FieldOffset(0)]
-        public uint entry;
+        public int entry;
 
         [FieldOffset(4)]
         public GameObjectTypes type;
 
         [FieldOffset(8)]
-        public uint displayId;
+        public int displayId;
 
         [FieldOffset(16)]
         public string name;
@@ -819,9 +819,9 @@ namespace Game.Entities
         public struct door
         {
             public uint startOpen;                               // 0 startOpen, enum { false, true, }; Default: false
-            public uint open;                                    // 1 open, References: Lock_, NoValue = 0
+            public int open;                                    // 1 open, References: Lock_, NoValue = 0
             public uint autoClose;                               // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
-            public uint noDamageImmune;                          // 3 noDamageImmune, enum { false, true, }; Default: false
+            public int noDamageImmune;                          // 3 noDamageImmune, enum { false, true, }; Default: false
             public uint openTextID;                              // 4 openTextID, References: BroadcastText, NoValue = 0
             public uint closeTextID;                             // 5 closeTextID, References: BroadcastText, NoValue = 0
             public uint ignoredByPathing;                        // 6 Ignored By Pathing, enum { false, true, }; Default: false
@@ -837,10 +837,10 @@ namespace Game.Entities
         public struct button
         {
             public uint startOpen;                               // 0 startOpen, enum { false, true, }; Default: false
-            public uint open;                                    // 1 open, References: Lock_, NoValue = 0
+            public int open;                                    // 1 open, References: Lock_, NoValue = 0
             public uint autoClose;                               // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
             public uint linkedTrap;                              // 3 linkedTrap, References: GameObjects, NoValue = 0
-            public uint noDamageImmune;                          // 4 noDamageImmune, enum { false, true, }; Default: false
+            public int noDamageImmune;                          // 4 noDamageImmune, enum { false, true, }; Default: false
             public uint GiganticAOI;                             // 5 Gigantic AOI, enum { false, true, }; Default: false
             public uint openTextID;                              // 6 openTextID, References: BroadcastText, NoValue = 0
             public uint closeTextID;                             // 7 closeTextID, References: BroadcastText, NoValue = 0
@@ -851,12 +851,12 @@ namespace Game.Entities
 
         public struct questgiver
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint questGiver;                              // 1 questGiver, References: QuestGiver, NoValue = 0
             public uint pageMaterial;                            // 2 pageMaterial, References: PageTextMaterial, NoValue = 0
             public uint gossipID;                                // 3 gossipID, References: Gossip, NoValue = 0
             public uint customAnim;                              // 4 customAnim, int, Min value: 0, Max value: 4, Default value: 0
-            public uint noDamageImmune;                          // 5 noDamageImmune, enum { false, true, }; Default: false
+            public int noDamageImmune;                          // 5 noDamageImmune, enum { false, true, }; Default: false
             public uint openTextID;                              // 6 openTextID, References: BroadcastText, NoValue = 0
             public uint requireLOS;                              // 7 require LOS, enum { false, true, }; Default: false
             public uint allowMounted;                            // 8 allowMounted, enum { false, true, }; Default: false
@@ -868,14 +868,14 @@ namespace Game.Entities
 
         public struct chest
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
             public uint chestRestockTime;                        // 2 chestRestockTime, int, Min value: 0, Max value: 1800000, Default value: 0
-            public uint consumable;                              // 3 consumable, enum { false, true, }; Default: false
+            public int consumable;                              // 3 consumable, enum { false, true, }; Default: false
             public uint minRestock;                              // 4 minRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public uint maxRestock;                              // 5 maxRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public uint triggeredEvent;                          // 6 triggeredEvent, References: GameEvents, NoValue = 0
-            public uint linkedTrap;                              // 7 linkedTrap, References: GameObjects, NoValue = 0
+            public int linkedTrap;                              // 7 linkedTrap, References: GameObjects, NoValue = 0
             public uint questID;                                 // 8 questID, References: QuestV2, NoValue = 0
             public uint InteractRadiusOverride;                  // 9 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint requireLOS;                              // 10 require LOS, enum { false, true, }; Default: false
@@ -927,7 +927,7 @@ namespace Game.Entities
 
         public struct trap
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint Unused;                                  // 1 Unused, int, Min value: 0, Max value: 65535, Default value: 0
             public uint radius;                                  // 2 radius, int, Min value: 0, Max value: 100, Default value: 0
             public uint spell;                                   // 3 spell, References: Spell, NoValue = 0
@@ -954,7 +954,7 @@ namespace Game.Entities
         public struct chair
         {
             public uint chairslots;                              // 0 chairslots, int, Min value: 1, Max value: 5, Default value: 1
-            public uint chairheight;                             // 1 chairheight, int, Min value: 0, Max value: 2, Default value: 1
+            public int chairheight;                             // 1 chairheight, int, Min value: 0, Max value: 2, Default value: 1
             public uint onlyCreatorUse;                          // 2 onlyCreatorUse, enum { false, true, }; Default: false
             public uint triggeredEvent;                          // 3 triggeredEvent, References: GameEvents, NoValue = 0
             public uint conditionID1;                            // 4 conditionID1, References: PlayerCondition, NoValue = 0
@@ -963,9 +963,9 @@ namespace Game.Entities
 
         public struct spellFocus
         {
-            public uint spellFocusType;                          // 0 spellFocusType, References: SpellFocusObject, NoValue = 0
+            public int spellFocusType;                          // 0 spellFocusType, References: SpellFocusObject, NoValue = 0
             public uint radius;                                  // 1 radius, int, Min value: 0, Max value: 50, Default value: 10
-            public uint linkedTrap;                              // 2 linkedTrap, References: GameObjects, NoValue = 0
+            public int linkedTrap;                              // 2 linkedTrap, References: GameObjects, NoValue = 0
             public uint serverOnly;                              // 3 serverOnly, enum { false, true, }; Default: false
             public uint questID;                                 // 4 questID, References: QuestV2, NoValue = 0
             public uint GiganticAOI;                             // 5 Gigantic AOI, enum { false, true, }; Default: false
@@ -995,19 +995,19 @@ namespace Game.Entities
 
         public struct goober
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint questID;                                 // 1 questID, References: QuestV2, NoValue = 0
             public uint eventID;                                 // 2 eventID, References: GameEvents, NoValue = 0
             public uint autoClose;                               // 3 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
             public uint customAnim;                              // 4 customAnim, int, Min value: 0, Max value: 4, Default value: 0
-            public uint consumable;                              // 5 consumable, enum { false, true, }; Default: false
+            public int consumable;                              // 5 consumable, enum { false, true, }; Default: false
             public uint cooldown;                                // 6 cooldown, int, Min value: 0, Max value: 65535, Default value: 0
             public uint pageID;                                  // 7 pageID, References: PageText, NoValue = 0
             public uint language;                                // 8 language, References: Languages, NoValue = 0
             public uint pageMaterial;                            // 9 pageMaterial, References: PageTextMaterial, NoValue = 0
             public uint spell;                                   // 10 spell, References: Spell, NoValue = 0
-            public uint noDamageImmune;                          // 11 noDamageImmune, enum { false, true, }; Default: false
-            public uint linkedTrap;                              // 12 linkedTrap, References: GameObjects, NoValue = 0
+            public int noDamageImmune;                          // 11 noDamageImmune, enum { false, true, }; Default: false
+            public int linkedTrap;                              // 12 linkedTrap, References: GameObjects, NoValue = 0
             public uint GiganticAOI;                             // 13 Gigantic AOI, enum { false, true, }; Default: false
             public uint openTextID;                              // 14 openTextID, References: BroadcastText, NoValue = 0
             public uint closeTextID;                             // 15 closeTextID, References: BroadcastText, NoValue = 0
@@ -1062,7 +1062,7 @@ namespace Game.Entities
 
         public struct areadamage
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint radius;                                  // 1 radius, int, Min value: 0, Max value: 50, Default value: 3
             public uint damageMin;                               // 2 damageMin, int, Min value: 0, Max value: 65535, Default value: 0
             public uint damageMax;                               // 3 damageMax, int, Min value: 0, Max value: 65535, Default value: 0
@@ -1075,7 +1075,7 @@ namespace Game.Entities
 
         public struct camera
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint _camera;                                  // 1 camera, References: CinematicSequences, NoValue = 0
             public uint eventID;                                 // 2 eventID, References: GameEvents, NoValue = 0
             public uint openTextID;                              // 3 openTextID, References: BroadcastText, NoValue = 0
@@ -1141,7 +1141,7 @@ namespace Game.Entities
 
         public struct spellcaster
         {
-            public uint spell;                                   // 0 spell, References: Spell, NoValue = 0
+            public int spell;                                   // 0 spell, References: Spell, NoValue = 0
             public int charges;                                  // 1 charges, int, Min value: -1, Max value: 65535, Default value: 1
             public uint partyOnly;                               // 2 partyOnly, enum { false, true, }; Default: false
             public uint allowMounted;                            // 3 allowMounted, enum { false, true, }; Default: false
@@ -1163,12 +1163,12 @@ namespace Game.Entities
 
         public struct flagstand
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint pickupSpell;                             // 1 pickupSpell, References: Spell, NoValue = 0
             public uint radius;                                  // 2 radius, int, Min value: 0, Max value: 50, Default value: 0
             public uint returnAura;                              // 3 returnAura, References: Spell, NoValue = 0
             public uint returnSpell;                             // 4 returnSpell, References: Spell, NoValue = 0
-            public uint noDamageImmune;                          // 5 noDamageImmune, enum { false, true, }; Default: false
+            public int noDamageImmune;                          // 5 noDamageImmune, enum { false, true, }; Default: false
             public uint openTextID;                              // 6 openTextID, References: BroadcastText, NoValue = 0
             public uint requireLOS;                              // 7 require LOS, enum { false, true, }; Default: true
             public uint conditionID1;                            // 8 conditionID1, References: PlayerCondition, NoValue = 0
@@ -1185,16 +1185,16 @@ namespace Game.Entities
             public uint chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
             public uint minRestock;                              // 2 minRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public uint maxRestock;                              // 3 maxRestock, int, Min value: 0, Max value: 65535, Default value: 0
-            public uint open;                                    // 4 open, References: Lock_, NoValue = 0
+            public int open;                                    // 4 open, References: Lock_, NoValue = 0
             public uint InteractRadiusOverride;                  // 5 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct flagdrop
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint eventID;                                 // 1 eventID, References: GameEvents, NoValue = 0
             public uint pickupSpell;                             // 2 pickupSpell, References: Spell, NoValue = 0
-            public uint noDamageImmune;                          // 3 noDamageImmune, enum { false, true, }; Default: false
+            public int noDamageImmune;                          // 3 noDamageImmune, enum { false, true, }; Default: false
             public uint openTextID;                              // 4 openTextID, References: BroadcastText, NoValue = 0
             public uint playerCast;                              // 5 playerCast, enum { false, true, }; Default: false
             public uint ExpireDuration;                          // 6 Expire Duration, int, Min value: 0, Max value: 60000, Default value: 10000
@@ -1267,9 +1267,9 @@ namespace Game.Entities
 
         public struct barberChair
         {
-            public uint chairheight;                             // 0 chairheight, int, Min value: 0, Max value: 2, Default value: 1
+            public int chairheight;                             // 0 chairheight, int, Min value: 0, Max value: 2, Default value: 1
             public int HeightOffset;                             // 1 Height Offset (inches), int, Min value: -100, Max value: 100, Default value: 0
-            public uint SitAnimKit;                              // 2 Sit Anim Kit, References: AnimKit, NoValue = 0
+            public int SitAnimKit;                              // 2 Sit Anim Kit, References: AnimKit, NoValue = 0
             public uint InteractRadiusOverride;                  // 3 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint CustomizationScope;                      // 4 Customization Scope, int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Preventteleportingtheplayeroutofthebarbershopchair;// 5 Prevent teleporting the player out of the barbershop chair, enum { false, true, }; Default: false
@@ -1465,7 +1465,7 @@ namespace Game.Entities
 
         public struct gatheringnode
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
             public uint Unused;                                  // 2 Unused, int, Min value: 0, Max value: 65535, Default value: 0
             public uint notInCombat;                             // 3 notInCombat, enum { false, true, }; Default: false
@@ -1485,7 +1485,7 @@ namespace Game.Entities
             public uint SpawnVignette;                           // 17 Spawn Vignette, References: vignette, NoValue = 0
             public uint MaxNumberofLoots;                        // 18 Max Number of Loots, int, Min value: 1, Max value: 40, Default value: 10
             public uint logloot;                                 // 19 log loot, enum { false, true, }; Default: false
-            public uint linkedTrap;                              // 20 linkedTrap, References: GameObjects, NoValue = 0
+            public int linkedTrap;                              // 20 linkedTrap, References: GameObjects, NoValue = 0
             public uint PlayOpenAnimationonOpening;              // 21 Play Open Animation on Opening, enum { false, true, }; Default: false
             public uint turnpersonallootsecurityoff;             // 22 turn personal loot security off, enum { false, true, }; Default: false
             public uint ClearObjectVignetteonOpening;            // 23 Clear Object Vignette on Opening, enum { false, true, }; Default: false
@@ -1592,7 +1592,7 @@ namespace Game.Entities
     // From `gameobject_template_addon`, `gameobject_overrides`
     public class GameObjectOverride
     {
-        public uint Faction;
+        public int Faction;
         public GameObjectFlags Flags;
     }
 
@@ -1600,9 +1600,9 @@ namespace Game.Entities
     {
         public uint Mingold;
         public uint Maxgold;
-        public uint[] ArtKits = new uint[5];
-        public uint WorldEffectID;
-        public uint AIAnimKitID;
+        public int[] ArtKits = new uint[5];
+        public int WorldEffectID;
+        public int AIAnimKitID;
     }
 
     public class GameObjectLocale
@@ -1617,8 +1617,8 @@ namespace Game.Entities
         public Quaternion ParentRotation;
         public InvisibilityType invisibilityType;
         public uint invisibilityValue;
-        public uint WorldEffectID;
-        public uint AIAnimKitID;
+        public int WorldEffectID;
+        public int AIAnimKitID;
     }
 
     public class GameObjectData : SpawnData

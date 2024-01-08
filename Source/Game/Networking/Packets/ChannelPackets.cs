@@ -57,7 +57,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Type, 6);
+            _worldPacket.WriteBits((byte)Type, 6);
             _worldPacket.WriteBits(Channel.GetByteCount(), 7);
             _worldPacket.WriteBits(Sender.GetByteCount(), 6);
 
@@ -78,7 +78,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(Sender);
         }
 
-        public string Sender = "";
+        public string Sender = string.Empty;
         public ObjectGuid SenderGuid;
         public ObjectGuid SenderAccountID;
         public ChatNotify Type;
@@ -107,11 +107,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(ChannelWelcomeMsg);
         }
 
-        public string ChannelWelcomeMsg = "";
+        public string ChannelWelcomeMsg = string.Empty;
         public int ChatChannelID;
         public ulong InstanceID;
         public ChannelFlags ChannelFlags;
-        public string Channel = "";
+        public string Channel = string.Empty;
         public ObjectGuid ChannelGUID;
     }
 
@@ -123,12 +123,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteBits(Channel.GetByteCount(), 7);
             _worldPacket.WriteBit(Suspended);
-            _worldPacket.WriteUInt32(ChatChannelID);
+            _worldPacket.WriteInt32(ChatChannelID);
             _worldPacket.WriteString(Channel);
         }
 
         public string Channel;
-        public uint ChatChannelID;
+        public int ChatChannelID;
         public bool Suspended;
     }
 
@@ -163,7 +163,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(RemovedUserGUID);
             _worldPacket.WriteUInt32((uint)ChannelFlags);
-            _worldPacket.WriteUInt32(ChannelID);
+            _worldPacket.WriteInt32(ChannelID);
 
             _worldPacket.WriteBits(ChannelName.GetByteCount(), 7);
             _worldPacket.FlushBits();
@@ -172,7 +172,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid RemovedUserGUID;
         public ChannelFlags ChannelFlags;
-        public uint ChannelID;
+        public int ChannelID;
         public string ChannelName;
     }
 
@@ -185,7 +185,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(UpdatedUserGUID);
             _worldPacket.WriteUInt8((byte)UserFlags);
             _worldPacket.WriteUInt32((uint)ChannelFlags);
-            _worldPacket.WriteUInt32(ChannelID);
+            _worldPacket.WriteInt32(ChannelID);
 
             _worldPacket.WriteBits(ChannelName.GetByteCount(), 7);
             _worldPacket.FlushBits();
@@ -195,7 +195,7 @@ namespace Game.Networking.Packets
         public ObjectGuid UpdatedUserGUID;
         public ChannelFlags ChannelFlags;
         public ChannelMemberFlags UserFlags;
-        public uint ChannelID;
+        public int ChannelID;
         public string ChannelName;
     }
 

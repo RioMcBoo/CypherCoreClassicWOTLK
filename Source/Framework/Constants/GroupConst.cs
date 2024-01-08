@@ -13,7 +13,7 @@ namespace Framework.Constants
         KickLFG = 3
     }
 
-    public enum GroupMemberOnlineStatus
+    public enum GroupMemberOnlineStatus : ushort
     {
         Offline = 0x00,
         Online = 0x01,      // Lua_UnitIsConnected
@@ -41,7 +41,7 @@ namespace Framework.Constants
         MainAssist = 1
     }
 
-    public enum GroupType
+    public enum GroupType : byte
     {
         None = 0,
         Normal = 1,
@@ -49,7 +49,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum GroupFlags
+    public enum GroupFlags : ushort
     {
         None = 0x00,
         FakeRaid = 0x01,
@@ -155,7 +155,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum PingSubjectType
+    public enum PingSubjectType : byte
     {
         Attack = 0,
         Warning = 1,

@@ -60,7 +60,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(MapID);
-            _worldPacket.WriteBits(ResetFailedReason, 2);
+            _worldPacket.WriteBits((int)ResetFailedReason, 2);
             _worldPacket.FlushBits();
         }
 

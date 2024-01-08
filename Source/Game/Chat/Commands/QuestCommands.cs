@@ -97,7 +97,7 @@ namespace Game.Chat
                         // we ignore unequippable quest items in this case, its' still be equipped
                         player.TakeQuestSourceItem(logQuest, false);
 
-                        if (quest.HasFlag(QuestFlags.Pvp))
+                        if (quest.HasAnyFlag(QuestFlags.Pvp))
                         {
                             player.pvpInfo.IsHostile = player.pvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
                             player.UpdatePvPState();

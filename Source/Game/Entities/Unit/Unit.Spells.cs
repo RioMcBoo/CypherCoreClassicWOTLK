@@ -2679,7 +2679,7 @@ namespace Game.Entities
                 creature.GetAI().OnSpellClick(clicker, ref spellClickHandled);
         }
 
-        public bool HasAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
+        public bool HasAura(int spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             return GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask) != null;
         }
@@ -3840,7 +3840,7 @@ namespace Game.Entities
 
         }
 
-        public AuraApplication GetAuraApplication(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
+        public AuraApplication GetAuraApplication(int spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
         {
             return GetAuraApplication(spellId, app =>
             {
@@ -3856,7 +3856,7 @@ namespace Game.Entities
             });
         }
 
-        public AuraApplication GetAuraApplication(uint spellId, Func<AuraApplication, bool> predicate)
+        public AuraApplication GetAuraApplication(int spellId, Func<AuraApplication, bool> predicate)
         {
             foreach (var app in m_appliedAuras.LookupByKey(spellId))
                 if (predicate(app))
@@ -3865,7 +3865,7 @@ namespace Game.Entities
             return null;
         }
 
-        public AuraApplication GetAuraApplication(uint spellId, Func<Aura, bool> predicate)
+        public AuraApplication GetAuraApplication(int spellId, Func<Aura, bool> predicate)
         {
             foreach (var app in m_appliedAuras.LookupByKey(spellId))
                 if (predicate(app.GetBase()))
@@ -3892,13 +3892,13 @@ namespace Game.Entities
             return null;
         }
 
-        public Aura GetAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
+        public Aura GetAura(int spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             AuraApplication aurApp = GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask);
             return aurApp?.GetBase();
         }
 
-        public Aura GetAura(uint spellId, Func<Aura, bool> predicate)
+        public Aura GetAura(int spellId, Func<Aura, bool> predicate)
         {
             AuraApplication aurApp = GetAuraApplication(spellId, predicate);
             return aurApp?.GetBase();

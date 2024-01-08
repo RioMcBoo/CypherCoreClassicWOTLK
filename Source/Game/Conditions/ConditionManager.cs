@@ -1446,10 +1446,10 @@ namespace Game
                 }
                 case ConditionTypes.Race:
                 {
-                    RaceMask<ulong> invalidRaceMask = new RaceMask<ulong>(cond.ConditionValue1 & ~RaceMask.AllPlayable.RawValue);
+                    RaceMask<ulong> invalidRaceMask = new RaceMask<ulong>(cond.ConditionValue1 & ~RaceMask.Playable.RawValue);
                     if (!invalidRaceMask.IsEmpty()) // uint32 works thanks to weird index remapping in racemask
                     {
-                        Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~RaceMask.AllPlayable.RawValue);
+                        Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~RaceMask.Playable.RawValue);
                         return false;
                     }
                     break;
@@ -2674,13 +2674,13 @@ namespace Game
                 case UnitConditionVariable.IsEnemy:
                     return (otherUnit != null && unit.GetReactionTo(otherUnit) <= ReputationRank.Hostile) ? 1 : 0;
                 case UnitConditionVariable.IsSpecMelee:
-                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetFlags().HasFlag(ChrSpecializationFlag.Melee) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().Flags().HasFlag(ChrSpecializationFlag.Melee) ? 1 : 0;
                 case UnitConditionVariable.IsSpecTank:
-                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetRole() == ChrSpecializationRole.Tank ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().Role() == ChrSpecializationRole.Tank ? 1 : 0;
                 case UnitConditionVariable.IsSpecRanged:
-                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetFlags().HasFlag(ChrSpecializationFlag.Ranged) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().Flags().HasFlag(ChrSpecializationFlag.Ranged) ? 1 : 0;
                 case UnitConditionVariable.IsSpecHealer:
-                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry()?.GetRole() == ChrSpecializationRole.Healer ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry()?.Role() == ChrSpecializationRole.Healer ? 1 : 0;
                 case UnitConditionVariable.IsPlayerControlledNPC:
                     return unit.IsCreature() && unit.HasUnitFlag(UnitFlags.PlayerControlled) ? 1 : 0;
                 case UnitConditionVariable.IsDying:
@@ -2755,7 +2755,7 @@ namespace Game
                         break;
                 }
 
-                if (condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr))
+                if (condition.Flags().HasFlag(UnitConditionFlags.LogicOr))
                 {
                     if (meets)
                         return true;
@@ -2764,7 +2764,7 @@ namespace Game
                     return false;
             }
 
-            return !condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr);
+            return !condition.Flags().HasFlag(UnitConditionFlags.LogicOr);
         }
         
         static int EvalSingleValue(ByteBuffer buffer, Map map)

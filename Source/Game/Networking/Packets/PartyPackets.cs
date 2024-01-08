@@ -283,12 +283,10 @@ namespace Game.Networking.Packets
             MemberStats.WmoGroupID = 0;
             MemberStats.WmoDoodadPlacementID = 0;
 
-            // Vehicle
-            Vehicle vehicle = player.GetVehicle();
-            if (vehicle != null)
+            // Vehicle            
+            if (player.GetVehicle() is Vehicle vehicle)
             {
-                VehicleSeatRecord vehicleSeat = vehicle.GetSeatForPassenger(player);
-                if (vehicleSeat != null)
+                if (vehicle.GetSeatForPassenger(player) is VehicleSeatRecord vehicleSeat)
                     MemberStats.VehicleSeat = (int)vehicleSeat.Id;
             }
 
@@ -298,7 +296,7 @@ namespace Game.Networking.Packets
                 PartyMemberAuraStates aura = new();
                 aura.SpellID = (int)aurApp.GetBase().GetId();
                 aura.ActiveFlags = aurApp.GetEffectMask();
-                aura.Flags = (byte)aurApp.GetFlags();
+                aura.Flags = aurApp.GetFlags();
 
                 if (aurApp.GetFlags().HasAnyFlag(AuraFlags.Scalable))
                 {
@@ -308,7 +306,7 @@ namespace Game.Networking.Packets
                             continue;
 
                         if (aurApp.HasEffect(aurEff.GetEffIndex()))
-                            aura.Points.Add((float)aurEff.GetAmount());
+                            aura.Points.Add(aurEff.GetAmount());
                     }
                 }
 
@@ -319,10 +317,8 @@ namespace Game.Networking.Packets
             PhasingHandler.FillPartyMemberPhase(MemberStats.Phases, player.GetPhaseShift());
 
             // Pet
-            if (player.GetPet() != null)
+            if (player.GetPet() is Pet pet)
             {
-                Pet pet = player.GetPet();
-
                 MemberStats.PetStats = new();
 
                 MemberStats.PetStats.GUID = pet.GetGUID();
@@ -338,7 +334,7 @@ namespace Game.Networking.Packets
 
                     aura.SpellID = (int)aurApp.GetBase().GetId();
                     aura.ActiveFlags = aurApp.GetEffectMask();
-                    aura.Flags = (byte)aurApp.GetFlags();
+                    aura.Flags = aurApp.GetFlags();
 
                     if (aurApp.GetFlags().HasAnyFlag(AuraFlags.Scalable))
                     {
@@ -348,7 +344,7 @@ namespace Game.Networking.Packets
                                 continue;
 
                             if (aurApp.HasEffect(aurEff.GetEffIndex()))
-                                aura.Points.Add((float)aurEff.GetAmount());
+                                aura.Points.Add(aurEff.GetAmount());
                         }
                     }
 
@@ -428,14 +424,7 @@ namespace Game.Networking.Packets
         }
 
         public byte? PartyIndex;
-    }
-
-    class GroupDestroyed : ServerPacket
-    {
-        public GroupDestroyed() : base(ServerOpcodes.GroupDestroyed) { }
-
-        public override void Write() { }
-    }
+    }    
 
     class SetLootMethod : ClientPacket
     {
@@ -633,13 +622,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt8(PartyIndex);
             _worldPacket.WritePackedGuid(PartyGUID);
             _worldPacket.WritePackedGuid(InitiatorGUID);
-            _worldPacket.WriteUInt32(Duration);
+            _worldPacket.WriteUInt64(Duration);
         }
 
         public sbyte PartyIndex;
         public ObjectGuid PartyGUID;
         public ObjectGuid InitiatorGUID;
-        public uint Duration;
+        public ulong Duration;
     }
 
     class ReadyCheckResponseClient : ClientPacket
@@ -904,23 +893,27 @@ namespace Game.Networking.Packets
         public ObjectGuid Victim;
     }
 
+    class GroupDestroyed : ServerPacket
+    {
+        public GroupDestroyed() : base(ServerOpcodes.GroupDestroyed) { }
+
+        public override void Write() { }
+    }
+
     class BroadcastSummonCast : ServerPacket
     {
-        public ObjectGuid Target;
-
         public BroadcastSummonCast() : base(ServerOpcodes.BroadcastSummonCast) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Target);
         }
+        
+        public ObjectGuid Target;
     }
 
     class BroadcastSummonResponse : ServerPacket
     {
-        public ObjectGuid Target;
-        public bool Accepted;
-
         public BroadcastSummonResponse() : base(ServerOpcodes.BroadcastSummonResponse) { }
 
         public override void Write()
@@ -929,13 +922,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Accepted);
             _worldPacket.FlushBits();
         }
+        
+        public ObjectGuid Target;
+        public bool Accepted;
     }
 
     class SetRestrictPingsToAssistants : ClientPacket
     {
-        public byte? PartyIndex;
-        public bool RestrictPingsToAssistants;
-
         public SetRestrictPingsToAssistants(WorldPacket packet) : base(packet) { }
 
         public override void Read()
@@ -945,15 +938,13 @@ namespace Game.Networking.Packets
             if (hasPartyIndex)
                 PartyIndex = _worldPacket.ReadUInt8();
         }
+        
+        public byte? PartyIndex;
+        public bool RestrictPingsToAssistants;
     }
 
     class SendPingUnit : ClientPacket
     {
-        public ObjectGuid SenderGUID;
-        public ObjectGuid TargetGUID;
-        public PingSubjectType Type = PingSubjectType.Max;
-        public uint PinFrameID;
-
         public SendPingUnit(WorldPacket packet) : base(packet) { }
 
         public override void Read()
@@ -963,15 +954,15 @@ namespace Game.Networking.Packets
             Type = (PingSubjectType)_worldPacket.ReadUInt8();
             PinFrameID = _worldPacket.ReadUInt32();
         }
-    }
-
-    class ReceivePingUnit : ServerPacket
-    {
+        
         public ObjectGuid SenderGUID;
         public ObjectGuid TargetGUID;
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
+    }
 
+    class ReceivePingUnit : ServerPacket
+    {
         public ReceivePingUnit() : base(ServerOpcodes.ReceivePingUnit) { }
 
         public override void Write()
@@ -981,16 +972,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)Type);
             _worldPacket.WriteUInt32(PinFrameID);
         }
+        
+        public ObjectGuid SenderGUID;
+        public ObjectGuid TargetGUID;
+        public PingSubjectType Type = PingSubjectType.Max;
+        public uint PinFrameID;
     }
 
     class SendPingWorldPoint : ClientPacket
     {
-        public ObjectGuid SenderGUID;
-        public uint MapID;
-        public Vector3 Point;
-        public PingSubjectType Type = PingSubjectType.Max;
-        public uint PinFrameID;
-
         public SendPingWorldPoint(WorldPacket packet) : base(packet) { }
 
         public override void Read()
@@ -1001,16 +991,16 @@ namespace Game.Networking.Packets
             Type = (PingSubjectType)_worldPacket.ReadUInt8();
             PinFrameID = _worldPacket.ReadUInt32();
         }
+        
+        public ObjectGuid SenderGUID;
+        public uint MapID;
+        public Vector3 Point;
+        public PingSubjectType Type = PingSubjectType.Max;
+        public uint PinFrameID;
     }
 
     class ReceivePingWorldPoint : ServerPacket
     {
-        public ObjectGuid SenderGUID;
-        public uint MapID = 0;
-        public Vector3 Point;
-        public PingSubjectType Type = PingSubjectType.Max;
-        public uint PinFrameID;
-
         public ReceivePingWorldPoint() : base(ServerOpcodes.ReceivePingWorldPoint) { }
 
         public override void Write()
@@ -1021,13 +1011,16 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)Type);
             _worldPacket.WriteUInt32(PinFrameID);
         }
+        
+        public ObjectGuid SenderGUID;
+        public uint MapID = 0;
+        public Vector3 Point;
+        public PingSubjectType Type = PingSubjectType.Max;
+        public uint PinFrameID;
     }
 
     class CancelPingPin : ServerPacket
     {
-        public ObjectGuid SenderGUID;
-        public uint PinFrameID;
-
         public CancelPingPin() : base(ServerOpcodes.CancelPingPin) { }
 
         public override void Write()
@@ -1035,6 +1028,9 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(SenderGUID);
             _worldPacket.WriteUInt32(PinFrameID);
         }
+        
+        public ObjectGuid SenderGUID;
+        public uint PinFrameID;
     }
 
     //Structs
@@ -1042,17 +1038,17 @@ namespace Game.Networking.Packets
     {
         public PartyMemberPhase(uint flags, uint id)
         {
-            Flags = (ushort)flags;
+            Flags = flags;
             Id = (ushort)id;
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt16(Flags);
+            data.WriteUInt32(Flags);
             data.WriteUInt16(Id);
         }
 
-        public ushort Flags;
+        public uint Flags;
         public ushort Id;
     }
 
@@ -1076,14 +1072,14 @@ namespace Game.Networking.Packets
     class PartyMemberAuraStates
     {
         public int SpellID;
-        public ushort Flags;
+        public AuraFlags Flags;
         public uint ActiveFlags;
         public List<float> Points = new();
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(SpellID);
-            data.WriteUInt16(Flags);
+            data.WriteUInt16((ushort)Flags);
             data.WriteUInt32(ActiveFlags);
             data.WriteInt32(Points.Count);
             foreach (float points in Points)
@@ -1100,7 +1096,9 @@ namespace Game.Networking.Packets
             data.WriteInt32(CurrentHealth);
             data.WriteInt32(MaxHealth);
             data.WriteInt32(Auras.Count);
-            Auras.ForEach(p => p.Write(data));
+
+            foreach(var aura in Auras)
+                aura.Write(data);
 
             data.WriteBits(Name.GetByteCount(), 8);
             data.FlushBits();
@@ -1139,7 +1137,7 @@ namespace Game.Networking.Packets
                 data.WriteUInt8(PartyType[i]);
 
             data.WriteInt16((short)Status);
-            data.WriteUInt8(PowerType);
+            data.WriteUInt8((byte)PowerType);
             data.WriteInt16((short)PowerDisplayID);
             data.WriteInt32(CurrentHealth);
             data.WriteInt32(MaxHealth);
@@ -1177,7 +1175,7 @@ namespace Game.Networking.Packets
         public int CurrentHealth;
         public int MaxHealth;
 
-        public byte PowerType;
+        public PowerType PowerType;
         public ushort CurrentPower;
         public ushort MaxPower;
 

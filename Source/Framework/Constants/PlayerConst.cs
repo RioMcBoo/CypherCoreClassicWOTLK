@@ -139,7 +139,7 @@ namespace Framework.Constants
         FactionArea = 0x04
     }
 
-    public enum ChatFlags
+    public enum ChatFlags : ushort
     {
         None = 0x00,
         AFK = 0x01,
@@ -201,7 +201,7 @@ namespace Framework.Constants
         DemonHunterVengeance = 581
     }
 
-    public enum SpecResetType
+    public enum SpecResetType : byte
     {
         Talents = 0,
         Specialization = 1,
@@ -260,7 +260,7 @@ namespace Framework.Constants
         Zoning = 2   // "Cannot reset %s.  There are players in your party attempting to zone into an instance."
     }
 
-    public enum ActivateTaxiReply
+    public enum ActivateTaxiReply : byte
     {
         Ok = 0,
         UnspecifiedServerError = 1,
@@ -277,7 +277,7 @@ namespace Framework.Constants
         NotStanding = 12,
     }
 
-    public enum TaxiNodeStatus
+    public enum TaxiNodeStatus : byte
     {
         None = 0,
         Learned = 1,
@@ -351,7 +351,7 @@ namespace Framework.Constants
     }
 
     /// Type of environmental damages
-    public enum EnviromentalDamage
+    public enum EnviromentalDamage : byte
     {
         Exhausted = 0,
         Drowning = 1,
@@ -379,6 +379,7 @@ namespace Framework.Constants
         public const int Miss = 1500;     // cooldown applied on runes when the spell misses
     }
 
+    [Flags]
     public enum PlayerFlags : uint
     {
         GroupLeader = 0x01,
@@ -415,7 +416,7 @@ namespace Framework.Constants
         CommentatorCamera = 0x80000000
     }
 
-    public enum PlayerFlagsEx
+    public enum PlayerFlagsEx : uint
     {
         ReagentBankUnlocked = 0x01,
         MercenaryMode = 0x02,
@@ -511,7 +512,7 @@ namespace Framework.Constants
         RAFLinked = 6
     }
 
-    public enum CharacterCustomizeFlags
+    public enum CharacterCustomizeFlags : uint
     {
         None = 0x00,
         Customize = 0x01,       // Name, Gender, Etc...
@@ -540,6 +541,7 @@ namespace Framework.Constants
         Underwear = 4,
     }
 
+    [Flags]
     public enum AtLoginFlags
     {
         None = 0x00,
@@ -706,7 +708,7 @@ namespace Framework.Constants
         Waterwalk = 0x10
     }
 
-    public enum AttackSwingErr
+    public enum AttackSwingErr : byte
     {
         NotInRange = 0,
         BadFacing = 1,
@@ -714,7 +716,7 @@ namespace Framework.Constants
         DeadTarget = 3
     }
 
-    public enum PlayerLogXPReason
+    public enum PlayerLogXPReason : byte
     {
         Kill = 0,
         NoKill = 1
@@ -787,8 +789,9 @@ namespace Framework.Constants
         Combat = 4
     }
 
-    public enum PlayerCreateMode
+    public enum PlayerCreateMode : sbyte
     {
+        None = -1,
         Normal = 0,
         NPE = 1,
 

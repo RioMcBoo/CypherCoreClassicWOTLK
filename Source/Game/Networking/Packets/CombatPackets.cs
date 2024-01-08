@@ -180,17 +180,17 @@ namespace Game.Networking.Packets
 
     class InterruptPowerRegen : ServerPacket
     {
-        public int PowerType;
-
         public InterruptPowerRegen(PowerType powerType) : base(ServerOpcodes.InterruptPowerRegen, ConnectionType.Instance)
         {
-            PowerType = (int)powerType;
+            PowerType = powerType;
         }
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(PowerType);
+            _worldPacket.WriteInt32((int)PowerType);
         }
+        
+        public PowerType PowerType;
     }
     
     public class SetSheathed : ClientPacket
@@ -254,13 +254,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(OriginalHonor);
             _worldPacket.WriteInt32(Honor);
             _worldPacket.WritePackedGuid(Target);
-            _worldPacket.WriteUInt32(Rank);
+            _worldPacket.WriteInt32(Rank);
         }
 
         public int OriginalHonor;
         public int Honor;
         public ObjectGuid Target;
-        public uint Rank;
+        public int Rank;
     }
 
     class BreakTarget : ServerPacket

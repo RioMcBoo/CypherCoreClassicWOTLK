@@ -27,7 +27,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum SkillLineFlags
+    public enum SkillLineFlags : ushort
     {
         AlwaysShownInUI = 0x01,
         NeverShownInUI = 0x02,
@@ -47,7 +47,7 @@ namespace Framework.Constants
         RacialForThePurposeOfTemporaryRaceChange = 0x8000,
     }
 
-    public enum AbilityLearnType : byte
+    public enum AbilityLearnType : sbyte
     {
         OnSkillValue = 1, // Spell state will update depending on skill value
         OnSkillLearn = 2, // Spell will be learned/removed together with entire skill
@@ -57,7 +57,10 @@ namespace Framework.Constants
     [Flags]
     public enum SkillLineAbilityFlags : byte
     {
-        CanFallbackToLearnedOnSkillLearn = 0x80, // The skill is rewarded from a quest if player started on exile's reach
+        /// <summary>
+        /// The skill is rewarded from a quest if player started on exile's reach
+        /// </summary>
+        CanFallbackToLearnedOnSkillLearn = 0x80, 
     }
 
     public enum Anim
@@ -924,7 +927,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum AreaFlags2
+    public enum AreaFlags2 :uint
     {
         ForceMicroDungeonArtMap = 0x01, // Ask Programmer
         UseSubzonePlayerLoot = 0x02,
@@ -942,7 +945,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum AreaMountFlags
+    public enum AreaMountFlags : uint
     {
         None = 0x0,
         AllowGroundMounts = 0x1,
@@ -958,6 +961,7 @@ namespace Framework.Constants
         Fishing = 2
     }
 
+    [Flags]
     public enum ArtifactPowerFlag : byte
     {
         Gold = 0x01,
@@ -977,24 +981,30 @@ namespace Framework.Constants
         BonusStamina = 2
     }
 
-    public enum AzeriteTierUnlockSetFlags
+    [Flags]
+    public enum AzeriteTierUnlockSetFlags : int
     {
         Default = 0x01
     }
 
-    public enum BattlegroundBracketId                                  // bracketId for level ranges
+    /// <summary>
+    /// bracketId for level ranges
+    /// </summary>
+    public enum BattlegroundBracketId
     {
         First = 0,
         Last = 15,
         Max
     }
 
+    [Flags]
     public enum ChrCustomizationOptionFlag
     {
         Disabled = 0x04
     }
 
-    public enum ChrCustomizationReqFlag
+    [Flags]
+    public enum ChrCustomizationReqFlag : int
     {
         HasRequirements = 0x01
     }
@@ -1059,7 +1069,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum CurrencyTypesFlagsB
+    public enum CurrencyTypesFlagsB : uint
     {
         UseTotalEarnedForEarned = 0x01,
         ShowQuestXPGainInTooltip = 0x02, // NYI
@@ -1068,7 +1078,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum BattlemasterListFlags : int
+    public enum BattlemasterListFlags : sbyte
     {
         Disabled = 0x01,
         SkipRoleCheck = 0x02,
@@ -1080,7 +1090,25 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum ChrRacesFlag
+    public enum CfgCategoriesCharsets : sbyte
+    {
+        Any = 0x00,
+        Latin1 = 0x01,
+        English = 0x02,
+        Russian = 0x04,
+        Korean = 0x08,
+        Chinese = 0x10
+    }
+
+    [Flags]
+    public enum CfgCategoriesFlags : sbyte
+    {
+        None = 0x0,
+        Tournament = 0x1
+    }
+
+    [Flags]
+    public enum ChrRacesFlag :int
     {
         NPCOnly = 0x01,
         DoNotComponentFeet = 0x02,
@@ -1109,17 +1137,21 @@ namespace Framework.Constants
         InternalOnly = 0x100000,
     }
 
+    [Flags]
     public enum ChrSpecializationFlag : uint
     {
         Caster = 0x01,
         Ranged = 0x02,
         Melee = 0x04,
-        DualWieldTwoHanded = 0x10,     // Used For Cunitdisplay::Setsheatheinvertedfordualwield
+        /// <summary>
+        /// Used For Cunitdisplay::Setsheatheinvertedfordualwield
+        /// </summary>
+        DualWieldTwoHanded = 0x10,
         PetOverrideSpec = 0x20,
         Recommended = 0x40,
     }
 
-    public enum ChrSpecializationRole
+    public enum ChrSpecializationRole : sbyte
     {
         Tank = 0,
         Healer = 1,
@@ -1178,7 +1210,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum ContentTuningFlag
+    public enum ContentTuningFlag :int
     {
         DisabledForItem = 0x04,
         Horde = 0x8,
@@ -1768,12 +1800,19 @@ namespace Framework.Constants
         Scenario = 5
     }
 
-    public enum MapDifficultyFlags : int
+    public enum MapDifficultyFlags : byte
     {
         LimitToPlayersFromOneRealm = 0x01,
-        UseLootBasedLockInsteadOfInstanceLock = 0x02, // Lock to single encounters
+        /// <summary>
+        /// Lock to single encounters
+        /// </summary>
+        UseLootBasedLockInsteadOfInstanceLock = 0x02,
         LockedToSoloOwner = 0x04,
-        ResumeDungeonProgressBasedOnLockout = 0x08, // Mythic dungeons with this flag zone into leaders instance instead of always using a fresh one (Return to Karazhan, Operation: Mechagon)
+        /// <summary>
+        ///  Mythic dungeons with this flag zone into leaders instance instead <br/>
+        ///  of always using a fresh one (Return to Karazhan, Operation: Mechagon)
+        /// </summary>
+        ResumeDungeonProgressBasedOnLockout = 0x08,
         DisableLockExtension = 0x10,
     }
 
@@ -1863,7 +1902,7 @@ namespace Framework.Constants
         Registrar = 11,
         Vendor = 12,
         PetitionVendor = 13,
-        TabardVendor = 14,
+        GuildTabardVendor = 14,
         TalentMaster = 15,
         SpecializationMaster = 16,
         MailInfo = 17,
@@ -1913,7 +1952,8 @@ namespace Framework.Constants
         TraitSystem = 61,
         BarbersChoice = 62,
         JailersTowerBuffs = 63,
-        MajorFactionRenown = 64
+        MajorFactionRenown = 64,
+        PersonalTabardVendor = 65
     }
 
     [Flags]
@@ -2052,9 +2092,14 @@ namespace Framework.Constants
 
     public enum TaxiNodeFlags : int
     {
-        Alliance = 0x1,
-        Horde = 0x2,
-        UseFavoriteMount = 0x10
+        ShowOnAllianceMap = 0x1,
+        ShowOnHordeMap = 0x2,
+        ShowOnMapBorder = 0x4,
+        ShowIfClientPassesCondition = 0x8,
+        UsePlayerFavoriteMount = 0x10,
+        EndPointPnly = 0x20,
+        IgnoreForFindNearest = 0x40,
+        DoNotShowInWorldMapUI = 0x80,
     }
 
     public enum TaxiPathNodeFlags : int
@@ -2398,7 +2443,7 @@ namespace Framework.Constants
         DeprecatedSelectionOption = 5
     }
 
-    public enum TraitNodeEntryType
+    public enum TraitNodeEntryType : byte
     {
         SpendHex = 0,
         SpendSquare = 1,
@@ -2419,7 +2464,7 @@ namespace Framework.Constants
         AvailableByDefault = 0x1
     }
 
-    public enum TraitNodeType
+    public enum TraitNodeType : byte
     {
         Single = 0,
         Tiered = 1,
@@ -2483,7 +2528,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum UnitConditionFlags
+    public enum UnitConditionFlags : byte
     {
         LogicOr = 0x1
     }
@@ -2681,7 +2726,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum CreatureModelDataFlags
+    public enum CreatureModelDataFlags : uint
     {
         NoFootprintParticles = 0x01,
         NoBreathParticles = 0x02,
@@ -2732,6 +2777,7 @@ namespace Framework.Constants
     //    ContentTuningPvpItemLevelDamageScaling = 15,
     //}
 
+    [Flags]
     public enum BattlePetSpeciesFlags : int
     {
         NoRename = 0x01,

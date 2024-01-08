@@ -324,7 +324,7 @@ namespace Game.DataStorage
                     uint palletIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
                     return _palletData[fieldIndex][palletIndex].As<T>();
             }
-            throw new Exception(string.Format("Unexpected compression Type {0}", _columnMeta[fieldIndex].CompressionType));
+            throw new Exception($"Unexpected compression Type {_columnMeta[fieldIndex].CompressionType}");
         }
 
         T[] GetFieldValueArray<T>(int fieldIndex, int arraySize) where T : unmanaged
@@ -574,12 +574,12 @@ namespace Game.DataStorage
     {
         public bool HasIndexTable()
         {
-            return Convert.ToBoolean(Flags & HeaderFlags.Index);
+            return (Flags & HeaderFlags.Index) != 0;
         }
 
         public bool HasOffsetTable()
         {
-            return Convert.ToBoolean(Flags & HeaderFlags.Sparse);
+            return (Flags & HeaderFlags.Sparse) != 0;
         }
 
         public uint Signature;
@@ -733,7 +733,7 @@ namespace Game.DataStorage
         {
             get
             {
-                return stringStorage[(int)locale] ?? "";
+                return stringStorage[(int)locale] ?? string.Empty;
             }
             set
             {

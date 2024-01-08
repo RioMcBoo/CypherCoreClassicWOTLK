@@ -1362,7 +1362,7 @@ namespace Game.Entities
                 amount = (int)(amount * GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyCategoryGainPct, currency.CategoryID));
             }
 
-            int scaler = currency.GetScaler();
+            int scaler = currency.Scaler();
 
             // Currency that is immediately converted into reputation with that faction instead
             FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(currency.FactionID);
@@ -1432,7 +1432,7 @@ namespace Game.Entities
             packet.Quantity = (int)playerCurrency.Quantity;
             packet.Flags = CurrencyGainFlags.None; // TODO: Check when flags are applied
 
-            if ((playerCurrency.WeeklyQuantity / currency.GetScaler()) > 0)
+            if ((playerCurrency.WeeklyQuantity / currency.Scaler()) > 0)
                 packet.WeeklyQuantity = (int)playerCurrency.WeeklyQuantity;
 
             if (currency.HasMaxQuantity(false, gainSource == CurrencyGainSource.UpdatingVersion))
@@ -1510,7 +1510,7 @@ namespace Game.Entities
             packet.Quantity = (int)playerCurrency.Quantity;
             packet.Flags = CurrencyGainFlags.None;
 
-            if ((playerCurrency.WeeklyQuantity / currency.GetScaler()) > 0)
+            if ((playerCurrency.WeeklyQuantity / currency.Scaler()) > 0)
                 packet.WeeklyQuantity = (int)playerCurrency.WeeklyQuantity;
 
             if (currency.IsTrackingQuantity())
@@ -2851,7 +2851,7 @@ namespace Game.Entities
                     {
                         PlayerInteractionType.None, PlayerInteractionType.Vendor, PlayerInteractionType.TaxiNode,
                         PlayerInteractionType.Trainer, PlayerInteractionType.SpiritHealer, PlayerInteractionType.Binder,
-                        PlayerInteractionType.Banker, PlayerInteractionType.PetitionVendor, PlayerInteractionType.TabardVendor,
+                        PlayerInteractionType.Banker, PlayerInteractionType.PetitionVendor, PlayerInteractionType.GuildTabardVendor,
                         PlayerInteractionType.BattleMaster, PlayerInteractionType.Auctioneer, PlayerInteractionType.TalentMaster,
                         PlayerInteractionType.StableMaster, PlayerInteractionType.None, PlayerInteractionType.GuildBanker,
                         PlayerInteractionType.None, PlayerInteractionType.None, PlayerInteractionType.None,
@@ -3115,7 +3115,7 @@ namespace Game.Entities
                     if (m_nextMailDelivereTime == 0 || m_nextMailDelivereTime > mail.deliver_time)
                         m_nextMailDelivereTime = mail.deliver_time;
                 }
-                else if ((mail.checkMask & MailCheckMask.Read) == 0)
+                else if ((mail.checkMask & MailCheckFlags.Read) == 0)
                     ++unReadMails;
             }
         }
@@ -3781,7 +3781,7 @@ namespace Game.Entities
 
         public static bool IsValidGender(Gender _gender) { return _gender <= Gender.Female; }
         public static bool IsValidClass(Class _class) { return Convert.ToBoolean((1 << ((int)_class - 1)) & (int)Class.ClassMaskAllPlayable); }
-        public static bool IsValidRace(Race _race) { return RaceMask.AllPlayable.HasRace(_race); }
+        public static bool IsValidRace(Race _race) { return RaceMask.Playable.HasRace(_race); }
 
         void LeaveLFGChannel()
         {
@@ -6225,8 +6225,8 @@ namespace Game.Entities
                     continue;
 
                 // Check faction
-                if ((currencyRecord.IsAlliance() && GetTeam() != Team.Alliance) ||
-                    (currencyRecord.IsHorde() && GetTeam() != Team.Horde))
+                if ((currencyRecord.IsAlliance && GetTeam() != Team.Alliance) ||
+                    (currencyRecord.IsHorde && GetTeam() != Team.Horde))
                     continue;
 
                 // Check award condition
@@ -6241,16 +6241,16 @@ namespace Game.Entities
                 record.Type = currencyRecord.Id;
                 record.Quantity = currency.Quantity;
 
-                if ((currency.WeeklyQuantity / currencyRecord.GetScaler()) > 0)
+                if ((currency.WeeklyQuantity / currencyRecord.Scaler) > 0)
                     record.WeeklyQuantity = currency.WeeklyQuantity;
 
-                if (currencyRecord.HasMaxEarnablePerWeek())
+                if (currencyRecord.HasMaxEarnablePerWeek)
                     record.MaxWeeklyQuantity = GetCurrencyWeeklyCap(currencyRecord);
 
-                if (currencyRecord.IsTrackingQuantity())
+                if (currencyRecord.IsTrackingQuantity)
                     record.TrackedQuantity = currency.TrackedQuantity;
 
-                if (currencyRecord.HasTotalEarned())
+                if (currencyRecord.HasTotalEarned)
                     record.TotalEarned = (int)currency.EarnedQuantity;
 
                 if (currencyRecord.HasMaxQuantity(true))
@@ -6291,7 +6291,7 @@ namespace Game.Entities
 
         public void AddExploredZones(uint pos, ulong mask) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)pos), mask); }
         public void RemoveExploredZones(uint pos, ulong mask) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)pos), mask); }
-        
+
         void CheckAreaExploreAndOutdoor()
         {
             if (!IsAlive())
@@ -6367,13 +6367,15 @@ namespace Game.Entities
                             XP = Math.Max(minScaledXP, XP);
                         }
 
-                    GiveXP(XP, null);
-                    SendExplorationExperience(areaId, XP);
-                }
-                Log.outInfo(LogFilter.Player, "Player {0} discovered a new area: {1}", GetGUID().ToString(), areaId);
+                        GiveXP(XP, null);
+                        SendExplorationExperience(areaId, XP);
+                    }
+                    Log.outInfo(LogFilter.Player, "Player {0} discovered a new area: {1}", GetGUID().ToString(), areaId);
 
+                }
             }
         }
+
         void SendExplorationExperience(uint Area, uint Experience)
         {
             SendPacket(new ExplorationExperience(Experience, Area));
@@ -6982,7 +6984,7 @@ namespace Game.Entities
             // change but I couldn't find a suitable alternative. OK to use class because only DK
             // can use this taxi.
             uint mount_display_id;
-            if (node.Flags.HasAnyFlag(TaxiNodeFlags.UseFavoriteMount) && preferredMountDisplay != 0)
+            if (node.Flags.HasAnyFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
                 mount_display_id = preferredMountDisplay;
             else
                 mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));
@@ -7487,7 +7489,7 @@ namespace Game.Entities
                 offItem.SaveToDB(trans);                                // recursive and not have transaction guard into self, item not in inventory and can be save standalone
 
                 string subject = ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem);
-                new MailDraft(subject, "There were problems with equipping one or several items").AddItem(offItem).SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied);
+                new MailDraft(subject, "There were problems with equipping one or several items").AddItem(offItem).SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckFlags.Copied);
 
                 DB.Characters.CommitTransaction(trans);
             }
@@ -7524,15 +7526,15 @@ namespace Game.Entities
             SetUpdateFieldValue(restInfo.ModifyValue(restInfo.Threshold), threshold);
         }
 
-        public bool HasPlayerFlag(PlayerFlags flags) { return (m_playerData.PlayerFlags & (uint)flags) != 0; }
-        public void SetPlayerFlag(PlayerFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), (uint)flags); }
-        public void RemovePlayerFlag(PlayerFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), (uint)flags); }
-        public void ReplaceAllPlayerFlags(PlayerFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), (uint)flags); }
+        public bool HasPlayerFlag(PlayerFlags flags) { return m_playerData.PlayerFlags.GetValue().HasAnyFlag(flags); }
+        public void SetPlayerFlag(PlayerFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), flags); }
+        public void RemovePlayerFlag(PlayerFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), flags); }
+        public void ReplaceAllPlayerFlags(PlayerFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), flags); }
 
-        public bool HasPlayerFlagEx(PlayerFlagsEx flags) { return (m_playerData.PlayerFlagsEx & (uint)flags) != 0; }
-        public void SetPlayerFlagEx(PlayerFlagsEx flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
-        public void RemovePlayerFlagEx(PlayerFlagsEx flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
-        public void ReplaceAllPlayerFlagsEx(PlayerFlagsEx flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
+        public bool HasPlayerFlagEx(PlayerFlagsEx flags) { return m_playerData.PlayerFlagsEx.GetValue().HasAnyFlag(flags); }
+        public void SetPlayerFlagEx(PlayerFlagsEx flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), flags); }
+        public void RemovePlayerFlagEx(PlayerFlagsEx flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), flags); }
+        public void ReplaceAllPlayerFlagsEx(PlayerFlagsEx flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), flags); }
 
         public void SetAverageItemLevelTotal(float newItemLevel) { SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.AvgItemLevel, 0), newItemLevel); }
         public void SetAverageItemLevelEquipped(float newItemLevel) { SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.AvgItemLevel, 1), newItemLevel); }

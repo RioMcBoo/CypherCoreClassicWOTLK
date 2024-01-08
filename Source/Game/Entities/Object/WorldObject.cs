@@ -1906,7 +1906,9 @@ namespace Game.Entities
                 return minduration;
 
             // we want only baseline cost here
-            var powerCostRecord = spellInfo.PowerCosts.FirstOrDefault(powerEntry => powerEntry != null && powerEntry.PowerType == PowerType.ComboPoints && (powerEntry.RequiredAuraSpellID == 0 || unit.HasAura(powerEntry.RequiredAuraSpellID)));
+            var powerCostRecord = spellInfo.PowerCosts.FirstOrDefault(
+                powerEntry => 
+                powerEntry != null && powerEntry.PowerType == PowerType.ComboPoints && (powerEntry.RequiredAuraSpellID == 0 || unit.HasAura(powerEntry.RequiredAuraSpellID)));
             if (powerCostRecord == null)
                 return minduration;
 
@@ -1917,7 +1919,7 @@ namespace Game.Entities
             int baseComboCost = powerCostRecord.ManaCost + (int)powerCostRecord.OptionalCost;
             var powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(PowerType.ComboPoints);
             if (powerTypeEntry != null)
-                baseComboCost += MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, powerCostRecord.PowerCostPct + powerCostRecord.OptionalCostPct);
+                baseComboCost += MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, powerCostRecord.PowerCostPct);
 
             float durationPerComboPoint = (float)(maxduration - minduration) / baseComboCost;
             return minduration + (int)(durationPerComboPoint * consumedCost.Amount);
@@ -2195,7 +2197,7 @@ namespace Game.Entities
             return SpellMissInfo.None;
         }
 
-        public void SendSpellMiss(Unit target, uint spellID, SpellMissInfo missInfo)
+        public void SendSpellMiss(Unit target, int spellID, SpellMissInfo missInfo)
         {
             SpellMissLog spellMissLog = new();
             spellMissLog.SpellID = spellID;
@@ -2247,7 +2249,7 @@ namespace Game.Entities
                 if (tempSummon == null || tempSummon.m_Properties == null)
                     return false;
 
-                if (tempSummon.m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.AttackableBySummoner)
+                if (tempSummon.m_Properties.HasFlag(SummonPropertiesFlags.AttackableBySummoner)
                     && targetGuid == tempSummon.GetSummonerGUID())
                     return true;
 
@@ -2327,10 +2329,10 @@ namespace Game.Entities
                                 var targetFactionEntry = CliDB.FactionStorage.LookupByKey(targetFactionTemplateEntry.Faction);
                                 if (targetFactionEntry != null)
                                 {
-                                    if (targetFactionEntry.CanHaveReputation())
+                                    if (targetFactionEntry.CanHaveReputation)
                                     {
                                         // check contested flags
-                                        if ((targetFactionTemplateEntry.Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0 && selfPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
+                                        if (targetFactionTemplateEntry.HasFlag(FactionTemplateFlags.ContestedGuard) && selfPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
                                             return ReputationRank.Hostile;
 
                                         // if faction has reputation, hostile state depends only from AtWar state
@@ -2363,7 +2365,7 @@ namespace Game.Entities
             if (targetPlayerOwner != null)
             {
                 // check contested flags
-                if ((factionTemplateEntry.Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0 && targetPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
+                if (factionTemplateEntry.HasFlag(FactionTemplateFlags.ContestedGuard) && targetPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
                     return ReputationRank.Hostile;
 
                 var repRank = targetPlayerOwner.GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry);
@@ -2375,7 +2377,7 @@ namespace Game.Entities
                     var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
                     if (factionEntry != null)
                     {
-                        if (factionEntry.CanHaveReputation())
+                        if (factionEntry.CanHaveReputation)
                         {
                             // CvP case - check reputation, don't allow state higher than neutral when at war
                             ReputationRank repRank1 = targetPlayerOwner.GetReputationMgr().GetRank(factionEntry);
@@ -2394,7 +2396,7 @@ namespace Game.Entities
                 return ReputationRank.Friendly;
             if (targetFactionTemplateEntry.IsFriendlyTo(factionTemplateEntry))
                 return ReputationRank.Friendly;
-            if ((factionTemplateEntry.Flags & (ushort)FactionTemplateFlags.HostileByDefault) != 0)
+            if (factionTemplateEntry.HasFlag(FactionTemplateFlags.HostileByDefault))
                 return ReputationRank.Hostile;
             // neutral by default
             return ReputationRank.Neutral;
@@ -2420,7 +2422,7 @@ namespace Game.Entities
             if (raw_faction != null && raw_faction.ReputationIndex >= 0)
                 return false;
 
-            return my_faction.IsHostileToPlayers();
+            return my_faction.IsHostileToPlayers;
         }
 
         public bool IsNeutralToAll()
@@ -2481,7 +2483,7 @@ namespace Game.Entities
             return spell.Prepare(targets.Targets, args.TriggeringAura);
         }
 
-        void SendPlayOrphanSpellVisual(ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        void SendPlayOrphanSpellVisual(ObjectGuid target, int spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
             PlayOrphanSpellVisual playOrphanSpellVisual = new();
             playOrphanSpellVisual.SourceLocation = GetPosition();
@@ -2506,7 +2508,7 @@ namespace Game.Entities
             SendMessageToSet(playOrphanSpellVisual, true);
         }
 
-        void SendPlayOrphanSpellVisual(Position targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        void SendPlayOrphanSpellVisual(Position targetLocation, int spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
             PlayOrphanSpellVisual playOrphanSpellVisual = new();
             playOrphanSpellVisual.SourceLocation = GetPosition();
@@ -2531,7 +2533,7 @@ namespace Game.Entities
             SendMessageToSet(playOrphanSpellVisual, true);
         }
 
-        void SendCancelOrphanSpellVisual(uint id)
+        void SendCancelOrphanSpellVisual(int id)
         {
             CancelOrphanSpellVisual cancelOrphanSpellVisual = new();
             cancelOrphanSpellVisual.SpellVisualID = id;
@@ -2934,16 +2936,16 @@ namespace Game.Entities
 
         public virtual float GetCombatReach() { return 0.0f; } // overridden (only) in Unit
 
-        public void PlayDistanceSound(uint soundId, Player target = null)
+        public void PlayDistanceSound(int soundId, Player target = null)
         {
-            PlaySpeakerBoxSound playSpeakerBoxSound = new(GetGUID(), soundId);
+            PlaySpeakerBotSound playSpeakerBoxSound = new(GetGUID(), soundId);
             if (target != null)
                 target.SendPacket(playSpeakerBoxSound);
             else
                 SendMessageToSet(playSpeakerBoxSound, true);
         }
 
-        public void PlayDirectSound(uint soundId, Player target = null, uint broadcastTextId = 0)
+        public void PlayDirectSound(int soundId, Player target = null, int broadcastTextId = 0)
         {
             PlaySound sound = new(GetGUID(), soundId, broadcastTextId);
             if (target != null)
@@ -2960,7 +2962,7 @@ namespace Game.Entities
                 SendMessageToSet(new PlayMusic(musicId), true);
         }
 
-        public void PlayObjectSound(uint soundKitId, ObjectGuid targetObjectGUID, Player target = null, int broadcastTextId = 0)
+        public void PlayObjectSound(int soundKitId, ObjectGuid targetObjectGUID, Player target = null, int broadcastTextId = 0)
         {
             PlayObjectSound pkt = new();
             pkt.TargetObjectGUID = targetObjectGUID;
@@ -3049,8 +3051,8 @@ namespace Game.Entities
         public void SetName(string name) { _name = name; }
 
         public ObjectGuid GetGUID() { return m_guid; }
-        public uint GetEntry() { return (uint)m_objectData.EntryId.GetValue(); }
-        public void SetEntry(uint entry) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.EntryId), (int)entry); }
+        public int GetEntry() { return m_objectData.EntryId.GetValue(); }
+        public void SetEntry(int entry) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.EntryId), entry); }
 
         public float GetObjectScale() { return m_objectData.Scale; }
         public virtual void SetObjectScale(float scale) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.Scale), scale); }
@@ -3926,22 +3928,6 @@ namespace Game.Entities
         public float Magnitude;
         public MovementForceType Type;
         public int Unused910;
-
-        public void Read(WorldPacket data)
-        {
-            ID = data.ReadPackedGuid();
-            Origin = data.ReadVector3();
-            Direction = data.ReadVector3();
-            TransportID = data.ReadUInt32();
-            Magnitude = data.ReadFloat();
-            Unused910 = data.ReadInt32();
-            Type = (MovementForceType)data.ReadBits<byte>(2);
-        }
-
-        public void Write(WorldPacket data)
-        {
-            MovementExtensions.WriteMovementForceWithDirection(this, data);
-        }
     }
 
     public class MovementForces

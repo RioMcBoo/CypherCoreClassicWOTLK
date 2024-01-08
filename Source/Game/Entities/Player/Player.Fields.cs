@@ -284,12 +284,12 @@ namespace Game.Entities
 
         public ItemContext itemContext;
         public List<PlayerCreateInfoItem> item = new();
-        public List<uint> customSpells = new();
-        public List<uint>[] castSpells = new List<uint>[(int)PlayerCreateMode.Max];
+        public List<int> customSpells = new();
+        public List<int>[] castSpells = new List<int>[(int)PlayerCreateMode.Max];
         public List<PlayerCreateInfoAction> action = new();
         public List<SkillRaceClassInfoRecord> skills = new();
 
-        public uint? introMovieId;
+        public int? introMovieId;
         public uint? introSceneId;
         public uint? introSceneIdNPE;
 
@@ -313,13 +313,13 @@ namespace Game.Entities
 
     public class PlayerCreateInfoItem
     {
-        public PlayerCreateInfoItem(uint id, uint amount)
+        public PlayerCreateInfoItem(int id, uint amount)
         {
             item_id = id;
             item_amount = amount;
         }
 
-        public uint item_id;
+        public int item_id;
         public uint item_amount;
     }
 
@@ -362,13 +362,13 @@ namespace Game.Entities
             {
                 Talents[i] = new Dictionary<uint, PlayerTalent>();
                 PvpTalents[i] = new uint[PlayerConst.MaxPvpTalentSlots];
-                Glyphs[i] = new ushort[PlayerConst.MaxGlyphSlotIndex];
+                Glyphs[i] = new uint[PlayerConst.MaxGlyphSlotIndex];
             }
         }
 
         public Dictionary<uint, PlayerTalent>[] Talents = new Dictionary<uint, PlayerTalent>[PlayerConst.MaxSpecializations];
         public uint[][] PvpTalents = new uint[PlayerConst.MaxSpecializations][];
-        public ushort[][] Glyphs = new ushort[PlayerConst.MaxSpecializations][];
+        public uint[][] Glyphs = new uint[PlayerConst.MaxSpecializations][];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;
         public uint UsedTalentCount;
@@ -468,11 +468,11 @@ namespace Game.Entities
     {
         public byte levelMin;
         public byte levelMax;
-        public uint item;
-        public uint item2;
-        public uint quest_A;
-        public uint quest_H;
-        public uint achievement;
+        public int item;
+        public int item2;
+        public int quest_A;
+        public int quest_H;
+        public int achievement;
         public string questFailedText;
     }
 

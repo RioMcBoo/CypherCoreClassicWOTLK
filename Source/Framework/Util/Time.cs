@@ -295,7 +295,7 @@ public static class Time
     public static uint GetPackedTimeFromUnixTime(long unixTime)
     {
         var now = UnixTimeToDateTime(unixTime);
-        return Convert.ToUInt32((now.Year - 2000) << 24 | (now.Month - 1) << 20 | (now.Day - 1) << 14 | (int)now.DayOfWeek << 11 | now.Hour << 6 | now.Minute);
+        return GetPackedTimeFromDateTime(now);
     }
 
     public static uint GetPackedTimeFromDateTime(DateTime now)

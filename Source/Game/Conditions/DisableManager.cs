@@ -22,7 +22,7 @@ namespace Game
             public List<uint> param1 = new();
         }
 
-        Dictionary<DisableType, Dictionary<uint, DisableData>> m_DisableMap = new();
+        Dictionary<DisableType, Dictionary<int, DisableData>> m_DisableMap = new();
 
         public void LoadDisables()
         {
@@ -270,7 +270,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Checked {0} quest disables in {1} ms", m_DisableMap[DisableType.Quest].Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public bool IsDisabledFor(DisableType type, uint entry, WorldObject refe, DisableFlags flags = 0)
+        public bool IsDisabledFor(DisableType type, int entry, WorldObject refe, DisableFlags flags = 0)
         {
             Cypher.Assert(type < DisableType.Max);
             if (!m_DisableMap.ContainsKey(type) || m_DisableMap[type].Empty())

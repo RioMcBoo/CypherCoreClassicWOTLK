@@ -83,13 +83,13 @@ namespace Game.Entities
 
         public void SetMinion(Minion minion, bool apply)
         {
-            Log.outDebug(LogFilter.Unit, "SetMinion {0} for {1}, apply {2}", minion.GetEntry(), GetEntry(), apply);
+            Log.outDebug(LogFilter.Unit, $"SetMinion {minion.GetEntry()} for {GetEntry()}, apply {apply}");
 
             if (apply)
             {
                 if (!minion.GetOwnerGUID().IsEmpty())
                 {
-                    Log.outFatal(LogFilter.Unit, "SetMinion: Minion {0} is not the minion of owner {1}", minion.GetEntry(), GetEntry());
+                    Log.outFatal(LogFilter.Unit, $"SetMinion: Minion {minion.GetEntry()} is not the minion of owner {GetEntry()}");
                     return;
                 }
 
@@ -119,8 +119,7 @@ namespace Game.Entities
                         if (oldPet != minion && (oldPet.IsPet() || minion.IsPet() || oldPet.GetEntry() != minion.GetEntry()))
                         {
                             // remove existing minion pet
-                            Pet oldPetAsPet = oldPet.ToPet();
-                            if (oldPetAsPet != null)
+                            if (oldPet.ToPet() is Pet oldPetAsPet)
                                 oldPetAsPet.Remove(PetSaveMode.NotInSlot);
                             else
                                 oldPet.UnSummon();
@@ -141,11 +140,11 @@ namespace Game.Entities
 
                 var properties = minion.m_Properties;
                 if (properties != null && properties.Title == SummonTitle.Companion)
+                { 
                     SetCritterGUID(minion.GetGUID());
-                    Player thisPlayer = ToPlayer();
-                    if (thisPlayer != null)
+                    if (ToPlayer() is Player thisPlayer)
                     {
-                        if (properties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
+                        if (properties.HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
                         {
                             var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
                             if (pet != null)
@@ -179,7 +178,7 @@ namespace Game.Entities
             {
                 if (minion.GetOwnerGUID() != GetGUID())
                 {
-                    Log.outFatal(LogFilter.Unit, "SetMinion: Minion {0} is not the minion of owner {1}", minion.GetEntry(), GetEntry());
+                    Log.outFatal(LogFilter.Unit, $"SetMinion: Minion {minion.GetEntry()} is not the minion of owner {GetEntry()}");
                     return;
                 }
 
@@ -217,7 +216,7 @@ namespace Game.Entities
                 if (spellInfo != null && spellInfo.IsCooldownStartedOnEvent())
                     GetSpellHistory().SendCooldownEvent(spellInfo);
 
-                if (GetMinionGUID() == minion.GetGUID())
+                //if (GetMinionGUID() == minion.GetGUID())
                 {
                     SetMinionGUID(ObjectGuid.Empty);
                     // Check if there is another minion
@@ -250,7 +249,6 @@ namespace Game.Entities
                     }
                 }
             }
-
             UpdatePetCombatState();
         }
 

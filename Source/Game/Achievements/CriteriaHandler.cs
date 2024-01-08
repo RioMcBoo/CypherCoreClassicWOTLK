@@ -3139,7 +3139,7 @@ namespace Game.Achievements
                             continue;
 
                         foreach (TraitEntry traitEntry in traitConfig.Entries)
-                            if (CliDB.TraitNodeEntryStorage.LookupByKey(traitEntry.TraitNodeEntryID)?.GetNodeEntryType() == TraitNodeEntryType.ProfPath)
+                            if (CliDB.TraitNodeEntryStorage.LookupByKey(traitEntry.TraitNodeEntryID)?.NodeEntryType() == TraitNodeEntryType.ProfPath)
                                 ranks += (uint)(traitEntry.Rank + traitEntry.GrantedRanks);
                     }
 
@@ -3229,8 +3229,8 @@ namespace Game.Achievements
         MultiMap<uint, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
         MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
 
-        MultiMap<CriteriaStartEvent, Criteria> _criteriasByTimedType = new();
-        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Max];
+        MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Count];
+        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Count];
 
         CriteriaManager()
         {
@@ -3352,7 +3352,7 @@ namespace Game.Achievements
                     _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
             }
 
-            for (var i = 0; i < (int)CriteriaFailEvent.Max; ++i)
+            for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
                 _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
 
             // Load criteria
@@ -3364,8 +3364,8 @@ namespace Game.Achievements
             {
                 Cypher.Assert(criteriaEntry.Type < CriteriaType.Count,
                     $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaType.Count}");
-                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Max, $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Max}");
-                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Max, $"CRITERIA_CONDITION_MAX must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Max}");
+                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Count, $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Count}");
+                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Count, $"CRITERIA_CONDITION_MAX must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Count}");
 
                 var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
                 if (treeList.Empty())
@@ -3592,7 +3592,27 @@ namespace Game.Achievements
         {
             return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
         }
-        
+
+        public MultiMap<int, Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent)
+        {
+            return _criteriasByStartEvent[(int)startEvent];
+        }
+
+        public List<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
+        {
+            return _criteriasByStartEvent[(int)startEvent].LookupByKey(asset);
+        }
+
+        public MultiMap<int, Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent)
+        {
+            return _criteriasByFailEvent[(int)failEvent];
+        }
+
+        public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
+        {
+            return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
+        }
+
         public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
         {
             return _guildCriteriasByType.LookupByKey(type);
@@ -3611,11 +3631,6 @@ namespace Game.Achievements
         public List<Criteria> GetTimedCriteriaByType(CriteriaStartEvent startEvent)
         {
             return _criteriasByTimedType.LookupByKey(startEvent);
-        }
-
-        public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
-        {
-            return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
         }
 
         public CriteriaDataSet GetCriteriaDataSet(Criteria criteria)
@@ -3836,7 +3851,7 @@ namespace Game.Achievements
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
                         return false;
                     }
-                    if (!RaceMask.AllPlayable.HasRace((Race)ClassRace.RaceId))
+                    if (!RaceMask.Playable.HasRace((Race)ClassRace.RaceId))
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);
@@ -3981,7 +3996,7 @@ namespace Game.Achievements
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
                         return false;
                     }
-                    if (ClassRace.RaceId != 0 && !RaceMask.AllPlayable.HasRace((Race)ClassRace.RaceId))
+                    if (ClassRace.RaceId != 0 && !RaceMask.Playable.HasRace((Race)ClassRace.RaceId))
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);

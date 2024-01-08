@@ -9,21 +9,47 @@ namespace Game.DataStorage
 {
     public sealed class AchievementRecord
     {
-        public string Description;
-        public string Title;
-        public string Reward;
+        public LocalizedString Description;
+        public LocalizedString Title;
+        public LocalizedString Reward;
         public uint Id;
+        /// <summary> -1 = none </summary>
         public short InstanceID;
-        public AchievementFaction Faction;
-        public ushort Supercedes;
-        public ushort Category;
+        private sbyte _faction;
+        /// <summary> it's Achievement parent (can`t start while parent uncomplete,
+        /// use its Criteria if don`t have own, use its progress on begin) </summary>
+        public short Supercedes;
+        public short Category;
+        /// <summary>
+        /// need this count of completed criterias (own or referenced achievement criterias)
+        /// </summary>
         public byte MinimumCriteria;
         public byte Points;
-        public AchievementFlags Flags;
-        public ushort UiOrder;
-        public uint IconFileID;
+        private int _flags;
+        public short UiOrder;
+        public int IconFileID;
         public uint CriteriaTree;
-        public ushort SharesCriteria;
+        /// <summary>
+        /// referenced achievement (counting of all completed criterias)
+        /// </summary>
+        public short SharesCriteria;
+
+        #region Properties
+        public AchievementFaction Faction => (AchievementFaction)_faction;
+        public AchievementFlags Flags => (AchievementFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(AchievementFlags flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(AchievementFlags flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
     }
 
     public sealed class AchievementCategoryRecord
@@ -65,7 +91,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Title;
-        public string Description;
+        public LocalizedString Description;
         public Vector2 WorldPosition;
         public sbyte Type;
         public uint PlayerConditionID;
@@ -104,7 +130,7 @@ namespace Game.DataStorage
 
     public sealed class AreaTableRecord
     {
-        public uint Id;
+        public int Id;
         public string ZoneName;
         public LocalizedString AreaName;
         public ushort ContinentID;
@@ -116,27 +142,58 @@ namespace Game.DataStorage
         public ushort UwAmbience;
         public ushort ZoneMusic;
         public ushort UwZoneMusic;
-        public byte ExplorationLevel;
+        public sbyte ExplorationLevel;
         public ushort IntroSound;
         public uint UwIntroSound;
         public byte FactionGroupMask;
         public float AmbientMultiplier;
-        public int MountFlags;
+        private int _mountFlags;
         public short PvpCombatWorldStateID;
         public byte WildBattlePetLevelMin;
         public byte WildBattlePetLevelMax;
         public byte WindSettingsID;
-        public uint[] Flags = new uint[2];
+        private int[] _flags = new int[2];
         public ushort[] LiquidTypeID = new ushort[4];
 
-        public AreaFlags GetFlags() { return (AreaFlags)Flags[0]; }
-        public AreaFlags2 GetFlags2() { return (AreaFlags2)Flags[1]; }
-        public AreaMountFlags GetMountFlags() { return (AreaMountFlags)MountFlags; }
+        #region Properties
+        public AreaFlags Flags => (AreaFlags)_flags[0];
+        public AreaFlags2 Flags2 => (AreaFlags2)_flags[1];
+        public AreaMountFlags MountFlags => (AreaMountFlags)_mountFlags;
+        #endregion
 
-        public bool IsSanctuary()
+        #region Helpers
+        public bool HasFlag(AreaFlags flag)
         {
-            return GetFlags().HasFlag(AreaFlags.NoPvP);
+            return _flags[0].HasFlag((int)flag);
         }
+
+        public bool HasAnyFlag(AreaFlags flag)
+        {
+            return _flags[0].HasAnyFlag((int)flag);
+        }
+
+        public bool HasFlag(AreaFlags2 flag)
+        {
+            return _flags[1].HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(AreaFlags2 flag)
+        {
+            return _flags[1].HasAnyFlag((int)flag);
+        }
+
+        public bool HasFlag(AreaMountFlags flag)
+        {
+            return _mountFlags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(AreaMountFlags flag)
+        {
+            return _mountFlags.HasAnyFlag((int)flag);
+        }
+
+        public bool IsSanctuary => HasFlag(AreaFlags.NoPvP);
+        #endregion
     }
 
     public sealed class AreaTriggerRecord
@@ -144,10 +201,10 @@ namespace Game.DataStorage
         public LocalizedString Message;
         public Vector3 Pos;
         public uint Id;
-        public ushort ContinentID;
+        public short ContinentID;
         public sbyte PhaseUseFlags;
-        public ushort PhaseID;
-        public ushort PhaseGroupID;
+        public short PhaseID;
+        public short PhaseGroupID;
         public float Radius;
         public float BoxLength;
         public float BoxWidth;
@@ -155,7 +212,7 @@ namespace Game.DataStorage
         public float BoxYaw;
         public sbyte ShapeType;
         public short ShapeID;
-        public int AreaTriggerActionSetID;
+        public short AreaTriggerActionSetID;
         public sbyte Flags;
     }
 
@@ -171,7 +228,7 @@ namespace Game.DataStorage
 
     public sealed class ArtifactRecord
     {
-        public string Name;
+        public LocalizedString Name;
         public uint Id;
         public ushort UiTextureKitID;
         public int UiNameColor;
@@ -186,7 +243,7 @@ namespace Game.DataStorage
 
     public sealed class ArtifactAppearanceRecord
     {
-        public string Name;
+        public LocalizedString Name;
         public uint Id;
         public ushort ArtifactAppearanceSetID;
         public byte DisplayIndex;
@@ -205,8 +262,8 @@ namespace Game.DataStorage
 
     public sealed class ArtifactAppearanceSetRecord
     {
-        public string Name;
-        public string Description;
+        public LocalizedString Name;
+        public LocalizedString Description;
         public uint Id;
         public byte DisplayIndex;
         public ushort UiCameraID;
@@ -230,8 +287,24 @@ namespace Game.DataStorage
         public byte ArtifactID;
         public byte MaxPurchasableRank;
         public int Label;
-        public ArtifactPowerFlag Flags;
+        private byte _flags;
         public byte Tier;
+
+        #region Properties
+        public ArtifactPowerFlag Flags => (ArtifactPowerFlag)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(ArtifactPowerFlag flag)
+        {
+            return _flags.HasFlag((byte)flag);
+        }
+
+        public bool HasAnyFlag(ArtifactPowerFlag flag)
+        {
+            return _flags.HasAnyFlag((byte)flag);
+        }
+        #endregion
     }
 
     public sealed class ArtifactPowerLinkRecord
@@ -251,7 +324,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public byte RankIndex;
-        public uint SpellID;
+        public int SpellID;
         public ushort ItemBonusListID;
         public float AuraPointsOverride;
         public uint ArtifactPowerID;
@@ -286,8 +359,11 @@ namespace Game.DataStorage
     public sealed class AuctionHouseRecord
     {
         public uint Id;
-        public string Name;
-        public ushort FactionID;                                               // id of faction.dbc for player factions associated with city
+        public LocalizedString Name;
+        /// <summary>
+        /// id of faction.dbc for player factions associated with city
+        /// </summary>
+        public ushort FactionID;
         public byte DepositRate;
         public byte ConsignmentRate;
     }
@@ -295,7 +371,7 @@ namespace Game.DataStorage
     public sealed class AzeriteEmpoweredItemRecord
     {
         public uint Id;
-        public uint ItemID;
+        public int ItemID;
         public uint AzeriteTierUnlockSetID;
         public uint AzeritePowerSetID;
     }
@@ -303,28 +379,28 @@ namespace Game.DataStorage
     public sealed class AzeriteEssenceRecord
     {
         public uint Id;
-        public string Name;
-        public string Description;
+        public LocalizedString Name;
+        public LocalizedString Description;
         public int SpecSetID;
     }
 
     public sealed class AzeriteEssencePowerRecord
     {
         public uint Id;
-        public string SourceAlliance;
-        public string SourceHorde;
+        public LocalizedString SourceAlliance;
+        public LocalizedString SourceHorde;
         public int AzeriteEssenceID;
         public byte Tier;
-        public uint MajorPowerDescription;
-        public uint MinorPowerDescription;
-        public uint MajorPowerActual;
-        public uint MinorPowerActual;
+        public int MajorPowerDescription;
+        public int MinorPowerDescription;
+        public int MajorPowerActual;
+        public int MinorPowerActual;
     }
 
     public sealed class AzeriteItemRecord
     {
         public uint Id;
-        public uint ItemID;
+        public int ItemID;
     }
 
     public sealed class AzeriteItemMilestonePowerRecord
@@ -347,14 +423,14 @@ namespace Game.DataStorage
         public uint Id;
         public ulong BaseExperienceToNextLevel;
         public ulong MinimumExperienceToNextLevel;
-        public uint ItemLevel;
+        public int ItemLevel;
     }
 
     public sealed class AzeritePowerRecord
     {
         public uint Id;
-        public uint SpellID;
-        public uint ItemBonusListID;
+        public int SpellID;
+        public int ItemBonusListID;
         public int SpecSetID;
         public int Flags;
     }
@@ -366,7 +442,7 @@ namespace Game.DataStorage
         public int AzeritePowerID;
         public int Class;
         public byte Tier;
-        public uint OrderIndex;
+        public int OrderIndex;
     }
 
     public sealed class AzeriteTierUnlockRecord
@@ -381,6 +457,23 @@ namespace Game.DataStorage
     public sealed class AzeriteTierUnlockSetRecord
     {
         public uint Id;
-        public AzeriteTierUnlockSetFlags Flags;
+        private int _flags;
+
+
+        #region Properties
+        public AzeriteTierUnlockSetFlags Flags => (AzeriteTierUnlockSetFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(AzeriteTierUnlockSetFlags flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(AzeriteTierUnlockSetFlags flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
     }
 }

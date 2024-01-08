@@ -7326,7 +7326,7 @@ namespace Game.Spells
 
             for (int j = 0; j < SharedConst.MaxLockCase; ++j)
             {
-                switch ((LockKeyType)lockInfo.LockType[j])
+                switch ((LockKeyType)lockInfo.Type[j])
                 {
                     // check key item (many fit cases can be)
                     case LockKeyType.Item:

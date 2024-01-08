@@ -3,7 +3,7 @@
 
 namespace Framework.Constants
 {
-    public enum RollVote
+    public enum RollVote : byte
     {
         Pass = 0,
         Need = 1,
@@ -13,7 +13,7 @@ namespace Framework.Constants
         NotValid = 5
     }
 
-    public enum RollMask
+    public enum RollMask : byte
     {
         Pass = 0x01,
         Need = 0x02,
@@ -25,7 +25,7 @@ namespace Framework.Constants
         AllMask = 0x0f
     }
 
-    public enum LootMethod
+    public enum LootMethod : byte
     {
         FreeForAll = 0,
         RoundRobin = 1,
@@ -65,13 +65,13 @@ namespace Framework.Constants
         Milling = 24
     }
 
-    public enum LootItemType
+    public enum LootItemType : byte
     {
         Item = 0,
         Currency = 1
     }
 
-    public enum LootError
+    public enum LootError : byte
     {
         DidntKill = 0,    // You don't have permission to loot that corpse.
         TooFar = 4,    // You are too far away to loot that corpse.
@@ -90,7 +90,7 @@ namespace Framework.Constants
     }
 
     // type of Loot Item in Loot View
-    public enum LootSlotType
+    public enum LootSlotType : byte
     {
         AllowLoot = 0,                     // Player Can Loot The Item.
         RollOngoing = 1,                   // Roll Is Ongoing. Player Cannot Loot.

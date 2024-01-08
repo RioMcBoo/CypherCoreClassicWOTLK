@@ -23,7 +23,8 @@ namespace Framework.Constants
 
         public const int MaxItemSetItems = 17;
         public const int MaxItemSetSpells = 8;
-
+        public const int MaxItemProtoFlags = 4;
+        public const int MaxItemProtoZones = 2;
         public const int MaxItemRandomProperties = 5;
         /// <summary>2 fields per visible item (entry+enchantment)</summary>
         public const int MaxVisibleItemOffset = 2;
@@ -192,7 +193,7 @@ namespace Framework.Constants
         public const byte End = 19;
     }
 
-    public enum SocketColor
+    public enum SocketColor : int
     {
         Meta = 0x00001,
         Red = 0x00002,
@@ -233,8 +234,10 @@ namespace Framework.Constants
         RequireSeasonEarned5 = 0x20,
     }
 
-    public enum ItemModType
+    public enum ItemModType : sbyte
     {
+        None = -1,
+
         Mana = 0,
         Health = 1,
         Agility = 3,
@@ -343,7 +346,7 @@ namespace Framework.Constants
         HideUntilCollected = 0x200,
     }
 
-    public enum ItemModifier
+    public enum ItemModifier : byte
     {
         TransmogAppearanceAllSpecs = 0,
         TransmogAppearanceSpec1 = 1,
@@ -991,7 +994,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum ItemQuality
+    public enum ItemQuality : sbyte
     {
         Poor = 0,                 //Grey
         Normal = 1,                 //White
@@ -1320,7 +1323,7 @@ namespace Framework.Constants
         CantBulkSellItemWithRefund = 118// Items that can be refunded can't be bulk sold.
     }
 
-    public enum BuyResult
+    public enum BuyResult : byte
     {
         CantFindItem = 0,
         ItemAlreadySold = 1,

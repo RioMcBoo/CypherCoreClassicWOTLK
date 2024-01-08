@@ -220,7 +220,7 @@ namespace Game
                                 break;
                             }
 
-                            if (qInfo.HasFlag(QuestFlags.CompletionAreaTrigger))
+                            if (qInfo.HasAnyFlag(QuestFlags.CompletionAreaTrigger))
                                 player.AreaExploredOrEventHappens(questId);
 
                             if (player.CanCompleteQuest(questId))

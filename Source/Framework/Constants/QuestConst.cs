@@ -5,7 +5,7 @@ using System;
 
 namespace Framework.Constants
 {
-    public enum QuestObjectiveType
+    public enum QuestObjectiveType : byte
     {
         Monster = 0,
         Item = 1,
@@ -31,6 +31,7 @@ namespace Framework.Constants
         Max
     }
 
+    [Flags]
     public enum QuestObjectiveFlags
     {
         TrackedOnMinimap = 0x01, // Client Displays Large Yellow Blob On Minimap For Creature/Gameobject
@@ -327,7 +328,7 @@ namespace Framework.Constants
         HasInProgress = 30        // "Progress Bar Objective Not Completed"
     }
 
-    public enum QuestPushReason
+    public enum QuestPushReason : byte
     {
         Success = 0,    // "Sharing quest with %s..."
         Invalid = 1,    // "%s is not eligible for that quest"
@@ -517,7 +518,7 @@ namespace Framework.Constants
         PushTeamQuestUsingMapController = 0x80000000
     }
 
-    public enum QuestFlagsEx2
+    public enum QuestFlagsEx2 : uint
     {
         ResetOnGameMilestone = 0x01,
         WarModeRewardsOptOut = 0x02,
@@ -545,6 +546,7 @@ namespace Framework.Constants
         HideRequiredItemsPreTurnIn = 0x00800000,
     }
 
+    [Flags]
     public enum QuestSpecialFlags
     {
         None = 0x00,

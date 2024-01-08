@@ -498,11 +498,11 @@ namespace Game
                     guild.ResetTimes(week);
         }
 
-        public void SetNextGuildId(uint Id) { NextGuildId = Id; }
+        public void SetNextGuildId(ulong Id) { NextGuildId = Id; }
 
         public List<GuildReward> GetGuildRewards() { return guildRewards; }
 
-        uint NextGuildId;
+        ulong NextGuildId;
         Dictionary<ulong, Guild> GuildStore = new();
         List<GuildReward> guildRewards = new();
     }
@@ -511,7 +511,7 @@ namespace Game
     {
         public uint ItemID;
         public byte MinGuildRep;
-        public RaceMask<ulong> RaceMask;
+        public RaceMask RaceMask;
         public ulong Cost;
         public List<uint> AchievementsRequired = new();
     }

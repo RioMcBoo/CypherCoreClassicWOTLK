@@ -523,7 +523,7 @@ namespace Game
             return obj.GetPhaseShift().CanSee(phaseShift);
         }
 
-        public static uint GetTerrainMapId(PhaseShift phaseShift, uint mapId, TerrainInfo terrain, float x, float y)
+        public static int GetTerrainMapId(PhaseShift phaseShift, int mapId, TerrainInfo terrain, float x, float y)
         {
             if (phaseShift.VisibleMapIds.Empty())
                 return mapId;
@@ -625,7 +625,7 @@ namespace Game
             return phases.ToString();
         }
 
-        public static bool IsPersonalPhase(uint phaseId)
+        public static bool IsPersonalPhase(int phaseId)
         {
             var phase = CliDB.PhaseStorage.LookupByKey(phaseId);
             if (phase != null)

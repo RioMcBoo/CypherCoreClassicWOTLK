@@ -25,12 +25,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket .WritePackedGuid( Unit);
-            _worldPacket.WriteBits(Status, 2);
+            _worldPacket.WritePackedGuid(Unit);
+            _worldPacket.WriteBits((byte)Status, 2);
             _worldPacket.FlushBits();
         }
 
-        public TaxiNodeStatus Status; // replace with TaxiStatus enum
+        public TaxiNodeStatus Status;     
         public ObjectGuid Unit;
     }
 
@@ -119,7 +119,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Reply, 4);
+            _worldPacket.WriteBits((byte)Reply, 4);
             _worldPacket.FlushBits();
         }
 

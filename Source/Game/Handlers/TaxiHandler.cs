@@ -106,7 +106,6 @@ namespace Game
                 data.CanUseNodes[i] &= reachableNodes[i];
             }
 
-
             SendPacket(data);
 
             GetPlayer().SetTaxiCheater(lastTaxiCheaterState);

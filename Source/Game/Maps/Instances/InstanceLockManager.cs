@@ -399,7 +399,7 @@ namespace Game.Maps
                 foreach (InstanceLock instanceLock in locksReset)
                 {
                     MapDb2Entries entries = new(instanceLock.GetMapId(), instanceLock.GetDifficultyId());
-                    DateTime newExpiryTime = GetNextResetTime(entries) - TimeSpan.FromSeconds(entries.MapDifficulty.GetRaidDuration());
+                    DateTime newExpiryTime = GetNextResetTime(entries) - TimeSpan.FromSeconds(entries.MapDifficulty.RaidDuration());
                     // set reset time to last reset time
                     instanceLock.SetExpiryTime(newExpiryTime);
                     instanceLock.SetExtended(false);
@@ -507,7 +507,7 @@ namespace Game.Maps
                 return Global.InstanceLockMgr.GetNextResetTime(entries);
 
             // if not expired, return expiration time + 1 reset period
-            return GetExpiryTime() + TimeSpan.FromSeconds(entries.MapDifficulty.GetRaidDuration());
+            return GetExpiryTime() + TimeSpan.FromSeconds(entries.MapDifficulty.RaidDuration());
         }
 
         public uint GetMapId() { return _mapId; }

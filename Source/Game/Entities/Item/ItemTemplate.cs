@@ -7,6 +7,7 @@ using Game.Miscellaneous;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Game.Entities
 {
@@ -281,35 +282,35 @@ namespace Game.Entities
 
         public static int CalculateItemSpecBit(ChrSpecializationRecord spec)
         {
-            return (spec.ClassID - 1) * PlayerConst.MaxSpecializations + spec.OrderIndex;
+            return ((int)spec.ClassID - 1) * PlayerConst.MaxSpecializations + spec.OrderIndex;
         }
 
         public uint GetRandomProperty()  { return ExtendedData.RandomSelect; }
         public uint GetRandomSuffix()  { return ExtendedData.ItemRandomSuffixGroupID; }
 
         public uint GetId() { return BasicData.Id; }
-        public ItemClass GetClass() { return (ItemClass)BasicData.ClassID; }
-        public uint GetSubClass() { return BasicData.SubclassID; }
-        public ItemQuality GetQuality() { return (ItemQuality)ExtendedData.OverallQualityID; }
+        public ItemClass GetClass() { return BasicData.ClassID; }
+        public ItemSubClass GetSubClass() { return BasicData.SubclassID; }
+        public ItemQuality GetQuality() { return ExtendedData.OverallQualityID; }
         public uint GetOtherFactionItemId() { return (uint)ExtendedData.OppositeFactionItemID; }
         public float GetPriceRandomValue() { return ExtendedData.PriceRandomValue; }
         public float GetPriceVariance() { return ExtendedData.PriceVariance; }
         public uint GetBuyCount() { return Math.Max(ExtendedData.VendorStackCount, 1u); }
         public uint GetBuyPrice() { return ExtendedData.BuyPrice; }
         public uint GetSellPrice() { return ExtendedData.SellPrice; }
-        public InventoryType GetInventoryType() { return ExtendedData.inventoryType; }
-        public int GetAllowableClass() { return ExtendedData.AllowableClass; }
-        public RaceMask<long> GetAllowableRace() { return new RaceMask<long>(ExtendedData.AllowableRace); }
+        public InventoryType GetInventoryType() { return ExtendedData.InventoryType; }
+        public ClassMask GetAllowableClass() { return ExtendedData.AllowableClass; }
+        public RaceMask GetAllowableRace() { return ExtendedData.AllowableRace; }
         public uint GetBaseItemLevel() { return ExtendedData.ItemLevel; }
         public int GetBaseRequiredLevel() { return ExtendedData.RequiredLevel; }
         public uint GetRequiredSkill() { return ExtendedData.RequiredSkill; }
         public uint GetRequiredSkillRank() { return ExtendedData.RequiredSkillRank; }
         public uint GetRequiredSpell() { return ExtendedData.RequiredAbility; }
         public uint GetRequiredReputationFaction() { return ExtendedData.MinFactionID; }
-        public uint GetRequiredReputationRank() { return ExtendedData.MinReputation; }
+        public int GetRequiredReputationRank() { return ExtendedData.MinReputation; }
         public uint GetMaxCount() { return (uint)ExtendedData.MaxCount; }
         public uint GetContainerSlots() { return ExtendedData.ContainerSlots; }
-        public int GetStatModifierBonusStat(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatModifierBonusStat[index]; }
+        public ItemModType GetStatModifierBonusStat(int index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatModifierBonusStat(index); }
         public int GetStatPercentEditor(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentEditor[index]; }
         public float GetStatPercentageOfSocket(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentageOfSocket[index]; }
         public uint GetScalingStatContentTuning() { return (uint)ExtendedData.ContentTuningID; }
@@ -359,8 +360,8 @@ namespace Game.Entities
         
         public bool IsRangedWeapon()
         {
-            return IsWeapon() && (GetSubClass() == (uint)ItemSubClassWeapon.Bow ||
-                   GetSubClass() == (uint)ItemSubClassWeapon.Gun || GetSubClass() == (uint)ItemSubClassWeapon.Crossbow);
+            return IsWeapon() && (GetSubClass().Weapon == ItemSubClassWeapon.Bow ||
+                   GetSubClass().Weapon == ItemSubClassWeapon.Gun || GetSubClass().Weapon == ItemSubClassWeapon.Crossbow);
         }
 
         public uint MaxDurability;
@@ -373,11 +374,63 @@ namespace Game.Entities
         public uint MaxMoneyLoot;
         public ItemFlagsCustom FlagsCu;
         public float SpellPPMRate;
-        public uint RandomBonusListTemplateId;
-        public BitSet[] Specializations = new BitSet[3];
-        public uint ItemSpecClassMask;
+        public BitSet[] Specializations = new BitSet[3];  // one set for 1-40 level range and another for 41-109 and one for 110
+        public ClassMask ItemSpecClassMask;
 
         protected ItemRecord BasicData;
         protected ItemSparseRecord ExtendedData;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct ItemSubClass
+    {
+        [FieldOffset(0)]
+        private int data;
+        [FieldOffset(0)]
+        public ItemSubClassConsumable Consumable;
+        [FieldOffset(0)]
+        public ItemSubClassContainer Container;
+        [FieldOffset(0)]
+        public ItemSubClassWeapon Weapon;
+        [FieldOffset(0)]
+        public ItemSubClassGem Gem;
+        [FieldOffset(0)]
+        public ItemSubClassArmor Armor;
+        [FieldOffset(0)]
+        public ItemSubClassReagent Reagent;
+        [FieldOffset(0)]
+        public ItemSubClassProjectile Projectile;
+        [FieldOffset(0)]
+        public ItemSubClassTradeGoods TradeGoods;
+        [FieldOffset(0)]
+        public ItemSubclassItemEnhancement Enhancement;
+        [FieldOffset(0)]
+        public ItemSubClassRecipe Recipe;
+        [FieldOffset(0)]
+        public ItemSubClassMoney Money;
+        [FieldOffset(0)]
+        public ItemSubClassQuiver Quiver;
+        [FieldOffset(0)]
+        public ItemSubClassQuest Quest;
+        [FieldOffset(0)]
+        public ItemSubClassKey Key;
+        [FieldOffset(0)]
+        public ItemSubClassPermanent Permanent;
+        [FieldOffset(0)]
+        public ItemSubClassJunk Junk;
+        [FieldOffset(0)]
+        public ItemSubClassGlyph Glyph;
+        [FieldOffset(0)]
+        public ItemSubclassBattlePet BattlePet;
+        [FieldOffset(0)]
+        public ItemSubclassWowToken WowToken;
+        [FieldOffset(0)]
+        public ItemSubclassProfession Profession;
+
+        public ItemSubClass(byte data = default)
+        {
+            this.data = data;
+        }
+
     }
 }

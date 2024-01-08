@@ -68,7 +68,7 @@ namespace Framework.Constants
         Seamless = 21,   // Teleport to another map without a loading screen, used for outdoor scenarios
     }
 
-    public enum InstanceResetWarningType
+    public enum InstanceResetWarningType : byte
     {
         WarningHours = 1,                    // WARNING! %s is scheduled to reset in %d hour(s).
         WarningMin = 2,                    // WARNING! %s is scheduled to reset in %d minute(s)!
@@ -141,7 +141,7 @@ namespace Framework.Constants
         AddCombatResLimit = 10
     }
 
-    public enum EncounterState
+    public enum EncounterState : byte
     {
         NotStarted = 0,
         InProgress = 1,
@@ -149,6 +149,19 @@ namespace Framework.Constants
         Done = 3,
         Special = 4,
         ToBeDecided = 5
+    }
+
+    [Flags]
+    public enum EncounterStateMask : byte
+    {
+        NotStarted = 1 << EncounterState.NotStarted,
+        InProgress = 1 << EncounterState.InProgress,
+        Fail = 1 << EncounterState.Fail,
+        Done = 1 << EncounterState.Done,
+        Special = 1 << EncounterState.Special,
+        ToBeDecided = 1 << EncounterState.ToBeDecided,
+
+        All = NotStarted | InProgress | Fail | Done | Special | ToBeDecided,
     }
 
     public enum EncounterCreditType
@@ -179,7 +192,7 @@ namespace Framework.Constants
         All = Vmap | Gobject
     }
 
-    public enum SpawnObjectType
+    public enum SpawnObjectType : byte
     {
         Creature = 0,
         GameObject = 1,
@@ -214,7 +227,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum InstanceSpawnGroupFlags
+    public enum InstanceSpawnGroupFlags : byte
     {
         ActivateSpawn = 0x01,
         BlockSpawn = 0x02,

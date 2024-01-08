@@ -42,9 +42,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             uint areasCount = _worldPacket.ReadBits<uint>(4);
+            IsFromAddOn = _worldPacket.HasBit();
 
             Request.Read(_worldPacket);
             RequestID = _worldPacket.ReadUInt32();
+            Origin = _worldPacket.ReadUInt8();
 
             for (int i = 0; i < areasCount; ++i)
                 Areas.Add(_worldPacket.ReadInt32());
@@ -52,7 +54,9 @@ namespace Game.Networking.Packets
 
         public WhoRequest Request = new();
         public uint RequestID;
-        public List<int> Areas= new();
+        public byte Origin;   // 1 = Social, 2 = Chat, 3 = Item
+        public bool IsFromAddOn;
+        public Array<int> Areas= new(10);
     }
 
     public class WhoResponsePkt : ServerPacket
@@ -65,13 +69,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Response.Count, 6);
             _worldPacket.FlushBits();
 
-            Response.ForEach(p => p.Write(_worldPacket));
+            foreach(var entry in Response)
+                entry.Write(_worldPacket);
         }
 
         public uint RequestID;
         public List<WhoEntry> Response = new();
     }
 
+    //Structs
     public struct WhoRequestServerInfo
     {
         public void Read(WorldPacket data)
@@ -92,7 +98,7 @@ namespace Game.Networking.Packets
         {
             MinLevel = data.ReadInt32();
             MaxLevel = data.ReadInt32();
-            RaceFilter = new RaceMask<long>(data.ReadInt64());
+            RaceFilter = (RaceMask)data.ReadInt64();
             ClassFilter = data.ReadInt32();
 
             uint nameLength = data.ReadBits<uint>(6);
@@ -130,7 +136,7 @@ namespace Game.Networking.Packets
         public string VirtualRealmName;
         public string Guild;
         public string GuildVirtualRealmName;
-        public RaceMask<long> RaceFilter;
+        public RaceMask RaceFilter;
         public int ClassFilter = -1;
         public List<string> Words = new();
         public bool ShowEnemies;
@@ -159,7 +165,7 @@ namespace Game.Networking.Packets
         public PlayerGuidLookupData PlayerData = new();
         public ObjectGuid GuildGUID;
         public uint GuildVirtualRealmAddress;
-        public string GuildName = "";
+        public string GuildName = string.Empty;
         public int AreaID;
         public bool IsGM;
     }

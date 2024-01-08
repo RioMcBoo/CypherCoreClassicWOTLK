@@ -1473,7 +1473,7 @@ namespace Game.AI
                     Quest qid = Global.ObjectMgr.GetQuestTemplate(e.Action.quest.questId);
                     if (qid != null)
                     {
-                        if (!qid.HasFlag(QuestFlags.CompletionEvent) && !qid.HasFlag(QuestFlags.CompletionAreaTrigger))
+                        if (!qid.HasAnyFlag(QuestFlags.CompletionEvent) && !qid.HasAnyFlag(QuestFlags.CompletionAreaTrigger))
                         {
                             Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} Flags for Quest entry {e.Action.quest.questId} does not include QUEST_FLAGS_COMPLETION_EVENT or QUEST_FLAGS_COMPLETION_AREA_TRIGGER, skipped.");
                             return false;

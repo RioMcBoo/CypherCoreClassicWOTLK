@@ -1,7 +1,11 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Bgs.Protocol;
 using System;
+using static System.Net.Mime.MediaTypeNames;
+using System.Diagnostics.Metrics;
+using System.Threading;
 
 namespace Framework.Constants
 {
@@ -302,10 +306,15 @@ namespace Framework.Constants
         public static SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
         {
             for (SpellSchools i = 0; i < SpellSchools.Max; ++i)
-                if (mask.HasAnyFlag((SpellSchoolMask)(1 << (int)i)))
+                if (mask.HasAnyFlag(GetSpellSchoolMask(i)))
                     return i;
 
             return SpellSchools.Normal;
+        }
+
+        public static SpellSchoolMask GetSpellSchoolMask(SpellSchools school)
+        {
+            return (SpellSchoolMask)(1 << (int)school);
         }
 
         public static SkillType SkillByQuestSort(int sort)
@@ -441,7 +450,7 @@ namespace Framework.Constants
         }
     }
 
-    public enum Locale
+    public enum Locale : sbyte
     {
         enUS = 0,
         koKR = 1,
@@ -455,7 +464,30 @@ namespace Framework.Constants
         None = 9,
         ptBR = 10,
         itIT = 11,
-        Total = 12
+        Total = 12,
+        
+        AllLanguages = -1,
+        Reserved = Total,
+    }
+
+    [Flags]
+    public enum LocaleMask : ushort
+    {
+        enUS = 1 << Locale.enUS,
+        koKR = 1 << Locale.koKR,
+        frFR = 1 << Locale.frFR,
+        deDE = 1 << Locale.deDE,
+        zhCN = 1 << Locale.zhCN,
+        zhTW = 1 << Locale.zhCN,
+        esES = 1 << Locale.esES,
+        esMX = 1 << Locale.esMX,
+        ruRU = 1 << Locale.ruRU,
+        None = 1 << Locale.None,
+        ptBR = 1 << Locale.ptBR,
+        itIT = 1 << Locale.itIT,             
+        Total = 1 << Locale.Total,
+
+        Reserved = 1 << Locale.Reserved,
     }
 
     public enum CascLocaleBit
@@ -525,6 +557,7 @@ namespace Framework.Constants
         Other = 0                            // if ReputationListId > 0 && Flags != FACTION_FLAG_TEAM_HEADER
     }
 
+    [Flags]
     public enum FactionMasks : byte
     {
         Player = 1,                              // any player
@@ -534,7 +567,8 @@ namespace Framework.Constants
         // if none flags set then non-aggressive creature
     }
 
-    public enum FactionTemplateFlags
+    [Flags]
+    public enum FactionTemplateFlags : ushort
     {
         PVP = 0x800,   // flagged for PvP
         ContestedGuard = 0x1000,   // faction will attack players that were involved in PvP combats
@@ -640,7 +674,7 @@ namespace Framework.Constants
         None = 2
     }
 
-    public enum Class
+    public enum Class : byte
     {
         None = 0,
         Warrior = 1,
@@ -658,17 +692,65 @@ namespace Framework.Constants
         Evoker = 13,
         Adventurer = 14,
         Max = 15,
-
-        ClassMaskAllPlayable = ((1 << (Warrior - 1)) | (1 << (Paladin - 1)) | (1 << (Hunter - 1)) |
-            (1 << (Rogue - 1)) | (1 << (Priest - 1)) | (1 << (Deathknight - 1)) | (1 << (Shaman - 1)) |
-            (1 << (Mage - 1)) | (1 << (Warlock - 1)) | (1 << (Monk - 1)) | (1 << (Druid - 1)) | (1 << (DemonHunter - 1)) | (1 << (Evoker - 1))),
-
-        ClassMaskAllCreatures = ((1 << (Warrior - 1)) | (1 << (Paladin - 1)) | (1 << (Rogue - 1)) | (1 << (Mage - 1))),
-
-        ClassMaskWandUsers = ((1 << (Priest - 1)) | (1 << (Mage - 1)) | (1 << (Warlock - 1)))
     }
 
-    public enum Race
+    [Flags]
+    public enum ClassMask : short
+    {
+        None = 0,
+        Warrior = 1 << (Class.Warrior - 1),
+        Paladin = 1 << (Class.Paladin - 1),
+        Hunter = 1 << (Class.Hunter - 1),
+        Rogue = 1 << (Class.Rogue - 1),
+        Priest = 1 << (Class.Priest - 1),
+        Deathknight = 1 << (Class.Deathknight - 1),
+        Shaman = 1 << (Class.Shaman - 1),
+        Mage = 1 << (Class.Mage - 1),
+        Warlock = 1 << (Class.Warrior - 1),
+        Monk = 1 << (Class.Monk - 1),
+        Druid = 1 << (Class.Druid - 1),
+        DemonHunter = 1 << (Class.DemonHunter - 1),
+        Evoker = 1 << (Class.Monk - 1),
+        Adventurer = 1 << (Class.Adventurer - 1),        
+
+        //Helpers
+        Creatures = Warrior | Paladin | Rogue | Mage,
+        WandUsers = Priest | Mage | Warlock,
+        Playable = Warrior | Paladin | Hunter | Rogue | Priest | Deathknight | Shaman |
+            Mage | Warlock | Monk | Druid | DemonHunter | Evoker | Adventurer,
+
+        All = Playable,
+    }
+
+    public enum ScalingClass
+    {
+        None = 0,
+        Warrior = Class.Warrior,
+        Paladin = Class.Paladin,
+        Hunter = Class.Hunter,
+        Rogue = Class.Rogue,
+        Priest = Class.Priest,
+        Deathknight = Class.Deathknight,
+        Shaman = Class.Shaman,
+        Mage = Class.Mage,
+        Warlock = Class.Warlock,
+        Monk = Class.Monk,
+        Druid = Class.Druid,
+        DemonHunter = Class.DemonHunter,
+        Evoker = Class.Evoker,
+        Adventurer = Class.Adventurer,        
+        Item1 = -1,
+        Consumable = -2,
+        Gem1 = -3,
+        Gem2 = -4,
+        Gem3 = -5,
+        Health = -6,
+        Item2 = -7,
+        Unknown = -8,
+        Unknown2 = -9,
+    }
+
+    public enum Race : byte
     {
         None = 0,
         Human = 1,
@@ -720,23 +802,76 @@ namespace Framework.Constants
         Max = 78
     }
 
+    [Flags]
+    public enum RaceMask : int
+    {
+        None = 0,
+        Human = 1 << (Race.Human - 1),
+        Orc = 1 << (Race.Orc - 1),
+        Dwarf = 1 << (Race.Dwarf - 1),
+        NightElf = 1 << (Race.NightElf - 1),
+        Undead = 1 << (Race.Undead - 1),
+        Tauren = 1 << (Race.Tauren - 1),
+        Gnome = 1 << (Race.Gnome - 1),
+        Troll = 1 << (Race.Troll - 1),
+        BloodElf = 1 << (Race.BloodElf - 1),
+        Draenei = 1 << (Race.Draenei - 1),
+
+        Goblin = 1 << (Race.Goblin - 1),
+        Worgen = 1 << (Race.Worgen - 1),
+        PandarenNeutral = 1 << (Race.PandarenNeutral - 1),
+        PandarenAlliance = 1 << (Race.PandarenAlliance - 1),
+        PandarenHorde = 1 << (Race.PandarenHorde - 1),
+        Nightborne = 1 << (Race.Nightborne - 1),
+        HighmountainTauren = 1 << (Race.HighmountainTauren - 1),
+        VoidElf = 1 << (Race.VoidElf - 1),
+        LightforgedDraenei = 1 << (Race.LightforgedDraenei - 1),
+        ZandalariTroll = 1 << (Race.ZandalariTroll - 1),
+        KulTiran = 1 << (Race.KulTiran - 1),
+
+        DarkIronDwarf = 1 << 11,
+        Vulpera = 1 << 12,
+        MagharOrc = 1 << 13,
+        MechaGnome = 1 << 14,
+        DracthyrHorde = 1 << 15,
+        DracthyrAlliance = 1 << 16,        
+
+        //Helpers
+        Alliance = Human | Dwarf | NightElf | Gnome | Draenei |
+            Worgen | PandarenAlliance | VoidElf | LightforgedDraenei | KulTiran | DarkIronDwarf | MechaGnome |
+            DracthyrAlliance,
+
+        Horde = Orc | Undead | Tauren | Troll | BloodElf |
+            Goblin | PandarenHorde | HighmountainTauren | Nightborne | ZandalariTroll | Vulpera | MagharOrc |
+            DracthyrHorde,
+
+        Neutral = PandarenNeutral,
+
+        Playable = Alliance | Horde | Neutral,
+
+        All = Playable,
+    }
+
     public enum Expansion
     {
         LevelCurrent = -1,
         Classic = 0,
         BurningCrusade = 1,
         WrathOfTheLichKing = 2,
-        Max,
         Cataclysm = 3,
         MistsOfPandaria = 4,
         WarlordsOfDraenor = 5,
         Legion = 6,
         BattleForAzeroth = 7,
-        ShadowLands = 8,       
+        ShadowLands = 8,
+        Dragonflight = 9,
+
+        Max,
+        MaxAccountExpansions,
 
         Current = WrathOfTheLichKing,
-        MaxAccountExpansions
     }
+
     public enum PowerType: sbyte
     {
         Health = -2,            // (-2 as signed value)
@@ -747,29 +882,30 @@ namespace Framework.Constants
         Happinnes = 4,
         Runes = 5,
         RunicPower = 6,
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         SoulShards = 7,
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         LunarPower = 8,       
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         HolyPower = 9,
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         AlternatePower = 10,
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         Maelstrom = 11,
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         Chi = 12,
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         Insanity = 13,
         ComboPoints = 14,
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         DemonicFury = 15,
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         ArcaneCharges = 16,
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         Fury = 17,
-        ///<summary>(unused 3.4.0)</summary> 
+        ///<summary>(unused 3.4.3)</summary> 
         Pain = 18,
+        ///<summary>(unused 3.4.3)</summary> 
         Essence = 19,
         RuneBlood = 20,
         RuneFrost = 21,
@@ -780,7 +916,6 @@ namespace Framework.Constants
         Max = 26,
 
         All = 127,          // default for class?
-        Health = -2,    // (-2 as signed value)
         MaxPerClass = 10
     }
 
@@ -801,7 +936,7 @@ namespace Framework.Constants
         Tradeskills = 2,
         Pets = 3
     }
-    public enum TrainerSpellState
+    public enum TrainerSpellState : byte
     {
         Known = 0,
         Available = 1,
@@ -814,7 +949,7 @@ namespace Framework.Constants
         NotEnoughMoney = 1
     }
 
-    public enum ChatMsg
+    public enum ChatMsg : sbyte
     {
         Addon = -1,
         System = 0x00,
@@ -887,7 +1022,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum ChatRestrictionType
+    public enum ChatRestrictionType : byte
     {
         Restricted = 0,
         Throttled = 1,
@@ -1409,7 +1544,20 @@ namespace Framework.Constants
         PlaysoundDistanceSound = 0x2,
 
         // Orientation Flags
-        OrientationFaceTarget = 0x1
+        OrientationFaceTarget = 0x1,
+
+        //Helpers
+        AllTalk = TalkUsePlayer,
+        AllEmote = EmoteUseState,
+        AllTeleport = TeleportUseCreature,
+        AllKillcredit = KillcreditRewardGroup,
+        AllRemoveAura = RemoveauraReverse,
+        AllCastspell = CastspellTriggered,
+        AllPlaysound = PlaysoundTargetPlayer | PlaysoundDistanceSound,
+        AllOrientation = OrientationFaceTarget,
+
+        CastSpellTargetFirst = CastspellSourceToTarget,
+        CastSpellTargetLast = CastspellSearchCreature,
     }
 
     public enum ScriptsType

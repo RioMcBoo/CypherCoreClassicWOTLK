@@ -288,13 +288,13 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Inv = new InvUpdate(_worldPacket);
-            Slot2 = _worldPacket.ReadUInt8();
-            Slot1 = _worldPacket.ReadUInt8();
+            DestinationSlot = _worldPacket.ReadUInt8();
+            SourceSlot = _worldPacket.ReadUInt8();
         }
 
         public InvUpdate Inv;
-        public byte Slot1; // Source Slot
-        public byte Slot2; // Destination Slot
+        public byte SourceSlot;
+        public byte DestinationSlot;
     }
 
     public class SwapItem : ClientPacket
@@ -310,11 +310,12 @@ namespace Game.Networking.Packets
             SlotA = _worldPacket.ReadUInt8();
         }
 
-        public InvUpdate Inv;
-        public byte SlotA;
+        public InvUpdate Inv;        
         public byte ContainerSlotB;
-        public byte SlotB;
         public byte ContainerSlotA;
+        public byte SlotB;
+        public byte SlotA;
+
     }
 
     public class AutoEquipItem : ClientPacket
@@ -328,9 +329,9 @@ namespace Game.Networking.Packets
             Slot = _worldPacket.ReadUInt8();
         }
 
-        public byte Slot;
         public InvUpdate Inv;
         public byte PackSlot;
+        public byte Slot;     
     }
 
     class AutoEquipItemSlot : ClientPacket
@@ -344,9 +345,9 @@ namespace Game.Networking.Packets
             ItemDstSlot = _worldPacket.ReadUInt8();
         }
 
-        public ObjectGuid Item;
-        public byte ItemDstSlot;
         public InvUpdate Inv;
+        public ObjectGuid Item;
+        public byte ItemDstSlot;        
     }
 
     public class AutoStoreBagItem : ClientPacket
@@ -356,13 +357,13 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Inv = new InvUpdate(_worldPacket);            
-            ContainerSlotA = _worldPacket.ReadUInt8();
             ContainerSlotB = _worldPacket.ReadUInt8();
+            ContainerSlotA = _worldPacket.ReadUInt8();
             SlotA = _worldPacket.ReadUInt8();
         }
 
-        public byte ContainerSlotB;
         public InvUpdate Inv;
+        public byte ContainerSlotB;        
         public byte ContainerSlotA;
         public byte SlotA;
     }
@@ -411,34 +412,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(Slot);
             _worldPacket.WriteInt32(SlotInBag);
             _worldPacket.WriteInt32(QuestLogItemID);
-            _worldPacket.WriteUInt32(Quantity);
-            _worldPacket.WriteUInt32(QuantityInInventory);
+            _worldPacket.WriteInt32(Quantity);
+            _worldPacket.WriteInt32(QuantityInInventory);
             _worldPacket.WriteInt32(DungeonEncounterID);
             _worldPacket.WriteInt32(BattlePetSpeciesID);
             _worldPacket.WriteInt32(BattlePetBreedID);
             _worldPacket.WriteUInt32(BattlePetBreedQuality);
             _worldPacket.WriteInt32(BattlePetLevel);
             _worldPacket.WritePackedGuid(ItemGUID);
-            _worldPacket.WriteInt32(Toasts.Count);
-            foreach (UiEventToast uiEventToast in Toasts)
-                uiEventToast.Write(_worldPacket);
 
             _worldPacket.WriteBit(Pushed);
             _worldPacket.WriteBit(Created);
             _worldPacket.WriteBits((uint)DisplayText, 3);
             _worldPacket.WriteBit(IsBonusRoll);
             _worldPacket.WriteBit(IsEncounterLoot);
-            _worldPacket.WriteBit(CraftingData != null);
-            _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
             _worldPacket.FlushBits();
 
             Item.Write(_worldPacket);
-
-            if (FirstCraftOperationID.HasValue)
-                _worldPacket.WriteUInt32(FirstCraftOperationID.Value);
-
-            if (CraftingData != null)
-                CraftingData.Write(_worldPacket);
         }
 
         public ObjectGuid PlayerGUID;
@@ -447,23 +437,19 @@ namespace Game.Networking.Packets
         public ItemInstance Item;
         public int QuestLogItemID;// Item ID used for updating quest progress
                                   // only set if different than real ID (similar to CreatureTemplate.KillCredit)
-        public uint Quantity;
-        public uint QuantityInInventory;
+        public int Quantity;
+        public int QuantityInInventory;
         public int DungeonEncounterID;
         public int BattlePetSpeciesID;
         public int BattlePetBreedID;
         public uint BattlePetBreedQuality;
         public int BattlePetLevel;
         public ObjectGuid ItemGUID;
-        public List<UiEventToast> Toasts = new();
-        public CraftingData CraftingData;
-        public uint? FirstCraftOperationID;
         public bool Pushed;
         public DisplayType DisplayText;
         public bool Created;
         public bool IsBonusRoll;
         public bool IsEncounterLoot;
-
 
         public enum DisplayType
         {
@@ -528,28 +514,6 @@ namespace Game.Networking.Packets
         public InvUpdate Inv;
     }
 
-    class EnchantmentLog : ServerPacket
-    {
-        public EnchantmentLog() : base(ServerOpcodes.EnchantmentLog, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(Owner);
-            _worldPacket.WritePackedGuid(Caster);
-            _worldPacket.WritePackedGuid(ItemGUID);
-            _worldPacket.WriteUInt32(ItemID);
-            _worldPacket.WriteUInt32(Enchantment);
-            _worldPacket.WriteUInt32(EnchantSlot);
-        }
-
-        public ObjectGuid Owner;
-        public ObjectGuid Caster;
-        public ObjectGuid ItemGUID;
-        public uint ItemID;
-        public uint Enchantment;
-        public uint EnchantSlot;
-    }
-
     class CancelTempEnchantment : ClientPacket
     {
         public CancelTempEnchantment(WorldPacket packet) : base(packet) { }
@@ -576,6 +540,28 @@ namespace Game.Networking.Packets
         public ObjectGuid ItemGuid;
         public uint SpellID;
         public uint Cooldown;
+    }
+
+    class EnchantmentLog : ServerPacket
+    {
+        public EnchantmentLog() : base(ServerOpcodes.EnchantmentLog, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(Owner);
+            _worldPacket.WritePackedGuid(Caster);
+            _worldPacket.WritePackedGuid(ItemGUID);
+            _worldPacket.WriteUInt32(ItemID);
+            _worldPacket.WriteUInt32(Enchantment);
+            _worldPacket.WriteUInt32(EnchantSlot);
+        }
+
+        public ObjectGuid Owner;
+        public ObjectGuid Caster;
+        public ObjectGuid ItemGUID;
+        public uint ItemID;
+        public uint Enchantment;
+        public uint EnchantSlot;
     }
 
     class ItemEnchantTimeUpdate : ServerPacket
@@ -665,7 +651,7 @@ namespace Game.Networking.Packets
             ItemGuid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid ItemGuid { get; set; }
+        public ObjectGuid ItemGuid;
     }
 
     class InventoryFullOverflow : ServerPacket
@@ -740,14 +726,14 @@ namespace Game.Networking.Packets
 
     public class ItemMod
     {
-        public uint Value;
+        public int Value;
         public ItemModifier Type;
 
         public ItemMod()
         {
             Type = ItemModifier.Max;
         }
-        public ItemMod(uint value, ItemModifier type)
+        public ItemMod(int value, ItemModifier type)
         {
             Value = value;
             Type = type;
@@ -755,13 +741,13 @@ namespace Game.Networking.Packets
 
         public void Read(WorldPacket data)
         {
-            Value = data.ReadUInt32();
+            Value = data.ReadInt32();
             Type = (ItemModifier)data.ReadUInt8();
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Value);
+            data.WriteInt32(Value);
             data.WriteUInt8((byte)Type);
         }
 
@@ -847,9 +833,9 @@ namespace Game.Networking.Packets
 
     public class ItemInstance
     {
-        public uint ItemID;
-        public uint RandomPropertiesSeed;
-        public uint RandomPropertiesID;
+        public int ItemID;
+        public int RandomPropertiesSeed;
+        public int RandomPropertiesID;
         public ItemBonuses ItemBonus;
         public ItemModList Modifications = new();
 
@@ -858,61 +844,17 @@ namespace Game.Networking.Packets
         public ItemInstance(Item item)
         {
             ItemID = item.GetEntry();
-            List<uint> bonusListIds = item.GetBonusListIDs();
-            if (!bonusListIds.Empty())
-            {
-                ItemBonus = new();
-                RandomPropertiesSeed = item.GetItemSuffixFactor();
-                RandomPropertiesID = (uint)item.GetItemRandomPropertyId();
-                ItemBonus.BonusListIDs.AddRange(bonusListIds);
-                ItemBonus.Context = item.GetContext();
-            }
+
+            RandomPropertiesSeed = item.GetItemSuffixFactor();
+            RandomPropertiesID = item.GetItemRandomPropertyId();
 
             foreach (var mod in item.m_itemData.Modifiers.GetValue().Values)
                 Modifications.Values.Add(new ItemMod((uint)mod.Value, (ItemModifier)mod.Type));
         }
 
-        public ItemInstance(Loots.LootItem lootItem)
-        {
-            ItemID = lootItem.itemid;
-            RandomPropertiesSeed = lootItem.randomSuffix;
-
-            if (lootItem.randomPropertyId.Type != ItemRandomEnchantmentType.BonusList)
-                RandomPropertiesID = lootItem.randomPropertyId.Id;
-
-            if (!lootItem.BonusListIDs.Empty())
-            {
-                ItemBonus = new();
-                ItemBonus.BonusListIDs = lootItem.BonusListIDs;
-                ItemBonus.Context = lootItem.context;
-            }
-        }
-
-        public ItemInstance(VoidStorageItem voidItem)
-        {
-            ItemID = voidItem.ItemEntry;
-            RandomPropertiesSeed = voidItem.ItemSuffixFactor;
-
-            if (voidItem.ItemRandomPropertyId.Type != ItemRandomEnchantmentType.BonusList)
-                RandomPropertiesID = voidItem.ItemRandomPropertyId.Id;
-
-            if (voidItem.FixedScalingLevel != 0)
-                Modifications.Values.Add(new ItemMod(voidItem.FixedScalingLevel, ItemModifier.TimewalkerLevel));
-
-            if (voidItem.ArtifactKnowledgeLevel != 0)
-                Modifications.Values.Add(new ItemMod(voidItem.ArtifactKnowledgeLevel, ItemModifier.ArtifactKnowledgeLevel));
-
-            if (!voidItem.BonusListIDs.Empty())
-            {
-                ItemBonus = new();
-                ItemBonus.Context = voidItem.Context;
-                ItemBonus.BonusListIDs = voidItem.BonusListIDs;
-            }
-        }
-
         public ItemInstance(SocketedGem gem)
         {
-            ItemID = (uint)gem.ItemId.GetValue();
+            ItemID = gem.ItemId.GetValue();
 
             ItemBonuses bonus = new();
             bonus.Context = (ItemContext)(byte)gem.Context;
@@ -924,12 +866,24 @@ namespace Game.Networking.Packets
                 ItemBonus = bonus;
         }
 
+        public ItemInstance(Loots.LootItem lootItem)
+        {
+            ItemID = lootItem.itemid;
+        }
+
+        public ItemInstance(VoidStorageItem voidItem)
+        {
+            ItemID = voidItem.ItemEntry;
+
+            if (voidItem.FixedScalingLevel != 0)
+                Modifications.Values.Add(new ItemMod(voidItem.FixedScalingLevel, ItemModifier.TimewalkerLevel));
+        }        
+
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(ItemID);
-
-            data.WriteInt32((int)RandomPropertiesSeed);
-            data.WriteInt32((int)RandomPropertiesID);
+            data.WriteInt32(ItemID);
+            data.WriteInt32(RandomPropertiesSeed);
+            data.WriteInt32(RandomPropertiesID);
 
             data.WriteBit(ItemBonus != null);
             data.FlushBits();
@@ -942,9 +896,9 @@ namespace Game.Networking.Packets
 
         public void Read(WorldPacket data)
         {
-            ItemID = data.ReadUInt32();
-            RandomPropertiesSeed = data.ReadUInt32();
-            RandomPropertiesID = data.ReadUInt32();
+            ItemID = data.ReadInt32();
+            RandomPropertiesSeed = data.ReadInt32();
+            RandomPropertiesID = data.ReadInt32();
 
             if (data.HasBit())
                 ItemBonus = new();
@@ -1001,20 +955,14 @@ namespace Game.Networking.Packets
     {
         public uint ItemID;
         public List<uint> BonusListIDs = new();
-        public List<ItemMod> Modifications = new();
 
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(ItemID);
             data.WriteInt32(BonusListIDs.Count);
-            data.WriteInt32(Modifications.Count);
 
-            if (!BonusListIDs.Empty())
-                foreach (var id in BonusListIDs)
+            foreach (var id in BonusListIDs)
                     data.WriteUInt32(id);
-
-            foreach (ItemMod modification in Modifications)
-                modification.Write(data);
         }
 
         public bool Equals(ItemBonusKey right)
@@ -1025,9 +973,6 @@ namespace Game.Networking.Packets
             if (BonusListIDs != right.BonusListIDs)
                 return false;
 
-            if (Modifications != right.Modifications)
-                return false;
-
             return true;
         }
     }
@@ -1035,7 +980,7 @@ namespace Game.Networking.Packets
     public class ItemEnchantData
     {
         public ItemEnchantData() { }
-        public ItemEnchantData(uint id, uint expiration, int charges, byte slot)
+        public ItemEnchantData(int id, uint expiration, int charges, byte slot)
         {
             ID = id;
             Expiration = expiration;
@@ -1045,13 +990,13 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(ID);
+            data.WriteInt32(ID);
             data.WriteUInt32(Expiration);
             data.WriteInt32(Charges);
             data.WriteUInt8(Slot);
         }
 
-        public uint ID;
+        public int ID;
         public uint Expiration;
         public int Charges;
         public byte Slot;
@@ -1098,24 +1043,24 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(ItemID);
-            data.WriteUInt32(ItemCount);
+            data.WriteInt32(ItemID);
+            data.WriteInt32(ItemCount);
         }
 
-        public uint ItemID;
-        public uint ItemCount;
+        public int ItemID;
+        public int ItemCount;
     }
 
     struct ItemPurchaseRefundCurrency
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(CurrencyID);
-            data.WriteUInt32(CurrencyCount);
+            data.WriteInt32(CurrencyID);
+            data.WriteInt32(CurrencyCount);
         }
 
-        public uint CurrencyID;
-        public uint CurrencyCount;
+        public int CurrencyID;
+        public int CurrencyCount;
     }
 
     class ItemPurchaseContents

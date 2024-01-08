@@ -37,7 +37,7 @@ namespace Game
         {
             NPCInteractionOpenResult npcInteraction = new();
             npcInteraction.Npc = guid;
-            npcInteraction.InteractionType = PlayerInteractionType.TabardVendor;
+            npcInteraction.InteractionType = PlayerInteractionType.GuildTabardVendor;
             npcInteraction.Success = true;
             SendPacket(npcInteraction);
         }

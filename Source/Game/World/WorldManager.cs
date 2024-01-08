@@ -2024,7 +2024,7 @@ namespace Game
             StringBuilder questIds = new StringBuilder("DELETE cq, cqo FROM character_queststatus cq LEFT JOIN character_queststatus_objectives cqo ON cq.quest = cqo.quest WHERE cq.quest IN (");
             foreach (var (questId, quest) in Global.ObjectMgr.GetQuestTemplates())
             {
-                if (quest.IsDaily() && quest.HasFlagEx(QuestFlagsEx.RemoveOnPeriodicReset))
+                if (quest.IsDaily() && quest.HasAnyFlag(QuestFlagsEx.RemoveOnPeriodicReset))
                     questIds.Append($"{questId},");
             }
             questIds.Append("0)");
@@ -2077,7 +2077,7 @@ namespace Game
             StringBuilder questIds = new StringBuilder("DELETE cq, cqo FROM character_queststatus cq LEFT JOIN character_queststatus_objectives cqo ON cq.quest = cqo.quest WHERE cq.quest IN (");
             foreach (var (questId, quest) in Global.ObjectMgr.GetQuestTemplates())
             {
-                if (quest.IsWeekly() && quest.HasFlagEx(QuestFlagsEx.RemoveOnWeeklyReset))
+                if (quest.IsWeekly() && quest.HasAnyFlag(QuestFlagsEx.RemoveOnWeeklyReset))
                     questIds.Append($"{questId},");
             }
             questIds.Append("0)");

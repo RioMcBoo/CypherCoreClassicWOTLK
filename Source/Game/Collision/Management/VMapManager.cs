@@ -273,12 +273,12 @@ namespace Game.Collision
             }
         }
 
-        public LoadResult ExistsMap(uint mapId, int x, int y)
+        public LoadResult ExistsMap(int mapId, int x, int y)
         {
             return StaticMapTree.CanLoadMap(VMapPath, mapId, x, y, this);
         }
 
-        public int GetParentMapId(uint mapId)
+        public int GetParentMapId(int mapId)
         {
             if (iParentMapData.ContainsKey(mapId))
                 return (int)iParentMapData[mapId];
@@ -297,7 +297,7 @@ namespace Game.Collision
             return pos;
         }
 
-        public static string GetMapFileName(uint mapId)
+        public static string GetMapFileName(int mapId)
         {
             return $"{mapId:D4}.vmtree";
         }

@@ -29,18 +29,18 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public string Description;
+        public LocalizedString Description;
         public byte MinLevel;
         public ushort MaxLevel;
-        public LfgType TypeID;
-        public sbyte Subtype;
+        private byte _typeID;
+        public byte Subtype;
         public sbyte Faction;
         public int IconTextureFileID;
         public int RewardsBgTextureFileID;
         public int PopupBgTextureFileID;
         public byte ExpansionLevel;
         public short MapID;
-        public Difficulty DifficultyID;
+        private byte _difficultyID;
         public float MinGear;
         public byte GroupID;
         public byte OrderIndex;
@@ -60,10 +60,27 @@ namespace Game.DataStorage
         public ushort BonusReputationAmount;
         public ushort MentorItemLevel;
         public byte MentorCharLevel;
-        public LfgFlags[] Flags = new LfgFlags[2];
+        private int[] _flags = new int[2];
 
-        // Helpers
-        public uint Entry() { return (uint)(Id + ((int)TypeID << 24)); }
+        #region Properties
+        public LfgType TypeID => (LfgType)_typeID;
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        public LfgFlags Flags => (LfgFlags)_flags[0];
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(LfgFlags flag)
+        {
+            return _flags[0].HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(LfgFlags flag)
+        {
+            return _flags[0].HasAnyFlag((int)flag);
+        }
+
+        public uint Entry => (uint)(Id + ((int)TypeID << 24));
+        #endregion
     }
 
     public sealed class LightRecord
@@ -82,7 +99,10 @@ namespace Game.DataStorage
         public string Name;
         public string[] Texture = new string[6];
         public ushort Flags;
-        public byte SoundBank;                                                // used to be "Type", maybe needs fixing (works well for now)
+        /// <summary>
+        /// used to be "Type", maybe needs fixing (works well for now)
+        /// </summary>
+        public byte SoundBank;
         public uint SoundID;
         public uint SpellID;
         public float MaxDarkenDepth;
@@ -107,7 +127,7 @@ namespace Game.DataStorage
         public uint Id;
         public int[] Index = new int[SharedConst.MaxLockCase];
         public ushort[] Skill = new ushort[SharedConst.MaxLockCase];
-        public byte[] LockType = new byte[SharedConst.MaxLockCase];
+        public byte[] Type = new byte[SharedConst.MaxLockCase];
         public byte[] Action = new byte[SharedConst.MaxLockCase];
     }
 }

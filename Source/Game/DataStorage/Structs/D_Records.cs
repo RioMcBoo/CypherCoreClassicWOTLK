@@ -2,6 +2,8 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using System;
+using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
@@ -26,28 +28,46 @@ namespace Game.DataStorage
         public uint State0Wmo;
         public byte HealEffect;
         public ushort HealEffectSpeed;
-        public byte State0NameSet;
-        public byte State1NameSet;
-        public byte State2NameSet;
-        public byte State3NameSet;
+        public sbyte State0NameSet;
+        public sbyte State1NameSet;
+        public sbyte State2NameSet;
+        public sbyte State3NameSet;
     }
 
     public sealed class DifficultyRecord
     {
         public uint Id;
-        public string Name;
-        public MapTypes InstanceType;
+        public LocalizedString Name;
+        private byte _instanceType;
         public byte OrderIndex;
         public sbyte OldEnumValue;
-        public byte FallbackDifficultyID;
+        private byte _fallbackDifficultyID;
         public byte MinPlayers;
         public byte MaxPlayers;
-        public DifficultyFlags Flags;
+        private byte _flags;
         public byte ItemContext;
         public byte ToggleDifficultyID;
-        public uint GroupSizeHealthCurveID;
-        public uint GroupSizeDmgCurveID;
-        public uint GroupSizeSpellPointsCurveID;
+        public ushort GroupSizeHealthCurveID;
+        public ushort GroupSizeDmgCurveID;
+        public ushort GroupSizeSpellPointsCurveID;
+
+        #region Properties
+        public MapTypes InstanceType => (MapTypes)_instanceType;
+        public Difficulty FallbackDifficultyID => (Difficulty)_fallbackDifficultyID;
+        public DifficultyFlags Flags => (DifficultyFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(DifficultyFlags flag)
+        {
+            return _flags.HasFlag((byte)flag);
+        }
+
+        public bool HasAnyFlag(DifficultyFlags flag)
+        {
+            return _flags.HasAnyFlag((byte)flag);
+        }
+        #endregion
     }
 
     public sealed class DungeonEncounterRecord
@@ -59,6 +79,7 @@ namespace Game.DataStorage
         public int OrderIndex;
         public sbyte Bit;
         public int Flags;
+        public int Faction;
     }
 
     public sealed class DurabilityCostsRecord

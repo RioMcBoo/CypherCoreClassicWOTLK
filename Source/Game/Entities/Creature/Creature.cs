@@ -783,7 +783,7 @@ namespace Game.Entities
             return creature;
         }
 
-        public bool Create(ulong guidlow, Map map, uint entry, Position pos, CreatureData data = null, uint vehId = 0, bool dynamic = false)
+        public bool Create(ulong guidlow, Map map, int entry, Position pos, CreatureData data = null, uint vehId = 0, bool dynamic = false)
         {
             SetMap(map);
 
@@ -2730,8 +2730,8 @@ namespace Game.Entities
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), levels.Value.MaxLevel);
             }
 
-            int mindelta = Math.Min(creatureDifficulty.DeltaLevelMax, creatureDifficulty.DeltaLevelMin);
-            int maxdelta = Math.Max(creatureDifficulty.DeltaLevelMax, creatureDifficulty.DeltaLevelMin);
+            int mindelta = Math.Min(creatureDifficulty.MaxLevel, creatureDifficulty.MinLevel);
+            int maxdelta = Math.Max(creatureDifficulty.MaxLevel, creatureDifficulty.MinLevel);
             int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), delta);

@@ -157,7 +157,7 @@ namespace Game.Entities
                     {
                         draft.AddItem(problematicItems.Dequeue());
                     }
-                    draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied);
+                    draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckFlags.Copied);
                 }
 
                 DB.Characters.CommitTransaction(trans);
@@ -730,7 +730,7 @@ namespace Game.Entities
                             else if (questStatusData.Status == QuestStatus.Failed)
                                 SetQuestSlotState(slot, QuestSlotStateMask.Fail);
 
-                            if (quest.HasFlagEx(QuestFlagsEx.RecastAcceptSpellOnLogin) && quest.HasFlag(QuestFlags.PlayerCastAccept) && quest.SourceSpellID > 0)
+                            if (quest.HasAnyFlag(QuestFlagsEx.RecastAcceptSpellOnLogin) && quest.HasAnyFlag(QuestFlags.PlayerCastAccept) && quest.SourceSpellID > 0)
                                 CastSpell(this, quest.SourceSpellID, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
 
                             ++slot;
@@ -1282,7 +1282,7 @@ namespace Game.Entities
                     m.deliver_time = mailsResult.Read<long>(7);
                     m.money = mailsResult.Read<ulong>(8);
                     m.COD = mailsResult.Read<ulong>(9);
-                    m.checkMask = (MailCheckMask)mailsResult.Read<byte>(10);
+                    m.checkMask = (MailCheckFlags)mailsResult.Read<byte>(10);
                     m.stationery = (MailStationery)mailsResult.Read<byte>(11);
                     m.mailTemplateId = mailsResult.Read<ushort>(12);
 

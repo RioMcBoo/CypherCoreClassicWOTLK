@@ -1197,7 +1197,7 @@ namespace Game.Entities
 
     public class TempSummonData
     {
-        public uint entry;        // Entry of summoned creature
+        public int entry;        // Entry of summoned creature
         public Position pos;        // Position, where should be creature spawned
         public TempSummonType type; // Summon type, see TempSummonType for available types
         public TimeSpan time;         // Despawn time, usable only with certain temp summon types

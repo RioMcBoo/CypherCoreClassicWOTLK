@@ -11,16 +11,16 @@ namespace Game.Maps
     {
         public uint groupId;
         public string name;
-        public uint mapId;
+        public int mapId;
         public SpawnGroupFlags flags;
     }
 
     public class SpawnData : SpawnMetadata
     {
-        public uint Id; // entry in respective _template table
+        public int Id; // entry in respective _template table
         public Position SpawnPoint;
         public PhaseUseFlagsValues PhaseUseFlags;
-        public uint PhaseId;
+        public int PhaseId;
         public uint PhaseGroup;
         public int terrainSwapMap;
         public uint poolId;
@@ -55,8 +55,8 @@ namespace Game.Maps
     public class SpawnMetadata
     {
         public SpawnObjectType type;
-        public ulong SpawnId;
-        public uint MapId = 0xFFFFFFFF;
+        public long SpawnId;
+        public int MapId = -1;
         public bool dbData = true;
         public SpawnGroupTemplateData spawnGroupData = null;
 

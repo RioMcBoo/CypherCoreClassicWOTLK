@@ -6,6 +6,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Groups
@@ -17,7 +18,7 @@ namespace Game.Groups
             NextGroupDbStoreId = 1;
             NextGroupId = 1;
         }
-
+        public void SetGroupDbStoreSize(int newSize) { GroupDbStore.EnsureCapacity(newSize); }
         public uint GenerateNewGroupDbStoreId()
         {
             uint newStorageId = NextGroupDbStoreId;

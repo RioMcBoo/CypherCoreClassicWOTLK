@@ -164,7 +164,7 @@ namespace Game
                 // guild events only? check invite status here?
                 // When an event is deleted, all invited (accepted/declined? - verify) guildies are notified via in-game mail. (wowwiki)
                 if (!remover.IsEmpty() && invite.InviteeGuid != remover)
-                    mail.SendMailTo(trans, new MailReceiver(invite.InviteeGuid.GetCounter()), new MailSender(calendarEvent), MailCheckMask.Copied);
+                    mail.SendMailTo(trans, new MailReceiver(invite.InviteeGuid.GetCounter()), new MailSender(calendarEvent), MailCheckFlags.Copied);
             }
 
             _invites.Remove(calendarEvent.EventId);
@@ -542,7 +542,7 @@ namespace Game
             packet.TextureID = calendarEvent.TextureId;
 
             Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
-            packet.EventGuildID = guild != null ? guild.GetGUID() : ObjectGuid.Empty;
+            packet.EventClubID = guild != null ? guild.GetGUID() : ObjectGuid.Empty;
 
             if (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement())
             {
@@ -579,7 +579,7 @@ namespace Game
             packet.TextureID = calendarEvent.TextureId;
 
             Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
-            packet.EventGuildID = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
+            packet.EventClubID = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
 
             foreach (var calendarInvite in eventInviteeList)
             {

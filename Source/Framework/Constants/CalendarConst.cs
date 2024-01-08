@@ -17,21 +17,21 @@ namespace Framework.Constants
         GuildEvent = 0x400
     }
 
-    public enum CalendarModerationRank
+    public enum CalendarModerationRank : byte
     {
         Player = 0,
         Moderator = 1,
         Owner = 2
     }
 
-    public enum CalendarSendEventType
+    public enum CalendarSendEventType : byte
     {
         Get = 0,
         Add = 1,
         Copy = 2
     }
 
-    public enum CalendarEventType
+    public enum CalendarEventType : byte
     {
         Raid = 0,
         Dungeon = 1,
@@ -49,7 +49,7 @@ namespace Framework.Constants
         Monthly = 3
     }
 
-    public enum CalendarInviteStatus
+    public enum CalendarInviteStatus : byte
     {
         Invited = 0,
         Accepted = 1,
@@ -63,7 +63,7 @@ namespace Framework.Constants
         Removed = 9     // Correct Name?
     }
 
-    public enum CalendarError
+    public enum CalendarError : byte
     {
         Ok = 0,
         GuildEventsExceeded = 1,

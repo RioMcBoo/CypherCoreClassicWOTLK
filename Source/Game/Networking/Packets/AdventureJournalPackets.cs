@@ -12,10 +12,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            AdventureJournalID = _worldPacket.ReadUInt32();
+            AdventureJournalID = _worldPacket.ReadInt32();
         }
 
-        public uint AdventureJournalID;
+        public int AdventureJournalID;
     }
 
     class AdventureJournalUpdateSuggestions : ClientPacket

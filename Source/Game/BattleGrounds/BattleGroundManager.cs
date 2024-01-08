@@ -297,7 +297,7 @@ namespace Game.BattleGrounds
 
             bg.SetBracket(bracketEntry);
             bg.SetInstanceID(Global.MapMgr.GenerateInstanceId());
-            bg.SetClientInstanceID(CreateClientVisibleInstanceId((BattlegroundTypeId)queueId.BattlemasterListId, bracketEntry.GetBracketId()));
+            bg.SetClientInstanceID(CreateClientVisibleInstanceId((BattlegroundTypeId)queueId.BattlemasterListId, bracketEntry.BracketId()));
             // reset the new bg (set status to status_wait_queue from status_none)
             // this shouldn't be needed anymore as a new Battleground instance is created each time. But some bg sub classes still depend on it.
             bg.Reset();

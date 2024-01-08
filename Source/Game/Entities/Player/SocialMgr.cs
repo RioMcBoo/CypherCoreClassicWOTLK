@@ -326,7 +326,7 @@ namespace Game.Entities
         }
     }
 
-    public enum FriendStatus
+    public enum FriendStatus : byte
     {
         Offline = 0x00,
         Online = 0x01,
@@ -344,7 +344,7 @@ namespace Game.Entities
         All = Friend | Ignored | Muted
     }
 
-    public enum FriendsResult
+    public enum FriendsResult : byte
     {
         DbError = 0x00,
         ListFull = 0x01,

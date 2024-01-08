@@ -519,7 +519,7 @@ namespace Game.Entities
         }
 
         public Dictionary<uint, PlayerSpellState> GetTalentMap(uint spec) { return _specializationInfo.Talents[spec]; }
-        public List<uint> GetGlyphs(byte spec) { return _specializationInfo.Glyphs[spec]; }
+        public uint[] GetGlyphs(byte spec) { return _specializationInfo.Glyphs[spec]; }
 
         public uint GetNextResetTalentsCost()
         {
@@ -626,7 +626,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void SendTalentsInfoData(bool pet)
+        public void SendTalentsInfoData()
         {
             UpdateTalentData packet = new();
             packet.UnspentTalentPoints = GetFreeTalentPoints();
@@ -674,11 +674,11 @@ namespace Game.Entities
                         talentInfo.TalentID = talent.Id;
                         talentInfo.Rank = (byte)curtalent_maxrank;
 
-                        groupInfoPkt.TalentInfos.Add(talentInfo);
+                        groupInfoPkt.Talents.Add(talentInfo);
                     }
                 }
 
-                groupInfoPkt.GlyphInfo = GetGlyphs(specIdx);
+                groupInfoPkt.GlyphIDs = GetGlyphs(specIdx);
 
                 packet.TalentGroupInfos.Add(groupInfoPkt);
             }
@@ -1152,7 +1152,7 @@ namespace Game.Entities
                     if (traitCurrency == null)
                         continue;
 
-                    switch (traitCurrency.GetCurrencyType())
+                    switch (traitCurrency.CurrencyType())
                     {
                         case TraitCurrencyType.Gold:
                             ModifyMoney(-amount);

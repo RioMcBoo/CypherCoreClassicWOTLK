@@ -326,8 +326,8 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(QueuedSlot);
             _worldPacket.WriteUInt32(ActualSlot);
-            _worldPacket.WriteUInt32(RewardMoney);
-            _worldPacket.WriteUInt32(AddedXP);
+            _worldPacket.WriteInt32(RewardMoney);
+            _worldPacket.WriteInt32(AddedXP);
             _worldPacket.WriteInt32(Rewards.Count);
 
             foreach (var reward in Rewards)
@@ -336,8 +336,8 @@ namespace Game.Networking.Packets
 
         public uint QueuedSlot;
         public uint ActualSlot;
-        public uint RewardMoney;
-        public uint AddedXP;
+        public int RewardMoney;
+        public int AddedXP;
         public List<LFGPlayerRewards> Rewards = new();
     }
 
@@ -364,7 +364,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt64(InstanceID);
             _worldPacket.WriteUInt32(ProposalID);
             _worldPacket.WriteUInt32(Slot);
-            _worldPacket.WriteUInt8(State);
+            _worldPacket.WriteInt8(State);
             _worldPacket.WriteUInt32(CompletedMask);
             _worldPacket.WriteUInt32(EncounterMask);
             _worldPacket.WriteInt32(Players.Count);
@@ -382,7 +382,7 @@ namespace Game.Networking.Packets
         public ulong InstanceID;
         public uint ProposalID;
         public uint Slot;
-        public byte State;
+        public sbyte State;
         public uint CompletedMask;
         public uint EncounterMask;
         public byte Unused;
@@ -423,7 +423,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Reason, 4);
+            _worldPacket.WriteBits((byte)Reason, 4);
             _worldPacket.FlushBits();
         }
 
@@ -657,7 +657,7 @@ namespace Game.Networking.Packets
 
     public struct LFGPlayerRewards
     {
-        public LFGPlayerRewards(uint id, uint quantity, int bonusQuantity, bool isCurrency)
+        public LFGPlayerRewards(int id, uint quantity, int bonusQuantity, bool isCurrency)
         {
             Quantity = quantity;
             BonusQuantity = bonusQuantity;
@@ -687,11 +687,11 @@ namespace Game.Networking.Packets
             data.WriteInt32(BonusQuantity);
 
             if (RewardCurrency.HasValue)
-                data.WriteUInt32(RewardCurrency.Value);
+                data.WriteInt32(RewardCurrency.Value);
         }
 
         public ItemInstance RewardItem;
-        public uint? RewardCurrency;
+        public int? RewardCurrency;
         public uint Quantity;
         public int BonusQuantity;
     }
@@ -708,7 +708,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(Target);
             data.WriteUInt32(TotalVotes);
             data.WriteUInt32(BootVotes);
-            data.WriteUInt32(TimeLeft);
+            data.WriteInt32(TimeLeft);
             data.WriteUInt32(VotesNeeded);
             data.WriteString(Reason);
         }
@@ -720,9 +720,9 @@ namespace Game.Networking.Packets
         public ObjectGuid Target;
         public uint TotalVotes;
         public uint BootVotes;
-        public uint TimeLeft;
+        public int TimeLeft;
         public uint VotesNeeded;
-        public string Reason = "";
+        public string Reason = string.Empty;
     }
 
     public struct LFGProposalUpdatePlayer

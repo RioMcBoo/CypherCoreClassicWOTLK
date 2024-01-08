@@ -7,11 +7,20 @@ namespace Game.DataStorage
 {
     public sealed class WMOAreaTableRecord
     {
-        public string AreaName;
+        public LocalizedString AreaName;
         public uint Id;
-        public ushort WmoID;                                                   //  used in root WMO
-        public byte NameSetID;                                                //  used in adt file
-        public int WmoGroupID;                                               //  used in group WMO
+        /// <summary>
+        /// used in root WMO
+        /// </summary>
+        public ushort WmoID;
+        /// <summary>
+        /// used in adt file
+        /// </summary>
+        public byte NameSetID;
+        /// <summary>
+        /// used in group WMO
+        /// </summary>
+        public int WmoGroupID;
         public byte SoundProviderPref;
         public byte SoundProviderPrefUnderwater;
         public ushort AmbienceID;

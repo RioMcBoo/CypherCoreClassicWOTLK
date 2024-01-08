@@ -16,15 +16,16 @@ namespace Game.DataStorage
 
             if (!File.Exists(path + fileName))
             {
-                Log.outError(LogFilter.ServerLoading, "File {0} not found.", fileName);
+                Log.outError(LogFilter.ServerLoading, $"File {fileName} not found.");
                 return storage;
             }
+
             using (var reader = new StreamReader(path + fileName))
             {
                 string headers = reader.ReadLine();
                 if (headers.IsEmpty())
                 {
-                    Log.outError(LogFilter.ServerLoading, "GameTable file {0} is empty.", fileName);
+                    Log.outError(LogFilter.ServerLoading, $"GameTable file {fileName} is empty.");
                     return storage;
                 }
 
@@ -68,10 +69,15 @@ namespace Game.DataStorage
     {
         public T GetRow(uint row)
         {
+            return GetRow(row);
+        }
+
+        public T GetRow(int row)
+        {
             if (row >= _data.Count)
                 return default;
 
-            return _data[(int)row];
+            return _data[row];
         }
 
         public int GetTableRowCount() { return _data.Count; }

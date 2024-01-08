@@ -128,7 +128,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(PartnerIsSameBnetAccount);
-            _worldPacket.WriteBits(Status, 5);
+            _worldPacket.WriteBits((int)Status, 5);
             switch (Status)
             {
                 case TradeStatus.Failed:
@@ -187,7 +187,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(ProposedEnchantment);
             _worldPacket.WriteInt32(Items.Count);
 
-            Items.ForEach(item => item.Write(_worldPacket));
+            foreach (var item in Items)
+                item.Write(_worldPacket);
         }
 
         public class UnwrappedTradeItem

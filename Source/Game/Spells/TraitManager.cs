@@ -366,7 +366,7 @@ namespace Game
             {
                 foreach (TraitCurrencyRecord currency in tree.Currencies)
                 {
-                    switch (currency.GetCurrencyType())
+                    switch (currency.CurrencyType())
                     {
                         case TraitCurrencyType.Gold:
                         {
@@ -547,17 +547,17 @@ namespace Game
                 {
                     foreach (NodeEntry entry in node.Entries)
                         foreach (TraitCondRecord condition in entry.Conditions)
-                            if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
+                            if (condition.CondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
                                 getOrCreateEntry(node.Data.Id, entry.Data.Id).GrantedRanks += condition.GrantedRanks;
 
                     foreach (TraitCondRecord condition in node.Conditions)
-                        if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
+                        if (condition.CondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
                             foreach (NodeEntry entry in node.Entries)
                                 getOrCreateEntry(node.Data.Id, entry.Data.Id).GrantedRanks += condition.GrantedRanks;
 
                     foreach (NodeGroup group in node.Groups)
                         foreach (TraitCondRecord condition in group.Conditions)
-                            if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
+                            if (condition.CondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
                                 foreach (NodeEntry entry in node.Entries)
                                     getOrCreateEntry(node.Data.Id, entry.Data.Id).GrantedRanks += condition.GrantedRanks;
                 }
@@ -596,7 +596,7 @@ namespace Game
 
             bool isNodeFullyFilled(Node node)
             {
-                if (node.Data.GetNodeType() == TraitNodeType.Selection)
+                if (node.Data.NodeType() == TraitNodeType.Selection)
                     return node.Entries.Any(nodeEntry =>
                     {
                         TraitEntryPacket traitEntry = getNodeEntry(node.Data.Id, nodeEntry.Data.Id);
@@ -618,7 +618,7 @@ namespace Game
                 bool hasConditions = false;
                 foreach (TraitCondRecord condition in conditions)
                 {
-                    if (condition.GetCondType() == TraitConditionType.Available || condition.GetCondType() == TraitConditionType.Visible)
+                    if (condition.CondType() == TraitConditionType.Available || condition.CondType() == TraitConditionType.Visible)
                     {
                         if (MeetsTraitCondition(traitConfig, player, condition, ref spentCurrencies))
                             return true;
@@ -636,7 +636,7 @@ namespace Game
                     return TalentLearnResult.FailedUnknown;
 
                 Node node = _traitNodes.LookupByKey(traitEntry.TraitNodeID);
-                if (node.Data.GetNodeType() == TraitNodeType.Selection)
+                if (node.Data.NodeType() == TraitNodeType.Selection)
                     if (getNodeEntryCount(traitEntry.TraitNodeID) != 1)
                         return TalentLearnResult.FailedUnknown;
 
@@ -677,7 +677,7 @@ namespace Game
 
             foreach (var (traitCurrencyId, spentAmount) in spentCurrencies)
             {
-                if (CliDB.TraitCurrencyStorage.LookupByKey(traitCurrencyId).GetCurrencyType() != TraitCurrencyType.TraitSourced)
+                if (CliDB.TraitCurrencyStorage.LookupByKey(traitCurrencyId).CurrencyType() != TraitCurrencyType.TraitSourced)
                     continue;
 
                 if (spentAmount == 0)

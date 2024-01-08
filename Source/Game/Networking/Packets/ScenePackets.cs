@@ -12,20 +12,20 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SceneID);
+            _worldPacket.WriteInt32(SceneID);
             _worldPacket.WriteUInt32(PlaybackFlags);
             _worldPacket.WriteUInt32(SceneInstanceID);
-            _worldPacket.WriteUInt32(SceneScriptPackageID);
+            _worldPacket.WriteInt32(SceneScriptPackageID);
             _worldPacket.WritePackedGuid(TransportGUID);
-            _worldPacket.WriteXYZO(Location);
+            _worldPacket.WriteVector4(Location.GetPosition4D());
             _worldPacket.WriteBit(Encrypted);
             _worldPacket.FlushBits();
         }
 
-        public uint SceneID;
+        public int SceneID;
         public uint PlaybackFlags;
         public uint SceneInstanceID;
-        public uint SceneScriptPackageID;
+        public int SceneScriptPackageID;
         public ObjectGuid TransportGUID;
         public Position Location;
         public bool Encrypted;

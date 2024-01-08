@@ -285,7 +285,7 @@ namespace Game.DataStorage
             // build single time for check spawnmask
             MultiMap<uint, Difficulty> spawnMasks = new();
             foreach (var mapDifficulty in CliDB.MapDifficultyStorage.Values)
-                spawnMasks.Add(mapDifficulty.MapID, (Difficulty)mapDifficulty.DifficultyID);
+                spawnMasks.Add(mapDifficulty.MapID, mapDifficulty.DifficultyID);
 
             uint oldMSTime = Time.GetMSTime();
             // Load area trigger positions (to put them on the server)

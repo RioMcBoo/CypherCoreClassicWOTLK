@@ -234,8 +234,8 @@ namespace Game
         public bool HasPhase(uint phaseId) { return Phases.ContainsKey(phaseId); }
         public Dictionary<uint, PhaseRef> GetPhases() { return Phases; }
 
-        public bool HasVisibleMapId(uint visibleMapId) { return VisibleMapIds.ContainsKey(visibleMapId); }
-        public Dictionary<uint, VisibleMapIdRef> GetVisibleMapIds() { return VisibleMapIds; }
+        public bool HasVisibleMapId(int visibleMapId) { return VisibleMapIds.ContainsKey(visibleMapId); }
+        public Dictionary<int, VisibleMapIdRef> GetVisibleMapIds() { return VisibleMapIds; }
 
         public bool HasUiWorldMapAreaIdSwap(uint uiWorldMapAreaId) { return UiMapPhaseIds.ContainsKey(uiWorldMapAreaId); }
         public Dictionary<uint, UiMapPhaseIdRef> GetUiMapPhaseIds() { return UiMapPhaseIds; }
@@ -245,7 +245,7 @@ namespace Game
         public PhaseShiftFlags Flags = PhaseShiftFlags.Unphased;
         public ObjectGuid PersonalGuid;
         public Dictionary<uint, PhaseRef> Phases = new();
-        public Dictionary<uint, VisibleMapIdRef> VisibleMapIds = new();
+        public Dictionary<int, VisibleMapIdRef> VisibleMapIds = new();
         public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds = new();
 
         int NonCosmeticReferences;

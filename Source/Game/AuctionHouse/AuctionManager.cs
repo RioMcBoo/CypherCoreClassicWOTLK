@@ -1319,7 +1319,7 @@ namespace Game
                 new MailDraft(Global.AuctionHouseMgr.BuildCommodityAuctionMailSubject(AuctionMailType.Sold, itemId, boughtFromAuction),
                     Global.AuctionHouseMgr.BuildAuctionSoldMailBody(player.GetGUID(), auction.BuyoutOrUnitPrice * boughtFromAuction, boughtFromAuction, (uint)depositPart, auctionHouseCut))
                     .AddMoney(profit)
-                    .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(auction.Owner), auction.Owner), new MailSender(this), MailCheckMask.Copied, WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay));
+                    .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(auction.Owner), auction.Owner), new MailSender(this), MailCheckFlags.Copied, WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay));
             }
 
             player.ModifyMoney(-(long)totalPrice);
@@ -1341,7 +1341,7 @@ namespace Game
                     mail.AddItem(batch.Items[i]);
                 }
 
-                mail.SendMailTo(trans, player, new MailSender(this), MailCheckMask.Copied);
+                mail.SendMailTo(trans, player, new MailSender(this), MailCheckFlags.Copied);
             }
 
             AuctionWonNotification packet = new();
@@ -1388,7 +1388,7 @@ namespace Game
 
                 new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Outbid, auction), "")
                     .AddMoney(auction.BidAmount)
-                    .SendMailTo(trans, new MailReceiver(oldBidder, auction.Bidder), new MailSender(this), MailCheckMask.Copied);
+                    .SendMailTo(trans, new MailReceiver(oldBidder, auction.Bidder), new MailSender(this), MailCheckFlags.Copied);
             }
         }
 
@@ -1454,7 +1454,7 @@ namespace Game
                     bidder.UpdateCriteria(CriteriaType.AuctionsWon, 1);
                 }
 
-                mail.SendMailTo(trans, new MailReceiver(bidder, auction.Bidder), new MailSender(this), MailCheckMask.Copied);
+                mail.SendMailTo(trans, new MailReceiver(bidder, auction.Bidder), new MailSender(this), MailCheckFlags.Copied);
             }
             else
             {
@@ -1488,7 +1488,7 @@ namespace Game
                 new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Sold, auction),
                     Global.AuctionHouseMgr.BuildAuctionSoldMailBody(auction.Bidder, auction.BidAmount, auction.BuyoutOrUnitPrice, (uint)auction.Deposit, auctionHouseCut))
                     .AddMoney(profit)
-                    .SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckMask.Copied, WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay));
+                    .SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckFlags.Copied, WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay));
             }
         }
 
@@ -1509,7 +1509,7 @@ namespace Game
                     for (int i = 0; i < SharedConst.MaxMailItems && itemIndex < auction.Items.Count; ++i, ++itemIndex)
                         mail.AddItem(auction.Items[itemIndex]);
 
-                    mail.SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckMask.Copied, 0);
+                    mail.SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckFlags.Copied, 0);
                 }
             }
             else
@@ -1530,7 +1530,7 @@ namespace Game
                 for (int i = 0; i < SharedConst.MaxMailItems && itemIndex < auction.Items.Count; ++i, ++itemIndex)
                     draft.AddItem(auction.Items[itemIndex]);
 
-                draft.SendMailTo(trans, owner, new MailSender(this), MailCheckMask.Copied);
+                draft.SendMailTo(trans, owner, new MailSender(this), MailCheckFlags.Copied);
             }
         }
 
@@ -1543,7 +1543,7 @@ namespace Game
             if ((bidder != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Bidder)))// && !sAuctionBotConfig.IsBotChar(auction.Bidder))
                 new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Removed, auction), "")
                 .AddMoney(auction.BidAmount)
-                .SendMailTo(trans, new MailReceiver(bidder, auction.Bidder), new MailSender(this), MailCheckMask.Copied);
+                .SendMailTo(trans, new MailReceiver(bidder, auction.Bidder), new MailSender(this), MailCheckFlags.Copied);
         }
 
         public void SendAuctionInvoice(AuctionPosting auction, Player owner, SQLTransaction trans)
@@ -1555,13 +1555,13 @@ namespace Game
             if ((owner != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
                 ByteBuffer tempBuffer = new();
-                tempBuffer.WritePackedTime(GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay));
+                tempBuffer.WritePackedTime32(GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay));
                 uint eta = tempBuffer.ReadUInt32();
 
                 new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Invoice, auction),
                     Global.AuctionHouseMgr.BuildAuctionInvoiceMailBody(auction.Bidder, auction.BidAmount, auction.BuyoutOrUnitPrice, (uint)auction.Deposit,
                         CalculateAuctionHouseCut(auction.BidAmount), WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay), eta))
-                    .SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckMask.Copied);
+                    .SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckFlags.Copied);
             }
         }
 
@@ -1609,7 +1609,7 @@ namespace Game
 
     public class AuctionPosting
     {
-        public uint Id;
+        public int Id;
         public AuctionsBucketData Bucket;
 
         public List<Item> Items = new();

@@ -3961,7 +3961,7 @@ namespace Game.Spells
         public bool HasChannelInterruptFlag(SpellAuraInterruptFlags2 flag) { return ChannelInterruptFlags2.HasAnyFlag(flag); }
 
         #region Fields
-        public uint Id { get; set; }
+        public int Id { get; set; }
         public Difficulty Difficulty { get; set; }
         public uint CategoryId { get; set; }
         public DispelType Dispel { get; set; }
@@ -4263,13 +4263,13 @@ namespace Game.Spells
                         if (_spellInfo.Scaling.ScalesFromItemLevel != 0)
                             effectiveItemLevel = _spellInfo.Scaling.ScalesFromItemLevel;
 
-                        if (Scaling.Class == -8 || Scaling.Class == -9)
+                        if (Scaling.Class == ScalingClass.Unknown || Scaling.Class == ScalingClass.Unknown2)
                         {
                             RandPropPointsRecord randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(effectiveItemLevel);
                             if (randPropPoints == null)
                                 randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(CliDB.RandPropPointsStorage.GetNumRows() - 1);
 
-                            tempValue = Scaling.Class == -8 ? randPropPoints.DamageReplaceStat : 0;
+                            tempValue = Scaling.Class == ScalingClass.Unknown ? randPropPoints.DamageReplaceStat : 0;
                         }
                         else
                             tempValue = ItemEnchantmentManager.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
@@ -4277,14 +4277,14 @@ namespace Game.Spells
                     else
                         tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), Scaling.Class);
 
-                    if (Scaling.Class == -7)
+                    if (Scaling.Class == ScalingClass.Item2)
                     {
                         GtGenericMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
                         if (ratingMult != null)
                         {
                             ItemSparseRecord itemSparse = CliDB.ItemSparseStorage.LookupByKey(itemId);
                             if (itemSparse != null)
-                                tempValue *= CliDB.GetIlvlStatMultiplier(ratingMult, itemSparse.inventoryType);
+                                tempValue *= CliDB.GetIlvlStatMultiplier(ratingMult, itemSparse.InventoryType);
                         }
                     }
                 }
@@ -4865,7 +4865,7 @@ namespace Game.Spells
         public SpellRadiusRecord TargetBRadiusEntry;
         public int ChainTargets;
         public uint ItemType;
-        public uint TriggerSpell;
+        public int TriggerSpell;
         public FlagArray128 SpellClassMask;
         public float BonusCoefficientFromAP;
         public List<Condition> ImplicitTargetConditions;
@@ -4877,7 +4877,7 @@ namespace Game.Spells
 
         public struct ScalingInfo
         {
-            public int Class;
+            public ScalingClass Class;
             public float Coefficient;
             public float Variance;
             public float ResourceCoefficient;

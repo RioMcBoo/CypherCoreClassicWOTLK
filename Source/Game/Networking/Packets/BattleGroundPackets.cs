@@ -47,20 +47,6 @@ namespace Game.Networking.Packets
         public ObjectGuid HealerGuid;
     }
 
-    public class AreaSpiritHealerTime : ServerPacket
-    {
-        public AreaSpiritHealerTime() : base(ServerOpcodes.AreaSpiritHealerTime) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(HealerGuid);
-            _worldPacket.WriteUInt32(TimeLeft);
-        }
-
-        public ObjectGuid HealerGuid;
-        public uint TimeLeft;
-    }
-
     public class AreaSpiritHealerQueue : ClientPacket
     {
         public AreaSpiritHealerQueue(WorldPacket packet) : base(packet) { }
@@ -71,6 +57,20 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid HealerGuid;
+    }
+
+    public class AreaSpiritHealerTime : ServerPacket
+    {
+        public AreaSpiritHealerTime() : base(ServerOpcodes.AreaSpiritHealerTime) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(HealerGuid);
+            _worldPacket.WriteInt32(TimeLeft);
+        }
+
+        public ObjectGuid HealerGuid;
+        public int TimeLeft;
     }
 
     public class HearthAndResurrect : ClientPacket
@@ -310,15 +310,24 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(WargameArenas);
             _worldPacket.WriteBit(RatedArenas);
             _worldPacket.WriteBit(ArenaSkirmish);
+            _worldPacket.WriteBit(SoloShuffle);
+            _worldPacket.WriteBit(RatedSoloShuffle);
+            _worldPacket.WriteBit(BattlegroundBlitz);
+            _worldPacket.WriteBit(RatedBattlegroundBlitz);
             _worldPacket.FlushBits();
         }
 
+        public bool RatedBattlegrounds;
+        public bool PugBattlegrounds;
+        public bool WargameBattlegrounds;
         public bool WargameArenas;
         public bool RatedArenas;
-        public bool WargameBattlegrounds;
         public bool ArenaSkirmish;
-        public bool PugBattlegrounds;
-        public bool RatedBattlegrounds;
+        public bool SoloShuffle;
+        public bool RatedSoloShuffle;
+        public bool BattlegroundBlitz;
+        /// <summary>solo rbg</summary>
+        public bool RatedBattlegroundBlitz;
     }
 
     class RequestBattlefieldStatus : ClientPacket
@@ -352,11 +361,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(NumPlayersIHaveReported);
         }
 
-        public ObjectGuid Offender;
-        public byte NumPlayersIHaveReported = 0;
-        public byte NumBlackMarksOnOffender = 0;
-        public ResultCode Result = ResultCode.GenericFailure;
-
         public enum ResultCode
         {
             Success = 0,
@@ -364,6 +368,11 @@ namespace Game.Networking.Packets
             AFKSystemEnabled = 5,
             AFKSystemDisabled = 6
         }
+
+        public ObjectGuid Offender;
+        public byte NumPlayersIHaveReported = 0;
+        public byte NumBlackMarksOnOffender = 0;
+        public ResultCode Result = ResultCode.GenericFailure;        
     }
 
     class BattlegroundPlayerPositions : ServerPacket
@@ -473,7 +482,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(MapID);
             _worldPacket.WriteUInt8((byte)State);
             _worldPacket.WriteInt64(StartTime);
-            _worldPacket.WriteInt32(Duration);
+            _worldPacket.WriteInt64(Duration);
             _worldPacket.WriteUInt8(ArenaFaction);
             _worldPacket.WriteUInt32(BattlemasterListID);
             _worldPacket.WriteBit(Registered);
@@ -488,28 +497,13 @@ namespace Game.Networking.Packets
         public uint MapID;
         public PVPMatchState State = PVPMatchState.Inactive;
         public long StartTime;
-        public int Duration;
+        public long Duration; //TODO: Ask IDA to be sure
         public RatedMatchDeserterPenalty DeserterPenalty;
         public byte ArenaFaction;
         public uint BattlemasterListID;
         public bool Registered;
         public bool AffectsRating;
-    }
-
-    class PVPMatchSetState : ServerPacket
-    {
-        public PVPMatchSetState(PVPMatchState state) : base(ServerOpcodes.PvpMatchSetState)
-        {
-            State = state;
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt8((byte)State);
-        }
-
-        PVPMatchState State;
-    }
+    }       
     
     class PVPMatchComplete : ServerPacket
     {
@@ -518,7 +512,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt8(Winner);
-            _worldPacket.WriteInt32(Duration);
+            _worldPacket.WriteInt64(Duration);
             _worldPacket.WriteBit(LogData != null);
             _worldPacket.WriteBits(SoloShuffleStatus, 2);
             _worldPacket.FlushBits();
@@ -528,27 +522,25 @@ namespace Game.Networking.Packets
         }
 
         public byte Winner;
-        public int Duration;
+        public long Duration; //TODO: Ask IDA to be sure
         public PVPMatchStatistics LogData;
         public uint SoloShuffleStatus;
     }
 
     class UpdateCapturePoint : ServerPacket
-    {
-        public BattlegroundCapturePointInfo CapturePointInfo;
-
+    {  
         public UpdateCapturePoint() : base(ServerOpcodes.UpdateCapturePoint) { }
 
         public override void Write()
         {
             CapturePointInfo.Write(_worldPacket);
         }
+
+        public BattlegroundCapturePointInfo CapturePointInfo;
     }
 
     class CapturePointRemoved : ServerPacket
-    {
-        public ObjectGuid CapturePointGUID;
-
+    {       
         public CapturePointRemoved() : base(ServerOpcodes.CapturePointRemoved) { }
         public CapturePointRemoved(ObjectGuid capturePointGUID) : base(ServerOpcodes.CapturePointRemoved)
         {
@@ -559,6 +551,8 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(CapturePointGUID);
         }
+
+        public ObjectGuid CapturePointGUID;
     }
 
     //Structs
@@ -568,6 +562,8 @@ namespace Game.Networking.Packets
         public int Ranking;
         public int SeasonPlayed;
         public int SeasonWon;
+        public int Unused1;
+        public int Unused2;
         public int WeeklyPlayed;
         public int WeeklyWon;
         public int RoundsSeasonPlayed;
@@ -575,14 +571,12 @@ namespace Game.Networking.Packets
         public int RoundsWeeklyPlayed;
         public int RoundsWeeklyWon;
         public int BestWeeklyRating;
-        public int BestSeasonRating;
         public int LastWeeksBestRating;
-        public int PvpTierID;
-        public int Unused1;
-        public int Unused2;
+        public int BestSeasonRating;
+        public int PvpTierID;        
         public int Unused3;
         public int Unused4;
-        public int Unused5;
+        public int Rank;
         public bool Disqualified;
 
         public void Write(WorldPacket data)
@@ -591,6 +585,8 @@ namespace Game.Networking.Packets
             data.WriteInt32(Ranking);
             data.WriteInt32(SeasonPlayed);
             data.WriteInt32(SeasonWon);
+            data.WriteInt32(Unused1);
+            data.WriteInt32(Unused2);
             data.WriteInt32(WeeklyPlayed);
             data.WriteInt32(WeeklyWon);
             data.WriteInt32(RoundsSeasonPlayed);
@@ -598,14 +594,12 @@ namespace Game.Networking.Packets
             data.WriteInt32(RoundsWeeklyPlayed);
             data.WriteInt32(RoundsWeeklyWon);
             data.WriteInt32(BestWeeklyRating);
-            data.WriteInt32(BestSeasonRating);
-            data.WriteInt32(LastWeeksBestRating);            
-            data.WriteInt32(PvpTierID);
-            data.WriteInt32(Unused1);
-            data.WriteInt32(Unused2);
+            data.WriteInt32(LastWeeksBestRating);
+            data.WriteInt32(BestSeasonRating);          
+            data.WriteInt32(PvpTierID);            
             data.WriteInt32(Unused3);
             data.WriteInt32(Unused4);
-            data.WriteInt32(Unused5);
+            data.WriteInt32(Rank);
             data.WriteBit(Disqualified);
             data.FlushBits();
         }
@@ -665,11 +659,8 @@ namespace Game.Networking.Packets
         }
 
         public struct PVPMatchPlayerPVPStat
-        {
-            public int PvpStatID;
-            public uint PvpStatValue;
-
-            public PVPMatchPlayerPVPStat(int pvpStatID, uint pvpStatValue)
+        {   
+            public PVPMatchPlayerPVPStat(int pvpStatID, int pvpStatValue)
             {
                 PvpStatID = pvpStatID;
                 PvpStatValue = pvpStatValue;
@@ -678,9 +669,11 @@ namespace Game.Networking.Packets
             public void Write(WorldPacket data)
             {
                 data.WriteInt32(PvpStatID);
-                data.WriteUInt32(PvpStatValue);
+                data.WriteInt32(PvpStatValue);
             }
 
+            public int PvpStatID;
+            public int PvpStatValue;
         }
 
         public class PVPMatchPlayerStatistics
@@ -695,7 +688,7 @@ namespace Game.Networking.Packets
                 data.WriteInt32(PrimaryTalentTree);
                 data.WriteInt8(Sex);
                 data.WriteUInt32((uint)PlayerRace);
-                data.WriteInt32(PlayerClass);
+                data.WriteInt32((int)PlayerClass);
                 data.WriteInt32(CreatureID);
                 data.WriteInt32(HonorLevel);
                 data.WriteInt32(Role);
@@ -748,7 +741,7 @@ namespace Game.Networking.Packets
             public int PrimaryTalentTree;
             public sbyte Sex;
             public Race PlayerRace;
-            public int PlayerClass;
+            public Class PlayerClass;
             public int CreatureID;
             public int HonorLevel;
             public int Role;
@@ -815,13 +808,7 @@ namespace Game.Networking.Packets
     }
 
     class BattlegroundCapturePointInfo
-    {
-        public ObjectGuid Guid;
-        public Vector2 Pos;
-        public BattlegroundCapturePointState State = BattlegroundCapturePointState.Neutral;
-        public long CaptureTime;
-        public TimeSpan CaptureTotalDuration;
-
+    {  
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(Guid);
@@ -834,5 +821,11 @@ namespace Game.Networking.Packets
                 data.WriteUInt32((uint)CaptureTotalDuration.TotalMilliseconds);
             }
         }
+
+        public ObjectGuid Guid;
+        public Vector2 Pos;
+        public BattlegroundCapturePointState State = BattlegroundCapturePointState.Neutral;
+        public long CaptureTime;
+        public TimeSpan CaptureTotalDuration;
     }
 }

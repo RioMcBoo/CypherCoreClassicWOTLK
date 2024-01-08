@@ -2452,7 +2452,7 @@ namespace Game.Entities
                     return true;
 
                 // profession equipment
-                if (slot >= ProfessionSlots.Start && slot < ProfessionSlots.End)
+                if (pos.Slot >= ProfessionSlots.Start && pos.Slot < ProfessionSlots.End)
                     return true;
 
                 // bag equip slots
@@ -2460,7 +2460,7 @@ namespace Game.Entities
                     return true;
 
                 // reagent bag equip slots
-                if (slot >= InventorySlots.ReagentBagStart && slot < InventorySlots.ReagentBagEnd)
+                if (pos.Slot >= InventorySlots.ReagentBagStart && pos.Slot < InventorySlots.ReagentBagEnd)
                     return true;
 
                 // backpack slots
@@ -4207,7 +4207,6 @@ namespace Game.Entities
                 for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
                     if (GetItemByPos(i) == null)
                         ++freeSlotCount;
-            }
 
             return freeSlotCount;
         }
@@ -5458,7 +5457,7 @@ namespace Game.Entities
                         for (int j = 0; j < batchSize; ++j)
                             draft.AddItem(unstorableItems[batchNumber * SharedConst.MaxMailItems + j]);
 
-                        draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied);
+                        draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckFlags.Copied);
                     });
 
                     for (int batch = 0; batch < fullBatches; ++batch)

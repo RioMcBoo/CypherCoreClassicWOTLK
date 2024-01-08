@@ -4,6 +4,7 @@
 using Framework.Constants;
 using System;
 using System.Numerics;
+using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
@@ -18,12 +19,18 @@ namespace Game.DataStorage
         public uint Id;
         public string Directory;
         public LocalizedString MapName;
-        public string MapDescription0;                               // Horde
-        public string MapDescription1;                               // Alliance
-        public string PvpShortDescription;
-        public string PvpLongDescription;
+        /// <summary>
+        /// Horde
+        /// </summary>
+        public LocalizedString MapDescription0;
+        /// <summary>
+        /// Alliance
+        /// </summary>
+        public LocalizedString MapDescription1;
+        public LocalizedString PvpShortDescription;
+        public LocalizedString PvpLongDescription;
         public byte MapType;
-        public MapTypes InstanceType;
+        private sbyte _instanceType;
         public byte ExpansionID;
         public ushort AreaTableID;
         public short LoadingScreenID;
@@ -33,64 +40,98 @@ namespace Game.DataStorage
         public byte TimeOffset;
         public float MinimapIconScale;
         public int RaidOffset;
-        public short CorpseMapID;                                              // map_id of entrance map in ghost mode (continent always and in most cases = normal entrance)
+        /// <summary>
+        /// map_id of entrance map in ghost mode (continent always and in most cases = normal entrance)
+        /// </summary>
+        public short CorpseMapID;
         public byte MaxPlayers;
         public short WindSettingsID;
         public int ZmpFileDataID;
-        public int WdtFileDataID;
-        public int NavigationMaxDistance;
-        public uint[] Flags = new uint[3];
+        private int[] _flags = new int[3];
 
-        // Helpers
-        public Expansion Expansion() { return (Expansion)ExpansionID; }
+        #region Properties
+        public MapTypes InstanceType => (MapTypes)_instanceType;
+        public MapFlags Flags => (MapFlags)_flags[0];
+        public MapFlags2 Flags2 => (MapFlags2)_flags[1];
+        public Expansion Expansion => (Expansion)ExpansionID;        
+        #endregion
 
-        public bool IsDungeon()
+        #region Helpers
+        public bool HasFlag(MapFlags flag)
         {
-            return (InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid || InstanceType == MapTypes.Scenario) && !IsGarrison();
+            return _flags[0].HasFlag((int)flag);
         }
-        public bool IsNonRaidDungeon() { return InstanceType == MapTypes.Instance; }
-        public bool Instanceable() { return InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid || InstanceType == MapTypes.Battleground || InstanceType == MapTypes.Arena || InstanceType == MapTypes.Scenario; }
-        public bool IsRaid() { return InstanceType == MapTypes.Raid; }
-        public bool IsBattleground() { return InstanceType == MapTypes.Battleground; }
-        public bool IsBattleArena() { return InstanceType == MapTypes.Arena; }
-        public bool IsBattlegroundOrArena() { return InstanceType == MapTypes.Battleground || InstanceType == MapTypes.Arena; }
-        public bool IsScenario() { return InstanceType == MapTypes.Scenario; }
-        public bool IsWorldMap() { return InstanceType == MapTypes.Common; }
 
-        public bool IsContinent()
+        public bool HasAnyFlag(MapFlags flag)
         {
-            switch (Id)
+            return _flags[0].HasAnyFlag((int)flag);
+        }
+
+        public bool HasFlag(MapFlags2 flag)
+        {
+            return _flags[1].HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(MapFlags2 flag)
+        {
+            return _flags[1].HasAnyFlag((int)flag);
+        }
+
+        public bool IsDungeon =>
+            (InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid || InstanceType == MapTypes.Scenario) && !IsGarrison;
+
+        public bool IsNonRaidDungeon => InstanceType == MapTypes.Instance;
+
+        public bool Instanceable =>
+            InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid || InstanceType == MapTypes.Battleground ||
+            InstanceType == MapTypes.Arena || InstanceType == MapTypes.Scenario;
+
+        public bool IsRaid => InstanceType == MapTypes.Raid;
+        public bool IsBattleground => InstanceType == MapTypes.Battleground;
+        public bool IsBattleArena => InstanceType == MapTypes.Arena;
+        public bool IsBattlegroundOrArena => InstanceType == MapTypes.Battleground || InstanceType == MapTypes.Arena;
+        public bool IsScenario => InstanceType == MapTypes.Scenario;
+        public bool IsWorldMap => InstanceType == MapTypes.Common;
+
+        public bool IsContinent
+        {
+            get
             {
-                case 0:
-                case 1:
-                case 530:
-                case 571:
-                case 870:
-                case 1116:
-                case 1220:
-                case 1642:
-                case 1643:
-                case 2222:
-                case 2444:
-                    return true;
-                default:
-                    return false;
+                switch (Id)
+                {
+                    case 0:
+                    case 1:
+                    case 530:
+                    case 571:
+                    case 870:
+                    case 1116:
+                    case 1220:
+                    case 1642:
+                    case 1643:
+                    case 2222:
+                    case 2444:
+                        return true;
+                    default:
+                        return false;
+                }
             }
         }
 
-        public bool IsDynamicDifficultyMap() { return GetFlags().HasFlag(MapFlags.DynamicDifficulty); }
-        public bool IsFlexLocking() { return GetFlags().HasFlag(MapFlags.FlexibleRaidLocking); }
-        public bool IsGarrison() { return GetFlags().HasFlag(MapFlags.Garrison); }
-        public bool IsSplitByFaction()
-        {
-            return Id == 609 || // Acherus (DeathKnight Start)
-            Id == 1265 ||   // Assault on the Dark Portal (WoD Intro)
-            Id == 2175 ||   // Exiles Reach - NPE
-            Id == 2570;     // Forbidden Reach (Dracthyr/Evoker Start)
-        }
+        public bool IsDynamicDifficultyMap => HasFlag(MapFlags.DynamicDifficulty);
+        public bool IsFlexLocking => HasFlag(MapFlags.FlexibleRaidLocking);
+        public bool IsGarrison => HasFlag(MapFlags.Garrison);
 
-        public MapFlags GetFlags() { return (MapFlags)Flags[0]; }
-        public MapFlags2 GetFlags2() { return (MapFlags2)Flags[1]; }
+        public bool IsSplitByFaction
+        {
+            get
+            {
+                return Id == 609 || // Acherus (DeathKnight Start)
+                Id == 1265 ||   // Assault on the Dark Portal (WoD Intro)
+                Id == 2175 ||   // Exiles Reach - NPE
+                Id == 2570;     // Forbidden Reach (Dracthyr/Evoker Start)
+            }
+        }
+        #endregion
     }
 
     public sealed class MapChallengeModeRecord
@@ -100,39 +141,64 @@ namespace Game.DataStorage
         public ushort MapID;
         public byte Flags;
         public uint ExpansionLevel;
-        public int RequiredWorldStateID; // maybe?
+        /// <summary>
+        /// maybe?
+        /// </summary>
+        public int RequiredWorldStateID;
         public short[] CriteriaCount = new short[3];
     }
 
     public sealed class MapDifficultyRecord
     {
         public uint Id;
-        public LocalizedString Message;                               // m_message_lang (text showed when transfer to map failed)
+        /// <summary>
+        /// m_message_lang (text showed when transfer to map failed)
+        /// </summary>
+        public LocalizedString Message;
         public uint ItemContextPickerID;
         public int ContentTuningID;
-        public byte DifficultyID;
+        private byte _difficultyID;
         public byte LockID;
-        public MapDifficultyResetInterval ResetInterval;
+        private byte _resetInterval;
         public byte MaxPlayers;
         public byte ItemContext;
-        public byte Flags;
+        private byte _flags;
         public uint MapID;
 
-        public bool HasResetSchedule() { return ResetInterval != MapDifficultyResetInterval.Anytime; }
-        public bool IsUsingEncounterLocks() { return GetFlags().HasFlag(MapDifficultyFlags.UseLootBasedLockInsteadOfInstanceLock); }
-        public bool IsRestoringDungeonState() { return GetFlags().HasFlag(MapDifficultyFlags.ResumeDungeonProgressBasedOnLockout); }
-        public bool IsExtendable() { return !GetFlags().HasFlag(MapDifficultyFlags.DisableLockExtension); }
+        #region Properties
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        public MapDifficultyResetInterval ResetInterval => (MapDifficultyResetInterval)_resetInterval;
+        public MapDifficultyFlags Flags => (MapDifficultyFlags)_flags;
+        #endregion
 
-        public uint GetRaidDuration()
+        #region Helpers
+        public bool HasFlag(MapDifficultyFlags flag)
         {
-            if (ResetInterval == MapDifficultyResetInterval.Daily)
-                return 86400;
-            if (ResetInterval == MapDifficultyResetInterval.Weekly)
-                return 604800;
-            return 0;
+            return _flags.HasFlag((byte)flag);
         }
 
-        public MapDifficultyFlags GetFlags() { return (MapDifficultyFlags)Flags; }
+        public bool HasAnyFlag(MapDifficultyFlags flag)
+        {
+            return _flags.HasAnyFlag((byte)flag);
+        }
+
+        public bool HasResetSchedule => ResetInterval != MapDifficultyResetInterval.Anytime;
+        public bool IsUsingEncounterLocks => HasFlag(MapDifficultyFlags.UseLootBasedLockInsteadOfInstanceLock);
+        public bool IsRestoringDungeonState => HasFlag(MapDifficultyFlags.ResumeDungeonProgressBasedOnLockout);
+        public bool IsExtendable => !HasFlag(MapDifficultyFlags.DisableLockExtension);
+
+        public uint RaidDuration
+        {
+            get
+            {
+                if (ResetInterval == MapDifficultyResetInterval.Daily)
+                    return 86400;
+                if (ResetInterval == MapDifficultyResetInterval.Weekly)
+                    return 604800;
+                return 0;
+            }
+        }
+        #endregion
     }
 
     public sealed class MapDifficultyXConditionRecord
@@ -150,55 +216,90 @@ namespace Game.DataStorage
         public uint Parent;
         public sbyte Operator;
         public sbyte Amount;
-        public uint Type;
-        public uint Asset;
+        public int Type;
+        public int Asset;
         public int SecondaryAsset;
         public sbyte TertiaryAsset;
     }
 
     public sealed class MountRecord
     {
-        public string Name;
-        public string SourceText;
-        public string Description;
+        public LocalizedString Name;
+        public LocalizedString SourceText;
+        public LocalizedString Description;
         public uint Id;
         public ushort MountTypeID;
-        public MountFlags Flags;
+        private ushort _flags;
         public sbyte SourceTypeEnum;
-        public uint SourceSpellID;
+        private int _sourceSpellID;
         public uint PlayerConditionID;
         public float MountFlyRideHeight;
         public int UiModelSceneID;
 
-        public bool IsSelfMount() { return (Flags & MountFlags.SelfMount) != 0; }
+        #region Properties
+        public MountFlags Flags => (MountFlags)_flags;
+        public uint SourceSpellID => (uint)_sourceSpellID;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(MountFlags flag)
+        {
+            return _flags.HasFlag((ushort)flag);
+        }
+
+        public bool HasAnyFlag(MountFlags flag)
+        {
+            return _flags.HasAnyFlag((ushort)flag);
+        }
+
+        public bool IsSelfMount => HasFlag(MountFlags.SelfMount);
+        #endregion
     }
 
     public sealed class MountCapabilityRecord
     {
         public uint Id;
-        public MountCapabilityFlags Flags;
+        private byte _flags;
         public ushort ReqRidingSkill;
         public ushort ReqAreaID;
         public uint ReqSpellAuraID;
-        public uint ReqSpellKnownID;
-        public uint ModSpellAuraID;
+        public int ReqSpellKnownID;
+        public int ModSpellAuraID;
         public short ReqMapID;
-        public int PlayerConditionID;
-        public int FlightCapabilityID;
+
+        #region Properties
+        public MountCapabilityFlags Flags => (MountCapabilityFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(MountCapabilityFlags flag)
+        {
+            return _flags.HasFlag((byte)flag);
+        }
+
+        public bool HasAnyFlag(MountCapabilityFlags flag)
+        {
+            return _flags.HasAnyFlag((byte)flag);
+        }
+        #endregion
     }
 
     public sealed class MountTypeXCapabilityRecord
     {
         public uint Id;
-        public ushort MountTypeID;
+        private ushort _mountTypeID;
         public ushort MountCapabilityID;
         public byte OrderIndex;
+
+        #region Properties
+        public uint MountTypeID => _mountTypeID;
+        #endregion
     }
 
     public sealed class MountXDisplayRecord
     {
         public uint Id;
-        public uint CreatureDisplayInfoID;
+        public int CreatureDisplayInfoID;
         public uint PlayerConditionID;
         public uint MountID;
     }
@@ -210,7 +311,6 @@ namespace Game.DataStorage
         public byte KeyID;
         public uint AudioFileDataID;
         public uint SubtitleFileDataID;
-        public int SubtitleFileFormat;
     }
 
     public sealed class MythicPlusSeasonRecord

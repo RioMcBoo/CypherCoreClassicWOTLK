@@ -32,7 +32,7 @@ namespace Game.Spells
     }
 
     [Flags]
-    public enum AuraFlags
+    public enum AuraFlags : ushort
     {
         None = 0x00,
         NoCaster = 0x01,

@@ -1146,7 +1146,7 @@ namespace Game.Entities
                                 case ItemEnchantmentType.BonusListID:
                                 {
                                     foreach (var itemBonus in ItemBonusMgr.GetItemBonuses(gemEnchant.EffectArg[i]))
-                                        if (itemBonus.BonusType == ItemBonusType.ItemLevel)
+                                        if (itemBonus.Type == ItemBonusType.ItemLevel)
                                             _bonusData.GemItemLevelBonus[slot] += (uint)itemBonus.Value[0];
                                     break;
                                 }
@@ -1156,7 +1156,7 @@ namespace Game.Entities
                                     if (bonusListId != 0)
                                     {
                                         foreach (var itemBonus in ItemBonusMgr.GetItemBonuses(bonusListId))
-                                            if (itemBonus.BonusType == ItemBonusType.ItemLevel)
+                                            if (itemBonus.Type == ItemBonusType.ItemLevel)
                                                 _bonusData.GemItemLevelBonus[slot] += (uint)itemBonus.Value[0];
                                     }
                                     break;
@@ -2152,7 +2152,7 @@ namespace Game.Entities
             itemBonusKey.BonusListIDs.Add(bonusListID);
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemBonusKey), itemBonusKey);
             foreach (var bonus in ItemBonusMgr.GetItemBonuses(bonusListID))
-                _bonusData.AddBonus(bonus.BonusType, bonus.Value);
+                _bonusData.AddBonus(bonus.Type, bonus.Value);
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
         }
 
@@ -2672,9 +2672,9 @@ namespace Game.Entities
 
         // ItemRandomPropertyId (signed but stored as unsigned)
         public int GetItemRandomPropertyId() { return m_itemData.RandomPropertiesID; }
-        public uint GetItemSuffixFactor() { return (uint)(int)m_itemData.PropertySeed; }
+        public int GetItemSuffixFactor() { return m_itemData.PropertySeed; }
         public ItemRandomEnchantmentId GetItemRandomEnchantmentId() { return m_randomEnchantment; }
-        public uint GetEnchantmentId(EnchantmentSlot slot) { return (uint)m_itemData.Enchantment[(int)slot].ID.GetValue(); }
+        public int GetEnchantmentId(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].ID.GetValue(); }
         public uint GetEnchantmentDuration(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Duration; }
         public int GetEnchantmentCharges(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Charges; }
 
@@ -2869,166 +2869,6 @@ namespace Game.Entities
         }
     }
 
-    public readonly record struct ItemSlot
-    {
-        public static implicit operator ItemSlot(byte slot) => new(slot);
-        public static implicit operator byte(ItemSlot slot) => slot.Value;
-        public const byte Null = byte.MaxValue;
-        public ItemSlot(byte slot) { Value = slot; }
-        public override int GetHashCode() => Value;
-
-        /// <summary>Is the Slot clearly determined?</summary>
-        public bool IsSpecific => Value != Null;
-        public bool IsEquipSlot => Value < EquipmentSlot.End;
-        public bool IsEquipBagSlot => Value >= InventorySlots.BagStart && Value < InventorySlots.BagEnd;
-        public bool IsItemSlot => Value >= InventorySlots.ItemStart && Value < InventorySlots.ItemEnd;
-        public bool IsValidItemSlot(byte backPackCapacity) => Value >= InventorySlots.ItemStart && Value < (InventorySlots.ItemStart + backPackCapacity);
-        public bool IsValidBagSlot => Value <= ItemConst.MaxBagSize || Value == Null;
-        public bool IsBankItemSlot => Value >= InventorySlots.BankItemStart && Value < InventorySlots.BankItemEnd;
-        public bool IsBankBagSlot => Value >= InventorySlots.BankBagStart && Value < InventorySlots.BankBagEnd;
-        public bool IsKeyringSlot => Value >= InventorySlots.KeyringStart && Value < InventorySlots.KeyringEnd;
-        public bool IsChildEquipmentSlot => Value >= InventorySlots.ChildEquipmentStart && Value < InventorySlots.ChildEquipmentEnd;
-        public bool IsBuyBackSlot => Value >= InventorySlots.BuyBackStart && Value < InventorySlots.BuyBackEnd;
-
-        public override string ToString() => Value.ToString();
-
-        public readonly byte Value;
-    }
-
-    public readonly record struct ItemPos
-    {
-        public static implicit operator ItemPos(byte slot) => new(slot);
-        public static implicit operator ItemPos(ItemSlot slot) => new(slot);
-        public static readonly ItemPos Undefined = new(ItemSlot.Null, ItemSlot.Null);
-
-        public override int GetHashCode()
-        {
-            return Slot.GetHashCode() & BagSlot.GetHashCode() << 8 /*ItemSlot size is 1 byte*/;
-        }
-
-        public ItemPos(byte slot, byte bagSlot = ItemSlot.Null)
-        {
-            Slot = slot;
-            BagSlot = bagSlot;
-        }
-
-        public ItemPos(byte slot, byte? bagSlot)
-        {
-            Slot = slot;
-            BagSlot = bagSlot.HasValue ? bagSlot.Value : ItemSlot.Null;
-        }
-
-        /// <summary>Is the position clearly determined?</summary>
-        public bool IsSpecificPos => Slot != ItemSlot.Null;
-
-        /// <summary>Is the bag clearly determined?</summary>
-        public bool IsSpecificBag => BagSlot != ItemSlot.Null;
-
-        /// <summary>Points to any place in the player's default inventory</summary>
-        public bool IsInventoryPos
-        {
-            get
-            {
-                if (!IsSpecificBag && Slot.IsItemSlot)
-                    return true;
-                if (BagSlot.IsEquipBagSlot && Slot.IsValidBagSlot) 
-                    return true;
-                if (!IsSpecificBag && Slot.IsKeyringSlot)
-                    return true;
-                if (!IsSpecificBag && Slot.IsChildEquipmentSlot)
-                    return true;
-                return false;
-            }
-        }
-
-        /// <summary>Points to any place in the player's bank</summary>
-        public bool IsBankPos
-        {
-            get
-            {
-                if (!IsSpecificBag && Slot.IsBankItemSlot)
-                    return true;
-                if (!IsSpecificBag && Slot.IsBankBagSlot)
-                    return true;
-                if (BagSlot.IsBankBagSlot)
-                    return true;
-                return false;
-            }
-        }
-
-        /// <summary>Points to any bag slot (equip/bank)</summary>
-        public bool IsBagSlotPos
-        {
-            get
-            {
-                if (!IsSpecificBag && Slot.IsEquipBagSlot)
-                    return true;
-                if (!IsSpecificBag && Slot.IsBankBagSlot)
-                    return true;
-                return false;
-            }
-        }
-
-        /// <summary>Can be equip on a character</summary>
-        public bool IsEquipmentPos
-        {
-            get
-            {
-                if (!IsSpecificBag && Slot.IsEquipSlot)
-                    return true;
-                if (!IsSpecificBag && Slot.IsEquipBagSlot)
-                    return true;
-                return false;
-            }
-        }
-
-        /// <summary>TODO: I don't know what is it</summary>
-        public bool IsChildEquipmentPos => !IsSpecificBag && Slot.IsChildEquipmentSlot;
-
-        /// <summary>Points to BuyBack slot</summary>
-        public bool IsBuyBackPos => !IsSpecificBag && Slot.IsBuyBackSlot;        
-
-        public readonly ItemSlot Slot;
-        public readonly ItemSlot BagSlot;
-    }
-
-    public readonly record struct ItemPosCount
-    {
-        public ItemPosCount(ItemPos pos, uint count = 1)
-        {
-            Pos = pos;
-            Count = count;
-        }
-
-        public ItemPosCount(byte slot, byte containerSlot, uint count = 1)
-        {
-            Pos = new ItemPos(slot, containerSlot);
-            Count = count;
-        }
-
-        public ItemPosCount(byte slot, ushort count = 1)
-        {
-            Pos = new ItemPos(slot);
-            Count = count;
-        }
-
-        public override int GetHashCode()
-        {
-            return Pos.GetHashCode() & ((int)(Count ^ (Count >> 16)) << 16); /*ItemPos size is 2 bytes*/
-        }
-
-        public bool IsContainedIn(List<ItemPosCount> vec)
-        {
-            foreach (var posCount in vec)
-                if (posCount.Pos == Pos)
-                    return true;
-            return false;
-        }
-
-        public readonly ItemPos Pos;
-        public readonly uint Count;
-    }
-
     public class ItemSetEffect
     {
         public uint ItemSetID;
@@ -3102,7 +2942,7 @@ namespace Game.Entities
         public void AddBonusList(uint bonusListId)
         {
             foreach (var bonus in ItemBonusMgr.GetItemBonuses(bonusListId))
-                AddBonus(bonus.BonusType, bonus.Value);
+                AddBonus(bonus.Type, bonus.Value);
         }
 
         public void AddBonus(ItemBonusType type, int[] values)

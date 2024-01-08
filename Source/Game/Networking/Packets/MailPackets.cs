@@ -30,8 +30,8 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Mails.Count);
             _worldPacket.WriteInt32(TotalNumRecords);
-
-            Mails.ForEach(p => p.Write(_worldPacket));
+            foreach(var mail in Mails)
+                mail.Write(_worldPacket);
         }
 
         public int TotalNumRecords;
@@ -428,7 +428,8 @@ namespace Game.Networking.Packets
             data.WriteBits(Body.GetByteCount(), 13);
             data.FlushBits();
 
-            Attachments.ForEach(p => p.Write(data));
+            foreach (var item in Attachments)
+                item.Write(data);
 
             data.WriteString(Subject);
             data.WriteString(Body);
@@ -444,8 +445,8 @@ namespace Game.Networking.Packets
         public int Flags;
         public float DaysLeft;
         public int MailTemplateID;
-        public string Subject = "";
-        public string Body = "";
+        public string Subject = string.Empty;
+        public string Body = string.Empty;
         public List<MailAttachedItem> Attachments = new();
     }
 }

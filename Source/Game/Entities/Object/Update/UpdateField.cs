@@ -61,7 +61,7 @@ namespace Game.Entities
         {
             BlockBit = blockBit;
             Bit = bit;
-            _value = "";
+            _value = string.Empty;
         }
 
         public static implicit operator string(UpdateFieldString updateField)

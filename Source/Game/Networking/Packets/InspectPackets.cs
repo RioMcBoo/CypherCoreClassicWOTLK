@@ -33,7 +33,6 @@ namespace Game.Networking.Packets
             DisplayInfo.Write(_worldPacket);
             _worldPacket.WriteInt32(Glyphs.Count);
             _worldPacket.WriteInt32(Talents.Count);
-            _worldPacket.WriteInt32(PvpTalents.Count);
             _worldPacket.WriteInt32(ItemLevel);
             _worldPacket.WriteUInt8(LifetimeMaxRank);
             _worldPacket.WriteUInt16(TodayHK);
@@ -46,9 +45,6 @@ namespace Game.Networking.Packets
 
             for (int i = 0; i < Talents.Count; ++i)
                 _worldPacket.WriteUInt16(Talents[i]);
-
-            for (int i = 0; i < PvpTalents.Count; ++i)
-                _worldPacket.WriteUInt16(PvpTalents[i]);
 
             _worldPacket.WriteBit(GuildData.HasValue);
             _worldPacket.WriteBit(AzeriteLevel.HasValue);
@@ -69,7 +65,6 @@ namespace Game.Networking.Packets
         public PlayerModelDisplayInfo DisplayInfo;
         public List<ushort> Glyphs = new();
         public List<ushort> Talents = new();
-        public Array<ushort> PvpTalents = new(PlayerConst.MaxPvpTalentSlots, 0);
         public InspectGuildData? GuildData;
         public Array<PVPBracketData> Bracket = new(7, default);
         public uint? AzeriteLevel;
@@ -187,7 +182,7 @@ namespace Game.Networking.Packets
         public ObjectGuid GUID;
         public List<InspectItemData> Items = new();
         public string Name;
-        public uint SpecializationID;
+        public int SpecializationID;
         public byte GenderID;
         public byte Race;
         public byte ClassID;
@@ -196,7 +191,7 @@ namespace Game.Networking.Packets
         public void Initialize(Player player)
         {
             GUID = player.GetGUID();
-            SpecializationID = (uint)player.GetPrimarySpecialization();
+            SpecializationID = (int)player.GetPrimarySpecialization();
             Name = player.GetName();
             GenderID = (byte)player.GetNativeGender();
             Race = (byte)player.GetRace();
@@ -216,7 +211,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(GUID);
-            data.WriteUInt32(SpecializationID);
+            data.WriteInt32(SpecializationID);
             data.WriteInt32(Items.Count);
             data.WriteBits(Name.GetByteCount(), 6);
             data.WriteUInt8(GenderID);
@@ -226,10 +221,7 @@ namespace Game.Networking.Packets
             data.WriteString(Name);
 
             foreach (var customization in Customizations)
-            {
-                data.WriteUInt32(customization.ChrCustomizationOptionID);
-                data.WriteUInt32(customization.ChrCustomizationChoiceID);
-            }
+                customization.Write(data);
 
             foreach (InspectItemData item in Items)
                 item.Write(data);

@@ -60,7 +60,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(PlayerGUID);
             _worldPacket.WriteUInt32(Unused_10_1_5);
             _worldPacket.WriteUInt32(Flags);
-            _worldPacket.WritePackedTime(CurrentTime);
+            _worldPacket.WritePackedTime32(CurrentTime);
             _worldPacket.WriteInt64(ElapsedTime);
             _worldPacket.WriteInt64(CreationTime);
             _worldPacket.WriteBit(RafAcceptanceID.HasValue);
@@ -128,7 +128,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Sender);
             _worldPacket.WritePackedGuid(Earner);
             _worldPacket.WriteUInt32(AchievementID);
-            _worldPacket.WritePackedTime(Time);
+            _worldPacket.WritePackedTime32(Time);
             _worldPacket.WriteUInt32(EarnerNativeRealm);
             _worldPacket.WriteUInt32(EarnerVirtualRealm);
             _worldPacket.WriteBit(Initial);
@@ -158,7 +158,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid PlayerGUID;
-        public string Name = "";
+        public string Name = string.Empty;
         public uint AchievementID;
         public bool GuildAchievement;
     }
@@ -173,11 +173,10 @@ namespace Game.Networking.Packets
 
             foreach (GuildCriteriaProgress progress in Progress)
             {
-                _worldPacket.WriteUInt32(progress.CriteriaID);
+                _worldPacket.WriteInt32(progress.CriteriaID);
                 _worldPacket.WriteInt64(progress.DateCreated);
                 _worldPacket.WriteInt64(progress.DateStarted);
-                _worldPacket.WritePackedTime(progress.DateUpdated);
-                _worldPacket.WriteUInt32(0); // this is a hack. this is a packed time written as int64 (progress.DateUpdated)
+                _worldPacket.WritePackedTime64(progress.DateUpdated);
                 _worldPacket.WriteUInt64(progress.Quantity);
                 _worldPacket.WritePackedGuid(progress.PlayerGUID);
                 _worldPacket.WriteInt32(progress.Unused_10_1_5);
@@ -195,11 +194,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(GuildGUID);
-            _worldPacket.WriteUInt32(CriteriaID);
+            _worldPacket.WriteInt32(CriteriaID);
         }
 
         public ObjectGuid GuildGUID;
-        public uint CriteriaID;
+        public int CriteriaID;
     }
 
     public class GuildSetFocusedAchievement : ClientPacket
@@ -222,7 +221,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteUInt32(AchievementID);
-            _worldPacket.WritePackedTime(TimeDeleted);
+            _worldPacket.WritePackedTime32(TimeDeleted);
         }
 
         public ObjectGuid GuildGUID;
@@ -238,7 +237,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteUInt32(AchievementID);
-            _worldPacket.WritePackedTime(TimeEarned);
+            _worldPacket.WritePackedTime32(TimeEarned);
         }
 
         public uint AchievementID;
@@ -269,12 +268,12 @@ namespace Game.Networking.Packets
         {
             PlayerGUID = _worldPacket.ReadPackedGuid();
             GuildGUID = _worldPacket.ReadPackedGuid();
-            AchievementID = _worldPacket.ReadUInt32();
+            AchievementID = _worldPacket.ReadInt32();
         }
 
         public ObjectGuid PlayerGUID;
         public ObjectGuid GuildGUID;
-        public uint AchievementID;
+        public int AchievementID;
     }
 
     class GuildAchievementMembers : ServerPacket
@@ -284,14 +283,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(GuildGUID);
-            _worldPacket.WriteUInt32(AchievementID);
+            _worldPacket.WriteInt32(AchievementID);
             _worldPacket.WriteInt32(Member.Count);
             foreach (ObjectGuid guid in Member)
                 _worldPacket.WritePackedGuid(guid);
         }
 
         public ObjectGuid GuildGUID;
-        public uint AchievementID;
+        public int AchievementID;
         public List<ObjectGuid> Member = new();
     }
 
@@ -301,7 +300,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Id);
-            data.WritePackedTime(Date);
+            data.WritePackedTime32(Date);
             data.WritePackedGuid(Owner);
             data.WriteUInt32(VirtualRealmAddress);
             data.WriteUInt32(NativeRealmAddress);
@@ -323,7 +322,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(Player);
             data.WriteUInt32(Unused_10_1_5);
             data.WriteUInt32(Flags);
-            data.WritePackedTime(Date);
+            data.WritePackedTime32(Date);
             data.WriteInt64(TimeFromStart);
             data.WriteInt64(TimeFromCreate);
             data.WriteBit(RafAcceptanceID.HasValue);
@@ -346,7 +345,7 @@ namespace Game.Networking.Packets
 
     public struct GuildCriteriaProgress
     {
-        public uint CriteriaID;
+        public int CriteriaID;
         public long DateCreated;
         public long DateStarted;
         public long DateUpdated;

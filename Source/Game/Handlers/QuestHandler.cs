@@ -175,7 +175,7 @@ namespace Game
 
                     _player.PlayerTalkClass.SendCloseGossip();
 
-                    if (quest.HasFlag(QuestFlags.LaunchGossipAccept))
+                    if (quest.HasAnyFlag(QuestFlags.LaunchGossipAccept))
                     {
                         void launchGossip(WorldObject worldObject)
                         {
@@ -339,7 +339,7 @@ namespace Game
             }
 
             WorldObject obj = GetPlayer();
-            if (!quest.HasFlag(QuestFlags.AutoComplete))
+            if (!quest.HasAnyFlag(QuestFlags.AutoComplete))
             {
                 obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
                 if (obj == null || !obj.HasInvolvedQuest(packet.QuestID))
@@ -380,7 +380,7 @@ namespace Game
             if (quest == null)
                 return;
 
-            if (!quest.HasFlag(QuestFlags.AutoComplete))
+            if (!quest.HasAnyFlag(QuestFlags.AutoComplete))
             {
                 WorldObject obj = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
                 if (obj == null || !obj.HasInvolvedQuest(packet.QuestID))
@@ -416,7 +416,7 @@ namespace Game
 
                     if (quest != null)
                     {
-                        if (quest.HasFlagEx(QuestFlagsEx.NoAbandonOnceBegun))
+                        if (quest.HasAnyFlag(QuestFlagsEx.NoAbandonOnceBegun))
                         {
                             foreach (QuestObjective objective in quest.Objectives)
                                 if (_player.IsQuestObjectiveComplete(packet.Entry, quest, objective))
@@ -426,7 +426,7 @@ namespace Game
                         if (quest.LimitTime != 0)
                             GetPlayer().RemoveTimedQuest(questId);
 
-                        if (quest.HasFlag(QuestFlags.Pvp))
+                        if (quest.HasAnyFlag(QuestFlags.Pvp))
                         {
                             GetPlayer().pvpInfo.IsHostile = GetPlayer().pvpInfo.IsInHostileArea || GetPlayer().HasPvPForcingQuest();
                             GetPlayer().UpdatePvPState();
@@ -502,7 +502,7 @@ namespace Game
             if (obj == null)
                 return;
 
-            if (!quest.HasFlag(QuestFlags.AutoComplete))
+            if (!quest.HasAnyFlag(QuestFlags.AutoComplete))
             {
                 if (!obj.HasInvolvedQuest(packet.QuestID))
                     return;

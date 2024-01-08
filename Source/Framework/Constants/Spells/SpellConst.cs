@@ -87,6 +87,13 @@ namespace Framework.Constants
         Ranged = 2      //hunter range and ranged weapon
     }
 
+    public enum SpellInterruptReason
+    {
+        Movement = 16,
+        StopCasting = 40,
+        Turning = 41,
+    }
+
     [Flags]
     public enum SpellInterruptFlags
     {
@@ -1416,7 +1423,7 @@ namespace Framework.Constants
         TooCloseToAnotherMoltenRitual = 2424, // You Can'T Begin A Molten Ritual This Close To Another One.
     }
 
-    public enum SpellMissInfo
+    public enum SpellMissInfo : byte
     {
         None = 0,
         Miss = 1,
@@ -1560,6 +1567,7 @@ namespace Framework.Constants
         FullDebugMask = 0xFFFFFFFF
     }
 
+    [Flags]
     public enum SpellSchoolMask
     {
         None = 0x0,                       // Not Exist
@@ -2897,7 +2905,7 @@ namespace Framework.Constants
         MaskAll = Damage | Heal | NoDmgHeal
     }
 
-    public enum SpellCooldownFlags
+    public enum SpellCooldownFlags : byte
     {
         None = 0x0,
         IncludeGCD = 0x1,  // Starts GCD in addition to normal cooldown specified in the packet

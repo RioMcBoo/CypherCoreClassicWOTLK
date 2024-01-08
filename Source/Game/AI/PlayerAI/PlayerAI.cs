@@ -395,7 +395,7 @@ namespace Game.AI
                 return false;
 
             var chrSpec = who.GetPrimarySpecializationEntry();
-            return chrSpec != null && chrSpec.GetRole() == ChrSpecializationRole.Healer;
+            return chrSpec != null && chrSpec.Role() == ChrSpecializationRole.Healer;
         }
 
         bool IsPlayerRangedAttacker(Player who)
@@ -404,7 +404,7 @@ namespace Game.AI
                 return false;
 
             var chrSpec = who.GetPrimarySpecializationEntry();
-            return chrSpec != null && chrSpec.GetFlags().HasFlag(ChrSpecializationFlag.Ranged);
+            return chrSpec != null && chrSpec.Flags().HasFlag(ChrSpecializationFlag.Ranged);
         }
 
         Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)

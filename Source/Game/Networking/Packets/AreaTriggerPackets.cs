@@ -15,12 +15,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            AreaTriggerID = _worldPacket.ReadUInt32();
+            AreaTriggerID = _worldPacket.ReadInt32();
             Entered = _worldPacket.HasBit();
             FromClient = _worldPacket.HasBit();
         }
 
-        public uint AreaTriggerID;
+        public int AreaTriggerID;
         public bool Entered;
         public bool FromClient;
     }

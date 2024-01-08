@@ -156,7 +156,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Item);
             _worldPacket.WritePackedGuid(Player);
 
-            _worldPacket.WriteBits(Error, 4);
+            _worldPacket.WriteBits((byte)Error, 4);
             _worldPacket.FlushBits();
         }
 
@@ -207,7 +207,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Result, 4);
+            _worldPacket.WriteBits((byte)Result, 4);
             _worldPacket.FlushBits();
         }
 

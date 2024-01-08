@@ -282,7 +282,7 @@ namespace Game
                 // will delete item or place to receiver mail list
                 draft.AddMoney((ulong)sendMail.Info.SendMoney)
                     .AddCOD((uint)sendMail.Info.Cod)
-                    .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(receiverGuid), receiverGuid.GetCounter()), new MailSender(player), sendMail.Info.Body.IsEmpty() ? MailCheckMask.Copied : MailCheckMask.HasBody, deliver_delay);
+                    .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(receiverGuid), receiverGuid.GetCounter()), new MailSender(player), sendMail.Info.Body.IsEmpty() ? MailCheckFlags.Copied : MailCheckFlags.HasBody, deliver_delay);
 
                 player.SaveInventoryAndGoldToDB(trans);
                 DB.Characters.CommitTransaction(trans);
@@ -324,7 +324,7 @@ namespace Game
             {
                 if (player.unReadMails != 0)
                     --player.unReadMails;
-                m.checkMask = m.checkMask | MailCheckMask.Read;
+                m.checkMask = m.checkMask | MailCheckFlags.Read;
                 player.m_mailsUpdated = true;
                 m.state = MailState.Changed;
             }
@@ -477,7 +477,7 @@ namespace Game
                     {
                         new MailDraft(m.subject, "")
                             .AddMoney(m.COD)
-                            .SendMailTo(trans, new MailReceiver(receiver, m.sender), new MailSender( MailMessageType.Normal, m.receiver), MailCheckMask.CodPayment);
+                            .SendMailTo(trans, new MailReceiver(receiver, m.sender), new MailSender( MailMessageType.Normal, m.receiver), MailCheckFlags.CodPayment);
                     }
 
                     player.ModifyMoney(-(long)m.COD);
@@ -614,7 +614,7 @@ namespace Game
             InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, bodyItem);
             if (msg == InventoryResult.Ok)
             {
-                m.checkMask = m.checkMask | MailCheckMask.Copied;
+                m.checkMask = m.checkMask | MailCheckFlags.Copied;
                 m.state = MailState.Changed;
                 player.m_mailsUpdated = true;
 
@@ -639,7 +639,7 @@ namespace Game
 
                 foreach (Mail mail in GetPlayer().GetMails())
                 {
-                    if (mail.checkMask.HasAnyFlag(MailCheckMask.Read))
+                    if (mail.checkMask.HasAnyFlag(MailCheckFlags.Read))
                         continue;
 
                     // and already delivered

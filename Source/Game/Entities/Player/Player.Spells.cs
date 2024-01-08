@@ -248,6 +248,12 @@ namespace Game.Entities
             SendPacket(petSpellsPacket);
         }
 
+        public ObjectGuid GetSummonedBattlePetGUID() => m_activePlayerData.SummonedBattlePetGUID;
+        public void SetSummonedBattlePetGUID(ObjectGuid guid)
+        {
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SummonedBattlePetGUID), guid);
+        }
+
         public bool CanSeeSpellClickOn(Creature creature)
         {
             if (creature.HasNpcFlag(NPCFlags.SpellClick))
@@ -623,11 +629,11 @@ namespace Game.Entities
                         case ItemEnchantmentType.Resistance:
                             if (pEnchant.ScalingClass != 0)
                             {
-                                int scalingClass = pEnchant.ScalingClass;
+                                ScalingClass scalingClass = pEnchant.ScalingClass;
                                 if ((m_unitData.MinItemLevel != 0 || m_unitData.MaxItemLevel != 0) && pEnchant.ScalingClassRestricted != 0)
                                     scalingClass = pEnchant.ScalingClassRestricted;
 
-                                uint minLevel = pEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.ScaleAsAGem) ? 1 : 60u;
+                                uint minLevel = pEnchant.HasFlag(SpellItemEnchantmentFlags.ScaleAsAGem) ? 1 : 60u;
                                 uint scalingLevel = GetLevel();
                                 byte maxLevel = (byte)(pEnchant.MaxLevel != 0 ? pEnchant.MaxLevel : CliDB.SpellScalingGameTable.GetTableRowCount() - 1);
 
@@ -664,11 +670,11 @@ namespace Game.Entities
                         {
                             if (pEnchant.ScalingClass != 0)
                             {
-                                int scalingClass = pEnchant.ScalingClass;
+                                ScalingClass scalingClass = pEnchant.ScalingClass;
                                 if ((m_unitData.MinItemLevel != 0 || m_unitData.MaxItemLevel != 0) && pEnchant.ScalingClassRestricted != 0)
                                     scalingClass = pEnchant.ScalingClassRestricted;
 
-                                uint minLevel = pEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.ScaleAsAGem) ? 1 : 60u;
+                                uint minLevel = pEnchant.HasFlag(SpellItemEnchantmentFlags.ScaleAsAGem) ? 1 : 60u;
                                 uint scalingLevel = GetLevel();
                                 byte maxLevel = (byte)(pEnchant.MaxLevel != 0 ? pEnchant.MaxLevel : CliDB.SpellScalingGameTable.GetTableRowCount() - 1);
 
@@ -2787,7 +2793,7 @@ namespace Game.Entities
                                         continue;
 
                                     float basePoints = Global.DB2Mgr.GetCurveValueAt((uint)traitDefinitionEffectPoint.CurveID, rank);
-                                    if (traitDefinitionEffectPoint.GetOperationType() == TraitPointsOperationType.Multiply)
+                                    if (traitDefinitionEffectPoint.OperationType() == TraitPointsOperationType.Multiply)
                                         basePoints *= spellInfo.GetEffect((uint)traitDefinitionEffectPoint.EffectIndex).CalcBaseValue(this, null, 0, -1);
 
                                     args.AddSpellMod(SpellValueMod.BasePoint0 + traitDefinitionEffectPoint.EffectIndex, (int)basePoints);

@@ -16,6 +16,9 @@ using System.Threading;
 namespace Game.DataStorage
 {
     using static CliDB;
+    using static Game.AI.SmartAction;
+    using static Game.ScriptNameContainer;
+    using static System.Runtime.InteropServices.JavaScript.JSType;
 
     public class DB2Manager : Singleton<DB2Manager>
     {
@@ -42,77 +45,26 @@ namespace Game.DataStorage
         public void LoadStores()
         {
             foreach (var areaGroupMember in AreaGroupMemberStorage.Values)
-                _areaGroupMembers.Add(areaGroupMember.AreaGroupID, areaGroupMember.AreaID);
-
-            foreach (ArtifactPowerRecord artifactPower in ArtifactPowerStorage.Values)
-                _artifactPowers.Add(artifactPower.ArtifactID, artifactPower);
-
-            foreach (ArtifactPowerLinkRecord artifactPowerLink in ArtifactPowerLinkStorage.Values)
-            {
-                _artifactPowerLinks.Add(artifactPowerLink.PowerA, artifactPowerLink.PowerB);
-                _artifactPowerLinks.Add(artifactPowerLink.PowerB, artifactPowerLink.PowerA);
-            }
-
-            foreach (ArtifactPowerRankRecord artifactPowerRank in ArtifactPowerRankStorage.Values)
-                _artifactPowerRanks[Tuple.Create(artifactPowerRank.ArtifactPowerID, artifactPowerRank.RankIndex)] = artifactPowerRank;
-
-            foreach (AzeriteEmpoweredItemRecord azeriteEmpoweredItem in AzeriteEmpoweredItemStorage.Values)
-                _azeriteEmpoweredItems[azeriteEmpoweredItem.ItemID] = azeriteEmpoweredItem;
-
-            foreach (AzeriteEssencePowerRecord azeriteEssencePower in AzeriteEssencePowerStorage.Values)
-                _azeriteEssencePowersByIdAndRank[((uint)azeriteEssencePower.AzeriteEssenceID, azeriteEssencePower.Tier)] = azeriteEssencePower;
-
-            foreach (AzeriteItemMilestonePowerRecord azeriteItemMilestonePower in AzeriteItemMilestonePowerStorage.Values)
-                _azeriteItemMilestonePowers.Add(azeriteItemMilestonePower);
-
-            _azeriteItemMilestonePowers = _azeriteItemMilestonePowers.OrderBy(p => p.RequiredLevel).ToList();
-
-            uint azeriteEssenceSlot = 0;
-            foreach (AzeriteItemMilestonePowerRecord azeriteItemMilestonePower in _azeriteItemMilestonePowers)
-            {
-                AzeriteItemMilestoneType type = (AzeriteItemMilestoneType)azeriteItemMilestonePower.Type;
-                if (type == AzeriteItemMilestoneType.MajorEssence || type == AzeriteItemMilestoneType.MinorEssence)
-                {
-                    //ASSERT(azeriteEssenceSlot < MAX_AZERITE_ESSENCE_SLOT);
-                    _azeriteItemMilestonePowerByEssenceSlot[azeriteEssenceSlot] = azeriteItemMilestonePower;
-                    ++azeriteEssenceSlot;
-                }
-            }
-
-            foreach (AzeritePowerSetMemberRecord azeritePowerSetMember in AzeritePowerSetMemberStorage.Values)
-                if (AzeritePowerStorage.ContainsKey(azeritePowerSetMember.AzeritePowerID))
-                    _azeritePowers.Add(azeritePowerSetMember.AzeritePowerSetID, azeritePowerSetMember);
-
-            foreach (AzeriteTierUnlockRecord azeriteTierUnlock in AzeriteTierUnlockStorage.Values)
-            {
-                var key = (azeriteTierUnlock.AzeriteTierUnlockSetID, (ItemContext)azeriteTierUnlock.ItemCreationContext);
-
-                if (!_azeriteTierUnlockLevels.ContainsKey(key))
-                    _azeriteTierUnlockLevels[key] = new byte[SharedConst.MaxAzeriteEmpoweredTier];
-
-                _azeriteTierUnlockLevels[key][azeriteTierUnlock.Tier] = azeriteTierUnlock.AzeriteLevel;
-            }
+                _areaGroupMembers.Add(areaGroupMember.AreaGroupID, areaGroupMember.AreaID);           
 
             foreach (BattlemasterListRecord battlemaster in BattlemasterListStorage.Values)
             {
                 if (battlemaster.MaxLevel < battlemaster.MinLevel)
                 {
                     Log.outError(LogFilter.ServerLoading, $"Battlemaster ({battlemaster.Id}) contains bad values for MinLevel ({battlemaster.MinLevel}) and MaxLevel ({battlemaster.MaxLevel}). Swapping values.");
-                    MathFunctions.Swap(ref battlemaster.MaxLevel, ref battlemaster.MinLevel);
+                    (battlemaster.MaxLevel, battlemaster.MinLevel) = (battlemaster.MinLevel, battlemaster.MaxLevel);
                 }
                 if (battlemaster.MaxPlayers < battlemaster.MinPlayers)
                 {
                     Log.outError(LogFilter.ServerLoading, $"Battlemaster ({battlemaster.Id}) contains bad values for MinPlayers ({battlemaster.MinPlayers}) and MaxPlayers ({battlemaster.MaxPlayers}). Swapping values.");
-                    sbyte minPlayers = battlemaster.MinPlayers;
-                    battlemaster.MinPlayers = (sbyte)battlemaster.MaxPlayers;
-                    battlemaster.MaxPlayers = minPlayers;
+                    (battlemaster.MaxPlayers, battlemaster.MinPlayers) = (battlemaster.MinPlayers, battlemaster.MaxPlayers);
                 }
             }
 
             foreach (var uiDisplay in ChrClassUIDisplayStorage.Values)
             {
-                Cypher.Assert(uiDisplay.ChrClassesID < (byte)Class.Max);
-                _uiDisplayByClass[uiDisplay.ChrClassesID] = uiDisplay;
+                Cypher.Assert(uiDisplay.ChrClassesID < Class.Max);
+                _uiDisplayByClass[(int)uiDisplay.ChrClassesID] = uiDisplay;
             }
 
             var powers = new List<ChrClassesXPowerTypesRecord>();
@@ -122,12 +74,13 @@ namespace Game.DataStorage
             powers.Sort(new ChrClassesXPowerTypesRecordComparer());
             foreach (var power in powers)
             {
+                // Personal serial number of the power type for each class. Simply skips unused power types during counting.
                 uint index = 0;
                 for (uint j = 0; j < (int)PowerType.Max; ++j)
                     if (_powersByClass[power.ClassID][j] != (int)PowerType.Max)
                         ++index;
 
-                _powersByClass[power.ClassID][power.PowerType] = index;
+                _powersByClass[power.ClassID][(int)power.PowerType] = index;
             }
 
             foreach (var customizationChoice in ChrCustomizationChoiceStorage.Values)
@@ -148,7 +101,7 @@ namespace Game.DataStorage
                         displayInfoByCustomizationChoice[customizationElement.ChrCustomizationChoiceID] = customizationDisplayInfo;
                         ChrCustomizationOptionRecord customizationOption = ChrCustomizationOptionStorage.LookupByKey(customizationChoice.ChrCustomizationOptionID);
                         if (customizationOption != null)
-                            shapeshiftFormByModel.Add(customizationOption.ChrModelID, Tuple.Create(customizationOption.Id, (byte)customizationDisplayInfo.ShapeshiftFormID));
+                            shapeshiftFormByModel.Add(customizationOption.ChrModelID, Tuple.Create(customizationOption.Id, customizationDisplayInfo.ShapeshiftFormID));
                     }
                 }
             }
@@ -213,32 +166,23 @@ namespace Game.DataStorage
                 //ASSERT(chrSpec.ClassID < MAX_CLASSES);
                 //ASSERT(chrSpec.OrderIndex < MAX_SPECIALIZATIONS);
 
-                uint storageIndex = chrSpec.ClassID;
-                if (chrSpec.GetFlags().HasFlag(ChrSpecializationFlag.PetOverrideSpec))
+                Class storageIndex = chrSpec.ClassID;
+                if (chrSpec.HasFlag(ChrSpecializationFlag.PetOverrideSpec))
                 {
                     //ASSERT(!chrSpec.ClassID);
-                    storageIndex = (int)Class.Max;
+                    storageIndex = Class.Max;
                 }
-                if (_chrSpecializationsByIndex[storageIndex] == null)
-                    _chrSpecializationsByIndex[storageIndex] = new ChrSpecializationRecord[PlayerConst.MaxSpecializations];
+                if (_chrSpecializationsByIndex[(int)storageIndex] == null)
+                    _chrSpecializationsByIndex[(int)storageIndex] = new ChrSpecializationRecord[PlayerConst.MaxSpecializations];
 
-                _chrSpecializationsByIndex[storageIndex][chrSpec.OrderIndex] = chrSpec;
+                _chrSpecializationsByIndex[(int)storageIndex][chrSpec.OrderIndex] = chrSpec;
             }
 
             foreach (ConditionalContentTuningRecord conditionalContentTuning in ConditionalContentTuningStorage.Values)
                 _conditionalContentTuning.Add(conditionalContentTuning.ParentContentTuningID, conditionalContentTuning);
 
-            foreach (ContentTuningXExpectedRecord contentTuningXExpectedStat in ContentTuningXExpectedStorage.Values)
-            {
-                if (ExpectedStatModStorage.ContainsKey(contentTuningXExpectedStat.ExpectedStatModID))
-                    _expectedStatModsByContentTuning.Add(contentTuningXExpectedStat.ContentTuningID, contentTuningXExpectedStat);
-            }
-
-            foreach (ContentTuningXLabelRecord contentTuningXLabel in ContentTuningXLabelStorage.Values)
-                _contentTuningLabels.Add((contentTuningXLabel.ContentTuningID, contentTuningXLabel.LabelID));
-
             foreach (CurrencyContainerRecord currencyContainer in CurrencyContainerStorage.Values)
-                _currencyContainers.Add(currencyContainer.CurrencyTypesID, currencyContainer);
+                _currencyContainers.Add(currencyContainer.CurrencyTypesID, currencyContainer);            
 
             MultiMap<uint, CurvePointRecord> unsortedPoints = new();
             foreach (var curvePoint in CurvePointStorage.Values)
@@ -251,7 +195,6 @@ namespace Game.DataStorage
                 curvePoints.Sort((point1, point2) => point1.OrderIndex.CompareTo(point2.OrderIndex));
                 _curvePoints.AddRange(curveId, curvePoints.Select(p => p.Pos));
             }
-
 
             foreach (EmotesTextSoundRecord emoteTextSound in EmotesTextSoundStorage.Values)
                 _emoteTextSounds[Tuple.Create(emoteTextSound.EmotesTextId, emoteTextSound.RaceId, emoteTextSound.SexId, emoteTextSound.ClassId)] = emoteTextSound;
@@ -272,18 +215,14 @@ namespace Game.DataStorage
             foreach (GameObjectDisplayInfoRecord gameObjectDisplayInfo in GameObjectDisplayInfoStorage.Values)
             {
                 if (gameObjectDisplayInfo.GeoBoxMax.X < gameObjectDisplayInfo.GeoBoxMin.X)
-                    Extensions.Swap(ref gameObjectDisplayInfo.GeoBox[3], ref gameObjectDisplayInfo.GeoBox[0]);
-                if (gameObjectDisplayInfo.GeoBoxMax.Y < gameObjectDisplayInfo.GeoBoxMin.Y)
-                    Extensions.Swap(ref gameObjectDisplayInfo.GeoBox[4], ref gameObjectDisplayInfo.GeoBox[1]);
-                if (gameObjectDisplayInfo.GeoBoxMax.Z < gameObjectDisplayInfo.GeoBoxMin.Z)
-                    Extensions.Swap(ref gameObjectDisplayInfo.GeoBox[5], ref gameObjectDisplayInfo.GeoBox[2]);
+                    (gameObjectDisplayInfo.GeoBoxMax, gameObjectDisplayInfo.GeoBoxMin) = (gameObjectDisplayInfo.GeoBoxMin, gameObjectDisplayInfo.GeoBoxMax);                
             }
 
             foreach (HeirloomRecord heirloom in HeirloomStorage.Values)
                 _heirlooms[heirloom.ItemID] = heirloom;
 
             foreach (GlyphBindableSpellRecord glyphBindableSpell in GlyphBindableSpellStorage.Values)
-                _glyphBindableSpells.Add(glyphBindableSpell.GlyphPropertiesID, (uint)glyphBindableSpell.SpellID);
+                _glyphBindableSpells.Add(glyphBindableSpell.GlyphPropertiesID, glyphBindableSpell.SpellID);
 
             foreach (GlyphRequiredSpecRecord glyphRequiredSpec in GlyphRequiredSpecStorage.Values)
                 _glyphRequiredSpecs.Add(glyphRequiredSpec.GlyphPropertiesID, (ChrSpecialization)glyphRequiredSpec.ChrSpecializationID);
@@ -304,13 +243,17 @@ namespace Game.DataStorage
             foreach (ItemCurrencyCostRecord itemCurrencyCost in ItemCurrencyCostStorage.Values)
                 _itemsWithCurrencyCost.Add(itemCurrencyCost.ItemID);
 
+            foreach (ItemEffectRecord itemEffect in ItemEffectStorage.Values)
+                _itemEffectsByItemId[itemEffect.ParentItemID] = itemEffect;
+
+
             foreach (ItemLimitCategoryConditionRecord condition in ItemLimitCategoryConditionStorage.Values)
                 _itemCategoryConditions.Add(condition.ParentItemLimitCategoryID, condition);
 
             foreach (var appearanceMod in ItemModifiedAppearanceStorage.Values)
             {
                 //ASSERT(appearanceMod.ItemID <= 0xFFFFFF);
-                _itemModifiedAppearancesByItem[(uint)((int)appearanceMod.ItemID | (appearanceMod.ItemAppearanceModifierID << 24))] = appearanceMod;
+                _itemModifiedAppearancesByItem[(uint)(appearanceMod.ItemID | (appearanceMod.ItemAppearanceModifierID << 24))] = appearanceMod;
             }
 
             foreach (ItemSetSpellRecord itemSetSpell in ItemSetSpellStorage.Values)
@@ -319,24 +262,15 @@ namespace Game.DataStorage
             foreach (var itemSpecOverride in ItemSpecOverrideStorage.Values)
                 _itemSpecOverrides.Add(itemSpecOverride.ItemID, itemSpecOverride);
 
-            foreach (var itemBonusTreeAssignment in ItemXBonusTreeStorage.Values)
-                _itemToBonusTree.Add(itemBonusTreeAssignment.ItemID, itemBonusTreeAssignment.ItemBonusTreeID);
-
-            foreach (var pair in _azeriteEmpoweredItems)
-                LoadAzeriteEmpoweredItemUnlockMappings(azeriteUnlockMappings, pair.Key);
-
-            foreach (var pair in _azeriteEmpoweredItems)
-                LoadAzeriteEmpoweredItemUnlockMappings(azeriteUnlockMappings, pair.Key);
-
             foreach (JournalTierRecord journalTier in JournalTierStorage.Values)
                 _journalTiersByIndex.Add(journalTier);
 
             foreach (MapDifficultyRecord entry in MapDifficultyStorage.Values)
             {
                 if (!_mapDifficulties.ContainsKey(entry.MapID))
-                    _mapDifficulties[(uint)entry.MapID] = new Dictionary<uint, MapDifficultyRecord>();
+                    _mapDifficulties[entry.MapID] = new Dictionary<Difficulty, MapDifficultyRecord>();
 
-                _mapDifficulties[(uint)entry.MapID][entry.DifficultyID] = entry;
+                _mapDifficulties[entry.MapID][entry.DifficultyID] = entry;
             }
 
             List<MapDifficultyXConditionRecord> mapDifficultyConditions = new();
@@ -378,11 +312,11 @@ namespace Game.DataStorage
 
             foreach (var namesProfanity in NamesProfanityStorage.Values)
             {
-                Cypher.Assert(namesProfanity.Language < (int)Locale.Total || namesProfanity.Language == -1);
-                if (namesProfanity.Language != -1)
-                    _nameValidators[namesProfanity.Language].Add(namesProfanity.Name);
+                Cypher.Assert(namesProfanity.Language < Locale.Total || namesProfanity.Language == Locale.AllLanguages);
+                if (namesProfanity.Language != Locale.AllLanguages)
+                    _nameValidators[(int)namesProfanity.Language].Add(namesProfanity.Name);
                 else
-                    for (uint i = 0; i < (int)Locale.Total; ++i)
+                    for (int i = 0; i < (int)Locale.Total; ++i)
                     {
                         if (i == (int)Locale.None)
                             continue;
@@ -392,17 +326,17 @@ namespace Game.DataStorage
             }
 
             foreach (var namesReserved in NamesReservedStorage.Values)
-                _nameValidators[(int)Locale.Total].Add(namesReserved.Name);
+                _nameValidators[(int)Locale.Reserved].Add(namesReserved.Name);
 
             foreach (var namesReserved in NamesReservedLocaleStorage.Values)
             {
-                Cypher.Assert(!Convert.ToBoolean(namesReserved.LocaleMask & ~((1 << (int)Locale.Total) - 1)));
-                for (int i = 0; i < (int)Locale.Total; ++i)
+                Cypher.Assert(namesReserved.LocaleMask.HasAnyFlag(LocaleMask.Total - 1));
+                for (int i = 1; i < (int)LocaleMask.Total; i = i << 1)
                 {
-                    if (i == (int)Locale.None)
+                    if (i.HasFlag((int)LocaleMask.None))
                         continue;
 
-                    if (Convert.ToBoolean(namesReserved.LocaleMask & (1 << i)))
+                    if (((int)namesReserved.LocaleMask).HasFlag(i))
                         _nameValidators[i].Add(namesReserved.Name);
                 }
             }
@@ -425,21 +359,14 @@ namespace Game.DataStorage
                 _powerTypes[powerType.PowerTypeEnum] = powerType;
             }
 
+            foreach (PvpDifficultyRecord record in PvpDifficultyStorage.Values)
+            {
+                Cypher.Assert(record.BracketId < BattlegroundBracketId.Max, 
+                    $"PvpDifficulty bracket {record.BracketId} exceeded max allowed value {BattlegroundBracketId.Max}");              
+            }
+
             foreach (PvpItemRecord pvpItem in PvpItemStorage.Values)
                 _pvpItemBonus[pvpItem.ItemID] = pvpItem.ItemLevelDelta;
-
-            foreach (PvpTalentSlotUnlockRecord talentUnlock in PvpTalentSlotUnlockStorage.Values)
-            {
-                Cypher.Assert(talentUnlock.Slot < (1 << PlayerConst.MaxPvpTalentSlots));
-                for (byte i = 0; i < PlayerConst.MaxPvpTalentSlots; ++i)
-                {
-                    if (Convert.ToBoolean(talentUnlock.Slot & (1 << i)))
-                    {
-                        Cypher.Assert(_pvpTalentSlotUnlock[i] == null);
-                        _pvpTalentSlotUnlock[i] = talentUnlock;
-                    }
-                }
-            }
 
             foreach (QuestLineXQuestRecord questLineQuest in QuestLineXQuestStorage.Values)
                 _questsByQuestLine.Add(questLineQuest.QuestLineID, questLineQuest);
@@ -473,7 +400,7 @@ namespace Game.DataStorage
             foreach (SkillRaceClassInfoRecord entry in SkillRaceClassInfoStorage.Values)
             {
                 if (SkillLineStorage.ContainsKey(entry.SkillID))
-                    _skillRaceClassInfoBySkill.Add((uint)entry.SkillID, entry);
+                    _skillRaceClassInfoBySkill.Add(entry.SkillID, entry);
             }
 
             foreach (var specSpells in SpecializationSpellsStorage.Values)
@@ -485,32 +412,14 @@ namespace Game.DataStorage
             foreach (SpellClassOptionsRecord classOption in SpellClassOptionsStorage.Values)
                 _spellFamilyNames.Add(classOption.SpellClassSet);
 
-            for (var i = 0; i < (int)Class.Max; ++i)
-            {
-                _talentsByPosition[i] = new List<TalentRecord>[PlayerConst.MaxTalentTiers][];
-                for (var x = 0; x < PlayerConst.MaxTalentTiers; ++x)
-                {
-                    _talentsByPosition[i][x] = new List<TalentRecord>[PlayerConst.MaxTalentColumns];
+            foreach (SpellProcsPerMinuteModRecord ppmMod in SpellProcsPerMinuteModStorage.Values)
+                _spellProcsPerMinuteMods.Add(ppmMod.SpellProcsPerMinuteID,ppmMod);
 
-                    for (var c = 0; c < PlayerConst.MaxTalentColumns; ++c)
-                        _talentsByPosition[i][x][c] = new List<TalentRecord>();
-                }
-            }
+            foreach (SpellVisualMissileRecord spellVisualMissile in SpellVisualMissileStorage.Values)
+                _spellVisualMissilesBySet.Add(spellVisualMissile.SpellVisualMissileSetID, spellVisualMissile);
 
-            // create talent spells set
-            foreach (TalentRecord talentInfo in TalentStorage.Values)
-            {
-                TalentTabRecord talentTab = TalentTabStorage.LookupByKey(talentInfo.TabID);
-                for (byte j = 0; j < PlayerConst.MaxTalentRank; ++j)
-                {
-                    if (talentInfo.SpellRank[j] != 0)
-                    {
-                        TalentSpellPosMap[(uint)talentInfo.SpellRank[j]] = new TalentSpellPos((ushort)talentInfo.Id, j);
-                        if (talentTab != null && talentTab.PetTalentMask != 0)
-                            PetTalentSpells.Add((uint)talentInfo.SpellRank[j]);
-                    }
-                }
-            }
+            foreach (ScalingStatValuesRecord scalingStatValue in ScalingStatValuesStorage.Values)
+                _scalingStatValuesByLevel.Add(scalingStatValue.Charlevel, scalingStatValue);
 
             foreach (TalentRecord talentInfo in TalentStorage.Values)
             {
@@ -520,30 +429,59 @@ namespace Game.DataStorage
                 _talentsByPosition[talentInfo.ClassID][talentInfo.TierID][talentInfo.ColumnIndex].Add(talentInfo);
             }
 
-            // prepare fast data access to bit pos of talent ranks for use at inspecting
-            {
-                // now have all max ranks (and then bit amount used for store talent ranks in inspect)
-                foreach (TalentTabRecord talentTabInfo in TalentTabStorage.Values)
-                {
-                    // prevent memory corruption; otherwise cls will become 12 below
-                    if (((Class)talentTabInfo.ClassMask & Class.ClassMaskAllPlayable) == 0)
-                        continue;
+            //for (var i = 0; i < (int)Class.Max; ++i)
+            //{
+            //    _talentsByPosition[i] = new List<TalentRecord>[PlayerConst.MaxTalentTiers][];
+            //    for (var x = 0; x < PlayerConst.MaxTalentTiers; ++x)
+            //    {
+            //        _talentsByPosition[i][x] = new List<TalentRecord>[PlayerConst.MaxTalentColumns];
 
-                    // store class talent tab pages
-                    for (int cls = 1; cls < (int)Class.Max; ++cls)
-                    {
-                        if ((talentTabInfo.ClassMask & (1 << (cls - 1))) != 0)
-                        {
-                            if (TalentTabPages[cls] == null)
-                                TalentTabPages[cls] = new uint[PlayerConst.MaxTalentTabs];
-                            TalentTabPages[cls][talentTabInfo.OrderIndex] = talentTabInfo.Id;
-                        }
-                    }
-                }
-            }
+            //        for (var c = 0; c < PlayerConst.MaxTalentColumns; ++c)
+            //            _talentsByPosition[i][x][c] = new List<TalentRecord>();
+            //    }
+            //}
+
+            //// create talent spells set
+            //foreach (TalentRecord talentInfo in TalentStorage.Values)
+            //{
+            //    TalentTabRecord talentTab = TalentTabStorage.LookupByKey(talentInfo.TabID);
+            //    for (byte j = 0; j < PlayerConst.MaxTalentRank; ++j)
+            //    {
+            //        if (talentInfo.SpellRank[j] != 0)
+            //        {
+            //            TalentSpellPosMap[(uint)talentInfo.SpellRank[j]] = new TalentSpellPos((ushort)talentInfo.Id, j);
+            //            if (talentTab != null && talentTab.PetTalentMask != 0)
+            //                PetTalentSpells.Add((uint)talentInfo.SpellRank[j]);
+            //        }
+            //    }
+            //}            
+
+            //// prepare fast data access to bit pos of talent ranks for use at inspecting
+            //{
+            //    // now have all max ranks (and then bit amount used for store talent ranks in inspect)
+            //    foreach (TalentTabRecord talentTabInfo in TalentTabStorage.Values)
+            //    {
+            //        // prevent memory corruption; otherwise cls will become 12 below
+            //        if (((Class)talentTabInfo.ClassMask & Class.Playable) == 0)
+            //            continue;
+
+            //        // store class talent tab pages
+            //        for (int cls = 1; cls < (int)Class.Max; ++cls)
+            //        {
+            //            if ((talentTabInfo.ClassMask & (1 << (cls - 1))) != 0)
+            //            {
+            //                if (TalentTabPages[cls] == null)
+            //                    TalentTabPages[cls] = new uint[PlayerConst.MaxTalentTabs];
+            //                TalentTabPages[cls][talentTabInfo.OrderIndex] = talentTabInfo.Id;
+            //            }
+            //        }
+            //    }
+            //}            
 
             foreach (ToyRecord toy in ToyStorage.Values)
+            {
                 _toys.Add(toy.ItemID);
+            }
 
             foreach (TransmogSetItemRecord transmogSetItem in TransmogSetItemStorage.Values)
             {
@@ -563,22 +501,22 @@ namespace Game.DataStorage
                 _uiMapAssignmentByWmoGroup[i] = new MultiMap<int, UiMapAssignmentRecord>();
             }
 
-            MultiMap<int, UiMapAssignmentRecord> uiMapAssignmentByUiMap = new();
+            MultiMap<uint, UiMapAssignmentRecord> uiMapAssignmentByUiMap = new();
             foreach (UiMapAssignmentRecord uiMapAssignment in UiMapAssignmentStorage.Values)
             {
                 uiMapAssignmentByUiMap.Add(uiMapAssignment.UiMapID, uiMapAssignment);
                 UiMapRecord uiMap = UiMapStorage.LookupByKey(uiMapAssignment.UiMapID);
                 if (uiMap != null)
                 {
-                    //ASSERT(uiMap.System < MAX_UI_MAP_SYSTEM, $"MAX_TALENT_TIERS must be at least {uiMap.System + 1}");
+                    Cypher.Assert(uiMap.System < UiMapSystem.Max, $"UiMapSystem.Max must be at least {uiMap.System + 1}");
                     if (uiMapAssignment.MapID >= 0)
-                        _uiMapAssignmentByMap[uiMap.System].Add(uiMapAssignment.MapID, uiMapAssignment);
+                        _uiMapAssignmentByMap[(int)uiMap.System].Add(uiMapAssignment.MapID, uiMapAssignment);
                     if (uiMapAssignment.AreaID != 0)
-                        _uiMapAssignmentByArea[uiMap.System].Add(uiMapAssignment.AreaID, uiMapAssignment);
+                        _uiMapAssignmentByArea[(int)uiMap.System].Add(uiMapAssignment.AreaID, uiMapAssignment);
                     if (uiMapAssignment.WmoDoodadPlacementID != 0)
-                        _uiMapAssignmentByWmoDoodadPlacement[uiMap.System].Add(uiMapAssignment.WmoDoodadPlacementID, uiMapAssignment);
+                        _uiMapAssignmentByWmoDoodadPlacement[(int)uiMap.System].Add(uiMapAssignment.WmoDoodadPlacementID, uiMapAssignment);
                     if (uiMapAssignment.WmoGroupID != 0)
-                        _uiMapAssignmentByWmoGroup[uiMap.System].Add(uiMapAssignment.WmoGroupID, uiMapAssignment);
+                        _uiMapAssignmentByWmoGroup[(int)uiMap.System].Add(uiMapAssignment.WmoGroupID, uiMapAssignment);
                 }
             }
 
@@ -592,7 +530,7 @@ namespace Game.DataStorage
                 UiMapRecord parentUiMap = UiMapStorage.LookupByKey(uiMap.ParentUiMapID);
                 if (parentUiMap != null)
                 {
-                    if (parentUiMap.GetFlags().HasAnyFlag(UiMapFlag.NoWorldPositions))
+                    if (parentUiMap.HasAnyFlag(UiMapFlag.NoWorldPositions))
                         continue;
                     UiMapAssignmentRecord uiMapAssignment = null;
                     UiMapAssignmentRecord parentUiMapAssignment = null;
@@ -963,7 +901,7 @@ namespace Game.DataStorage
                 return levels[tier];
 
             AzeriteTierUnlockSetRecord azeriteTierUnlockSet = AzeriteTierUnlockSetStorage.LookupByKey(azeriteUnlockSetId);
-            if (azeriteTierUnlockSet != null && azeriteTierUnlockSet.Flags.HasAnyFlag(AzeriteTierUnlockSetFlags.Default))
+            if (azeriteTierUnlockSet != null && azeriteTierUnlockSet.HasAnyFlag(AzeriteTierUnlockSetFlags.Default))
             {
                 levels = _azeriteTierUnlockLevels.LookupByKey((azeriteUnlockSetId, ItemContext.None));
                 if (levels != null)
@@ -1056,7 +994,7 @@ namespace Game.DataStorage
             {
                 var specialization = classSet.LookupByIndex((int)index);
                 if (specialization != null)
-                    return specialization;               
+                    return specialization;
             }
 
             return new ChrSpecializationRecord();
@@ -1075,14 +1013,14 @@ namespace Game.DataStorage
 
             return contentTuningId;
         }
-        
+
         public ContentTuningLevels? GetContentTuningData(uint contentTuningId, uint redirectFlag, bool forItem = false)
         {
             ContentTuningRecord contentTuning = ContentTuningStorage.LookupByKey(GetRedirectedContentTuningId(contentTuningId, redirectFlag));
             if (contentTuning == null)
                 return null;
 
-            if (forItem && contentTuning.GetFlags().HasFlag(ContentTuningFlag.DisabledForItem))
+            if (forItem && contentTuning.HasFlag(ContentTuningFlag.DisabledForItem))
                 return null;
 
             //static int getLevelAdjustment(ContentTuningCalcType Type) => Type switch
@@ -1109,7 +1047,7 @@ namespace Game.DataStorage
         {
             return _contentTuningLabels.Contains((contentTuningId, label));
         }
-        
+
         public string GetCreatureFamilyPetName(CreatureFamily petfamily, Locale locale)
         {
             if (petfamily == CreatureFamily.None)
@@ -1293,6 +1231,7 @@ namespace Game.DataStorage
                 return emoteTextSound;
 
             emoteTextSound = _emoteTextSounds.LookupByKey(Tuple.Create(emote, (byte)race, (byte)gender, 0));
+        }
         float ExpectedStatModReducer(float mod, ContentTuningXExpectedRecord contentTuningXExpected, ExpectedStatType stat, int ActiveMilestoneSeason)
         {
             if (contentTuningXExpected == null)
@@ -1302,16 +1241,16 @@ namespace Game.DataStorage
             {
                 var mythicPlusSeason = MythicPlusSeasonStorage.LookupByKey(contentTuningXExpected.MinMythicPlusSeasonID);
                 if (mythicPlusSeason != null)
-                if (ActiveMilestoneSeason < mythicPlusSeason.MilestoneSeason)
-                    return mod;
+                    if (ActiveMilestoneSeason < mythicPlusSeason.MilestoneSeason)
+                        return mod;
             }
 
             if (contentTuningXExpected.MaxMythicPlusSeasonID != 0)
             {
                 var mythicPlusSeason = MythicPlusSeasonStorage.LookupByKey(contentTuningXExpected.MaxMythicPlusSeasonID);
                 if (mythicPlusSeason != null)
-                if (ActiveMilestoneSeason >= mythicPlusSeason.MilestoneSeason)
-                    return mod;
+                    if (ActiveMilestoneSeason >= mythicPlusSeason.MilestoneSeason)
+                        return mod;
             }
 
             var expectedStatMod = ExpectedStatModStorage.LookupByKey(contentTuningXExpected.ExpectedStatModID);
@@ -1340,13 +1279,7 @@ namespace Game.DataStorage
             return mod;
         }
 
-        public float EvaluateExpectedStat(ExpectedStatType stat, uint level, int expansion, uint contentTuningId, Class unitClass, int mythicPlusMilestoneSeason)
-            return mod;
-
-            // int32 MythicPlusSubSeason = 0;
-        }
-
-        public float EvaluateExpectedStat(ExpectedStatType stat, uint level, int expansion, uint contentTuningId, Class unitClass)
+        float EvaluateExpectedStat(ExpectedStatType stat, uint level, int expansion, uint contentTuningId, Class unitClass)
         {
             var expectedStatRecord = _expectedStatsByLevel.LookupByKey(Tuple.Create(level, expansion));
             if (expectedStatRecord == null)
@@ -1427,12 +1360,15 @@ namespace Game.DataStorage
                     break;
             }
             return value;
+
         }
 
-        public List<uint> GetFactionTeamList(uint faction)
+
+        List<uint> GetFactionTeamList(uint faction)
         {
             return _factionTeams.LookupByKey(faction);
         }
+
 
         public List<FriendshipRepReactionRecord> GetFriendshipRepReactions(uint friendshipRepID)
         {
@@ -1482,7 +1418,7 @@ namespace Game.DataStorage
             return 0;
         }
 
-        public ItemModifiedAppearanceRecord GetItemModifiedAppearance(uint itemId, uint appearanceModId)
+        public ItemModifiedAppearanceRecord GetItemModifiedAppearance(int itemId, uint appearanceModId)
         {
             var itemModifiedAppearance = _itemModifiedAppearancesByItem.LookupByKey(itemId | (appearanceModId << 24));
             if (itemModifiedAppearance != null)
@@ -1499,7 +1435,7 @@ namespace Game.DataStorage
             return null;
         }
 
-        public ItemModifiedAppearanceRecord GetDefaultItemModifiedAppearance(uint itemId)
+        public ItemModifiedAppearanceRecord GetDefaultItemModifiedAppearance(int itemId)
         {
             return _itemModifiedAppearancesByItem.LookupByKey(itemId);
         }
@@ -1509,7 +1445,7 @@ namespace Game.DataStorage
             return _itemSetSpells.LookupByKey(itemSetId);
         }
 
-        public List<ItemSpecOverrideRecord> GetItemSpecOverrides(uint itemId)
+        public List<ItemSpecOverrideRecord> GetItemSpecOverrides(int itemId)
         {
             return _itemSpecOverrides.LookupByKey(itemId);
         }
@@ -1555,7 +1491,7 @@ namespace Game.DataStorage
             return 0;
         }
 
-        public MapDifficultyRecord GetDefaultMapDifficulty(uint mapId)
+        public MapDifficultyRecord GetDefaultMapDifficulty(int mapId)
         {
             Difficulty NotUsed = Difficulty.None;
             return GetDefaultMapDifficulty(mapId, ref NotUsed);
@@ -1587,7 +1523,7 @@ namespace Game.DataStorage
             return dicMapDiff.First().Value;
         }
 
-        public MapDifficultyRecord GetMapDifficultyData(uint mapId, Difficulty difficulty)
+        public MapDifficultyRecord GetMapDifficultyData(int mapId, Difficulty difficulty)
         {
             var dictionaryMapDiff = _mapDifficulties.LookupByKey(mapId);
             if (dictionaryMapDiff == null)
@@ -1600,9 +1536,9 @@ namespace Game.DataStorage
             return mapDifficulty;
         }
 
-        public MapDifficultyRecord GetDownscaledMapDifficultyData(uint mapId, ref Difficulty difficulty)
+        public MapDifficultyRecord GetDownscaledMapDifficultyData(int mapId, ref Difficulty difficulty)
         {
-            DifficultyRecord diffEntry = DifficultyStorage.LookupByKey(difficulty);
+            DifficultyRecord diffEntry = DifficultyStorage.LookupByKey((int)difficulty);
             if (diffEntry == null)
                 return GetDefaultMapDifficulty(mapId, ref difficulty);
 
@@ -1721,7 +1657,7 @@ namespace Game.DataStorage
         public PvpDifficultyRecord GetBattlegroundBracketById(uint mapid, BattlegroundBracketId id)
         {
             foreach (var entry in PvpDifficultyStorage.Values)
-                if (entry.MapID == mapid && entry.GetBracketId() == id)
+                if (entry.MapID == mapid && entry.BracketId() == id)
                     return entry;
 
             return null;
@@ -1888,7 +1824,7 @@ namespace Game.DataStorage
         {
             return _spellVisualMissilesBySet.LookupByKey(spellVisualMissileSetId);
         }
-        
+
         public List<TalentRecord> GetTalentsByPosition(Class class_, uint tier, uint column)
         {
             return _talentsByPosition[(int)class_][tier][column];
@@ -2259,7 +2195,7 @@ namespace Game.DataStorage
 
         public bool HasItemCurrencyCost(uint itemId) { return _itemsWithCurrencyCost.Contains(itemId); }
 
-        public Dictionary<uint, Dictionary<uint, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
+        public Dictionary<int, Dictionary<Difficulty, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
 
         public void AddDB2<T>(uint tableHash, DB6Storage<T> store) where T : new()
         {
@@ -2294,8 +2230,8 @@ namespace Game.DataStorage
         Dictionary<uint, MultiMap<uint, uint>> _chrCustomizationRequiredChoices = new();
         ChrSpecializationRecord[][] _chrSpecializationsByIndex = new ChrSpecializationRecord[(int)Class.Max + 1][];
         MultiMap<uint, ConditionalContentTuningRecord> _conditionalContentTuning = new();
-        List<(uint, int)> _contentTuningLabels = new();
         MultiMap<uint, CurrencyContainerRecord> _currencyContainers = new();
+        List<(uint, int)> _contentTuningLabels = new();
         MultiMap<uint, Vector2> _curvePoints = new();
         Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord> _emoteTextSounds = new();
         Dictionary<Tuple<uint, int>, ExpectedStatRecord> _expectedStatsByLevel = new();
@@ -2308,11 +2244,12 @@ namespace Game.DataStorage
         ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[20];
         List<uint> _itemsWithCurrencyCost = new();
         MultiMap<uint, ItemLimitCategoryConditionRecord> _itemCategoryConditions = new();
-        Dictionary<uint, ItemModifiedAppearanceRecord> _itemModifiedAppearancesByItem = new();
+        Dictionary<int, ItemModifiedAppearanceRecord> _itemModifiedAppearancesByItem = new();
         MultiMap<uint, ItemSetSpellRecord> _itemSetSpells = new();
-        MultiMap<uint, ItemSpecOverrideRecord> _itemSpecOverrides = new();
+        MultiMap<int, ItemSpecOverrideRecord> _itemSpecOverrides = new();
+        Dictionary<uint, ItemEffectRecord> _itemEffectsByItemId = new();
         List<JournalTierRecord> _journalTiersByIndex = new();
-        Dictionary<uint, Dictionary<uint, MapDifficultyRecord>> _mapDifficulties = new();
+        Dictionary<int, Dictionary<Difficulty, MapDifficultyRecord>> _mapDifficulties = new();
         MultiMap<uint, Tuple<uint, PlayerConditionRecord>> _mapDifficultyConditions = new();
         Dictionary<uint, MountRecord> _mountsBySpellId = new();
         MultiMap<uint, MountTypeXCapabilityRecord> _mountCapabilitiesByType = new();
@@ -2336,6 +2273,7 @@ namespace Game.DataStorage
         List<byte> _spellFamilyNames = new();
         MultiMap<uint, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new();
         MultiMap<uint, SpellVisualMissileRecord> _spellVisualMissilesBySet = new();
+        MultiMap<uint, ScalingStatValuesRecord> _scalingStatValuesByLevel = new();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
         List<uint> _toys = new();
         MultiMap<uint, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new();
@@ -2348,6 +2286,7 @@ namespace Game.DataStorage
         List<int> _uiMapPhases = new();
         Dictionary<Tuple<short, sbyte, int>, WMOAreaTableRecord> _wmoAreaTableLookup = new();
     }
+
 
     class UiMapBounds
     {
@@ -2556,7 +2495,7 @@ namespace Game.DataStorage
             UniqueID = data.ReadUInt32();
         }
     }
-    
+
     public class HotfixOptionalData
     {
         public uint Key;
@@ -2608,7 +2547,7 @@ namespace Game.DataStorage
         public List<ChrCustomizationDisplayInfoRecord> Displays = new();
     }
 
-    enum CurveInterpolationMode
+    public enum CurveInterpolationMode
     {
         Linear = 0,
         Cosine = 1,

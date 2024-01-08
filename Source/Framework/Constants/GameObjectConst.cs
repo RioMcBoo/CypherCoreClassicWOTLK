@@ -72,14 +72,16 @@ namespace Framework.Constants
         Max
     }
 
-    public enum GameObjectState
+    public enum GameObjectState : uint
     {
         Active = 0,
         Ready = 1,
         Destroyed = 2,
+        Max = 3,
+
         TransportActive = 24,
         TransportStopped = 25,
-        Max = 3
+        TransportFrameLast = TransportActive + SharedConst.MaxTransportStopFrames,
     }
 
     public enum GameObjectDynamicLowFlags : ushort

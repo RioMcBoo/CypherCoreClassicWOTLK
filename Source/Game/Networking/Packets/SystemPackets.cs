@@ -84,9 +84,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ChatDisabledByPlayer);
             _worldPacket.WriteBit(LFGListCustomRequiresAuthenticator);
             _worldPacket.WriteBit(AddonsDisabled);
-            _worldPacket.WriteBit(Unused1000);
+            _worldPacket.WriteBit(WarGamesEnabled);
             _worldPacket.WriteBit(ContentTrackingEnabled);
+
             _worldPacket.WriteBit(IsSellAllJunkEnabled);
+            _worldPacket.WriteBit(IsGroupFinderEnabled);
+            _worldPacket.WriteBit(IsLFDEnabled);
+            _worldPacket.WriteBit(IsLFREnabled);
+            _worldPacket.WriteBit(IsPremadeGroupEnabled);
 
             _worldPacket.FlushBits();
 
@@ -98,6 +103,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteFloat(QuickJoinConfig.PlayerMultiplier);
                 _worldPacket.WriteFloat(QuickJoinConfig.PlayerFriendValue);
                 _worldPacket.WriteFloat(QuickJoinConfig.PlayerGuildValue);
+
                 _worldPacket.WriteFloat(QuickJoinConfig.ThrottleInitialThreshold);
                 _worldPacket.WriteFloat(QuickJoinConfig.ThrottleDecayTime);
                 _worldPacket.WriteFloat(QuickJoinConfig.ThrottlePrioritySpike);
@@ -105,6 +111,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteFloat(QuickJoinConfig.ThrottlePvPPriorityNormal);
                 _worldPacket.WriteFloat(QuickJoinConfig.ThrottlePvPPriorityLow);
                 _worldPacket.WriteFloat(QuickJoinConfig.ThrottlePvPHonorThreshold);
+
                 _worldPacket.WriteFloat(QuickJoinConfig.ThrottleLfgListPriorityDefault);
                 _worldPacket.WriteFloat(QuickJoinConfig.ThrottleLfgListPriorityAbove);
                 _worldPacket.WriteFloat(QuickJoinConfig.ThrottleLfgListPriorityBelow);
@@ -121,14 +128,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(SessionAlert.Value.Delay);
                 _worldPacket.WriteInt32(SessionAlert.Value.Period);
                 _worldPacket.WriteInt32(SessionAlert.Value.DisplayTime);
-            }
-
-            if (Unknown340)
-            { 
-                _worldPacket.WriteUInt32((uint)UnknownBytes.Length);
-                if (UnknownBytes.Length > 0)
-                    _worldPacket.WriteBytes(UnknownBytes, (uint)UnknownBytes.Length);                    
-            }
+            }        
 
             _worldPacket.WriteBit(Squelch.IsSquelched);
             _worldPacket.WritePackedGuid(Squelch.BnetAccountGuid);
@@ -185,17 +185,18 @@ namespace Game.Networking.Packets
         public bool ChatDisabledByPlayer;
         public bool LFGListCustomRequiresAuthenticator;
         public bool AddonsDisabled;
-        public bool Unused1000;
+        public bool WarGamesEnabled; // classic only
         public bool ContentTrackingEnabled;
         public bool IsSellAllJunkEnabled;
+        public bool IsGroupFinderEnabled = true;  // classic only
+        public bool IsLFDEnabled = true;  // classic only
+        public bool IsLFREnabled = true;  // classic only
+        public bool IsPremadeGroupEnabled = true;  // classic only
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
         public RafSystemFeatureInfo RAFSystem;
         public List<GameRuleValuePair> GameRuleValues = new();
-        public byte[] UnknownBytes;
-
-
 
         public struct SessionAlertConfig
         {
@@ -317,7 +318,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(LaunchETA.Value);
 
             if (!RealmHiddenAlert.IsEmpty())
-                _worldPacket.WriteString(RealmHiddenAlert);
+                _worldPacket.WriteCString(RealmHiddenAlert);
 
             foreach (var sourceRegion in LiveRegionCharacterCopySourceRegions)
                 _worldPacket.WriteInt32(sourceRegion);
@@ -329,39 +330,39 @@ namespace Game.Networking.Packets
                 debugTimeEventInfo.Write(_worldPacket);
         }
 
-        public bool BpayStoreAvailable; // NYI
-        public bool BpayStoreDisabledByParentalControls; // NYI
+        public bool BpayStoreAvailable;                 // NYI
+        public bool BpayStoreDisabledByParentalControls;// NYI
         public bool CharUndeleteEnabled;
-        public bool BpayStoreEnabled; // NYI
-        public bool CommerceSystemEnabled; // NYI
-        public bool Unk14; // NYI
-        public bool WillKickFromWorld; // NYI
-        public bool IsExpansionPreorderInStore; // NYI
-        public bool KioskModeEnabled; // NYI
-        public bool CompetitiveModeEnabled; // NYI
-        public bool TrialBoostEnabled; // NYI
-        public bool TokenBalanceEnabled; // NYI
-        public bool LiveRegionCharacterListEnabled; // NYI
-        public bool LiveRegionCharacterCopyEnabled; // NYI
-        public bool LiveRegionAccountCopyEnabled; // NYI
+        public bool BpayStoreEnabled;                   // NYI
+        public bool CommerceSystemEnabled;              // NYI
+        public bool Unk14;                              // NYI
+        public bool WillKickFromWorld;                  // NYI
+        public bool IsExpansionPreorderInStore;         // NYI
+        public bool KioskModeEnabled;                   // NYI
+        public bool CompetitiveModeEnabled;             // NYI
+        public bool TrialBoostEnabled;                  // NYI
+        public bool TokenBalanceEnabled;                // NYI
+        public bool LiveRegionCharacterListEnabled;     // NYI
+        public bool LiveRegionCharacterCopyEnabled;     // NYI
+        public bool LiveRegionAccountCopyEnabled;       // NYI
         public bool LiveRegionKeyBindingsCopyEnabled;
-        public bool Unknown901CheckoutRelated; // NYI
+        public bool Unknown901CheckoutRelated;          // NYI
         public bool AddonsDisabled;
         public bool Unused1000;
         public bool AccountSaveDataExportEnabled;
         public bool AccountLockedByExport;
         public EuropaTicketConfig? EuropaTicketSystemStatus;
         public List<int> LiveRegionCharacterCopySourceRegions = new();
-        public uint TokenPollTimeSeconds;     // NYI
-        public long TokenBalanceAmount;     // NYI 
+        public uint TokenPollTimeSeconds;               // NYI
+        public long TokenBalanceAmount;                 // NYI 
         public int MaxCharactersPerRealm;
-        public uint BpayStoreProductDeliveryDelay;     // NYI
+        public uint BpayStoreProductDeliveryDelay;      // NYI
         public int ActiveCharacterUpgradeBoostType;     // NYI
-        public int ActiveClassTrialBoostType;     // NYI
+        public int ActiveClassTrialBoostType;           // NYI
         public int MinimumExpansionLevel;
         public int MaximumExpansionLevel;
         public uint KioskSessionMinutes;
-        public int ActiveSeason; // Currently active Classic season
+        public int ActiveSeason;                        // Currently active Classic season
         public List<GameRuleValuePair> GameRuleValues = new();
         public short MaxPlayerNameQueriesPerPacket = 50;
         public short PlayerNameQueryTelemetryInterval = 600;
@@ -370,27 +371,7 @@ namespace Game.Networking.Packets
         public List<DebugTimeEventInfo> DebugTimeEvents = new();
         public int Unused1007;
         public string RealmHiddenAlert;
-    }
-
-    public class MOTD : ServerPacket
-    {
-        public MOTD() : base(ServerOpcodes.Motd) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteBits(Text.Count, 4);
-            _worldPacket.FlushBits();
-
-            foreach (var line in Text)
-            {
-                _worldPacket.WriteBits(line.GetByteCount(), 7);
-                _worldPacket.FlushBits();
-                _worldPacket.WriteString(line);
-            }
-        }
-
-        public List<string> Text;
-    }
+    }    
 
     public class SetTimeZoneInformation : ServerPacket
     {
@@ -413,13 +394,29 @@ namespace Game.Networking.Packets
         public string ServerRegionalTZ;
     }
 
+    public class MOTD : ServerPacket
+    {
+        public MOTD() : base(ServerOpcodes.Motd) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(Text.Count, 4);
+            _worldPacket.FlushBits();
+
+            foreach (var line in Text)
+            {
+                _worldPacket.WriteBits(line.GetByteCount(), 7);
+                _worldPacket.FlushBits();
+                _worldPacket.WriteString(line);
+            }
+        }
+
+        public List<string> Text;
+    }
+
+    //Structs
     public struct SavedThrottleObjectState
     {
-        public uint MaxTries;
-        public uint PerMilliseconds;
-        public uint TryCount;
-        public uint LastResetTimeBeforeNow;
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(MaxTries);
@@ -427,17 +424,15 @@ namespace Game.Networking.Packets
             data.WriteUInt32(TryCount);
             data.WriteUInt32(LastResetTimeBeforeNow);
         }
+        
+        public uint MaxTries;
+        public uint PerMilliseconds;
+        public uint TryCount;
+        public uint LastResetTimeBeforeNow;
     }
 
     public struct EuropaTicketConfig
     {
-        public bool TicketsEnabled;
-        public bool BugsEnabled;
-        public bool ComplaintsEnabled;
-        public bool SuggestionsEnabled;
-
-        public SavedThrottleObjectState ThrottleState;
-
         public void Write(WorldPacket data)
         {
             data.WriteBit(TicketsEnabled);
@@ -447,25 +442,29 @@ namespace Game.Networking.Packets
 
             ThrottleState.Write(data);
         }
+        
+        public bool TicketsEnabled;
+        public bool BugsEnabled;
+        public bool ComplaintsEnabled;
+        public bool SuggestionsEnabled;
+
+        public SavedThrottleObjectState ThrottleState;
     }
 
     public struct GameRuleValuePair
     {
-        public int Rule;
-        public int Value;
-
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Rule);
             data.WriteInt32(Value);
         }
+        
+        public int Rule;
+        public int Value;
     }
 
     public struct DebugTimeEventInfo
     {
-        public uint TimeEvent;
-        public string Text;
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(TimeEvent);
@@ -474,5 +473,8 @@ namespace Game.Networking.Packets
 
             data.WriteString(Text);
         }
+        
+        public uint TimeEvent;
+        public string Text;
     }
 }

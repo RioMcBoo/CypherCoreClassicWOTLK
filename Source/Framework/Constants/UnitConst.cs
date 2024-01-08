@@ -212,7 +212,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum HitInfo
+    public enum HitInfo : uint
     {
         NormalSwing = 0x0,
         Unk1 = 0x01,               // req correct packet structure
@@ -242,7 +242,7 @@ namespace Framework.Constants
         FakeDamage = 0x1000000                // enables damage animation even if no damage done, set only if no damage
     }
 
-    public enum ReactStates
+    public enum ReactStates : byte
     {
         Passive = 0,
         Defensive = 1,
@@ -250,9 +250,6 @@ namespace Framework.Constants
         Assist = 3
     }
 
-    /// <summary>
-    /// UnitStandStateType
-    /// </summary>
     public enum UnitStandStateType : byte
     {
         Stand = 0,

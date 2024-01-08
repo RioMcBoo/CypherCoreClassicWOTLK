@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
@@ -29,6 +30,14 @@ namespace System.Collections.Generic
         {
             for (var i = 0; i < _limit; ++i)
                 Add(value);
+        }
+       
+        public new void Add(T item)
+        {
+            if (Count >= _limit)
+                throw new InternalBufferOverflowException("Attempted to read more array elements from packet " + Count + 1 + " than allowed " + _limit);
+
+            base.Add(item);
         }
 
         public new T this[int index]

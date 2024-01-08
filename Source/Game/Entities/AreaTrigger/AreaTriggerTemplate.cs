@@ -106,22 +106,22 @@ namespace Game.Entities
 
     public struct AreaTriggerMovementScriptInfo
     {
-        public uint SpellScriptID;
+        public int SpellScriptID;
         public Vector3 Center;
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(SpellScriptID);
+            data.WriteInt32(SpellScriptID);
             data.WriteVector3(Center);
         }
     }
 
     public struct AreaTriggerId
     {
-        public uint Id;
+        public int Id;
         public bool IsServerSide;
 
-        public AreaTriggerId(uint id, bool isServerSide)
+        public AreaTriggerId(int id, bool isServerSide)
         {
             Id = id;
             IsServerSide = isServerSide;

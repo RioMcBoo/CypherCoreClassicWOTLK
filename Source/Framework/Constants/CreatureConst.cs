@@ -556,6 +556,7 @@ namespace Framework.Constants
 
     public enum CreatureType
     {
+        None = 0,
         Beast = 1,
         Dragonkin = 2,
         Demon = 3,
@@ -571,10 +572,33 @@ namespace Framework.Constants
         GasCloud = 13,
         WildPet = 14,
         Aberration = 15,
+    }
 
-        MaskDemonOrUndead = (1 << (Demon - 1)) | (1 << (Undead - 1)),
-        MaskHumanoidOrUndead = (1 << (Humanoid - 1)) | (1 << (Undead - 1)),
-        MaskMechanicalOrElemental = (1 << (Mechanical - 1)) | (1 << (Elemental - 1))
+    public enum CreatureTypeMask
+    {
+        Beast = 1 << (CreatureType.Beast - 1),
+        Dragonkin = 1 << (CreatureType.Dragonkin - 1),
+        Demon = 1 << (CreatureType.Demon - 1),
+        Elemental = 1 << (CreatureType.Elemental - 1),
+        Giant = 1 << (CreatureType.Giant - 1),
+        Undead = 1 << (CreatureType.Undead - 1),
+        Humanoid = 1 << (CreatureType.Humanoid - 1),
+        Critter = 1 << (CreatureType.Critter - 1),
+        Mechanical = 1 << (CreatureType.Mechanical - 1),
+        NotSpecified = 1 << (CreatureType.NotSpecified - 1),
+        Totem = 1 << (CreatureType.Totem - 1),
+        NonCombatPet = 1 << (CreatureType.NonCombatPet - 1),
+        GasCloud = 1 << (CreatureType.GasCloud - 1),
+        WildPet = 1 << (CreatureType.WildPet - 1),
+        Aberration = 1 << (CreatureType.Aberration - 1),
+
+        MaskDemonOrUndead = Demon | Undead,
+        MaskHumanoidOrUndead = Humanoid | Undead,
+        MaskMechanicalOrElemental = Mechanical | Elemental,
+
+        All = Beast | Dragonkin | Demon | Elemental | Giant | Undead |
+            Humanoid | Critter | Mechanical | NotSpecified | Totem |
+            NonCombatPet | GasCloud | WildPet | Aberration,
     }
 
     public enum CreatureFamily

@@ -917,7 +917,7 @@ namespace Scripts.Spells.Druid
                 return SpellCastResult.BadTargets;
 
             var spec = target.GetPrimarySpecializationEntry();
-            if (spec == null || spec.GetRole() != ChrSpecializationRole.Healer)
+            if (spec == null || spec.Role() != ChrSpecializationRole.Healer)
                 return SpellCastResult.BadTargets;
 
             return SpellCastResult.SpellCastOk;

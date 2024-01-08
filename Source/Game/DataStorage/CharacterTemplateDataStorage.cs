@@ -27,16 +27,15 @@ namespace Game.DataStorage
                         FactionMasks factionGroup = (FactionMasks)classesResult.Read<byte>(1);
                         byte classID = classesResult.Read<byte>(2);
 
-                        if (!((factionGroup & (FactionMasks.Player | FactionMasks.Alliance)) == (FactionMasks.Player | FactionMasks.Alliance)) &&
-                            !((factionGroup & (FactionMasks.Player | FactionMasks.Horde)) == (FactionMasks.Player | FactionMasks.Horde)))
+                        if (!factionGroup.HasFlag(FactionMasks.Player) || !factionGroup.HasFlag(FactionMasks.Alliance | FactionMasks.Horde))
                         {
-                            Log.outError(LogFilter.Sql, "Faction group {0} defined for character template {1} in `character_template_class` is invalid. Skipped.", factionGroup, templateId);
+                            Log.outError(LogFilter.Sql, $"Faction group {factionGroup} defined for character template {templateId} in `character_template_class` is invalid. Skipped.");
                             continue;
                         }
 
                         if (!CliDB.ChrClassesStorage.ContainsKey(classID))
                         {
-                            Log.outError(LogFilter.Sql, "Class {0} defined for character template {1} in `character_template_class` does not exists, skipped.", classID, templateId);
+                            Log.outError(LogFilter.Sql, $"Class {classID} defined for character template {templateId} in `character_template_class` does not exists, skipped.");
                             continue;
                         }
 
@@ -69,7 +68,7 @@ namespace Game.DataStorage
 
                     if (templ.Classes.Empty())
                     {
-                        Log.outError(LogFilter.Sql, "Character template {0} does not have any classes defined in `character_template_class`. Skipped.", templ.TemplateSetId);
+                        Log.outError(LogFilter.Sql, $"Character template {templ.TemplateSetId} does not have any classes defined in `character_template_class`. Skipped.");
                         continue;
                     }
 
@@ -78,7 +77,7 @@ namespace Game.DataStorage
                 while (templates.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} character templates in {1} ms.", _characterTemplateStore.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_characterTemplateStore.Count} character templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public Dictionary<uint, CharacterTemplate> GetCharacterTemplates()

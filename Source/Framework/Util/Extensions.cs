@@ -10,16 +10,129 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
+using Framework.Constants;
+using Bgs.Protocol;
+using System.Security.Cryptography;
+using static System.Net.Mime.MediaTypeNames;
+using System.Diagnostics.Metrics;
+using System.Threading;
 
 namespace System
 {
     public static class Extensions
     {
-        public static bool HasAnyFlag<T>(this T value, T flag) where T : struct
+        public static bool HasAnyFlag<T>(this T value, T flag) where T : IBinaryInteger<T>
+        {
+            return (value & flag) != T.Zero;
+        }
+
+        public static bool HasFlag<T>(this T value, T flag) where T : IBinaryInteger<T>
+        {
+            return (value & flag) == flag;
+        }
+
+        public static bool HasAnyFlag(this Enum value, Enum flag)
         {
             long lValue = Convert.ToInt64(value);
             long lFlag = Convert.ToInt64(flag);
             return (lValue & lFlag) != 0;
+        }
+
+        public static bool HasFlag(this Enum value, Enum flag)
+        {
+            long lValue = Convert.ToInt64(value);
+            long lFlag = Convert.ToInt64(flag);
+            return (lValue & lFlag) == lFlag;
+        }
+
+        public static bool HasRace(this RaceMask mask, Race _race)
+        {
+            switch (_race)
+            {
+                case Race.Human:
+                    return mask.HasFlag(RaceMask.Human);
+                case Race.Orc:
+                    return mask.HasFlag(RaceMask.Orc);
+                case Race.Dwarf:
+                    return mask.HasFlag(RaceMask.Dwarf);
+                case Race.NightElf:
+                    return mask.HasFlag(RaceMask.NightElf);
+                case Race.Undead:
+                    return mask.HasFlag(RaceMask.Undead);
+                case Race.Tauren:
+                    return mask.HasFlag(RaceMask.Tauren);
+                case Race.Gnome:
+                    return mask.HasFlag(RaceMask.Gnome);
+                case Race.Troll:
+                    return mask.HasFlag(RaceMask.Troll);
+                case Race.BloodElf:
+                    return mask.HasFlag(RaceMask.BloodElf);
+                case Race.Draenei:
+                    return mask.HasFlag(RaceMask.Draenei);
+
+                case Race.Goblin:
+                    return mask.HasFlag(RaceMask.Goblin);
+                case Race.Worgen:
+                    return mask.HasFlag(RaceMask.Worgen);
+                case Race.PandarenNeutral:
+                    return mask.HasFlag(RaceMask.PandarenNeutral);
+                case Race.PandarenAlliance:
+                    return mask.HasFlag(RaceMask.PandarenAlliance);
+                case Race.PandarenHorde: 
+                    return mask.HasFlag(RaceMask.PandarenHorde);
+                case Race.Nightborne: 
+                    return mask.HasFlag(RaceMask.Nightborne);
+                case Race.HighmountainTauren: 
+                    return mask.HasFlag(RaceMask.HighmountainTauren);
+                case Race.VoidElf: 
+                    return mask.HasFlag(RaceMask.VoidElf);
+                case Race.LightforgedDraenei: 
+                    return mask.HasFlag(RaceMask.LightforgedDraenei);
+                case Race.ZandalariTroll: 
+                    return mask.HasFlag(RaceMask.ZandalariTroll);
+                case Race.KulTiran: 
+                    return mask.HasFlag(RaceMask.KulTiran);
+
+                case Race.DarkIronDwarf: 
+                    return mask.HasFlag(RaceMask.DarkIronDwarf);
+                case Race.Vulpera: 
+                    return mask.HasFlag(RaceMask.Vulpera);
+                case Race.MagharOrc: 
+                    return mask.HasFlag(RaceMask.MagharOrc);
+                case Race.MechaGnome: 
+                    return mask.HasFlag(RaceMask.MechaGnome);
+                case Race.DracthyrHorde: 
+                    return mask.HasFlag(RaceMask.DracthyrHorde);
+                case Race.DracthyrAlliance: 
+                    return mask.HasFlag(RaceMask.DracthyrAlliance);
+
+                default: return false;
+            }
+        }
+
+        public static ClassMask GetClassMask(this Class _class)
+        {
+            return (ClassMask)(1 << ((int)_class - 1));
+        }
+
+        public static bool HasClass(this ClassMask mask, Class _class)
+        {
+            return (mask & (ClassMask)(1 << ((int)_class - 1))) != 0;            
+        }
+
+        public static bool HasSchool(this SpellSchoolMask mask, SpellSchools _school)
+        {
+            return (mask & (SpellSchoolMask)(1 << (int)_school)) != 0;            
+        }
+
+        public static bool HasState(this EncounterStateMask mask, EncounterState _state)
+        {
+            return (mask & (EncounterStateMask)(1 << (int)_state)) != 0;
+        }
+
+        public static bool HasType(this CreatureTypeMask mask, CreatureType _type)
+        {
+            return (mask & (CreatureTypeMask)(1 << ((int)_type - 1))) != 0;
         }
 
         public static string ToHexString(this byte[] byteArray, bool reverse = false)

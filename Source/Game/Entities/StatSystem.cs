@@ -389,9 +389,9 @@ namespace Game.Entities
 
         public void SetCreateMana(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseMana), val); }
 
-        public uint GetArmor()
+        public int GetArmor()
         {
-            return (uint)GetResistance(SpellSchools.Normal);
+            return GetResistance(SpellSchools.Normal);
         }
 
         public void SetArmor(int val, int bonusVal)
@@ -491,7 +491,7 @@ namespace Game.Entities
 
         public void SetCreateHealth(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseHealth), val); }
 
-        public ulong GetHealth() { return m_unitData.Health; }
+        public long GetHealth() { return m_unitData.Health; }
 
         public void SetHealth(ulong val)
         {

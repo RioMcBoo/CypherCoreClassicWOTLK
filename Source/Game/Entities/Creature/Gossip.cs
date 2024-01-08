@@ -759,7 +759,7 @@ namespace Game.Misc
     public struct NpcTextData
     {
         public float Probability;
-        public uint BroadcastTextID;
+        public int BroadcastTextID;
     }
 
     public class NpcText
@@ -779,8 +779,8 @@ namespace Game.Misc
         public uint OrderIndex;
         public GossipOptionNpc OptionNpc;
         public string OptionText;
-        public uint OptionBroadcastTextId;
-        public uint Language;
+        public int OptionBroadcastTextId;
+        public int Language;
         public GossipOptionFlags Flags;
         public uint ActionMenuID;
         public uint ActionPoiID;

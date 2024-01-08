@@ -134,7 +134,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Caster);
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteInt32(Effects.Count);
 
             foreach (SpellLogEffect effect in Effects)
@@ -186,7 +186,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Caster;
-        public uint SpellID;
+        public int SpellID;
         public List<SpellLogEffect> Effects = new();
     }
 
@@ -199,11 +199,11 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(TargetGUID);
             _worldPacket.WritePackedGuid(CasterGUID);
 
-            _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteUInt32(Health);
+            _worldPacket.WriteInt32(SpellID);
+            _worldPacket.WriteInt32(Health);
             _worldPacket.WriteInt32(OriginalHeal);
-            _worldPacket.WriteUInt32(OverHeal);
-            _worldPacket.WriteUInt32(Absorbed);
+            _worldPacket.WriteInt32(OverHeal);
+            _worldPacket.WriteInt32(Absorbed);
             _worldPacket.WriteInt32(Supporters.Count);
 
             foreach (SpellSupportInfo supportInfo in Supporters)
@@ -231,11 +231,11 @@ namespace Game.Networking.Packets
 
         public ObjectGuid CasterGUID;
         public ObjectGuid TargetGUID;
-        public uint SpellID;
-        public uint Health;
+        public int SpellID;
+        public int Health;
         public int OriginalHeal;
-        public uint OverHeal;
-        public uint Absorbed;
+        public int OverHeal;
+        public int Absorbed;
         public bool Crit;
         public float? CritRollMade;
         public float? CritRollNeeded;
@@ -251,7 +251,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(TargetGUID);
             _worldPacket.WritePackedGuid(CasterGUID);
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteInt32(Effects.Count);
             WriteLogDataBit();
             FlushBits();
@@ -263,7 +263,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid TargetGUID;
         public ObjectGuid CasterGUID;
-        public uint SpellID;
+        public int SpellID;
         public List<SpellLogEffect> Effects = new();
 
         public struct PeriodicalAuraLogEffectDebugInfo
@@ -276,13 +276,13 @@ namespace Game.Networking.Packets
         {
             public void Write(WorldPacket data)
             {
-                data.WriteUInt32(Effect);
-                data.WriteUInt32(Amount);
+                data.WriteInt32(Effect);
+                data.WriteInt32(Amount);
                 data.WriteInt32(OriginalDamage);
-                data.WriteUInt32(OverHealOrKill);
-                data.WriteUInt32(SchoolMaskOrPower);
-                data.WriteUInt32(AbsorbedOrAmplitude);
-                data.WriteUInt32(Resisted);
+                data.WriteInt32(OverHealOrKill);
+                data.WriteInt32(SchoolMaskOrPower);
+                data.WriteInt32(AbsorbedOrAmplitude);
+                data.WriteInt32(Resisted);
                 data.WriteInt32(Supporters.Count);
 
                 foreach (SpellSupportInfo supportInfo in Supporters)
@@ -303,13 +303,13 @@ namespace Game.Networking.Packets
                 }
             }
 
-            public uint Effect;
-            public uint Amount;
+            public int Effect;
+            public int Amount;
             public int OriginalDamage;
-            public uint OverHealOrKill;
-            public uint SchoolMaskOrPower;
-            public uint AbsorbedOrAmplitude;
-            public uint Resisted;
+            public int OverHealOrKill;
+            public int SchoolMaskOrPower;
+            public int AbsorbedOrAmplitude;
+            public int Resisted;
             public bool Crit;
             public PeriodicalAuraLogEffectDebugInfo? DebugInfo;
             public ContentTuningParams ContentTuning;
@@ -325,14 +325,14 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WritePackedGuid(Victim);
-            _worldPacket.WriteUInt32(InterruptedSpellID);
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(InterruptedSpellID);
+            _worldPacket.WriteInt32(SpellID);
         }
 
         public ObjectGuid Caster;
         public ObjectGuid Victim;
-        public uint InterruptedSpellID;
-        public uint SpellID;
+        public int InterruptedSpellID;
+        public int SpellID;
     }
 
     class SpellDispellLog : ServerPacket
@@ -345,12 +345,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsBreak);
             _worldPacket.WritePackedGuid(TargetGUID);
             _worldPacket.WritePackedGuid(CasterGUID);
-            _worldPacket.WriteUInt32(DispelledBySpellID);
+            _worldPacket.WriteInt32(DispelledBySpellID);
 
             _worldPacket.WriteInt32(DispellData.Count);
             foreach (var data in DispellData)
             {
-                _worldPacket.WriteUInt32(data.SpellID);
+                _worldPacket.WriteInt32(data.SpellID);
                 _worldPacket.WriteBit(data.Harmful);
                 _worldPacket.WriteBit(data.Rolled.HasValue);
                 _worldPacket.WriteBit(data.Needed.HasValue);
@@ -366,7 +366,7 @@ namespace Game.Networking.Packets
         public List<SpellDispellData> DispellData = new();
         public ObjectGuid CasterGUID;
         public ObjectGuid TargetGUID;
-        public uint DispelledBySpellID;
+        public int DispelledBySpellID;
         public bool IsBreak;
         public bool IsSteal;
     }
@@ -381,8 +381,8 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(TargetGUID);
             _worldPacket.WritePackedGuid(CasterGUID);
 
-            _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteUInt32((uint)Type);
+            _worldPacket.WriteInt32(SpellID);
+            _worldPacket.WriteInt32((int)Type);
             _worldPacket.WriteInt32(Amount);
             _worldPacket.WriteInt32(OverEnergize);
 
@@ -391,9 +391,9 @@ namespace Game.Networking.Packets
             WriteLogData();
         }
 
-        public ObjectGuid TargetGUID;
-        public ObjectGuid CasterGUID;
-        public uint SpellID;
+        public ObjectGuid TargetGUID;  
+        public ObjectGuid CasterGUID;              
+        public int SpellID;
         public PowerType Type;
         public int Amount;
         public int OverEnergize;
@@ -407,12 +407,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(Target);
             _worldPacket.WritePackedGuid(Caster);
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(SpellID);
         }
 
         public ObjectGuid Target;
         public ObjectGuid Caster;
-        public uint SpellID;
+        public int SpellID;
     }
 
     class SpellMissLog : ServerPacket
@@ -421,7 +421,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(SpellID);
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WriteInt32(Entries.Count);
 
@@ -429,7 +429,7 @@ namespace Game.Networking.Packets
                 missEntry.Write(_worldPacket);
         }
 
-        public uint SpellID;
+        public int SpellID;
         public ObjectGuid Caster;
         public List<SpellLogMissEntry> Entries = new();
     }
@@ -442,7 +442,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WritePackedGuid(Target);
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteBit(Rolled.HasValue);
             _worldPacket.WriteBit(Needed.HasValue);
             _worldPacket.FlushBits();
@@ -456,7 +456,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid Caster;
         public ObjectGuid Target;
-        public uint SpellID;
+        public int SpellID;
         public float? Rolled;
         public float? Needed;
     }
@@ -469,14 +469,14 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(CasterGUID);
             _worldPacket.WritePackedGuid(VictimGUID);
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteBit(IsPeriodic);
             _worldPacket.FlushBits();
         }
 
         public ObjectGuid CasterGUID;
         public ObjectGuid VictimGUID;
-        public uint SpellID;
+        public int SpellID;
         public bool IsPeriodic;
     }
 
@@ -488,12 +488,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(Attacker);
             _worldPacket.WritePackedGuid(Defender);
-            _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteUInt32(TotalDamage);
+            _worldPacket.WriteInt32(SpellID);
+            _worldPacket.WriteInt32(TotalDamage);
             _worldPacket.WriteInt32(OriginalDamage);
-            _worldPacket.WriteUInt32(OverKill);
-            _worldPacket.WriteUInt32(SchoolMask);
-            _worldPacket.WriteUInt32(LogAbsorbed);
+            _worldPacket.WriteInt32(OverKill);
+            _worldPacket.WriteInt32(SchoolMask);
+            _worldPacket.WriteInt32(LogAbsorbed);
 
             WriteLogDataBit();
             FlushBits();
@@ -502,12 +502,12 @@ namespace Game.Networking.Packets
 
         public ObjectGuid Attacker;
         public ObjectGuid Defender;
-        public uint SpellID;
-        public uint TotalDamage;
+        public int SpellID;
+        public int TotalDamage;
         public int OriginalDamage;
-        public uint OverKill;
-        public uint SchoolMask;
-        public uint LogAbsorbed;
+        public int OverKill;
+        public int SchoolMask;
+        public int LogAbsorbed;
     }
 
     class AttackerStateUpdate : CombatLogServerPacket
@@ -574,8 +574,8 @@ namespace Game.Networking.Packets
             attackRoundInfo.WriteFloat(ContentTuning.TargetItemLevel);
             attackRoundInfo.WriteUInt32(ContentTuning.ScalingHealthItemLevelCurveID);
             attackRoundInfo.WriteUInt32((uint)ContentTuning.Flags);
-            attackRoundInfo.WriteUInt32(ContentTuning.PlayerContentTuningID);
-            attackRoundInfo.WriteUInt32(ContentTuning.TargetContentTuningID);
+            attackRoundInfo.WriteInt32(ContentTuning.PlayerContentTuningID);
+            attackRoundInfo.WriteInt32(ContentTuning.TargetContentTuningID);
 
             WriteLogDataBit();
             FlushBits();
@@ -610,11 +610,11 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(Attacker);
             _worldPacket.WritePackedGuid(Victim);
-            _worldPacket.WriteUInt32(AbsorbedSpellID);
-            _worldPacket.WriteUInt32(AbsorbSpellID);
+            _worldPacket.WriteInt32(AbsorbedSpellID);
+            _worldPacket.WriteInt32(AbsorbSpellID);
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WriteInt32(Absorbed);
-            _worldPacket.WriteUInt32(OriginalDamage);
+            _worldPacket.WriteInt32(OriginalDamage);
             _worldPacket.WriteInt32(Supporters.Count);
 
             foreach (SpellSupportInfo supportInfo in Supporters)
@@ -630,10 +630,10 @@ namespace Game.Networking.Packets
         public ObjectGuid Attacker;
         public ObjectGuid Victim;
         public ObjectGuid Caster;
-        public uint AbsorbedSpellID;
-        public uint AbsorbSpellID;
+        public int AbsorbedSpellID;
+        public int AbsorbSpellID;
         public int Absorbed;
-        public uint OriginalDamage;
+        public int OriginalDamage;
         public bool Unk;
         public List<SpellSupportInfo> Supporters = new();
     }
@@ -742,7 +742,7 @@ namespace Game.Networking.Packets
 
     struct SpellDispellData
     {
-        public uint SpellID;
+        public int SpellID;
         public bool Harmful;
         public int? Rolled;
         public int? Needed;

@@ -26,7 +26,6 @@ namespace Game.DataStorage
         public uint QuestLineID;
         public uint QuestID;
         public uint OrderIndex;
-        public int Flags;
     }
 
     public sealed class QuestMoneyRewardRecord
@@ -39,23 +38,26 @@ namespace Game.DataStorage
     {
         public uint Id;
         public ushort PackageID;
-        public uint ItemID;
-        public byte ItemQuantity;
-        public QuestPackageFilter DisplayType;
+        public int ItemID;
+        public uint ItemQuantity;
+        private byte _displayType;
+
+        #region Helpers
+        public QuestPackageFilter DisplayType => (QuestPackageFilter)_displayType;
+        #endregion
     }
 
     public sealed class QuestSortRecord
     {
         public uint Id;
-        public string SortName;
-        public byte UiOrderIndex;
+        public LocalizedString SortName;
+        public sbyte UiOrderIndex;
     }
 
     public sealed class QuestV2Record
     {
         public uint Id;
         public ushort UniqueBitFlag;
-        public int UiQuestDetailsTheme;
     }
 
     public sealed class QuestXPRecord

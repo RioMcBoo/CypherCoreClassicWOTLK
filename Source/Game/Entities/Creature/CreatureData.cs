@@ -23,32 +23,32 @@ namespace Game.Entities
         public string IconName;
         public List<uint> GossipMenuIds = new();
         public Dictionary<Difficulty, CreatureDifficulty> difficultyStorage = new();
-        public uint RequiredExpansion;
+        public Expansion RequiredExpansion;
         public uint VignetteID; // @todo Read Vignette.db2
-        public uint Faction;
-        public ulong Npcflag;
+        public int Faction;
+        public NPCFlags Npcflag;
         public float SpeedWalk;
         public float SpeedRun;
         public float Scale;
         public CreatureEliteType Rank;
-        public uint PetSpellDataId;
-        public uint DmgSchool;
+        public SpellSchools DmgSchool;
         public uint BaseAttackTime;
         public uint RangeAttackTime;
         public float BaseVariance;
         public float RangeVariance;
-        public uint UnitClass;
+        public Class UnitClass;
         public UnitFlags UnitFlags;
-        public uint UnitFlags2;
-        public uint UnitFlags3;
+        public UnitFlags2 UnitFlags2;
+        public UnitFlags3 UnitFlags3;
         public CreatureFamily Family;
         public Class TrainerClass;
         public CreatureType CreatureType;
-        public int[] Resistance = new int[7];
-        public uint[] Spells = new uint[8];
-        public uint VehicleId;
-        public string AIName;
-        public uint MovementType;
+        public uint PetSpellDataId;
+        public int[] Resistance = new int[(int)SpellSchools.Max];
+        public int[] Spells = new int[SharedConst.MaxCreatureSpells];
+        public int VehicleId;
+        public string AIName = string.Empty;
+        public MovementGeneratorType MovementType;
         public CreatureMovementData Movement = new();
         public float ModExperience;
         public bool Civilian;
@@ -86,6 +86,7 @@ namespace Game.Entities
 
             return selectedItr;
         }
+
         public CreatureModel GetFirstValidModel()
         {
             foreach (CreatureModel model in Models)
@@ -196,8 +197,7 @@ namespace Game.Entities
             stats.TitleAlt = TitleAlt;
             stats.CursorName = IconName;
 
-            var items = Global.ObjectMgr.GetCreatureQuestItemList(Entry, difficulty);
-            if (items != null)
+            if (Global.ObjectMgr.GetCreatureQuestItemList(Entry, difficulty) is List<uint> items)
                 stats.QuestItems.AddRange(items);
 
             if (locale != Locale.enUS)
@@ -253,7 +253,7 @@ namespace Game.Entities
 
     public struct EquipmentItem
     {
-        public uint ItemId;
+        public int ItemId;
         public ushort AppearanceModId;
         public ushort ItemVisual;
     }
@@ -271,11 +271,11 @@ namespace Game.Entities
         public uint currentwaypoint;
         public uint curhealth;
         public uint curmana;
-        public byte movementType;
-        public ulong? npcflag;
-        public uint? unit_flags;                                  // enum UnitFlags mask values
-        public uint? unit_flags2;                                 // enum UnitFlags2 mask values
-        public uint? unit_flags3;                                 // enum UnitFlags3 mask values
+        public MovementGeneratorType movementType;
+        public NPCFlags? npcflag;
+        public UnitFlags? unit_flags;
+        public UnitFlags2? unit_flags2;
+        public UnitFlags3? unit_flags3;
 
         public CreatureData() : base(SpawnObjectType.Creature) { }
     }
@@ -321,8 +321,8 @@ namespace Game.Entities
     {
         public float BoundingRadius;
         public float CombatReach;
-        public sbyte gender;
-        public uint DisplayIdOtherGender;
+        public Gender gender;
+        public int DisplayIdOtherGender;
         public bool IsTrigger;
     }
 
@@ -331,12 +331,12 @@ namespace Game.Entities
         public static CreatureModel DefaultInvisibleModel = new(11686, 1.0f, 1.0f);
         public static CreatureModel DefaultVisibleModel = new(17519, 1.0f, 1.0f);
 
-        public uint CreatureDisplayID;
+        public int CreatureDisplayID;
         public float DisplayScale;
         public float Probability;
 
         public CreatureModel() { }
-        public CreatureModel(uint creatureDisplayID, float displayScale, float probability)
+        public CreatureModel(int creatureDisplayID, float displayScale, float probability)
         {
             CreatureDisplayID = creatureDisplayID;
             DisplayScale = displayScale;
@@ -347,20 +347,20 @@ namespace Game.Entities
     public class CreatureSummonedData
     {
         public uint? CreatureIDVisibleToSummoner;
-        public uint? GroundMountDisplayID;
-        public uint? FlyingMountDisplayID;
+        public int? GroundMountDisplayID;
+        public int? FlyingMountDisplayID;
     }
 
     public class CreatureAddon
     {
         public uint path_id;
-        public uint mount;
-        public byte standState;
-        public byte animTier;
-        public byte sheathState;
+        public int mount;
+        public UnitStandStateType standState;
+        public AnimTier animTier;
+        public SheathState sheathState;
         public byte pvpFlags;
         public byte visFlags;
-        public uint emote;
+        public int emote;
         public ushort aiAnimKit;
         public ushort movementAnimKit;
         public ushort meleeAnimKit;
@@ -433,9 +433,8 @@ namespace Game.Entities
 
     public class CreatureDifficulty
     {
-        public short DeltaLevelMin;
-        public short DeltaLevelMax;
-        public uint ContentTuningID;
+        public byte MinLevel;
+        public byte MaxLevel;
         public int HealthScalingExpansion;
         public float HealthModifier;
         public float ManaModifier;

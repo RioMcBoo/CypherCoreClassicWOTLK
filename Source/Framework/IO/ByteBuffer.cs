@@ -297,6 +297,14 @@ namespace Framework.IO
             WriteFloat(pos.W);
         }
 
+        public void WriteQuaternion(Quaternion rotation)
+        {
+            WriteFloat(rotation.X);
+            WriteFloat(rotation.Y);
+            WriteFloat(rotation.Z);
+            WriteFloat(rotation.W);
+        }
+
         public void WriteVector3(Vector3 pos)
         {
             WriteFloat(pos.X);
@@ -336,18 +344,49 @@ namespace Framework.IO
             return bit;
         }
 
-        public void WriteBits(object bit, int count)
+        public void WriteBits(uint bits, int count)
         {
             for (int i = count - 1; i >= 0; --i)
-                WriteBit(((Convert.ToUInt32(bit) >> i) & 1) != 0);
+                WriteBit(((bits >> i) & 1) != 0);
         }
 
-        public void WritePackedTime(long time)
+        public void WriteBits(int bits, int count)
+        {
+            WriteBits((uint)bits, count);
+        }
+
+        public void WriteBits(byte bits, int count)
+        {
+            WriteBits((uint)bits, count);
+        }
+
+        public void WriteBits(sbyte bits, int count)
+        {
+            WriteBits((uint)bits, count);
+        }
+
+        public void WriteBits(short bits, int count)
+        {
+            WriteBits((uint)bits, count);
+        }
+
+        public void WriteBits(ushort bits, int count)
+        {
+            WriteBits((uint)bits, count);
+        }
+
+        public void WritePackedTime32(long time)
         {
             WriteUInt32(Time.GetPackedTimeFromUnixTime(time));
         }
 
-        public void WritePackedTime()
+        public void WritePackedTime64(long time)
+        {
+            WriteUInt32(Time.GetPackedTimeFromUnixTime(time));
+            WriteUInt32(0); // this is a hack. this is a packed time written as int64
+        }
+
+        public void WritePackedTime32()
         {
             WriteUInt32(Time.GetPackedTimeFromDateTime(DateTime.Now));
         }

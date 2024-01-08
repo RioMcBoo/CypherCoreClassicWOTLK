@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.Miscellaneous;
 using System;
 
 namespace Game.DataStorage
@@ -9,15 +10,35 @@ namespace Game.DataStorage
     public sealed class ParagonReputationRecord
     {
         public uint Id;
-        public uint FactionID;
+        private int _factionID;
         public int LevelThreshold;
         public int QuestID;
+
+        #region Properties
+        public uint FactionID => (uint)_factionID;
+        #endregion
     }
 
     public sealed class PhaseRecord
     {
         public uint Id;
-        public PhaseEntryFlags Flags;
+        private ushort _flags;
+
+        #region Properties
+        public PhaseEntryFlags Flags => (PhaseEntryFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(PhaseEntryFlags flag)
+        {
+            return _flags.HasFlag((ushort)flag);
+        }
+
+        public bool HasAnyFlag(PhaseEntryFlags flag)
+        {
+            return _flags.HasAnyFlag((ushort)flag);
+        }
+        #endregion
     }
 
     public sealed class PhaseXPhaseGroupRecord
@@ -29,8 +50,8 @@ namespace Game.DataStorage
 
     public sealed class PlayerConditionRecord
     {        
-        public long RaceMask;
-        public string FailureDescription;
+        private long _raceMask;
+        public LocalizedString FailureDescription;
         public uint Id;
         public ushort MinLevel;
         public ushort MaxLevel;
@@ -86,9 +107,6 @@ namespace Game.DataStorage
         public sbyte MinExpansionTier;
         public byte MinPVPRank;
         public byte MaxPVPRank;
-        public uint ContentTuningID;
-        public int CovenantID;
-        public uint TraitNodeEntryLogic;
         public ushort[] SkillID = new ushort[4];
         public ushort[] MinSkill = new ushort[4];
         public ushort[] MaxSkill = new ushort[4];
@@ -97,12 +115,12 @@ namespace Game.DataStorage
         public uint[] PrevQuestID = new uint[4];
         public uint[] CurrQuestID = new uint[4];
         public uint[] CurrentCompletedQuestID = new uint[4];
-        public uint[] SpellID = new uint[4];
-        public uint[] ItemID = new uint[4];
+        public int[] SpellID = new int[4];
+        public int[] ItemID = new int[4];
         public uint[] ItemCount = new uint[4];
         public ushort[] Explored = new ushort[2];
         public uint[] Time = new uint[2];
-        public uint[] AuraSpellID = new uint[4];
+        public int[] AuraSpellID = new int[4];
         public byte[] AuraStacks = new byte[4];
         public ushort[] Achievement = new ushort[4];
         public ushort[] AreaID = new ushort[4];
@@ -113,9 +131,10 @@ namespace Game.DataStorage
         public uint[] CurrencyCount = new uint[4];
         public uint[] QuestKillMonster = new uint[6];
         public int[] MovementFlags = new int[2];
-        public int[]TraitNodeEntryID = new int[4];
-        public ushort[]TraitNodeEntryMinRank = new ushort[4];
-        public ushort[]TraitNodeEntryMaxRank = new ushort[4];
+
+        #region Properties
+        public RaceMask RaceMask => (RaceMask)_raceMask;
+        #endregion
     }
 
     public sealed class PowerDisplayRecord
@@ -133,7 +152,7 @@ namespace Game.DataStorage
         public uint Id;
         public string NameGlobalStringTag;
         public string CostGlobalStringTag;        
-        public PowerType PowerTypeEnum;
+        private sbyte _powerTypeEnum;
         public int MinPower;
         public int MaxBasePower;
         public int CenterPower;
@@ -142,43 +161,76 @@ namespace Game.DataStorage
         public int RegenInterruptTimeMS;
         public float RegenPeace;
         public float RegenCombat;
-        public short Flags;
+        private short _flags;
 
-        public PowerTypeFlags GetFlags() { return (PowerTypeFlags)Flags; }
+        #region Properties
+        public PowerTypeFlags Flags => (PowerTypeFlags)_flags;
+        public PowerType PowerTypeEnum => (PowerType)_powerTypeEnum;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(PowerTypeFlags flag)
+        {
+            return _flags.HasFlag((short)flag);
+        }
+
+        public bool HasAnyFlag(PowerTypeFlags flag)
+        {
+            return _flags.HasAnyFlag((short)flag);
+        }
+        #endregion
     }
 
     public sealed class PrestigeLevelInfoRecord
     {
         public uint Id;
-        public string Name;
+        public LocalizedString Name;
         public int PrestigeLevel;
         public int BadgeTextureFileDataID;
-        public PrestigeLevelInfoFlags Flags;
+        private byte _flags;
         public int AwardedAchievementID;
 
-        public bool IsDisabled() { return (Flags & PrestigeLevelInfoFlags.Disabled) != 0; }
+        #region Properties
+        public PrestigeLevelInfoFlags Flags => (PrestigeLevelInfoFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(PrestigeLevelInfoFlags flag)
+        {
+            return _flags.HasFlag((byte)flag);
+        }
+
+        public bool HasAnyFlag(PrestigeLevelInfoFlags flag)
+        {
+            return _flags.HasAnyFlag((byte)flag);
+        }
+
+        public bool IsDisabled => HasFlag(PrestigeLevelInfoFlags.Disabled);
+        #endregion
     }
 
     public sealed class PvpDifficultyRecord
     {
         public uint Id;
-        public byte RangeIndex;
+        private byte RangeIndex;
         public byte MinLevel;
         public byte MaxLevel;
         public uint MapID;
 
-        // helpers
-        public BattlegroundBracketId GetBracketId()
-        {
-            return (BattlegroundBracketId)RangeIndex;
-        }
+        #region Helpers
+        public BattlegroundBracketId BracketId => (BattlegroundBracketId)RangeIndex;
+        #endregion
     }
 
     public sealed class PvpItemRecord
     {
         public uint Id;
-        public uint ItemID;
+        private int _itemID;
         public byte ItemLevelDelta;
+
+        #region Properties
+        public uint ItemID => (uint)_itemID;
+        #endregion
     }
 
     public sealed class PvpSeasonRecord
@@ -200,7 +252,6 @@ namespace Game.DataStorage
         public int ActionBarSpellID;
         public int PvpTalentCategoryID;
         public int LevelRequired;
-        public int PlayerConditionID;
     }
 
     public sealed class PvpTalentCategoryRecord
@@ -213,9 +264,9 @@ namespace Game.DataStorage
     {
         public uint Id;
         public sbyte Slot;
-        public uint LevelRequired;
-        public uint DeathKnightLevelRequired;
-        public uint DemonHunterLevelRequired;
+        public int LevelRequired;
+        public int DeathKnightLevelRequired;
+        public int DemonHunterLevelRequired;
     }
 
     public sealed class PvpTierRecord
@@ -226,7 +277,7 @@ namespace Game.DataStorage
         public short MaxRating;
         public int PrevTier;
         public int NextTier;
-        public sbyte BracketID;
+        public byte BracketID;
         public sbyte Rank;
         public int RankIconFileDataID;
     }

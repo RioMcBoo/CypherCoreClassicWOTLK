@@ -2,19 +2,21 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using System;
+using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
     public sealed class FactionRecord
-    {        
+    {
         public long[] ReputationRaceMask = new long[4];
         public LocalizedString Name;
-        public string Description;
+        public LocalizedString Description;
         public uint Id;
         public short ReputationIndex;
         public ushort ParentFactionID;
         public byte Expansion;
-        public uint FriendshipRepID;
+        public byte FriendshipRepID;
         public int Flags;
         public ushort ParagonFactionID;
         public int RenownFactionID;
@@ -23,14 +25,18 @@ namespace Game.DataStorage
         public ushort[] ReputationFlags = new ushort[4];
         public int[] ReputationBase = new int[4];
         public int[] ReputationMax = new int[4];
-        public float[] ParentFactionMod = new float[2];                        // Faction outputs rep * ParentFactionModOut as spillover reputation
-        public byte[] ParentFactionCap = new byte[2];                        // The highest rank the faction will profit from incoming spillover
+        /// <summary>
+        /// Faction outputs rep * ParentFactionModOut as spillover reputation
+        /// </summary>
+        public float[] ParentFactionMod = new float[2];
+        /// <summary>
+        /// The highest rank the faction will profit from incoming spillover
+        /// </summary>
+        public byte[] ParentFactionCap = new byte[2];
 
-        // helpers
-        public bool CanHaveReputation()
-        {
-            return ReputationIndex >= 0;
-        }
+        #region Helpers
+        public bool CanHaveReputation => ReputationIndex >= 0;
+        #endregion
     }
 
     public sealed class FactionTemplateRecord
@@ -39,14 +45,29 @@ namespace Game.DataStorage
 
         public uint Id;
         public ushort Faction;
-        public ushort Flags;
+        private ushort _flags;
         public byte FactionGroup;
         public byte FriendGroup;
         public byte EnemyGroup;
         public ushort[] Enemies = new ushort[MAX_FACTION_RELATIONS];
         public ushort[] Friend = new ushort[MAX_FACTION_RELATIONS];
 
-        // helpers
+       
+        #region Properties
+        public FactionTemplateFlags Flags => (FactionTemplateFlags)_flags;        
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(FactionTemplateFlags flag)
+        {
+            return _flags.HasFlag((ushort)flag);
+        }
+
+        public bool HasAnyFlag(FactionTemplateFlags flag)
+        {
+            return _flags.HasAnyFlag((ushort)flag);
+        }
+
         public bool IsFriendlyTo(FactionTemplateRecord entry)
         {
             if (this == entry)
@@ -61,8 +82,9 @@ namespace Game.DataStorage
                     if (Friend[i] == entry.Faction)
                         return true;
             }
-            return (FriendGroup & entry.FactionGroup) != 0 || (FactionGroup & entry.FriendGroup) != 0;
+            return FriendGroup.HasAnyFlag(entry.FactionGroup) || FactionGroup.HasAnyFlag(entry.FriendGroup);
         }
+
         public bool IsHostileTo(FactionTemplateRecord entry)
         {
             if (this == entry)
@@ -77,9 +99,10 @@ namespace Game.DataStorage
                     if (Friend[i] == entry.Faction)
                         return false;
             }
-            return (EnemyGroup & entry.FactionGroup) != 0;
+            return EnemyGroup.HasAnyFlag(entry.FactionGroup);
         }
-        public bool IsHostileToPlayers() { return (EnemyGroup & (byte)FactionMasks.Player) != 0; }
+        public bool IsHostileToPlayers => EnemyGroup.HasFlag((byte)FactionMasks.Player);
+
         public bool IsNeutralToAll()
         {
             for (int i = 0; i < MAX_FACTION_RELATIONS; ++i)
@@ -87,7 +110,8 @@ namespace Game.DataStorage
                     return false;
             return EnemyGroup == 0 && FriendGroup == 0;
         }
-        public bool IsContestedGuardFaction() { return (Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0; }
+        public bool IsContestedGuardFaction => HasFlag(FactionTemplateFlags.ContestedGuard);
+        #endregion
     }
 
     public sealed class FriendshipRepReactionRecord
@@ -96,16 +120,13 @@ namespace Game.DataStorage
         public LocalizedString Reaction;
         public byte FriendshipRepID;
         public ushort ReactionThreshold;
-        public int OverrideColor;
     }
 
     public sealed class FriendshipReputationRecord
     {
         public LocalizedString Description;
-        public LocalizedString StandingModified;
-        public LocalizedString StandingChanged;
         public uint Id;
-        public ushort FactionID;
-        public int TextureFileID;
+        public int Field34146722002;
+        public int Field34146722003;
     }
 }

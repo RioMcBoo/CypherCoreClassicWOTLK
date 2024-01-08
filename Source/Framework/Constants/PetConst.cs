@@ -53,7 +53,7 @@ namespace Framework.Constants
         Talent = 2
     }
 
-    public enum PetActionFeedback
+    public enum PetActionFeedback : byte
     {
         None = 0,
         Dead = 1,
@@ -68,7 +68,7 @@ namespace Framework.Constants
         Attack = 1
     }
 
-    public enum CommandStates
+    public enum CommandStates : byte
     {
         Stay = 0,
         Follow = 1,
@@ -77,7 +77,7 @@ namespace Framework.Constants
         MoveTo = 4
     }
 
-    public enum PetNameInvalidReason
+    public enum PetNameInvalidReason : byte
     {
         // custom, not send
         Success = 0,
@@ -116,7 +116,7 @@ namespace Framework.Constants
         EliteTooHighLevel = 14
     }
 
-    public enum StableResult
+    public enum StableResult : byte
     {
         NotEnoughMoney = 1,                              // "you don't have enough money"
         InvalidSlot = 3,                              // "That slot is locked"

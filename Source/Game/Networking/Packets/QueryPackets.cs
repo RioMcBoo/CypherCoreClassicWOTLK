@@ -13,34 +13,6 @@ using System.Numerics;
 
 namespace Game.Networking.Packets
 {
-    public class QueryPlayerNames : ClientPacket
-    {
-        public QueryPlayerNames(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            Players = new ObjectGuid[_worldPacket.ReadInt32()];
-            for (var i = 0; i < Players.Length; ++i)
-                Players[i] = _worldPacket.ReadPackedGuid();
-        }
-
-        public ObjectGuid[] Players;
-    }
-
-    public class QueryPlayerNamesResponse : ServerPacket
-    {
-        public List<NameCacheLookupResult> Players = new();
-
-        public QueryPlayerNamesResponse() : base(ServerOpcodes.QueryPlayerNamesResponse) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteInt32(Players.Count);
-            foreach (NameCacheLookupResult lookupResult in Players)
-                lookupResult.Write(_worldPacket);
-        }
-    }
-
     public class QueryCreature : ClientPacket
     {
         public QueryCreature(WorldPacket packet) : base(packet) { }
@@ -91,7 +63,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Stats.CreatureType);
                 _worldPacket.WriteInt32(Stats.CreatureFamily);
                 _worldPacket.WriteInt32(Stats.Classification);
-                _worldPacket.WriteInt32((int)Stats.PetSpellDataId);
+                _worldPacket.WriteUInt32(Stats.PetSpellDataId);
 
                 for (var i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
                     _worldPacket.WriteUInt32(Stats.ProxyCreatureID[i]);
@@ -138,6 +110,34 @@ namespace Game.Networking.Packets
         public uint CreatureID;
     }
 
+    public class QueryPlayerNames : ClientPacket
+    {
+        public QueryPlayerNames(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Players = new ObjectGuid[_worldPacket.ReadInt32()];
+            for (var i = 0; i < Players.Length; ++i)
+                Players[i] = _worldPacket.ReadPackedGuid();
+        }
+
+        public ObjectGuid[] Players;
+    }
+
+    public class QueryPlayerNamesResponse : ServerPacket
+    {
+        public QueryPlayerNamesResponse() : base(ServerOpcodes.QueryPlayerNamesResponse) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Players.Count);
+            foreach (NameCacheLookupResult lookupResult in Players)
+                lookupResult.Write(_worldPacket);
+        }
+        
+        public List<NameCacheLookupResult> Players = new();
+    }
+    
     public class QueryPageText : ClientPacket
     {
         public QueryPageText(WorldPacket packet) : base(packet) { }
@@ -389,11 +389,11 @@ namespace Game.Networking.Packets
             MissingQuestCount = _worldPacket.ReadInt32();
 
             for (byte i = 0; i < MissingQuestCount; ++i)
-                MissingQuestPOIs[i] = _worldPacket.ReadUInt32();
+                MissingQuestPOIs[i] = _worldPacket.ReadInt32();
         }
 
         public int MissingQuestCount;
-        public uint[] MissingQuestPOIs = new uint[175];
+        public int[] MissingQuestPOIs = new int[175];
     }
 
     public class QuestPOIQueryResponse : ServerPacket
@@ -425,14 +425,13 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint questCount = _worldPacket.ReadUInt32();
-            QuestCompletionNPCs = new uint[questCount];
+            int questCount = _worldPacket.ReadInt32();
 
-            for (uint i = 0; i < questCount; ++i)
-                QuestCompletionNPCs[i] = _worldPacket.ReadUInt32();
+            for (int i = 0; i < questCount; ++i)
+                QuestCompletionNPCs[i] = _worldPacket.ReadInt32();
         }
 
-        public uint[] QuestCompletionNPCs;
+        public Array<int> QuestCompletionNPCs = new (100);
     }
 
     class QuestCompletionNPCResponse : ServerPacket
@@ -444,11 +443,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(QuestCompletionNPCs.Count);
             foreach (var quest in QuestCompletionNPCs)
             {
-                _worldPacket.WriteUInt32(quest.QuestID);
+                _worldPacket.WriteInt32(quest.QuestID);
 
                 _worldPacket.WriteInt32(quest.NPCs.Count);
                 foreach (var npc in quest.NPCs)
-                    _worldPacket.WriteUInt32(npc);
+                    _worldPacket.WriteInt32(npc);
             }
         }
 
@@ -500,7 +499,7 @@ namespace Game.Networking.Packets
         public bool HasDeclined;
         public DeclinedName DeclinedNames = new();
         public long Timestamp;
-        public string Name = "";
+        public string Name = string.Empty;
     }
 
     class ItemTextQuery : ClientPacket
@@ -523,7 +522,6 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteBit(Valid);
             _worldPacket.WriteBits(Text.GetByteCount(), 13);
-            _worldPacket.FlushBits();
 
             _worldPacket.WriteString(Text);
             _worldPacket.WritePackedGuid(Id);
@@ -635,8 +633,7 @@ namespace Game.Networking.Packets
 
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                 data.WriteBits(DeclinedNames.name[i].GetByteCount(), 7);
-
-            data.FlushBits();
+            
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                 data.WriteString(DeclinedNames.name[i]);
 
@@ -657,7 +654,7 @@ namespace Game.Networking.Packets
         public ObjectGuid AccountID;
         public ObjectGuid BnetAccountID;
         public ObjectGuid GuidActual;
-        public string Name = "";
+        public string Name = string.Empty;
         public ulong GuildClubMemberID;   // same as bgs.protocol.club.v1.MemberId.unique_id
         public uint VirtualRealmAddress;
         public Race RaceID = Race.None;
@@ -672,7 +669,7 @@ namespace Game.Networking.Packets
     {
         public uint Unused1;
         public ObjectGuid Unused2;
-        public string Unused3 = "";
+        public string Unused3 = string.Empty;
         
         public void Write(WorldPacket data)
         {
@@ -778,7 +775,7 @@ namespace Game.Networking.Packets
 
     class QuestCompletionNPC
     {
-        public uint QuestID;
-        public List<uint> NPCs = new();
+        public int QuestID;
+        public List<int> NPCs = new();
     }
 }

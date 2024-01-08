@@ -38,7 +38,7 @@ namespace Game.BlackMarket
                 AddTemplate(templ);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} black market templates in {1} ms.", _templates.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_templates.Count} black market templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadAuctions()
@@ -80,7 +80,7 @@ namespace Game.BlackMarket
 
             DB.Characters.CommitTransaction(trans);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} black market auctions in {1} ms.", _auctions.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_auctions.Count} black market auctions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void Update(bool updateTime = false)
@@ -242,15 +242,15 @@ namespace Game.BlackMarket
 
             // Log trade
             if (logGmTrade)
-                Log.outCommand(bidderAccId, "GM {0} (Account: {1}) won item in blackmarket auction: {2} (Entry: {3} Count: {4}) and payed gold : {5}.",
-                    bidderName, bidderAccId, item.GetTemplate().GetName(), item.GetEntry(), item.GetCount(), entry.GetCurrentBid() / MoneyConstants.Gold);
+                Log.outCommand(bidderAccId, $"GM {bidderName} (Account: {bidderAccId}) won item in blackmarket auction: {item.GetTemplate().GetName()} " +
+                    $"(Entry: {item.GetEntry()} Count: {item.GetCount()}) and payed gold : {entry.GetCurrentBid() / MoneyConstants.Gold}.");
 
             if (bidder != null)
                 bidder.GetSession().SendBlackMarketWonNotification(entry, item);
 
             new MailDraft(entry.BuildAuctionMailSubject(BMAHMailAuctionAnswers.Won), entry.BuildAuctionMailBody())
                 .AddItem(item)
-                .SendMailTo(trans, new MailReceiver(bidder, entry.GetBidder()),new MailSender(entry), MailCheckMask.Copied);
+                .SendMailTo(trans, new MailReceiver(bidder, entry.GetBidder()),new MailSender(entry), MailCheckFlags.Copied);
 
             entry.MailSent();
         }
@@ -273,7 +273,7 @@ namespace Game.BlackMarket
 
             new MailDraft(entry.BuildAuctionMailSubject(BMAHMailAuctionAnswers.Outbid), entry.BuildAuctionMailBody())
                 .AddMoney(entry.GetCurrentBid())
-                .SendMailTo(trans, new MailReceiver(oldBidder, entry.GetBidder()), new MailSender(entry), MailCheckMask.Copied);
+                .SendMailTo(trans, new MailReceiver(oldBidder, entry.GetBidder()), new MailSender(entry), MailCheckFlags.Copied);
         }
 
         public BlackMarketEntry GetAuctionByID(uint marketId)

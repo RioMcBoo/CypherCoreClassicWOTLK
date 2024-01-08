@@ -160,7 +160,7 @@ namespace Game.Entities
             {
                 for (int j = 0; j < SpellConst.MaxReagents; ++j)
                 {
-                    if (spellInfo.Reagent[j] > 0 && Global.ObjectMgr.GetItemTemplate((uint)spellInfo.Reagent[j]) == null)
+                    if (spellInfo.Reagent[j] > 0 && Global.ObjectMgr.GetItemTemplate(spellInfo.Reagent[j]) == null)
                     {
                         if (msg)
                         {
@@ -603,7 +603,7 @@ namespace Game.Entities
             return mSpellAreaForAreaMap.LookupByKey(area_id);
         }
 
-        public SpellInfo GetSpellInfo(uint spellId, Difficulty difficulty)
+        public SpellInfo GetSpellInfo(int spellId, Difficulty difficulty)
         {
             var list = mSpellInfoMap.LookupByKey(spellId);
 
@@ -611,23 +611,23 @@ namespace Game.Entities
             if (index != -1)
                 return list[index];
 
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
             if (difficultyEntry != null)
             {
                 do
                 {
-                    index = list.FindIndex(spellInfo => spellInfo.Difficulty == (Difficulty)difficultyEntry.FallbackDifficultyID);
+                    index = list.FindIndex(spellInfo => spellInfo.Difficulty == difficultyEntry.FallbackDifficultyID);
                     if (index != -1)
                         return list[index];
 
-                    difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
+                    difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficultyEntry.FallbackDifficultyID);
                 } while (difficultyEntry != null);
             }
 
             return null;
         }
 
-        List<SpellInfo> _GetSpellInfo(uint spellId)
+        List<SpellInfo> _GetSpellInfo(int spellId)
         {
             return mSpellInfoMap.LookupByKey(spellId);
         }
@@ -638,7 +638,7 @@ namespace Game.Entities
                 callback(spellInfo);
         }
 
-        public void ForEachSpellInfoDifficulty(uint spellId, Action<SpellInfo> callback)
+        public void ForEachSpellInfoDifficulty(int spellId, Action<SpellInfo> callback)
         {
             foreach (SpellInfo spellInfo in _GetSpellInfo(spellId))
                 callback(spellInfo);
@@ -2114,7 +2114,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (!spellArea.raceMask.IsEmpty() && (spellArea.raceMask & RaceMask.AllPlayable).IsEmpty())
+                if (!spellArea.raceMask.IsEmpty() && (spellArea.raceMask & RaceMask.Playable).IsEmpty())
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong race mask ({1}) requirement", spell, spellArea.raceMask);
                     continue;
@@ -4693,7 +4693,7 @@ namespace Game.Entities
         }
 
         // SpellInfo object management
-        public bool HasSpellInfo(uint spellId, Difficulty difficulty)
+        public bool HasSpellInfo(int spellId, Difficulty difficulty)
         {
             var list = mSpellInfoMap.LookupByKey(spellId);
             if (list.Count == 0)
@@ -4702,7 +4702,7 @@ namespace Game.Entities
             return list.Any(spellInfo => spellInfo.Difficulty == difficulty);
         }
 
-        public MultiMap<uint, SpellInfo> GetSpellInfoStorage()
+        public MultiMap<int, SpellInfo> GetSpellInfoStorage()
         {
             return mSpellInfoMap;
         }
@@ -4802,7 +4802,7 @@ namespace Game.Entities
         }
 
         #region Fields
-        Dictionary<uint, SpellChainNode> mSpellChains = new();
+        Dictionary<int, SpellChainNode> mSpellChains = new();
         MultiMap<uint, uint> mSpellsReqSpell = new();
         MultiMap<uint, uint> mSpellReq = new();
         Dictionary<uint, SpellLearnSkillNode> mSpellLearnSkills = new();
@@ -4826,7 +4826,7 @@ namespace Game.Entities
         MultiMap<uint, SkillLineAbilityRecord> mSkillLineAbilityMap = new();
         Dictionary<uint, MultiMap<uint, uint>> mPetLevelupSpellMap = new();
         Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new();           // only spells not listed in related mPetLevelupSpellMap entry
-        MultiMap<uint, SpellInfo> mSpellInfoMap = new();
+        MultiMap<int, SpellInfo> mSpellInfoMap = new();
         Dictionary<Tuple<uint, byte>, uint> mSpellTotemModel = new();
 
         public delegate void AuraEffectHandler(AuraEffect effect, AuraApplication aurApp, AuraEffectHandleModes mode, bool apply);

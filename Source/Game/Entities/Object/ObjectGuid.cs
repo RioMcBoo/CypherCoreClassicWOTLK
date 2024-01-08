@@ -128,7 +128,7 @@ namespace Game.Entities
             return ObjectGuidFactory.CreateClubFinder(0, clubType, clubFinderId, counter);
         }
 
-        public static ObjectGuid Create(HighGuid type, uint mapId, uint entry, ulong counter)
+        public static ObjectGuid Create(HighGuid type, int mapId, uint entry, ulong counter)
         {
             switch (type)
             {

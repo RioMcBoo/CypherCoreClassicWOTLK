@@ -11,21 +11,39 @@ namespace Game.DataStorage
     {
         public LocalizedString Name;
         public uint Id;
-        public int ParentUiMapID;
-        public int Flags;
-        public byte System;
-        public UiMapType Type;
+        private int _parentUiMapID;
+        private int _flags;
+        private sbyte _system;
+        private byte _type;
         public int BountySetID;
         public uint BountyDisplayLocation;
         public int VisibilityPlayerConditionID2; // if not met then map is skipped when evaluating UiMapAssignment
         public int VisibilityPlayerConditionID;  // if not met then client checks other maps with the same AlternateUiMapGroup, not re-evaluating UiMapAssignment for them
         public sbyte HelpTextPosition;
         public int BkgAtlasID;
-        public uint LevelRangeMin;
-        public uint LevelRangeMax;
+        public uint AlternateUiMapGroup;
+        public uint ContentTuningID;
 
-        public UiMapFlag GetFlags() { return (UiMapFlag)Flags; }
-}
+        #region Properties
+        public uint ParentUiMapID => (uint)_parentUiMapID;
+        public UiMapFlag Flags => (UiMapFlag)_flags;
+        public UiMapSystem System => (UiMapSystem)_system;
+        public UiMapType Type => (UiMapType)_type;
+        
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(UiMapFlag flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(UiMapFlag flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
+    }
 
     public sealed class UiMapAssignmentRecord
     {
@@ -33,12 +51,16 @@ namespace Game.DataStorage
         public Vector2 UiMax;
         public Vector3[] Region = new Vector3[2];
         public uint Id;
-        public int UiMapID;
+        private int _uiMapID;
         public int OrderIndex;
         public int MapID;
         public int AreaID;
         public int WmoDoodadPlacementID;
         public int WmoGroupID;
+
+        #region Prioperties
+        public uint UiMapID => (uint)_uiMapID;
+        #endregion
     }
 
     public sealed class UiMapLinkRecord
@@ -65,22 +87,38 @@ namespace Game.DataStorage
 
     public sealed class UnitConditionRecord
     {
-        public uint Id;
-        public byte Flags;
-        public byte[] Variable = new byte[8];
-        public sbyte[] Op = new sbyte[8];
-        public int[] Value = new int[8];
+        public const int MAX_UNIT_CONDITION_VALUES = 8;
 
-        public UnitConditionFlags GetFlags() { return (UnitConditionFlags)Flags; }
+        public uint Id;
+        private byte _flags;
+        public byte[] Variable = new byte[MAX_UNIT_CONDITION_VALUES];
+        public sbyte[] Op = new sbyte[MAX_UNIT_CONDITION_VALUES];
+        public int[] Value = new int[MAX_UNIT_CONDITION_VALUES];
+
+        #region Properties
+        public UnitConditionFlags Flags => (UnitConditionFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(UnitConditionFlags flag)
+        {
+            return _flags.HasFlag((byte)flag);
+        }
+
+        public bool HasAnyFlag(UnitConditionFlags flag)
+        {
+            return _flags.HasAnyFlag((byte)flag);
+        }
+        #endregion
     }
 
     public sealed class UnitPowerBarRecord
     {
         public uint Id;
-        public string Name;
-        public string Cost;
-        public string OutOfError;
-        public string ToolTip;
+        public LocalizedString Name;
+        public LocalizedString Cost;
+        public LocalizedString OutOfError;
+        public LocalizedString ToolTip;
         public uint MinPower;
         public uint MaxPower;
         public ushort StartPower;
@@ -91,7 +129,7 @@ namespace Game.DataStorage
         public ushort Flags;
         public float StartInset;
         public float EndInset;
-        public uint[] FileDataID = new uint[6];
-        public uint[] Color = new uint[6];
+        public int[] FileDataID = new int[6];
+        public int[] Color = new int[6];
     }
 }

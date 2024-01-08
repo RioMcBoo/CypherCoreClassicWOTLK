@@ -5,17 +5,6 @@ namespace Game.Networking.Packets
 {
     public struct PerksVendorItem
     {
-        public int VendorItemID;
-        public int MountID;
-        public int BattlePetSpeciesID;
-        public int TransmogSetID;
-        public int ItemModifiedAppearanceID;
-        public int Field_14;
-        public int Field_18;
-        public int Price;
-        public long AvailableUntil;
-        public bool Disabled;
-
         public void Write(WorldPacket data)
         {
             data.WriteInt32(VendorItemID);
@@ -30,5 +19,16 @@ namespace Game.Networking.Packets
             data.WriteBit(Disabled);
             data.FlushBits();
         }
+        
+        public int VendorItemID;
+        public int MountID;
+        public int BattlePetSpeciesID;
+        public int TransmogSetID;
+        public int ItemModifiedAppearanceID;
+        public int Field_14;
+        public int Field_18;
+        public int Price;
+        public long AvailableUntil;
+        public bool Disabled;
     }
 }

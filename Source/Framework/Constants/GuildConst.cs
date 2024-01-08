@@ -219,7 +219,7 @@ namespace Framework.Constants
         HasRestriction = 13
     }
 
-    public enum PetitionSigns
+    public enum PetitionSigns : byte
     {
         Ok = 0,
         AlreadySigned = 1,

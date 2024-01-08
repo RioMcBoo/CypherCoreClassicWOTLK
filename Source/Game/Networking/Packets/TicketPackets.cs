@@ -85,15 +85,11 @@ namespace Game.Networking.Packets
             CaseID = _worldPacket.ReadInt32();
         }
 
-        int CaseID;
+        public int CaseID;
     }
 
     public class SubmitUserFeedback : ClientPacket
     {
-        public SupportTicketHeader Header;
-        public string Note;
-        public bool IsSuggestion;
-
         public SubmitUserFeedback(WorldPacket packet) : base(packet) { }
 
         public override void Read()
@@ -103,8 +99,12 @@ namespace Game.Networking.Packets
             IsSuggestion = _worldPacket.HasBit();
 
             if (noteLength != 0)
-                Note = _worldPacket.ReadString(noteLength - 1);
+                Note = _worldPacket.ReadString(noteLength - 1); // skip null terminator
         }
+        
+        public SupportTicketHeader Header;
+        public string Note;
+        public bool IsSuggestion;
     }
 
     public class SupportTicketSubmitComplaint : ClientPacket
@@ -200,8 +200,8 @@ namespace Game.Networking.Packets
         public int ReportType;
         public int MajorCategory;
         public int MinorCategoryFlags;
-        public string Note;
         public SupportTicketHorusChatLog HorusChatLog;
+        public string Note;        
         public SupportTicketMailInfo? MailInfo;
         public SupportTicketCalendarEventInfo? CalenderInfo;
         public SupportTicketPetInfo? PetInfo;
@@ -252,7 +252,7 @@ namespace Game.Networking.Packets
                     ReportLineIndex = data.ReadUInt32();
             }
 
-            public List<SupportTicketChatLine> Lines = new();
+            public Array<SupportTicketChatLine> Lines = new(255);
             public uint? ReportLineIndex;
         }
 
@@ -308,8 +308,6 @@ namespace Game.Networking.Packets
 
         public class SupportTicketHorusChatLog
         {
-            public List<SupportTicketHorusChatLine> Lines = new();
-
             public void Read(WorldPacket data)
             {
                 uint linesCount = data.ReadUInt32();
@@ -322,6 +320,8 @@ namespace Game.Networking.Packets
                     Lines.Add(chatLine);
                 }
             }
+            
+            public Array<SupportTicketHorusChatLine> Lines = new(255);
         }
 
         public struct SupportTicketMailInfo
@@ -361,7 +361,6 @@ namespace Game.Networking.Packets
             public void Read(WorldPacket data)
             {
                 PetID = data.ReadPackedGuid();
-
                 PetName = data.ReadString(data.ReadBits<byte>(8));
             }
 
@@ -373,7 +372,7 @@ namespace Game.Networking.Packets
         {
             public void Read(WorldPacket data)
             {
-                byte nameLength = data.ReadBits<byte>(8);
+                byte nameLength = data.ReadBits<byte>(7);
                 GuildID = data.ReadPackedGuid();
 
                 GuildName = data.ReadString(nameLength);
@@ -388,8 +387,8 @@ namespace Game.Networking.Packets
             public void Read(WorldPacket data)
             {
                 RideTicket = new RideTicket();
-                RideTicket.Read(data);
 
+                RideTicket.Read(data);
                 GroupFinderActivityID = data.ReadUInt32();
                 Unknown1007 = data.ReadUInt8();
                 LastTitleAuthorGuid = data.ReadPackedGuid();
@@ -425,8 +424,8 @@ namespace Game.Networking.Packets
             public void Read(WorldPacket data)
             {
                 RideTicket = new RideTicket();
-                RideTicket.Read(data);
 
+                RideTicket.Read(data);
                 Comment = data.ReadString(data.ReadBits<uint>(9));
             }
 
@@ -497,7 +496,6 @@ namespace Game.Networking.Packets
         public ComplaintOffender Offender;
         public ulong MailID;
         public ComplaintChat Chat;
-
         public ulong EventGuid;
         public ulong InviteGuid;
 

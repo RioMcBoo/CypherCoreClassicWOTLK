@@ -4,13 +4,17 @@
 using Framework.Constants;
 using System;
 using System.Numerics;
+using System.Xml.Linq;
+using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
     public sealed class TactKeyRecord
     {
+        public const int TACTKEY_SIZE = 16;
+
         public uint Id;
-        public byte[] Key = new byte[16];
+        public byte[] Key = new byte[TACTKEY_SIZE];
     }
 
     public sealed class TalentRecord
@@ -54,12 +58,59 @@ namespace Game.DataStorage
         public uint ContinentID;
         public uint ConditionID;
         public ushort CharacterBitNumber;
-        public TaxiNodeFlags Flags;
+        private int _flags;
         public int UiTextureKitID;
         public float Facing;
         public uint SpecialIconConditionID;
         public uint VisibilityConditionID;
-        public uint[] MountCreatureID = new uint[2];
+        private int[] _mountCreatureID = new int[2];
+
+        #region Properties
+        public TaxiNodeFlags Flags => (TaxiNodeFlags)_flags;
+        public int MountCreatureID(Team team)
+        {
+            switch (team)
+            {
+                case Team.Horde:
+                    return _mountCreatureID[0];
+                case Team.Alliance:
+                    return _mountCreatureID[1];
+                default:
+                    Cypher.Assert(false, $"Wrong variable of enum `Team`:{team}", "public sealed class TaxiNodesRecord, public int MountCreatureID(Team team), wrong variable value `team`.");
+                    return 0;
+            }
+        }
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(TaxiNodeFlags flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(TaxiNodeFlags flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+
+        public bool IsPartOfTaxiNetwork
+        {
+            get
+            {
+                return HasAnyFlag(TaxiNodeFlags.ShowOnAllianceMap | TaxiNodeFlags.ShowOnHordeMap)
+                    // manually whitelisted nodes
+                    || Id == 1985   // [Hidden] Argus Ground Points Hub (Ground TP out to here, TP to Vindicaar from here)
+                    || Id == 1986   // [Hidden] Argus Vindicaar Ground Hub (Vindicaar TP out to here, TP to ground from here)
+                    || Id == 1987   // [Hidden] Argus Vindicaar No Load Hub (Vindicaar No Load transition goes through here)
+                    || Id == 2627   // [Hidden] 9.0 Bastion Ground Points Hub (Ground TP out to here, TP to Sanctum from here)
+                    || Id == 2628   // [Hidden] 9.0 Bastion Ground Hub (Sanctum TP out to here, TP to ground from here)
+                    || Id == 2732   // [HIDDEN] 9.2 Resonant Peaks - Teleport Network - Hidden Hub (Connects all Nodes to each other without unique paths)
+                    || Id == 2835   // [Hidden] 10.0 Travel Network - Destination Input
+                    || Id == 2843   // [Hidden] 10.0 Travel Network - Destination Output
+                ;
+            }
+        }
+        #endregion
     }
 
     public sealed class TaxiPathRecord
@@ -77,28 +128,48 @@ namespace Game.DataStorage
         public ushort PathID;
         public int NodeIndex;
         public ushort ContinentID;
-        public TaxiPathNodeFlags Flags;
+        private int _flags;
         public uint Delay;
         public uint ArrivalEventID;
         public uint DepartureEventID;
+
+        #region Properties
+        public TaxiNodeFlags Flags => (TaxiNodeFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(TaxiNodeFlags flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(TaxiNodeFlags flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
     }
 
     public sealed class TotemCategoryRecord
     {
         public uint Id;
-        public string Name;
+        public LocalizedString Name;
         public byte TotemCategoryType;
         public int TotemCategoryMask;
     }
 
     public sealed class ToyRecord
     {
-        public string SourceText;
+        public LocalizedString SourceText;
         public uint Id;
-        public uint ItemID;
+        private int _itemID;
         public byte Flags;
         public sbyte SourceTypeEnum;
-    }
+
+        #region Properties
+        public uint ItemID => (uint)_itemID;
+        #endregion
+    }   
 
     public sealed class TransmogHolidayRecord
     {
@@ -109,11 +180,11 @@ namespace Game.DataStorage
     public sealed class TraitCondRecord
     {
         public uint Id;
-        public int CondType;
-        public int TraitTreeID;
+        private int _condType;
+        public uint TraitTreeID;
         public int GrantedRanks;
-        public uint QuestID;
-        public uint AchievementID;
+        public int QuestID;
+        public int AchievementID;
         public int SpecSetID;
         public int TraitNodeGroupID;
         public int TraitNodeID;
@@ -124,7 +195,9 @@ namespace Game.DataStorage
         public int FreeSharedStringID;
         public int SpendMoreSharedStringID;
 
-        public TraitConditionType GetCondType() { return (TraitConditionType)CondType; }
+        #region Properties
+        public TraitConditionType CondType => (TraitConditionType)_condType;
+        #endregion
     }
 
     public sealed class TraitCostRecord
@@ -138,23 +211,25 @@ namespace Game.DataStorage
     public sealed class TraitCurrencyRecord
     {
         public uint Id;
-        public int Type;
+        private int _type;
         public int CurrencyTypesID;
         public int Flags;
         public int Icon;
 
-        public TraitCurrencyType GetCurrencyType() { return (TraitCurrencyType)Type; }
+        #region Properties
+        public TraitCurrencyType CurrencyType => (TraitCurrencyType)_type;
+        #endregion
     }
 
     public sealed class TraitCurrencySourceRecord
     {
         public LocalizedString Requirement;
         public uint Id;
-        public int TraitCurrencyID;
+        public uint TraitCurrencyID;
         public int Amount;
-        public uint QuestID;
-        public uint AchievementID;
-        public uint PlayerLevel;
+        public int QuestID;
+        public int AchievementID;
+        public int PlayerLevel;
         public int TraitNodeEntryID;
         public int OrderIndex;
     }
@@ -165,28 +240,30 @@ namespace Game.DataStorage
         public LocalizedString OverrideSubtext;
         public LocalizedString OverrideDescription;
         public uint Id;
-        public uint SpellID;
+        public int SpellID;
         public int OverrideIcon;
-        public uint OverridesSpellID;
-        public uint VisibleSpellID;
+        public int OverridesSpellID;
+        public int VisibleSpellID;
     }
 
     public sealed class TraitDefinitionEffectPointsRecord
     {
         public uint Id;
-        public int TraitDefinitionID;
+        public uint TraitDefinitionID;
         public int EffectIndex;
-        public int OperationType;
+        private int _operationType;
         public int CurveID;
 
-        public TraitPointsOperationType GetOperationType() { return (TraitPointsOperationType)OperationType; }
+        #region Properties
+        public TraitPointsOperationType OperationType => (TraitPointsOperationType)_operationType;
+        #endregion
     }
 
     public sealed class TraitEdgeRecord
     {
         public uint Id;
         public int VisualStyle;
-        public int LeftTraitNodeID;
+        public uint LeftTraitNodeID;
         public int RightTraitNodeID;
         public int Type;
     }
@@ -194,13 +271,15 @@ namespace Game.DataStorage
     public sealed class TraitNodeRecord
     {
         public uint Id;
-        public int TraitTreeID;
+        public uint TraitTreeID;
         public int PosX;
         public int PosY;
-        public sbyte Type;
+        private byte _type;
         public int Flags;
 
-        public TraitNodeType GetNodeType() { return (TraitNodeType)Type; }
+        #region Properties
+        public TraitNodeType NodeType => (TraitNodeType)_type;
+        #endregion
     }
 
     public sealed class TraitNodeEntryRecord
@@ -208,9 +287,11 @@ namespace Game.DataStorage
         public uint Id;
         public int TraitDefinitionID;
         public int MaxRanks;
-        public byte NodeEntryType;
+        private byte _nodeEntryType;
 
-        public TraitNodeEntryType GetNodeEntryType() { return (TraitNodeEntryType)NodeEntryType; }
+        #region Properties
+        public TraitNodeEntryType NodeEntryType => (TraitNodeEntryType)_nodeEntryType;
+        #endregion
     }
 
     public sealed class TraitNodeEntryXTraitCondRecord
@@ -223,14 +304,14 @@ namespace Game.DataStorage
     public sealed class TraitNodeEntryXTraitCostRecord
     {
         public uint Id;
-        public int TraitNodeEntryID;
+        public uint TraitNodeEntryID;
         public int TraitCostID;
     }
 
     public sealed class TraitNodeGroupRecord
     {
         public uint Id;
-        public int TraitTreeID;
+        public uint TraitTreeID;
         public int Flags;
     }
 
@@ -238,20 +319,20 @@ namespace Game.DataStorage
     {
         public uint Id;
         public int TraitCondID;
-        public int TraitNodeGroupID;
+        public uint TraitNodeGroupID;
     }
 
     public sealed class TraitNodeGroupXTraitCostRecord
     {
         public uint Id;
-        public int TraitNodeGroupID;
+        public uint TraitNodeGroupID;
         public int TraitCostID;
     }
 
     public sealed class TraitNodeGroupXTraitNodeRecord
     {
         public uint Id;
-        public int TraitNodeGroupID;
+        public uint TraitNodeGroupID;
         public int TraitNodeID;
         public int Index;
     }
@@ -260,20 +341,20 @@ namespace Game.DataStorage
     {
         public uint Id;
         public int TraitCondID;
-        public int TraitNodeID;
+        public uint TraitNodeID;
     }
 
     public sealed class TraitNodeXTraitCostRecord
     {
         public uint Id;
-        public int TraitNodeID;
+        public uint TraitNodeID;
         public int TraitCostID;
     }
 
     public sealed class TraitNodeXTraitNodeEntryRecord
     {
         public uint Id;
-        public int TraitNodeID;
+        public uint TraitNodeID;
         public int TraitNodeEntryID;
         public int Index;
     }
@@ -281,28 +362,42 @@ namespace Game.DataStorage
     public sealed class TraitTreeRecord
     {
         public uint Id;
-        public int TraitSystemID;
+        public uint TraitSystemID;
         public int Unused1000_1;
         public int FirstTraitNodeID;
         public int PlayerConditionID;
-        public int Flags;
+        private int _flags;
         public float Unused1000_2;
         public float Unused1000_3;
 
-        public TraitTreeFlag GetFlags() { return (TraitTreeFlag)Flags; }
+        #region Properties
+        public TraitTreeFlag Flags => (TraitTreeFlag)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(TraitTreeFlag flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(TraitTreeFlag flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
     }
 
     public sealed class TraitTreeLoadoutRecord
     {
         public uint Id;
-        public int TraitTreeID;
+        public uint TraitTreeID;
         public int ChrSpecializationID;
     }
 
     public sealed class TraitTreeLoadoutEntryRecord
     {
         public uint Id;
-        public int TraitTreeLoadoutID;
+        public uint TraitTreeLoadoutID;
         public int SelectedTraitNodeID;
         public int SelectedTraitNodeEntryID;
         public int NumPoints;
@@ -320,24 +415,13 @@ namespace Game.DataStorage
     {
         public uint Id;
         public int Index;
-        public int TraitTreeID;
+        public uint TraitTreeID;
         public int TraitCurrencyID;
-    }
-
-    public sealed class TransmogIllusionRecord
-    {
-        public uint Id;
-        public int UnlockConditionID;
-        public int TransmogCost;
-        public int SpellItemEnchantmentID;
-        public int Flags;
-
-        public TransmogIllusionFlags GetFlags() { return (TransmogIllusionFlags)Flags; }
     }
 
     public sealed class TransmogSetRecord
     {
-        public string Name;
+        public LocalizedString Name;
         public uint Id;
         public int ClassMask;
         public uint TrackingQuestID;

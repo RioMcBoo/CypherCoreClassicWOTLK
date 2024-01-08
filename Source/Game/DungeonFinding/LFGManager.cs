@@ -2281,7 +2281,7 @@ namespace Game.DungeonFinding
             minlevel = dbc.MinLevel;
             maxlevel = (byte)dbc.MaxLevel;
             difficulty = dbc.DifficultyID;
-            seasonal = dbc.Flags[0].HasAnyFlag(LfgFlags.Seasonal);
+            seasonal = dbc.HasAnyFlag(LfgFlags.Seasonal);
         }
 
         public uint id;

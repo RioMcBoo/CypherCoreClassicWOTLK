@@ -59,7 +59,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Player);
             _worldPacket.WriteInt64(Time);
             _worldPacket.WriteUInt32(Size);
-            _worldPacket.WriteBits(DataType, 4);
+            _worldPacket.WriteBits((uint)DataType, 4);
 
             if (CompressedData == null)
                 _worldPacket.WriteUInt32(0);

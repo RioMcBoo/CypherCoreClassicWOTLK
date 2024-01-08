@@ -21,7 +21,7 @@ namespace Framework.Constants
         WorldAttempt5 = 89
     }
 
-    public enum LoginFailureReason
+    public enum LoginFailureReason : byte
     {
         Failed = 0,
         NoWorld = 1,

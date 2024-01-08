@@ -1738,7 +1738,7 @@ namespace Game.BattleGrounds
 
         public BattlegroundBracketId GetBracketId()
         {
-            return _pvpDifficultyEntry.GetBracketId();
+            return _pvpDifficultyEntry.BracketId();
         }
 
         byte GetUniqueBracketId()

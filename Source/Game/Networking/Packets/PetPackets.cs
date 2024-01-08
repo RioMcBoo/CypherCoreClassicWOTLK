@@ -81,8 +81,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt16((ushort)((byte)CommandState | (Flag << 16)));
             _worldPacket.WriteUInt8((byte)ReactState);
 
-            foreach (uint actionButton in ActionButtons)
-                _worldPacket.WriteUInt32(actionButton);
+            foreach (int actionButton in ActionButtons)
+                _worldPacket.WriteInt32(actionButton);
 
             _worldPacket.WriteInt32(Actions.Count);
             _worldPacket.WriteInt32(Cooldowns.Count);
@@ -93,17 +93,17 @@ namespace Game.Networking.Packets
 
             foreach (PetSpellCooldown cooldown in Cooldowns)
             {
-                _worldPacket.WriteUInt32(cooldown.SpellID);
-                _worldPacket.WriteUInt32(cooldown.Duration);
-                _worldPacket.WriteUInt32(cooldown.CategoryDuration);
+                _worldPacket.WriteInt32(cooldown.SpellID);
+                _worldPacket.WriteInt32(cooldown.Duration);
+                _worldPacket.WriteInt32(cooldown.CategoryDuration);
                 _worldPacket.WriteFloat(cooldown.ModRate);
                 _worldPacket.WriteUInt16(cooldown.Category);
             }
 
             foreach (PetSpellHistory history in SpellHistory)
             {
-                _worldPacket.WriteUInt32(history.CategoryID);
-                _worldPacket.WriteUInt32(history.RecoveryTime);
+                _worldPacket.WriteInt32(history.CategoryID);
+                _worldPacket.WriteInt32(history.RecoveryTime);
                 _worldPacket.WriteFloat(history.ChargeModRate);
                 _worldPacket.WriteInt8(history.ConsumedCharges);
             }
@@ -117,7 +117,7 @@ namespace Game.Networking.Packets
         public CommandStates CommandState;
         public byte Flag;
 
-        public uint[] ActionButtons = new uint[10];
+        public int[] ActionButtons = new int[10];
 
         public List<uint> Actions = new();
         public List<PetSpellCooldown> Cooldowns = new();
@@ -157,11 +157,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Spells.Count);
-            foreach (uint spell in Spells)
-                _worldPacket.WriteUInt32(spell);
+            foreach (int spell in Spells)
+                _worldPacket.WriteInt32(spell);
         }
 
-        public List<uint> Spells = new();
+        public List<int> Spells = new();
     }
 
     class PetNameInvalid : ServerPacket
@@ -260,32 +260,6 @@ namespace Game.Networking.Packets
         public uint Action;
     }
 
-    class CancelModSpeedNoControlAuras : ClientPacket
-    {
-        public ObjectGuid TargetGUID;
-
-        public CancelModSpeedNoControlAuras(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            TargetGUID = _worldPacket.ReadPackedGuid();
-        }
-    }
-    
-    class PetCancelAura : ClientPacket
-    {
-        public PetCancelAura(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            PetGUID = _worldPacket.ReadPackedGuid();
-            SpellID = _worldPacket.ReadUInt32();
-        }
-
-        public ObjectGuid PetGUID;
-        public uint SpellID;
-    }
-
     class SetPetSpecialization : ServerPacket
     {
         public SetPetSpecialization() : base(ServerOpcodes.SetPetSpecialization) { }
@@ -304,11 +278,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteUInt8((byte)Response);
         }
 
-        public uint SpellID;
+        public int SpellID;
         public PetActionFeedback Response;
     }
 
@@ -319,7 +293,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(UnitGUID);
-            _worldPacket.WriteUInt32((uint)Action);
+            _worldPacket.WriteInt32((int)Action);
         }
 
         public ObjectGuid UnitGUID;
@@ -340,11 +314,6 @@ namespace Game.Networking.Packets
 
     class PetMode : ServerPacket
     {
-        public ObjectGuid PetGUID;
-        public ReactStates ReactState;
-        public CommandStates CommandState;
-        public byte Flag;
-
         public PetMode() : base(ServerOpcodes.PetMode, ConnectionType.Instance) { }
 
         public override void Write()
@@ -353,22 +322,27 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt16((ushort)((int)CommandState | Flag << 8));
             _worldPacket.WriteUInt8((byte)ReactState);
         }
+        
+        public ObjectGuid PetGUID;
+        public ReactStates ReactState;
+        public CommandStates CommandState;
+        public byte Flag;
     }
-    
+
     //Structs
     public class PetSpellCooldown
     {
-        public uint SpellID;
-        public uint Duration;
-        public uint CategoryDuration;
+        public int SpellID;
+        public int Duration;
+        public int CategoryDuration;
         public float ModRate = 1.0f;
         public ushort Category;
     }
 
     public class PetSpellHistory
     {
-        public uint CategoryID;
-        public uint RecoveryTime;
+        public int CategoryID;
+        public int RecoveryTime;
         public float ChargeModRate = 1.0f;
         public sbyte ConsumedCharges;
     }

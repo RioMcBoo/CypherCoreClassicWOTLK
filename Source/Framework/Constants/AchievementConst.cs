@@ -12,7 +12,7 @@ namespace Framework.Constants
         Any = -1,
     }
 
-    public enum CriteriaTreeFlags : short
+    public enum CriteriaTreeFlags : int
     {
         ProgressBar = 0x0001, // Progress Bar
         DoNotDisplay = 0x0002, // Do Not Display
@@ -42,7 +42,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum AchievementFlags
+    public enum AchievementFlags : int
     {
         Counter = 0x01,
         Hidden = 0x02,
@@ -467,7 +467,7 @@ namespace Framework.Constants
         DailyQuestsCleared = 13,   // Daily quests cleared
         SendEvent = 14,   // Send event "{GameEvents}" (player-sent/instance only)
 
-        Max
+        Count
     }
 
     public enum CriteriaStartEvent : byte
@@ -488,10 +488,11 @@ namespace Framework.Constants
         SendEvent = 13, // Send event "{GameEvents}" (player-sent/instance only)
         BeginScenarioStep = 14, // Begin scenario step "{#Step}" (for use with "Player on Scenario" modifier only)
 
-        Max
+        Count
     }
 
-    public enum CriteriaFlags
+    [Flags]
+    public enum CriteriaFlags : int
     {
         FailAchievement = 0x01, // Fail Achievement
         ResetOnStart = 0x02, // Reset on Start
@@ -501,7 +502,7 @@ namespace Framework.Constants
         IsForQuest = 0x20  // Is For Quest
     }
 
-    public enum CriteriaType : byte
+    public enum CriteriaType : short
     {
         KillCreature = 0,   // Kill NPC "{Creature}"
         WinBattleground = 1,   // Win battleground "{Map}"

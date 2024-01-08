@@ -62,8 +62,8 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WritePackedTime(ServerTime);
-            _worldPacket.WritePackedTime(GameTime);
+            _worldPacket.WritePackedTime32(ServerTime);
+            _worldPacket.WritePackedTime32(GameTime);
             _worldPacket.WriteFloat(NewSpeed);
             _worldPacket.WriteInt32(ServerTimeHolidayOffset);
             _worldPacket.WriteInt32(GameTimeHolidayOffset);
@@ -89,7 +89,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Type);
+            _worldPacket.WriteInt32(Type);
             _worldPacket.WriteInt32(Quantity);
             _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WriteInt32(Toasts.Count);
@@ -108,6 +108,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
             _worldPacket.WriteBit(NextRechargeTime.HasValue);
             _worldPacket.WriteBit(RechargeCycleStartTime.HasValue);
+            _worldPacket.WriteBit(OverflownCurrencyID.HasValue);
             _worldPacket.FlushBits();
 
             if (WeeklyQuantity.HasValue)
@@ -139,9 +140,12 @@ namespace Game.Networking.Packets
 
             if (RechargeCycleStartTime.HasValue)
                 _worldPacket.WriteInt64(RechargeCycleStartTime.Value);
+
+            if (OverflownCurrencyID.HasValue)
+                _worldPacket.WriteInt64(OverflownCurrencyID.Value);
         }
 
-        public uint Type;
+        public int Type;
         public int Quantity;
         public CurrencyGainFlags Flags;
         public List<UiEventToast> Toasts = new();
@@ -155,21 +159,8 @@ namespace Game.Networking.Packets
         public uint? FirstCraftOperationID;
         public long? NextRechargeTime;
         public long? RechargeCycleStartTime;
+        public int? OverflownCurrencyID;    // what currency was originally changed but couldn't be incremented because of a cap
         public bool SuppressChatLog;
-    }
-
-    public class SetMaxWeeklyQuantity : ServerPacket
-    {
-        public SetMaxWeeklyQuantity() : base(ServerOpcodes.SetMaxWeeklyQuantity, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(Type);
-            _worldPacket.WriteUInt32(MaxWeeklyQuantity);
-        }
-
-        public uint MaxWeeklyQuantity;
-        public uint Type;
     }
 
     public class SetSelection : ClientPacket
@@ -194,8 +185,8 @@ namespace Game.Networking.Packets
 
             foreach (Record data in Data)
             {
-                _worldPacket.WriteUInt32(data.Type);
-                _worldPacket.WriteUInt32(data.Quantity);
+                _worldPacket.WriteInt32(data.Type);
+                _worldPacket.WriteInt32(data.Quantity);
 
                 _worldPacket.WriteBit(data.WeeklyQuantity.HasValue);
                 _worldPacket.WriteBit(data.MaxWeeklyQuantity.HasValue);
@@ -208,11 +199,11 @@ namespace Game.Networking.Packets
                 _worldPacket.FlushBits();
 
                 if (data.WeeklyQuantity.HasValue)
-                    _worldPacket.WriteUInt32(data.WeeklyQuantity.Value);
+                    _worldPacket.WriteInt32(data.WeeklyQuantity.Value);
                 if (data.MaxWeeklyQuantity.HasValue)
-                    _worldPacket.WriteUInt32(data.MaxWeeklyQuantity.Value);
+                    _worldPacket.WriteInt32(data.MaxWeeklyQuantity.Value);
                 if (data.TrackedQuantity.HasValue)
-                    _worldPacket.WriteUInt32(data.TrackedQuantity.Value);
+                    _worldPacket.WriteInt32(data.TrackedQuantity.Value);
                 if (data.MaxQuantity.HasValue)
                     _worldPacket.WriteInt32(data.MaxQuantity.Value);
                 if (data.TotalEarned.HasValue)
@@ -228,11 +219,11 @@ namespace Game.Networking.Packets
 
         public struct Record
         {
-            public uint Type;
-            public uint Quantity;
-            public uint? WeeklyQuantity;       // Currency count obtained this Week.  
-            public uint? MaxWeeklyQuantity;    // Weekly Currency cap.
-            public uint? TrackedQuantity;
+            public int Type;
+            public int Quantity;
+            public int? WeeklyQuantity;       // Currency count obtained this Week.  
+            public int? MaxWeeklyQuantity;    // Weekly Currency cap.
+            public int? TrackedQuantity;
             public int? MaxQuantity;
             public int? TotalEarned;
             public long? NextRechargeTime;
@@ -247,10 +238,22 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            violenceLevel = _worldPacket.ReadInt8();
+            violenceLevel = (Violence)_worldPacket.ReadInt8();
         }
 
-        public sbyte violenceLevel; // 0 - no combat effects, 1 - display some combat effects, 2 - blood, 3 - bloody, 4 - bloodier, 5 - bloodiest
+        public enum Violence : sbyte
+        {
+            NoCombatEffects = 0,
+            DisplaySomeCombatEffects = 1,
+            Blood = 2,
+            Bloody = 3,
+            Bloodier = 4,
+            Bloodiest = 5,
+
+            NotDefined = -1,
+        }
+
+        public Violence violenceLevel = Violence.NotDefined;
     }
 
     public class TimeSyncRequest : ServerPacket
@@ -288,9 +291,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(CinematicID);
+            _worldPacket.WritePackedGuid(ConversationGuid);
         }
 
         public uint CinematicID;
+        public ObjectGuid ConversationGuid;
     }
 
     public class TriggerMovie : ServerPacket
@@ -354,24 +359,16 @@ namespace Game.Networking.Packets
 
     public class WorldServerInfo : ServerPacket
     {
-        public WorldServerInfo() : base(ServerOpcodes.WorldServerInfo, ConnectionType.Instance)
-        {
-            InstanceGroupSize = new uint?();
-
-            RestrictedAccountMaxLevel = new uint?();
-            RestrictedAccountMaxMoney = new ulong?();
-        }
+        public WorldServerInfo() : base(ServerOpcodes.WorldServerInfo, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(DifficultyID);
             _worldPacket.WriteBit(IsTournamentRealm);
             _worldPacket.WriteBit(XRealmPvpAlert);
-            _worldPacket.WriteBit(BlockExitingLoadingScreen);
             _worldPacket.WriteBit(RestrictedAccountMaxLevel.HasValue);
             _worldPacket.WriteBit(RestrictedAccountMaxMoney.HasValue);
             _worldPacket.WriteBit(InstanceGroupSize.HasValue);
-            _worldPacket.FlushBits();
 
             if (RestrictedAccountMaxLevel.HasValue)
                 _worldPacket.WriteUInt32(RestrictedAccountMaxLevel.Value);
@@ -381,13 +378,13 @@ namespace Game.Networking.Packets
 
             if (InstanceGroupSize.HasValue)
                 _worldPacket.WriteUInt32(InstanceGroupSize.Value);
+
+            _worldPacket.FlushBits();
         }
 
         public uint DifficultyID;
         public bool IsTournamentRealm;
         public bool XRealmPvpAlert;
-        public bool BlockExitingLoadingScreen;     // when set to true, sending SMSG_UPDATE_OBJECT with CreateObject Self bit = true will not hide loading screen
-                                                    // instead it will be done after this packet is sent again with false in this bit and SMSG_UPDATE_OBJECT Values for player
         public uint? RestrictedAccountMaxLevel;
         public ulong? RestrictedAccountMaxMoney;
         public uint? InstanceGroupSize;
@@ -688,7 +685,7 @@ namespace Game.Networking.Packets
 
     public class ExplorationExperience : ServerPacket
     {
-        public ExplorationExperience(uint experience, uint areaID) : base(ServerOpcodes.ExplorationExperience)
+        public ExplorationExperience(int experience, int areaID) : base(ServerOpcodes.ExplorationExperience)
         {
             Experience = experience;
             AreaID = areaID;
@@ -696,12 +693,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(AreaID);
-            _worldPacket.WriteUInt32(Experience);
+            _worldPacket.WriteInt32(AreaID);
+            _worldPacket.WriteInt32(Experience);
         }
 
-        public uint Experience;
-        public uint AreaID;
+        public int Experience;
+        public int AreaID;
     }
 
     public class LevelUpInfo : ServerPacket
@@ -710,8 +707,8 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Level);
-            _worldPacket.WriteUInt32(HealthDelta);
+            _worldPacket.WriteInt32(Level);
+            _worldPacket.WriteInt32(HealthDelta);
 
             foreach (int power in PowerDelta)
                 _worldPacket.WriteInt32(power);
@@ -720,15 +717,13 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(stat);
 
             _worldPacket.WriteInt32(NumNewTalents);
-            _worldPacket.WriteInt32(NumNewPvpTalentSlots);
         }
 
-        public uint Level = 0;
-        public uint HealthDelta = 0;
+        public int Level = 0;
+        public int HealthDelta = 0;
         public int[] PowerDelta = new int[(int)PowerType.MaxPerClass];
         public int[] StatDelta = new int[(int)Stats.Max];
         public int NumNewTalents;
-        public int NumNewPvpTalentSlots;
     }
 
     public class PlayMusic : ServerPacket
@@ -753,25 +748,19 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             bool hasPartyIndex = _worldPacket.HasBit();
-            Min = _worldPacket.ReadUInt32();
-            Max = _worldPacket.ReadUInt32();
+            Min = _worldPacket.ReadInt32();
+            Max = _worldPacket.ReadInt32();
             if (hasPartyIndex)
                 PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public uint Min;
-        public uint Max;
+        public int Min;
+        public int Max;
         public byte? PartyIndex;
     }
 
     public class RandomRoll : ServerPacket
     {
-        public ObjectGuid Roller;
-        public ObjectGuid RollerWowAccount;
-        public int Min;
-        public int Max;
-        public int Result;
-
         public RandomRoll() : base(ServerOpcodes.RandomRoll) { }
 
         public override void Write()
@@ -782,18 +771,24 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Max);
             _worldPacket.WriteInt32(Result);
         }
+        
+        public ObjectGuid Roller;
+        public ObjectGuid RollerWowAccount;
+        public int Min;
+        public int Max;
+        public int Result;
     }
 
     public class EnableBarberShop : ServerPacket
     {
-        public byte CustomizationScope;
-
         public EnableBarberShop() : base(ServerOpcodes.EnableBarberShop) { }
 
         public override void Write() 
         {
             _worldPacket.WriteUInt8(CustomizationScope);
         }
+        
+        public byte CustomizationScope;
     }
 
     class PhaseShiftChange : ServerPacket
@@ -842,10 +837,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Percent);
+            _worldPacket.WriteInt32(Percent);
         }
 
-        public uint Percent;
+        public int Percent;
     }
 
     class ObjectUpdateFailed : ClientPacket
@@ -878,7 +873,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SoundKitID);
+            _worldPacket.WriteInt32(SoundKitID);
             _worldPacket.WritePackedGuid(SourceObjectGUID);
             _worldPacket.WritePackedGuid(TargetObjectGUID);
             _worldPacket.WriteVector3(Position);
@@ -887,14 +882,14 @@ namespace Game.Networking.Packets
 
         public ObjectGuid TargetObjectGUID;
         public ObjectGuid SourceObjectGUID;
-        public uint SoundKitID;
+        public int SoundKitID;
         public Vector3 Position;
         public int BroadcastTextID;
     }
 
     class PlaySound : ServerPacket
     {
-        public PlaySound(ObjectGuid sourceObjectGuid, uint soundKitID, uint broadcastTextId) : base(ServerOpcodes.PlaySound)
+        public PlaySound(ObjectGuid sourceObjectGuid, int soundKitID, int broadcastTextId) : base(ServerOpcodes.PlaySound)
         {
             SourceObjectGuid = sourceObjectGuid;
             SoundKitID = soundKitID;
@@ -903,19 +898,19 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SoundKitID);
+            _worldPacket.WriteInt32(SoundKitID);
             _worldPacket.WritePackedGuid(SourceObjectGuid);
-            _worldPacket.WriteUInt32(BroadcastTextID);
+            _worldPacket.WriteInt32(BroadcastTextID);
         }
 
         public ObjectGuid SourceObjectGuid;
-        public uint SoundKitID;
-        public uint BroadcastTextID;
+        public int SoundKitID;
+        public int BroadcastTextID;
     }
 
-    class PlaySpeakerBoxSound : ServerPacket
+    class PlaySpeakerBotSound : ServerPacket
     {
-        public PlaySpeakerBoxSound(ObjectGuid sourceObjectGuid, uint soundKitID) : base(ServerOpcodes.PlaySpeakerbotSound)
+        public PlaySpeakerBotSound(ObjectGuid sourceObjectGuid, int soundKitID) : base(ServerOpcodes.PlaySpeakerbotSound)
         {
             SourceObjectGUID = sourceObjectGuid;
             SoundKitID = soundKitID;
@@ -924,19 +919,12 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(SourceObjectGUID);
-            _worldPacket.WriteUInt32(SoundKitID);
+            _worldPacket.WriteInt32(SoundKitID);
         }
 
         public ObjectGuid SourceObjectGUID;
-        public uint SoundKitID;
-    }
-
-    class OpeningCinematic : ClientPacket
-    {
-        public OpeningCinematic(WorldPacket packet) : base(packet) { }
-
-        public override void Read() { }
-    }
+        public int SoundKitID;
+    }    
 
     class CompleteCinematic : ClientPacket
     {
@@ -1078,20 +1066,6 @@ namespace Game.Networking.Packets
         public ushort AnimKitID;
     }
 
-    class SetMeleeAnimKit : ServerPacket
-    {
-        public SetMeleeAnimKit() : base(ServerOpcodes.SetMeleeAnimKit, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(Unit);
-            _worldPacket.WriteUInt16(AnimKitID);
-        }
-
-        public ObjectGuid Unit;
-        public ushort AnimKitID;
-    }
-
     class SetMovementAnimKit : ServerPacket
     {
         public SetMovementAnimKit() : base(ServerOpcodes.SetMovementAnimKit, ConnectionType.Instance) { }
@@ -1106,6 +1080,20 @@ namespace Game.Networking.Packets
         public ushort AnimKitID;
     }
 
+    class SetMeleeAnimKit : ServerPacket
+    {
+        public SetMeleeAnimKit() : base(ServerOpcodes.SetMeleeAnimKit, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(Unit);
+            _worldPacket.WriteUInt16(AnimKitID);
+        }
+
+        public ObjectGuid Unit;
+        public ushort AnimKitID;
+    }    
+
     class SetPlayHoverAnim : ServerPacket
     {
         public SetPlayHoverAnim() : base(ServerOpcodes.SetPlayHoverAnim, ConnectionType.Instance) { }
@@ -1119,6 +1107,13 @@ namespace Game.Networking.Packets
 
         public ObjectGuid UnitGUID;
         public bool PlayHoverAnim;
+    }
+
+    class OpeningCinematic : ClientPacket
+    {
+        public OpeningCinematic(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
     }
 
     class TogglePvP : ClientPacket
@@ -1220,13 +1215,13 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteUInt32(Threshold);
-            _worldPacket.WriteUInt32(ItemID);
+            _worldPacket.WriteInt32(Threshold);
+            _worldPacket.WriteInt32(ItemID);
         }
 
         public ObjectGuid Guid;
-        public uint ItemID;
-        public uint Threshold;
+        public int ItemID;
+        public int Threshold;
     }
 
     class SetTaxiBenchmarkMode : ClientPacket
@@ -1247,110 +1242,16 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(AreaLightID);
-            _worldPacket.WriteUInt32(OverrideLightID);
-            _worldPacket.WriteUInt32(TransitionMilliseconds);
+            _worldPacket.WriteInt32(AreaLightID);
+            _worldPacket.WriteInt32(OverrideLightID);
+            _worldPacket.WriteInt32(TransitionMilliseconds);
         }
 
-        public uint AreaLightID;
-        public uint TransitionMilliseconds;
-        public uint OverrideLightID;
+        public int AreaLightID;
+        public int TransitionMilliseconds;
+        public int OverrideLightID;
     }
 
-    public class StartTimer : ServerPacket
-    {
-        public StartTimer() : base(ServerOpcodes.StartTimer) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(TotalTime);
-            _worldPacket.WriteUInt32(TimeLeft);
-            _worldPacket.WriteInt32((int)Type);
-        }
-
-        public uint TotalTime;
-        public uint TimeLeft;
-        public TimerType Type;
-    }
-
-    class ConversationLineStarted : ClientPacket
-    {
-        public ObjectGuid ConversationGUID;
-        public uint LineID;
-
-        public ConversationLineStarted(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            ConversationGUID = _worldPacket.ReadPackedGuid();
-            LineID = _worldPacket.ReadUInt32();
-        }
-    }
-
-    class RequestLatestSplashScreen : ClientPacket
-    {
-        public RequestLatestSplashScreen(WorldPacket packet) : base(packet) { }
-
-        public override void Read() { }
-    }
-
-    class SplashScreenShowLatest : ServerPacket
-    {
-        public SplashScreenShowLatest() : base(ServerOpcodes.SplashScreenShowLatest, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(UISplashScreenID);
-        }
-
-        public uint UISplashScreenID;
-    }
-
-    class DisplayToast : ServerPacket
-    {
-        public ulong Quantity;
-        public DisplayToastMethod DisplayToastMethod;
-        public bool Mailed;
-        public DisplayToastType Type = DisplayToastType.Money;
-        public uint QuestID;
-        public bool IsSecondaryResult;
-        public ItemInstance Item;
-        public bool BonusRoll;
-        public int LootSpec;
-        public Gender Gender = Gender.None;
-        public uint CurrencyID;
-
-        public DisplayToast() : base(ServerOpcodes.DisplayToast, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt64(Quantity);
-            _worldPacket.WriteUInt8((byte)DisplayToastMethod);
-            _worldPacket.WriteUInt32(QuestID);
-
-            _worldPacket.WriteBit(Mailed);
-            _worldPacket.WriteBits((byte)Type, 2);
-            _worldPacket.WriteBit(IsSecondaryResult);
-
-            switch (Type)
-            {
-                case DisplayToastType.NewItem:
-                    _worldPacket.WriteBit(BonusRoll);
-                    Item.Write(_worldPacket);
-                    _worldPacket.WriteInt32(LootSpec);
-                    _worldPacket.WriteInt8((sbyte)Gender);
-                    break;
-                case DisplayToastType.NewCurrency:
-                    _worldPacket.WriteUInt32(CurrencyID);
-                    break;
-                default:
-                    break;
-            }
-
-            _worldPacket.FlushBits();
-        }
-    }
-    
     class DisplayGameError : ServerPacket
     {
         public DisplayGameError(GameError error) : base(ServerOpcodes.DisplayGameError)
@@ -1385,7 +1286,7 @@ namespace Game.Networking.Packets
         GameError Error;
         int? Arg;
         int? Arg2;
-    }
+    } 
 
     class AccountMountUpdate : ServerPacket
     {
@@ -1398,15 +1299,15 @@ namespace Game.Networking.Packets
 
             foreach (var (spellId, flags) in Mounts)
             {
-                _worldPacket.WriteUInt32(spellId);
-                _worldPacket.WriteBits(flags, 4);
+                _worldPacket.WriteInt32(spellId);
+                _worldPacket.WriteBits((byte)flags, 4);
             }
 
             _worldPacket.FlushBits();
         }
 
         public bool IsFullUpdate = false;
-        public Dictionary<uint, MountStatusFlags> Mounts = new();
+        public Dictionary<int, MountStatusFlags> Mounts = new();
     }
 
     class MountSetFavorite : ClientPacket
@@ -1433,8 +1334,116 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid SourceGuid;
+    }    
+
+    public class StartTimer : ServerPacket
+    {
+        public StartTimer() : base(ServerOpcodes.StartTimer) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt64(TotalTime);
+            _worldPacket.WriteUInt64(TimeLeft);
+            _worldPacket.WriteInt32((int)Type);
+        }
+
+        public ulong TotalTime;
+        public ulong TimeLeft;
+        public TimerType Type;
     }
-    
+
+    class ConversationLineStarted : ClientPacket
+    {
+        public ConversationLineStarted(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ConversationGUID = _worldPacket.ReadPackedGuid();
+            LineID = _worldPacket.ReadUInt32();
+        }
+        
+        public ObjectGuid ConversationGUID;
+        public uint LineID;
+    }
+
+    class RequestLatestSplashScreen : ClientPacket
+    {
+        public RequestLatestSplashScreen(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    class SplashScreenShowLatest : ServerPacket
+    {
+        public SplashScreenShowLatest() : base(ServerOpcodes.SplashScreenShowLatest, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(UISplashScreenID);
+        }
+
+        public uint UISplashScreenID;
+    }
+
+    class DisplayToast : ServerPacket
+    {
+        public DisplayToast() : base(ServerOpcodes.DisplayToast, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt64(Quantity);
+            _worldPacket.WriteUInt8((byte)DisplayToastMethod);
+            _worldPacket.WriteUInt32(QuestID);
+
+            _worldPacket.WriteBit(Mailed);
+            _worldPacket.WriteBits((byte)Type, 2);
+            _worldPacket.WriteBit(IsSecondaryResult);
+
+            switch (Type)
+            {
+                case DisplayToastType.NewItem:
+                    _worldPacket.WriteBit(BonusRoll);
+                    Item.Write(_worldPacket);
+                    _worldPacket.WriteInt32(LootSpec);
+                    _worldPacket.WriteInt8((sbyte)Gender);
+                    break;
+                case DisplayToastType.NewCurrency:
+                    _worldPacket.WriteUInt32(CurrencyID);
+                    break;
+                default:
+                    break;
+            }
+
+            _worldPacket.FlushBits();
+        }
+        
+        public ulong Quantity;
+        public DisplayToastMethod DisplayToastMethod = DisplayToastMethod.DoNotDisplay;
+        public bool Mailed;
+        public DisplayToastType Type = DisplayToastType.Money;
+        public uint QuestID;
+        public bool IsSecondaryResult;
+        public ItemInstance Item;
+        public bool BonusRoll;
+        public int LootSpec;
+        public Gender Gender = Gender.None;
+        public uint CurrencyID;
+    }
+
+    public class SetMaxWeeklyQuantity : ServerPacket
+    {
+        public SetMaxWeeklyQuantity() : base(ServerOpcodes.SetMaxWeeklyQuantity, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(Type);
+            _worldPacket.WriteUInt32(MaxWeeklyQuantity);
+        }
+
+        public uint MaxWeeklyQuantity;
+        public uint Type;
+    }
+
     //Structs
     struct PhaseShiftDataPhase
     {

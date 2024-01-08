@@ -100,7 +100,7 @@ namespace Game.BattleFields
             {
                 Position towerCannonPos = turret.GetPosition();
                 Creature creature = SpawnCreature(WGNpcs.TowerCannon, towerCannonPos);
-                if (creature)
+                if (creature != null)
                 {
                     CanonList.Add(creature.GetGUID());
                     HideNpc(creature);
@@ -111,7 +111,7 @@ namespace Game.BattleFields
             foreach (var build in WGConst.WGGameObjectBuilding)
             {
                 GameObject go = SpawnGameObject(build.Entry, build.Pos, build.Rot);
-                if (go)
+                if (go != null)
                 {
                     BfWGGameObjectBuilding b = new(this, build.BuildingType, build.WorldState);
                     b.Init(go);
@@ -125,13 +125,13 @@ namespace Game.BattleFields
             foreach (var teleporter in WGConst.WGPortalDefenderData)
             {
                 GameObject go = SpawnGameObject(teleporter.AllianceEntry, teleporter.Pos, teleporter.Rot);
-                if (go)
+                if (go != null)
                 {
                     DefenderPortalList[TeamId.Alliance].Add(go.GetGUID());
                     go.SetRespawnTime((int)(GetDefenderTeam() == TeamId.Alliance ? BattlegroundConst.RespawnImmediately : BattlegroundConst.RespawnOneDay));
                 }
                 go = SpawnGameObject(teleporter.HordeEntry, teleporter.Pos, teleporter.Rot);
-                if (go)
+                if (go != null)
                 {
                     DefenderPortalList[TeamId.Horde].Add(go.GetGUID());
                     go.SetRespawnTime((int)(GetDefenderTeam() == TeamId.Horde ? BattlegroundConst.RespawnImmediately : BattlegroundConst.RespawnOneDay));
@@ -146,7 +146,7 @@ namespace Game.BattleFields
         {
             // Spawn titan relic
             GameObject relic = SpawnGameObject(WGGameObjects.TitanSRelic, WGConst.RelicPos, WGConst.RelicRot);
-            if (relic)
+            if (relic != null)
             {
                 // Update faction of relic, only attacker can click on
                 relic.SetFaction(WGConst.WintergraspFaction[GetAttackerTeam()]);
@@ -167,7 +167,7 @@ namespace Game.BattleFields
             foreach (var guid in CanonList)
             {
                 Creature creature = GetCreature(guid);
-                if (creature)
+                if (creature != null)
                 {
                     ShowNpc(creature, true);
                     creature.SetFaction(WGConst.WintergraspFaction[GetDefenderTeam()]);
@@ -202,7 +202,7 @@ namespace Game.BattleFields
                 {
                     // Kick player in orb room, TODO: offline player ?
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                     {
                         float x, y, z;
                         player.GetPosition(out x, out y, out z);
@@ -244,7 +244,7 @@ namespace Game.BattleFields
             if (!m_titansRelicGUID.IsEmpty())
             {
                 GameObject relic = GetGameObject(m_titansRelicGUID);
-                if (relic)
+                if (relic != null)
                     relic.RemoveFromWorld();
             }
             m_titansRelicGUID.Clear();
@@ -275,7 +275,7 @@ namespace Game.BattleFields
             foreach (var guid in CanonList)
             {
                 Creature creature = GetCreature(guid);
-                if (creature)
+                if (creature != null)
                 {
                     if (!endByTimer)
                         creature.SetFaction(WGConst.WintergraspFaction[GetDefenderTeam()]);
@@ -295,21 +295,21 @@ namespace Game.BattleFields
             foreach (var guid in DefenderPortalList[GetDefenderTeam()])
             {
                 GameObject portal = GetGameObject(guid);
-                if (portal)
+                if (portal != null)
                     portal.SetRespawnTime((int)BattlegroundConst.RespawnImmediately);
             }
 
             foreach (var guid in DefenderPortalList[GetAttackerTeam()])
             {
                 GameObject portal = GetGameObject(guid);
-                if (portal)
+                if (portal != null)
                     portal.SetRespawnTime((int)BattlegroundConst.RespawnOneDay);
             }
 
             foreach (var guid in m_PlayersInWar[GetDefenderTeam()])
             {
                 Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                if (player != null)
                 {
                     player.CastSpell(player, WGSpells.EssenceOfWintergrasp, true);
                     player.CastSpell(player, WGSpells.VictoryReward, true);
@@ -327,7 +327,7 @@ namespace Game.BattleFields
             foreach (var guid in m_PlayersInWar[GetAttackerTeam()])
             {
                 Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                if (player != null)
                     player.CastSpell(player, WGSpells.DefeatReward, true);
             }
 
@@ -336,7 +336,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInWar[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         RemoveAurasFromPlayer(player);
                 }
 
@@ -345,7 +345,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_vehicles[team])
                 {
                     Creature creature = GetCreature(guid);
-                    if (creature)
+                    if (creature != null)
                         if (creature.IsVehicle())
                             creature.DespawnOrUnsummon();
                 }
@@ -360,7 +360,7 @@ namespace Game.BattleFields
                     foreach (var guid in m_players[team])
                     {
                         Player player = Global.ObjAccessor.FindPlayer(guid);
-                        if (player)
+                        if (player != null)
                         {
                             player.RemoveAurasDueToSpell(m_DefenderTeam == TeamId.Alliance ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player.GetGUID());
                             player.AddAura(m_DefenderTeam == TeamId.Horde ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player);
@@ -390,7 +390,7 @@ namespace Game.BattleFields
                 //}
                 default:
                 {
-                    if (player)
+                    if (player != null)
                         player.CompletedAchievement(achievementEntry);
                     break;
                 }
@@ -454,7 +454,8 @@ namespace Game.BattleFields
                     case WGNpcs.Catapult:
                     case WGNpcs.Demolisher:
                     {
-                        if (!creature.ToTempSummon() || creature.ToTempSummon().GetSummonerGUID().IsEmpty() || !Global.ObjAccessor.FindPlayer(creature.ToTempSummon().GetSummonerGUID()))
+                        if (creature.ToTempSummon() == null || creature.ToTempSummon().GetSummonerGUID().IsEmpty() || 
+                            Global.ObjAccessor.FindPlayer(creature.ToTempSummon().GetSummonerGUID()) == null)
                         {
                             creature.DespawnOrUnsummon();
                             return;
@@ -585,7 +586,7 @@ namespace Game.BattleFields
             foreach (var guid in m_PlayersInWar[teamId])
             {
                 Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                if (player != null)
                     if (player.GetDistance2d(unitKilled) < 40.0f)
                         PromotePlayer(player);
             }
@@ -605,7 +606,7 @@ namespace Game.BattleFields
                     killer.RemoveAura(WGSpells.Recruit);
                     killer.CastSpell(killer, WGSpells.Corporal, true);
                     Creature stalker = GetCreature(StalkerGuid);
-                    if (stalker)
+                    if (stalker != null)
                         Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankCorporal, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
                 }
                 else
@@ -618,7 +619,7 @@ namespace Game.BattleFields
                     killer.RemoveAura(WGSpells.Corporal);
                     killer.CastSpell(killer, WGSpells.Lieutenant, true);
                     Creature stalker = GetCreature(StalkerGuid);
-                    if (stalker)
+                    if (stalker != null)
                         Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankFirstLieutenant, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
                 }
                 else
@@ -677,7 +678,7 @@ namespace Game.BattleFields
             if (!player.GetSession().PlayerLogout())
             {
                 Creature vehicle = player.GetVehicleCreatureBase();
-                if (vehicle)   // Remove vehicle of player if he go out.
+                if (vehicle != null)   // Remove vehicle of player if he go out.
                     vehicle.DespawnOrUnsummon();
 
                 RemoveAurasFromPlayer(player);
@@ -738,7 +739,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInWar[GetAttackerTeam()])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         if (player.GetDistance2d(GetGameObject(building.GetGUID())) < 50.0f)
                             player.KilledMonsterCredit(WintergraspQuests.CreditDefendSiege);
                 }
@@ -759,7 +760,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInWar[GetAttackerTeam()])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.RemoveAuraFromStack(WGSpells.TowerControl);
                 }
 
@@ -767,7 +768,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInWar[GetDefenderTeam()])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                     {
                         player.CastSpell(player, WGSpells.TowerControl, true);
                         player.KilledMonsterCredit(WintergraspQuests.CreditTowersDestroyed);
@@ -795,12 +796,12 @@ namespace Game.BattleFields
 
         public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker)
         {
-            if (!obj || !IsWarTime())
+            if (obj == null || !IsWarTime())
                 return;
 
             // We handle only gameobjects here
             GameObject go = obj.ToGameObject();
-            if (!go)
+            if (go == null)
                 return;
 
             // On click on titan relic
@@ -809,7 +810,7 @@ namespace Game.BattleFields
                 GameObject relic = GetRelic();
                 if (CanInteractWithRelic())
                     EndBattle(false);
-                else if (relic)
+                else if (relic != null)
                     relic.SetRespawnTime(0);
             }
 
@@ -819,7 +820,7 @@ namespace Game.BattleFields
                 if (go.GetGUID() == building.GetGUID())
                 {
                     GameObject buildingGo = GetGameObject(building.GetGUID());
-                    if (buildingGo)
+                    if (buildingGo != null)
                     {
                         if (buildingGo.GetGoInfo().DestructibleBuilding.DamagedEvent == eventId)
                             building.Damaged();
@@ -875,7 +876,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_players[m_tenacityTeam])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         if (player.GetLevel() >= m_MinLevel)
                             player.RemoveAurasDueToSpell(WGSpells.Tenacity);
                 }
@@ -883,7 +884,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_vehicles[m_tenacityTeam])
                 {
                     Creature creature = GetCreature(guid);
-                    if (creature)
+                    if (creature != null)
                         creature.RemoveAurasDueToSpell(WGSpells.TenacityVehicle);
                 }
             }
@@ -909,14 +910,14 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInWar[m_tenacityTeam])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SetAuraStack(WGSpells.Tenacity, player, (uint)newStack);
                 }
 
                 foreach (var guid in m_vehicles[m_tenacityTeam])
                 {
                     Creature creature = GetCreature(guid);
-                    if (creature)
+                    if (creature != null)
                         creature.SetAuraStack(WGSpells.TenacityVehicle, creature, (uint)newStack);
                 }
 
@@ -925,14 +926,14 @@ namespace Game.BattleFields
                     foreach (var guid in m_PlayersInWar[m_tenacityTeam])
                     {
                         Player player = Global.ObjAccessor.FindPlayer(guid);
-                        if (player)
+                        if (player != null)
                             player.CastSpell(player, buff_honor, true);
                     }
 
                     foreach (var guid in m_vehicles[m_tenacityTeam])
                     {
                         Creature creature = GetCreature(guid);
-                        if (creature)
+                        if (creature != null)
                             creature.CastSpell(creature, buff_honor, true);
                     }
                 }
@@ -1006,7 +1007,7 @@ namespace Game.BattleFields
             }
 
             GameObject build = _wg.GetGameObject(_buildGUID);
-            if (build)
+            if (build != null)
             {
                 // Rebuild gameobject
                 if (build.IsDestructibleBuilding())
@@ -1015,7 +1016,7 @@ namespace Game.BattleFields
                     if (build.GetEntry() == WGGameObjects.VaultGate)
                     {
                         GameObject go = build.FindNearestGameObject(WGGameObjects.KeepCollisionWall, 50.0f);
-                        if (go)
+                        if (go != null)
                             go.SetGoState(GameObjectState.Active);
                     }
 
@@ -1056,14 +1057,14 @@ namespace Game.BattleFields
             foreach (var guid in m_CreatureTopList[_wg.GetAttackerTeam()])
             {
                 Creature creature = _wg.GetCreature(guid);
-                if (creature)
+                if (creature != null)
                     _wg.HideNpc(creature);
             }
 
             foreach (var guid in m_TurretTopList)
             {
                 Creature creature = _wg.GetCreature(guid);
-                if (creature)
+                if (creature != null)
                     _wg.HideNpc(creature);
             }
 
@@ -1092,16 +1093,15 @@ namespace Game.BattleFields
                     _wg.UpdatedDestroyedTowerCount(_teamControl);
                     break;
                 case WGGameObjectBuildingType.DoorLast:
-                    GameObject build = _wg.GetGameObject(_buildGUID);
-                    if (build)
+                    if (_wg.GetGameObject(_buildGUID) is GameObject build)
                     {
                         GameObject go = build.FindNearestGameObject(WGGameObjects.KeepCollisionWall, 50.0f);
-                        if (go)
+                        if (go != null)
                             go.SetGoState(GameObjectState.Active);
                     }
                     _wg.SetRelicInteractible(true);
-                    if (_wg.GetRelic())
-                        _wg.GetRelic().RemoveFlag(GameObjectFlags.InUse | GameObjectFlags.NotSelectable);
+                    if (_wg.GetRelic() is GameObject relic)
+                        relic.RemoveFlag(GameObjectFlags.InUse | GameObjectFlags.NotSelectable);
                     else
                         Log.outError(LogFilter.Server, "BattlefieldWG: Titan Relic not found.");
                     break;
@@ -1112,7 +1112,7 @@ namespace Game.BattleFields
 
         public void Init(GameObject go)
         {
-            if (!go)
+            if (go == null)
                 return;
 
             // GameObject associated to object
@@ -1206,11 +1206,11 @@ namespace Game.BattleFields
                 foreach (var gobData in WGConst.AttackTowers[towerId - 4].GameObject)
                 {
                     GameObject goHorde = _wg.SpawnGameObject(gobData.HordeEntry, gobData.Pos, gobData.Rot);
-                    if (goHorde)
+                    if (goHorde != null)
                         m_GameObjectList[TeamId.Horde].Add(goHorde.GetGUID());
 
                     GameObject goAlliance = _wg.SpawnGameObject(gobData.AllianceEntry, gobData.Pos, gobData.Rot);
-                    if (goAlliance)
+                    if (goAlliance != null)
                         m_GameObjectList[TeamId.Alliance].Add(goAlliance.GetGUID());
                 }
 
@@ -1218,11 +1218,11 @@ namespace Game.BattleFields
                 foreach (var creatureData in WGConst.AttackTowers[towerId - 4].CreatureBottom)
                 {
                     Creature creature = _wg.SpawnCreature(creatureData.HordeEntry, creatureData.Pos);
-                    if (creature)
+                    if (creature != null)
                         m_CreatureBottomList[TeamId.Horde].Add(creature.GetGUID());
 
                     creature = _wg.SpawnCreature(creatureData.AllianceEntry, creatureData.Pos);
-                    if (creature)
+                    if (creature != null)
                         m_CreatureBottomList[TeamId.Alliance].Add(creature.GetGUID());
                 }
             }
@@ -1235,7 +1235,7 @@ namespace Game.BattleFields
                 foreach (var turretPos in WGConst.TowerCannon[towerId].TowerCannonBottom)
                 {
                     Creature turret = _wg.SpawnCreature(WGNpcs.TowerCannon, turretPos);
-                    if (turret)
+                    if (turret != null)
                     {
                         m_TowerCannonBottomList.Add(turret.GetGUID());
                         switch (go.GetEntry())
@@ -1260,7 +1260,7 @@ namespace Game.BattleFields
                 foreach (var towerCannonPos in WGConst.TowerCannon[towerId].TurretTop)
                 {
                     Creature turret = _wg.SpawnCreature(WGNpcs.TowerCannon, towerCannonPos);
-                    if (turret)
+                    if (turret != null)
                     {
                         m_TurretTopList.Add(turret.GetGUID());
                         switch (go.GetEntry())
@@ -1289,42 +1289,42 @@ namespace Game.BattleFields
             foreach (var guid in m_CreatureTopList[_wg.GetDefenderTeam()])
             {
                 Creature creature = _wg.GetCreature(guid);
-                if (creature)
+                if (creature != null)
                     _wg.HideNpc(creature);
             }
 
             foreach (var guid in m_CreatureTopList[_wg.GetAttackerTeam()])
             {
                 Creature creature = _wg.GetCreature(guid);
-                if (creature)
+                if (creature != null)
                     _wg.ShowNpc(creature, true);
             }
 
             foreach (var guid in m_CreatureBottomList[_wg.GetDefenderTeam()])
             {
                 Creature creature = _wg.GetCreature(guid);
-                if (creature)
+                if (creature != null)
                     _wg.HideNpc(creature);
             }
 
             foreach (var guid in m_CreatureBottomList[_wg.GetAttackerTeam()])
             {
                 Creature creature = _wg.GetCreature(guid);
-                if (creature)
+                if (creature != null)
                     _wg.ShowNpc(creature, true);
             }
 
             foreach (var guid in m_GameObjectList[_wg.GetDefenderTeam()])
             {
                 GameObject obj = _wg.GetGameObject(guid);
-                if (obj)
+                if (obj != null)
                     obj.SetRespawnTime(Time.Day);
             }
 
             foreach (var guid in m_GameObjectList[_wg.GetAttackerTeam()])
             {
                 GameObject obj = _wg.GetGameObject(guid);
-                if (obj)
+                if (obj != null)
                     obj.SetRespawnTime(0);
             }
         }
@@ -1334,10 +1334,10 @@ namespace Game.BattleFields
             foreach (var guid in m_TowerCannonBottomList)
             {
                 Creature creature = _wg.GetCreature(guid);
-                if (creature)
+                if (creature != null)
                 {
                     GameObject build = _wg.GetGameObject(_buildGUID);
-                    if (build)
+                    if (build != null)
                     {
                         if (disable)
                             _wg.HideNpc(creature);
@@ -1369,10 +1369,10 @@ namespace Game.BattleFields
             foreach (var guid in m_TurretTopList)
             {
                 Creature creature = _wg.GetCreature(guid);
-                if (creature)
+                if (creature != null)
                 {
                     GameObject build = _wg.GetGameObject(_buildGUID);
-                    if (build)
+                    if (build != null)
                     {
                         if (disable)
                             _wg.HideNpc(creature);
@@ -1575,7 +1575,7 @@ namespace Game.BattleFields
 
         public override void JustDied(Unit killer)
         {
-            if (!killer || !killer.IsPlayer())
+            if (killer == null || !killer.IsPlayer())
                 return;
 
             BattlefieldWG wintergrasp = (BattlefieldWG)Global.BattleFieldMgr.GetBattlefieldByBattleId(killer.GetMap(), BattlefieldIds.WG);

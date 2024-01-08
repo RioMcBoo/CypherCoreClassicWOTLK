@@ -6,7 +6,7 @@ using System;
 namespace Framework.Constants
 {
     [Flags]
-    public enum LfgRoles
+    public enum LfgRoles : byte
     {
         None = 0x00,
         Leader = 0x01,
@@ -88,6 +88,7 @@ namespace Framework.Constants
         EnableRaidBrowser = 0x02,
     }
 
+    [Flags]
     public enum LfgFlags
     {
         Unk1 = 0x1,
@@ -114,7 +115,7 @@ namespace Framework.Constants
         Success = 2
     }
 
-    public enum LfgTeleportResult
+    public enum LfgTeleportResult : byte
     {
         // 7 = "You Can'T Do That Right Now" | 5 = No Client Reaction
         None = 0,      // Internal Use

@@ -800,7 +800,7 @@ namespace Game.Entities
 
     public struct VehicleAccessory
     {
-        public VehicleAccessory(uint entry, sbyte seatId, bool isMinion, byte summonType, uint summonTime)
+        public VehicleAccessory(int entry, sbyte seatId, bool isMinion, byte summonType, uint summonTime)
         {
             AccessoryEntry = entry;
             IsMinion = isMinion;
@@ -808,7 +808,7 @@ namespace Game.Entities
             SeatId = seatId;
             SummonedType = summonType;
         }
-        public uint AccessoryEntry;
+        public int AccessoryEntry;
         public bool IsMinion;
         public uint SummonTime;
         public sbyte SeatId;
@@ -829,14 +829,14 @@ namespace Game.Entities
         public float ExitParameterO;
         public VehicleExitParameters ExitParameter;
 
-        public VehicleSeatAddon(float orientatonOffset, float exitX, float exitY, float exitZ, float exitO, byte param)
+        public VehicleSeatAddon(float orientatonOffset, float exitX, float exitY, float exitZ, float exitO, VehicleExitParameters param)
         {
             SeatOrientationOffset = orientatonOffset;
             ExitParameterX = exitX;
             ExitParameterY = exitY;
             ExitParameterZ = exitZ;
             ExitParameterO = exitO;
-            ExitParameter = (VehicleExitParameters)param;
+            ExitParameter = param;
         }
     }
 }
