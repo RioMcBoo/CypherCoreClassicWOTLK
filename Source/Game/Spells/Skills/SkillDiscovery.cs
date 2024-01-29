@@ -184,7 +184,12 @@ namespace Game.Spells
             return false;
         }
 
-        public static int GetSkillDiscoverySpell(int skillId, int spellId, Player player)
+        public static int GetSkillDiscoverySpell(SkillType skillId, int spellId, Player player)
+        {
+            return GetSkillDiscoverySpell((int)skillId, spellId, player);
+        }
+
+            public static int GetSkillDiscoverySpell(int skillId, int spellId, Player player)
         {
             int skillvalue = skillId != 0 ? player.GetSkillValue(skillId) : 0;
 

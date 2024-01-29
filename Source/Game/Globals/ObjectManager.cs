@@ -6367,7 +6367,7 @@ namespace Game
                         var raceMask = rcInfo.RaceMask;
                         for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (raceMask.HasRace(raceIndex))
+                            if (raceMask == RaceMask.None || raceMask.HasRace(raceIndex))
                             {
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
