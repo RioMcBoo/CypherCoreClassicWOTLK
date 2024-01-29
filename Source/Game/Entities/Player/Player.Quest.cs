@@ -2046,7 +2046,7 @@ namespace Game.Entities
 
                 if (quest.IsTurnIn() && CanTakeQuest(quest, false) && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly())
                 {
-                    if (GetLevel() <= (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
+                    if (GetLevel() > (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
                         result |= QuestGiverStatus.RepeatableTurnin;
                     else
                         result |= QuestGiverStatus.TrivialRepeatableTurnin;
@@ -2068,7 +2068,7 @@ namespace Game.Entities
                     {
                         if (SatisfyQuestLevel(quest, false))
                         {
-                            bool isTrivial = GetLevel() <= (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff));
+                            bool isTrivial = GetLevel() > (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff));
                             if (quest.IsImportant())
                                 result |= isTrivial ? QuestGiverStatus.TrivialImportantQuest : QuestGiverStatus.ImportantQuest;
                             else if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
