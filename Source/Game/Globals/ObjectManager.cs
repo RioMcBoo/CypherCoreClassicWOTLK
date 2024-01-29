@@ -5744,99 +5744,6 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} access requirement definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
-
-        public void LoadInstanceEncounters()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            //                                           0         1            2                3
-            using var result = DB.World.Query("SELECT entry, creditType, creditEntry, lastEncounterDungeon FROM instance_encounters");
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 instance encounters, table is empty!");
-                return;
-            }
-
-            uint count = 0;
-            Dictionary<int, (int, DungeonEncounterRecord)> dungeonLastBosses = new();
-            do
-            {
-                int entry = result.Read<int>(0);
-                EncounterCreditType creditType = (EncounterCreditType)result.Read<byte>(1);
-                int creditEntry = result.Read<int>(2);
-                int lastEncounterDungeon = result.Read<int>(3);
-                DungeonEncounterRecord dungeonEncounter = CliDB.DungeonEncounterStorage.LookupByKey(entry);
-                if (dungeonEncounter == null)
-                {
-                    Log.outError(LogFilter.Sql, "Table `instance_encounters` has an invalid encounter id {0}, skipped!", entry);
-                    continue;
-                }
-
-                if (lastEncounterDungeon != 0 && Global.LFGMgr.GetLFGDungeonEntry(lastEncounterDungeon) == 0)
-                {
-                    Log.outError(LogFilter.Sql, "Table `instance_encounters` has an encounter {0} ({1}) marked as final for invalid dungeon id {2}, skipped!",
-                        entry, dungeonEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()], lastEncounterDungeon);
-                    continue;
-                }
-
-                var pair = dungeonLastBosses.LookupByKey(lastEncounterDungeon);
-                if (lastEncounterDungeon != 0)
-                {
-                    if (pair != default)
-                    {
-                        Log.outError(LogFilter.Sql, "Table `instance_encounters` specified encounter {0} ({1}) as last encounter but {2} ({3}) is already marked as one, skipped!",
-                            entry, dungeonEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()], pair.Item1, pair.Item2.Name[Global.WorldMgr.GetDefaultDbcLocale()]);
-                        continue;
-                    }
-
-                    dungeonLastBosses[lastEncounterDungeon] = (entry, dungeonEncounter);
-                }
-
-                switch (creditType)
-                {
-                    case EncounterCreditType.KillCreature:
-                    {
-                        CreatureTemplate creatureInfo = GetCreatureTemplate(creditEntry);
-                        if (creatureInfo == null)
-                        {
-                            Log.outError(LogFilter.Sql, "Table `instance_encounters` has an invalid creature (entry {0}) linked to the encounter {1} ({2}), skipped!",
-                                creditEntry, entry, dungeonEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]);
-                            continue;
-                        }
-                        creatureInfo.FlagsExtra |= CreatureFlagsExtra.DungeonBoss;
-                        break;
-                    }
-                    case EncounterCreditType.CastSpell:
-                        if (!Global.SpellMgr.HasSpellInfo(creditEntry, Difficulty.None))
-                        {
-                            Log.outError(LogFilter.Sql, "Table `instance_encounters` has an invalid spell (entry {0}) linked to the encounter {1} ({2}), skipped!",
-                                creditEntry, entry, dungeonEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]);
-                            continue;
-                        }
-                        break;
-                    default:
-                        Log.outError(LogFilter.Sql, "Table `instance_encounters` has an invalid credit Type ({0}) for encounter {1} ({2}), skipped!",
-                            creditType, entry, dungeonEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]);
-                        continue;
-                }
-
-                if (dungeonEncounter.DifficultyID == 0)
-                {
-                    foreach (var difficulty in CliDB.DifficultyStorage.Values)
-                    {
-                        if (Global.DB2Mgr.GetMapDifficultyData(dungeonEncounter.MapID, difficulty.Id) != null)
-                            _dungeonEncounterStorage.Add((dungeonEncounter.MapID, difficulty.Id), new DungeonEncounter(dungeonEncounter, creditType, creditEntry, lastEncounterDungeon));
-                    }
-                }
-                else
-                    _dungeonEncounterStorage.Add((dungeonEncounter.MapID, dungeonEncounter.DifficultyID), new DungeonEncounter(dungeonEncounter, creditType, creditEntry, lastEncounterDungeon));
-
-                ++count;
-            } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} instance encounters in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
-        }
-
         public void LoadSpawnGroupTemplates()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -6145,11 +6052,6 @@ namespace Game
             }
             
             return false;
-        }
-
-        public List<DungeonEncounter> GetDungeonEncounterList(int mapId, Difficulty difficulty)
-        {
-            return _dungeonEncounterStorage.LookupByKey((mapId, difficulty));
         }
 
         public bool IsTransportMap(int mapId) { return _transportMaps.Contains((ushort)mapId); }
@@ -11656,7 +11558,6 @@ namespace Game
         List<int> _tavernAreaTriggerStorage = new();
         Dictionary<int, AreaTriggerStruct> _areaTriggerStorage = new();
         Dictionary<(int, Difficulty), AccessRequirement> _accessRequirementStorage = new();
-        MultiMap<(int,Difficulty), DungeonEncounter> _dungeonEncounterStorage = new();
         Dictionary<int, WorldSafeLocsEntry> _worldSafeLocs = new();
 
         Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new();
@@ -12191,22 +12092,6 @@ namespace Game
         public float target_Y;
         public float target_Z;
         public float target_Orientation;
-    }
-
-    public class DungeonEncounter
-    {
-        public DungeonEncounter(DungeonEncounterRecord _dbcEntry, EncounterCreditType _creditType, int _creditEntry, int _lastEncounterDungeon)
-        {
-            dbcEntry = _dbcEntry;
-            creditType = _creditType;
-            creditEntry = _creditEntry;
-            lastEncounterDungeon = _lastEncounterDungeon;
-        }
-
-        public DungeonEncounterRecord dbcEntry;
-        public EncounterCreditType creditType;
-        public int creditEntry;
-        public int lastEncounterDungeon;
     }
 
     public class MailLevelReward
