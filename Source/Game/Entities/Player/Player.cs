@@ -4000,6 +4000,20 @@ namespace Game.Entities
             int fatigueTimer = (int)MirrorTimerType.Fatigue;
             int fireTimer = (int)MirrorTimerType.Fire;
 
+            int getEnvironmentalDamage(EnviromentalDamage damageType)
+            {
+                byte damagePercent = 10;
+                if (damageType == EnviromentalDamage.Drowning || damageType == EnviromentalDamage.Exhausted)
+                    damagePercent *= 2;
+
+                int damage = (int)(GetMaxHealth() * damagePercent / 100);
+
+                // Randomize damage
+                damage += RandomHelper.IRand(0, (int)Math.Pow(10, Math.Max(0, Math.Log10(damage) - 1)));
+
+                return damage;
+            }
+
             // In water
             if (m_MirrorTimerFlags.HasAnyFlag(PlayerUnderwaterState.InWater))
             {
@@ -4017,8 +4031,7 @@ namespace Game.Entities
                     {
                         m_MirrorTimer[breathTimer] += 1 * Time.InMilliseconds;
                         // Calculate and deal damage
-                        // @todo Check this formula
-                        int damage = (int)(GetMaxHealth() / 5 + RandomHelper.URand(0, GetLevel() - 1));
+                        int damage = getEnvironmentalDamage(EnviromentalDamage.Drowning);
                         EnvironmentalDamage(EnviromentalDamage.Drowning, damage);
                     }
                     else if (!m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InWater))      // Update time in client if need
@@ -4054,7 +4067,7 @@ namespace Game.Entities
                         m_MirrorTimer[fatigueTimer] += 1 * Time.InMilliseconds;
                         if (IsAlive())                                            // Calculate and deal damage
                         {
-                            int damage = (int)(GetMaxHealth() / 5 + RandomHelper.URand(0, GetLevel() - 1));
+                            int damage = getEnvironmentalDamage(EnviromentalDamage.Exhausted);
                             EnvironmentalDamage(EnviromentalDamage.Exhausted, damage);
                         }
                         else if (HasPlayerFlag(PlayerFlags.Ghost))       // Teleport ghost to graveyard
@@ -4086,8 +4099,7 @@ namespace Game.Entities
                     {
                         m_MirrorTimer[fireTimer] += 1 * Time.InMilliseconds;
                         // Calculate and deal damage
-                        // @todo Check this formula
-                        int damage = RandomHelper.IRand(600, 700);
+                        int damage = getEnvironmentalDamage(EnviromentalDamage.Lava);
                         if (m_MirrorTimerFlags.HasAnyFlag(PlayerUnderwaterState.InLava))
                             EnvironmentalDamage(EnviromentalDamage.Lava, damage);
                         // need to skip Slime damage in Undercity,
