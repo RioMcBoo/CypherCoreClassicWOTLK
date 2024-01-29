@@ -4892,7 +4892,6 @@ namespace Game.Maps
             }
 
             InstanceLockData lockData = i_instanceLock.GetInstanceInitializationData();
-            i_data.SetCompletedEncountersMask(lockData.CompletedEncountersMask);
             i_data.SetEntranceLocation(lockData.EntranceWorldSafeLocId);
             if (!lockData.Data.IsEmpty())
             {

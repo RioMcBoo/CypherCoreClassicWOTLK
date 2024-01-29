@@ -383,6 +383,8 @@ namespace Game.Maps
                             {
                                 DoUpdateCriteria(CriteriaType.DefeatDungeonEncounter, dungeonEncounter.Id);
                                 SendBossKillCredit(dungeonEncounter.Id);
+                                if (dungeonEncounter.CompleteWorldStateID != 0)
+                                    DoUpdateWorldState((uint)dungeonEncounter.CompleteWorldStateID, 1);
                             }
 
                             instance.DoOnPlayers(player => player.AtEndOfEncounter(EncounterType.DungeonEncounter));
@@ -448,8 +450,14 @@ namespace Game.Maps
                 // in loot-based lockouts instance can be loaded with later boss marked as killed without preceding bosses
                 // but we still need to have them alive
                 for (int i = 0; i < bosses.Count; ++i)
+                {
                     if (bosses[i].state == EncounterState.Done && !CheckRequiredBosses(i))
                         bosses[i].state = EncounterState.NotStarted;
+
+                    var dungeonEncounter = bosses[i].GetDungeonEncounterForDifficulty(instance.GetDifficultyID());
+                    if (dungeonEncounter != null && dungeonEncounter.CompleteWorldStateID != 0)
+                        DoUpdateWorldState((uint)dungeonEncounter.CompleteWorldStateID, bosses[i].state == EncounterState.Done ? 1 : 0);
+                }
 
                 UpdateSpawnGroups();
                 AfterDataLoad();
@@ -810,7 +818,8 @@ namespace Game.Maps
             {
                 if (encounter.creditType == type && encounter.creditEntry == creditEntry)
                 {
-                    completedEncounters |= (1u << encounter.dbcEntry.Bit);
+                    if (encounter.dbcEntry.CompleteWorldStateID != 0)
+                        DoUpdateWorldState((uint)encounter.dbcEntry.CompleteWorldStateID, 1);
 
                     if (encounter.lastEncounterDungeon != 0)
                     {
@@ -836,11 +845,6 @@ namespace Game.Maps
                         }
                 }
             }
-        }
-
-        public void SetCompletedEncountersMask(uint newMask)
-        {
-            completedEncounters = newMask;
         }
 
         void UpdatePhasing()
@@ -930,8 +934,6 @@ namespace Game.Maps
 
         public virtual bool CheckRequiredBosses(int bossId, Player player = null) { return true; }
 
-        public uint GetCompletedEncounterMask() { return completedEncounters; }
-
         // Sets a temporary entrance that does not get saved to db
         public void SetTemporaryEntranceLocation(int worldSafeLocationId) { _temporaryEntranceId = worldSafeLocationId; }
 
@@ -979,7 +981,6 @@ namespace Game.Maps
         Dictionary<int, int> _creatureInfo = new();
         Dictionary<int, int> _gameObjectInfo = new();
         Dictionary<int, ObjectGuid> _objectGuids = new();
-        uint completedEncounters; // DEPRECATED, REMOVE
         List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new();
         List<int> _activatedAreaTriggers = new();
         int _entranceId;
