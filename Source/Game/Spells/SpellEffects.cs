@@ -2596,7 +2596,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.SummonObjectWild)]
         void EffectSummonObjectWild()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
             WorldObject target = focusObject;
@@ -3236,7 +3236,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.SummonObjectSlot1)]
         void EffectSummonObject()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
@@ -4106,7 +4106,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.TransDoor)]
         void EffectTransmitted()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
@@ -5099,7 +5099,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.CreateAreaTrigger)]
         void EffectCreateAreaTrigger()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
@@ -5169,7 +5169,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.CreateConversation)]
         void EffectCreateConversation()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
@@ -5461,7 +5461,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.CreateSceneObject)]
         void EffectCreateSceneObject()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
@@ -5480,7 +5480,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.CreatePersonalSceneObject)]
         void EffectCreatePrivateSceneObject()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
@@ -5586,7 +5586,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.CreatePrivateConversation)]
         void EffectCreatePrivateConversation()
         {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+            if (effectHandleMode != SpellEffectHandleMode.LaunchTarget)
                 return;
 
             if (unitTarget.GetTypeId() != TypeId.Player)
