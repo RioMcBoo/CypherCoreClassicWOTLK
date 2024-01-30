@@ -4303,7 +4303,7 @@ namespace Game.Spells
                 return;
 
             var skillid = (SkillType)effectInfo.MiscValue;
-            if (effectInfo.Effect == SpellEffectName.Skill && playerTarget.GetSkillStep(skillid) >= damage)
+            if (playerTarget.GetSkillStep(skillid) >= damage)
                 return;
 
             var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, playerTarget.GetRace(), playerTarget.GetClass());
