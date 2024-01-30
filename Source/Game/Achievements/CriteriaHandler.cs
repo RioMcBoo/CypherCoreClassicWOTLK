@@ -2733,7 +2733,7 @@ namespace Game.Achievements
                             break;
                         case 123: // Shadowlands Season 1 End
                                   // timestamp = unknown
-                            break; ;
+                            break;
                         case 149: // Shadowlands Season 2 End
                                   // timestamp = unknown
                             break;

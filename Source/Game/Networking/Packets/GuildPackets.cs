@@ -5,10 +5,8 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
 using Game.Miscellaneous;
-using Google.Protobuf;
 using System;
 using System.Collections.Generic;
-using static Game.AI.SmartAction;
 
 namespace Game.Networking.Packets
 {
