@@ -3058,7 +3058,7 @@ namespace Game
             if (disallowedUnitFlags3 != 0)
             {
                 Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) " +
-                    $"with disallowed `unit_flags2` {disallowedUnitFlags3} [{(uint)disallowedUnitFlags3}], removing incorrect flag.");
+                    $"with disallowed `unit_flags3` {disallowedUnitFlags3} [{(uint)disallowedUnitFlags3}], removing incorrect flag.");
                 cInfo.UnitFlags3 &= UnitFlags3.Allowed;
             }
 
