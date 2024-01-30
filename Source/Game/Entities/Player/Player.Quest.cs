@@ -2478,7 +2478,8 @@ namespace Game.Entities
                     {
                         if (IsQuestObjectiveProgressBarComplete(logSlot, quest))
                         {
-                            var progressBarObjective = quest.Objectives.Find(otherObjective => otherObjective.Type == QuestObjectiveType.ProgressBar && !otherObjective.Flags.HasAnyFlag(QuestObjectiveFlags.PartOfProgressBar));
+                            var progressBarObjective = quest.Objectives.Find(otherObjective => 
+                                otherObjective.Type == QuestObjectiveType.ProgressBar && !otherObjective.Flags.HasAnyFlag(QuestObjectiveFlags.PartOfProgressBar));
                             if (progressBarObjective != null)
                                 SendQuestUpdateAddCreditSimple(progressBarObjective);
 
@@ -2503,9 +2504,12 @@ namespace Game.Entities
                             updateZoneAuras = true;
                     }
 
-                    if (objectiveIsNowComplete && CanCompleteQuest(questId, objective.Id))
-                        CompleteQuest(questId);
-                    else if (objectiveStatusData.QuestStatusPair.Status.Status == QuestStatus.Complete)
+                    if (objectiveIsNowComplete)
+                    {
+                        if (CanCompleteQuest(questId, objective.Id))
+                            CompleteQuest(questId);
+                    }
+                    else if (!objective.Flags.HasAnyFlag(QuestObjectiveFlags.Optional) && objectiveStatusData.QuestStatusPair.Status.Status == QuestStatus.Complete)
                         IncompleteQuest(questId);
                 }
             }
