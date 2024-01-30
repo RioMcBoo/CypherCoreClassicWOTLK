@@ -1591,9 +1591,9 @@ namespace Game.Spells
 
                             TempSummonType summonType = TempSummonType.TimedDespawn;
                             if (duration == TimeSpan.Zero)
-                                    summonType = TempSummonType.DeadDespawn;
+                                summonType = TempSummonType.DeadDespawn;
                             else if (duration == TimeSpan.FromMilliseconds(-1))
-                                    summonType = TempSummonType.ManualDespawn;
+                                summonType = TempSummonType.ManualDespawn;
 
                                 for (int count = 0; count < numSummons; ++count)
                                 {
@@ -1946,7 +1946,7 @@ namespace Game.Spells
             if (damage < 1)
                 return;
 
-            var skillid = (SkillType)effectInfo.MiscValue;
+            var skillid = (SkillType)effectInfo.MiscValue;            
 
             SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, playerTarget.GetRace(), playerTarget.GetClass());
             if (rcEntry == null)
@@ -4303,7 +4303,7 @@ namespace Game.Spells
                 return;
 
             var skillid = (SkillType)effectInfo.MiscValue;
-            if (playerTarget.GetSkillStep(skillid) >= damage)
+            if (effectInfo.Effect == SpellEffectName.Skill && playerTarget.GetSkillStep(skillid) >= damage)
                 return;
 
             var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, playerTarget.GetRace(), playerTarget.GetClass());

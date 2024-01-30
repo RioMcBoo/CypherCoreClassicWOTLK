@@ -109,6 +109,11 @@ namespace Game.Entities
             return skillInfo.SkillRank[skillStatusData.Pos];
         }
 
+        public ushort GetSkillStep(int skill)
+        {
+            return GetSkillStep((SkillType)skill);
+        }
+
         public ushort GetSkillStep(SkillType skill)
         {
             if (skill == 0)
