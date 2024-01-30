@@ -5004,7 +5004,7 @@ namespace Game.Spells
             if (!target.IsAlive())
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo()))
+            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5132,7 +5132,7 @@ namespace Game.Spells
             if (!target.IsAlive())
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo()))
+            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5322,7 +5322,7 @@ namespace Game.Spells
             if (caster == null || !caster.IsAlive() || !target.IsAlive() || target.GetPowerType() != powerType)
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo()))
+            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5440,7 +5440,7 @@ namespace Game.Spells
             if (caster == null || !target.IsAlive() || target.GetPowerType() != powerType)
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo()))
+            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5566,7 +5566,7 @@ namespace Game.Spells
         {
             Unit target = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
-            if (triggerTarget.HasUnitState(UnitState.Isolated) || triggerTarget.IsImmunedToDamage(GetSpellInfo()))
+            if (triggerTarget.HasUnitState(UnitState.Isolated) || triggerTarget.IsImmunedToDamage(GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(triggerTarget, target);
                 return;
