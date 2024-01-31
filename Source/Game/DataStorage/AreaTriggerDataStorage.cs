@@ -203,9 +203,15 @@ namespace Game.DataStorage
                             if (createProperties.Shape.PolygonDatas.Height <= 0.0f)
                                 createProperties.Shape.PolygonDatas.Height = 1.0f;
 
-                        createProperties.PolygonVertices = verticesByCreateProperties[createProperties.Id];
-                        createProperties.PolygonVerticesTarget = verticesTargetByCreateProperties[createProperties.Id];
-                        createProperties.SplinePoints = splinesByCreateProperties[createProperties.Id];
+                    createProperties.PolygonVertices = verticesByCreateProperties[createProperties.Id];
+                    createProperties.PolygonVerticesTarget = verticesTargetByCreateProperties[createProperties.Id];
+                    if (!createProperties.PolygonVerticesTarget.Empty() && createProperties.PolygonVertices.Count != createProperties.PolygonVerticesTarget.Count)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_polygon_vertex` has invalid target vertices, either all or none vertices must have a corresponding target vertex (AreaTriggerCreatePropertiesId: {createProperties.Id}).");
+                        createProperties.PolygonVerticesTarget.Clear();
+                    }
+
+                    createProperties.SplinePoints = splinesByCreateProperties[createProperties.Id];
 
                         _areaTriggerCreateProperties[createProperties.Id] = createProperties;
                     }
