@@ -24,7 +24,7 @@ namespace Game.Movement
             _navMeshQuery = null;
             Log.outDebug(LogFilter.Maps, "PathGenerator:PathGenerator for {0}", _source.GetGUID().ToString());
 
-            uint mapId = PhasingHandler.GetTerrainMapId(_source.GetPhaseShift(), _source.GetMapId(), _source.GetMap().GetTerrain(), _source.GetPositionX(), _source.GetPositionY());
+            int mapId = PhasingHandler.GetTerrainMapId(_source.GetPhaseShift(), _source.GetMapId(), _source.GetMap().GetTerrain(), _source.GetPositionX(), _source.GetPositionY());
             if (Global.DisableMgr.IsPathfindingEnabled(_source.GetMapId()))
             {
                 _navMeshQuery = Global.MMapMgr.GetNavMeshQuery(mapId, _source.GetMapId(), _source.GetInstanceId());
@@ -868,6 +868,9 @@ namespace Game.Movement
 
         void UpdateFilter()
         {
+            _filter.setIncludeFlags((ushort)(_filter.getIncludeFlags() | _source.GetMap().GetForceEnabledNavMeshFilterFlags()));
+            _filter.setExcludeFlags((ushort)(_filter.getExcludeFlags() | _source.GetMap().GetForceDisabledNavMeshFilterFlags()));
+
             // allow creatures to cheat and use different movement types if they are moved
             // forcefully into terrain they can't normally move in
             Unit _sourceUnit = _source.ToUnit();

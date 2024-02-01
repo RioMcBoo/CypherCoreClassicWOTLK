@@ -3218,6 +3218,17 @@ namespace Game.Maps
 
         public TerrainInfo GetTerrain() { return m_terrain; }
 
+        // custom PathGenerator include and exclude filter flags
+        // these modify what kind of terrain types are available in current instance
+        // for example this can be used to mark offmesh connections as enabled/disabled
+        public ushort GetForceEnabledNavMeshFilterFlags() { return m_forceEnabledNavMeshFilterFlags; }
+        public void SetForceEnabledNavMeshFilterFlag(ushort flag) { m_forceEnabledNavMeshFilterFlags |= flag; }
+        public void RemoveForceEnabledNavMeshFilterFlag(ushort flag) { m_forceEnabledNavMeshFilterFlags &= (ushort)~flag; }
+
+        public ushort GetForceDisabledNavMeshFilterFlags() { return m_forceDisabledNavMeshFilterFlags; }
+        public void SetForceDisabledNavMeshFilterFlag(ushort flag) { m_forceDisabledNavMeshFilterFlags |= flag; }
+        public void RemoveForceDisabledNavMeshFilterFlag(ushort flag) { m_forceDisabledNavMeshFilterFlags &= (ushort)~flag; }
+
         public int GetInstanceId()
         {
             return i_InstanceId;
@@ -4675,6 +4686,8 @@ namespace Game.Maps
         protected List<WorldObject> m_activeNonPlayers = new();
         protected List<Player> m_activePlayers = new();
         TerrainInfo m_terrain;
+        ushort m_forceEnabledNavMeshFilterFlags;
+        ushort m_forceDisabledNavMeshFilterFlags;
 
         SortedMultiMap<long, ScriptAction> m_scriptSchedule = new();
 
@@ -4903,7 +4916,7 @@ namespace Game.Maps
         }
 
         public Group GetOwningGroup() { return i_owningGroupRef.GetTarget(); }
-        
+
         public void TrySetOwningGroup(Group group)
         {
             if (!i_owningGroupRef.IsValid())
@@ -4984,7 +4997,7 @@ namespace Game.Maps
                 SQLTransaction trans = new();
 
                 if (entries.IsInstanceIdBound())
-                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), 
+                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(),
                         instanceCompletedEncounters, updateSaveDataEvent.DungeonEncounter, i_data.GetEntranceLocationForCompletedEncounters(instanceCompletedEncounters)));
 
                 foreach (var player in GetPlayers())
@@ -5020,7 +5033,7 @@ namespace Game.Maps
                 DB.Characters.CommitTransaction(trans);
             }
         }
-        
+
         public void UpdateInstanceLock(UpdateAdditionalSaveDataEvent updateSaveDataEvent)
         {
             if (i_instanceLock != null)
@@ -5211,7 +5224,7 @@ namespace Game.Maps
             MapDifficultyXConditionId = mapDifficultyXConditionId;
         }
     }
-    
+
     public struct ScriptAction
     {
         public ObjectGuid ownerGUID;
