@@ -467,7 +467,7 @@ namespace Framework.Constants
         DailyQuestsCleared = 13,   // Daily quests cleared
         SendEvent = 14,   // Send event "{GameEvents}" (player-sent/instance only)
 
-        Count
+        Max
     }
 
     public enum CriteriaStartEvent : byte
@@ -488,7 +488,7 @@ namespace Framework.Constants
         SendEvent = 13, // Send event "{GameEvents}" (player-sent/instance only)
         BeginScenarioStep = 14, // Begin scenario step "{#Step}" (for use with "Player on Scenario" modifier only)
 
-        Count
+        Max
     }
 
     [Flags]

@@ -1774,7 +1774,7 @@ namespace Game.Achievements
                 case ModifierTreeType.TimeBetween: // 109
                 {
                     WowTime from = new();
-                    from.SetPackedTime(reqValue);
+                    from.SetPackedTime((uint)reqValue);
                     WowTime to = new();
                     to.SetPackedTime((uint)secondaryAsset);
 
@@ -3131,8 +3131,8 @@ namespace Game.Achievements
         MultiMap<int, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<int, Criteria>[(int)CriteriaType.Count];
         MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
 
-        MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Count];
-        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Count];
+        MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Max];
+        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Max];
 
         CriteriaManager()
         {
@@ -3261,7 +3261,7 @@ namespace Game.Achievements
                     _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
             }
 
-            for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
+            for (var i = 0; i < (int)CriteriaFailEvent.Max; ++i)
                 _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
 
             // Load criteria
@@ -3273,8 +3273,8 @@ namespace Game.Achievements
             {
                 Cypher.Assert(criteriaEntry.Type < CriteriaType.Count,
                     $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaType.Count}");
-                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Count, $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Count}");
-                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Count, $"CRITERIA_CONDITION_MAX must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Count}");
+                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Max, $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Max}");
+                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Max, $"CRITERIA_CONDITION_MAX must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Max}");
 
                 var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
                 if (treeList.Empty())
@@ -3360,8 +3360,9 @@ namespace Game.Achievements
                     _questObjectiveCriteriasByType.Add(criteriaEntry.Type, criteria);
                 }
 
-                if (criteriaEntry.StartTimer != 0)
+                if (criteriaEntry.StartEvent != 0)
                     _criteriasByStartEvent[criteriaEntry.StartEvent].Add(criteriaEntry.StartAsset, criteria);
+
                 if (criteriaEntry.FailEvent != 0)
                     _criteriasByFailEvent[criteriaEntry.FailEvent].Add(criteriaEntry.FailAsset, criteria);
             }
