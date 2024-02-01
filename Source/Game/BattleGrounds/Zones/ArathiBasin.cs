@@ -374,7 +374,7 @@ namespace Game.BattleGrounds.Zones
                 return;
 
             //remove bonus honor aura trigger creature when node is lost
-            DelCreature(node + 7);//null checks are in DelCreature! 0-6 spirit guides
+            DelCreature(node + 7u);//null checks are in DelCreature! 0-6 spirit guides
 
             DelCreature(node);
 

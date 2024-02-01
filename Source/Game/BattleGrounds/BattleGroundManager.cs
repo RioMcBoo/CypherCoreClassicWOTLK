@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Game.BattleGrounds.Zones;
+using Game.BattleGrounds.Zones.EyeofStorm;
 
 namespace Game.BattleGrounds
 {
@@ -76,7 +77,7 @@ namespace Game.BattleGrounds
 
                 for (byte i = 0; i < scheduled.Count; i++)
                 {
-                    uint arenaMMRating = scheduled[i].ArenaMatchmakerRating;
+                    int arenaMMRating = scheduled[i].ArenaMatchmakerRating;
                     BattlegroundQueueTypeId bgQueueTypeId = scheduled[i].QueueId;
                     BattlegroundBracketId bracket_id = scheduled[i].BracketId;
                     GetBattlegroundQueue(bgQueueTypeId).BattlegroundQueueUpdate(diff, bracket_id, arenaMMRating);
@@ -484,7 +485,7 @@ namespace Game.BattleGrounds
             return true;
         }
 
-        public void ScheduleQueueUpdate(uint arenaMatchmakerRating, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundBracketId bracket_id)
+        public void ScheduleQueueUpdate(int arenaMatchmakerRating, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundBracketId bracket_id)
         {
             //we will use only 1 number created of bgTypeId and bracket_id
             ScheduledQueueUpdate scheduleId = new(arenaMatchmakerRating, bgQueueTypeId, bracket_id);
@@ -532,7 +533,7 @@ namespace Game.BattleGrounds
                 CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
                 if (cInfo != null)
                 {
-                    if (!cInfo.Npcflag.HasAnyFlag(NPCFlags.BattleMaster))
+                    if (!cInfo.Npcflag.HasAnyFlag(NPCFlags1.BattleMaster))
                         Log.outError(LogFilter.Sql, "Creature (Entry: {0}) listed in `battlemaster_entry` is not a battlemaster.", entry);
                 }
                 else
@@ -563,10 +564,10 @@ namespace Game.BattleGrounds
             var templates = Global.ObjectMgr.GetCreatureTemplates();
             foreach (var creature in templates)
             {
-                if (creature.Value.Npcflag.HasAnyFlag(NPCFlags.BattleMaster) && !mBattleMastersMap.ContainsKey(creature.Value.Entry))
+                if (creature.Value.Npcflag.HasAnyFlag(NPCFlags1.BattleMaster) && !mBattleMastersMap.ContainsKey(creature.Value.Entry))
                 {
                     Log.outError(LogFilter.Sql, "CreatureTemplate (Entry: {0}) has UNIT_NPC_FLAG_BATTLEMASTER but no data in `battlemaster_entry` table. Removing flag!", creature.Value.Entry);
-                    templates[creature.Key].Npcflag &= ~NPCFlags.BattleMaster;
+                    templates[creature.Key].Npcflag &= ~NPCFlags1.BattleMaster;
                 }
             }
         }
@@ -720,14 +721,14 @@ namespace Game.BattleGrounds
 
         struct ScheduledQueueUpdate
         {
-            public ScheduledQueueUpdate(uint arenaMatchmakerRating, BattlegroundQueueTypeId queueId, BattlegroundBracketId bracketId)
+            public ScheduledQueueUpdate(int arenaMatchmakerRating, BattlegroundQueueTypeId queueId, BattlegroundBracketId bracketId)
             {
                 ArenaMatchmakerRating = arenaMatchmakerRating;
                 QueueId = queueId;
                 BracketId = bracketId;
             }
 
-            public uint ArenaMatchmakerRating;
+            public int ArenaMatchmakerRating;
             public BattlegroundQueueTypeId QueueId;
             public BattlegroundBracketId BracketId;
 
