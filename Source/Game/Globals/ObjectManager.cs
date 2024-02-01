@@ -10979,16 +10979,15 @@ namespace Game
         {
             var key = (mapid, difficulty);
 
-            if (mapObjectGuidsStore.ContainsKey(key) && mapObjectGuidsStore[key].ContainsKey(cellid))
-                return mapObjectGuidsStore[key][cellid];
+            if (mapObjectGuidsStore.ContainsKey(key) && mapObjectGuidsStore[key].TryGetValue(cellid, out CellObjectGuids guids))
+                return guids;
 
             return null;
         }
 
         public Dictionary<int, CellObjectGuids> GetMapObjectGuids(int mapid, Difficulty difficulty)
         {
-            var key = (mapid, difficulty);
-            return mapObjectGuidsStore.LookupByKey(key);
+            return mapObjectGuidsStore.LookupByKey((mapid, difficulty));
         }
 
         public PageText GetPageText(int pageEntry)

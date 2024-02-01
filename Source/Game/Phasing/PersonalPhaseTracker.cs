@@ -23,9 +23,9 @@ namespace Game
 
     class PlayerPersonalPhasesTracker
     {
-        Dictionary<uint, PersonalPhaseSpawns> _spawns = new();
+        Dictionary<int, PersonalPhaseSpawns> _spawns = new();
 
-        public void RegisterTrackedObject(uint phaseId, WorldObject obj)
+        public void RegisterTrackedObject(int phaseId, WorldObject obj)
         {
             _spawns[phaseId].Objects.Add(obj);
         }
@@ -76,7 +76,7 @@ namespace Game
             }
         }
 
-        public bool IsGridLoadedForPhase(uint gridId, uint phaseId)
+        public bool IsGridLoadedForPhase(int gridId, int phaseId)
         {
             PersonalPhaseSpawns spawns = _spawns.LookupByKey(phaseId);
             if (spawns != null)
@@ -85,7 +85,7 @@ namespace Game
             return false;
         }
 
-        public void SetGridLoadedForPhase(uint gridId, uint phaseId)
+        public void SetGridLoadedForPhase(int gridId, int phaseId)
         {
             if (!_spawns.ContainsKey(phaseId))
                 _spawns[phaseId] = new();
@@ -94,7 +94,7 @@ namespace Game
             group.Grids.Add((ushort)gridId);
         }
 
-        public void SetGridUnloaded(uint gridId)
+        public void SetGridUnloaded(int gridId)
         {
             foreach (var itr in _spawns.ToList())
             {
@@ -160,7 +160,7 @@ namespace Game
             }
         }
 
-        public void RegisterTrackedObject(uint phaseId, ObjectGuid phaseOwner, WorldObject obj)
+        public void RegisterTrackedObject(int phaseId, ObjectGuid phaseOwner, WorldObject obj)
         {
             Cypher.Assert(phaseId != 0);
             Cypher.Assert(!phaseOwner.IsEmpty());

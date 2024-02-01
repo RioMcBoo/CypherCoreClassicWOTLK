@@ -13,10 +13,10 @@ namespace Game.Maps
         internal Cell i_cell;
         internal Grid i_grid;
         internal Map i_map;
-        internal uint i_gameObjects;
-        internal uint i_creatures;
-        internal uint i_corpses;
-        internal uint i_areaTriggers;
+        internal int i_gameObjects;
+        internal int i_creatures;
+        internal int i_corpses;
+        internal int i_areaTriggers;
 
         public ObjectGridLoaderBase(Grid grid, Map map, Cell cell)
         {
@@ -25,12 +25,12 @@ namespace Game.Maps
             i_map = map;
         }
 
-        public uint GetLoadedCreatures() { return i_creatures; }
-        public uint GetLoadedGameObjects() { return i_gameObjects; }
-        public uint GetLoadedCorpses() { return i_corpses; }
-        public uint GetLoadedAreaTriggers() { return i_areaTriggers; }
+        public int GetLoadedCreatures() { return i_creatures; }
+        public int GetLoadedGameObjects() { return i_gameObjects; }
+        public int GetLoadedCorpses() { return i_corpses; }
+        public int GetLoadedAreaTriggers() { return i_areaTriggers; }
 
-        internal void LoadHelper<T>(SortedSet<ulong> guid_set, CellCoord cell, ref uint count, Map map, uint phaseId = 0, ObjectGuid? phaseOwner = null) where T : WorldObject, new()
+        internal void LoadHelper<T>(SortedSet<long> guid_set, CellCoord cell, ref int count, Map map, int phaseId = 0, ObjectGuid? phaseOwner = null) where T : WorldObject, new()
         {
             foreach (var guid in guid_set)
             {
@@ -55,7 +55,7 @@ namespace Game.Maps
             }
         }
 
-        void AddObjectHelper<T>(CellCoord cellCoord, ref uint count, Map map, T obj) where T : WorldObject
+        void AddObjectHelper<T>(CellCoord cellCoord, ref int count, Map map, T obj) where T : WorldObject
         {
             var cell = new Cell(cellCoord);
             map.AddToGrid(obj, cell);
@@ -79,10 +79,10 @@ namespace Game.Maps
             i_gameObjects = 0;
             i_corpses = 0;
             i_cell.data.cell_y = 0;
-            for (uint x = 0; x < MapConst.MaxCells; ++x)
+            for (int x = 0; x < MapConst.MaxCells; ++x)
             {
                 i_cell.data.cell_x = x;
-                for (uint y = 0; y < MapConst.MaxCells; ++y)
+                for (int y = 0; y < MapConst.MaxCells; ++y)
                 {
                     i_cell.data.cell_y = y;
 
@@ -101,26 +101,22 @@ namespace Game.Maps
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
-            if (cellguids == null)
-                return;
-
-            LoadHelper<GameObject>(cellguids.gameobjects, cellCoord, ref i_gameObjects, i_map);
+            if (cellguids != null)
+                LoadHelper<GameObject>(cellguids.gameobjects, cellCoord, ref i_gameObjects, i_map);
         }
 
         public override void Visit(IList<Creature> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
-            if (cellguids == null)
-                return;
-
-            LoadHelper<Creature>(cellguids.creatures, cellCoord, ref i_creatures, i_map);
+            if (cellguids != null)
+                LoadHelper<Creature>(cellguids.creatures, cellCoord, ref i_creatures, i_map);
         }
 
         public override void Visit(IList<AreaTrigger> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
-            SortedSet<ulong> areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
+            SortedSet<long> areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
             if (areaTriggers == null)
                 return;
 
@@ -130,7 +126,7 @@ namespace Game.Maps
 
     class PersonalPhaseGridLoader : ObjectGridLoaderBase
     {
-        uint _phaseId;
+        int _phaseId;
         ObjectGuid _phaseOwner;
 
         public PersonalPhaseGridLoader(Grid grid, Map map, Cell cell, ObjectGuid phaseOwner) : base(grid, map, cell)
@@ -155,14 +151,14 @@ namespace Game.Maps
                 LoadHelper<Creature>(cell_guids.creatures, cellCoord, ref i_creatures, i_map, _phaseId, _phaseOwner);
         }
 
-        public void Load(uint phaseId)
+        public void Load(int phaseId)
         {
             _phaseId = phaseId;
             i_cell.data.cell_y = 0;
-            for (uint x = 0; x < MapConst.MaxCells; ++x)
+            for (int x = 0; x < MapConst.MaxCells; ++x)
             {
                 i_cell.data.cell_x = x;
-                for (uint y = 0; y < MapConst.MaxCells; ++y)
+                for (int y = 0; y < MapConst.MaxCells; ++y)
                 {
                     i_cell.data.cell_y = y;
 
@@ -211,7 +207,7 @@ namespace Game.Maps
         Map i_map;
         Grid i_grid;
 
-        public uint i_corpses;
+        public int i_corpses;
     }
 
     //Stop the creatures before unloading the NGrid
@@ -221,7 +217,7 @@ namespace Game.Maps
         {
             // stop any fights at grid de-activation and remove dynobjects/areatriggers created at cast by creatures
             for (var i = 0; i < objs.Count; ++i)
-            {  
+            {
                 Creature creature = objs[i];
                 creature.RemoveAllDynObjects();
                 creature.RemoveAllAreaTriggers();
@@ -274,7 +270,7 @@ namespace Game.Maps
 
                 obj.SetDestroyedObject(true);
                 obj.CleanupsBeforeDelete();
-            }       
+            }
         }
     }
 
