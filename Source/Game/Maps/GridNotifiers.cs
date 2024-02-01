@@ -2538,6 +2538,9 @@ namespace Game.Maps
             if (_args.IgnoreNotOwnedPrivateObjects && !go.CheckPrivateObjectOwnerVisibility(_obj))
                 return false;
 
+            if (_args.GameObjectType.HasValue && go.GetGoType() != _args.GameObjectType)
+                return false;
+
             _customizer.Update(go);
             return true;
         }
