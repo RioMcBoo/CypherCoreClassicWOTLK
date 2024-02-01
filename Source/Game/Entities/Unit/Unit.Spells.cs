@@ -3942,7 +3942,7 @@ namespace Game.Entities
         {
             Aura aura = aurApp.GetBase();
 
-            _RemoveNoStackAurasDueToAura(aura);
+            _RemoveNoStackAurasDueToAura(aura, false);
 
             if (aurApp.HasRemoveMode())
                 return;
@@ -3999,7 +3999,7 @@ namespace Game.Entities
             Cypher.Assert(!m_cleanupDone);
             m_ownedAuras.Add(aura.GetId(), aura);
 
-            _RemoveNoStackAurasDueToAura(aura);
+            _RemoveNoStackAurasDueToAura(aura, true);
 
             if (aura.IsRemoved())
                 return;
@@ -4088,7 +4088,7 @@ namespace Game.Entities
             return null;
         }
 
-        void _RemoveNoStackAurasDueToAura(Aura aura)
+        void _RemoveNoStackAurasDueToAura(Aura aura, bool owned)
         {
             SpellInfo spellProto = aura.GetSpellInfo();
 
@@ -4102,13 +4102,10 @@ namespace Game.Entities
                 return;
             }
 
-            foreach (var app in GetAppliedAuras())
-            {
-                if (aura.CanStackWith(app.Value.GetBase()))
-                    continue;
-
-                RemoveAura(app, AuraRemoveMode.Default);
-            }
+            if (owned)
+                RemoveOwnedAuras(ownedAura => !aura.CanStackWith(ownedAura), AuraRemoveMode.Default);
+            else
+                RemoveAppliedAuras(appliedAura => !aura.CanStackWith(appliedAura.GetBase()), AuraRemoveMode.Default);
         }
         public int GetHighestExclusiveSameEffectSpellGroupValue(AuraEffect aurEff, AuraType auraType, bool checkMiscValue = false, int miscValue = 0)
         {
