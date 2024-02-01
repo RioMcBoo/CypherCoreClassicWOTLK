@@ -1553,7 +1553,7 @@ namespace Game
             {
                 if (!IsValidEvent(script.Key))
                     Log.outError(LogFilter.Sql, $"Table `event_scripts` has script (Id: {script.Key}) not referring to any gameobject_template " +
-                        $"(data field referencing GameEvent), any taxi path node or any spell effect {SpellEffectName.SendEvent}.");
+                        $"(data field referencing GameEvent), any taxi path node, any criteria asset or any spell effect {SpellEffectName.SendEvent}.");
             }
 
             uint oldMSTime = Time.GetMSTime();
@@ -1575,7 +1575,7 @@ namespace Game
                 if (!IsValidEvent(eventId))
                 {
                     Log.outError(LogFilter.Sql, $"Event (ID: {eventId}) not referring to any gameobject_template (data field referencing GameEvent), " +
-                        $"any taxi path node or any spell effect {SpellEffectName.SendEvent}.");
+                        $"any taxi path node, any criteria asset or any spell effect {SpellEffectName.SendEvent}.");
                     continue;
                 }
                 _eventScriptStorage[eventId] = GetScriptId(scriptName);

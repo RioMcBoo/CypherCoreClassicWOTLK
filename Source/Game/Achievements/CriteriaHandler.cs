@@ -1204,6 +1204,11 @@ namespace Game.Achievements
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
+                case CriteriaType.PlayerTriggerGameEvent:
+                case CriteriaType.AnyoneTriggerGameEventScenario:
+                    if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
+                        return false;
+                    break;
                 default:
                     break;
             }
