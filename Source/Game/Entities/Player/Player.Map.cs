@@ -134,13 +134,17 @@ namespace Game.Entities
 
             PushQuests();
 
-            UpdateCriteria(CriteriaType.EnterTopLevelArea, newArea);
-
             UpdateMountCapability();
 
             if ((oldAreaEntry != null && oldAreaEntry.HasFlag(AreaFlags2.UseSubzoneForChatChannel))
                 || (area != null && area.HasFlag(AreaFlags2.UseSubzoneForChatChannel)))
                 UpdateLocalChannels(newArea);
+
+            if (oldArea != newArea)
+            {
+                UpdateCriteria(CriteriaType.EnterArea, newArea);
+                UpdateCriteria(CriteriaType.LeaveArea, oldArea);
+            }
         }
 
         public void UpdateZone(int newZone, int newArea)
@@ -223,6 +227,9 @@ namespace Game.Entities
                 Guild guild = GetGuild();
                 if (guild != null)
                     guild.UpdateMemberData(this, GuildMemberData.ZoneId, newZone);
+
+                UpdateCriteria(CriteriaType.EnterTopLevelArea, newZone);
+                UpdateCriteria(CriteriaType.LeaveTopLevelArea, oldZone);
             }
         }
 
