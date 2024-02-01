@@ -17,7 +17,7 @@ namespace Game.Chat.Commands
     class GoCommands
     {
         [Command("areatrigger", RBACPermissions.CommandGo)]
-        static bool HandleGoAreaTriggerCommand(CommandHandler handler, uint areaTriggerId)
+        static bool HandleGoAreaTriggerCommand(CommandHandler handler, int areaTriggerId)
         {
             var at = CliDB.AreaTriggerStorage.LookupByKey(areaTriggerId);
             if (at == null)
@@ -34,15 +34,15 @@ namespace Game.Chat.Commands
             if (needles.Empty())
                 return false;
 
-            MultiMap<uint, CreatureTemplate> matches = new();
-            Dictionary<uint, List<CreatureData>> spawnLookup = new();
+            MultiMap<int, CreatureTemplate> matches = new();
+            Dictionary<int, List<CreatureData>> spawnLookup = new();
 
             // find all boss flagged mobs that match our needles
             foreach (var pair in Global.ObjectMgr.GetCreatureTemplates())
             {
                 CreatureTemplate data = pair.Value;
 
-                uint count = 0;
+                int count = 0;
                 string scriptName = Global.ObjectMgr.GetScriptName(data.ScriptID);
                 foreach (var label in needles)
                     if (scriptName.Contains(label) || data.Name.Contains(label))
@@ -80,7 +80,7 @@ namespace Game.Chat.Commands
 
             // see if we have multiple equal matches left
             var keyValueList = matches.KeyValueList;
-            uint maxCount = keyValueList.Last().Key;
+            int maxCount = keyValueList.Last().Key;
             for (var i = keyValueList.Count; i > 0;)
             {
                 if ((++i) != 0 && keyValueList[i].Key == maxCount)
@@ -116,7 +116,7 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition();
 
             CreatureData spawn = spawns.First();
-            uint mapId = spawn.MapId;
+            int mapId = spawn.MapId;
             if (!player.TeleportTo(new WorldLocation(mapId, spawn.SpawnPoint)))
             {
                 string mapName = CliDB.MapStorage.LookupByKey(mapId).MapName[handler.GetSessionDbcLocale()];
@@ -129,19 +129,19 @@ namespace Game.Chat.Commands
         }
 
         [Command("bugticket", RBACPermissions.CommandGo)]
-        static bool HandleGoBugTicketCommand(CommandHandler handler, uint ticketId)
+        static bool HandleGoBugTicketCommand(CommandHandler handler, int ticketId)
         {
             return HandleGoTicketCommand<BugTicket>(handler, ticketId);
         }
 
         [Command("complaintticket", RBACPermissions.CommandGo)]
-        static bool HandleGoComplaintTicketCommand(CommandHandler handler, uint ticketId)
+        static bool HandleGoComplaintTicketCommand(CommandHandler handler, int ticketId)
         {
             return HandleGoTicketCommand<ComplaintTicket>(handler, ticketId);
         }
 
         [Command("graveyard", RBACPermissions.CommandGo)]
-        static bool HandleGoGraveyardCommand(CommandHandler handler, uint graveyardId)
+        static bool HandleGoGraveyardCommand(CommandHandler handler, int graveyardId)
         {
             WorldSafeLocsEntry gy = Global.ObjectMgr.GetWorldSafeLoc(graveyardId);
             if (gy == null)
@@ -168,10 +168,10 @@ namespace Game.Chat.Commands
         }
 
         [Command("grid", RBACPermissions.CommandGo)]
-        static bool HandleGoGridCommand(CommandHandler handler, float gridX, float gridY, uint? mapIdArg)
+        static bool HandleGoGridCommand(CommandHandler handler, float gridX, float gridY, int? mapIdArg)
         {
             Player player = handler.GetSession().GetPlayer();
-            uint mapId = mapIdArg.GetValueOrDefault(player.GetMapId());
+            int mapId = mapIdArg.GetValueOrDefault(player.GetMapId());
 
             // center of grid
             float x = (gridX - MapConst.CenterGridId + 0.5f) * MapConst.SizeofGrids;
@@ -202,10 +202,10 @@ namespace Game.Chat.Commands
             if (labels.Empty())
                 return false;
 
-            MultiMap<uint, Tuple<uint, string, string>> matches = new();
+            MultiMap<int, (int, string, string)> matches = new();
             foreach (var pair in Global.ObjectMgr.GetInstanceTemplates())
             {
-                uint count = 0;
+                int count = 0;
                 string scriptName = Global.ObjectMgr.GetScriptName(pair.Value.ScriptId);
                 string mapName1 = CliDB.MapStorage.LookupByKey(pair.Key).MapName[handler.GetSessionDbcLocale()];
                 foreach (var label in labels)
@@ -213,7 +213,7 @@ namespace Game.Chat.Commands
                         ++count;
 
                 if (count != 0)
-                    matches.Add(count, Tuple.Create(pair.Key, mapName1, scriptName));
+                    matches.Add(count, (pair.Key, mapName1, scriptName));
             }
 
             if (matches.Empty())
@@ -224,7 +224,7 @@ namespace Game.Chat.Commands
 
             // see if we have multiple equal matches left
             var keyValueList = matches.KeyValueList;
-            uint maxCount = keyValueList.Last().Key;
+            int maxCount = keyValueList.Last().Key;
             for (var i = keyValueList.Count; i > 0;)
             {
                 if ((++i) != 0 && keyValueList[i].Key == maxCount)
@@ -239,7 +239,7 @@ namespace Game.Chat.Commands
             }
 
             var it = matches.Last();
-            uint mapId = it.Value.Item1;
+            int mapId = it.Value.Item1;
             string mapName = it.Value.Item2;
 
             Player player = handler.GetSession().GetPlayer();
@@ -259,7 +259,7 @@ namespace Game.Chat.Commands
                 }
                 else
                 {
-                    uint parentMapId = exit.target_mapId;
+                    int parentMapId = exit.target_mapId;
                     string parentMapName = CliDB.MapStorage.LookupByKey(parentMapId).MapName[handler.GetSessionDbcLocale()];
                     handler.SendSysMessage(CypherStrings.CommandGoInstanceGateFailed, mapName, mapId, parentMapName, parentMapId);
                 }
@@ -295,7 +295,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("quest", RBACPermissions.CommandGo)]
-        static bool HandleGoQuestCommand(CommandHandler handler, uint questId)
+        static bool HandleGoQuestCommand(CommandHandler handler, int questId)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -306,14 +306,14 @@ namespace Game.Chat.Commands
             }
 
             float x, y, z;
-            uint mapId;
+            int mapId;
 
             var poiData = Global.ObjectMgr.GetQuestPOIData(questId);
             if (poiData != null)
             {
                 var data = poiData.Blobs[0];
 
-                mapId = (uint)data.MapID;
+                mapId = data.MapID;
 
                 x = data.Points[0].X;
                 y = data.Points[0].Y;
@@ -344,13 +344,13 @@ namespace Game.Chat.Commands
         }
 
         [Command("suggestionticket", RBACPermissions.CommandGo)]
-        static bool HandleGoSuggestionTicketCommand(CommandHandler handler, uint ticketId)
+        static bool HandleGoSuggestionTicketCommand(CommandHandler handler, int ticketId)
         {
             return HandleGoTicketCommand<SuggestionTicket>(handler, ticketId);
         }
 
         [Command("taxinode", RBACPermissions.CommandGo)]
-        static bool HandleGoTaxinodeCommand(CommandHandler handler, uint nodeId)
+        static bool HandleGoTaxinodeCommand(CommandHandler handler, int nodeId)
         {
             var node = CliDB.TaxiNodesStorage.LookupByKey(nodeId);
             if (node == null)
@@ -363,10 +363,10 @@ namespace Game.Chat.Commands
 
         //teleport at coordinates, including Z and orientation
         [Command("xyz", RBACPermissions.CommandGo)]
-        static bool HandleGoXYZCommand(CommandHandler handler, float x, float y, float? z, uint? id, float? o)
+        static bool HandleGoXYZCommand(CommandHandler handler, float x, float y, float? z, int? id, float? o)
         {
             Player player = handler.GetSession().GetPlayer();
-            uint mapId = id.GetValueOrDefault(player.GetMapId());
+            int mapId = id.GetValueOrDefault(player.GetMapId());
             if (z.HasValue)
             {
                 if (!GridDefines.IsValidMapCoord(mapId, x, y, z.Value))
@@ -391,11 +391,11 @@ namespace Game.Chat.Commands
 
         //teleport at coordinates
         [Command("zonexy", RBACPermissions.CommandGo)]
-        static bool HandleGoZoneXYCommand(CommandHandler handler, float x, float y, uint? areaIdArg)
+        static bool HandleGoZoneXYCommand(CommandHandler handler, float x, float y, int? areaIdArg)
         {
             Player player = handler.GetSession().GetPlayer();
 
-            uint areaId = areaIdArg.HasValue ? areaIdArg.Value : player.GetZoneId();
+            int areaId = areaIdArg.HasValue ? areaIdArg.Value : player.GetZoneId();
 
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (x < 0 || x > 100 || y < 0 || y > 100 || areaEntry == null)
@@ -405,14 +405,16 @@ namespace Game.Chat.Commands
             }
 
             // update to parent zone if exist (client map show only zones without parents)
-            AreaTableRecord zoneEntry = areaEntry.ParentAreaID != 0 ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID) : areaEntry;
+            var zoneEntry = areaEntry.ParentAreaID != 0 && areaEntry.HasFlag(AreaFlags.IsSubzone)
+                ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID)
+                : areaEntry;
             Cypher.Assert(zoneEntry != null);
 
             x /= 100.0f;
             y /= 100.0f;
 
             TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(zoneEntry.ContinentID);
-            if (!Global.DB2Mgr.Zone2MapCoordinates(areaEntry.ParentAreaID != 0 ? areaEntry.ParentAreaID : areaId, ref x, ref y))
+            if (!Global.DB2Mgr.Zone2MapCoordinates(zoneEntry.Id, ref x, ref y))
             {
                 handler.SendSysMessage(CypherStrings.InvalidZoneMap, areaId, areaEntry.AreaName[handler.GetSessionDbcLocale()], terrain.GetId(), terrain.GetMapName());
                 return false;
@@ -436,7 +438,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        static bool HandleGoTicketCommand<T>(CommandHandler handler, uint ticketId) where T : Ticket
+        static bool HandleGoTicketCommand<T>(CommandHandler handler, int ticketId) where T : Ticket
         {
             T ticket = Global.SupportMgr.GetTicket<T>(ticketId);
             if (ticket == null)
@@ -457,11 +459,11 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        static bool DoTeleport(CommandHandler handler, Position pos, uint mapId = 0xFFFFFFFF)
+        static bool DoTeleport(CommandHandler handler, Position pos, int mapId = -1)
         {
             Player player = handler.GetSession().GetPlayer();
 
-            if (mapId == 0xFFFFFFFF)
+            if (mapId == -1)
                 mapId = player.GetMapId();
 
             if (!GridDefines.IsValidMapCoord(mapId, pos) || Global.ObjectMgr.IsTransportMap(mapId))
@@ -484,7 +486,7 @@ namespace Game.Chat.Commands
         class GoCommandCreature
         {
             [Command("", RBACPermissions.CommandGo)]
-            static bool HandleGoCreatureSpawnIdCommand(CommandHandler handler, ulong spawnId)
+            static bool HandleGoCreatureSpawnIdCommand(CommandHandler handler, long spawnId)
             {
                 CreatureData spawnpoint = Global.ObjectMgr.GetCreatureData(spawnId);
                 if (spawnpoint == null)
@@ -528,7 +530,7 @@ namespace Game.Chat.Commands
         class GoCommandGameobject
         {
             [Command("", RBACPermissions.CommandGo)]
-            static bool HandleGoGameObjectSpawnIdCommand(CommandHandler handler, ulong spawnId)
+            static bool HandleGoGameObjectSpawnIdCommand(CommandHandler handler, long spawnId)
             {
                 GameObjectData spawnpoint = Global.ObjectMgr.GetGameObjectData(spawnId);
                 if (spawnpoint == null)
@@ -545,7 +547,7 @@ namespace Game.Chat.Commands
             {
                 GameObjectData spawnpoint = null;
                 foreach (var pair in Global.ObjectMgr.GetAllGameObjectData())
-        {
+                {
                     if (pair.Value.Id != goId)
                         continue;
 

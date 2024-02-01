@@ -23,7 +23,7 @@ namespace Game.SupportSystem
             SetSuggestionSystemStatus(WorldConfig.GetBoolValue(WorldCfg.SupportSuggestionsEnabled));
         }
 
-        public T GetTicket<T>(uint Id) where T : Ticket
+        public T GetTicket<T>(int Id) where T : Ticket
         {
             switch (typeof(T).Name)
             {
@@ -38,7 +38,7 @@ namespace Game.SupportSystem
             return default;
         }
 
-        public uint GetOpenTicketCount<T>() where T : Ticket
+        public int GetOpenTicketCount<T>() where T : Ticket
         {
             switch (typeof(T).Name)
             {
@@ -77,7 +77,7 @@ namespace Game.SupportSystem
                 if (!bug.IsClosed())
                     ++_openBugTicketCount;
 
-                uint id = bug.GetId();
+                int id = bug.GetId();
                 if (_lastBugId < id)
                     _lastBugId = id;
 
@@ -113,7 +113,7 @@ namespace Game.SupportSystem
                 if (!complaint.IsClosed())
                     ++_openComplaintTicketCount;
 
-                uint id = complaint.GetId();
+                int id = complaint.GetId();
                 if (_lastComplaintId < id)
                     _lastComplaintId = id;
 
@@ -161,7 +161,7 @@ namespace Game.SupportSystem
                 if (!suggestion.IsClosed())
                     ++_openSuggestionTicketCount;
 
-                uint id = suggestion.GetId();
+                int id = suggestion.GetId();
                 if (_lastSuggestionId < id)
                     _lastSuggestionId = id;
 
@@ -196,7 +196,7 @@ namespace Game.SupportSystem
             ticket.SaveToDB();
         }
 
-        public void RemoveTicket<T>(uint ticketId) where T : Ticket
+        public void RemoveTicket<T>(int ticketId) where T : Ticket
         {
             T ticket = GetTicket<T>(ticketId);
             if (ticket != null)
@@ -218,7 +218,7 @@ namespace Game.SupportSystem
             }
         }
 
-        public void CloseTicket<T>(uint ticketId, ObjectGuid closedBy) where T : Ticket
+        public void CloseTicket<T>(int ticketId, ObjectGuid closedBy) where T : Ticket
         {
             T ticket = GetTicket<T>(ticketId);
             if (ticket != null)
@@ -325,9 +325,9 @@ namespace Game.SupportSystem
             }
         }
 
-        long GetAge(ulong t) { return (GameTime.GetGameTime() - (long)t) / Time.Day; }
+        long GetAge(long t) { return (GameTime.GetGameTime() - t) / Time.Day; }
 
-        IEnumerable<KeyValuePair<uint, ComplaintTicket>> GetComplaintsByPlayerGuid(ObjectGuid playerGuid)
+        IEnumerable<KeyValuePair<int, ComplaintTicket>> GetComplaintsByPlayerGuid(ObjectGuid playerGuid)
         {
             return _complaintTicketList.Where(ticket => ticket.Value.GetPlayerGuid() == playerGuid);
         }
@@ -337,7 +337,7 @@ namespace Game.SupportSystem
         public bool GetBugSystemStatus() { return _supportSystemStatus && _bugSystemStatus; }
         public bool GetComplaintSystemStatus() { return _supportSystemStatus && _complaintSystemStatus; }
         public bool GetSuggestionSystemStatus() { return _supportSystemStatus && _suggestionSystemStatus; }
-        public ulong GetLastChange() { return _lastChange; }
+        public long GetLastChange() { return _lastChange; }
 
         public void SetSupportSystemStatus(bool status) { _supportSystemStatus = status; }
         public void SetTicketSystemStatus(bool status) { _ticketSystemStatus = status; }
@@ -345,26 +345,26 @@ namespace Game.SupportSystem
         public void SetComplaintSystemStatus(bool status) { _complaintSystemStatus = status; }
         public void SetSuggestionSystemStatus(bool status) { _suggestionSystemStatus = status; }
 
-        public void UpdateLastChange() { _lastChange = (ulong)GameTime.GetGameTime(); }
+        public void UpdateLastChange() { _lastChange = GameTime.GetGameTime(); }
 
-        public uint GenerateBugId() { return ++_lastBugId; }
-        public uint GenerateComplaintId() { return ++_lastComplaintId; }
-        public uint GenerateSuggestionId() { return ++_lastSuggestionId; }
+        public int GenerateBugId() { return ++_lastBugId; }
+        public int GenerateComplaintId() { return ++_lastComplaintId; }
+        public int GenerateSuggestionId() { return ++_lastSuggestionId; }
 
         bool _supportSystemStatus;
         bool _ticketSystemStatus;
         bool _bugSystemStatus;
         bool _complaintSystemStatus;
         bool _suggestionSystemStatus;
-        Dictionary<uint, BugTicket> _bugTicketList = new();
-        Dictionary<uint, ComplaintTicket> _complaintTicketList = new();
-        Dictionary<uint, SuggestionTicket> _suggestionTicketList = new();
-        uint _lastBugId;
-        uint _lastComplaintId;
-        uint _lastSuggestionId;
-        uint _openBugTicketCount;
-        uint _openComplaintTicketCount;
-        uint _openSuggestionTicketCount;
-        ulong _lastChange;
+        Dictionary<int, BugTicket> _bugTicketList = new();
+        Dictionary<int, ComplaintTicket> _complaintTicketList = new();
+        Dictionary<int, SuggestionTicket> _suggestionTicketList = new();
+        int _lastBugId;
+        int _lastComplaintId;
+        int _lastSuggestionId;
+        int _openBugTicketCount;
+        int _openComplaintTicketCount;
+        int _openSuggestionTicketCount;
+        long _lastChange;
     }
 }

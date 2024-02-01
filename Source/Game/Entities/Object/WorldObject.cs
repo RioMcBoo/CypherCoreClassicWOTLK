@@ -114,7 +114,7 @@ namespace Game.Entities
 
             var area = CliDB.AreaTableStorage.LookupByKey(m_areaId);
             if (area != null)
-                if (area.ParentAreaID != 0)
+                if (area.ParentAreaID != 0 && area.HasFlag(AreaFlags.IsSubzone))
                     m_zoneId = area.ParentAreaID;
 
             m_outdoors = data.outdoors;
@@ -498,7 +498,7 @@ namespace Game.Entities
                     data.WriteInt32((int)createProperties.MorphCurveId);
 
                 if (hasFacingCurveID)
-                    data.WriteUInt32(createProperties.FacingCurveId);
+                    data.WriteInt32((int)createProperties.FacingCurveId);
 
                 if (hasMoveCurveID)
                     data.WriteInt32((int)createProperties.MoveCurveId);

@@ -782,7 +782,7 @@ namespace Game.Chat
             int zoneId = player.GetZoneId();
 
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
-            if (areaEntry == null || areaEntry.ParentAreaID != 0)
+            if (areaEntry == null || areaEntry.HasFlag(AreaFlags.IsSubzone))
             {
                 handler.SendSysMessage(CypherStrings.CommandGraveyardwrongzone, graveyardId, zoneId);
                 return false;
@@ -1010,7 +1010,7 @@ namespace Game.Chat
         [CommandNonGroup("mutehistory", RBACPermissions.CommandMutehistory, true)]
         static bool HandleMuteHistoryCommand(CommandHandler handler, string accountName)
         {
-            uint accountId = Global.AccountMgr.GetId(accountName);
+            int accountId = Global.AccountMgr.GetId(accountName);
             if (accountId == 0)
             {
                 handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -1100,7 +1100,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("pinfo", RBACPermissions.CommandPinfo, true)]
-        static bool HandlePInfoCommand(CommandHandler handler, [OptionalArg]PlayerIdentifier arg)
+        static bool HandlePInfoCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier arg)
         {
             if (arg == null)
                 arg = PlayerIdentifier.FromTargetOrSelf(handler);
@@ -1369,11 +1369,11 @@ namespace Game.Chat
 
             // Output III. LANG_PINFO_BANNED if ban exists and is applied
             if (banTime >= 0)
-                handler.SendSysMessage(CypherStrings.PinfoBanned, banType, banReason, banTime > 0 ? Time.secsToTimeString((ulong)(banTime - GameTime.GetGameTime()), TimeFormat.ShortText) : handler.GetCypherString(CypherStrings.Permanently), bannedBy);
+                handler.SendSysMessage(CypherStrings.PinfoBanned, banType, banReason, banTime > 0 ? Time.secsToTimeString((banTime - GameTime.GetGameTime()), TimeFormat.ShortText) : handler.GetCypherString(CypherStrings.Permanently), bannedBy);
 
             // Output IV. LANG_PINFO_MUTED if mute is applied
             if (muteTime > 0)
-                handler.SendSysMessage(CypherStrings.PinfoMuted, muteReason, Time.secsToTimeString((ulong)(muteTime - GameTime.GetGameTime()), TimeFormat.ShortText), muteBy);
+                handler.SendSysMessage(CypherStrings.PinfoMuted, muteReason, Time.secsToTimeString((muteTime - GameTime.GetGameTime()), TimeFormat.ShortText), muteBy);
 
             // Output V. LANG_PINFO_ACC_ACCOUNT
             handler.SendSysMessage(CypherStrings.PinfoAccAccount, userName, accId, security);
@@ -1420,11 +1420,14 @@ namespace Game.Chat
             {
                 zoneName = area.AreaName[locale];
 
-                AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-                if (zone != null)
+                if (area.HasFlag(AreaFlags.IsSubzone))
                 {
-                    areaName = zoneName;
-                    zoneName = zone.AreaName[locale];
+                    AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                    if (zone != null)
+                    {
+                        areaName = zoneName;
+                        zoneName = zone.AreaName[locale];
+                    }
                 }
             }
 

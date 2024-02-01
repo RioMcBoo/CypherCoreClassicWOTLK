@@ -213,7 +213,7 @@ namespace Game.Chat
                 if (cmd.IsInvokerVisible(handler) && cmd.Invoke(handler, oldTail))
                 { /* invocation succeeded, log this */
                     if (!handler.IsConsole())
-                        LogCommandUsage(handler.GetSession(), (uint)cmd._permission.RequiredPermission, cmdStr);
+                        LogCommandUsage(handler.GetSession(), cmd._permission.RequiredPermission, cmdStr);
                 }
                 else if (!handler.HasSentErrorMessage())
                 { /* invocation failed, we should show usage */
@@ -312,17 +312,17 @@ namespace Game.Chat
                 cmd.ResolveNames($"{name} {subToken}");
         }
 
-        static void LogCommandUsage(WorldSession session, uint permission, string cmdStr)
+        static void LogCommandUsage(WorldSession session, RBACPermissions permission, string cmdStr)
         {
             if (Global.AccountMgr.IsPlayerAccount(session.GetSecurity()))
                 return;
 
-            if (Global.AccountMgr.GetRBACPermission((uint)RBACPermissions.RolePlayer).GetLinkedPermissions().Contains(permission))
+            if (Global.AccountMgr.GetRBACPermission(RBACPermissions.RolePlayer).GetLinkedPermissions().Contains(permission))
                 return;
 
             Player player = session.GetPlayer();
             ObjectGuid targetGuid = player.GetTarget();
-            uint areaId = player.GetAreaId();
+            int areaId = player.GetAreaId();
             string areaName = "Unknown";
             string zoneName = "Unknown";
 
@@ -331,9 +331,12 @@ namespace Game.Chat
             {
                 Locale locale = session.GetSessionDbcLocale();
                 areaName = area.AreaName[locale];
-                var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-                if (zone != null)
-                    zoneName = zone.AreaName[locale];
+                if (area.HasFlag(AreaFlags.IsSubzone))
+                {
+                    var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                    if (zone != null)
+                        zoneName = zone.AreaName[locale];
+                }
             }
 
             Log.outCommand(session.GetAccountId(), $"Command: {cmdStr} [Player: {player.GetName()} ({player.GetGUID()}) (Account: {session.GetAccountId()}) " +

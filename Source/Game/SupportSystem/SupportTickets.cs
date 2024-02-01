@@ -13,11 +13,11 @@ namespace Game.SupportSystem
 {
     public class Ticket
     {
-        protected uint _id;
+        protected int _id;
         protected ObjectGuid _playerGuid;
-        protected uint _mapId;
+        protected int _mapId;
         protected Vector3 _pos;
-        protected ulong _createTime;
+        protected long _createTime;
         protected ObjectGuid _closedBy; // 0 = Open, -1 = Console, playerGuid = player abandoned ticket, other = GM who closed it.
         protected ObjectGuid _assignedTo;
         protected string _comment;
@@ -25,7 +25,7 @@ namespace Game.SupportSystem
         public Ticket() { }
         public Ticket(Player player)
         {
-            _createTime = (ulong)GameTime.GetGameTime();
+            _createTime = GameTime.GetGameTime();
             _playerGuid = player.GetGUID();
         }
 
@@ -58,7 +58,7 @@ namespace Game.SupportSystem
         public bool IsAssignedTo(ObjectGuid guid) { return guid == _assignedTo; }
         public bool IsAssignedNotTo(ObjectGuid guid) { return IsAssigned() && !IsAssignedTo(guid); }
 
-        public uint GetId() { return _id; }
+        public int GetId() { return _id; }
         public ObjectGuid GetPlayerGuid() { return _playerGuid; }
         public Player GetPlayer() { return Global.ObjAccessor.FindConnectedPlayer(_playerGuid); }
         public string GetPlayerName()
@@ -86,7 +86,7 @@ namespace Game.SupportSystem
         public virtual void SetUnassigned() { _assignedTo.Clear(); }
         public void SetClosedBy(ObjectGuid value) { _closedBy = value; }
         public void SetComment(string comment) { _comment = comment; }
-        public void SetPosition(uint mapId, Vector3 pos)
+        public void SetPosition(int mapId, Vector3 pos)
         {
             _mapId = mapId;
             _pos = pos;
@@ -116,10 +116,10 @@ namespace Game.SupportSystem
         public override void LoadFromDB(SQLFields fields)
         {
             byte idx = 0;
-            _id = fields.Read<uint>(idx);
-            _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(++idx));
+            _id = fields.Read<int>(idx);
+            _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<long>(++idx));
             _note = fields.Read<string>(++idx);
-            _createTime = fields.Read<ulong>(++idx);
+            _createTime = fields.Read<long>(++idx);
             _mapId = fields.Read<ushort>(++idx);
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
@@ -128,11 +128,11 @@ namespace Game.SupportSystem
             if (closedBy == 0)
                 _closedBy = ObjectGuid.Empty;
             else if (closedBy < 0)
-                _closedBy.SetRawValue(0, (ulong)closedBy);
+                _closedBy.SetRawValue(0, closedBy);
             else
-                _closedBy = ObjectGuid.Create(HighGuid.Player, (ulong)closedBy);
+                _closedBy = ObjectGuid.Create(HighGuid.Player, closedBy);
 
-            ulong assignedTo = fields.Read<ulong>(++idx);
+            long assignedTo = fields.Read<long>(++idx);
             if (assignedTo == 0)
                 _assignedTo = ObjectGuid.Empty;
             else
@@ -170,7 +170,7 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            var curTime = (ulong)GameTime.GetGameTime();
+            var curTime = GameTime.GetGameTime();
 
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
@@ -219,14 +219,14 @@ namespace Game.SupportSystem
         public override void LoadFromDB(SQLFields fields)
         {
             byte idx = 0;
-            _id = fields.Read<uint>(idx);
-            _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(++idx));
+            _id = fields.Read<int>(idx);
+            _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<long>(++idx));
             _note = fields.Read<string>(++idx);
-            _createTime = fields.Read<ulong>(++idx);
+            _createTime = fields.Read<long>(++idx);
             _mapId = fields.Read<ushort>(++idx);
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
-            _targetCharacterGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(++idx));
+            _targetCharacterGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<long>(++idx));
             _reportType = (ReportType)fields.Read<int>(++idx);
             _majorCategory = (ReportMajorCategory)fields.Read<int>(++idx);
             _minorCategoryFlags = (ReportMinorCategory)fields.Read<int>(++idx);
@@ -238,11 +238,11 @@ namespace Game.SupportSystem
             if (closedBy == 0)
                 _closedBy = ObjectGuid.Empty;
             else if (closedBy < 0)
-                _closedBy.SetRawValue(0, (ulong)closedBy);
+                _closedBy.SetRawValue(0, closedBy);
             else
-                _closedBy = ObjectGuid.Create(HighGuid.Player, (ulong)closedBy);
+                _closedBy = ObjectGuid.Create(HighGuid.Player, closedBy);
 
-            ulong assignedTo = fields.Read<ulong>(++idx);
+            long assignedTo = fields.Read<long>(++idx);
             if (assignedTo == 0)
                 _assignedTo = ObjectGuid.Empty;
             else
@@ -314,7 +314,7 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            ulong curTime = (ulong)GameTime.GetGameTime();
+            long curTime = GameTime.GetGameTime();
 
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
@@ -370,10 +370,10 @@ namespace Game.SupportSystem
         public override void LoadFromDB(SQLFields fields)
         {
             byte idx = 0;
-            _id = fields.Read<uint>(idx);
-            _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(++idx));
+            _id = fields.Read<int>(idx);
+            _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<long>(++idx));
             _note = fields.Read<string>(++idx);
-            _createTime = fields.Read<ulong>(++idx);
+            _createTime = fields.Read<long>(++idx);
             _mapId = fields.Read<ushort>(++idx);
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
@@ -382,11 +382,11 @@ namespace Game.SupportSystem
             if (closedBy == 0)
                 _closedBy = ObjectGuid.Empty;
             else if (closedBy < 0)
-                _closedBy.SetRawValue(0, (ulong)closedBy);
+                _closedBy.SetRawValue(0, closedBy);
             else
-                _closedBy = ObjectGuid.Create(HighGuid.Player, (ulong)closedBy);
+                _closedBy = ObjectGuid.Create(HighGuid.Player, closedBy);
 
-            ulong assignedTo = fields.Read<ulong>(++idx);
+            long assignedTo = fields.Read<long>(++idx);
             if (assignedTo == 0)
                 _assignedTo = ObjectGuid.Empty;
             else

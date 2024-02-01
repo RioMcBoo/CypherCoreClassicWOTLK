@@ -63,7 +63,7 @@ namespace Game.AI
                     switch (source_type)
                     {
                         case SmartScriptType.Creature:
-                            if (Global.ObjectMgr.GetCreatureTemplate((uint)temp.EntryOrGuid) == null)
+                            if (Global.ObjectMgr.GetCreatureTemplate(temp.EntryOrGuid) == null)
                             {
                                 Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: Creature entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
@@ -72,7 +72,7 @@ namespace Game.AI
 
                         case SmartScriptType.GameObject:
                         {
-                            if (Global.ObjectMgr.GetGameObjectTemplate((uint)temp.EntryOrGuid) == null)
+                            if (Global.ObjectMgr.GetGameObjectTemplate(temp.EntryOrGuid) == null)
                             {
                                 Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: GameObject entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
@@ -81,7 +81,7 @@ namespace Game.AI
                         }
                         case SmartScriptType.AreaTrigger:
                         {
-                            if (CliDB.AreaTableStorage.LookupByKey((uint)temp.EntryOrGuid) == null)
+                            if (CliDB.AreaTableStorage.LookupByKey(temp.EntryOrGuid) == null)
                             {
                                 Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: AreaTrigger entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
@@ -90,7 +90,7 @@ namespace Game.AI
                         }
                         case SmartScriptType.Scene:
                         {
-                            if (Global.ObjectMgr.GetSceneTemplate((uint)temp.EntryOrGuid) == null)
+                            if (Global.ObjectMgr.GetSceneTemplate(temp.EntryOrGuid) == null)
                             {
                                 Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: Scene id ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
@@ -99,7 +99,7 @@ namespace Game.AI
                         }
                         case SmartScriptType.Event:
                         {
-                            if (!Global.ObjectMgr.IsValidEvent((uint)temp.EntryOrGuid))
+                            if (!Global.ObjectMgr.IsValidEvent(temp.EntryOrGuid))
                             {
                                 Log.outError(LogFilter.Sql, $"SmartAIMgr::LoadSmartAIFromDB: Event id ({temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
@@ -108,7 +108,7 @@ namespace Game.AI
                         }
                         case SmartScriptType.Quest:
                         {
-                            if (Global.ObjectMgr.GetQuestTemplate((uint)temp.EntryOrGuid) == null)
+                            if (Global.ObjectMgr.GetQuestTemplate(temp.EntryOrGuid) == null)
                             {
                                 Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Quest id ({temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
@@ -119,7 +119,7 @@ namespace Game.AI
                             break;//nothing to check, really
                         case SmartScriptType.AreaTriggerEntity:
                         {
-                            if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)temp.EntryOrGuid, false)) == null)
+                            if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId(temp.EntryOrGuid, false)) == null)
                             {
                                 Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide false) does not exist, skipped loading.");
                                 continue;
@@ -128,7 +128,7 @@ namespace Game.AI
                         }
                         case SmartScriptType.AreaTriggerEntityServerside:
                         {
-                            if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)temp.EntryOrGuid, true)) == null)
+                            if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId(temp.EntryOrGuid, true)) == null)
                             {
                                 Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide true) does not exist, skipped loading.");
                                 continue;
@@ -146,7 +146,7 @@ namespace Game.AI
                     {
                         case SmartScriptType.Creature:
                         {
-                            CreatureData creature = Global.ObjectMgr.GetCreatureData((ulong)-temp.EntryOrGuid);
+                            CreatureData creature = Global.ObjectMgr.GetCreatureData(-temp.EntryOrGuid);
                             if (creature == null)
                             {
                                 Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
@@ -169,7 +169,7 @@ namespace Game.AI
                         }
                         case SmartScriptType.GameObject:
                         {
-                            GameObjectData gameObject = Global.ObjectMgr.GetGameObjectData((ulong)-temp.EntryOrGuid);
+                            GameObjectData gameObject = Global.ObjectMgr.GetGameObjectData(-temp.EntryOrGuid);
                             if (gameObject == null)
                             {
                                 Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
@@ -204,27 +204,27 @@ namespace Game.AI
                 temp.Event.event_chance = result.Read<byte>(6);
                 temp.Event.event_flags = (SmartEventFlags)result.Read<ushort>(7);
 
-                temp.Event.raw.param1 = result.Read<uint>(8);
-                temp.Event.raw.param2 = result.Read<uint>(9);
-                temp.Event.raw.param3 = result.Read<uint>(10);
-                temp.Event.raw.param4 = result.Read<uint>(11);
-                temp.Event.raw.param5 = result.Read<uint>(12);
+                temp.Event.raw.param1 = result.Read<int>(8);
+                temp.Event.raw.param2 = result.Read<int>(9);
+                temp.Event.raw.param3 = result.Read<int>(10);
+                temp.Event.raw.param4 = result.Read<int>(11);
+                temp.Event.raw.param5 = result.Read<int>(12);
                 temp.Event.param_string = result.Read<string>(13);
 
                 temp.Action.type = (SmartActions)result.Read<byte>(14);
-                temp.Action.raw.param1 = result.Read<uint>(15);
-                temp.Action.raw.param2 = result.Read<uint>(16);
-                temp.Action.raw.param3 = result.Read<uint>(17);
-                temp.Action.raw.param4 = result.Read<uint>(18);
-                temp.Action.raw.param5 = result.Read<uint>(19);
-                temp.Action.raw.param6 = result.Read<uint>(20);
-                temp.Action.raw.param7 = result.Read<uint>(21);
+                temp.Action.raw.param1 = result.Read<int>(15);
+                temp.Action.raw.param2 = result.Read<int>(16);
+                temp.Action.raw.param3 = result.Read<int>(17);
+                temp.Action.raw.param4 = result.Read<int>(18);
+                temp.Action.raw.param5 = result.Read<int>(19);
+                temp.Action.raw.param6 = result.Read<int>(20);
+                temp.Action.raw.param7 = result.Read<int>(21);
 
                 temp.Target.type = (SmartTargets)result.Read<byte>(22);
-                temp.Target.raw.param1 = result.Read<uint>(23);
-                temp.Target.raw.param2 = result.Read<uint>(24);
-                temp.Target.raw.param3 = result.Read<uint>(25);
-                temp.Target.raw.param4 = result.Read<uint>(26);
+                temp.Target.raw.param1 = result.Read<int>(23);
+                temp.Target.raw.param2 = result.Read<int>(24);
+                temp.Target.raw.param3 = result.Read<int>(25);
+                temp.Target.raw.param4 = result.Read<int>(26);
                 temp.Target.x = result.Read<float>(27);
                 temp.Target.y = result.Read<float>(28);
                 temp.Target.z = result.Read<float>(29);
@@ -408,7 +408,7 @@ namespace Game.AI
                     if (e.Target.unitGUID.entry != 0 && !IsCreatureValid(e, e.Target.unitGUID.entry))
                         return false;
 
-                    ulong guid = e.Target.unitGUID.dbGuid;
+                    long guid = e.Target.unitGUID.dbGuid;
                     CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                     if (data == null)
                     {
@@ -427,7 +427,7 @@ namespace Game.AI
                     if (e.Target.goGUID.entry != 0 && !IsGameObjectValid(e, e.Target.goGUID.entry))
                         return false;
 
-                    ulong guid = e.Target.goGUID.dbGuid;
+                    long guid = e.Target.goGUID.dbGuid;
                     GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                     if (data == null)
                     {
@@ -505,7 +505,7 @@ namespace Game.AI
             return true;
         }
 
-        static bool IsSpellVisualKitValid(SmartScriptHolder e, uint entry)
+        static bool IsSpellVisualKitValid(SmartScriptHolder e, int entry)
         {
             if (!CliDB.SpellVisualKitStorage.ContainsKey(entry))
             {
@@ -603,12 +603,12 @@ namespace Game.AI
                 _ => Marshal.SizeOf(typeof(SmartEvent.Raw)),
             };
 
-            int rawCount = Marshal.SizeOf(typeof(SmartEvent.Raw)) / sizeof(uint);
-            int paramsCount = paramsStructSize / sizeof(uint);
+            int rawCount = Marshal.SizeOf(typeof(SmartEvent.Raw)) / sizeof(int);
+            int paramsCount = paramsStructSize / sizeof(int);
 
             for (int index = paramsCount; index < rawCount; index++)
             {
-                uint value = 0;
+                int value = 0;
                 switch (index)
                 {
                     case 0:
@@ -777,12 +777,12 @@ namespace Game.AI
                 _ => Marshal.SizeOf(typeof(SmartAction.Raw)),
             };
 
-            int rawCount = Marshal.SizeOf(typeof(SmartAction.Raw)) / sizeof(uint);
-            int paramsCount = paramsStructSize / sizeof(uint);
+            int rawCount = Marshal.SizeOf(typeof(SmartAction.Raw)) / sizeof(int);
+            int paramsCount = paramsStructSize / sizeof(int);
 
             for (int index = paramsCount; index < rawCount; index++)
             {
-                uint value = 0;
+                int value = 0;
                 switch (index)
                 {
                     case 0:
@@ -850,12 +850,12 @@ namespace Game.AI
                 _ => Marshal.SizeOf(typeof(SmartTarget.Raw)),
             };
 
-            int rawCount = Marshal.SizeOf(typeof(SmartTarget.Raw)) / sizeof(uint);
-            int paramsCount = paramsStructSize / sizeof(uint);
+            int rawCount = Marshal.SizeOf(typeof(SmartTarget.Raw)) / sizeof(int);
+            int paramsCount = paramsStructSize / sizeof(int);
 
             for (int index = paramsCount; index < rawCount; index++)
             {
-                uint value = 0;
+                int value = 0;
                 switch (index)
                 {
                     case 0:
@@ -1439,7 +1439,7 @@ namespace Game.AI
                                 return false;
                         }
 
-                        ulong guid = e.Action.crossCast.targetParam1;
+                        long guid = e.Action.crossCast.targetParam1;
                         SpawnObjectType spawnType = targetType == SmartTargets.CreatureGuid ? SpawnObjectType.Creature : SpawnObjectType.GameObject;
                         var data = Global.ObjectMgr.GetSpawnData(spawnType, guid);
                         if (data == null)
@@ -1654,7 +1654,7 @@ namespace Game.AI
                     break;
                 case SmartActions.GameEventStop:
                 {
-                    uint eventId = e.Action.gameEventStop.id;
+                    int eventId = e.Action.gameEventStop.id;
 
                     var events = Global.GameEventMgr.GetEventMap();
                     if (eventId < 1 || eventId >= events.Length)
@@ -1673,7 +1673,7 @@ namespace Game.AI
                 }
                 case SmartActions.GameEventStart:
                 {
-                    uint eventId = e.Action.gameEventStart.id;
+                    int eventId = e.Action.gameEventStart.id;
 
                     var events = Global.GameEventMgr.GetEventMap();
                     if (eventId < 1 || eventId >= events.Length)
@@ -1696,7 +1696,7 @@ namespace Game.AI
                     {
                         sbyte equipId = (sbyte)e.Action.equip.entry;
 
-                        if (equipId != 0 && Global.ObjectMgr.GetEquipmentInfo((uint)e.EntryOrGuid, equipId) == null)
+                        if (equipId != 0 && Global.ObjectMgr.GetEquipmentInfo(e.EntryOrGuid, equipId) == null)
                         {
                             Log.outError(LogFilter.Sql, "SmartScript: SMART_ACTION_EQUIP uses non-existent equipment info id {0} for creature {1}, skipped.", equipId, e.EntryOrGuid);
                             return false;
@@ -1723,8 +1723,8 @@ namespace Game.AI
                 }
                 case SmartActions.SetIngamePhaseId:
                 {
-                    uint phaseId = e.Action.ingamePhaseId.id;
-                    uint apply = e.Action.ingamePhaseId.apply;
+                    int phaseId = e.Action.ingamePhaseId.id;
+                    int apply = e.Action.ingamePhaseId.apply;
 
                     if (apply != 0 && apply != 1)
                     {
@@ -1741,8 +1741,8 @@ namespace Game.AI
                 }
                 case SmartActions.SetIngamePhaseGroup:
                 {
-                    uint phaseGroup = e.Action.ingamePhaseGroup.groupId;
-                    uint apply = e.Action.ingamePhaseGroup.apply;
+                    int phaseGroup = e.Action.ingamePhaseGroup.groupId;
+                    int apply = e.Action.ingamePhaseGroup.apply;
 
                     if (apply != 0 && apply != 1)
                     {
@@ -1841,7 +1841,7 @@ namespace Game.AI
                         return false;
                     }
 
-                    if (areaEntry.ParentAreaID != 0)
+                    if (areaEntry.ParentAreaID != 0 && areaEntry.HasFlag(AreaFlags.IsSubzone))
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses subzone (ID: {e.Action.overrideLight.zoneId}) instead of zone, skipped.");
                         return false;
@@ -1870,7 +1870,7 @@ namespace Game.AI
                         return false;
                     }
 
-                    if (areaEntry.ParentAreaID != 0)
+                    if (areaEntry.ParentAreaID != 0 && areaEntry.HasFlag(AreaFlags.IsSubzone))
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses subzone (ID: {e.Action.overrideWeather.zoneId}) instead of zone, skipped.");
                         return false;
@@ -2014,7 +2014,7 @@ namespace Game.AI
                     if (!NotNULL(e, e.Action.activateGameObject.gameObjectAction))
                         return false;
 
-                    if (e.Action.activateGameObject.gameObjectAction >= (uint)GameObjectActions.Max)
+                    if (e.Action.activateGameObject.gameObjectAction >= (int)GameObjectActions.Max)
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has gameObjectAction parameter out of range (max allowed {(uint)GameObjectActions.Max - 1}, current value {e.Action.activateGameObject.gameObjectAction}), skipped.");
                         return false;
@@ -2072,7 +2072,7 @@ namespace Game.AI
                     break;
                 case SmartActions.BecomePersonalCloneForPlayer:
                 {
-                    if (e.Action.becomePersonalClone.type < (uint)TempSummonType.TimedOrDeadDespawn || e.Action.becomePersonalClone.type > (uint)TempSummonType.ManualDespawn)
+                    if (e.Action.becomePersonalClone.type < (int)TempSummonType.TimedOrDeadDespawn || e.Action.becomePersonalClone.type > (int)TempSummonType.ManualDespawn)
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses incorrect TempSummonType {e.Action.becomePersonalClone.type}, skipped.");
                         return false;
@@ -2117,7 +2117,7 @@ namespace Game.AI
             return true;
         }
 
-        static bool IsAnimKitValid(SmartScriptHolder e, uint entry)
+        static bool IsAnimKitValid(SmartScriptHolder e, int entry)
         {
             if (!CliDB.AnimKitStorage.ContainsKey(entry))
             {
@@ -2126,7 +2126,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsTextValid(SmartScriptHolder e, uint id)
+        static bool IsTextValid(SmartScriptHolder e, int id)
         {
             if (e.GetScriptType() != SmartScriptType.Creature)
                 return true;
@@ -2216,6 +2216,15 @@ namespace Game.AI
             }
             return true;
         }
+        static bool IsMinMaxValid(SmartScriptHolder e, uint min, uint max)
+        {
+            if (max < min)
+            {
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses min/max params wrong ({min}/{max}), skipped.");
+                return false;
+            }
+            return true;
+        }
         static bool NotNULL(SmartScriptHolder e, int data)
         {
             if (data == 0)
@@ -2274,9 +2283,9 @@ namespace Game.AI
         public List<SmartScriptHolder> GetScript(int entry, SmartScriptType type)
         {
             List<SmartScriptHolder> temp = new();
-            if (_eventMap[(uint)type].ContainsKey(entry))
+            if (_eventMap[(int)type].ContainsKey(entry))
             {
-                foreach (var holder in _eventMap[(uint)type][entry])
+                foreach (var holder in _eventMap[(int)type][entry])
                     temp.Add(new SmartScriptHolder(holder));
             }
             else
@@ -2288,7 +2297,7 @@ namespace Game.AI
             return temp;
         }
 
-        public static SmartScriptHolder FindLinkedSourceEvent(List<SmartScriptHolder> list, uint eventId)
+        public static SmartScriptHolder FindLinkedSourceEvent(List<SmartScriptHolder> list, int eventId)
         {
             var sch = list.Find(p => p.Link == eventId);
             if (sch != null)
@@ -2297,7 +2306,7 @@ namespace Game.AI
             return null;
         }
 
-        public SmartScriptHolder FindLinkedEvent(List<SmartScriptHolder> list, uint link)
+        public SmartScriptHolder FindLinkedEvent(List<SmartScriptHolder> list, int link)
         {
             var sch = list.Find(p => p.EventId == link && p.GetEventType() == SmartEvents.Link);
             if (sch != null)
@@ -2419,7 +2428,7 @@ namespace Game.AI
                 _ => 0,
             };
 
-        public static void TC_SAI_IS_BOOLEAN_VALID(SmartScriptHolder e, uint value, [CallerArgumentExpression("value")] string valueName = null)
+        public static void TC_SAI_IS_BOOLEAN_VALID(SmartScriptHolder e, int value, [CallerArgumentExpression("value")] string valueName = null)
         {
             if (value > 1)
                 Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses param {valueName} of Type Boolean with value {value}, valid values are 0 or 1, skipped.");
@@ -2428,17 +2437,17 @@ namespace Game.AI
 
     public class SmartScriptHolder : IComparable<SmartScriptHolder>
     {
-        public const uint DefaultPriority = uint.MaxValue;
+        public const int DefaultPriority = -1;
 
         public int EntryOrGuid;
         public SmartScriptType SourceType;
-        public uint EventId;
-        public uint Link;
+        public int EventId;
+        public int Link;
         public SmartEvent Event;
         public SmartAction Action;
         public SmartTarget Target;
         public uint Timer;
-        public uint Priority;
+        public int Priority;
         public bool Active;
         public bool RunOnce;
         public bool EnableTimed;
@@ -2495,7 +2504,7 @@ namespace Game.AI
         public uint event_phase_mask;
 
         [FieldOffset(8)]
-        public uint event_chance;
+        public int event_chance;
 
         [FieldOffset(12)]
         public SmartEventFlags event_flags;
@@ -2623,7 +2632,7 @@ namespace Game.AI
         {
             public uint cooldownMin;
             public uint cooldownMax;
-            public uint playerOnly;
+            public int playerOnly;
             public int creature;
         }
         public struct SpellHit
@@ -2635,11 +2644,11 @@ namespace Game.AI
         }
         public struct Los
         {
-            public uint hostilityMode;
-            public uint maxDist;
+            public int hostilityMode;
+            public int maxDist;
             public uint cooldownMin;
             public uint cooldownMax;
-            public uint playerOnly;
+            public int playerOnly;
         }
         public struct Respawn
         {
@@ -2660,49 +2669,49 @@ namespace Game.AI
         }
         public struct FriendlyCC
         {
-            public uint radius;
+            public int radius;
             public uint repeatMin;
             public uint repeatMax;
         }
         public struct MissingBuff
         {
-            public uint spell;
-            public uint radius;
+            public int spell;
+            public int radius;
             public uint repeatMin;
             public uint repeatMax;
         }
         public struct Summoned
         {
-            public uint creature;
+            public int creature;
             public uint cooldownMin;
             public uint cooldownMax;
         }
         public struct Quest
         {
-            public uint questId;
+            public int questId;
             public uint cooldownMin;
             public uint cooldownMax;
         }
         public struct QuestObjective
         {
-            public uint id;
+            public int id;
         }
         public struct Emote
         {
-            public uint emoteId;
+            public int emoteId;
             public uint cooldownMin;
             public uint cooldownMax;
         }
         public struct Aura
         {
-            public uint spell;
-            public uint count;
+            public int spell;
+            public int count;
             public uint repeatMin;
             public uint repeatMax;
         }
         public struct Charm
         {
-            public uint onRemove;
+            public int onRemove;
         }
         public struct MovementInform
         {
@@ -2750,7 +2759,7 @@ namespace Game.AI
         }
         public struct GossipHello
         {
-            public uint filter;
+            public int filter;
         }
         public struct Gossip
         {
@@ -2759,15 +2768,15 @@ namespace Game.AI
         }
         public struct GameEvent
         {
-            public uint gameEventId;
+            public int gameEventId;
         }
         public struct GoLootStateChanged
         {
-            public uint lootState;
+            public int lootState;
         }
         public struct EventInform
         {
-            public uint eventId;
+            public int eventId;
         }
         public struct DoAction
         {
@@ -2797,21 +2806,21 @@ namespace Game.AI
         }
         public struct SpellCast
         {
-            public uint spell;
+            public int spell;
             public uint cooldownMin;
             public uint cooldownMax;
         }
         public struct Spell
         {
-            public uint effIndex;
+            public int effIndex;
         }
         public struct Raw
         {
-            public uint param1;
-            public uint param2;
-            public uint param3;
-            public uint param4;
-            public uint param5;
+            public int param1;
+            public int param2;
+            public int param3;
+            public int param4;
+            public int param5;
         }
         #endregion
     }
@@ -3143,289 +3152,289 @@ namespace Game.AI
         #region Stucts
         public struct Talk
         {
-            public uint textGroupId;
+            public int textGroupId;
             public uint duration;
-            public uint useTalkTarget;
+            public int useTalkTarget;
         }
         public struct SimpleTalk
         {
-            public uint textGroupId;
+            public int textGroupId;
             public uint duration;
         }
         public struct Faction
         {
-            public uint factionId;
+            public int factionId;
         }
         public struct MorphOrMount
         {
-            public uint creature;
-            public uint model;
+            public int creature;
+            public int model;
         }
         public struct Sound
         {
-            public uint soundId;
-            public uint onlySelf;
-            public uint distance;
-            public uint keyBroadcastTextId;
+            public int soundId;
+            public int onlySelf;
+            public int distance;
+            public int keyBroadcastTextId;
         }
         public struct Emote
         {
-            public uint emoteId;
+            public int emoteId;
         }
         public struct Quest
         {
-            public uint questId;
+            public int questId;
         }
         public struct QuestOffer
         {
-            public uint questId;
-            public uint directAdd;
+            public int questId;
+            public int directAdd;
         }
         public struct React
         {
-            public uint state;
+            public int state;
         }
         public struct RandomEmote
         {
-            public uint emote1;
-            public uint emote2;
-            public uint emote3;
-            public uint emote4;
-            public uint emote5;
-            public uint emote6;
+            public int emote1;
+            public int emote2;
+            public int emote3;
+            public int emote4;
+            public int emote5;
+            public int emote6;
         }
         public struct Cast
         {
-            public uint spell;
-            public uint castFlags;
-            public uint triggerFlags;
-            public uint targetsLimit;
+            public int spell;
+            public int castFlags;
+            public int triggerFlags;
+            public int targetsLimit;
         }
         public struct CrossCast
         {
-            public uint spell;
-            public uint castFlags;
-            public uint targetType;
-            public uint targetParam1;
-            public uint targetParam2;
-            public uint targetParam3;
+            public int spell;
+            public int castFlags;
+            public int targetType;
+            public int targetParam1;
+            public int targetParam2;
+            public int targetParam3;
         }
         public struct SummonCreature
         {
-            public uint creature;
-            public uint type;
-            public uint duration;
-            public uint storageID;
-            public uint attackInvoker;
-            public uint flags; // SmartActionSummonCreatureFlags
-            public uint count;
+            public int creature;
+            public int type;
+            public int duration;
+            public int storageID;
+            public int attackInvoker;
+            public int flags; // SmartActionSummonCreatureFlags
+            public int count;
         }
         public struct ThreatPCT
         {
-            public uint threatINC;
-            public uint threatDEC;
+            public int threatINC;
+            public int threatDEC;
         }
         public struct CastCreatureOrGO
         {
-            public uint quest;
-            public uint spell;
+            public int quest;
+            public int spell;
         }
         public struct Threat
         {
-            public uint threatINC;
-            public uint threatDEC;
+            public int threatINC;
+            public int threatDEC;
         }
         public struct AutoAttack
         {
-            public uint attack;
+            public int attack;
         }
         public struct CombatMove
         {
-            public uint move;
+            public int move;
         }
         public struct SetEventPhase
         {
-            public uint phase;
+            public int phase;
         }
         public struct IncEventPhase
         {
-            public uint inc;
-            public uint dec;
+            public int inc;
+            public int dec;
         }
         public struct CastedCreatureOrGO
         {
-            public uint creature;
-            public uint spell;
+            public int creature;
+            public int spell;
         }
         public struct RemoveAura
         {
-            public uint spell;
-            public uint charges;
-            public uint onlyOwnedAuras;
+            public int spell;
+            public int charges;
+            public int onlyOwnedAuras;
         }
         public struct Follow
         {
-            public uint dist;
-            public uint angle;
-            public uint entry;
-            public uint credit;
-            public uint creditType;
+            public int dist;
+            public int angle;
+            public int entry;
+            public int credit;
+            public int creditType;
         }
         public struct RandomPhase
         {
-            public uint phase1;
-            public uint phase2;
-            public uint phase3;
-            public uint phase4;
-            public uint phase5;
-            public uint phase6;
+            public int phase1;
+            public int phase2;
+            public int phase3;
+            public int phase4;
+            public int phase5;
+            public int phase6;
         }
         public struct RandomPhaseRange
         {
-            public uint phaseMin;
-            public uint phaseMax;
+            public int phaseMin;
+            public int phaseMax;
         }
         public struct KilledMonster
         {
-            public uint creature;
+            public int creature;
         }
         public struct SetInstanceData
         {
-            public uint field;
-            public uint data;
-            public uint type;
+            public int field;
+            public int data;
+            public int type;
         }
         public struct SetInstanceData64
         {
-            public uint field;
+            public int field;
         }
         public struct UpdateTemplate
         {
-            public uint creature;
-            public uint updateLevel;
+            public int creature;
+            public int updateLevel;
         }
         public struct CallHelp
         {
-            public uint range;
-            public uint withEmote;
+            public int range;
+            public int withEmote;
         }
         public struct SetSheath
         {
-            public uint sheath;
+            public int sheath;
         }
         public struct ForceDespawn
         {
-            public uint delay;
+            public int delay;
             public uint forceRespawnTimer;
         }
         public struct InvincHP
         {
-            public uint minHP;
-            public uint percent;
+            public int minHP;
+            public int percent;
         }
         public struct IngamePhaseId
         {
-            public uint id;
-            public uint apply;
+            public int id;
+            public int apply;
         }
         public struct IngamePhaseGroup
         {
-            public uint groupId;
-            public uint apply;
+            public int groupId;
+            public int apply;
         }
         public struct SetData
         {
-            public uint field;
-            public uint data;
+            public int field;
+            public int data;
         }
         public struct MoveRandom
         {
-            public uint distance;
+            public int distance;
         }
         public struct Visibility
         {
-            public uint state;
+            public int state;
         }
         public struct SummonGO
         {
-            public uint entry;
-            public uint despawnTime;
-            public uint summonType;
+            public int entry;
+            public int despawnTime;
+            public int summonType;
         }
         public struct Active
         {
-            public uint state;
+            public int state;
         }
         public struct Taxi
         {
-            public uint id;
+            public int id;
         }
         public struct WpStart
         {
-            public uint run;
-            public uint pathID;
-            public uint repeat;
-            public uint quest;
+            public int run;
+            public int pathID;
+            public int repeat;
+            public int quest;
             public uint despawnTime;
-            //public uint reactState; DO NOT REUSE
+            //public int reactState; DO NOT REUSE
         }
         public struct WpPause
         {
-            public uint delay;
+            public int delay;
         }
         public struct WpStop
         {
             public uint despawnTime;
-            public uint quest;
-            public uint fail;
+            public int quest;
+            public int fail;
         }
         public struct Item
         {
-            public uint entry;
-            public uint count;
+            public int entry;
+            public int count;
         }
         public struct SetRun
         {
-            public uint run;
+            public int run;
         }
         public struct SetDisableGravity
         {
-            public uint disable;
+            public int disable;
         }
         public struct Teleport
         {
-            public uint mapID;
+            public int mapID;
         }
         public struct SetCounter
         {
-            public uint counterId;
-            public uint value;
-            public uint reset;
+            public int counterId;
+            public int value;
+            public int reset;
         }
         public struct StoreTargets
         {
-            public uint id;
+            public int id;
         }
         public struct TimeEvent
         {
-            public uint id;
-            public uint min;
-            public uint max;
-            public uint repeatMin;
-            public uint repeatMax;
-            public uint chance;
+            public int id;
+            public int min;
+            public int max;
+            public int repeatMin;
+            public int repeatMax;
+            public int chance;
         }
         public struct Movie
         {
-            public uint entry;
+            public int entry;
         }
         public struct Equip
         {
-            public uint entry;
+            public int entry;
             public uint mask;
-            public uint slot1;
-            public uint slot2;
-            public uint slot3;
+            public int slot1;
+            public int slot2;
+            public int slot3;
         }
         public struct Flag
         {
@@ -3433,269 +3442,269 @@ namespace Game.AI
         }
         public struct SetunitByte
         {
-            public uint byte1;
-            public uint type;
+            public int byte1;
+            public int type;
         }
         public struct DelunitByte
         {
-            public uint byte1;
-            public uint type;
+            public int byte1;
+            public int type;
         }
         public struct TimedActionList
         {
-            public uint id;
-            public uint timerType;
-            public uint allowOverride;
+            public int id;
+            public int timerType;
+            public int allowOverride;
         }
         public struct RandTimedActionList
         {
-            public uint actionList1;
-            public uint actionList2;
-            public uint actionList3;
-            public uint actionList4;
-            public uint actionList5;
-            public uint actionList6;
+            public int actionList1;
+            public int actionList2;
+            public int actionList3;
+            public int actionList4;
+            public int actionList5;
+            public int actionList6;
         }
         public struct RandRangeTimedActionList
         {
-            public uint idMin;
-            public uint idMax;
+            public int idMin;
+            public int idMax;
         }
         public struct InterruptSpellCasting
         {
-            public uint withDelayed;
-            public uint spell_id;
-            public uint withInstant;
+            public int withDelayed;
+            public int spell_id;
+            public int withInstant;
         }
         public struct Jump
         {
-            public uint SpeedXY;
-            public uint SpeedZ;
-            public uint Gravity;
-            public uint UseDefaultGravity;
-            public uint PointId;
-            public uint ContactDistance;
+            public int SpeedXY;
+            public int SpeedZ;
+            public int Gravity;
+            public int UseDefaultGravity;
+            public int PointId;
+            public int ContactDistance;
         }
         public struct FleeAssist
         {
-            public uint withEmote;
+            public int withEmote;
         }
         public struct EnableTempGO
         {
-            public uint duration;
+            public int duration;
         }
         public struct MoveToPos
         {
-            public uint pointId;
-            public uint transport;
-            public uint disablePathfinding;
-            public uint contactDistance;
+            public int pointId;
+            public int transport;
+            public int disablePathfinding;
+            public int contactDistance;
         }
         public struct SendGossipMenu
         {
-            public uint gossipMenuId;
-            public uint gossipNpcTextId;
+            public int gossipMenuId;
+            public int gossipNpcTextId;
         }
         public struct SetGoLootState
         {
-            public uint state;
+            public int state;
         }
         public struct SendTargetToTarget
         {
-            public uint id;
+            public int id;
         }
         public struct SetRangedMovement
         {
-            public uint distance;
-            public uint angle;
+            public int distance;
+            public int angle;
         }
         public struct SetHealthRegen
         {
-            public uint regenHealth;
+            public int regenHealth;
         }
         public struct SetRoot
         {
-            public uint root;
+            public int root;
         }
         public struct GoState
         {
-            public uint state;
+            public int state;
         }
         public struct CreatureGroup
         {
-            public uint group;
-            public uint attackInvoker;
+            public int group;
+            public int attackInvoker;
         }
         public struct Power
         {
-            public uint powerType;
-            public uint newPower;
+            public int powerType;
+            public int newPower;
         }
         public struct GameEventStop
         {
-            public uint id;
+            public int id;
         }
         public struct GameEventStart
         {
-            public uint id;
+            public int id;
         }
         public struct ClosestWaypointFromList
         {
-            public uint wp1;
-            public uint wp2;
-            public uint wp3;
-            public uint wp4;
-            public uint wp5;
-            public uint wp6;
+            public int wp1;
+            public int wp2;
+            public int wp3;
+            public int wp4;
+            public int wp5;
+            public int wp6;
         }
         public struct MoveOffset
         {
-            public uint PointId;
+            public int PointId;
         }
         public struct RandomSound
         {
-            public uint sound1;
-            public uint sound2;
-            public uint sound3;
-            public uint sound4;
-            public uint onlySelf;
-            public uint distance;
+            public int sound1;
+            public int sound2;
+            public int sound3;
+            public int sound4;
+            public int onlySelf;
+            public int distance;
         }
         public struct CorpseDelay
         {
-            public uint timer;
-            public uint includeDecayRatio;
+            public int timer;
+            public int includeDecayRatio;
         }
         public struct DisableEvade
         {
-            public uint disable;
+            public int disable;
         }
         public struct GroupSpawn
         {
-            public uint groupId;
+            public int groupId;
             public uint minDelay;
             public uint maxDelay;
             public uint spawnflags;
         }
         public struct LoadEquipment
         {
-            public uint id;
-            public uint force;
+            public int id;
+            public int force;
         }
         public struct RandomTimedEvent
         {
-            public uint minId;
-            public uint maxId;
+            public int minId;
+            public int maxId;
         }
         public struct PauseMovement
         {
-            public uint movementSlot;
+            public int movementSlot;
             public uint pauseTimer;
-            public uint force;
+            public int force;
         }
         public struct RespawnData
         {
-            public uint spawnType;
-            public uint spawnId;
+            public int spawnType;
+            public int spawnId;
         }
         public struct AnimKit
         {
-            public uint animKit;
-            public uint type;
+            public int animKit;
+            public int type;
         }
         public struct Scene
         {
-            public uint sceneId;
+            public int sceneId;
         }
         public struct Cinematic
         {
-            public uint entry;
+            public int entry;
         }
         public struct MovementSpeed
         {
-            public uint movementType;
-            public uint speedInteger;
-            public uint speedFraction;
+            public int movementType;
+            public int speedInteger;
+            public int speedFraction;
         }
         public struct SpellVisualKit
         {
-            public uint spellVisualKitId;
-            public uint kitType;
+            public int spellVisualKitId;
+            public int kitType;
             public uint duration;
         }
         public struct OverrideLight
         {
-            public uint zoneId;
-            public uint areaLightId;
-            public uint overrideLightId;
-            public uint transitionMilliseconds;
+            public int zoneId;
+            public int areaLightId;
+            public int overrideLightId;
+            public int transitionMilliseconds;
         }
         public struct OverrideWeather
         {
-            public uint zoneId;
-            public uint weatherId;
-            public uint intensity;
+            public int zoneId;
+            public int weatherId;
+            public int intensity;
         }
         public struct SetHover
         {
-            public uint enable;
+            public int enable;
         }
         public struct Evade
         {
-            public uint toRespawnPosition;
+            public int toRespawnPosition;
         }
         public struct SetHealthPct
         {
-            public uint percent;
+            public int percent;
         }
         public struct Conversation
         {
-            public uint id;
+            public int id;
         }
         public struct SetImmunePC
         {
-            public uint immunePC;
+            public int immunePC;
         }
         public struct SetImmuneNPC
         {
-            public uint immuneNPC;
+            public int immuneNPC;
         }
         public struct SetUninteractible
         {
-            public uint uninteractible;
+            public int uninteractible;
         }
         public struct ActivateGameObject
         {
-            public uint gameObjectAction;
-            public uint param;
+            public int gameObjectAction;
+            public int param;
         }
         public struct AddToStoredTargets
         {
-            public uint id;
+            public int id;
         }
         public struct BecomePersonalClone
         {
-            public uint type;
-            public uint duration;
+            public int type;
+            public int duration;
         }
         public struct TriggerGameEvent
         {
-            public uint eventId;
-            public uint useSaiTargetAsGameEventSource;
+            public int eventId;
+            public int useSaiTargetAsGameEventSource;
         }
         public struct DoAction
         {
-            public uint actionId;
+            public int actionId;
         }
         public struct Raw
         {
-            public uint param1;
-            public uint param2;
-            public uint param3;
-            public uint param4;
-            public uint param5;
-            public uint param6;
-            public uint param7;
+            public int param1;
+            public int param2;
+            public int param3;
+            public int param4;
+            public int param5;
+            public int param6;
+            public int param7;
         }
         #endregion
     }
@@ -3778,89 +3787,89 @@ namespace Game.AI
         #region Structs
         public struct HostilRandom
         {
-            public uint maxDist;
-            public uint playerOnly;
-            public uint powerType;
+            public int maxDist;
+            public int playerOnly;
+            public int powerType;
         }
         public struct Farthest
         {
-            public uint maxDist;
-            public uint playerOnly;
-            public uint isInLos;
+            public int maxDist;
+            public int playerOnly;
+            public int isInLos;
         }
         public struct UnitRange
         {
-            public uint creature;
-            public uint minDist;
-            public uint maxDist;
-            public uint maxSize;
+            public int creature;
+            public int minDist;
+            public int maxDist;
+            public int maxSize;
         }
         public struct UnitGUID
         {
-            public uint dbGuid;
-            public uint entry;
+            public int dbGuid;
+            public int entry;
         }
         public struct UnitDistance
         {
-            public uint creature;
-            public uint dist;
-            public uint maxSize;
+            public int creature;
+            public int dist;
+            public int maxSize;
         }
         public struct PlayerDistance
         {
-            public uint dist;
+            public int dist;
         }
         public struct PlayerRange
         {
-            public uint minDist;
-            public uint maxDist;
+            public int minDist;
+            public int maxDist;
         }
         public struct Stored
         {
-            public uint id;
+            public int id;
         }
         public struct GoRange
         {
-            public uint entry;
-            public uint minDist;
-            public uint maxDist;
-            public uint maxSize;
+            public int entry;
+            public int minDist;
+            public int maxDist;
+            public int maxSize;
         }
         public struct GoGUID
         {
-            public uint dbGuid;
-            public uint entry;
+            public int dbGuid;
+            public int entry;
         }
         public struct GoDistance
         {
-            public uint entry;
-            public uint dist;
-            public uint maxSize;
+            public int entry;
+            public int dist;
+            public int maxSize;
         }
         public struct UnitClosest
         {
-            public uint entry;
-            public uint dist;
-            public uint dead;
+            public int entry;
+            public int dist;
+            public int dead;
         }
         public struct GoClosest
         {
-            public uint entry;
-            public uint dist;
+            public int entry;
+            public int dist;
         }
         public struct ClosestAttackable
         {
-            public uint maxDist;
-            public uint playerOnly;
+            public int maxDist;
+            public int playerOnly;
         }
         public struct ClosestFriendly
         {
-            public uint maxDist;
-            public uint playerOnly;
+            public int maxDist;
+            public int playerOnly;
         }
         public struct Owner
         {
-            public uint useCharmerOrOwner;
+            public int useCharmerOrOwner;
         }
         public struct Vehicle
         {
@@ -3868,14 +3877,14 @@ namespace Game.AI
         }
         public struct ThreatList
         {
-            public uint maxDist;
+            public int maxDist;
         }
         public struct Raw
         {
-            public uint param1;
-            public uint param2;
-            public uint param3;
-            public uint param4;
+            public int param1;
+            public int param2;
+            public int param3;
+            public int param4;
         }
         #endregion
     }

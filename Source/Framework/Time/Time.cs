@@ -132,12 +132,12 @@ public static class Time
         return DateTimeToUnixTime(UnixTimeToDateTime(time).ToUniversalTime());
     }
 
-    public static string secsToTimeString(ulong timeInSecs, TimeFormat timeFormat = TimeFormat.FullText, bool hoursOnly = false)
+    public static string secsToTimeString(long timeInSecs, TimeFormat timeFormat = TimeFormat.FullText, bool hoursOnly = false)
     {
-        ulong secs = timeInSecs % Minute;
-        ulong minutes = timeInSecs % Hour / Minute;
-        ulong hours = timeInSecs % Day / Hour;
-        ulong days = timeInSecs / Day;
+        long secs = timeInSecs % Minute;
+        long minutes = timeInSecs % Hour / Minute;
+        long hours = timeInSecs % Day / Hour;
+        long days = timeInSecs / Day;
 
         if (timeFormat == TimeFormat.Numeric)
         {
