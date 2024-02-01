@@ -2952,16 +2952,19 @@ namespace Game.Entities
 
         public bool CanJoinConstantChannelInZone(ChatChannelsRecord channel, AreaTableRecord zone)
         {
-            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.ZoneDep) && zone.HasFlag(AreaFlags.NoChatChannels))
+            if (channel.HasFlag(ChatChannelFlags.ZoneBased) && zone.HasFlag(AreaFlags.NoChatChannels))
                 return false;
 
-            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly) && !zone.HasFlag(AreaFlags.AllowTradeChannel))
+            if (channel.HasFlag(ChatChannelFlags.OnlyInCities) && !zone.HasFlag(AreaFlags.AllowTradeChannel))
                 return false;
 
-            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.GuildReq) && GetGuildId() != 0)
+            if (channel.HasFlag(ChatChannelFlags.GuildRecruitment) && GetGuildId() != 0)
                 return false;
 
-            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.NoClientJoin))
+            if (channel.Ruleset == ChatChannelRuleset.Disabled)
+                return false;
+
+            if (channel.HasFlag(ChatChannelFlags.Regional))
                 return false;
 
             return true;
@@ -3009,7 +3012,7 @@ namespace Game.Entities
 
             foreach (var channelEntry in CliDB.ChatChannelsStorage.Values)
             {
-                if (!channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Initial))
+                if (!channelEntry.HasFlag(ChatChannelFlags.AutoJoin))
                     continue;
 
                 Channel usedChannel = null;
@@ -3028,9 +3031,9 @@ namespace Game.Entities
 
                 if (CanJoinConstantChannelInZone(channelEntry, current_zone))
                 {
-                    if (!channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Global))
+                    if (!channelEntry.HasFlag(ChatChannelFlags.ZoneBased))
                     {
-                        if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly) && usedChannel != null)
+                        if (channelEntry.HasFlag(ChatChannelFlags.LinkedChannel) && usedChannel != null)
                             continue;                            // Already on the channel, as city channel names are not changing
 
                         joinChannel = cMgr.GetSystemChannel(channelEntry.Id, current_zone);
@@ -4634,7 +4637,7 @@ namespace Game.Entities
 
             pet.SetCreatorGUID(GetGUID());
             pet.SetFaction(GetFaction());
-            pet.ReplaceAllNpcFlags(NPCFlags.None);
+            pet.ReplaceAllNpcFlags(NPCFlags1.None);
             pet.ReplaceAllNpcFlags2(NPCFlags2.None);
             pet.InitStatsForLevel(GetLevel());
 

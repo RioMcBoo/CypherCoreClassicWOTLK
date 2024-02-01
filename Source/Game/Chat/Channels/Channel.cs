@@ -16,7 +16,7 @@ namespace Game.Chat
 {
     public class Channel
     {
-        public Channel(ObjectGuid guid, uint channelId, Team team = 0, AreaTableRecord zoneEntry = null)
+        public Channel(ObjectGuid guid, int channelId, Team team = 0, AreaTableRecord zoneEntry = null)
         {
             _channelFlags = ChannelFlags.General;
             _channelId = channelId;
@@ -25,13 +25,13 @@ namespace Game.Chat
             _zoneEntry = zoneEntry;
 
             ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Trade))             // for trade channel
+            if (channelEntry.HasFlag(ChatChannelFlags.AllowItemLinks))             // for trade channel
                 _channelFlags |= ChannelFlags.Trade;
 
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly2))        // for city only channels
+            if (channelEntry.HasFlag(ChatChannelFlags.LinkedChannel))        // for city only channels
                 _channelFlags |= ChannelFlags.City;
 
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Lfg))               // for LFG channel
+            if (channelEntry.HasFlag(ChatChannelFlags.LookingForGroup))               // for LFG channel
                 _channelFlags |= ChannelFlags.Lfg;
             else                                                // for all other channels
                 _channelFlags |= ChannelFlags.NotLfg;
@@ -52,7 +52,7 @@ namespace Game.Chat
                 // legacy db content might not have 0x prefix, account for that
                 string bannedGuidStr = token.Contains("0x") ? token.Substring(2) : token;
                 ObjectGuid banned = new();
-                banned.SetRawValue(ulong.Parse(bannedGuidStr.Substring(0, 16)), ulong.Parse(bannedGuidStr.Substring(16)));
+                banned.SetRawValue(long.Parse(bannedGuidStr.Substring(0, 16)), long.Parse(bannedGuidStr.Substring(16)));
                 if (banned.IsEmpty())
                     continue;
 
@@ -61,17 +61,17 @@ namespace Game.Chat
             }
         }
 
-        public static void GetChannelName(ref string channelName, uint channelId, Locale locale, AreaTableRecord zoneEntry)
+        public static void GetChannelName(ref string channelName, int channelId, Locale locale, AreaTableRecord zoneEntry)
         {
             if (channelId != 0)
             {
                 ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-                if (!channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Global))
+                if (channelEntry.HasFlag(ChatChannelFlags.ZoneBased))
                 {
-                    if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly))
-                        channelName = string.Format(channelEntry.Name[locale].ConvertFormatSyntax(), Global.ObjectMgr.GetCypherString(CypherStrings.ChannelCity, locale));
-                    else
-                        channelName = string.Format(channelEntry.Name[locale].ConvertFormatSyntax(), zoneEntry.AreaName[locale]);
+                    if (channelEntry.HasFlag(ChatChannelFlags.LinkedChannel))
+                        zoneEntry = ChannelManager.SpecialLinkedArea;
+
+                    channelName = string.Format(channelEntry.Name[locale].ConvertFormatSyntax(), zoneEntry?.AreaName[locale]);
                 }
                 else
                     channelName = channelEntry.Name[locale];
@@ -829,7 +829,7 @@ namespace Game.Chat
             }
         }
 
-        public uint GetChannelId() { return _channelId; }
+        public int GetChannelId() { return _channelId; }
         public bool IsConstant() { return _channelId != 0; }
 
         public ObjectGuid GetGUID() { return _channelGuid; }
@@ -878,7 +878,7 @@ namespace Game.Chat
         bool _isOwnerInvisible;
 
         ChannelFlags _channelFlags;
-        uint _channelId;
+        int _channelId;
         Team _channelTeam;
         ObjectGuid _channelGuid;
         ObjectGuid _ownerGuid;

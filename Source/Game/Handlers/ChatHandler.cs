@@ -144,7 +144,7 @@ namespace Game
 
             if (!CanSpeak())
             {
-                string timeStr = Time.secsToTimeString((ulong)(m_muteTime - GameTime.GetGameTime()));
+                string timeStr = Time.secsToTimeString(m_muteTime - GameTime.GetGameTime());
                 SendNotification(CypherStrings.WaitBeforeSpeaking, timeStr);
                 return;
             }
@@ -334,6 +334,10 @@ namespace Game
                     Channel chn = !channelGuid.IsEmpty() ? ChannelManager.GetChannelForPlayerByGuid(channelGuid, sender) : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
                     if (chn != null)
                     {
+                        var chatChannel = CliDB.ChatChannelsStorage.LookupByKey(chn.GetChannelId());
+                        if (chatChannel != null && chatChannel.HasFlag(ChatChannelFlags.ReadOnly))
+                            return;
+
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, chn);
                         chn.Say(GetPlayer().GetGUID(), msg, lang);
                     }
@@ -541,12 +545,12 @@ namespace Game
 
             if (!CanSpeak())
             {
-                string timeStr = Time.secsToTimeString((ulong)(m_muteTime - GameTime.GetGameTime()));
+                string timeStr = Time.secsToTimeString(m_muteTime - GameTime.GetGameTime());
                 SendNotification(CypherStrings.WaitBeforeSpeaking, timeStr);
                 return;
             }
 
-            Global.ScriptMgr.OnPlayerTextEmote(GetPlayer(), (uint)packet.SoundIndex, (uint)packet.EmoteID, packet.Target);
+            Global.ScriptMgr.OnPlayerTextEmote(GetPlayer(), packet.SoundIndex, packet.EmoteID, packet.Target);
 
             EmotesTextRecord em = CliDB.EmotesTextStorage.LookupByKey(packet.EmoteID);
             if (em == null)

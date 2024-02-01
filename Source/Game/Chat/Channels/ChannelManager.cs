@@ -13,6 +13,8 @@ namespace Game.Chat
 {
     public class ChannelManager
     {
+        public static AreaTableRecord SpecialLinkedArea { get; private set; }
+
         public ChannelManager(Team team)
         {
             _team = team;
@@ -21,6 +23,9 @@ namespace Game.Chat
 
         public static void LoadFromDB()
         {
+            SpecialLinkedArea = CliDB.AreaTableStorage.LookupByKey(3459);
+            Cypher.Assert(SpecialLinkedArea.HasFlag(AreaFlags.LinkedChatSpecialArea));
+
             if (!WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 custom chat channels. Custom channel saving is disabled.");
@@ -126,7 +131,7 @@ namespace Game.Chat
             return null;
         }
 
-        public Channel GetSystemChannel(uint channelId, AreaTableRecord zoneEntry = null)
+        public Channel GetSystemChannel(int channelId, AreaTableRecord zoneEntry = null)
         {
             ObjectGuid channelGuid = CreateBuiltinChannelGuid(channelId, zoneEntry);
             var currentChannel = _channels.LookupByKey(channelGuid);
@@ -155,7 +160,7 @@ namespace Game.Chat
             return _customChannels.LookupByKey(name.ToLower());
         }
 
-        public Channel GetChannel(uint channelId, string name, Player player, bool notify = true, AreaTableRecord zoneEntry = null)
+        public Channel GetChannel(int channelId, string name, Player player, bool notify = true, AreaTableRecord zoneEntry = null)
         {
             Channel result = null;
             if (channelId != 0) // builtin
@@ -182,7 +187,7 @@ namespace Game.Chat
             return result;
         }
 
-        public void LeftChannel(uint channelId, AreaTableRecord zoneEntry)
+        public void LeftChannel(int channelId, AreaTableRecord zoneEntry)
         {
             var guid = CreateBuiltinChannelGuid(channelId, zoneEntry);
             var channel = _channels.LookupByKey(guid);
@@ -213,27 +218,21 @@ namespace Game.Chat
             return channelGuid;
         }
 
-        ObjectGuid CreateBuiltinChannelGuid(uint channelId, AreaTableRecord zoneEntry = null)
+        ObjectGuid CreateBuiltinChannelGuid(int channelId, AreaTableRecord zoneEntry = null)
         {
-
             ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-            uint zoneId = zoneEntry != null ? zoneEntry.Id : 0;
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Global | ChannelDBCFlags.CityOnly))
-                zoneId = 0;
+            int zoneId = 0;
+            if (zoneEntry != null && channelEntry.HasFlag(ChatChannelFlags.ZoneBased) && !channelEntry.HasFlag(ChatChannelFlags.LinkedChannel))
+                zoneId = zoneEntry.Id;
 
-            ulong high = 0;
-            high |= (ulong)HighGuid.ChatChannel << 58;
-            high |= (ulong)Global.WorldMgr.GetRealmId().Index << 42;
-            high |= 1ul << 25; // built-in
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly2))
-                high |= 1ul << 24; // trade
+            if (channelEntry.HasFlag(ChatChannelFlags.GlobalForTournament))
+            {
+                var category = CliDB.CfgCategoriesStorage.LookupByKey(Global.WorldMgr.GetRealm().Timezone);
+                if (category != null && category.HasFlag(CfgCategoriesFlags.Tournament))
+                    zoneId = 0;
+            }
 
-            high |= (ulong)(zoneId) << 10;
-            high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
-
-            ObjectGuid channelGuid = new();
-            channelGuid.SetRawValue(high, channelId);
-            return channelGuid;
+            return ObjectGuid.Create(HighGuid.ChatChannel, true, channelEntry.HasFlag(ChatChannelFlags.LinkedChannel), (ushort)zoneId, (byte)(_team == Team.Alliance ? 3 : 5), channelId);
         }
 
         Dictionary<string, Channel> _customChannels = new();

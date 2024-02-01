@@ -88,23 +88,23 @@ namespace Game.DataStorage
     {        
         public LocalizedString Name;
         public LocalizedString Shortcut;
-        public uint Id;
+        public int Id;
         private int _flags;
         public sbyte FactionGroup;
         private int _ruleset;
 
         #region Properties
-        public ChannelDBCFlags Flags => (ChannelDBCFlags)_flags;
+        public ChatChannelFlags Flags => (ChatChannelFlags)_flags;
         public ChatChannelRuleset Ruleset => (ChatChannelRuleset)_ruleset;
         #endregion
 
         #region Helpers
-        public bool HasFlag(ChannelDBCFlags flag)
+        public bool HasFlag(ChatChannelFlags flag)
         {
             return _flags.HasFlag((int)flag);
         }
 
-        public bool HasAnyFlag(ChannelDBCFlags flag)
+        public bool HasAnyFlag(ChatChannelFlags flag)
         {
             return _flags.HasAnyFlag((int)flag);
         }

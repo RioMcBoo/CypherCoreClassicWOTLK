@@ -67,69 +67,6 @@ namespace Framework.Constants
         // LookingForGroup          0x50 = 0x40 | 0x10
     }
 
-    public enum ChannelDBCFlags : int
-    {
-        None = 0x00000,
-        /// <summary>
-        /// AutoJoin (General, Trade, Localdefense, Lfg)
-        /// </summary>
-        Initial = 0x00001,
-        /// <summary>
-        /// ZoneBased (General, Trade, Localdefense, Guildrecruitment)
-        /// </summary>
-        ZoneDep = 0x00002,
-        /// <summary>
-        /// ReadOnly (Worlddefense)
-        /// </summary>
-        Global = 0x00004,
-        /// <summary>
-        /// AllowItemLinks (Trade, Lfg)
-        /// </summary>
-        Trade = 0x00008,
-        /// <summary>
-        /// OnlyInCities (Trade, Guildrecruitment, Lfg)
-        /// </summary>
-        CityOnly = 0x00010,
-        /// <summary>
-        /// LinkedChannel (Trade, Guildrecruitment, Lfg)
-        /// </summary>
-        CityOnly2 = 0x00020,
-        /// <summary>
-        /// ZoneAttackAlerts (Localdefense, Worlddefense)
-        /// </summary>
-        Defense = 0x10000,
-        /// <summary>
-        /// GuildRecruitment
-        /// </summary>
-        GuildReq = 0x20000,
-        /// <summary>
-        /// LookingForGroup
-        /// </summary>
-        Lfg = 0x40000,
-        /// <summary>
-        /// GlobalForTournament (General)
-        /// </summary>
-        GlobalForTournament = 0x80000,
-        DisableRaidIcons = 0x00100000,
-        /// <summary>
-        /// Regional
-        /// </summary>
-        NoClientJoin = 0x200000
-    }
-
-    public enum ChatChannelRuleset : int
-    {
-        None = 0,
-        Mentor = 1,
-        Disabled = 2,
-        ChromieTimeCataclysm = 3,
-        ChromieTimeBuringCrusade = 4,
-        ChromieTimeWrath = 5,
-        ChromieTimeMists = 6,
-        ChromieTimeWoD = 7,
-        ChromieTimeLegion = 8,
-    }
-
     public enum ChannelMemberFlags : byte
     {
         None = 0x00,

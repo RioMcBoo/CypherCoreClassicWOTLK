@@ -301,16 +301,16 @@ namespace Game.Networking.Packets
             EmoteID = _worldPacket.ReadInt32();
             SoundIndex = _worldPacket.ReadInt32();
 
-            SpellVisualKitIDs = new uint[_worldPacket.ReadUInt32()];
+            SpellVisualKitIDs = new int[_worldPacket.ReadInt32()];
             SequenceVariation = _worldPacket.ReadInt32();
             for (var i = 0; i < SpellVisualKitIDs.Length; ++i)
-                SpellVisualKitIDs[i] = _worldPacket.ReadUInt32();
+                SpellVisualKitIDs[i] = _worldPacket.ReadInt32();
         }
 
         public ObjectGuid Target;
         public int EmoteID;
         public int SoundIndex;
-        public uint[] SpellVisualKitIDs;
+        public int[] SpellVisualKitIDs;
         public int SequenceVariation;
     }
 
