@@ -767,20 +767,20 @@ namespace Game.Entities
             if (target == null)
                 return;
 
-            damage -= (int)target.GetDamageReduction((uint)damage);
+            damage -= target.GetDamageReduction(damage);
         }
 
-        public int CalculateAOEAvoidance(int damage, SpellSchoolMask schoolMask, ObjectGuid casterGuid)
+        public int CalculateAOEAvoidance(int damage, SpellSchoolMask schoolMask, bool npcCaster)
         {
-            damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModAoeDamageAvoidance, (uint)schoolMask));
-            if (casterGuid.IsAnyTypeCreature())
-                damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModCreatureAoeDamageAvoidance, (uint)schoolMask));
+            damage = (int)(damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModAoeDamageAvoidance, (uint)schoolMask));
+            if (npcCaster != null)
+                damage = (int)(damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModCreatureAoeDamageAvoidance, (uint)schoolMask));
 
             return damage;
         }
         
         // player or player's pet resilience (-1%)
-        uint GetDamageReduction(uint damage) { return 0; }
+        int GetDamageReduction(int damage) { return 0; }
 
         float GetCombatRatingReduction(CombatRating cr)
         {

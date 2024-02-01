@@ -90,7 +90,7 @@ namespace Game.Spells
 
             // Determine if spell can be reflected back to the caster
             // Patch 1.2 notes: Spell Reflection no longer reflects abilities
-            m_canReflect = caster.IsUnit() && m_spellInfo.DmgClass == SpellDmgClass.Magic && !m_spellInfo.HasAttribute(SpellAttr0.IsAbility)
+            m_canReflect = caster.IsUnit() && ((m_spellInfo.DmgClass == SpellDmgClass.Magic && !m_spellInfo.HasAttribute(SpellAttr0.IsAbility)) || m_spellInfo.HasAttribute(SpellAttr7.AllowSpellReflection))
                 && !m_spellInfo.HasAttribute(SpellAttr1.NoReflection) && !m_spellInfo.HasAttribute(SpellAttr0.NoImmunities)
                 && !m_spellInfo.IsPassive();
 
@@ -1746,9 +1746,9 @@ namespace Game.Spells
             if (m_spellInfo.HasAttribute(SpellAttr2.ChainFromCaster))
                 searchRadius = GetMinMaxRange(false).maxRange;
             else if (spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.ChainFromInitialTarget))
-                searchRadius= jumpRadius;
+                searchRadius = jumpRadius;
             else
-                searchRadius= jumpRadius * chainTargets;
+                searchRadius = jumpRadius * chainTargets;
 
             WorldObject chainSource = m_spellInfo.HasAttribute(SpellAttr2.ChainFromCaster) ? m_caster : target;
             List<WorldObject> tempTargets = new();
@@ -1924,7 +1924,7 @@ namespace Game.Spells
                 float hitDelay = m_spellInfo.LaunchDelay;
                 WorldObject missileSource = m_caster;
                 if (m_spellInfo.HasAttribute(SpellAttr4.BouncyChainMissiles))
-                {                    
+                {
                     var previousTargetInfo = m_UniqueTargetInfo.FindLast(target => (target.EffectMask & effectMask) != 0);
                     if (previousTargetInfo != null)
                     {
@@ -2612,6 +2612,9 @@ namespace Game.Spells
             if (m_spellInfo.HasAttribute(SpellAttr12.StartCooldownOnCastStart))
                 SendSpellCooldown();
 
+            if (m_spellInfo.HasAttribute(SpellAttr7.ResetSwingTimerAtSpellStart) && IsAutoActionResetSpell())
+                ResetCombatTimers();
+
             //Containers for channeled spells have to be set
             // @todoApply this to all casted spells if needed
             // Why check duration? 29350: channelled triggers channelled
@@ -2949,6 +2952,9 @@ namespace Game.Spells
                 m_launchHandled = true;
             }
 
+            if (!m_spellInfo.HasAttribute(SpellAttr7.ResetSwingTimerAtSpellStart) && IsAutoActionResetSpell())
+                ResetCombatTimers();
+
             // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
             SendSpellGo();
 
@@ -3050,8 +3056,7 @@ namespace Game.Spells
             if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastInProgress) && !m_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
                 m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed, m_spellInfo);
 
-            if (!m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs))
-                Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
+            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
 
             // Call CreatureAI hook OnSpellCast
             Creature caster = m_originalCaster.ToCreature();
@@ -3304,8 +3309,7 @@ namespace Game.Spells
                 }
             }
 
-            if (!m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs))
-                Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), m_procSpellType, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
+            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), m_procSpellType, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
         }
 
         void SendSpellCooldown()
@@ -3450,8 +3454,7 @@ namespace Game.Spells
             if (creatureCaster != null)
                 creatureCaster.ReleaseSpellFocus(this);
 
-            if (!m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs))
-                Unit.ProcSkillsAndAuras(unitCaster, null, new ProcFlagsInit(ProcFlags.CastEnded), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, this, null, null);
+            Unit.ProcSkillsAndAuras(unitCaster, null, new ProcFlagsInit(ProcFlags.CastEnded), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, this, null, null);
 
             if (result != SpellCastResult.SpellCastOk)
             {
@@ -3476,17 +3479,6 @@ namespace Game.Spells
                     if (unitCaster.GetDeathState() != DeathState.JustDied)
                         unitCaster.SetDeathState(DeathState.JustDied);
                     return;
-                }
-            }
-
-            if (IsAutoActionResetSpell())
-            {
-                if (!m_spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
-                {
-                    unitCaster.ResetAttackTimer(WeaponAttackType.BaseAttack);
-                    if (unitCaster.HaveOffhandWeapon())
-                        unitCaster.ResetAttackTimer(WeaponAttackType.OffAttack);
-                    unitCaster.ResetAttackTimer(WeaponAttackType.RangedAttack);
                 }
             }
 
@@ -3673,7 +3665,7 @@ namespace Game.Spells
                             int itemid = spellInfo.Reagent[i];
                             int itemcount = spellInfo.ReagentCount[i];
 
-                            if (!caster.HasItemCount(itemid, itemcount))
+                            if (caster != null && !caster.HasItemCount(itemid, itemcount))
                             {
                                 packet.FailedArg1 = itemid;  // first missing item
                                 break;
@@ -3687,7 +3679,7 @@ namespace Game.Spells
                     {
                         foreach (var reagentsCurrency in spellInfo.ReagentsCurrency)
                         {
-                            if (!caster.HasCurrency(reagentsCurrency.CurrencyTypesID, reagentsCurrency.CurrencyCount))
+                            if (caster != null && !caster.HasCurrency(reagentsCurrency.CurrencyTypesID, reagentsCurrency.CurrencyCount))
                             {
                                 packet.FailedArg1 = -1;
                                 packet.FailedArg2 = reagentsCurrency.CurrencyTypesID;
@@ -3714,10 +3706,18 @@ namespace Game.Spells
             if (result == SpellCastResult.SpellCastOk)
                 return;
 
-            if (!m_caster.IsTypeId(TypeId.Player))
+            Player receiver = m_caster.ToPlayer();
+            if (m_spellInfo.HasAttribute(SpellAttr7.ReportSpellFailureToUnitTarget))
+            {
+                Player target = m_targets.GetUnitTarget()?.ToPlayer();
+                if (target != null)
+                    receiver = target;
+            }
+
+            if (receiver == null)
                 return;
 
-            if (m_caster.ToPlayer().IsLoading())  // don't send cast results at loading time
+            if (receiver.IsLoading())  // don't send cast results at loading time
                 return;
 
             if (_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DontReportCastError))
@@ -3726,7 +3726,7 @@ namespace Game.Spells
             CastFailed castFailed = new();
             castFailed.Visual = m_SpellVisual;
             FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, param1, param2, m_caster.ToPlayer());
-            m_caster.ToPlayer().SendPacket(castFailed);
+            receiver.SendPacket(castFailed);
         }
 
         public void SendPetCastResult(SpellCastResult result, int? param1 = null, int? param2 = null)
@@ -4750,7 +4750,7 @@ namespace Game.Spells
                 }
             }
 
-            if (m_spellInfo.HasAttribute(SpellAttr7.IsCheatSpell) && m_caster.IsUnit() && !m_caster.ToUnit().HasUnitFlag2(UnitFlags2.AllowCheatSpells))
+            if (m_spellInfo.HasAttribute(SpellAttr7.DebugSpell) && m_caster.IsUnit() && !m_caster.ToUnit().HasUnitFlag2(UnitFlags2.AllowCheatSpells))
             {
                 m_customError = SpellCustomErrors.GmOnly;
                 return SpellCastResult.CustomError;
@@ -6986,7 +6986,7 @@ namespace Game.Spells
 
                     if (target.GetGUID() != corpse.GetOwnerGUID())
                         return false;
-                    
+
                     if (!corpse.HasCorpseDynamicFlag(CorpseDynFlags.Lootable))
                         return false;
 
@@ -7051,7 +7051,7 @@ namespace Game.Spells
 
         bool IsAutoActionResetSpell()
         {
-            if (IsTriggered())
+            if (IsTriggered() || m_spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
                 return false;
 
             if (m_casttime == 0 && m_spellInfo.HasAttribute(SpellAttr6.DoesntResetSwingTimerIfInstant))
@@ -7068,7 +7068,8 @@ namespace Game.Spells
         bool IsNeedSendToClient()
         {
             return m_SpellVisual.SpellXSpellVisualID != 0 || m_SpellVisual.ScriptVisualID != 0 || m_spellInfo.IsChanneled() ||
-                m_spellInfo.HasAttribute(SpellAttr8.AuraSendAmount) || m_spellInfo.HasHitDelay() || (m_triggeredByAuraSpell == null && !IsTriggered());
+                (m_spellInfo.HasAttribute(SpellAttr8.AuraSendAmount)) || m_spellInfo.HasHitDelay() || (m_triggeredByAuraSpell == null && !IsTriggered()) ||
+                m_spellInfo.HasAttribute(SpellAttr7.AlwaysCastLog);
         }
 
         public Unit GetUnitCasterForEffectHandlers()
@@ -7099,7 +7100,7 @@ namespace Game.Spells
 
             PrepareTargetProcessing();
 
-            foreach (TargetInfo  target in m_UniqueTargetInfo)
+            foreach (TargetInfo target in m_UniqueTargetInfo)
                 PreprocessSpellLaunch(target);
 
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
@@ -7173,9 +7174,9 @@ namespace Game.Spells
             if (m_originalCaster != null && m_damage > 0)
             {
                 bool isAoeTarget = spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect() || spellEffectInfo.IsEffect(SpellEffectName.PersistentAreaAura);
-                if (isAoeTarget || m_spellInfo.HasAttribute(SpellAttr5.TreatAsAreaEffect))
+                if (isAoeTarget || m_spellInfo.HasAttribute(SpellAttr5.TreatAsAreaEffect) || m_spellInfo.HasAttribute(SpellAttr7.TreatAsNpcAoe))
                 {
-                    m_damage = unit.CalculateAOEAvoidance(m_damage, (uint)m_spellInfo.SchoolMask, m_originalCaster.GetGUID());
+                    m_damage = unit.CalculateAOEAvoidance(m_damage, (uint)m_spellInfo.SchoolMask, !m_originalCaster.IsControlledByPlayer() || m_spellInfo.HasAttribute(SpellAttr7.TreatAsNpcAoe));
 
                     if (m_originalCaster.IsPlayer())
                     {
@@ -7223,6 +7224,18 @@ namespace Game.Spells
 
             targetInfo.Damage += m_damage;
             targetInfo.Healing += m_healing;
+        }
+
+        void ResetCombatTimers()
+        {
+            Unit unitCaster = m_caster.ToUnit();
+            if (unitCaster == null)
+                return;
+
+            unitCaster.ResetAttackTimer(WeaponAttackType.BaseAttack);
+            if (unitCaster.HaveOffhandWeapon())
+                unitCaster.ResetAttackTimer(WeaponAttackType.OffAttack);
+            unitCaster.ResetAttackTimer(WeaponAttackType.RangedAttack);
         }
 
         SpellCastResult CanOpenLock(SpellEffectInfo effect, int lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)
@@ -7909,7 +7922,7 @@ namespace Game.Spells
         public bool IsChannelActive() { return m_caster.IsUnit() && m_caster.ToUnit().GetChannelSpellId() != 0; }
 
         public int GetProcChainLength() { return m_procChainLength; }
-        
+
         public bool IsDeletable()
         {
             return !m_referencedFromCurrentSpell && !m_executedCurrently;
@@ -7969,7 +7982,7 @@ namespace Game.Spells
         public SpellInfo GetTriggeredByAuraSpell() { return m_triggeredByAuraSpell; }
 
         public int GetTimer() { return m_timer; }
-        
+
         #region Fields
         Dictionary<SpellEffectName, SpellLogEffect> _executeLogEffects = new();
         PathGenerator m_preGeneratedPath;
@@ -8382,7 +8395,7 @@ namespace Game.Spells
                 ProcFlagsHit hitMask = ProcFlagsHit.None;
 
                 // Spells with this flag cannot trigger if effect is cast on self
-                bool canEffectTrigger = (!spell.m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs) || !spell.m_spellInfo.HasAttribute(SpellAttr3.SuppressTargetProcs)) && spell.unitTarget.CanProc();
+                bool canEffectTrigger = spell.unitTarget.CanProc();
 
                 // Trigger info was not filled in Spell::prepareDataForTriggerSystem - we do it now
                 if (canEffectTrigger && !procAttacker && !procVictim)
@@ -8550,12 +8563,6 @@ namespace Game.Spells
                 // Do triggers for unit
                 if (canEffectTrigger)
                 {
-                    if (spell.m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs))
-                        procAttacker = new ProcFlagsInit();
-
-                    if (spell.m_spellInfo.HasAttribute(SpellAttr3.SuppressTargetProcs))
-                        procVictim = new ProcFlagsInit();
-
                     Unit.ProcSkillsAndAuras(caster, spell.unitTarget, procAttacker, procVictim, procSpellType, ProcFlagsSpellPhase.Hit, hitMask, spell, spellDamageInfo, healInfo);
 
                     // item spells (spell hit of non-damage spell may also activate items, for example seal of corruption hidden hit)
@@ -8592,7 +8599,7 @@ namespace Game.Spells
                 }
 
                 // Check for SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER
-                if (MissCondition == SpellMissInfo.None && spell.m_spellInfo.HasAttribute(SpellAttr7.InterruptOnlyNonplayer) && !unit.IsPlayer())
+                if (MissCondition == SpellMissInfo.None && spell.m_spellInfo.HasAttribute(SpellAttr7.CanCauseInterrupt) && !unit.IsPlayer())
                     caster.CastSpell(unit, 32747, new CastSpellExtraArgs(spell));
             }
 
@@ -9139,7 +9146,7 @@ namespace Game.Spells
 
         Spell m_Spell;
     }
-    
+
     class ProcReflectDelayed : BasicEvent
     {
         public ProcReflectDelayed(Unit owner, ObjectGuid casterGuid)
@@ -9216,7 +9223,7 @@ namespace Game.Spells
             Targets = new();
             Targets.SetDst(dest);
         }
-        
+
         public CastSpellTargetArg(SpellCastTargets targets)
         {
             Targets = new();
@@ -9365,15 +9372,15 @@ namespace Game.Spells
         }
 
         public static implicit operator CastSpellExtraArgs(bool triggered) => new CastSpellExtraArgs(triggered);
-        
+
         public static implicit operator CastSpellExtraArgs(TriggerCastFlags trigger) => new CastSpellExtraArgs(trigger);
-        
+
         public static implicit operator CastSpellExtraArgs(Item item) => new CastSpellExtraArgs(item);
-        
+
         public static implicit operator CastSpellExtraArgs(Spell triggeringSpell) => new CastSpellExtraArgs(triggeringSpell);
-        
+
         public static implicit operator CastSpellExtraArgs(AuraEffect eff) => new CastSpellExtraArgs(eff);
-        
+
         public static implicit operator CastSpellExtraArgs(Difficulty castDifficulty) => new CastSpellExtraArgs(castDifficulty);
     }
 

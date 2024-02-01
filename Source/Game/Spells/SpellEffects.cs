@@ -2479,7 +2479,7 @@ namespace Game.Spells
                     spell_bonus = (int)(spell_bonus * weapon_total_pct);
             }
 
-            uint weaponDamage = unitCaster.CalculateDamage(m_attackType, normalized, addPctMods);
+            int weaponDamage = unitCaster.CalculateDamage(m_attackType, normalized, addPctMods);
             Mechanics mechanic = Mechanics.None;
 
             // Sequence is important
@@ -3616,7 +3616,7 @@ namespace Game.Spells
             if (effectHandleMode == SpellEffectHandleMode.HitTarget)
             {
                 // not all charge effects used in negative spells
-                if (!m_spellInfo.IsPositive() && m_caster.IsTypeId(TypeId.Player))
+                if (m_spellInfo.HasAttribute(SpellAttr7.AttackOnChargeToUnit))
                     unitCaster.Attack(unitTarget, true);
 
                 if (effectInfo.TriggerSpell != 0)
@@ -4408,7 +4408,7 @@ namespace Game.Spells
                     // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
                     // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
                     // Polymorph instead of 1 / (5 + 1) . 16%.
-                    bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
+                    bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelRemovesCharges);
                     byte charges = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();
                     if (charges > 0)
                         stealList.Add(new DispelableAura(aura, chance, charges));
@@ -5107,7 +5107,7 @@ namespace Game.Spells
                 return;
 
             int duration = GetSpellInfo().CalcDuration(GetCaster());
-            AreaTrigger.CreateAreaTrigger((uint)effectInfo.MiscValue, unitCaster, null, GetSpellInfo(), destTarget.GetPosition(), duration, m_SpellVisual, this);
+            AreaTrigger.CreateAreaTrigger(effectInfo.MiscValue, unitCaster, null, GetSpellInfo(), destTarget.GetPosition(), duration, m_SpellVisual, this);
         }
 
         [SpellEffectHandler(SpellEffectName.RemoveTalent)]

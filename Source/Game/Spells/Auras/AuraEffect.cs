@@ -662,7 +662,7 @@ namespace Game.Spells
                     {
                         if (triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
                         {
-                            uint lastExtraAttackSpell = eventInfo.GetActor().GetLastExtraAttackSpell();
+                            int lastExtraAttackSpell = eventInfo.GetActor().GetLastExtraAttackSpell();
 
                             // Patch 1.12.0(?) extra attack abilities can no longer chain proc themselves
                             if (lastExtraAttackSpell == triggerSpellId)
@@ -5087,8 +5087,8 @@ namespace Game.Spells
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
-                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect))
-                    damage = target.CalculateAOEAvoidance(damage, m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
+                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe))
+                    damage = target.CalculateAOEAvoidance(damage, m_spellInfo.SchoolMask, (caster != null && !caster.IsControlledByPlayer()) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe));
             }
 
             int dmg = damage;
@@ -5667,7 +5667,7 @@ namespace Game.Spells
             if (pet == null)
                 return;
 
-            ChrSpecializationRecord currSpec = CliDB.ChrSpecializationStorage.LookupByKey(pet.GetSpecialization());
+            ChrSpecializationRecord currSpec = CliDB.ChrSpecializationStorage.LookupByKey((int)pet.GetSpecialization());
             if (currSpec == null)
                 return;
 

@@ -919,6 +919,12 @@ namespace Game.Entities
             return base.GetCastSpellXSpellVisualId(spellInfo);
         }
 
+        public bool IsSilenced(SpellSchoolMask schoolMask) { return (m_unitData.SilencedSchoolMask & (uint)schoolMask) != 0; }
+
+        public void SetSilencedSchoolMask(SpellSchoolMask schoolMask) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SilencedSchoolMask), (uint)schoolMask); }
+
+        public void ReplaceAllSilencedSchoolMask(SpellSchoolMask schoolMask) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SilencedSchoolMask), (uint)schoolMask); }
+
         public SpellHistory GetSpellHistory() { return _spellHistory; }
 
         public static ProcFlagsHit CreateProcHitMask(SpellNonMeleeDamage damageInfo, SpellMissInfo missCondition)
@@ -1495,10 +1501,18 @@ namespace Game.Entities
             }
 
             WeaponAttackType attType = damageInfo != null ? damageInfo.GetAttackType() : WeaponAttackType.BaseAttack;
-            if (typeMaskActor && actor != null)
+            SpellInfo spellInfo = null;
+            if (spell != null)
+                spellInfo = spell.GetSpellInfo();
+            else if (damageInfo != null)
+                spellInfo = damageInfo.GetSpellInfo();
+            else if (healInfo != null)
+                spellInfo = healInfo.GetSpellInfo();
+
+            if (typeMaskActor != null && actor != null && !(spellInfo != null && spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs)))
                 actor.ProcSkillsAndReactives(false, actionTarget, typeMaskActor, hitMask, attType);
 
-            if (typeMaskActionTarget && actionTarget != null)
+            if (typeMaskActionTarget && actionTarget != null && !(spellInfo != null && spellInfo.HasAttribute(SpellAttr3.SuppressTargetProcs)))
                 actionTarget.ProcSkillsAndReactives(true, actor, typeMaskActionTarget, hitMask, attType);
 
             if (actor != null)
@@ -1903,9 +1917,12 @@ namespace Game.Entities
                 Player bgPlayer = unit.ToPlayer();
                 if (bgPlayer != null)
                 {
-                    Battleground bg = bgPlayer.GetBattleground();
-                    if (bg != null)
-                        bg.UpdatePlayerScore(bgPlayer, ScoreType.HealingDone, gain);
+                    if (healInfo.GetSpellInfo() == null || !healInfo.GetSpellInfo().HasAttribute(SpellAttr7.DoNotCountForPvpScoreboard))
+                    {
+                        Battleground bg = bgPlayer.GetBattleground();
+                        if (bg != null)
+                            bg.UpdatePlayerScore(bgPlayer, ScoreType.HealingDone, gain);
+                    }
 
                     // use the actual gain, as the overheal shall not be counted, skip gain 0 (it ignored anyway in to criteria)
                     if (gain != 0)
@@ -2758,7 +2775,7 @@ namespace Game.Entities
 
             return false;
         }
-        
+
         public bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags flag, ObjectGuid guid = default)
         {
             if (!HasInterruptFlag(flag))
@@ -2807,7 +2824,7 @@ namespace Game.Entities
             return false;
         }
         
-        public uint GetAuraCount(int spellId)
+        public int GetAuraCount(int spellId)
         {
             uint count = 0;
             var range = m_appliedAuras.LookupByKey(spellId);
@@ -2873,7 +2890,7 @@ namespace Game.Entities
                     // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
                     // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% Chance to dispell
                     // Polymorph instead of 1 / (5 + 1) . 16%.
-                    bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
+                    bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelRemovesCharges);
                     byte charges = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();
                     if (charges > 0)
                         dispelList.Add(new DispelableAura(aura, chance, charges));
@@ -2911,7 +2928,7 @@ namespace Game.Entities
         {
             return false;
         }
-        
+
         public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags flag, SpellInfo source = null)
         {
             if (!HasInterruptFlag(flag))
@@ -3039,7 +3056,7 @@ namespace Game.Entities
                         }
                     }
 
-                    bool stealCharge = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
+                    bool stealCharge = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelRemovesCharges);
                     // Cast duration to unsigned to prevent permanent aura's such as Righteous Fury being permanently added to caster
                     uint dur = (uint)Math.Min(2u * Time.Minute * Time.InMilliseconds, aura.GetDuration());
 
@@ -3245,7 +3262,7 @@ namespace Game.Entities
                     // Call OnDispel hook on AuraScript
                     aura.CallScriptDispel(dispelInfo);
 
-                    if (aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges))
+                    if (aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelRemovesCharges))
                         aura.ModCharges(-dispelInfo.GetRemovedCharges(), AuraRemoveMode.EnemySpell);
                     else
                         aura.ModStackAmount(-dispelInfo.GetRemovedCharges(), AuraRemoveMode.EnemySpell);
@@ -3461,7 +3478,7 @@ namespace Game.Entities
             // this may be a dead loop if some events on aura remove will continiously apply aura on remove
             // we want to have all auras removed, so use your brain when linking events
             for (int counter = 0; !m_appliedAuras.Empty() || !m_ownedAuras.Empty(); counter++)
-            {                
+            {
                 foreach (var aurAppIter in GetAppliedAuras())
                     _UnapplyAura(aurAppIter, AuraRemoveMode.Default);
 
@@ -3820,7 +3837,7 @@ namespace Game.Entities
             }
             return null;
         }
-        
+
         // spell mustn't have familyflags
         public AuraEffect GetAuraEffect(AuraType type, SpellFamilyNames family, FlagArray128 familyFlag, ObjectGuid casterGUID = default)
         {
@@ -3908,7 +3925,7 @@ namespace Game.Entities
             AuraApplication aurApp = GetAuraApplication(predicate);
             return aurApp?.GetBase();
         }
-        
+
         public uint BuildAuraStateUpdateForTarget(Unit target)
         {
             uint auraStates = m_unitData.AuraState & ~(uint)AuraStateType.PerCasterAuraStateMask;
@@ -3931,7 +3948,7 @@ namespace Game.Entities
             AuraApplication aurApp = aura.GetApplicationOfTarget(GetGUID());
             Cypher.Assert(aurApp != null);
             if (aurApp.GetEffectMask() == 0)
-                _ApplyAura(aurApp, (uint)(1 << effIndex));
+                _ApplyAura(aurApp, 1u << effIndex));
             else
                 aurApp._HandleEffect(effIndex, true);
         }
@@ -4172,7 +4189,7 @@ namespace Game.Entities
                                 //uint removedAuras = m_removedAurasCount;
                                 RemoveAura(aurApp);
                                 //if (hasMoreThanOneEffect || m_removedAurasCount > removedAuras + 1)
-                                    //continue;
+                                //continue;
                             }
                         }
                     }

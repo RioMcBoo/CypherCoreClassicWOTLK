@@ -1711,7 +1711,7 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
-        public GameObject FindNearestUnspawnedGameObject(uint entry, float range)
+        public GameObject FindNearestUnspawnedGameObject(int entry, float range)
         {
             NearestUnspawnedGameObjectEntryInObjectRangeCheck checker = new(this, entry, range);
             GameObjectLastSearcher searcher = new(this, checker);
@@ -1934,7 +1934,7 @@ namespace Game.Entities
                 return duration;
 
             // some auras are not affected by duration modifiers
-            if (spellInfo.HasAttribute(SpellAttr7.IgnoreDurationMods))
+            if (spellInfo.HasAttribute(SpellAttr7.NoTargetDurationMod))
                 return duration;
 
             // cut duration only of negative effects
@@ -2180,7 +2180,7 @@ namespace Game.Entities
                 reflectchance += victim.GetTotalAuraModifierByMiscMask(AuraType.ReflectSpellsSchool, (uint)spellInfo.GetSchoolMask());
 
                 if (reflectchance > 0 && RandomHelper.randChance(reflectchance))
-                    return SpellMissInfo.Reflect;
+                    return spellInfo.HasAttribute(SpellAttr7.ReflectionOnlyDefends) ? SpellMissInfo.Deflect : SpellMissInfo.Reflect;
             }
 
             if (spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
