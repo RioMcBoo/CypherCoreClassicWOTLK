@@ -1155,11 +1155,11 @@ namespace Game.Achievements
                     break;
                 case CriteriaType.PVPKillInArea:
                 case CriteriaType.EnterTopLevelArea:
-                    if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
+                    if (miscValue1 == 0 || !Global.DB2Mgr.IsInArea((int)miscValue1, criteria.Entry.Asset))
                         return false;
                     break;
                 case CriteriaType.CurrencyGained:
-                    if (miscValue1 == 0 || miscValue2 == 0 || (long)miscValue2 < 0
+                    if (miscValue1 == 0 || miscValue2 == 0 || miscValue2 < 0
                         || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
@@ -1319,9 +1319,7 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.PlayerIsInArea: // 17
                 {
-                    int zoneId, areaId;
-                    referencePlayer.GetZoneAndAreaId(out zoneId, out areaId);
-                    if (zoneId != reqValue && areaId != reqValue)
+                    if (!Global.DB2Mgr.IsInArea(referencePlayer.GetAreaId(), reqValue))
                         return false;
                     break;
                 }
@@ -1329,9 +1327,7 @@ namespace Game.Achievements
                 {
                     if (refe == null)
                         return false;
-                    int zoneId, areaId;
-                    refe.GetZoneAndAreaId(out zoneId, out areaId);
-                    if (zoneId != reqValue && areaId != reqValue)
+                    if (!Global.DB2Mgr.IsInArea(refe.GetAreaId(), reqValue))
                         return false;
                     break;
                 }
@@ -2759,11 +2755,9 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerIsInAreaGroup: // 298
                 {
                     var areas = Global.DB2Mgr.GetAreasForGroup(reqValue);
-                    AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(referencePlayer.GetAreaId());
-                    if (area != null)
-                        foreach (uint areaInGroup in areas)
-                            if (areaInGroup == area.Id || areaInGroup == area.ParentAreaID)
-                                return true;
+                    foreach (var areaInGroup in areas)
+                        if (Global.DB2Mgr.IsInArea(referencePlayer.GetAreaId(), areaInGroup))
+                            return true;
                     return false;
                 }
                 case ModifierTreeType.TargetIsInAreaGroup: // 299
@@ -2772,11 +2766,9 @@ namespace Game.Achievements
                         return false;
 
                     var areas = Global.DB2Mgr.GetAreasForGroup(reqValue);
-                    var area = CliDB.AreaTableStorage.LookupByKey(refe.GetAreaId());
-                    if (area != null)
-                        foreach (uint areaInGroup in areas)
-                            if (areaInGroup == area.Id || areaInGroup == area.ParentAreaID)
-                                return true;
+                    foreach (var areaInGroup in areas)
+                        if (Global.DB2Mgr.IsInArea(refe.GetAreaId(), areaInGroup))
+                            return true;
                     return false;
                 }
                 case ModifierTreeType.PlayerIsInChromieTime: // 300 not used in WOTLK

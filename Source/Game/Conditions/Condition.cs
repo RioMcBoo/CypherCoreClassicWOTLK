@@ -156,11 +156,11 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Class:
                     if (unit != null)
-                        condMeets = Convert.ToBoolean(unit.GetClassMask() & ConditionValue1);
+                        condMeets = ((ClassMask)ConditionValue1).HasClass(unit.GetClass());
                     break;
                 case ConditionTypes.Race:
                     if (unit != null)
-                        condMeets = new RaceMask<uint>(ConditionValue1).HasRace(unit.GetRace());
+                        condMeets = ((RaceMask)ConditionValue1).HasRace(unit.GetRace());
                     break;
                 case ConditionTypes.Gender:
                     if (player != null)
@@ -196,7 +196,7 @@ namespace Game.Conditions
                     }
                     break;
                 case ConditionTypes.Areaid:
-                    condMeets = obj.GetAreaId() == ConditionValue1;
+                    condMeets = Global.DB2Mgr.IsInArea(obj.GetAreaId(), ConditionValue1);
                     break;
                 case ConditionTypes.Spell:
                     if (player != null)

@@ -2922,7 +2922,7 @@ namespace Game.Maps
     // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)
     class NearestGameObjectEntryInObjectRangeCheck : ICheck<GameObject>
     {
-        public NearestGameObjectEntryInObjectRangeCheck(WorldObject obj, uint entry, float range, bool spawnedOnly = true)
+        public NearestGameObjectEntryInObjectRangeCheck(WorldObject obj, int entry, float range, bool spawnedOnly = true)
         {
             _obj = obj;
             _entry = entry;
@@ -2941,7 +2941,7 @@ namespace Game.Maps
         }
 
         WorldObject _obj;
-        uint _entry;
+        int _entry;
         float _range;
         bool _spawnedOnly;
     }
@@ -2950,10 +2950,10 @@ namespace Game.Maps
     class NearestUnspawnedGameObjectEntryInObjectRangeCheck : ICheck<GameObject>
     {
         WorldObject i_obj;
-        uint i_entry;
+        int i_entry;
         float i_range;
 
-        public NearestUnspawnedGameObjectEntryInObjectRangeCheck(WorldObject obj, uint entry, float range)
+        public NearestUnspawnedGameObjectEntryInObjectRangeCheck(WorldObject obj, int entry, float range)
         {
             i_obj = obj;
             i_entry = entry;

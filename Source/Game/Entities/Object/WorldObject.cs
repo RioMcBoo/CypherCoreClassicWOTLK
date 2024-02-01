@@ -1690,7 +1690,7 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
-        public GameObject FindNearestGameObject(uint entry, float range, bool spawnedOnly = true)
+        public GameObject FindNearestGameObject(int entry, float range, bool spawnedOnly = true)
         {
             var checker = new NearestGameObjectEntryInObjectRangeCheck(this, entry, range, spawnedOnly);
             var searcher = new GameObjectLastSearcher(this, checker);
