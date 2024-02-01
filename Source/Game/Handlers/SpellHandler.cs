@@ -78,7 +78,7 @@ namespace Game
             }
 
             // locked item
-            uint lockId = proto.GetLockID();
+            int lockId = proto.GetLockID();
             if (lockId != 0)
             {
                 LockRecord lockInfo = CliDB.LockStorage.LookupByKey(lockId);
@@ -151,7 +151,7 @@ namespace Game
 
             SQLTransaction trans = new();
 
-            uint entry = result.Read<uint>(0);
+            int entry = result.Read<int>(0);
             uint flags = result.Read<uint>(1);
 
             item.SetGiftCreator(ObjectGuid.Empty);
@@ -204,6 +204,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CastSpell, Processing = PacketProcessing.ThreadSafe)]
         void HandleCastSpell(CastSpell cast)
         {
+            // Skip casting invalid spells right away
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cast.Cast.SpellID, _player.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
@@ -363,7 +364,7 @@ namespace Game
             if (mover != _player && mover.IsTypeId(TypeId.Player))
                 return;
 
-            var spellInfo = Global.SpellMgr.GetSpellInfo((uint)cancelChanneling.ChannelSpell, mover.GetMap().GetDifficultyID());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(cancelChanneling.ChannelSpell, mover.GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return;
 
@@ -489,14 +490,14 @@ namespace Game
                 // Display items in visible slots
                 foreach (var slot in itemSlots)
                 {
-                    uint itemDisplayId;
+                    int itemDisplayId;
                     Item item = player.GetItemByPos(slot);
                     if (item != null)
                         itemDisplayId = item.GetDisplayId(player);
                     else
                         itemDisplayId = 0;
 
-                    mirrorImageComponentedData.ItemDisplayID.Add((int)itemDisplayId);
+                    mirrorImageComponentedData.ItemDisplayID.Add(itemDisplayId);
                 }
 
                 SendPacket(mirrorImageComponentedData);
@@ -505,7 +506,7 @@ namespace Game
             {
                 MirrorImageCreatureData data = new();
                 data.UnitGUID = guid;
-                data.DisplayID = (int)creator.GetDisplayId();
+                data.DisplayID = creator.GetDisplayId();
                 SendPacket(data);
             }
         }

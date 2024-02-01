@@ -753,7 +753,7 @@ namespace Game.Entities
 
             bool canDodge = !spellInfo.HasAttribute(SpellAttr7.NoAttackDodge);
             bool canParry = !spellInfo.HasAttribute(SpellAttr7.NoAttackParry);
-            bool canBlock = true;
+            bool canBlock = !spellInfo.HasAttribute(SpellAttr8.NoAttackBlock);
 
             // if victim is casting or cc'd it can't avoid attacks
             if (victim.IsNonMeleeSpellCast(false, false, true) || victim.HasUnitState(UnitState.Controlled))
@@ -871,7 +871,7 @@ namespace Game.Entities
             spell.Finish(result);
         }
 
-        public virtual SpellInfo GetCastSpellInfo(SpellInfo spellInfo)
+        public virtual SpellInfo GetCastSpellInfo(SpellInfo spellInfo, TriggerCastFlags triggerFlag)
         {
             SpellInfo findMatchingAuraEffectIn(AuraType type)
             {
@@ -882,7 +882,13 @@ namespace Game.Entities
                     {
                         SpellInfo info = Global.SpellMgr.GetSpellInfo(auraEffect.GetAmount(), GetMap().GetDifficultyID());
                         if (info != null)
+                        {
+                            if (auraEffect.GetSpellInfo().HasAttribute(SpellAttr8.IgnoreSpellcastOverrideCost))
+                                triggerFlag |= TriggerCastFlags.IgnorePowerAndReagentCost;
+
                             return info;
+
+                        }
                     }
                 }
 
@@ -2767,7 +2773,7 @@ namespace Game.Entities
             return false;
         }
 
-        public bool HasAuraTypeWithTriggerSpell(AuraType auratype, uint triggerSpell)
+        public bool HasAuraTypeWithTriggerSpell(AuraType auratype, int triggerSpell)
         {
             foreach (var aura in GetAuraEffectsByType(auratype))
                 if (aura.GetSpellEffectInfo().TriggerSpell == triggerSpell)
@@ -2826,7 +2832,7 @@ namespace Game.Entities
         
         public int GetAuraCount(int spellId)
         {
-            uint count = 0;
+            int count = 0;
             var range = m_appliedAuras.LookupByKey(spellId);
             foreach (var aura in range)
             {
@@ -3948,7 +3954,7 @@ namespace Game.Entities
             AuraApplication aurApp = aura.GetApplicationOfTarget(GetGUID());
             Cypher.Assert(aurApp != null);
             if (aurApp.GetEffectMask() == 0)
-                _ApplyAura(aurApp, 1u << effIndex));
+                _ApplyAura(aurApp, 1u << effIndex);
             else
                 aurApp._HandleEffect(effIndex, true);
         }

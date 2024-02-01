@@ -1793,13 +1793,13 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Points);
-            data.WriteUInt8(Type);
+            data.WriteUInt8((byte)Type);
             data.WritePackedGuid(BeaconGUID);
         }
         
         public ObjectGuid BeaconGUID;
         public uint Points;
-        public byte Type;
+        public SpellHealPredictionType Type;
     }
 
     public class SpellCastData

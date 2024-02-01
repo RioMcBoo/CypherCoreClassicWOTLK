@@ -61,7 +61,7 @@ namespace Game.Spells
             // default amount calculation
             int amount = 0;
 
-            if (!m_spellInfo.HasAttribute(SpellAttr8.MasteryAffectPoints) || MathFunctions.fuzzyEq(GetSpellEffectInfo().BonusCoefficient, 0.0f))
+            if (!m_spellInfo.HasAttribute(SpellAttr8.MasteryAffectsPoints) || MathFunctions.fuzzyEq(GetSpellEffectInfo().BonusCoefficient, 0.0f))
                 amount = GetSpellEffectInfo().CalcValue(caster, m_baseAmount, GetBase().GetOwner().ToUnit(), GetBase().GetCastItemId(), GetBase().GetCastItemLevel());
             else if (caster != null && caster.IsTypeId(TypeId.Player))
                 amount = (int)(caster.ToPlayer().m_activePlayerData.Mastery * GetSpellEffectInfo().BonusCoefficient);
@@ -169,6 +169,8 @@ namespace Game.Spells
                 caster.ModSpellDurationTime(spellInfo, ref period);
             else if (spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic))
                 period = (int)(period * caster.m_unitData.ModCastingSpeed);
+            else if (spellInfo.HasAttribute(SpellAttr8.MeleeHasteAffectsPeriodic))
+                period = (int)(period * caster.m_unitData.ModHaste);
 
             if (period == 0)
                 return 0.0f;
@@ -179,7 +181,7 @@ namespace Game.Spells
 
             return totalTicks * CalculateEstimatedAmount(caster, target, spellInfo, spellEffectInfo, (int)amount, stack, null).GetValueOrDefault(amount);
         }
-        
+
         public uint GetTotalTicks()
         {
             uint totalTicks = 0;
@@ -252,6 +254,8 @@ namespace Game.Spells
                         caster.ModSpellDurationTime(m_spellInfo, ref _period);
                     else if (m_spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic))
                         _period = (int)(_period * caster.m_unitData.ModCastingSpeed);
+                    else if (m_spellInfo.HasAttribute(SpellAttr8.MeleeHasteAffectsPeriodic))
+                        _period = (int)(_period * caster.m_unitData.ModHaste);
                 }
             }
             else // prevent infinite loop on Update
@@ -351,7 +355,7 @@ namespace Game.Spells
                 HandleEffect(aurApp, handleMask, true, triggeredBy);
             }
 
-            if (GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) || Aura.EffectTypeNeedsSendingAmount(GetAuraType()))
+            if (GetSpellInfo().HasAttribute(SpellAttr8.AuraPointsOnClient) || Aura.EffectTypeNeedsSendingAmount(GetAuraType()))
                 GetBase().SetNeedClientUpdateForTargets();
         }
 
@@ -2502,7 +2506,7 @@ namespace Game.Spells
                 if (!apply && !target.IsFlying())
                     target.GetMotionMaster().MoveFall();
         }
-        
+
         [AuraEffectHandler(AuraType.ModStunDisableGravity)]
         void HandleAuraModStunAndDisableGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -4787,7 +4791,7 @@ namespace Game.Spells
             uint casterType = (uint)GetMiscValue();
             if (casterType > 0)
                 caster = GetCaster();
-            
+
             caster?.CastSpell(aurApp.GetTarget(), GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(this));
         }
 
@@ -5519,6 +5523,8 @@ namespace Game.Spells
         {
             Unit triggerCaster = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
+            if (GetSpellInfo().HasAttribute(SpellAttr8.TargetProcsOnCaster) && eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
+                triggerTarget = eventInfo.GetActor();
 
             int triggerSpellId = GetSpellEffectInfo().TriggerSpell;
             if (triggerSpellId == 0)
@@ -5541,6 +5547,8 @@ namespace Game.Spells
         {
             Unit triggerCaster = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
+            if (GetSpellInfo().HasAttribute(SpellAttr8.TargetProcsOnCaster) && eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
+                triggerTarget = eventInfo.GetActor();
 
             int triggerSpellId = GetSpellEffectInfo().TriggerSpell;
             if (triggerSpellId == 0)

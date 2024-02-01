@@ -871,6 +871,18 @@ namespace Game.Spells
                     return SpellCastResult.NotInRaidInstance;
             }
 
+            if (HasAttribute(SpellAttr8.RemoveOutsideDungeonsAndRaids))
+            {
+                if (mapEntry == null || !mapEntry.IsDungeon)
+                    return SpellCastResult.TargetNotInInstance;
+            }
+
+            if (HasAttribute(SpellAttr8.NotInBattleground))
+            {
+                if (mapEntry == null || mapEntry.IsBattleground)
+                    return SpellCastResult.NotInBattleground;
+            }
+
             // DB base check (if non empty then must fit at least single for allow)
             var saBounds = Global.SpellMgr.GetSpellAreaMapBounds(Id);
             if (!saBounds.Empty())
@@ -987,6 +999,10 @@ namespace Game.Spells
 
             Unit unitTarget = target.ToUnit();
 
+            if (HasAttribute(SpellAttr8.OnlyTargetIfSameCreator))
+                if (caster != target && caster.GetGUID() != target.GetOwnerGUID())
+                    return SpellCastResult.BadTargets;
+
             // creature/player specific target checks
             if (unitTarget != null)
             {
@@ -1040,6 +1056,10 @@ namespace Game.Spells
                         }
                     }
                 }
+
+                if (HasAttribute(SpellAttr8.OnlyTargetOwnSummons))
+                    if (!unitTarget.IsSummon() || unitTarget.ToTempSummon().GetSummonerGUID() != caster.GetGUID())
+                        return SpellCastResult.BadTargets;
             }
             // corpse specific target checks
             else if (target.IsTypeId(TypeId.Corpse))
@@ -1131,7 +1151,7 @@ namespace Game.Spells
                 if (HasEffect(SpellEffectName.SelfResurrect) || HasEffect(SpellEffectName.Resurrect))
                     return SpellCastResult.TargetCannotBeResurrected;
 
-            if (HasAttribute(SpellAttr8.BattleResurrection))
+            if (HasAttribute(SpellAttr8.EnforceInCombatRessurectionLimit))
             {
                 Map map = caster.GetMap();
                 if (map != null)
@@ -4207,7 +4227,7 @@ namespace Game.Spells
             if (Scaling.Coefficient != 0.0f)
             {
                 int level = _spellInfo.SpellLevel;
-                if (target != null && _spellInfo.IsPositiveEffect(EffectIndex) && (Effect == SpellEffectName.ApplyAura))
+                if (target != null && _spellInfo.HasAttribute(SpellAttr8.UseTargetsLevelForSpellScaling))
                     level = target.GetLevel();
                 else if (caster != null && caster.IsUnit())
                     level = caster.ToUnit().GetLevel();
