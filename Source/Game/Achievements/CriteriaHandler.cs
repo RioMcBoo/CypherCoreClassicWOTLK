@@ -3141,6 +3141,13 @@ namespace Game.Achievements
                 _criteriasByAsset[i] = new MultiMap<int, Criteria>();
                 _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<int, Criteria>();
             }
+
+            for (var i = 0; i < (int)CriteriaStartEvent.Max; ++i)
+                _criteriasByStartEvent[i] = new();
+
+            for (var i = 0; i < (int)CriteriaFailEvent.Max; ++i)
+                _criteriasByFailEvent[i] = new();
+
         }
 
         public void LoadCriteriaModifiersTree()

@@ -2106,7 +2106,7 @@ namespace Game
                     continue;
                 }
 
-                if (creatureSummonedDataStorage.ContainsKey(creatureId))
+                if (!creatureSummonedDataStorage.ContainsKey(creatureId))
                     creatureSummonedDataStorage[creatureId] = new();
 
                 CreatureSummonedData summonedData = creatureSummonedDataStorage[creatureId];
