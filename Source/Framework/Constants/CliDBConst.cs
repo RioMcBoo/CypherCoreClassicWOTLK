@@ -1090,7 +1090,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum CfgCategoriesCharsets : sbyte
+    public enum CfgCategoriesCharsets : byte
     {
         Any = 0x00,
         Latin1 = 0x01,
@@ -1101,7 +1101,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum CfgCategoriesFlags : sbyte
+    public enum CfgCategoriesFlags : byte
     {
         None = 0x0,
         Tournament = 0x1

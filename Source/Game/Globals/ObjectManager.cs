@@ -6,7 +6,6 @@ using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
 using Game.Achievements;
-using Game.AI;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
@@ -14,18 +13,14 @@ using Game.Loots;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
-using Game.Miscellaneous;
 using Game.Movement;
 using Game.Scripting;
 using Game.Spells;
-using Google.Protobuf.Collections;
-using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using static Game.AI.SmartTarget;
 
 namespace Game
 {
@@ -62,32 +57,13 @@ namespace Game
                 return new ExtendedPlayerName(name, "");
         }
 
-        static LanguageType GetRealmLanguageType(bool create)
+        static CfgCategoriesCharsets GetRealmLanguageType(bool create)
         {
-            switch ((RealmZones)WorldConfig.GetIntValue(WorldCfg.RealmZone))
-            {
-                case RealmZones.Unknown:                            // any language
-                case RealmZones.Development:
-                case RealmZones.TestServer:
-                case RealmZones.QaServer:
-                    return LanguageType.Any;
-                case RealmZones.UnitedStates:                      // extended-Latin
-                case RealmZones.Oceanic:
-                case RealmZones.LatinAmerica:
-                case RealmZones.English:
-                case RealmZones.German:
-                case RealmZones.French:
-                case RealmZones.Spanish:
-                    return LanguageType.ExtendenLatin;
-                case RealmZones.Korea:                              // East-Asian
-                case RealmZones.Taiwan:
-                case RealmZones.China:
-                    return LanguageType.EastAsia;
-                case RealmZones.Russian:                            // Cyrillic
-                    return LanguageType.Cyrillic;
-                default:
-                    return create ? LanguageType.BasicLatin : LanguageType.Any;        // basic-Latin at create, any at login
-            }
+            Cfg_CategoriesRecord category = CliDB.CfgCategoriesStorage.LookupByKey(Global.WorldMgr.GetRealm().Timezone);
+            if (category != null)
+                return create ? category.CreateCharsetMask : category.ExistingCharsetMask;
+
+            return create ? CfgCategoriesCharsets.English : CfgCategoriesCharsets.Any;        // basic-Latin at create, any at login
         }
 
         public static CreatureModel ChooseDisplayId(CreatureTemplate cinfo, CreatureData data = null)
@@ -185,45 +161,44 @@ namespace Game
         {
             if (strictMask == 0)                                       // any language, ignore realm
             {
-                if (IsCultureString(LanguageType.BasicLatin, str, numericOrSpace))
+                if (IsCultureString(CfgCategoriesCharsets.Latin1, str, numericOrSpace))
                     return true;
-                if (IsCultureString(LanguageType.ExtendenLatin, str, numericOrSpace))
+                if (IsCultureString(CfgCategoriesCharsets.Russian, str, numericOrSpace))
                     return true;
-                if (IsCultureString(LanguageType.Cyrillic, str, numericOrSpace))
+                if (IsCultureString(CfgCategoriesCharsets.Korean, str, numericOrSpace))
                     return true;
-                if (IsCultureString(LanguageType.EastAsia, str, numericOrSpace))
+                if (IsCultureString(CfgCategoriesCharsets.Chinese, str, numericOrSpace))
                     return true;
                 return false;
             }
 
-            if (Convert.ToBoolean(strictMask & 0x2))                                    // realm zone specific
+            if ((strictMask & 0x2) != 0)                                    // realm zone specific
             {
-                LanguageType lt = GetRealmLanguageType(create);
-                if (lt.HasAnyFlag(LanguageType.ExtendenLatin))
-                {
-                    if (IsCultureString(LanguageType.BasicLatin, str, numericOrSpace))
-                        return true;
-                    if (IsCultureString(LanguageType.ExtendenLatin, str, numericOrSpace))
-                        return true;
-                }
-                if (lt.HasAnyFlag(LanguageType.Cyrillic))
-                    if (IsCultureString(LanguageType.Cyrillic, str, numericOrSpace))
-                        return true;
-                if (lt.HasAnyFlag(LanguageType.EastAsia))
-                    if (IsCultureString(LanguageType.EastAsia, str, numericOrSpace))
-                        return true;
+                CfgCategoriesCharsets lt = GetRealmLanguageType(create);
+                if (lt == CfgCategoriesCharsets.Any)
+                    return true;
+                if (lt.HasFlag(CfgCategoriesCharsets.Latin1) && IsCultureString(CfgCategoriesCharsets.Latin1, str, numericOrSpace))
+                    return true;
+                if (lt.HasFlag(CfgCategoriesCharsets.English) && IsCultureString(CfgCategoriesCharsets.English, str, numericOrSpace))
+                    return true;
+                if (lt.HasFlag(CfgCategoriesCharsets.Russian) && IsCultureString(CfgCategoriesCharsets.Russian, str, numericOrSpace))
+                    return true;
+                if (lt.HasFlag(CfgCategoriesCharsets.Korean) && IsCultureString(CfgCategoriesCharsets.Korean, str, numericOrSpace))
+                    return true;
+                if (lt.HasFlag(CfgCategoriesCharsets.Chinese) && IsCultureString(CfgCategoriesCharsets.Chinese, str, numericOrSpace))
+                    return true;
             }
 
-            if (Convert.ToBoolean(strictMask & 0x1))                                    // basic Latin
+            if ((strictMask & 0x1) != 0)                                    // basic Latin
             {
-                if (IsCultureString(LanguageType.BasicLatin, str, numericOrSpace))
+                if (IsCultureString(CfgCategoriesCharsets.English, str, numericOrSpace))
                     return true;
             }
 
             return false;
         }
 
-        static bool IsCultureString(LanguageType culture, string str, bool numericOrSpace)
+        static bool IsCultureString(CfgCategoriesCharsets culture, string str, bool numericOrSpace)
         {
             foreach (var wchar in str)
             {
@@ -232,13 +207,17 @@ namespace Game
 
                 switch (culture)
                 {
-                    case LanguageType.BasicLatin:
+                    case CfgCategoriesCharsets.English:
                         if (wchar >= 'a' && wchar <= 'z')                      // LATIN SMALL LETTER A - LATIN SMALL LETTER Z
                             return true;
                         if (wchar >= 'A' && wchar <= 'Z')                      // LATIN CAPITAL LETTER A - LATIN CAPITAL LETTER Z
                             return true;
-                        return false;
-                    case LanguageType.ExtendenLatin:
+                        break;
+                    case CfgCategoriesCharsets.Latin1:
+                        if (wchar >= 'a' && wchar <= 'z')                      // LATIN SMALL LETTER A - LATIN SMALL LETTER Z
+                            return true;
+                        if (wchar >= 'A' && wchar <= 'Z')                      // LATIN CAPITAL LETTER A - LATIN CAPITAL LETTER Z
+                            return true;
                         if (wchar >= 0x00C0 && wchar <= 0x00D6)                  // LATIN CAPITAL LETTER A WITH GRAVE - LATIN CAPITAL LETTER O WITH DIAERESIS
                             return true;
                         if (wchar >= 0x00D8 && wchar <= 0x00DE)                  // LATIN CAPITAL LETTER O WITH STROKE - LATIN CAPITAL LETTER THORN
@@ -253,31 +232,33 @@ namespace Game
                             return true;
                         if (wchar == 0x1E9E)                                     // LATIN CAPITAL LETTER SHARP S
                             return true;
-                        return false;
-                    case LanguageType.Cyrillic:
+                        break;
+                    case CfgCategoriesCharsets.Russian:
                         if (wchar >= 0x0410 && wchar <= 0x044F)                  // CYRILLIC CAPITAL LETTER A - CYRILLIC SMALL LETTER YA
                             return true;
                         if (wchar == 0x0401 || wchar == 0x0451)                  // CYRILLIC CAPITAL LETTER IO, CYRILLIC SMALL LETTER IO
                             return true;
-                        return false;
-                    case LanguageType.EastAsia:
+                        break;
+                    case CfgCategoriesCharsets.Korean:
                         if (wchar >= 0x1100 && wchar <= 0x11F9)                  // Hangul Jamo
                             return true;
-                        if (wchar >= 0x3041 && wchar <= 0x30FF)                  // Hiragana + Katakana
-                            return true;
                         if (wchar >= 0x3131 && wchar <= 0x318E)                  // Hangul Compatibility Jamo
-                            return true;
-                        if (wchar >= 0x31F0 && wchar <= 0x31FF)                  // Katakana Phonetic Ext.
-                            return true;
-                        if (wchar >= 0x3400 && wchar <= 0x4DB5)                  // CJK Ideographs Ext. A
-                            return true;
-                        if (wchar >= 0x4E00 && wchar <= 0x9FC3)                  // Unified CJK Ideographs
                             return true;
                         if (wchar >= 0xAC00 && wchar <= 0xD7A3)                  // Hangul Syllables
                             return true;
                         if (wchar >= 0xFF01 && wchar <= 0xFFEE)                  // Halfwidth forms
                             return true;
-                        return false;
+                        break;
+                    case CfgCategoriesCharsets.Chinese:
+                        if (wchar >= 0x4E00 && wchar <= 0x9FFF)                  // Unified CJK Ideographs
+                            return true;
+                        if (wchar >= 0x3400 && wchar <= 0x4DBF)                  // CJK Ideographs Ext. A
+                            return true;
+                        if (wchar >= 0x3100 && wchar <= 0x312C)                  // Bopomofo
+                            return true;
+                        if (wchar >= 0xF900 && wchar <= 0xFAFF)                  // CJK Compatibility Ideographs
+                            return true;
+                        break;
                 }
             }
 
@@ -1532,7 +1513,7 @@ namespace Game
                     Log.outError(LogFilter.Sql, $"Table `spell_scripts` - spell {spellId} effect {spellEffIndex} is not SPELL_EFFECT_SCRIPT_EFFECT or SPELL_EFFECT_DUMMY");
             }
         }
-        
+
         void LoadEventSet()
         {
             _eventStorage.Clear();
@@ -5536,7 +5517,7 @@ namespace Game
         {
             return _creatureTemplateSparringStorage.LookupByKey(entry);
         }
-        
+
         public CreatureMovementData GetCreatureMovementOverride(ulong spawnId)
         {
             return creatureMovementOverrides.LookupByKey(spawnId);
@@ -8816,7 +8797,7 @@ namespace Game
 
             return null;
         }
-        
+
         //Spells /Skills / Phases
         public void LoadPhases()
         {
@@ -10995,7 +10976,7 @@ namespace Game
 
             return 0;
         }
-        
+
         public uint GetMaxLevelForExpansion(Expansion expansion)
         {
             switch (expansion)

@@ -2,11 +2,8 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.Entities;
-using Game.Miscellaneous;
 using System;
 using System.Numerics;
-using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
@@ -15,9 +12,9 @@ namespace Game.DataStorage
         public uint Id;
         public LocalizedString Name;
         public ushort LocaleMask;
-        private sbyte _createCharsetMask;
-        private sbyte _existingCharsetMask;
-        private sbyte _flags;
+        private byte _createCharsetMask;
+        private byte _existingCharsetMask;
+        private byte _flags;
         public sbyte Order;
 
         #region Properties
@@ -29,12 +26,12 @@ namespace Game.DataStorage
         #region Helpers
         public bool HasFlag(CfgCategoriesFlags flag)
         {
-            return _flags.HasFlag((sbyte)flag);
+            return _flags.HasFlag((byte)flag);
         }
 
         public bool HasAnyFlag(CfgCategoriesFlags flag)
         {
-            return _flags.HasAnyFlag((sbyte)flag);
+            return _flags.HasAnyFlag((byte)flag);
         }
         #endregion
     }
