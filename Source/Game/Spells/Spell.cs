@@ -6140,7 +6140,7 @@ namespace Game.Spells
                             break;
                         case SpellGroupStackRule.ExclusiveSameEffect: // this one has further checks, but i don't think they're necessary for autocast logic
                         case SpellGroupStackRule.ExclusiveHighest:
-                            if (Math.Abs(spellEffectInfo.BasePoints) <= Math.Abs(eff.GetAmount()))
+                            if (Math.Abs(spellEffectInfo.CalcBaseValue(m_caster, target, 0, -1)) <= Math.Abs(eff.GetAmount()))
                                 return false;
                             break;
                         case SpellGroupStackRule.Default:
