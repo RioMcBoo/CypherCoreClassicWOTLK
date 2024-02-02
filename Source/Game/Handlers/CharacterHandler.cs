@@ -1085,6 +1085,8 @@ namespace Game
 
             m_playerLoading.Clear();
 
+            _player.UpdateMountCapability();
+
             // Handle Login-Achievements (should be handled after loading)
             _player.UpdateCriteria(CriteriaType.Login, 1);
 
