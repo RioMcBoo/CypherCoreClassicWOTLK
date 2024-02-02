@@ -2476,7 +2476,7 @@ namespace Game.Entities
         }
 
         // Interrupts
-        public void InterruptNonMeleeSpells(bool withDelayed, uint spell_id = 0, bool withInstant = true)
+        public void InterruptNonMeleeSpells(bool withDelayed, int spell_id = 0, bool withInstant = true)
         {
             // generic spells are interrupted if they are not finished or delayed
             if (GetCurrentSpell(CurrentSpellTypes.Generic) != null && (spell_id == 0 || m_currentSpells[CurrentSpellTypes.Generic].m_spellInfo.Id == spell_id))

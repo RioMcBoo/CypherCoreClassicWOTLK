@@ -22,10 +22,10 @@ namespace Game.AI
         SmartScript _script = new();
 
         bool _isCharmed;
-        uint _followCreditType;
+        int _followCreditType;
         uint _followArrivedTimer;
-        uint _followCredit;
-        uint _followArrivedEntry;
+        int _followCredit;
+        int _followArrivedEntry;
         ObjectGuid _followGuid;
         float _followDist;
         float _followAngle;
@@ -44,7 +44,7 @@ namespace Game.AI
         bool _run;
         bool _evadeDisabled;
         bool _canCombatMove;
-        uint _invincibilityHpLevel;
+        int _invincibilityHpLevel;
 
         uint _despawnTime;
         uint _despawnState;
@@ -70,7 +70,7 @@ namespace Game.AI
             return !_isCharmed;
         }
 
-        public void StartPath(uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 0)
+        public void StartPath(int pathId = 0, bool repeat = false, Unit invoker = null, int nodeId = 0)
         {
             if (HasEscortState(SmartEscortState.Escorting))
                 StopPath();
@@ -99,7 +99,7 @@ namespace Game.AI
             me.GetMotionMaster().MovePath(path, _repeatWaypointPath);
         }
 
-        WaypointPath LoadPath(uint entry)
+        WaypointPath LoadPath(int entry)
         {
             if (HasEscortState(SmartEscortState.Escorting))
                 return null;
@@ -165,8 +165,8 @@ namespace Game.AI
         {
             if (!HasEscortState(SmartEscortState.Escorting))
             {
-                uint nodeId = 0;
-                uint pathId = 0;
+                int nodeId = 0;
+                int pathId = 0;
                 if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
                     (nodeId, pathId) = me.GetCurrentWaypointInfo();
 
@@ -261,7 +261,7 @@ namespace Game.AI
             if (fail)
                 return;
 
-            uint pathid = GetScript().GetPathId();
+            int pathid = GetScript().GetPathId();
             GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, _currentWaypointNode, pathid);
 
             if (_repeatWaypointPath)
@@ -854,7 +854,7 @@ namespace Game.AI
             }
         }
 
-        public void SetFollow(Unit target, float dist, float angle, uint credit, uint end, uint creditType)
+        public void SetFollow(Unit target, float dist, float angle, int credit, int end, int creditType)
         {
             if (target == null)
             {
@@ -903,7 +903,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.FollowCompleted, player);
         }
 
-        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker, uint startFromEventId = 0)
+        public void SetTimedActionList(SmartScriptHolder e, int entry, Unit invoker, int startFromEventId = 0)
         {
             GetScript().SetTimedActionList(e, entry, invoker, startFromEventId);
         }
@@ -1061,7 +1061,7 @@ namespace Game.AI
 
         public SmartScript GetScript() { return _script; }
 
-        public void SetInvincibilityHpLevel(uint level) { _invincibilityHpLevel = level; }
+        public void SetInvincibilityHpLevel(int level) { _invincibilityHpLevel = level; }
 
         public void SetDespawnTime(uint t, uint r = 0)
         {
@@ -1152,7 +1152,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.DataSet, invoker, id, value);
         }
 
-        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
+        public void SetTimedActionList(SmartScriptHolder e, int entry, Unit invoker)
         {
             GetScript().SetTimedActionList(e, entry, invoker);
         }
@@ -1218,7 +1218,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.AreatriggerOntrigger, unit);
         }
 
-        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
+        public void SetTimedActionList(SmartScriptHolder e, int entry, Unit invoker)
         {
             GetScript().SetTimedActionList(e, entry, invoker);
         }

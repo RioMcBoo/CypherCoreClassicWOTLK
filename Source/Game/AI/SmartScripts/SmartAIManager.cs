@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
@@ -55,7 +56,7 @@ namespace Game.AI
                 SmartScriptType source_type = (SmartScriptType)result.Read<byte>(1);
                 if (source_type >= SmartScriptType.Max)
                 {
-                    Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: invalid source_type ({0}), skipped loading.", source_type);
+                    Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: invalid source_type ({0}), skipped loading.", source_type);
                     continue;
                 }
                 if (temp.EntryOrGuid >= 0)
@@ -65,7 +66,7 @@ namespace Game.AI
                         case SmartScriptType.Creature:
                             if (Global.ObjectMgr.GetCreatureTemplate(temp.EntryOrGuid) == null)
                             {
-                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: Creature entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
+                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: Creature entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
                             }
                             break;
@@ -74,7 +75,7 @@ namespace Game.AI
                         {
                             if (Global.ObjectMgr.GetGameObjectTemplate(temp.EntryOrGuid) == null)
                             {
-                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: GameObject entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
+                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: GameObject entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
                             }
                             break;
@@ -83,7 +84,7 @@ namespace Game.AI
                         {
                             if (CliDB.AreaTableStorage.LookupByKey(temp.EntryOrGuid) == null)
                             {
-                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: AreaTrigger entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
+                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: AreaTrigger entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
                             }
                             break;
@@ -101,7 +102,7 @@ namespace Game.AI
                         {
                             if (!Global.ObjectMgr.IsValidEvent(temp.EntryOrGuid))
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr::LoadSmartAIFromDB: Event id ({temp.EntryOrGuid}) does not exist, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr::LoadFromDB: Event id ({temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
                             break;
@@ -199,36 +200,60 @@ namespace Game.AI
                 temp.SourceType = source_type;
                 temp.EventId = result.Read<ushort>(2);
                 temp.Link = result.Read<ushort>(3);
-                temp.Event.type = (SmartEvents)result.Read<byte>(4);
-                temp.Event.event_phase_mask = result.Read<ushort>(5);
-                temp.Event.event_chance = result.Read<byte>(6);
-                temp.Event.event_flags = (SmartEventFlags)result.Read<ushort>(7);
 
-                temp.Event.raw.param1 = result.Read<int>(8);
-                temp.Event.raw.param2 = result.Read<int>(9);
-                temp.Event.raw.param3 = result.Read<int>(10);
-                temp.Event.raw.param4 = result.Read<int>(11);
-                temp.Event.raw.param5 = result.Read<int>(12);
-                temp.Event.param_string = result.Read<string>(13);
+                bool invalidDifficulties = false;
+                foreach (string token in new StringArray(result.Read<string>(4), ' '))
+                {
+                    if (!Enum.TryParse<Difficulty>(token, out Difficulty difficultyId))
+                    {
+                        invalidDifficulties = true;
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr::LoadFromDB: Invalid difficulties for entryorguid ({temp.EntryOrGuid}) source_type ({temp.GetScriptType()}) id ({temp.EventId}), skipped loading.");
+                        break;
+                    }
 
-                temp.Action.type = (SmartActions)result.Read<byte>(14);
-                temp.Action.raw.param1 = result.Read<int>(15);
-                temp.Action.raw.param2 = result.Read<int>(16);
-                temp.Action.raw.param3 = result.Read<int>(17);
-                temp.Action.raw.param4 = result.Read<int>(18);
-                temp.Action.raw.param5 = result.Read<int>(19);
-                temp.Action.raw.param6 = result.Read<int>(20);
-                temp.Action.raw.param7 = result.Read<int>(21);
+                    if (difficultyId != 0 && !CliDB.DifficultyStorage.ContainsKey((int)difficultyId))
+                    {
+                        invalidDifficulties = true;
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr::LoadFromDB: Invalid difficulty id ({difficultyId}) for entryorguid ({temp.EntryOrGuid}) source_type ({temp.GetScriptType()}) id ({temp.EventId}), skipped loading.");
+                        break;
+                    }
 
-                temp.Target.type = (SmartTargets)result.Read<byte>(22);
-                temp.Target.raw.param1 = result.Read<int>(23);
-                temp.Target.raw.param2 = result.Read<int>(24);
-                temp.Target.raw.param3 = result.Read<int>(25);
-                temp.Target.raw.param4 = result.Read<int>(26);
-                temp.Target.x = result.Read<float>(27);
-                temp.Target.y = result.Read<float>(28);
-                temp.Target.z = result.Read<float>(29);
-                temp.Target.o = result.Read<float>(30);
+                    temp.Difficulties.Add(difficultyId);
+                }
+
+                if (invalidDifficulties)
+                    continue;
+
+                temp.Event.type = (SmartEvents)result.Read<byte>(5);
+                temp.Event.event_phase_mask = result.Read<ushort>(6);
+                temp.Event.event_chance = result.Read<byte>(7);
+                temp.Event.event_flags = (SmartEventFlags)result.Read<ushort>(8);
+
+                temp.Event.raw.param1 = result.Read<int>(9);
+                temp.Event.raw.param2 = result.Read<int>(10);
+                temp.Event.raw.param3 = result.Read<int>(11);
+                temp.Event.raw.param4 = result.Read<int>(12);
+                temp.Event.raw.param5 = result.Read<int>(13);
+                temp.Event.param_string = result.Read<string>(14);
+
+                temp.Action.type = (SmartActions)result.Read<byte>(15);
+                temp.Action.raw.param1 = result.Read<int>(16);
+                temp.Action.raw.param2 = result.Read<int>(17);
+                temp.Action.raw.param3 = result.Read<int>(18);
+                temp.Action.raw.param4 = result.Read<int>(19);
+                temp.Action.raw.param5 = result.Read<int>(20);
+                temp.Action.raw.param6 = result.Read<int>(21);
+                temp.Action.raw.param7 = result.Read<int>(22);
+
+                temp.Target.type = (SmartTargets)result.Read<byte>(23);
+                temp.Target.raw.param1 = result.Read<int>(24);
+                temp.Target.raw.param2 = result.Read<int>(25);
+                temp.Target.raw.param3 = result.Read<int>(26);
+                temp.Target.raw.param4 = result.Read<int>(27);
+                temp.Target.x = result.Read<float>(28);
+                temp.Target.y = result.Read<float>(29);
+                temp.Target.z = result.Read<float>(30);
+                temp.Target.o = result.Read<float>(31);
 
                 //check target
                 if (!IsTargetValid(temp))
@@ -906,6 +931,11 @@ namespace Game.AI
             if (e.Event.event_flags > SmartEventFlags.All)
             {
                 Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid event flags ({2}), skipped.", e.EntryOrGuid, e.EventId, e.Event.event_flags);
+                return false;
+            }
+            if (e.Event.event_flags.HasFlag(SmartEventFlags.Deprecated))
+            {
+                Log.outError(LogFilter.Sql, $"SmartAIMgr: EntryOrGuid {e.EntryOrGuid} using event ({e.EventId}) has deprecated event flags ({e.Event.event_flags}), skipped.");
                 return false;
             }
             if (e.Link != 0 && e.Link == e.EventId)
@@ -2443,6 +2473,8 @@ namespace Game.AI
         public SmartScriptType SourceType;
         public int EventId;
         public int Link;
+        public List<Difficulty> Difficulties = new();
+
         public SmartEvent Event;
         public SmartAction Action;
         public SmartTarget Target;
@@ -2623,8 +2655,8 @@ namespace Game.AI
         #region Structs
         public struct MinMaxRepeat
         {
-            public int min;
-            public int max;
+            public uint min;
+            public uint max;
             public uint repeatMin;
             public uint repeatMax;
         }
@@ -2786,8 +2818,8 @@ namespace Game.AI
         {
             public int minHpPct;
             public int maxHpPct;
-            public int repeatMin;
-            public int repeatMax;
+            public uint repeatMin;
+            public uint repeatMax;
             public int radius;
         }
         public struct Distance
@@ -3380,7 +3412,7 @@ namespace Game.AI
         }
         public struct WpPause
         {
-            public int delay;
+            public uint delay;
         }
         public struct WpStop
         {
@@ -3418,10 +3450,10 @@ namespace Game.AI
         public struct TimeEvent
         {
             public int id;
-            public int min;
-            public int max;
-            public int repeatMin;
-            public int repeatMax;
+            public uint min;
+            public uint max;
+            public uint repeatMin;
+            public uint repeatMax;
             public int chance;
         }
         public struct Movie
@@ -3572,7 +3604,7 @@ namespace Game.AI
         }
         public struct CorpseDelay
         {
-            public int timer;
+            public uint timer;
             public int includeDecayRatio;
         }
         public struct DisableEvade

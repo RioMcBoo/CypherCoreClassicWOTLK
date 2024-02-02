@@ -113,8 +113,8 @@ namespace Framework.Constants
         /// </summary>
         public const int SmartEventParamCount = 4;
         public const int SmartActionParamCount = 7;
-        public const uint SmartSummonCounter = 0xFFFFFF;
-        public const uint SmartEscortTargets = 0xFFFFFF;
+        public const int SmartSummonCounter = 0xFFFFFF;
+        public const int SmartEscortTargets = 0xFFFFFF;
 
         /// <summary>
         /// BGs / Arena Const
