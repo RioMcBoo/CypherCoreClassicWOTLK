@@ -601,7 +601,7 @@ namespace Game.DataStorage
             return _storage.LookupByKey(type);
         }
 
-        public void LoadHotfixData()
+        public void LoadHotfixData(BitSet availableDb2Locales)
         {
             uint oldMSTime = Time.GetMSTime();
 
@@ -624,7 +624,17 @@ namespace Game.DataStorage
                 HotfixRecord.Status status = (HotfixRecord.Status)result.Read<byte>(4);
                 if (status == HotfixRecord.Status.Valid && !_storage.ContainsKey(tableHash))
                 {
-                    if (!_hotfixBlob.Any(p => p.ContainsKey((tableHash, recordId))))
+                    var key = (tableHash, recordId);
+                    for (int locale = 0; locale < (int)Locale.Total; ++locale)
+                    {
+                        if (!availableDb2Locales[locale])
+                            continue;
+
+                        if (!_hotfixBlob[locale].ContainsKey(key))
+                            availableDb2Locales[locale] = false;
+                    }
+
+                    if (!availableDb2Locales.Any())
                     {
                         Log.outError(LogFilter.Sql, $"Table `hotfix_data` references unknown DB2 store by hash 0x{tableHash:X} and has no reference to `hotfix_blob` in hotfix id {id} with RecordID: {recordId}");
                         continue;
@@ -637,7 +647,13 @@ namespace Game.DataStorage
                 hotfixRecord.ID.PushID = id;
                 hotfixRecord.ID.UniqueID = uniqueId;
                 hotfixRecord.HotfixStatus = status;
-                _hotfixData.Add(id, hotfixRecord);
+                hotfixRecord.AvailableLocalesMask = (uint)availableDb2Locales.ToBlockRange()[0];//Ulgy i know
+
+                HotfixPush push = _hotfixData[id];
+                push.Records.Add(hotfixRecord);
+                push.AvailableLocalesMask |= hotfixRecord.AvailableLocalesMask;
+
+                _hotfixData.Add(id, push);
                 deletedRecords[(tableHash, recordId)] = status == HotfixRecord.Status.RecordRemoved;
 
                 ++count;
@@ -776,7 +792,7 @@ namespace Game.DataStorage
 
         public uint GetHotfixCount() { return (uint)_hotfixData.Count; }
 
-        public MultiMap<int, HotfixRecord> GetHotfixData() { return _hotfixData; }
+        public Dictionary<int, HotfixPush> GetHotfixData() { return _hotfixData; }
 
         public byte[] GetHotfixBlobData(uint tableHash, int recordId, Locale locale)
         {
@@ -2050,7 +2066,7 @@ namespace Game.DataStorage
         delegate bool AllowedHotfixOptionalData(byte[] data);
 
         Dictionary<uint, IDB2Storage> _storage = new();
-        MultiMap<int, HotfixRecord> _hotfixData = new();
+        Dictionary<int, HotfixPush> _hotfixData = new();
         Dictionary<(uint tableHash, int recordId), byte[]>[] _hotfixBlob = new Dictionary<(uint tableHash, int recordId), byte[]>[(int)Locale.Total];
         MultiMap<uint, (uint, AllowedHotfixOptionalData)> _allowedHotfixOptionalData = new();
         MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[] _hotfixOptionalData = new MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[(int)Locale.Total];
@@ -2288,6 +2304,7 @@ namespace Game.DataStorage
         public int RecordID;
         public HotfixId ID;
         public Status HotfixStatus = Status.Invalid;
+        public uint AvailableLocalesMask;
 
         public void Write(WorldPacket data)
         {
@@ -2335,6 +2352,12 @@ namespace Game.DataStorage
     {
         public int Key;
         public byte[] Data;
+    }
+
+    public class HotfixPush
+    {
+        public List<HotfixRecord> Records = new();
+        public uint AvailableLocalesMask;
     }
 
     class ChrClassesXPowerTypesRecordComparer : IComparer<ChrClassesXPowerTypesRecord>
