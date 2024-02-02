@@ -78,7 +78,7 @@ namespace Game.Networking.Packets
         public int FriendshipFactionID;
         public ObjectGuid GossipGUID;
         public List<ClientGossipText> GossipText = new();
-        public int? TextID;
+        public int? TextID; // in classic variants this still holds npc_text id
         public int? BroadcastTextID;
         public int GossipID;
     }
