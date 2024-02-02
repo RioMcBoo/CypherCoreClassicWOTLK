@@ -3393,7 +3393,7 @@ namespace Game.Entities
                     discreteResistProbability[i] = Math.Max(0.5f - 2.5f * Math.Abs(0.1f * i - averageResist), 0.0f);
             }
 
-            float roll = (float)RandomHelper.NextDouble();
+            float roll = RandomHelper.NextSingle();
             float probabilitySum = 0.0f;
 
             uint resistance = 0;

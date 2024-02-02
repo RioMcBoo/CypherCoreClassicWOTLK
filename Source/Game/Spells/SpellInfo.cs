@@ -1001,7 +1001,7 @@ namespace Game.Spells
 
             if (HasAttribute(SpellAttr8.OnlyTargetIfSameCreator))
             {
-                ObjectGuid getCreatorOrSelf(WorldObject obj)
+                var getCreatorOrSelf = (WorldObject obj) =>
                 {
                     ObjectGuid creator = obj.GetCreatorGUID();
                     if (creator.IsEmpty())
@@ -4922,7 +4922,7 @@ namespace Game.Spells
                 case SpellTargetDirectionTypes.FrontLeft:
                     return pi / 4;
                 case SpellTargetDirectionTypes.Random:
-                    return (float)RandomHelper.NextDouble() * (2 * pi);
+                    return RandomHelper.NextSingle() * (2 * pi);
                 default:
                     return 0.0f;
             }
