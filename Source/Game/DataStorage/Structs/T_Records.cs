@@ -141,16 +141,16 @@ namespace Game.DataStorage
         public int DepartureEventID;
 
         #region Properties
-        public TaxiNodeFlags Flags => (TaxiNodeFlags)_flags;
+        public TaxiPathNodeFlags Flags => (TaxiPathNodeFlags)_flags;
         #endregion
 
         #region Helpers
-        public bool HasFlag(TaxiNodeFlags flag)
+        public bool HasFlag(TaxiPathNodeFlags flag)
         {
             return _flags.HasFlag((int)flag);
         }
 
-        public bool HasAnyFlag(TaxiNodeFlags flag)
+        public bool HasAnyFlag(TaxiPathNodeFlags flag)
         {
             return _flags.HasAnyFlag((int)flag);
         }

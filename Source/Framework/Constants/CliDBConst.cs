@@ -2105,18 +2105,20 @@ namespace Framework.Constants
         DontDismissWhenEncounterIsAborted = 0x80000000  // NYI
     }
 
+    [Flags]
     public enum TaxiNodeFlags : int
     {
-        ShowOnAllianceMap = 0x1,
-        ShowOnHordeMap = 0x2,
-        ShowOnMapBorder = 0x4,
-        ShowIfClientPassesCondition = 0x8,
+        ShowOnAllianceMap = 0x01,
+        ShowOnHordeMap = 0x02,
+        ShowOnMapBorder = 0x04,
+        ShowIfClientPassesCondition = 0x08,
         UsePlayerFavoriteMount = 0x10,
         EndPointPnly = 0x20,
         IgnoreForFindNearest = 0x40,
         DoNotShowInWorldMapUI = 0x80,
     }
 
+    [Flags]
     public enum TaxiPathNodeFlags : int
     {
         Teleport = 0x1,

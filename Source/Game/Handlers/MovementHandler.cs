@@ -187,7 +187,7 @@ namespace Game
                         {
                             Log.outDebug(LogFilter.Player, $"FALLDAMAGE Below map. Map min height: {plrMover.GetMap().GetMinHeight(plrMover.GetPhaseShift(), movementInfo.Pos.GetPositionX(), movementInfo.Pos.GetPositionY())}, Player debug info:\n{plrMover.GetDebugInfo()}");
                             plrMover.SetPlayerFlag(PlayerFlags.IsOutOfBounds);
-                            plrMover.EnvironmentalDamage(EnviromentalDamage.FallToVoid, (uint)GetPlayer().GetMaxHealth());
+                            plrMover.EnvironmentalDamage(EnviromentalDamage.FallToVoid, (int)GetPlayer().GetMaxHealth());
                             // player can be alive if GM/etc
                             // change the death state to CORPSE to prevent the death timer from
                             // starting in the next player update
@@ -238,7 +238,7 @@ namespace Game
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(loc.GetMapId());
 
             // reset instance validity, except if going to an instance inside an instance
-            if (!player.m_InstanceValid && !mapEntry.IsDungeon())
+            if (!player.m_InstanceValid && !mapEntry.IsDungeon)
                 player.m_InstanceValid = true;
 
             Map oldMap = player.GetMap();
@@ -302,7 +302,7 @@ namespace Game
             if (player.InBattleground())
             {
                 // cleanup setting if outdated
-                if (!mapEntry.IsBattlegroundOrArena())
+                if (!mapEntry.IsBattlegroundOrArena)
                 {
                     // We're not in BG
                     player.SetBattlegroundId(0, BattlegroundTypeId.None);
@@ -346,7 +346,7 @@ namespace Game
                 player.ResurrectPlayer(0.5f);
 
             // resurrect character at enter into instance where his corpse exist after add to map
-            if (mapEntry.IsDungeon() && !player.IsAlive())
+            if (mapEntry.IsDungeon && !player.IsAlive())
             {
                 if (player.GetCorpseLocation().GetMapId() == mapEntry.Id)
                 {
@@ -355,11 +355,11 @@ namespace Game
                 }
             }
 
-            if (mapEntry.IsDungeon())
+            if (mapEntry.IsDungeon)
             {
                 // check if this instance has a reset time and send it to player if so
                 MapDb2Entries entries = new(mapEntry.Id, newMap.GetDifficultyID());
-                if (entries.MapDifficulty.HasResetSchedule())
+                if (entries.MapDifficulty.HasResetSchedule)
                 {
                     RaidInstanceMessage raidInstanceMessage = new();
                     raidInstanceMessage.Type = InstanceResetWarningType.Welcome;
@@ -387,7 +387,7 @@ namespace Game
             }
 
             // update zone immediately, otherwise leave channel will cause crash in mtmap
-            player.GetZoneAndAreaId(out uint newzone, out uint newarea);
+            player.GetZoneAndAreaId(out int newzone, out int newarea);
             player.UpdateZone(newzone, newarea);
 
             // honorless target
@@ -413,7 +413,7 @@ namespace Game
 
             WorldLocation loc = GetPlayer().GetTeleportDest();
 
-            if (CliDB.MapStorage.LookupByKey(loc.GetMapId()).IsDungeon())
+            if (CliDB.MapStorage.LookupByKey(loc.GetMapId()).IsDungeon)
             {
                 UpdateLastInstance updateLastInstance = new();
                 updateLastInstance.MapID = loc.GetMapId();
@@ -443,14 +443,14 @@ namespace Game
 
             plMover.SetSemaphoreTeleportNear(false);
 
-            uint old_zone = plMover.GetZoneId();
+            int old_zone = plMover.GetZoneId();
 
             WorldLocation dest = plMover.GetTeleportDest();
 
             plMover.UpdatePosition(dest, true);
             plMover.SetFallInformation(0, GetPlayer().GetPositionZ());
 
-            uint newzone, newarea;
+            int newzone, newarea;
             plMover.GetZoneAndAreaId(out newzone, out newarea);
             plMover.UpdateZone(newzone, newarea);
 
@@ -736,23 +736,33 @@ namespace Game
             // 2) switch from one map to other in case multim-map taxi path
             // we need process only (1)
 
-            uint curDest = GetPlayer().m_taxi.GetTaxiDestination();
+            int curDest = GetPlayer().m_taxi.GetTaxiDestination();
             if (curDest != 0)
             {
                 TaxiNodesRecord curDestNode = CliDB.TaxiNodesStorage.LookupByKey(curDest);
 
                 // far teleport case
-                if (curDestNode != null && curDestNode.ContinentID != GetPlayer().GetMapId() && GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
+                if (GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
                 {
                     FlightPathMovementGenerator flight = GetPlayer().GetMotionMaster().GetCurrentMovementGenerator() as FlightPathMovementGenerator;
                     if (flight != null)
                     {
-                        // short preparations to continue flight
-                        flight.SetCurrentNodeAfterTeleport();
-                        TaxiPathNodeRecord node = flight.GetPath()[(int)flight.GetCurrentNode()];
-                        flight.SkipCurrentNode();
+                        bool shouldTeleport = curDestNode != null && curDestNode.ContinentID != GetPlayer().GetMapId();
+                        if (!shouldTeleport)
+                        {
+                            var currentNode = flight.GetPath()[flight.GetCurrentNode()];
+                            shouldTeleport = currentNode.HasFlag(TaxiPathNodeFlags.Teleport);
+                        }
 
-                        GetPlayer().TeleportTo(curDestNode.ContinentID, node.Loc.X, node.Loc.Y, node.Loc.Z, GetPlayer().GetOrientation());
+                        if (shouldTeleport)
+                        {
+                            // short preparations to continue flight
+                            flight.SetCurrentNodeAfterTeleport();
+                            var node = flight.GetPath()[flight.GetCurrentNode()];
+                            flight.SkipCurrentNode();
+
+                            GetPlayer().TeleportTo(curDestNode.ContinentID, node.Loc.X, node.Loc.Y, node.Loc.Z, GetPlayer().GetOrientation());
+                        }
                     }
                 }
 

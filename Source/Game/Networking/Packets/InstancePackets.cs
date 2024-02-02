@@ -13,10 +13,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteInt32(MapID);
         }
 
-        public uint MapID;
+        public int MapID;
     }
 
     class InstanceInfoPkt : ServerPacket

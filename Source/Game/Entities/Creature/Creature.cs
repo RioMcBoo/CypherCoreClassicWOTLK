@@ -360,8 +360,8 @@ namespace Game.Entities
 
             // checked and error show at loading templates
             var factionTemplate = CliDB.FactionTemplateStorage.LookupByKey(cInfo.Faction);
-            if (factionTemplate != null)
-                SetPvP(factionTemplate.HasAnyFlag(FactionTemplateFlags.PVP));
+            if (factionTemplate != null)  
+                SetPvP(factionTemplate.HasAnyFlag(FactionTemplateFlags.PVP));               
 
             // updates spell bars for vehicles and set player's faction - should be called here, to overwrite faction that is set from the new template
             if (IsVehicle())
@@ -410,7 +410,7 @@ namespace Game.Entities
             // Apply all other side effects of flag changes
             SetTemplateRooted(flags.HasFlag(CreatureStaticFlags.Sessile));
         }
-        
+
         public override void Update(uint diff)
         {
             if (IsAIEnabled() && triggerJustAppeared && m_deathState != DeathState.Dead)
@@ -1145,14 +1145,14 @@ namespace Game.Entities
             SummonCreature(npcEntry, GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(1), 0, 0);
         }
 
-        public bool HasFlag(CreatureStaticFlags flag)  { return _staticFlags.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags2 flag)  { return _staticFlags.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags3 flag)  { return _staticFlags.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags4 flag)  { return _staticFlags.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags5 flag)  { return _staticFlags.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags6 flag)  { return _staticFlags.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags7 flag)  { return _staticFlags.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags8 flag)  { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags flag) { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags2 flag) { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags3 flag) { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags4 flag) { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags5 flag) { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags6 flag) { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags7 flag) { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags8 flag) { return _staticFlags.HasFlag(flag); }
 
         public int GetGossipMenuId()
         {
@@ -1215,7 +1215,7 @@ namespace Game.Entities
         }
 
         public bool IsTapListNotClearedOnEvade() { return m_dontClearTapListOnEvade; }
-        
+
         public void SetTappedBy(Unit unit, bool withGroup = true)
         {
             // set the player whose group should receive the right
@@ -1298,7 +1298,7 @@ namespace Game.Entities
         public bool CanHaveLoot() { return !_staticFlags.HasFlag(CreatureStaticFlags.NoLoot); }
 
         public void SetCanHaveLoot(bool canHaveLoot) { _staticFlags.ApplyFlag(CreatureStaticFlags.NoLoot, !canHaveLoot); }
-        
+
         public void SaveToDB()
         {
             // this should only be used when the creature has already been loaded
@@ -1758,7 +1758,7 @@ namespace Game.Entities
         }
 
         public bool IsTemplateRooted() { return _staticFlags.HasFlag(CreatureStaticFlags.Sessile); }
-        
+
         public void SetTemplateRooted(bool rooted)
         {
             _staticFlags.ApplyFlag(CreatureStaticFlags.Sessile, rooted);
@@ -3210,7 +3210,7 @@ namespace Game.Entities
             return (CreatureAI)i_AI;
         }
 
-        public T GetAI<T>() where T : CreatureAI
+        public new T GetAI<T>() where T : CreatureAI
         {
             return (T)i_AI;
         }
@@ -3228,7 +3228,7 @@ namespace Game.Entities
         public void SetCanMelee(bool canMelee) { _staticFlags.ApplyFlag(CreatureStaticFlags.NoMelee, !canMelee); }
 
         public bool CanIgnoreLineOfSightWhenCastingOnMe() { return _staticFlags.HasFlag(CreatureStaticFlags4.IgnoreLosWhenCastingOnMe); }
-        
+
         public sbyte GetOriginalEquipmentId() { return m_originalEquipmentId; }
         public byte GetCurrentEquipmentId() { return m_equipmentId; }
         public void SetCurrentEquipmentId(byte id) { m_equipmentId = id; }
@@ -3378,7 +3378,7 @@ namespace Game.Entities
 
         bool CanRegenerateHealth() { return !_staticFlags.HasFlag(CreatureStaticFlags5.NoHealthRegen) && _regenerateHealth; }
         public void SetRegenerateHealth(bool value) { _staticFlags.ApplyFlag(CreatureStaticFlags5.NoHealthRegen, !value); }
-        
+
         public void SetHomePosition(float x, float y, float z, float o)
         {
             m_homePosition.Relocate(x, y, z, o);

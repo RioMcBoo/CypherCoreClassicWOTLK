@@ -84,7 +84,7 @@ namespace Game.Entities
 
         static int GetVertexIDFromNodeID(TaxiNodesRecord node)
         {
-            return m_verticesByNode.ContainsKey(node.Id) ? m_verticesByNode[node.Id] : -1;
+            return m_verticesByNode.LookupByKey(node.Id);
         }
 
         static int GetNodeIDFromVertexID(int vertexID)
@@ -107,7 +107,7 @@ namespace Game.Entities
             {
                 TaxiNodesRecord from = CliDB.TaxiNodesStorage.LookupByKey(path.FromTaxiNode);
                 TaxiNodesRecord to = CliDB.TaxiNodesStorage.LookupByKey(path.ToTaxiNode);
-                if (from != null && to != null && from.Flags.HasAnyFlag(TaxiNodeFlags.ShowOnAllianceMap | TaxiNodeFlags.ShowOnHordeMap) && to.Flags.HasAnyFlag(TaxiNodeFlags.ShowOnAllianceMap | TaxiNodeFlags.ShowOnHordeMap))
+                if (from != null && to != null && from.IsPartOfTaxiNetwork && to.IsPartOfTaxiNetwork)
                     AddVerticeAndEdgeFromNodeInfo(from, to, path.Id, edges);
             }
 
@@ -141,25 +141,30 @@ namespace Game.Entities
             else
             {
                 shortestPath.Clear();
-                // We want to use Dijkstra on this graph
-                DijkstraShortestPath g = new(m_graph, (int)GetVertexIDFromNodeID(from));
-                var path = g.PathTo((int)GetVertexIDFromNodeID(to));
-                // found a path to the goal
-                shortestPath.Add(from.Id);
-                foreach (var edge in path)
-                {
-                    //todo  test me No clue about this....
-                    var To = m_nodesByVertex[(int)edge.To];
-                    TaxiNodeFlags requireFlag = (player.GetTeam() == Team.Alliance) ? TaxiNodeFlags.ShowOnAllianceMap : TaxiNodeFlags.ShowOnHordeMap;
-                    if (!To.Flags.HasAnyFlag(requireFlag))
-                        continue;
 
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(To.ConditionID);
-                    if (condition != null)
-                        if (!ConditionManager.IsPlayerMeetingCondition(player, condition))
+                int fromVertexId = GetVertexIDFromNodeID(from);
+                int toVertexId = GetVertexIDFromNodeID(to);
+                if (fromVertexId != 0 && toVertexId != 0)
+                {
+                    // We want to use Dijkstra on this graph
+                    DijkstraShortestPath dijkstra = new(m_graph, fromVertexId);
+                    var path = dijkstra.PathTo(toVertexId);
+                    // found a path to the goal
+                    shortestPath.Add(from.Id);
+                    foreach (var edge in path)
+                    {
+                        var To = m_nodesByVertex[edge.To];
+                        TaxiNodeFlags requireFlag = (player.GetTeam() == Team.Alliance) ? TaxiNodeFlags.ShowOnAllianceMap : TaxiNodeFlags.ShowOnHordeMap;
+                        if (!To.HasFlag(requireFlag))
                             continue;
 
-                    shortestPath.Add(GetNodeIDFromVertexID(edge.To));
+                        PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(To.ConditionID);
+                        if (condition != null)
+                            if (!ConditionManager.IsPlayerMeetingCondition(player, condition))
+                                continue;
+
+                        shortestPath.Add(GetNodeIDFromVertexID(edge.To));
+                    }
                 }
             }
 
@@ -169,11 +174,15 @@ namespace Game.Entities
         //todo test me
         public static void GetReachableNodesMask(TaxiNodesRecord from, byte[] mask)
         {
-            DepthFirstSearch depthFirst = new(m_graph, GetVertexIDFromNodeID(from), vertex =>
+            int vertexId = GetVertexIDFromNodeID(from);
+            if (vertexId == 0)
+                return;
+
+            DepthFirstSearch depthFirst = new(m_graph, vertexId, vertex =>
             {
                 TaxiNodesRecord taxiNode = CliDB.TaxiNodesStorage.LookupByKey(GetNodeIDFromVertexID(vertex));
                 if (taxiNode != null)
-                    mask[(taxiNode.Id - 1) / 8] |= (byte)(1 << (int)((taxiNode.Id - 1) % 8));
+                    mask[(taxiNode.Id - 1) / 8] |= (byte)(1 << ((taxiNode.Id - 1) % 8));
             });
         }
     }

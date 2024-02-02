@@ -407,7 +407,7 @@ namespace Game.DataStorage
 
             foreach (var node in TaxiNodesStorage.Values)
             {
-                if (!node.HasAnyFlag(TaxiNodeFlags.ShowOnAllianceMap | TaxiNodeFlags.ShowOnHordeMap))
+                if (!node.IsPartOfTaxiNetwork)
                     continue;
 
                 // valid taxi network node

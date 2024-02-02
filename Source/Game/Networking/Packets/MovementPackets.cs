@@ -792,12 +792,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteInt32(SequenceIndex);
             _worldPacket.WriteBits(Reason, 2);
             _worldPacket.FlushBits();
         }
 
-        public uint SequenceIndex = 1;
+        public int SequenceIndex = 1;
         public uint Reason = 1;
     }
 
