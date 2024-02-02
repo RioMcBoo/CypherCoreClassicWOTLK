@@ -324,8 +324,8 @@ namespace Game.Entities
         TimeSpan GetDuration() { return _duration; }
         public int GetTextureKitId() { return _textureKitId; }
 
-        public ObjectGuid GetCreatorGuid() { return _creatorGuid; }
-        public override ObjectGuid GetOwnerGUID() { return GetCreatorGuid(); }
+        public override ObjectGuid GetCreatorGUID() { return _creatorGuid; }
+        public override ObjectGuid GetOwnerGUID() { return GetCreatorGUID(); }
         public override int GetFaction() { return 0; }
 
         public override float GetStationaryX() { return _stationaryPosition.GetPositionX(); }
@@ -422,7 +422,7 @@ namespace Game.Entities
 
         public void Invoke(ConversationActorActivePlayerTemplate activePlayer)
         {
-            _conversation.AddActor(_actor.Id, _actor.Index, ObjectGuid.Create(HighGuid.Player, -2L));
+            _conversation.AddActor(_actor.Id, _actor.Index, ObjectGuid.Create(HighGuid.Player, -1L));
         }
 
         public void Invoke(ConversationActorTalkingHeadTemplate talkingHead)

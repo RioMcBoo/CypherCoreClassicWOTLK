@@ -78,13 +78,13 @@ namespace Game.Entities
             return false;
         }
 
-        public static SceneObject CreateSceneObject(uint sceneId, Unit creator, Position pos, ObjectGuid privateObjectOwner)
+        public static SceneObject CreateSceneObject(int sceneId, Unit creator, Position pos, ObjectGuid privateObjectOwner)
         {
             SceneTemplate sceneTemplate = Global.ObjectMgr.GetSceneTemplate(sceneId);
             if (sceneTemplate == null)
                 return null;
 
-            ulong lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.SceneObject);
+            long lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.SceneObject);
 
             SceneObject sceneObject = new();
             if (!sceneObject.Create(lowGuid, SceneType.Normal, sceneId, sceneTemplate != null ? sceneTemplate.ScenePackageId : 0, creator.GetMap(), creator, pos, privateObjectOwner))
@@ -96,7 +96,7 @@ namespace Game.Entities
             return sceneObject;
         }
 
-        bool Create(ulong lowGuid, SceneType type, uint sceneId, uint scriptPackageId, Map map, Unit creator, Position pos, ObjectGuid privateObjectOwner)
+        bool Create(long lowGuid, SceneType type, int sceneId, int scriptPackageId, Map map, Unit creator, Position pos, ObjectGuid privateObjectOwner)
         {
             SetMap(map);
             Relocate(pos);
@@ -110,7 +110,7 @@ namespace Game.Entities
             SetEntry(scriptPackageId);
             SetObjectScale(1.0f);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_sceneObjectData).ModifyValue(m_sceneObjectData.ScriptPackageID), (int)scriptPackageId);
+            SetUpdateFieldValue(m_values.ModifyValue(m_sceneObjectData).ModifyValue(m_sceneObjectData.ScriptPackageID), scriptPackageId);
             SetUpdateFieldValue(m_values.ModifyValue(m_sceneObjectData).ModifyValue(m_sceneObjectData.RndSeedVal), GameTime.GetGameTimeMS());
             SetUpdateFieldValue(m_values.ModifyValue(m_sceneObjectData).ModifyValue(m_sceneObjectData.CreatedBy), creator.GetGUID());
             SetUpdateFieldValue(m_values.ModifyValue(m_sceneObjectData).ModifyValue(m_sceneObjectData.SceneType), (uint)type);
@@ -185,6 +185,7 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
+        public override ObjectGuid GetCreatorGUID() { return m_sceneObjectData.CreatedBy; }
         public override ObjectGuid GetOwnerGUID() { return m_sceneObjectData.CreatedBy; }
         public override int GetFaction() { return 0; }
 

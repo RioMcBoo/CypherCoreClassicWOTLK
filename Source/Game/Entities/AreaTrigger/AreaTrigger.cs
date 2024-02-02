@@ -1456,6 +1456,7 @@ namespace Game.Entities
 
         public AreaTriggerCreateProperties GetCreateProperties() { return _areaTriggerCreateProperties; }
 
+        public override ObjectGuid GetCreatorGUID() { return GetCasterGuid(); }
         public override ObjectGuid GetOwnerGUID() { return GetCasterGuid(); }
         public ObjectGuid GetCasterGuid() { return m_areaTriggerData.Caster; }
 
