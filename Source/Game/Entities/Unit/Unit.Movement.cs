@@ -847,6 +847,9 @@ namespace Game.Entities
 
         public void UpdateMountCapability()
         {
+            if (IsLoading())
+                return;
+
             var mounts = GetAuraEffectsByType(AuraType.Mounted);
             foreach (AuraEffect aurEff in mounts.ToArray())
             {
