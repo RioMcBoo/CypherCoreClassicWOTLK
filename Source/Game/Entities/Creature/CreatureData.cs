@@ -292,6 +292,7 @@ namespace Game.Entities
 
     public class CreatureData : SpawnData
     {
+        public CreatureModel display;
         public int displayid;
         public sbyte equipmentId;
         public float WanderDistance;
