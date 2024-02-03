@@ -1502,7 +1502,7 @@ namespace Game.Entities
                 }
             }
 
-            return modelid;
+            return 0;
         }
 
         public Totem ToTotem() { return IsTotem() ? (this as Totem) : null; }

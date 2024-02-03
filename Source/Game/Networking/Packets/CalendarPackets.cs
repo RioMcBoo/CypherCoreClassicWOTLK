@@ -22,10 +22,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            EventID = _worldPacket.ReadUInt64();
+            EventID = _worldPacket.ReadInt64();
         }
 
-        public ulong EventID;
+        public long EventID;
     }
 
     class CalendarCommunityInviteRequest : ClientPacket
@@ -34,13 +34,13 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            ClubId = _worldPacket.ReadUInt64();
+            ClubId = _worldPacket.ReadInt64();
             MinLevel = _worldPacket.ReadUInt8();
             MaxLevel = _worldPacket.ReadUInt8();
             MaxRankOrder = _worldPacket.ReadUInt8();
         }
 
-        public ulong ClubId;
+        public long ClubId;
         public byte MinLevel = 1;
         public byte MaxLevel = 100;
         public byte MaxRankOrder;
@@ -53,10 +53,10 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             EventInfo.Read(_worldPacket);
-            MaxSize = _worldPacket.ReadUInt32();
+            MaxSize = _worldPacket.ReadInt32();
         }
 
-        public uint MaxSize = 100;
+        public int MaxSize = 100;
         public CalendarAddEventInfo EventInfo = new();
     }
 
@@ -80,15 +80,15 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            EventID = _worldPacket.ReadUInt64();
-            ModeratorID = _worldPacket.ReadUInt64();
-            ClubID = _worldPacket.ReadUInt64();
+            EventID = _worldPacket.ReadInt64();
+            ModeratorID = _worldPacket.ReadInt64();
+            ClubID = _worldPacket.ReadInt64();
             Flags = _worldPacket.ReadUInt32();
         }
 
-        public ulong ModeratorID;
-        public ulong EventID;
-        public ulong ClubID;
+        public long ModeratorID;
+        public long EventID;
+        public long ClubID;
         public uint Flags;
     }
 
@@ -98,16 +98,16 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            EventID = _worldPacket.ReadUInt64();
-            ModeratorID = _worldPacket.ReadUInt64();
-            EventClubID = _worldPacket.ReadUInt64();
+            EventID = _worldPacket.ReadInt64();
+            ModeratorID = _worldPacket.ReadInt64();
+            EventClubID = _worldPacket.ReadInt64();
             Date = new();
             Date.Read(_worldPacket);
         }
 
-        public ulong ModeratorID;
-        public ulong EventID;
-        public ulong EventClubID;
+        public long ModeratorID;
+        public long EventID;
+        public long EventClubID;
         public WowTime Date;
     }
 
@@ -214,7 +214,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventID);
             Date.Write(_worldPacket);
             _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WriteUInt8((byte)EventType);
@@ -253,9 +253,9 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            EventID = _worldPacket.ReadUInt64();
-            ModeratorID = _worldPacket.ReadUInt64();
-            ClubID = _worldPacket.ReadUInt64();
+            EventID = _worldPacket.ReadInt64();
+            ModeratorID = _worldPacket.ReadInt64();
+            ClubID = _worldPacket.ReadInt64();
 
             ushort nameLen = _worldPacket.ReadBits<ushort>(9);
             Creating = _worldPacket.HasBit();
@@ -264,11 +264,11 @@ namespace Game.Networking.Packets
             Name = _worldPacket.ReadString(nameLen);
         }
 
-        public ulong ModeratorID;
+        public long ModeratorID;
         public bool IsSignUp;
         public bool Creating = true;
-        public ulong EventID;
-        public ulong ClubID;
+        public long EventID;
+        public long ClubID;
         public string Name;
     }
 
@@ -278,13 +278,13 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            EventID = _worldPacket.ReadUInt64();
-            InviteID = _worldPacket.ReadUInt64();
+            EventID = _worldPacket.ReadInt64();
+            InviteID = _worldPacket.ReadInt64();
             Status = (CalendarInviteStatus)_worldPacket.ReadUInt8();
         }
 
-        public ulong InviteID;
-        public ulong EventID;
+        public long InviteID;
+        public long EventID;
         public CalendarInviteStatus Status;
     }
 
@@ -463,14 +463,14 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            EventID = _worldPacket.ReadUInt64();
-            ClubID = _worldPacket.ReadUInt64();
+            EventID = _worldPacket.ReadInt64();
+            ClubID = _worldPacket.ReadInt64();
             Tentative = _worldPacket.HasBit();
         }
 
         public bool Tentative;
-        public ulong EventID;
-        public ulong ClubID;
+        public long EventID;
+        public long ClubID;
     }
 
     class CalendarRemoveInvite : ClientPacket
@@ -480,15 +480,15 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
-            InviteID = _worldPacket.ReadUInt64();
-            ModeratorID = _worldPacket.ReadUInt64();
-            EventID = _worldPacket.ReadUInt64();
+            InviteID = _worldPacket.ReadInt64();
+            ModeratorID = _worldPacket.ReadInt64();
+            EventID = _worldPacket.ReadInt64();
         }
 
         public ObjectGuid Guid;
-        public ulong EventID;
-        public ulong ModeratorID;
-        public ulong InviteID;
+        public long EventID;
+        public long ModeratorID;
+        public long InviteID;
     }
 
     class CalendarStatus : ClientPacket
@@ -498,16 +498,16 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
-            EventID = _worldPacket.ReadUInt64();
-            InviteID = _worldPacket.ReadUInt64();
-            ModeratorID = _worldPacket.ReadUInt64();
+            EventID = _worldPacket.ReadInt64();
+            InviteID = _worldPacket.ReadInt64();
+            ModeratorID = _worldPacket.ReadInt64();
             Status = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid Guid;
-        public ulong EventID;
-        public ulong ModeratorID;
-        public ulong InviteID;
+        public long EventID;
+        public long ModeratorID;
+        public long InviteID;
         public byte Status;
     }
 
@@ -518,13 +518,13 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             MapID = _worldPacket.ReadInt32();
-            DifficultyID = _worldPacket.ReadUInt32();
+            DifficultyID = (Difficulty)_worldPacket.ReadInt32();
             Extend = _worldPacket.HasBit();
         }
 
         public int MapID;
         public bool Extend;
-        public uint DifficultyID;
+        public Difficulty DifficultyID;
     }
 
     class CalendarModeratorStatusQuery : ClientPacket
@@ -534,15 +534,15 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
-            EventID = _worldPacket.ReadUInt64();
-            InviteID = _worldPacket.ReadUInt64();
+            EventID = _worldPacket.ReadInt64();
+            InviteID = _worldPacket.ReadInt64();
             ModeratorID = _worldPacket.ReadUInt64();
             Status = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid Guid;
-        public ulong EventID;
-        public ulong InviteID;
+        public long EventID;
+        public long InviteID;
         public ulong ModeratorID;
         public byte Status;
     }
@@ -578,14 +578,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(InstanceID);
+            _worldPacket.WriteInt64(InstanceID);
             ServerTime.Write(_worldPacket);
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt32((uint)DifficultyID);
             _worldPacket.WriteInt32(TimeRemaining);
         }
 
-        public ulong InstanceID;
+        public long InstanceID;
         public Difficulty DifficultyID;
         public int TimeRemaining;
         public WowTime ServerTime;
@@ -598,12 +598,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(InstanceID);
+            _worldPacket.WriteInt64(InstanceID);
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt32((uint)DifficultyID);
         }
 
-        public ulong InstanceID;
+        public long InstanceID;
         public int MapID;
         public Difficulty DifficultyID;
     }
@@ -651,13 +651,13 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventID);
             _worldPacket.WritePackedTime32(Date);
             _worldPacket.WriteUInt32(Flags);
             _worldPacket.WriteUInt8(Status);
         }
 
-        public ulong EventID;
+        public long EventID;
         public uint Flags;
         public long Date;
         public byte Status;
@@ -665,7 +665,7 @@ namespace Game.Networking.Packets
 
     class CalendarInviteNotesAlert : ServerPacket
     {
-        public CalendarInviteNotesAlert(ulong eventID, string notes) : base(ServerOpcodes.CalendarInviteNotesAlert)
+        public CalendarInviteNotesAlert(long eventID, string notes) : base(ServerOpcodes.CalendarInviteNotesAlert)
         {
             EventID = eventID;
             Notes = notes;
@@ -673,14 +673,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventID);
 
             _worldPacket.WriteBits(Notes.GetByteCount(), 8);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Notes);
         }
 
-        public ulong EventID;
+        public long EventID;
         public string Notes;
     }
 
@@ -789,9 +789,9 @@ namespace Game.Networking.Packets
     {
         public void Read(WorldPacket data)
         {
-            ClubID = data.ReadUInt64();
-            EventID = data.ReadUInt64();
-            ModeratorID = data.ReadUInt64();
+            ClubID = data.ReadInt64();
+            EventID = data.ReadInt64();
+            ModeratorID = data.ReadInt64();
             EventType = data.ReadUInt8();
             TextureID = data.ReadUInt32();
             Time = new();
@@ -805,9 +805,9 @@ namespace Game.Networking.Packets
             Description = data.ReadString(descLen);
         }
 
-        public ulong ClubID;
-        public ulong EventID;
-        public ulong ModeratorID;
+        public long ClubID;
+        public long EventID;
+        public long ModeratorID;
         public string Title;
         public string Description;
         public byte EventType;
@@ -820,17 +820,18 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt64(EventID);
-            data.WriteUInt64(InviteID);
+            data.WriteInt64(EventID);
+            data.WriteInt64(InviteID);
             data.WriteUInt8((byte)Status);
             data.WriteUInt8((byte)Moderator);
             data.WriteUInt8(InviteType);
             data.WritePackedGuid(InviterGuid);
             data.WriteBit(IgnoreFriendAndGuildRestriction);
+            data.FlushBits();
         }
 
-        public ulong EventID;
-        public ulong InviteID;
+        public long EventID;
+        public long InviteID;
         public ObjectGuid InviterGuid;
         public CalendarInviteStatus Status;
         public CalendarModerationRank Moderator;
@@ -841,13 +842,13 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt64(InstanceID);
+            data.WriteInt64(InstanceID);
             data.WriteInt32(MapID);
             data.WriteUInt32(DifficultyID);
             data.WriteInt32(ExpireTime);
         }
 
-        public ulong InstanceID;
+        public long InstanceID;
         public int MapID;
         public uint DifficultyID;
         public int ExpireTime;
@@ -857,12 +858,12 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt64(EventID);
+            data.WriteInt64(EventID);
             data.WriteUInt8((byte)EventType);
             Date.Write(data);
             data.WriteUInt32((uint)Flags);
             data.WriteInt32(TextureID);
-            data.WriteUInt64(EventClubID);
+            data.WriteInt64(EventClubID);
             data.WritePackedGuid(OwnerGuid);
 
             data.WriteBits(EventName.GetByteCount(), 8);
@@ -870,13 +871,13 @@ namespace Game.Networking.Packets
             data.WriteString(EventName);
         }
 
-        public ulong EventID;
+        public long EventID;
         public string EventName;
         public CalendarEventType EventType;
         public WowTime Date;
         public CalendarFlags Flags;
         public int TextureID;
-        public ulong EventClubID;
+        public long EventClubID;
         public ObjectGuid OwnerGuid;
     }
 

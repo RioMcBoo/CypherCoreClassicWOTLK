@@ -61,8 +61,8 @@ namespace Game
                 return;
             }
 
-            BattlemasterListRecord battlemasterListEntry = CliDB.BattlemasterListStorage.LookupByKey(bgQueueTypeId.BattlemasterListId);
-            if (Global.DisableMgr.IsDisabledFor(DisableType.Battleground, bgQueueTypeId.BattlemasterListId, null) || battlemasterListEntry.Flags.HasAnyFlag(BattlemasterListFlags.Disabled))
+            BattlemasterListRecord battlemasterListEntry = CliDB.BattlemasterListStorage.LookupByKey((int)bgQueueTypeId.BattlemasterListId);
+            if (Global.DisableMgr.IsDisabledFor(DisableType.Battleground, (int)bgQueueTypeId.BattlemasterListId, null) || battlemasterListEntry.Flags.HasAnyFlag(BattlemasterListFlags.Disabled))
             {
                 GetPlayer().SendSysMessage(CypherStrings.BgDisabled);
                 return;
@@ -80,7 +80,7 @@ namespace Game
                 return;
 
             // expected bracket entry
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.BattlemasterEntry.MapId[0], GetPlayer().GetLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgTemplate.BattlemasterEntry.MapId[0], GetPlayer().GetLevel());
             if (bracketEntry == null)
                 return;
 
@@ -130,8 +130,8 @@ namespace Game
                     return;
                 }
                 
-                bool isInRandomBgQueue = _player.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RB, BattlegroundQueueIdType.Battleground, false, 0))
-                    || _player.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RandomEpic, BattlegroundQueueIdType.Battleground, false, 0));
+                bool isInRandomBgQueue = _player.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId(BattlegroundTypeId.RB, BattlegroundQueueIdType.Battleground, false, 0))
+                    || _player.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId(BattlegroundTypeId.RandomEpic, BattlegroundQueueIdType.Battleground, false, 0));
                 if (!Global.BattlegroundMgr.IsRandomBattleground(bgTypeId) && isInRandomBgQueue)
                 {
                     // player is already in random queue
@@ -167,8 +167,8 @@ namespace Game
                 BattlegroundQueue bgQueue = Global.BattlegroundMgr.GetBattlegroundQueue(bgQueueTypeId);
                 GroupQueueInfo ginfo = bgQueue.AddGroup(GetPlayer(), null, getQueueTeam(), bracketEntry, isPremade, 0, 0);
 
-                uint avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId());
-                uint queueSlot = GetPlayer().AddBattlegroundQueueId(bgQueueTypeId);
+                uint avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId);
+                int queueSlot = GetPlayer().AddBattlegroundQueueId(bgQueueTypeId);
 
                 Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatusQueued, GetPlayer(), queueSlot, ginfo.JoinTime, bgQueueTypeId, avgTime, false);
                 SendPacket(battlefieldStatusQueued);
@@ -192,7 +192,7 @@ namespace Game
                 {
                     Log.outDebug(LogFilter.Battleground, "Battleground: the following players are joining as group:");
                     ginfo = bgQueue.AddGroup(GetPlayer(), grp, getQueueTeam(), bracketEntry, isPremade, 0, 0);
-                    avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId());
+                    avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId);
                 }
 
                 for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
@@ -210,7 +210,7 @@ namespace Game
                     }
 
                     // add to queue
-                    uint queueSlot = member.AddBattlegroundQueueId(bgQueueTypeId);
+                    int queueSlot = member.AddBattlegroundQueueId(bgQueueTypeId);
 
                     Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatusQueued, member, queueSlot, ginfo.JoinTime, bgQueueTypeId, avgTime, true);
                     member.SendPacket(battlefieldStatusQueued);
@@ -219,7 +219,7 @@ namespace Game
                 Log.outDebug(LogFilter.Battleground, "Battleground: group end");
             }
 
-            Global.BattlegroundMgr.ScheduleQueueUpdate(0, bgQueueTypeId, bracketEntry.BracketId());
+            Global.BattlegroundMgr.ScheduleQueueUpdate(0, bgQueueTypeId, bracketEntry.BracketId);
         }
 
         [WorldPacketHandler(ClientOpcodes.PvpLogData)]
@@ -295,7 +295,7 @@ namespace Game
                 return;
             }
 
-            uint mapId = (uint)bgTemplate.BattlemasterEntry.MapId[0];
+            int mapId = bgTemplate.BattlemasterEntry.MapId[0];
 
             // BGTemplateId returns Battleground_AA when it is arena queue.
             // Do instance id search as there is no AA bg instances.
@@ -382,7 +382,7 @@ namespace Game
                 // if player leaves rated arena match before match start, it is counted as he played but he lost
                 if (bgQueue.GetQueueId().Rated && ginfo.IsInvitedToBGInstanceGUID != 0)
                 {
-                    ArenaTeam at = Global.ArenaTeamMgr.GetArenaTeamById((uint)ginfo.Team);
+                    ArenaTeam at = Global.ArenaTeamMgr.GetArenaTeamById((int)ginfo.Team);
                     if (at != null)
                     {
                         Log.outDebug(LogFilter.Battleground, "UPDATING memberLost's personal arena rating for {0} by opponents rating: {1}, because he has left queue!", GetPlayer().GetGUID().ToString(), ginfo.OpponentsTeamRating);
@@ -398,7 +398,7 @@ namespace Game
                 bgQueue.RemovePlayer(GetPlayer().GetGUID(), true);
                 // player left queue, we should update it - do not update Arena Queue
                 if (bgQueue.GetQueueId().TeamSize == 0)
-                    Global.BattlegroundMgr.ScheduleQueueUpdate(ginfo.ArenaMatchmakerRating, bgQueueTypeId, bracketEntry.BracketId());
+                    Global.BattlegroundMgr.ScheduleQueueUpdate(ginfo.ArenaMatchmakerRating, bgQueueTypeId, bracketEntry.BracketId);
 
                 Log.outDebug(LogFilter.Battleground, $"Battleground: player {_player.GetName()} ({_player.GetGUID()}) left queue for bgtype { bg.GetTypeID()}, queue {bgQueueTypeId}.");
             }
@@ -469,11 +469,11 @@ namespace Game
                         continue;
 
                     // expected bracket entry
-                    PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.BattlemasterEntry.MapId[0], _player.GetLevel());
+                    PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgTemplate.BattlemasterEntry.MapId[0], _player.GetLevel());
                     if (bracketEntry == null)
                         continue;
 
-                    uint avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId());
+                    uint avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId);
                     BattlefieldStatusQueued battlefieldStatus;
                     Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out battlefieldStatus, _player, i, _player.GetBattlegroundQueueJoinTime(bgQueueTypeId), bgQueueTypeId, avgTime, ginfo.Players.Count > 1);
                     SendPacket(battlefieldStatus);
@@ -498,15 +498,15 @@ namespace Game
                 return;
             }
 
-            if (Global.DisableMgr.IsDisabledFor(DisableType.Battleground, (uint)BattlegroundTypeId.AA, null))
+            if (Global.DisableMgr.IsDisabledFor(DisableType.Battleground, (int)BattlegroundTypeId.AA, null))
             {
                 GetPlayer().SendSysMessage(CypherStrings.ArenaDisabled);
                 return;
             }
 
             BattlegroundTypeId bgTypeId = bgTemplate.Id;
-            BattlegroundQueueTypeId bgQueueTypeId = Global.BattlegroundMgr.BGQueueTypeId((ushort)bgTypeId, BattlegroundQueueIdType.Arena, true, arenatype);
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.BattlemasterEntry.MapId[0], _player.GetLevel());
+            BattlegroundQueueTypeId bgQueueTypeId = Global.BattlegroundMgr.BGQueueTypeId(bgTypeId, BattlegroundQueueIdType.Arena, true, arenatype);
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgTemplate.BattlemasterEntry.MapId[0], _player.GetLevel());
             if (bracketEntry == null)
                 return;
 
@@ -517,15 +517,15 @@ namespace Game
             if (grp.GetLeaderGUID() != GetPlayer().GetGUID())
                 return;
 
-            uint ateamId = GetPlayer().GetArenaTeamId(packet.TeamSizeIndex);
+            int ateamId = GetPlayer().GetArenaTeamId(packet.TeamSizeIndex);
             // check real arenateam existence only here (if it was moved to group.CanJoin .. () then we would ahve to get it twice)
             ArenaTeam at = Global.ArenaTeamMgr.GetArenaTeamById(ateamId);
             if (at == null)
                 return;
 
             // get the team rating for queuing
-            uint arenaRating = at.GetRating();
-            uint matchmakerRating = at.GetAverageMMR(grp);
+            int arenaRating = at.GetRating();
+            int matchmakerRating = at.GetAverageMMR(grp);
             // the arenateam id must match for everyone in the group
 
             if (arenaRating <= 0)
@@ -537,13 +537,13 @@ namespace Game
             GroupQueueInfo ginfo = null;
 
             ObjectGuid errorGuid;
-            var err = grp.CanJoinBattlegroundQueue(bgTemplate, bgQueueTypeId, (uint)arenatype, (uint)arenatype, true, packet.TeamSizeIndex, out errorGuid);
+            var err = grp.CanJoinBattlegroundQueue(bgTemplate, bgQueueTypeId, (int)arenatype, (int)arenatype, true, packet.TeamSizeIndex, out errorGuid);
             if (err == 0)
             {
                 Log.outDebug(LogFilter.Battleground, "Battleground: arena team id {0}, leader {1} queued with matchmaker rating {2} for Type {3}", GetPlayer().GetArenaTeamId(packet.TeamSizeIndex), GetPlayer().GetName(), matchmakerRating, arenatype);
 
                 ginfo = bgQueue.AddGroup(GetPlayer(), grp, _player.GetTeam(), bracketEntry, false, arenaRating, matchmakerRating, ateamId);
-                avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId());
+                avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.BracketId);
             }
 
             for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
@@ -569,7 +569,7 @@ namespace Game
                 }
 
                 // add to queue
-                uint queueSlot = member.AddBattlegroundQueueId(bgQueueTypeId);
+                int queueSlot = member.AddBattlegroundQueueId(bgQueueTypeId);
 
                 Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatusQueued, member, queueSlot, ginfo.JoinTime, bgQueueTypeId, avgTime, true);
                 member.SendPacket(battlefieldStatusQueued);
@@ -577,7 +577,7 @@ namespace Game
                 Log.outDebug(LogFilter.Battleground, $"Battleground: player joined queue for arena as group bg queue {bgQueueTypeId}, {member.GetGUID()}, NAME {member.GetName()}");
             }
 
-            Global.BattlegroundMgr.ScheduleQueueUpdate(matchmakerRating, bgQueueTypeId, bracketEntry.BracketId());
+            Global.BattlegroundMgr.ScheduleQueueUpdate(matchmakerRating, bgQueueTypeId, bracketEntry.BracketId);
         }
 
         [WorldPacketHandler(ClientOpcodes.ReportPvpPlayerAfk)]
@@ -607,8 +607,17 @@ namespace Game
         {
             // This packet is completely irrelevant, it triggers PVP_TYPES_ENABLED lua event but that is not handled in interface code as of 6.1.2
             PVPOptionsEnabled pvpOptionsEnabled = new();
+            pvpOptionsEnabled.RatedBattlegrounds = false;
             pvpOptionsEnabled.PugBattlegrounds = true;
-            SendPacket(new PVPOptionsEnabled());
+            pvpOptionsEnabled.WargameBattlegrounds = false;
+            pvpOptionsEnabled.WargameArenas = false;
+            pvpOptionsEnabled.RatedArenas = false;
+            pvpOptionsEnabled.ArenaSkirmish = false;
+            pvpOptionsEnabled.SoloShuffle = false;
+            pvpOptionsEnabled.RatedSoloShuffle = false;
+            pvpOptionsEnabled.BattlegroundBlitz = false;
+            pvpOptionsEnabled.RatedBattlegroundBlitz = false;
+            SendPacket(pvpOptionsEnabled);
         }
 
         [WorldPacketHandler(ClientOpcodes.AreaSpiritHealerQuery)]
@@ -677,7 +686,7 @@ namespace Game
             }
 
             AreaTableRecord atEntry = CliDB.AreaTableStorage.LookupByKey(GetPlayer().GetAreaId());
-            if (atEntry == null || !atEntry.GetFlags().HasFlag(AreaFlags.AllowHearthAndRessurectFromArea))
+            if (atEntry == null || !atEntry.HasFlag(AreaFlags.AllowHearthAndRessurectFromArea))
                 return;
 
             GetPlayer().BuildPlayerRepop();

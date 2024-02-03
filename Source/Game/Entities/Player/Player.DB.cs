@@ -433,7 +433,7 @@ namespace Game.Entities
                 do
                 {
                     var spell = m_spells.LookupByKey(favoritesResult.Read<int>(0));
-                    if (spell !=null)
+                    if (spell != null)
                         spell.Favorite = true;
                 } while (favoritesResult.NextRow());
             }
@@ -1363,10 +1363,9 @@ namespace Game.Entities
         {
             if (result.IsEmpty())
                 return;
-
             _declinedname = new DeclinedName();
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                _declinedname.name[i] = result.Read<string>(i);
+                _declinedname.Name[i] = result.Read<string>(i);
         }
 
         void _LoadArenaTeamInfo(SQLResult result)
@@ -2400,7 +2399,7 @@ namespace Game.Entities
 
             m_traitConfigStates.Clear();
         }
-        
+
         public void _SaveMail(SQLTransaction trans)
         {
             PreparedStatement stmt;
@@ -3071,7 +3070,7 @@ namespace Game.Entities
                             transport = transportOnMap;
                     }
                 }
-                
+
                 if (transport != null)
                 {
                     float x = trans_x;
@@ -3190,7 +3189,7 @@ namespace Game.Entities
             else if (map.IsDungeon()) // if map is dungeon...
             {
                 TransferAbortParams denyReason = map.CannotEnter(this); // ... and can't enter map, then look for entry point.
-                if (denyReason != null) 
+                if (denyReason != null)
                 {
                     SendTransferAborted(map.GetId(), denyReason.Reason, denyReason.Arg, denyReason.MapDifficultyXConditionId);
                     areaTrigger = Global.ObjectMgr.GetGoBackTrigger(mapId);
@@ -3424,7 +3423,8 @@ namespace Game.Entities
             }
             */
 
-            Log.outDebug(LogFilter.Player, $"Player.LoadFromDB: The value of player {GetName()} after load item and aura is: ");
+            SetPersonalTabard(personalTabardEmblemStyle, personalTabardEmblemColor, personalTabardBorderStyle, personalTabardBorderColor, personalTabardBackgroundColor);
+            Log.outDebug(LogFilter.Player, $"Player.LoadFromDB: The value of player {GetName()} after load item and aura is: ");            
 
             // GM state
             if (GetSession().HasPermission(RBACPermissions.RestoreSavedGmState))

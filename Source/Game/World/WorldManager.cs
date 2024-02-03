@@ -190,7 +190,7 @@ namespace Game
             addSessQueue.Enqueue(s);
         }
 
-        public void AddInstanceSocket(WorldSocket sock, ulong connectToKey)
+        public void AddInstanceSocket(WorldSocket sock, long connectToKey)
         {
             _linkSocketQueue.Enqueue(Tuple.Create(sock, connectToKey));
         }
@@ -1718,7 +1718,7 @@ namespace Game
             }
             else
             {
-                uint account = 0;
+                int account = 0;
                 if (mode == BanMode.Account)
                     account = Global.AccountMgr.GetId(nameOrIP);
                 else if (mode == BanMode.Character)
@@ -1899,9 +1899,13 @@ namespace Game
 
         public void SendServerMessage(ServerMessageType messageID, string stringParam = "", Player player = null)
         {
+            ServerMessagesRecord serverMessage = CliDB.ServerMessagesStorage.LookupByKey((int)messageID);
+            if (serverMessage == null)
+                return;
+
             ChatServerMessage packet = new();
             packet.MessageID = (int)messageID;
-            if (messageID <= ServerMessageType.String)
+            if (serverMessage.Text[player != null ? player.GetSession().GetSessionDbcLocale() : GetDefaultDbcLocale()].Contains("%s"))
                 packet.StringParam = stringParam;
 
             if (player != null)
@@ -2606,7 +2610,7 @@ namespace Game
         List<WorldSession> m_QueuedPlayer = new();
         ConcurrentQueue<WorldSession> addSessQueue = new();
 
-        ConcurrentQueue<Tuple<WorldSocket, ulong>> _linkSocketQueue = new();
+        ConcurrentQueue<Tuple<WorldSocket, long>> _linkSocketQueue = new();
 
         AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
 

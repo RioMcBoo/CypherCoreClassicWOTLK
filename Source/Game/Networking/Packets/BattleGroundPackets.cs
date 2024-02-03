@@ -207,10 +207,10 @@ namespace Game.Networking.Packets
             BlacklistMap[1] = _worldPacket.ReadInt32();
 
             for (var i = 0; i < queueCount; ++i)
-                QueueIDs[i] = _worldPacket.ReadUInt64();
+                QueueIDs[i] = _worldPacket.ReadInt64();
         }
 
-        public Array<ulong> QueueIDs = new(1);
+        public Array<long> QueueIDs = new(1);
         public byte Roles;
         public int[] BlacklistMap = new int[2];
     }

@@ -1830,7 +1830,7 @@ namespace Framework.Constants
         Some = 8
     }
 
-    public enum MountCapabilityFlags : byte
+    public enum MountCapabilityFlags : int
     {
         Ground = 0x1,
         Flying = 0x2,
@@ -1839,7 +1839,7 @@ namespace Framework.Constants
         IgnoreRestrictions = 0x20
     }
 
-    public enum MountFlags : ushort
+    public enum MountFlags : int
     {
         SelfMount = 0x02,                   // Player becomes the mount himself
         FactionSpecific = 0x04,
@@ -1848,7 +1848,7 @@ namespace Framework.Constants
         HideIfUnknown = 0x40
     }
 
-    public enum PhaseEntryFlags : ushort
+    public enum PhaseEntryFlags : int
     {
         ReadOnly = 0x1,
         InternalPhase = 0x2,

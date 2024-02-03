@@ -5,14 +5,14 @@ namespace Framework.Constants
 {
     public enum AccountDataTypes : byte
     {
-        GlobalConfigCache = 0x00,
-        PerCharacterConfigCache = 0x01,
-        GlobalBindingsCache = 0x02,
-        PerCharacterBindingsCache = 0x03,
-        GlobalMacrosCache = 0x04,
-        PerCharacterMacrosCache = 0x05,
-        PerCharacterLayoutCache = 0x06,
-        PerCharacterChatCache = 0x07,
+        GlobalConfigCache = 0,
+        PerCharacterConfigCache = 1,
+        GlobalBindingsCache = 2,
+        PerCharacterBindingsCache = 3,
+        GlobalMacrosCache = 4,
+        PerCharacterMacrosCache = 5,
+        PerCharacterLayoutCache = 6,
+        PerCharacterChatCache = 7,
         GlobalTtsCache = 8,
         PerCharacterTtsCache = 9,
         GlobalFlaggedCache = 10,

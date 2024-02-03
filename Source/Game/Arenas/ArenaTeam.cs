@@ -439,13 +439,13 @@ namespace Game.Arenas
             return false;
         }
 
-        public uint GetAverageMMR(Group group)
+        public int GetAverageMMR(Group group)
         {
             if (group == null)
                 return 0;
 
-            uint matchMakerRating = 0;
-            uint playerDivider = 0;
+            int matchMakerRating = 0;
+            int playerDivider = 0;
             foreach (var member in Members)
             {
                 // Skip if player is not online
@@ -773,7 +773,7 @@ namespace Game.Arenas
         public ObjectGuid GetCaptain() { return CaptainGuid; }
         public string GetName() { return TeamName; }
         public ArenaTeamStats GetStats() { return stats; }
-        public uint GetRating() { return stats.Rating; }
+        public int GetRating() { return stats.Rating; }
 
         public int GetMembersSize() { return Members.Count; }
         bool Empty() { return Members.Empty(); }

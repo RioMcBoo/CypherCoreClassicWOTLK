@@ -387,7 +387,7 @@ namespace Game.Entities
             return false;
         }
 
-        public BattlegroundQueueTypeId GetBattlegroundQueueTypeId(uint index)
+        public BattlegroundQueueTypeId GetBattlegroundQueueTypeId(int index)
         {
             if (index < SharedConst.MaxPlayerBGQueues)
                 return m_bgBattlegroundQueueID[index].bgQueueTypeId;
@@ -423,7 +423,7 @@ namespace Game.Entities
             m_bgData.queueId = queueId;
         }
 
-        public uint AddBattlegroundQueueId(BattlegroundQueueTypeId val)
+        public int AddBattlegroundQueueId(BattlegroundQueueTypeId val)
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
             {

@@ -152,6 +152,7 @@ namespace Game.Achievements
                     case CriteriaType.DamageDealt:
                     case CriteriaType.HealingDone:
                     case CriteriaType.EarnArtifactXPForAzeriteItem:
+                    case CriteriaType.GainLevels:
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Accumulate);
                         break;
                     case CriteriaType.KillCreature:
@@ -805,6 +806,7 @@ namespace Game.Achievements
                 case CriteriaType.CompleteAnyReplayQuest:
                 case CriteriaType.BuyItemsFromVendors:
                 case CriteriaType.SellItemsToVendors:
+                case CriteriaType.GainLevels:
                     return progress.Counter >= requiredAmount;
                 case CriteriaType.EarnAchievement:
                 case CriteriaType.CompleteQuest:
@@ -938,6 +940,7 @@ namespace Game.Achievements
                 case CriteriaType.CompleteAnyReplayQuest:
                 case CriteriaType.BuyItemsFromVendors:
                 case CriteriaType.SellItemsToVendors:
+                case CriteriaType.GainLevels:
                     if (miscValue1 == 0)
                         return false;
                     break;
@@ -2751,6 +2754,15 @@ namespace Game.Achievements
                         case 149: // Shadowlands Season 2 End
                                   // timestamp = unknown
                             break;
+                        case 349: // Dragonflight Season 3 Start (pre-season)
+                            eventTimestamp = 1699340400L; // November 7, 2023 8:00
+                            break;
+                        case 350: // Dragonflight Season 3 Start
+                            eventTimestamp = 1699945200L; // November 14, 2023 8:00
+                            break;
+                        case 352: // Dragonflight Season 3 End
+                                  // eventTimestamp = time_t(); unknown
+                            break;
                         default:
                             break;
                     }
@@ -3103,6 +3115,13 @@ namespace Game.Achievements
                     if (referencePlayer.GetPositionZ() >= reqValue)
                         return false;
                     break;
+                case ModifierTreeType.PlayerIsOnMapWithExpansion: // 380
+                {
+                    var mapEntry = referencePlayer.GetMap().GetEntry();
+                    if ((int)mapEntry.Expansion != reqValue)
+                        return false;
+                    break;
+                }
                 default:
                     return false;
             }
@@ -3141,8 +3160,8 @@ namespace Game.Achievements
         MultiMap<int, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<int, Criteria>[(int)CriteriaType.Count];
         MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
 
-        MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Max];
-        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Max];
+        MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Count];
+        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Count];
 
         CriteriaManager()
         {
@@ -3152,10 +3171,10 @@ namespace Game.Achievements
                 _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<int, Criteria>();
             }
 
-            for (var i = 0; i < (int)CriteriaStartEvent.Max; ++i)
+            for (var i = 0; i < (int)CriteriaStartEvent.Count; ++i)
                 _criteriasByStartEvent[i] = new();
 
-            for (var i = 0; i < (int)CriteriaFailEvent.Max; ++i)
+            for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
                 _criteriasByFailEvent[i] = new();
 
         }
@@ -3271,7 +3290,7 @@ namespace Game.Achievements
                     _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
             }
 
-            for (var i = 0; i < (int)CriteriaFailEvent.Max; ++i)
+            for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
                 _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
 
             // Load criteria
@@ -3281,10 +3300,9 @@ namespace Game.Achievements
             int questObjectiveCriterias = 0;
             foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
             {
-                Cypher.Assert(criteriaEntry.Type < CriteriaType.Count,
-                    $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaType.Count}");
-                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Max, $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Max}");
-                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Max, $"CRITERIA_CONDITION_MAX must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Max}");
+                Cypher.Assert(criteriaEntry.Type < CriteriaType.Count, $"CriteriaType.Count must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaType.Count}");
+                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Count, $"CriteriaStartEvent.Count must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Count}");
+                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Count, $"CriteriaFailEvent.Count must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Count}");
 
                 var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
                 if (treeList.Empty())

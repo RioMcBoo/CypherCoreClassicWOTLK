@@ -3567,7 +3567,7 @@ namespace Game.Guilds
                 return ValidateEmblemColors(m_style, m_color, m_borderStyle, m_borderColor, m_backgroundColor);
             }
 
-            public static bool ValidateEmblemColors(uint style, uint color, uint borderStyle, uint borderColor, uint backgroundColor)
+            public static bool ValidateEmblemColors(int style, int color, int borderStyle, int borderColor, int backgroundColor)
             {
                 return CliDB.GuildColorBackgroundStorage.ContainsKey(backgroundColor) &&
                        CliDB.GuildColorBorderStorage.ContainsKey(borderColor) &&

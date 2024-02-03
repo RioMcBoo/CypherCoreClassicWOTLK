@@ -121,13 +121,13 @@ namespace Game.Entities
                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.ConversationLine, line.Id, creator))
                     continue;
 
+                var  convoLine = CliDB.ConversationLineStorage.LookupByKey(line.Id); // never null for conversationTemplate->Lines
+
                 ConversationLine lineField = new();
                 lineField.ConversationLineID = line.Id;
                 lineField.UiCameraID = line.UiCameraID;
                 lineField.ActorIndex = line.ActorIdx;
                 lineField.Flags = line.Flags;
-
-                ConversationLineRecord convoLine = CliDB.ConversationLineStorage.LookupByKey(line.Id); // never null for conversationTemplate->Lines
 
                 for (Locale locale = Locale.enUS; locale < Locale.Total; locale = locale + 1)
                 {

@@ -24,8 +24,8 @@ namespace Game
             CalendarSendCalendar packet = new();
             packet.ServerTime = GameTime.GetWowTime();
 
-            var invites = Global.CalendarMgr.GetPlayerInvites(guid);
-            foreach (var invite in invites)
+            var playerInvites = Global.CalendarMgr.GetPlayerInvites(guid);
+            foreach (var invite in playerInvites)
             {
                 CalendarSendCalendarInviteInfo inviteInfo = new();
                 inviteInfo.EventID = invite.EventId;
@@ -43,7 +43,7 @@ namespace Game
             var playerEvents = Global.CalendarMgr.GetPlayerEvents(guid);
             foreach (var calendarEvent in playerEvents)
             {
-                CalendarSendCalendarEventInfo eventInfo;
+                CalendarSendCalendarEventInfo eventInfo = new();
                 eventInfo.EventID = calendarEvent.EventId;
                 eventInfo.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
                 eventInfo.Date += GetTimezoneOffset();
@@ -60,8 +60,7 @@ namespace Game
             foreach (InstanceLock instanceLock in Global.InstanceLockMgr.GetInstanceLocksForPlayer(_player.GetGUID()))
             {
                 CalendarSendCalendarRaidLockoutInfo lockoutInfo = new();
-
-                lockoutInfo.MapID = (int)instanceLock.GetMapId();
+                lockoutInfo.MapID = instanceLock.GetMapId();
                 lockoutInfo.DifficultyID = (uint)instanceLock.GetDifficultyId();
                 lockoutInfo.ExpireTime = (int)Math.Max((instanceLock.GetEffectiveExpiryTime() - GameTime.GetSystemTime()).TotalSeconds, 0);
                 lockoutInfo.InstanceID = instanceLock.GetInstanceId();
@@ -298,7 +297,7 @@ namespace Game
 
             ObjectGuid inviteeGuid = ObjectGuid.Empty;
             Team inviteeTeam = 0;
-            ulong inviteeGuildId = 0;
+            long inviteeGuildId = 0;
 
             if (!ObjectManager.NormalizePlayerName(ref calendarInvite.Name))
                 return;
@@ -526,7 +525,7 @@ namespace Game
             if (_player.GetMapId() == setSavedInstanceExtend.MapID)
                 return;
 
-            var expiryTimes = Global.InstanceLockMgr.UpdateInstanceLockExtensionForPlayer(_player.GetGUID(), new MapDb2Entries((uint)setSavedInstanceExtend.MapID, (Difficulty)setSavedInstanceExtend.DifficultyID), setSavedInstanceExtend.Extend);
+            var expiryTimes = Global.InstanceLockMgr.UpdateInstanceLockExtensionForPlayer(_player.GetGUID(), new MapDb2Entries(setSavedInstanceExtend.MapID, (Difficulty)setSavedInstanceExtend.DifficultyID), setSavedInstanceExtend.Extend);
 
             if (expiryTimes.Item1 == DateTime.MinValue)
                 return;

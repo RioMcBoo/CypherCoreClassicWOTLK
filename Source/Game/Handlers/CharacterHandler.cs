@@ -111,8 +111,6 @@ namespace Game
                 while (result.NextRow() && charResult.Characters.Count < 200);
             }
 
-            charResult.IsAlliedRacesCreationAllowed = CanAccessAlliedRaces();
-
             foreach (var requirement in Global.ObjectMgr.GetRaceUnlockRequirements())
             {
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
@@ -793,27 +791,26 @@ namespace Game
 
             pCurrChar.SetVirtualPlayerRealm(Global.WorldMgr.GetVirtualRealmAddress());
 
-            SendAccountDataTimes(ObjectGuid.Empty, AccountDataTypes.GlobalCacheMask);
+            SendAccountDataTimes(ObjectGuid.Empty, AccountDataTypeMask.GlobalCacheMask);
             SendTutorialsData();
 
             pCurrChar.GetMotionMaster().Initialize();
             pCurrChar.SendDungeonDifficulty();
 
             LoginVerifyWorld loginVerifyWorld = new();
-            loginVerifyWorld.MapID = (int)pCurrChar.GetMapId();
+            loginVerifyWorld.MapID = pCurrChar.GetMapId();
             loginVerifyWorld.Pos = pCurrChar.GetPosition();
             SendPacket(loginVerifyWorld);
 
             // load player specific part before send times
-            LoadAccountData(holder.GetResult(PlayerLoginQueryLoad.AccountData), AccountDataTypes.PerCharacterCacheMask);
+            LoadAccountData(holder.GetResult(PlayerLoginQueryLoad.AccountData), AccountDataTypeMask.PerCharacterCacheMask);
 
-            SendAccountDataTimes(playerGuid, AccountDataTypes.AllAccountDataCacheMask);
+            SendAccountDataTimes(playerGuid, AccountDataTypeMask.AllAccountDataCacheMask);
 
             SendFeatureSystemStatus();
 
-            MOTD motd = new();
-            motd.Text = Global.WorldMgr.GetMotd();
-            SendPacket(motd);
+            foreach (var motdLine in Global.WorldMgr.GetMotd())
+                Global.WorldMgr.SendServerMessage(ServerMessageType.String, motdLine, pCurrChar);
 
             SendSetTimeZoneInformation();
 
@@ -1347,20 +1344,20 @@ namespace Game
 
             for (int i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
             {
-                string declinedName = packet.DeclinedNames.name[i];
+                string declinedName = packet.DeclinedNames.Name[i];
                 if (!ObjectManager.NormalizePlayerName(ref declinedName))
                 {
                     SendSetPlayerDeclinedNamesResult(DeclinedNameResult.Error, packet.Player);
                     return;
                 }
-                packet.DeclinedNames.name[i] = declinedName;
+                packet.DeclinedNames.Name[i] = declinedName;
             }
 
             for (int i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
             {
-                string declinedName = packet.DeclinedNames.name[i];
+                string declinedName = packet.DeclinedNames.Name[i];
                 CharacterDatabase.EscapeString(ref declinedName);
-                packet.DeclinedNames.name[i] = declinedName;
+                packet.DeclinedNames.Name[i] = declinedName;
             }
 
             SQLTransaction trans = new();
@@ -1373,7 +1370,7 @@ namespace Game
             stmt.AddValue(0, packet.Player.GetCounter());
 
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                stmt.AddValue(i + 1, packet.DeclinedNames.name[i]);
+                stmt.AddValue(i + 1, packet.DeclinedNames.Name[i]);
 
             trans.Append(stmt);
 
@@ -2537,6 +2534,29 @@ namespace Game
             GetPlayer().SetStandState(packet.StandState);
         }
 
+        [WorldPacketHandler(ClientOpcodes.SavePersonalEmblem)]
+        void HandleSavePersonalEmblem(SavePersonalEmblem savePersonalEmblem)
+        {
+            if (_player.GetNPCIfCanInteractWith(savePersonalEmblem.Vendor, NPCFlags1.None, NPCFlags2.PersonalTabardDesigner) == null)
+            {
+                SendPacket(new PlayerSavePersonalEmblem(GuildEmblemError.InvalidVendor));
+                return;
+            }
+
+            if (!Guild.EmblemInfo.ValidateEmblemColors(savePersonalEmblem.PersonalTabard.EmblemStyle, savePersonalEmblem.PersonalTabard.EmblemColor,
+                savePersonalEmblem.PersonalTabard.BorderStyle, savePersonalEmblem.PersonalTabard.BorderColor, savePersonalEmblem.PersonalTabard.BackgroundColor))
+            {
+                SendPacket(new PlayerSavePersonalEmblem(GuildEmblemError.InvalidTabardColors));
+                return;
+            }
+
+            _player.SetPersonalTabard(savePersonalEmblem.PersonalTabard.EmblemStyle, savePersonalEmblem.PersonalTabard.EmblemColor,
+                savePersonalEmblem.PersonalTabard.BorderStyle, savePersonalEmblem.PersonalTabard.BorderColor,
+                savePersonalEmblem.PersonalTabard.BackgroundColor);
+
+            SendPacket(new PlayerSavePersonalEmblem(GuildEmblemError.Success));
+        }
+
         void SendCharCreate(ResponseCodes result, ObjectGuid guid = default)
         {
             CreateChar response = new();
@@ -2834,9 +2854,9 @@ namespace Game
 
         public ObjectGuid GetGuid() { return m_guid; }
 
-        uint GetAccountId() { return m_accountId; }
+        int GetAccountId() { return m_accountId; }
 
-        uint m_accountId;
+        int m_accountId;
         ObjectGuid m_guid;
     }
 

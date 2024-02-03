@@ -1042,7 +1042,7 @@ namespace Game.Networking.Packets
                 stringLengths[i] = _worldPacket.ReadBits<byte>(7);
 
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                DeclinedNames.name[i] = _worldPacket.ReadString(stringLengths[i]);
+                DeclinedNames.Name[i] = _worldPacket.ReadString(stringLengths[i]);
         }
 
         public ObjectGuid Player;
@@ -1079,17 +1079,17 @@ namespace Game.Networking.Packets
 
     class PlayerSavePersonalEmblem : ServerPacket
     {
-        public PlayerSavePersonalEmblem(int error) : base(ServerOpcodes.PlayerSavePersonalEmblem)
+        public PlayerSavePersonalEmblem(GuildEmblemError error) : base(ServerOpcodes.PlayerSavePersonalEmblem)
         {
             Error = error;
         }
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(Error);
+            _worldPacket.WriteInt32((int)Error);
         }
 
-        public int Error;
+        public GuildEmblemError Error;
     }
 
 

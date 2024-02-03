@@ -122,7 +122,7 @@ namespace Game
 
                 Global.OutdoorPvPMgr.HandlePlayerLeaveZone(_player, _player.GetZoneId());
 
-                for (uint i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+                for (int i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
                 {
                     BattlegroundQueueTypeId bgQueueTypeId = _player.GetBattlegroundQueueTypeId(i);
                     if (bgQueueTypeId != default)
@@ -431,14 +431,14 @@ namespace Game
             return _registeredAddonPrefixes.Contains(prefix);
         }
 
-        public void SendAccountDataTimes(ObjectGuid playerGuid, AccountDataTypes mask)
+        public void SendAccountDataTimes(ObjectGuid playerGuid, AccountDataTypeMask mask)
         {
             AccountDataTimes accountDataTimes = new();
             accountDataTimes.PlayerGuid = playerGuid;
             accountDataTimes.ServerTime = GameTime.GetGameTime();
-            for (int i = 0; i < (int)AccountDataTypes.Max; ++i)
-                if (((int)mask & (1 << i)) != 0)
-                    accountDataTimes.AccountTimes[i] = GetAccountData((AccountDataTypes)i).Time;
+            for (AccountDataTypes i = 0; i < AccountDataTypes.Max; ++i)
+                if (mask.HasType(i))
+                    accountDataTimes.AccountTimes[(int)i] = GetAccountData(i).Time;
 
             SendPacket(accountDataTimes);
         }
@@ -502,43 +502,43 @@ namespace Game
             SendPacket(connectTo);
         }
 
-        void LoadAccountData(SQLResult result, AccountDataTypes mask)
+        void LoadAccountData(SQLResult result, AccountDataTypeMask mask)
         {
-            for (int i = 0; i < (int)AccountDataTypes.Max; ++i)
-                if (Convert.ToBoolean((int)mask & (1 << i)))
-                    _accountData[i] = new AccountData();
+            for (AccountDataTypes i = 0; i < AccountDataTypes.Max; ++i)
+                if (mask.HasType(i))
+                    _accountData[(int)i] = new AccountData();
 
             if (result.IsEmpty())
                 return;
 
             do
             {
-                int type = result.Read<byte>(0);
-                if (type >= (int)AccountDataTypes.Max)
+                AccountDataTypes type = (AccountDataTypes)result.Read<byte>(0);
+                if (type >=AccountDataTypes.Max)
                 {
                     Log.outError(LogFilter.Server, "Table `{0}` have invalid account data Type ({1}), ignore.",
-                        mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
+                        mask == AccountDataTypeMask.GlobalCacheMask ? "account_data" : "character_account_data", type);
                     continue;
                 }
 
-                if (((int)mask & (1 << type)) == 0)
+                if (!mask.HasType(type))
                 {
                     Log.outError(LogFilter.Server, "Table `{0}` have non appropriate for table  account data Type ({1}), ignore.",
-                        mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
+                        mask == AccountDataTypeMask.GlobalCacheMask ? "account_data" : "character_account_data", type);
                     continue;
                 }
 
-                _accountData[type].Time = result.Read<long>(1);
+                _accountData[(int)type].Time = result.Read<long>(1);
                 var bytes = result.Read<byte[]>(2);
                 var line = Encoding.Default.GetString(bytes);
-                _accountData[type].Data = line;
+                _accountData[(int)type].Data = line;
             }
             while (result.NextRow());
         }
 
         void SetAccountData(AccountDataTypes type, long time, string data)
         {
-            if (Convert.ToBoolean((1 << (int)type) & (int)AccountDataTypes.GlobalCacheMask))
+            if (AccountDataTypeMask.GlobalCacheMask.HasType(type))
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_ACCOUNT_DATA);
                 stmt.AddValue(0, GetAccountId());
@@ -786,7 +786,7 @@ namespace Game
 
         void InitializeSessionCallback(SQLQueryHolder<AccountInfoQueryLoad> holder, SQLQueryHolder<AccountInfoQueryLoad> realmHolder)
         {
-            LoadAccountData(realmHolder.GetResult(AccountInfoQueryLoad.GlobalAccountDataIndexPerRealm), AccountDataTypes.GlobalCacheMask);
+            LoadAccountData(realmHolder.GetResult(AccountInfoQueryLoad.GlobalAccountDataIndexPerRealm), AccountDataTypeMask.GlobalCacheMask);
             LoadTutorialsData(realmHolder.GetResult(AccountInfoQueryLoad.TutorialsIndexPerRealm));
             _collectionMgr.LoadAccountToys(holder.GetResult(AccountInfoQueryLoad.GlobalAccountToys));
             _collectionMgr.LoadAccountHeirlooms(holder.GetResult(AccountInfoQueryLoad.GlobalAccountHeirlooms));
@@ -805,7 +805,7 @@ namespace Game
             SendFeatureSystemStatusGlueScreen();
             SendClientCacheVersion(WorldConfig.GetUIntValue(WorldCfg.ClientCacheVersion));
             SendAvailableHotfixes();
-            SendAccountDataTimes(ObjectGuid.Empty, AccountDataTypes.GlobalCacheMask);
+            SendAccountDataTimes(ObjectGuid.Empty, AccountDataTypeMask.GlobalCacheMask);
             SendTutorialsData();
 
             SQLResult result = holder.GetResult(AccountInfoQueryLoad.GlobalRealmCharacterCounts);

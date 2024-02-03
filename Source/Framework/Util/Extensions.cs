@@ -187,6 +187,11 @@ namespace System
             return mask | (QuestSlotStateMask)((uint)QuestSlotStateMask.QuestSlotStart << slot);
         }
 
+        public static bool HasType(this AccountDataTypeMask mask, AccountDataTypes _type)
+        {
+            return (mask & (AccountDataTypeMask)(1 << (int)_type)) != 0;
+        }
+
         public static string ToHexString(this byte[] byteArray, bool reverse = false)
         {
             if (reverse)

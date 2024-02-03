@@ -566,8 +566,15 @@ namespace Game.Entities
 
     public class DeclinedName
     {
-        public StringArray name = new(SharedConst.MaxDeclinedNameCases);
-    }
+        public StringArray Name = new(SharedConst.MaxDeclinedNameCases);
+
+        public DeclinedName() { }
+        public DeclinedName(DeclinedName uf)
+        {
+            for (var i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
+                Name[i] = uf.Name[i];
+        }
+}
 
     struct PositionUpdateInfo
     {
