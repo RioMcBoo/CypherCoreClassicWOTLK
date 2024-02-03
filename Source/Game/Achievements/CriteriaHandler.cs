@@ -125,8 +125,10 @@ namespace Game.Achievements
                     case CriteriaType.PlayerTriggerGameEvent:
                     case CriteriaType.Login:
                     case CriteriaType.AnyoneTriggerGameEventScenario:
+                    case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
                     case CriteriaType.BattlePetReachLevel:
                     case CriteriaType.ActivelyEarnPetLevel:
+                    case CriteriaType.DefeatDungeonEncounter:
                     case CriteriaType.PlaceGarrisonBuilding:
                     case CriteriaType.ActivateAnyGarrisonBuilding:
                     case CriteriaType.HonorLevelIncrease:
@@ -384,7 +386,6 @@ namespace Game.Achievements
                     case CriteriaType.AccountObtainPetThroughBattle:
                     case CriteriaType.WinPetBattle:
                     case CriteriaType.PlayerObtainPetThroughBattle:
-                    case CriteriaType.DefeatDungeonEncounter:
                     case CriteriaType.ActivateGarrisonBuilding:
                     case CriteriaType.UpgradeGarrison:
                     case CriteriaType.StartAnyGarrisonMissionWithFollowerType:
@@ -408,7 +409,6 @@ namespace Game.Achievements
                     case CriteriaType.BattlePetAchievementPointsEarned:
                     case CriteriaType.ReleasedSpirit:
                     case CriteriaType.AccountKnownPet:
-                    case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
                     case CriteriaType.CompletedLFGDungeon:
                     case CriteriaType.KickInitiatorInLFGDungeon:
                     case CriteriaType.KickVoterInLFGDungeon:
@@ -787,6 +787,7 @@ namespace Game.Achievements
                 case CriteriaType.CatchFishInFishingHole:
                 case CriteriaType.LearnSpellFromSkillLine:
                 case CriteriaType.WinDuel:
+                case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
                 case CriteriaType.GetLootByType:
                 case CriteriaType.LearnTradeskillSkillLine:
                 case CriteriaType.CompletedLFGDungeonWithStrangers:
@@ -796,6 +797,7 @@ namespace Game.Achievements
                 case CriteriaType.UniquePetsOwned:
                 case CriteriaType.BattlePetReachLevel:
                 case CriteriaType.ActivelyEarnPetLevel:
+                case CriteriaType.DefeatDungeonEncounter:
                 case CriteriaType.LearnAnyTransmogInSlot:
                 case CriteriaType.ParagonLevelIncreaseWithFaction:
                 case CriteriaType.PlayerHasEarnedHonor:
@@ -1180,6 +1182,11 @@ namespace Game.Achievements
                     break;
                 case CriteriaType.EarnTeamArenaRating:
                     return false;
+                case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
+                case CriteriaType.DefeatDungeonEncounter:
+                    if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
+                        return false;
+                    break;
                 case CriteriaType.PlaceGarrisonBuilding:
                 case CriteriaType.ActivateGarrisonBuilding:
                     if (miscValue1 != criteria.Entry.Asset)
@@ -3503,9 +3510,11 @@ namespace Game.Achievements
                 case CriteriaType.GainAura:
                 case CriteriaType.CatchFishInFishingHole:
                 case CriteriaType.LearnSpellFromSkillLine:
+                case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
                 case CriteriaType.GetLootByType:
                 case CriteriaType.LandTargetedSpellOnTarget:
                 case CriteriaType.LearnTradeskillSkillLine:
+                case CriteriaType.DefeatDungeonEncounter:
                     return true;
                 default:
                     return false;
