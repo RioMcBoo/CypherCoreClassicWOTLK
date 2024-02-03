@@ -1584,6 +1584,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_eventScriptStorage.Count} event scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
+        //Load WP Scripts
         public void LoadSpellScriptNames()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -1774,8 +1775,6 @@ namespace Game
                     return sSpellScripts;
                 case ScriptsType.Event:
                     return sEventScripts;
-                case ScriptsType.Waypoint:
-                    return sWaypointScripts;
                 default:
                     return null;
             }
@@ -1789,8 +1788,6 @@ namespace Game
                     return "spell_scripts";
                 case ScriptsType.Event:
                     return "event_scripts";
-                case ScriptsType.Waypoint:
-                    return "waypoint_scripts";
                 default:
                     return "";
             }
@@ -11560,7 +11557,6 @@ namespace Game
         MultiMap<int, int> spellScriptsStorage = new();
         public Dictionary<int, MultiMap<int, ScriptInfo>> sSpellScripts = new();
         public Dictionary<int, MultiMap<int, ScriptInfo>> sEventScripts = new();
-        public Dictionary<int, MultiMap<int, ScriptInfo>> sWaypointScripts = new();
         Dictionary<int, int> areaTriggerScriptStorage = new();
         List<int> _eventStorage = new();
         Dictionary<int, int> _eventScriptStorage = new();

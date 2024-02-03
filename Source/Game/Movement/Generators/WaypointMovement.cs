@@ -301,13 +301,6 @@ namespace Game.Movement
                     _nextMoveTime.Reset(waitTime);
             }
 
-            if (waypoint.eventId != 0 && RandomHelper.URand(0, 99) < waypoint.eventChance)
-            {
-                Log.outDebug(LogFilter.MapsScript, $"Creature movement start script {waypoint.eventId} at point {_currentNode} for {owner.GetGUID()}.");
-                owner.ClearUnitState(UnitState.RoamingMove);
-                owner.GetMap().ScriptsStart(ScriptsType.Waypoint, waypoint.eventId, owner, null);
-            }
-
             // inform AI
             CreatureAI ai = owner.GetAI();
             if (ai != null)
