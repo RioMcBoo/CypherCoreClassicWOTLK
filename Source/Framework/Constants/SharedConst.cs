@@ -1669,6 +1669,7 @@ namespace Framework.Constants
         BasemapLoadGrids,
         BattlegroundCastDeserter,
         BattlegroundInvitationType,
+        BattlegroundMapLoadGrids,
         BattlegroundPremadeGroupWaitForMatch,
         BattlegroundPrematureFinishTimer,
         BattlegroundQueueAnnouncerEnable,
