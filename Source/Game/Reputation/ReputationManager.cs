@@ -185,7 +185,7 @@ namespace Game
             return false;
         }
         
-        public int GetParagonLevel(uint paragonFactionId)
+        public int GetParagonLevel(int paragonFactionId)
         {
             return GetParagonLevel(CliDB.FactionStorage.LookupByKey(paragonFactionId));
         }
@@ -850,7 +850,7 @@ namespace Game
             return (uint)ReputationRankStrIndex[(int)GetRank(factionEntry)];
         }
 
-        public ReputationRank GetForcedRankIfAny(uint factionId)
+        public ReputationRank GetForcedRankIfAny(int factionId)
         {
             var forced = _forcedReactions.ContainsKey(factionId);
             return forced ? _forcedReactions[factionId] : ReputationRank.None;
@@ -866,8 +866,8 @@ namespace Game
 
             for (int i = 0; i < 4; i++)
             {
-                var raceMask = new RaceMask<long>(factionEntry.ReputationRaceMask[i]);
-                if ((factionEntry.ReputationClassMask[i] == 0 || factionEntry.ReputationClassMask[i].HasAnyFlag((short)classMask)) && (raceMask.IsEmpty() || raceMask.HasRace(race)))
+                var raceMask = (RaceMask)factionEntry.ReputationRaceMask[i];
+                if ((factionEntry.ReputationClassMask(i) == ClassMask.None || factionEntry.ReputationClassMask(i).HasClass(playerClass)) && (raceMask == RaceMask.None || raceMask.HasRace(race)))
                     return factionEntry.ReputationBase[i];
             }
 
@@ -910,7 +910,7 @@ namespace Game
         };
 
         SortedDictionary<uint, FactionState> _factions = new();
-        Dictionary<uint, ReputationRank> _forcedReactions = new();
+        Dictionary<int, ReputationRank> _forcedReactions = new();
     }
 
     public class FactionState
@@ -937,8 +937,8 @@ namespace Game
 
     public class ReputationOnKillEntry
     {
-        public uint RepFaction1;
-        public uint RepFaction2;
+        public int RepFaction1;
+        public int RepFaction2;
         public uint ReputationMaxCap1;
         public int RepValue1;
         public uint ReputationMaxCap2;
@@ -950,8 +950,8 @@ namespace Game
 
     public class RepSpilloverTemplate
     {
-        public uint[] faction = new uint[5];
-        public float[] faction_rate = new float[5];
-        public uint[] faction_rank = new uint[5];
+        public int[] faction = new int[SharedConst.SpilloverFactionsMax];
+        public float[] faction_rate = new float[SharedConst.SpilloverFactionsMax];
+        public uint[] faction_rank = new uint[SharedConst.SpilloverFactionsMax];
     }
 }

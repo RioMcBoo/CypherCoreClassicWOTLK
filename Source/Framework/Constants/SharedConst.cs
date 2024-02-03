@@ -11,6 +11,7 @@ namespace Framework.Constants
 {
     public class SharedConst
     {
+        public const int SpilloverFactionsMax = 5;
         /// <summary>
         /// CliDB Const
         /// </summary>
@@ -415,11 +416,6 @@ namespace Framework.Constants
             CascLocaleBit.ptBR,
             CascLocaleBit.itIT
         };
-
-        public static long GetMaskForRace(Race raceId)
-        {
-            return raceId < Race.Max && raceBits[(int)raceId] >= 0 && raceBits[(int)raceId] < 64 ? (1 << raceBits[(int)raceId]) : 0;
-        }
 
         public static bool IsActivePetSlot(PetSaveMode slot)
         {
@@ -875,6 +871,7 @@ namespace Framework.Constants
     public enum PowerType: sbyte
     {
         Health = -2,            // (-2 as signed value)
+        None = -1,
         Mana = 0,
         Rage = 1,
         Focus = 2,

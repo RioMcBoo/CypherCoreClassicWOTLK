@@ -16,7 +16,7 @@ namespace Game
         List<QuestPool> _dailyPools = new();
         List<QuestPool> _weeklyPools = new();
         List<QuestPool> _monthlyPools = new();
-        Dictionary<uint, QuestPool> _poolLookup = new(); // questId -> pool
+        Dictionary<int, QuestPool> _poolLookup = new(); // questId -> pool
 
         QuestPoolManager() { }
 
@@ -274,7 +274,7 @@ namespace Game
             return null;
         }
 
-        public bool IsQuestActive(uint questId)
+        public bool IsQuestActive(int questId)
         {
             var it = _poolLookup.LookupByKey(questId);
             if (it == null) // not pooled

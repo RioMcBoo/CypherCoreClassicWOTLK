@@ -1159,6 +1159,18 @@ namespace Game.Entities
                 // Activate and update skill line
                 if (newVal != 0)
                 {
+                    // enable parent skill line if missing
+                    if (skillEntry.ParentSkillLineID != 0 && skillEntry.ParentTierIndex > 0 && GetSkillStep(skillEntry.ParentSkillLineID) < skillEntry.ParentTierIndex)
+                    {
+                        var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillEntry.ParentSkillLineID, GetRace(), GetClass());
+                        if (rcEntry != null)
+                        {
+                            var tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
+                            if (tier != null)
+                                SetSkill(skillEntry.ParentSkillLineID, (uint)skillEntry.ParentTierIndex, Math.Max(GetPureSkillValue(skillEntry.ParentSkillLineID), 1u), tier.GetValueForTierIndex(skillEntry.ParentTierIndex - 1));
+                        }
+                    }
+
                     // if skill value is going down, update enchantments before setting the new value
                     if (newVal < currVal)
                         UpdateSkillEnchantments(id, currVal, (ushort)newVal);
@@ -1299,7 +1311,7 @@ namespace Game.Entities
                             if (tier != null)
                             {
                                 ushort skillval = GetPureSkillValue((SkillType)skillEntry.ParentSkillLineID);
-                                SetSkill(skillEntry.ParentSkillLineID, (uint)skillEntry.ParentTierIndex, Math.Max(skillval, (ushort)1), tier.Value[skillEntry.ParentTierIndex - 1]);
+                                SetSkill(skillEntry.ParentSkillLineID, (uint)skillEntry.ParentTierIndex, Math.Max(skillval, (ushort)1), tier.GetValueForTierIndex(skillEntry.ParentTierIndex - 1));
                             }
                         }
                     }
@@ -2157,7 +2169,7 @@ namespace Game.Entities
                 case SkillRangeType.Rank:
                 {
                     SkillTiersEntry tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
-                    ushort maxValue = (ushort)tier.Value[0];
+                    ushort maxValue = (ushort)tier.GetValueForTierIndex(0);
                     ushort skillValue = 1;
                     if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                         skillValue = maxValue;
@@ -2329,16 +2341,50 @@ namespace Game.Entities
                         SetSkill(spellLearnSkill.skill, 0, 0, 0);
                     else                                            // set to prev. skill setting values
                     {
-                        uint skill_value = GetPureSkillValue(prevSkill.skill);
-                        uint skill_max_value = GetPureMaxSkillValue(prevSkill.skill);
+                        ushort skill_value = GetPureSkillValue(prevSkill.skill);
+                        ushort skill_max_value = GetPureMaxSkillValue(prevSkill.skill);
 
-                        if (skill_value > prevSkill.value)
+                        ushort new_skill_max_value = prevSkill.maxvalue;
+
+                        if (new_skill_max_value == 0)
+                        {
+                            var rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo((uint)prevSkill.skill, GetRace(), GetClass());
+                            if (rcInfo != null)
+                            {
+                                switch (Global.SpellMgr.GetSkillRangeType(rcInfo))
+                                {
+                                    case SkillRangeType.Language:
+                                        skill_value = 300;
+                                        new_skill_max_value = 300;
+                                        break;
+                                    case SkillRangeType.Level:
+                                        new_skill_max_value = GetMaxSkillValueForLevel();
+                                        break;
+                                    case SkillRangeType.Mono:
+                                        new_skill_max_value = 1;
+                                        break;
+                                    case SkillRangeType.Rank:
+                                    {
+                                        var tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
+                                        new_skill_max_value = (ushort)tier.GetValueForTierIndex(prevSkill.step - 1);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+
+                                if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                                    skill_value = new_skill_max_value;
+                            }
+                        }
+                        else if (skill_value > prevSkill.value)
                             skill_value = prevSkill.value;
-
-                        uint new_skill_max_value = prevSkill.maxvalue == 0 ? GetMaxSkillValueForLevel() : prevSkill.maxvalue;
 
                         if (skill_max_value > new_skill_max_value)
                             skill_max_value = new_skill_max_value;
+
+                        if (skill_value > new_skill_max_value)
+                            skill_value = new_skill_max_value;
 
                         SetSkill(prevSkill.skill, prevSkill.step, skill_value, skill_max_value);
                     }
@@ -2536,7 +2582,7 @@ namespace Game.Entities
             {
                 uint next_active_spell_id = 0;
                 // fix activate state for non-stackable low rank (and find next spell for !active case)
-                if (!spellInfo.IsStackableWithRanks() && spellInfo.IsRanked())
+                if (spellInfo.IsRanked())
                 {
                     uint next = Global.SpellMgr.GetNextSpellInChain(spellId);
                     if (next != 0)
@@ -2601,11 +2647,7 @@ namespace Game.Entities
                     else if (IsInWorld)
                     {
                         if (next_active_spell_id != 0)
-                        {
                             SendSupercededSpell(spellId, next_active_spell_id);
-                            // if (IsUnlearnSpellsPacketNeededForSpell(spellId))
-                            //     SendUnlearnSpells();
-                        }
                         else
                         {
                             UnlearnedSpells removedSpells = new();
@@ -2653,25 +2695,9 @@ namespace Game.Entities
 
             if (!disabled_case) // skip new spell adding if spell already known (disabled spells case)
             {
-                // talent: unlearn all other talent ranks (high and low)
-                if (Global.DB2Mgr.GetTalentSpellPos(spellId) is TalentSpellPos talentPos)
-                {
-                    CliDB.TalentStorage.TryGetValue(talentPos.TalentID, out TalentRecord talentInfo);
-                    if (talentInfo != null)
-                    {
-                        for (byte rank = 0; rank < PlayerConst.MaxTalentRank; ++rank)
-                        {
-                            // skip learning spell and no rank spell case
-                            uint rankSpellId = (uint)talentInfo.SpellRank[rank];
-                            if (rankSpellId == 0 || rankSpellId == spellId)
-                                continue;
-
-                            RemoveSpell(rankSpellId, false, false);
-                        }
-                    }
-                }
                 // non talent spell: learn low ranks (recursive call)
-                else if (Global.SpellMgr.GetPrevSpellInChain(spellId) is uint prev_spell && prev_spell != 0)
+                uint prev_spell = Global.SpellMgr.GetPrevSpellInChain(spellId);
+                if (prev_spell != 0)
                 {
                     if (!IsInWorld || disabled)                    // at spells loading, no output, but allow save
                         AddSpell(prev_spell, active, true, true, disabled, false, fromSkill);
@@ -2688,10 +2714,8 @@ namespace Game.Entities
                 if (traitDefinitionId.HasValue)
                     newspell.TraitDefinitionId = traitDefinitionId.Value;
 
-                bool needsUnlearnSpellsPacket = false;
-
                 // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
-                if (newspell.Active && !newspell.Disabled && !spellInfo.IsStackableWithRanks() && spellInfo.IsRanked())
+                if (newspell.Active && !newspell.Disabled && spellInfo.IsRanked())
                 {
                     foreach (var _spell in m_spells)
                     {
@@ -2709,10 +2733,7 @@ namespace Game.Entities
                                 if (spellInfo.IsHighRankOf(i_spellInfo))
                                 {
                                     if (IsInWorld)                 // not send spell (re-/over-)learn packets at loading
-                                    {
                                         SendSupercededSpell(_spell.Key, spellId);
-                                        // needsUnlearnSpellsPacket = needsUnlearnSpellsPacket || IsUnlearnSpellsPacketNeededForSpell(_spell.Key);
-                                    }
 
                                     // mark old spell as disable (SMSG_SUPERCEDED_SPELL replace it in client by new)
                                     _spell.Value.Active = false;
@@ -2723,10 +2744,7 @@ namespace Game.Entities
                                 else
                                 {
                                     if (IsInWorld)                 // not send spell (re-/over-)learn packets at loading
-                                    {
                                         SendSupercededSpell(spellId, _spell.Key);
-                                        // needsUnlearnSpellsPacket = needsUnlearnSpellsPacket || IsUnlearnSpellsPacketNeededForSpell(spellId);
-                                    }
 
                                     // mark new spell as disable (not learned yet for client and will not learned)
                                     newspell.Active = false;
@@ -2739,9 +2757,6 @@ namespace Game.Entities
                 }
                 m_spells[spellId] = newspell;
 
-                if (needsUnlearnSpellsPacket)
-                    SendUnlearnSpells();
-
                 // return false if spell disabled
                 if (newspell.Disabled)
                     return false;
@@ -2751,7 +2766,7 @@ namespace Game.Entities
 
             // cast talents with SPELL_EFFECT_LEARN_SPELL (other dependent spells will learned later as not auto-learned)
             // note: all spells with SPELL_EFFECT_LEARN_SPELL isn't passive
-            if (!loading && talentCost > 0 && spellInfo.HasAttribute(SpellCustomAttributes.IsTalent) && spellInfo.HasEffect(SpellEffectName.LearnSpell))
+            if (!loading && spellInfo.HasAttribute(SpellCustomAttributes.IsTalent) && spellInfo.HasEffect(SpellEffectName.LearnSpell))
             {
                 // ignore stance requirement for talent learn spell (stance set for spell only for client spell description show)
                 castSpell = true;
@@ -2793,7 +2808,7 @@ namespace Game.Entities
                                         continue;
 
                                     float basePoints = Global.DB2Mgr.GetCurveValueAt((uint)traitDefinitionEffectPoint.CurveID, rank);
-                                    if (traitDefinitionEffectPoint.OperationType() == TraitPointsOperationType.Multiply)
+                                    if (traitDefinitionEffectPoint.GetOperationType() == TraitPointsOperationType.Multiply)
                                         basePoints *= spellInfo.GetEffect((uint)traitDefinitionEffectPoint.EffectIndex).CalcBaseValue(this, null, 0, -1);
 
                                     args.AddSpellMod(SpellValueMod.BasePoint0 + traitDefinitionEffectPoint.EffectIndex, (int)basePoints);
@@ -2814,9 +2829,6 @@ namespace Game.Entities
                 if (traitDefinition != null)
                     AddOverrideSpell(traitDefinition.OverridesSpellID, spellId);
             }
-
-            // update used talent points count
-            SetUsedTalentCount(GetUsedTalentCount() + talentCost);
 
             // update free primary prof.points (if any, can be none in case GM .learn prof. learning)
             uint freeProfs = GetFreePrimaryProfessionPoints();
@@ -2840,7 +2852,39 @@ namespace Game.Entities
                     if (skill_value < spellLearnSkill.value)
                         skill_value = spellLearnSkill.value;
 
-                    ushort new_skill_max_value = spellLearnSkill.maxvalue == 0 ? GetMaxSkillValueForLevel() : spellLearnSkill.maxvalue;
+                    ushort new_skill_max_value = spellLearnSkill.maxvalue;
+
+                    if (new_skill_max_value == 0)
+                    {
+                        var rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo((uint)spellLearnSkill.skill, GetRace(), GetClass());
+                        if (rcInfo != null)
+                        {
+                            switch (Global.SpellMgr.GetSkillRangeType(rcInfo))
+                            {
+                                case SkillRangeType.Language:
+                                    skill_value = 300;
+                                    new_skill_max_value = 300;
+                                    break;
+                                case SkillRangeType.Level:
+                                    new_skill_max_value = GetMaxSkillValueForLevel();
+                                    break;
+                                case SkillRangeType.Mono:
+                                    new_skill_max_value = 1;
+                                    break;
+                                case SkillRangeType.Rank:
+                                {
+                                    var tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
+                                    new_skill_max_value = (ushort)tier.GetValueForTierIndex(spellLearnSkill.step - 1);
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+
+                            if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                                skill_value = new_skill_max_value;
+                        }
+                    }
 
                     if (skill_max_value < new_skill_max_value)
                         skill_max_value = new_skill_max_value;
@@ -2907,7 +2951,8 @@ namespace Game.Entities
             // return true (for send learn packet) only if spell active (in case ranked spells) and not replace old spell
             return active && !disabled && !superceded_old;
         }
-        public override bool HasSpell(uint spellId)
+
+        public override bool HasSpell(int spellId)
         {
             var spell = m_spells.LookupByKey(spellId);
             if (spell != null)
@@ -2915,6 +2960,7 @@ namespace Game.Entities
 
             return false;
         }
+
         public bool HasActiveSpell(uint spellId)
         {
             var spell = m_spells.LookupByKey(spellId);
@@ -3098,7 +3144,7 @@ namespace Game.Entities
                     }
                     break;
                 }
-                // special case if two mods apply 100% critical Chance, only consume one
+                // special case if two mods apply 100% critical chance, only consume one
                 case SpellModOp.CritChance:
                 {
                     SpellModifier modCritical = null;
@@ -3571,7 +3617,7 @@ namespace Game.Entities
                 {
                     foreach (ItemEffectRecord effectData in item.GetEffects())
                     {
-                        // wrong triggering Type
+                        // wrong triggering type
                         if (effectData.TriggerType != ItemSpelltriggerType.OnProc)
                             continue;
 
@@ -3691,7 +3737,7 @@ namespace Game.Entities
 
         float GetWeaponProcChance()
         {
-            // normalized proc Chance for weapon attack speed
+            // normalized proc chance for weapon attack speed
             // (odd formula...)
             if (IsAttackReady(WeaponAttackType.BaseAttack))
                 return (GetBaseAttackTime(WeaponAttackType.BaseAttack) * 1.8f / 1000.0f);
@@ -3787,6 +3833,269 @@ namespace Game.Entities
         {
             SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
             SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillPermBonus, (int)pos), bonus);
+        }
+
+        public void RequestSpellCast(SpellCastRequest castRequest)
+        {
+            // We are overriding an already existing spell cast request so inform the client that the old cast is being replaced
+            if (_pendingSpellCastRequest != null)
+                CancelPendingCastRequest();
+
+            _pendingSpellCastRequest = castRequest;
+
+            // If we can process the cast request right now, do it.
+            if (CanExecutePendingSpellCastRequest())
+                ExecutePendingSpellCastRequest();
+        }
+
+        public void CancelPendingCastRequest()
+        {
+            if (_pendingSpellCastRequest == null)
+                return;
+
+            // We have to inform the client that the cast has been canceled. Otherwise the cast button will remain highlightened
+            CastFailed castFailed = new();
+            castFailed.CastID = _pendingSpellCastRequest.CastRequest.CastID;
+            castFailed.SpellID = (int)_pendingSpellCastRequest.CastRequest.SpellID;
+            castFailed.Reason = SpellCastResult.DontReport;
+            SendPacket(castFailed);
+
+            _pendingSpellCastRequest = null;
+        }
+
+        // A spell can be queued up within 400 milliseconds before global cooldown expires or the cast finishes
+        static TimeSpan SPELL_QUEUE_TIME_WINDOW = TimeSpan.FromMilliseconds(400);
+
+        public bool CanRequestSpellCast(SpellInfo spellInfo, Unit castingUnit)
+        {
+            if (castingUnit.GetSpellHistory().GetRemainingGlobalCooldown(spellInfo) > SPELL_QUEUE_TIME_WINDOW)
+                return false;
+
+            foreach (CurrentSpellTypes spellSlot in new[] { CurrentSpellTypes.Melee, CurrentSpellTypes.Generic })
+            {
+                Spell spell = GetCurrentSpell(spellSlot);
+                if (spell != null && TimeSpan.FromMilliseconds(spell.GetRemainingCastTime()) > SPELL_QUEUE_TIME_WINDOW)
+                    return false;
+            }
+
+            return true;
+        }
+
+        void ExecutePendingSpellCastRequest()
+        {
+            if (_pendingSpellCastRequest == null)
+                return;
+
+            TriggerCastFlags triggerFlag = TriggerCastFlags.None;
+
+            Unit castingUnit = _pendingSpellCastRequest.CastingUnitGUID == GetGUID() ? this : Global.ObjAccessor.GetUnit(this, _pendingSpellCastRequest.CastingUnitGUID);
+
+            // client provided targets
+            SpellCastTargets targets = new(castingUnit, _pendingSpellCastRequest.CastRequest);
+
+            // The spell cast has been requested by using an item. Handle the cast accordingly.
+            if (_pendingSpellCastRequest.ItemData != null)
+            {
+                if (ProcessItemCast(_pendingSpellCastRequest, targets))
+                    _pendingSpellCastRequest = null;
+                else
+                    CancelPendingCastRequest();
+                return;
+            }
+
+            // check known spell or raid marker spell (which not requires player to know it)
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(_pendingSpellCastRequest.CastRequest.SpellID, GetMap().GetDifficultyID());
+            Player plrCaster = castingUnit.ToPlayer();
+            if (plrCaster != null && !plrCaster.HasActiveSpell(spellInfo.Id) && !spellInfo.HasAttribute(SpellAttr8.SkipIsKnownCheck))
+            {
+                bool allow = false;
+
+                // allow casting of unknown spells for special lock cases
+                GameObject go = targets.GetGOTarget();
+                if (go != null && go.GetSpellForLock(plrCaster) == spellInfo)
+                    allow = true;
+
+                // allow casting of spells triggered by clientside periodic trigger auras
+                if (castingUnit.HasAuraTypeWithTriggerSpell(AuraType.PeriodicTriggerSpellFromClient, spellInfo.Id))
+                {
+                    allow = true;
+                    triggerFlag = TriggerCastFlags.FullMask;
+                }
+
+                if (!allow)
+                {
+                    CancelPendingCastRequest();
+                    return;
+                }
+            }
+
+            // Check possible spell cast overrides
+            spellInfo = castingUnit.GetCastSpellInfo(spellInfo, triggerFlag);
+            if (spellInfo.IsPassive())
+            {
+                CancelPendingCastRequest();
+                return;
+            }
+
+            // can't use our own spells when we're in possession of another unit
+            if (IsPossessing())
+            {
+                CancelPendingCastRequest();
+                return;
+            }
+
+            // Client is resending autoshot cast opcode when other spell is cast during shoot rotation
+            // Skip it to prevent "interrupt" message
+            // Also check targets! target may have changed and we need to interrupt current spell
+            if (spellInfo.IsAutoRepeatRangedSpell())
+            {
+                Spell currentSpell = castingUnit.GetCurrentSpell(CurrentSpellTypes.AutoRepeat);
+                if (currentSpell != null)
+                {
+                    if (currentSpell.m_spellInfo == spellInfo && currentSpell.m_targets.GetUnitTargetGUID() == targets.GetUnitTargetGUID())
+                    {
+                        CancelPendingCastRequest();
+                        return;
+                    }
+                }
+            }
+
+            // auto-selection buff level base at target level (in spellInfo)
+            if (targets.GetUnitTarget() != null)
+            {
+                SpellInfo actualSpellInfo = spellInfo.GetAuraRankForLevel(targets.GetUnitTarget().GetLevelForTarget(this));
+
+                // if rank not found then function return NULL but in explicit cast case original spell can be cast and later failed with appropriate error message
+                if (actualSpellInfo != null)
+                    spellInfo = actualSpellInfo;
+            }
+
+            Spell spell = new Spell(castingUnit, spellInfo, triggerFlag);
+
+            SpellPrepare spellPrepare = new();
+            spellPrepare.ClientCastID = _pendingSpellCastRequest.CastRequest.CastID;
+            spellPrepare.ServerCastID = spell.m_castId;
+            SendPacket(spellPrepare);
+
+            spell.m_fromClient = true;
+            spell.m_misc.Data0 = _pendingSpellCastRequest.CastRequest.Misc[0];
+            spell.m_misc.Data1 = _pendingSpellCastRequest.CastRequest.Misc[1];
+            spell.Prepare(targets);
+
+            _pendingSpellCastRequest = null;
+        }
+
+        bool ProcessItemCast(SpellCastRequest castRequest, SpellCastTargets targets)
+        {
+            Item item = GetUseableItemByPos(castRequest.ItemData.PackSlot, castRequest.ItemData.Slot);
+            if (item == null)
+            {
+                SendEquipError(InventoryResult.ItemNotFound);
+                return false;
+            }
+
+            if (item.GetGUID() != castRequest.ItemData.CastItem)
+            {
+                SendEquipError(InventoryResult.ItemNotFound);
+                return false;
+            }
+
+            ItemTemplate proto = item.GetTemplate();
+            if (proto == null)
+            {
+                SendEquipError(InventoryResult.ItemNotFound, item);
+                return false;
+            }
+
+            // some item classes can be used only in equipped state
+            if (proto.GetInventoryType() != InventoryType.NonEquip && !item.IsEquipped())
+            {
+                SendEquipError(InventoryResult.ItemNotFound, item);
+                return false;
+            }
+
+            InventoryResult msg = CanUseItem(item);
+            if (msg != InventoryResult.Ok)
+            {
+                SendEquipError(msg, item, null);
+                return false;
+            }
+
+            // only allow conjured consumable, bandage, poisons (all should have the 2^21 item flag set in DB)
+            if (proto.GetClass() == ItemClass.Consumable && !proto.HasFlag(ItemFlags.IgnoreDefaultArenaRestrictions) && InArena())
+            {
+                SendEquipError(InventoryResult.NotDuringArenaMatch, item);
+                return false;
+            }
+
+            // don't allow items banned in arena
+            if (proto.HasFlag(ItemFlags.NotUseableInArena) && InArena())
+            {
+                SendEquipError(InventoryResult.NotDuringArenaMatch, item);
+                return false;
+            }
+
+            if (IsInCombat())
+            {
+                foreach (var effect in item.GetEffects())
+                {
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effect.SpellID, GetMap().GetDifficultyID());
+                    if (spellInfo != null)
+                    {
+                        if (!spellInfo.CanBeUsedInCombat(this))
+                        {
+                            SendEquipError(InventoryResult.NotInCombat, item);
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // check also  BIND_ON_ACQUIRE and BIND_QUEST for .additem or .additemset case by GM (not binded at adding to inventory)
+            if (item.GetBonding() == ItemBondingType.OnUse || item.GetBonding() == ItemBondingType.OnAcquire || item.GetBonding() == ItemBondingType.Quest)
+            {
+                if (!item.IsSoulBound())
+                {
+                    item.SetState(ItemUpdateState.Changed, this);
+                    item.SetBinding(true);
+                    GetSession().GetCollectionMgr().AddItemAppearance(item);
+                }
+            }
+
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ItemUse);
+
+            // Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
+            if (!Global.ScriptMgr.OnItemUse(this, item, targets, castRequest.CastRequest.CastID))
+            {
+                // no script or script not process request by self
+                CastItemUseSpell(item, targets, castRequest.CastRequest.CastID, castRequest.CastRequest.Misc);
+            }
+
+            return true;
+        }
+
+        bool CanExecutePendingSpellCastRequest()
+        {
+            if (_pendingSpellCastRequest == null)
+                return false;
+
+            Unit castingUnit = _pendingSpellCastRequest.CastingUnitGUID == GetGUID() ? this : Global.ObjAccessor.GetUnit(this, _pendingSpellCastRequest.CastingUnitGUID);
+            if (castingUnit == null || !castingUnit.IsInWorld || (castingUnit != this && GetUnitBeingMoved() != castingUnit))
+            {
+                // If the casting unit is no longer available, just cancel the entire spell cast request and be done with it
+                CancelPendingCastRequest();
+                return false;
+            }
+
+            // Generic and melee spells have to wait, channeled spells can be processed immediately.
+            if (castingUnit.GetCurrentSpell(CurrentSpellTypes.Channeled) == null && castingUnit.HasUnitState(UnitState.Casting))
+                return false;
+
+            // Waiting for the global cooldown to expire before attempting to execute the cast request
+            if (castingUnit.GetSpellHistory().GetRemainingGlobalCooldown(Global.SpellMgr.GetSpellInfo(_pendingSpellCastRequest.CastRequest.SpellID, GetMap().GetDifficultyID())) > TimeSpan.Zero)
+                return false;
+
+            return true;
         }
     }
 

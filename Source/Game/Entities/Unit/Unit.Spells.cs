@@ -2817,7 +2817,7 @@ namespace Game.Entities
             return false;
         }
         
-        public uint GetAuraCount(uint spellId)
+        public uint GetAuraCount(int spellId)
         {
             uint count = 0;
             var range = m_appliedAuras.LookupByKey(spellId);

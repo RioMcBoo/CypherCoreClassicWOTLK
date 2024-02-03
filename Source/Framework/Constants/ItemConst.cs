@@ -778,10 +778,35 @@ namespace Framework.Constants
         Wand = 19,
         FishingPole = 20,
 
-        MaskRanged = (1 << Bow) | (1 << Gun) | (1 << Crossbow),
-
         Max = 21
 
+    }
+
+    public enum ItemSubClassWeaponMask
+    {
+        Axe = 1 << ItemSubClassWeapon.Axe,
+        Axe2 = 1 << ItemSubClassWeapon.Axe2,
+        Bow = 1 << ItemSubClassWeapon.Bow,
+        Gun = 1 << ItemSubClassWeapon.Gun,
+        Mace = 1 << ItemSubClassWeapon.Mace,
+        Mace2 = 1 << ItemSubClassWeapon.Mace2,
+        Polearm = 1 << ItemSubClassWeapon.Polearm,
+        Sword = 1 << ItemSubClassWeapon.Sword,
+        Sword2 = 1 << ItemSubClassWeapon.Sword2,
+        Warglaives = 1 << ItemSubClassWeapon.Warglaives,
+        Staff = 1 << ItemSubClassWeapon.Staff,
+        Exotic = 1 << ItemSubClassWeapon.Exotic,
+        Exotic2 = 1 << ItemSubClassWeapon.Exotic2,
+        Fist = 1 << ItemSubClassWeapon.Fist,
+        Miscellaneous = 1 << ItemSubClassWeapon.Miscellaneous,
+        Dagger = 1 << ItemSubClassWeapon.Dagger,
+        Thrown = 1 << ItemSubClassWeapon.Thrown,
+        Spear = 1 << ItemSubClassWeapon.Spear,
+        Crossbow = 1 << ItemSubClassWeapon.Crossbow,
+        Wand = 1 << ItemSubClassWeapon.Wand,
+        FishingPole = 1 << ItemSubClassWeapon.FishingPole,
+
+        Ranged = Bow | Gun | Crossbow,
     }
 
     public enum ItemSubClassGem

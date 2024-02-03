@@ -1859,7 +1859,7 @@ namespace Game.Entities
             return false;
         }
 
-        public QuestStatus GetQuestStatus(uint questId)
+        public QuestStatus GetQuestStatus(int questId)
         {
             if (questId != 0)
             {
@@ -2165,7 +2165,7 @@ namespace Game.Entities
             }
         }
 
-        public ushort FindQuestSlot(uint quest_id)
+        public ushort FindQuestSlot(int quest_id)
         {
             for (ushort i = 0; i < SharedConst.MaxQuestLogSize; ++i)
                 if (GetQuestSlotQuestId(i) == quest_id)

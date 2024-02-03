@@ -55,7 +55,7 @@ namespace Game.DataStorage
         public uint Id;
         public ushort MinLevel;
         public ushort MaxLevel;
-        public int ClassMask;
+        private int _classMask;
         public uint SkillLogic;
         public byte LanguageID;
         public byte MinLanguage;
@@ -77,12 +77,12 @@ namespace Game.DataStorage
         public byte PartyStatus;
         public byte LifetimeMaxPVPRank;
         public uint AchievementLogic;
-        public sbyte Gender;
-        public sbyte NativeGender;
+        private sbyte _gender;
+        private sbyte _nativeGender;
         public uint AreaLogic;
         public uint LfgLogic;
         public uint CurrencyLogic;
-        public uint QuestKillID;
+        public int QuestKillID;
         public uint QuestKillLogic;
         public sbyte MinExpansionLevel;
         public sbyte MaxExpansionLevel;
@@ -95,12 +95,12 @@ namespace Game.DataStorage
         public uint PhaseGroupID;
         public byte Flags;
         public sbyte ChrSpecializationIndex;
-        public sbyte ChrSpecializationRole;
+        private sbyte _chrSpecializationRole;
         public uint ModifierTreeID;
-        public sbyte PowerType;
+        private sbyte _powerType;
         public byte PowerTypeComp;
         public byte PowerTypeValue;
-        public int WeaponSubclassMask;
+        private int _weaponSubclassMask;
         public byte MaxGuildLevel;
         public byte MinGuildLevel;
         public sbyte MaxExpansionTier;
@@ -110,7 +110,7 @@ namespace Game.DataStorage
         public ushort[] SkillID = new ushort[4];
         public ushort[] MinSkill = new ushort[4];
         public ushort[] MaxSkill = new ushort[4];
-        public uint[] MinFactionID = new uint[3];
+        public int[] MinFactionID = new int[3];
         public byte[] MinReputation = new byte[3];
         public uint[] PrevQuestID = new uint[4];
         public uint[] CurrQuestID = new uint[4];
@@ -134,6 +134,12 @@ namespace Game.DataStorage
 
         #region Properties
         public RaceMask RaceMask => (RaceMask)_raceMask;
+        public ClassMask ClassMask => (ClassMask)_classMask;
+        public Gender Gender => (Gender)_gender;
+        public Gender NativeGender => (Gender)_nativeGender;
+        public PowerType PowerType => (PowerType)_powerType;
+        public ChrSpecializationRole ChrSpecializationRole => (ChrSpecializationRole)_chrSpecializationRole;
+        public ItemSubClassWeaponMask WeaponSubclassMask => (ItemSubClassWeaponMask)_weaponSubclassMask;
         #endregion
     }
 

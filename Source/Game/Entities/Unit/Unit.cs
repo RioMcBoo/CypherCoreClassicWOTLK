@@ -1910,8 +1910,7 @@ namespace Game.Entities
         public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Race), (byte)race); }
         public ulong GetRaceMask() { return 1UL << ((int)GetRace() - 1); }
         public Class GetClass() { return (Class)(byte)m_unitData.ClassId; }
-        public void SetClass(Class classId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ClassId), (byte)classId); }
-        public uint GetClassMask() { return (uint)(1 << ((int)GetClass() - 1)); }
+        public void SetClass(Class classId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ClassId), (byte)classId); }        
         public Gender GetGender() { return (Gender)(byte)m_unitData.Sex; }
         public void SetGender(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Sex), (byte)sex); }
 

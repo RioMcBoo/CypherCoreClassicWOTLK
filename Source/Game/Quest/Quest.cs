@@ -460,7 +460,7 @@ namespace Game
             return 0;
         }
 
-        public static bool IsTakingQuestEnabled(uint questId)
+        public static bool IsTakingQuestEnabled(int questId)
         {
             if (!Global.QuestPoolMgr.IsQuestActive(questId))
                 return false;

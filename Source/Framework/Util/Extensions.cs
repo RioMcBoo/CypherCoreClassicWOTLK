@@ -135,6 +135,11 @@ namespace System
             return (mask & (CreatureTypeMask)(1 << ((int)_type - 1))) != 0;
         }
 
+        public static bool HasWeapon(this ItemSubClassWeaponMask mask, ItemSubClassWeapon _weapon)
+        {
+            return (mask & (ItemSubClassWeaponMask)(1 << (int)_weapon)) != 0;
+        }
+
         public static string ToHexString(this byte[] byteArray, bool reverse = false)
         {
             if (reverse)

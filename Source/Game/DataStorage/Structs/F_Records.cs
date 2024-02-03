@@ -21,7 +21,7 @@ namespace Game.DataStorage
         public ushort ParagonFactionID;
         public int RenownFactionID;
         public int RenownCurrencyID;
-        public short[] ReputationClassMask = new short[4];
+        private short[] _reputationClassMask = new short[4];
         public ushort[] ReputationFlags = new ushort[4];
         public int[] ReputationBase = new int[4];
         public int[] ReputationMax = new int[4];
@@ -33,6 +33,10 @@ namespace Game.DataStorage
         /// The highest rank the faction will profit from incoming spillover
         /// </summary>
         public byte[] ParentFactionCap = new byte[2];
+
+        #region Properties
+        public ClassMask ReputationClassMask(int index) => (ClassMask)_reputationClassMask[index];
+        #endregion
 
         #region Helpers
         public bool CanHaveReputation => ReputationIndex >= 0;

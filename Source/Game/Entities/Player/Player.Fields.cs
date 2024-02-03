@@ -101,7 +101,7 @@ namespace Game.Entities
         uint m_lastPotionId;
 
         //Spell
-        Dictionary<uint, PlayerSpell> m_spells = new();
+        Dictionary<int, PlayerSpell> m_spells = new();
         Dictionary<SkillType, SkillStatusData> mSkillStatus = new();
         Dictionary<uint, PlayerCurrency> _currencyStorage = new();
         List<SpellModifier>[][] m_spellMods = new List<SpellModifier>[(int)SpellModOp.Max][];
@@ -153,7 +153,7 @@ namespace Game.Entities
         List<uint> m_weeklyquests = new();
         List<uint> m_monthlyquests = new();
         Dictionary<uint, Dictionary<uint, long>> m_seasonalquests = new();
-        Dictionary<uint, QuestStatusData> m_QuestStatus = new();
+        Dictionary<int, QuestStatusData> m_QuestStatus = new();
         MultiMap<(QuestObjectiveType Type, int ObjectID), QuestObjectiveStatusData> m_questObjectiveStatus = new();
         Dictionary<uint, QuestSaveType> m_QuestStatusSave = new();
         List<uint> m_DFQuests = new();

@@ -1940,22 +1940,30 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (!unitTarget.IsTypeId(TypeId.Player))
+            Player playerTarget = unitTarget?.ToPlayer();
+            if (playerTarget == null)
                 return;
 
             if (damage < 1)
                 return;
 
-            SkillType skillid = (SkillType)effectInfo.MiscValue;
-            SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, unitTarget.GetRace(), unitTarget.GetClass());
+            uint skillid = (uint)effectInfo.MiscValue;
+
+            SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, playerTarget.GetRace(), playerTarget.GetClass());
             if (rcEntry == null)
                 return;
 
             SkillTiersEntry tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
             if (tier == null)
                 return;
-            ushort skillval = unitTarget.ToPlayer().GetPureSkillValue((SkillType)skillid);
-            unitTarget.ToPlayer().SetSkill(skillid, (uint)damage, Math.Max(skillval, (ushort)1), tier.Value[damage - 1]);
+
+            ushort skillval = Math.Max((ushort)1, playerTarget.GetPureSkillValue(skillid));
+            ushort maxSkillVal = (ushort)tier.GetValueForTierIndex(damage - 1);
+
+            if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                skillval = maxSkillVal;
+
+            playerTarget.SetSkill(skillid, (uint)damage, skillval, maxSkillVal);
         }
 
         [SpellEffectHandler(SpellEffectName.PlayMovie)]
@@ -2247,7 +2255,7 @@ namespace Game.Spells
 
             Pet OldSummon = owner.GetPet();
 
-            // if pet requested Type already exist
+            // if pet requested type already exist
             if (OldSummon != null)
             {
                 if (petentry == 0 || OldSummon.GetEntry() == petentry)
@@ -4286,7 +4294,32 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
-            Log.outDebug(LogFilter.Spells, "WORLD: SkillEFFECT");
+            Player playerTarget = GetUnitCasterForEffectHandlers()?.ToPlayer();
+            if (playerTarget == null)
+                return;
+
+            if (damage < 1)
+                return;
+
+            uint skillid = (uint)effectInfo.MiscValue;
+            if (playerTarget.GetSkillStep(skillid) >= damage)
+                return;
+
+            var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, playerTarget.GetRace(), playerTarget.GetClass());
+            if (rcEntry == null)
+                return;
+
+            var tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
+            if (tier == null)
+                return;
+
+            ushort skillval = Math.Max((ushort)1, playerTarget.GetPureSkillValue(skillid));
+            ushort maxSkillVal = (ushort)tier.GetValueForTierIndex(damage - 1);
+
+            if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                skillval = maxSkillVal;
+
+            playerTarget.SetSkill(skillid, (uint)damage, skillval, maxSkillVal);
         }
 
         void EffectSpiritHeal()
@@ -4372,7 +4405,7 @@ namespace Game.Spells
                         continue;
 
                     // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
-                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% Chance to dispell
+                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
                     // Polymorph instead of 1 / (5 + 1) . 16%.
                     bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
                     byte charges = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();
@@ -4849,7 +4882,7 @@ namespace Game.Spells
                 if (!player.HasSpell(spell_id) || player.GetSpellHistory().HasCooldown(spell_id))
                     continue;
 
-                if (!spellInfo.HasAttribute(SpellAttr9.SummonPlayerTotem))
+                if (!spellInfo.HasAttribute(SpellAttr7.CanBeMultiCast))
                     continue;
 
                 CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.CastDirectly | TriggerCastFlags.DontReportCastError);
@@ -4972,7 +5005,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.SummonPersonalGameobject)]
         void EffectSummonPersonalGameObject()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
             uint goId = (uint)effectInfo.MiscValue;

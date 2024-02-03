@@ -13,7 +13,7 @@ namespace Game.Entities
 {
     public class CreatureTemplate
     {
-        public uint Entry;
+        public int Entry;
         public uint[] KillCredit = new uint[SharedConst.MaxCreatureKillCredit];
         public List<CreatureModel> Models = new();
         public string Name;

@@ -2000,28 +2000,28 @@ namespace Game
 
         public static bool IsPlayerMeetingCondition(Player player, PlayerConditionRecord condition)
         {
-            if (condition.RaceMask != 0 && !Convert.ToBoolean(SharedConst.GetMaskForRace(player.GetRace()) & condition.RaceMask))
+            if (condition.RaceMask != RaceMask.None && !condition.RaceMask.HasRace(player.GetRace()))
                 return false;
 
-            if (condition.ClassMask != 0 && !Convert.ToBoolean(player.GetClassMask() & condition.ClassMask))
+            if (condition.ClassMask != ClassMask.None && !condition.ClassMask.HasClass(player.GetClass()))
                 return false;
 
-            if (condition.Gender >= 0 && (int)player.GetGender() != condition.Gender)
+            if (condition.Gender != Gender.Unknown && player.GetGender() != condition.Gender)
                 return false;
 
-            if (condition.NativeGender >= 0 && player.GetNativeGender() != (Gender)condition.NativeGender)
+            if (condition.NativeGender != Gender.Unknown && player.GetNativeGender() != condition.NativeGender)
                 return false;
 
-            if (condition.PowerType != -1 && condition.PowerTypeComp != 0)
+            if (condition.PowerType != PowerType.None && condition.PowerTypeComp != 0)
             {
-                int requiredPowerValue = Convert.ToBoolean(condition.Flags & 4) ? player.GetMaxPower((PowerType)condition.PowerType) : condition.PowerTypeValue;
-                if (!PlayerConditionCompare(condition.PowerTypeComp, player.GetPower((PowerType)condition.PowerType), requiredPowerValue))
+                int requiredPowerValue = Convert.ToBoolean(condition.Flags & 4) ? player.GetMaxPower(condition.PowerType) : condition.PowerTypeValue;
+                if (!PlayerConditionCompare(condition.PowerTypeComp, player.GetPower(condition.PowerType), requiredPowerValue))
                     return false;
             }
 
             if (condition.ChrSpecializationIndex >= 0 || condition.ChrSpecializationRole >= 0)
             {
-                ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey((uint)player.GetPrimarySpecialization());
+                ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey((int)player.GetPrimarySpecialization());
                 if (spec != null)
                 {
                     if (condition.ChrSpecializationIndex >= 0 && spec.OrderIndex != condition.ChrSpecializationIndex)
@@ -2139,7 +2139,7 @@ namespace Game
             if (condition.WeaponSubclassMask != 0)
             {
                 Item mainHand = player.GetItemByPos(EquipmentSlot.MainHand);
-                if (mainHand == null || !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.WeaponSubclassMask))
+                if (mainHand == null || !condition.WeaponSubclassMask.HasWeapon(mainHand.GetTemplate().GetSubClass().Weapon))
                     return false;
             }
 

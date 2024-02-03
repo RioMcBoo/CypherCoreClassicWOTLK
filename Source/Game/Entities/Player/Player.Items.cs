@@ -2332,7 +2332,7 @@ namespace Game.Entities
 
             return result;
         }
-        public uint GetItemCount(uint item, bool inBankAlso = false, Item skipItem = null)
+        public uint GetItemCount(int item, bool inBankAlso = false, Item skipItem = null)
         {
             bool countGems = skipItem != null && skipItem.GetTemplate().GetGemProperties() != 0;
 

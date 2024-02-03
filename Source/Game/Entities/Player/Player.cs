@@ -5940,6 +5940,7 @@ namespace Game.Entities
             if (pet != null)
                 pet.SynchronizeLevelWithOwner();
         }
+
         public void InitDataForForm(bool reapplyMods = false)
         {
             ShapeShiftForm form = GetShapeshiftForm();
@@ -5964,11 +5965,12 @@ namespace Game.Entities
             UpdateAttackPowerAndDamage(true);
         }
 
-        public ReputationRank GetReputationRank(uint faction)
+        public ReputationRank GetReputationRank(int faction)
         {
             var factionEntry = CliDB.FactionStorage.LookupByKey(faction);
             return GetReputationMgr().GetRank(factionEntry);
         }
+
         public ReputationMgr GetReputationMgr()
         {
             return reputationMgr;
