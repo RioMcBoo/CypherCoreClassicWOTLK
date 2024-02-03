@@ -7877,6 +7877,8 @@ namespace Game.Spells
             return m_casttime;
         }
 
+        public int GetRemainingCastTime() { return m_timer; }
+
         bool IsAutoRepeat()
         {
             return m_autoRepeat;

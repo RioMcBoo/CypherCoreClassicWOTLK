@@ -156,10 +156,10 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Spells.Count);
             foreach (var spell in Spells)
-                _worldPacket.WriteUInt32(spell);
+                _worldPacket.WriteInt32(spell);
         }
 
-        List<uint> Spells = new();
+        List<int> Spells = new();
     }
 
     public class AuraUpdate : ServerPacket
@@ -185,7 +185,7 @@ namespace Game.Networking.Packets
     {
         public CastSpell(WorldPacket packet) : base(packet)
         {
-            Cast = new SpellCastRequest();
+            Cast = new SpellCastRequestPkt();
         }
 
         public override void Read()
@@ -193,14 +193,14 @@ namespace Game.Networking.Packets
             Cast.Read(_worldPacket);
         }
         
-        public SpellCastRequest Cast;
+        public SpellCastRequestPkt Cast;
     }
 
     public class PetCastSpell : ClientPacket
     {
         public PetCastSpell(WorldPacket packet) : base(packet)
         {
-            Cast = new SpellCastRequest();
+            Cast = new SpellCastRequestPkt();
         }
 
         public override void Read()
@@ -210,14 +210,14 @@ namespace Game.Networking.Packets
         }
         
         public ObjectGuid PetGUID;
-        public SpellCastRequest Cast;
+        public SpellCastRequestPkt Cast;
     }
 
     public class UseItem : ClientPacket
     {
         public UseItem(WorldPacket packet) : base(packet)
         {
-            Cast = new SpellCastRequest();
+            Cast = new SpellCastRequestPkt();
         }
 
         public override void Read()
@@ -231,7 +231,7 @@ namespace Game.Networking.Packets
         public byte PackSlot;
         public byte Slot;
         public ObjectGuid CastItem;
-        public SpellCastRequest Cast;
+        public SpellCastRequestPkt Cast;
     }
 
     class SpellPrepare : ServerPacket
@@ -759,7 +759,7 @@ namespace Game.Networking.Packets
         public int SpellVisualKitID;
         public int Delay;
     }
-    
+
     public class CancelCast : ClientPacket
     {
         public CancelCast(WorldPacket packet) : base(packet) { }
@@ -1330,14 +1330,14 @@ namespace Game.Networking.Packets
         }
 
         public void Write(WorldPacket data)
-        {   
+        {
             data.WriteFloat(PlayerItemLevel);
             data.WriteFloat(TargetItemLevel);
             data.WriteInt16(PlayerLevelDelta);
             data.WriteUInt32(ScalingHealthItemLevelCurveID);
             data.WriteUInt8(TargetLevel);
             data.WriteUInt8(Expansion);
-            data.WriteInt8(TargetScalingLevelDelta); 
+            data.WriteInt8(TargetScalingLevelDelta);
             data.WriteUInt32((uint)Flags);
             data.WriteInt32(PlayerContentTuningID);
             data.WriteInt32(TargetContentTuningID);
@@ -1360,7 +1360,7 @@ namespace Game.Networking.Packets
         public int Unused927;
 
         public enum ContentTuningType
-        {        
+        {
             CreatureToPlayerDamage = 1,
             PlayerToCreatureDamage = 2,
             CreatureToCreatureDamage = 4,
@@ -1652,7 +1652,7 @@ namespace Game.Networking.Packets
         public int Count;
     }
 
-    public class SpellCastRequest
+    public class SpellCastRequestPkt
     {   
         public void Read(WorldPacket data)
         {
@@ -1819,7 +1819,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8(DestLocSpellCastIndex);
             Immunities.Write(data);
             Predict.Write(data);
- 
+
             data.WriteBits(HitTargets.Count, 16);
             data.WriteBits(MissTargets.Count, 16);
             data.WriteBits(MissStatus.Count, 16);
@@ -1971,7 +1971,7 @@ namespace Game.Networking.Packets
             data.FlushBits();
 
             if (unused622_1.HasValue)
-                data .WriteUInt32(unused622_1.Value);
+                data.WriteUInt32(unused622_1.Value);
             if (unused622_2.HasValue)
                 data.WriteUInt32(unused622_2.Value);
         }

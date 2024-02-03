@@ -354,6 +354,10 @@ namespace Game.Entities
             base.Update(diff);
             SetCanDelayTeleport(false);
 
+            // Unit::Update updates the spell history and spell states. We can now check if we can launch another pending cast.
+            if (CanExecutePendingSpellCastRequest())
+                ExecutePendingSpellCastRequest();
+
             long now = GameTime.GetGameTime();
 
             UpdatePvPFlag(now);
@@ -637,6 +641,9 @@ namespace Game.Entities
                     Log.outError(LogFilter.Player, "Player.setDeathState: Attempted to kill a dead player '{0}' ({1})", GetName(), GetGUID().ToString());
                     return;
                 }
+
+                // clear all pending spell cast requests when dying
+                CancelPendingCastRequest();
 
                 // drunken state is cleared on death
                 SetDrunkValue(0);
