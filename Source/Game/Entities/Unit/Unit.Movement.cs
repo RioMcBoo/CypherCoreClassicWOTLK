@@ -736,6 +736,16 @@ namespace Game.Entities
                     SetAnimTier(AnimTier.Ground);
             }
 
+            if (IsAlive())
+            {
+                if (IsGravityDisabled() || IsHovering())
+                    SetPlayHoverAnim(true);
+                else
+                    SetPlayHoverAnim(false);
+            }
+            else if (IsPlayer()) // To update player who dies while flying/hovering
+                SetPlayHoverAnim(false, false);
+
             return true;
         }
 
@@ -1101,6 +1111,16 @@ namespace Game.Entities
                 else
                     SetAnimTier(AnimTier.Ground);
             }
+
+            if (IsAlive())
+            {
+                if (IsGravityDisabled() || IsHovering())
+                    SetPlayHoverAnim(true);
+                else
+                    SetPlayHoverAnim(false);
+            }
+            else if (IsPlayer()) // To update player who dies while flying/hovering
+                SetPlayHoverAnim(false, false);
 
             return true;
         }
@@ -1651,9 +1671,15 @@ namespace Game.Entities
 
         public bool IsPlayingHoverAnim() { return _playHoverAnim; }
         
-        void SetPlayHoverAnim(bool enable)
+        void SetPlayHoverAnim(bool enable, bool sendUpdate = true)
         {
+            if (IsPlayingHoverAnim() == enable)
+                return;
+
             _playHoverAnim = enable;
+
+            if (!sendUpdate)
+                return;
 
             SetPlayHoverAnim data = new();
             data.UnitGUID = GetGUID();
