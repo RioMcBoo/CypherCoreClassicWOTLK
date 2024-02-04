@@ -1211,7 +1211,7 @@ namespace Game.Entities
                 PlayerTalkClass.ClearMenus();
                 questGiver.ToCreature()?.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
                 questGiver.ToGameObject()?.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
-            }           
+            }
 
             Global.ScriptMgr.OnQuestStatusChange(this, questId);
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
@@ -2185,6 +2185,19 @@ namespace Game.Entities
             return (((GetQuestSlotState(slot) & objective.StorageIndex) != 0) ? 1 : 0);
         }    
 
+        int GetQuestSlotObjectiveData(uint questId, uint objectiveId)
+        {
+            ushort slot = FindQuestSlot(questId);
+            if (slot >= SharedConst.MaxQuestLogSize)
+                return 0;
+
+            QuestObjective obj = Global.ObjectMgr.GetQuestObjective(objectiveId);
+            if (obj == null)
+                return 0;
+
+            return GetQuestSlotObjectiveData(slot, obj);
+        }
+
         public void SetQuestSlot(ushort slot, int quest_id)
         {
             var questLogField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
@@ -2745,6 +2758,23 @@ namespace Game.Entities
             }
 
             return true;
+        }
+
+        bool IsQuestObjectiveComplete(uint questId, uint objectiveId)
+        {
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+            if (quest == null)
+                return false;
+
+            ushort slot = FindQuestSlot(questId);
+            if (slot >= SharedConst.MaxQuestLogSize)
+                return false;
+
+            QuestObjective obj = Global.ObjectMgr.GetQuestObjective(objectiveId);
+            if (obj == null)
+                return false;
+
+            return IsQuestObjectiveComplete(slot, quest, obj);
         }
 
         public bool IsQuestObjectiveProgressBarComplete(ushort slot, Quest quest)
