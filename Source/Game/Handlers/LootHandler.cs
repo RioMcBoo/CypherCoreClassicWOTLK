@@ -451,7 +451,10 @@ namespace Game
 
                 // now move item from loot to target inventory
                 Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomProperties, item.GetAllowedLooters(), item.context);
-                aeResult.Add(newitem, item.count, loot.loot_type, loot.GetDungeonEncounterId());
+                if (newitem != null)
+                    aeResult.Add(newitem, item.count, loot.loot_type, loot.GetDungeonEncounterId());
+                else
+                    target.ApplyItemLootedSpell(Global.ObjectMgr.GetItemTemplate(item.itemid));
 
                 // mark as looted
                 item.count = 0;

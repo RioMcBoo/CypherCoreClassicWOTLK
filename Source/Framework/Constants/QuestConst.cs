@@ -46,6 +46,12 @@ namespace Framework.Constants
         IgnoreSoulboundItems = 0x0200,
     }
 
+    [Flags]
+    public enum QuestObjectiveFlags2
+    {
+        QuestBoundItem = 0x1   // Item is bound to a single objective, only increments the counter for one quest if multiple require the same item and is not stored in inventory
+    }
+
     public enum QuestCompleteSpellType
     {
         LegacyBehavior = 0,

@@ -331,6 +331,7 @@ namespace Game.Entities
         public float SpellPPMRate;
         public BitSet[] Specializations = new BitSet[3];  // one set for 1-40 level range and another for 41-109 and one for 110
         public ClassMask ItemSpecClassMask;
+        public int QuestLogItemId;
 
         protected ItemRecord BasicData;
         protected ItemSparseRecord ExtendedData;

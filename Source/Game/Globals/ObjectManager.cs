@@ -5273,8 +5273,8 @@ namespace Game
 
             uint count = 0;
 
-            //                                        0   1        2         3             4             5
-            using var result = DB.World.Query("SELECT Id, FlagsCu, FoodType, MinMoneyLoot, MaxMoneyLoot, SpellPPMChance FROM item_template_addon");
+            //                                        0   1        2         3             4             5                6
+            using var result = DB.World.Query("SELECT Id, FlagsCu, FoodType, MinMoneyLoot, MaxMoneyLoot, SpellPPMChance, QuestLogItemId FROM item_template_addon");
             if (!result.IsEmpty())
             {
                 do
@@ -5299,6 +5299,7 @@ namespace Game
                     itemTemplate.MinMoneyLoot = minMoneyLoot;
                     itemTemplate.MaxMoneyLoot = maxMoneyLoot;
                     itemTemplate.SpellPPMRate = result.Read<float>(5);
+                    itemTemplate.QuestLogItemId = result.Read<int>(6);
                     ++count;
                 } while (result.NextRow());
             }

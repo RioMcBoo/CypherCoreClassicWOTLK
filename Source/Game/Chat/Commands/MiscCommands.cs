@@ -2222,6 +2222,9 @@ namespace Game.Chat
                 {
                     var item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, ItemEnchantmentManager.GenerateRandomProperties(template.Key), null, itemContext);
 
+                    if (item == null)
+                        continue;
+
                     // remove binding (let GM give it to another player later)
                     if (player == playerTarget)
                         item.SetBinding(false);

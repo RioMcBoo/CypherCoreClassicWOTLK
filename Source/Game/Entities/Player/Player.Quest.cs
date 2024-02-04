@@ -15,6 +15,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Game.Entities
 {
@@ -492,11 +493,6 @@ namespace Game.Entities
             if (!CanTakeQuest(quest, false))
                 return false;
 
-            if (quest.HasQuestObjectiveType(QuestObjectiveType.Item))
-                foreach (QuestObjective obj in quest.Objectives)
-                    if (obj.Type == QuestObjectiveType.Item && !HasItemCount(obj.ObjectID, obj.Amount))
-                        return false;
-
             if (!CanRewardQuest(quest, false))
                 return false;
 
@@ -530,7 +526,7 @@ namespace Game.Entities
             {
                 foreach (QuestObjective obj in quest.Objectives)
                 {
-                    if (obj.Type != QuestObjectiveType.Item)
+                    if (obj.Type != QuestObjectiveType.Item || obj.Flags2.HasAnyFlag(QuestObjectiveFlags2.QuestBoundItem))
                         continue;
 
                     if (GetItemCount(obj.ObjectID) < obj.Amount)
@@ -2117,7 +2113,7 @@ namespace Game.Entities
             {
                 foreach (QuestObjective obj in quest.Objectives)
                 {
-                    if (obj.Type == QuestObjectiveType.Item)
+                    if (obj.Type == QuestObjectiveType.Item && !obj.Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem))
                     {
                         int reqItemCount = obj.Amount;
                         int curItemCount = GetItemCount(obj.ObjectID, true);
@@ -2292,16 +2288,41 @@ namespace Game.Entities
                 AreaExploredOrEventHappens(questId);
         }
 
-        public void ItemAddedQuestCheck(int entry, int count)
+        Func<QuestObjective, bool> QuestBoundItemFunc = objective => { return objective.Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem); };
+        Func<QuestObjective, bool> NotQuestBoundItemFunc = objective => { return !objective.Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem); };
+
+        public void ItemAddedQuestCheck(int entry, int count, bool? boundItemFlagRequirement = null)
         {
-            UpdateQuestObjectiveProgress(QuestObjectiveType.Item, entry, count);
+            ItemAddedQuestCheck(entry, count, boundItemFlagRequirement, out _);
+        }
+
+        public void ItemAddedQuestCheck(int entry, int count, bool? boundItemFlagRequirement, out bool hadBoundItemObjective)
+        {
+            hadBoundItemObjective = false;
+
+            List<QuestObjective> updatedObjectives = new();
+            Func<QuestObjective, bool> objectiveFilter = null;
+            if (boundItemFlagRequirement.HasValue)
+                objectiveFilter = boundItemFlagRequirement.Value ? QuestBoundItemFunc : NotQuestBoundItemFunc;
+
+            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(entry);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.Item, (int)itemTemplate.GetId(), count, ObjectGuid.Empty, updatedObjectives, objectiveFilter);
+            if (itemTemplate.QuestLogItemId != 0 && (updatedObjectives.Count != 1 || !updatedObjectives[0].Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem)))
+                UpdateQuestObjectiveProgress(QuestObjectiveType.Item, itemTemplate.QuestLogItemId, count, ObjectGuid.Empty, updatedObjectives, objectiveFilter);
+
+            if (updatedObjectives.Count == 1 && updatedObjectives[0].Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem))
+            {
+                hadBoundItemObjective = updatedObjectives.Count == 1 && updatedObjectives[0].Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem);
+
+                SendQuestUpdateAddItem(itemTemplate, updatedObjectives[0], (ushort)count);
+            }
         }
 
         public void ItemRemovedQuestCheck(int entry, int count)
         {
             foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, entry)))
             {
-                int questId = objectiveStatusData.QuestStatusPair.QuestID; 
+                int questId = objectiveStatusData.QuestStatusPair.QuestID;
                 ushort logSlot = objectiveStatusData.QuestStatusPair.Status.Slot;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                 QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveStatusData.ObjectiveId);
@@ -2390,7 +2411,7 @@ namespace Game.Entities
             UpdateQuestObjectiveProgress(QuestObjectiveType.ObtainCurrency, currencyId, change);
         }
 
-        public void UpdateQuestObjectiveProgress(QuestObjectiveType objectiveType, int objectId, long addCount, ObjectGuid victimGuid = default)
+        public void UpdateQuestObjectiveProgress(QuestObjectiveType objectiveType, int objectId, long addCount, ObjectGuid victimGuid = default, List<QuestObjective> updatedObjectives = null, Func<QuestObjective, bool> objectiveFilter = null)
         {
             bool anyObjectiveChangedCompletionState = false;
             bool updatePhaseShift = false;
@@ -2417,47 +2438,51 @@ namespace Game.Entities
                         continue;
 
                 bool objectiveWasComplete = IsQuestObjectiveComplete(logSlot, quest, objective);
-                if (!objectiveWasComplete || addCount < 0)
+                if (objectiveWasComplete && addCount >= 0)
+                    continue;
+
+                if (objectiveFilter != null && !objectiveFilter(objective))
+                    continue;
+
+                bool objectiveIsNowComplete = false;
+                if (objective.IsStoringValue())
                 {
-                    bool objectiveIsNowComplete = false;
-                    if (objective.IsStoringValue())
+                    if (objectiveType == QuestObjectiveType.PlayerKills && objective.Flags.HasAnyFlag(QuestObjectiveFlags.KillPlayersSameFaction))
                     {
-                        if (objectiveType == QuestObjectiveType.PlayerKills && objective.Flags.HasAnyFlag(QuestObjectiveFlags.KillPlayersSameFaction))
-                        {
-                            Player victim = Global.ObjAccessor.GetPlayer(GetMap(), victimGuid);
-                            if (victim?.GetEffectiveTeam() != GetEffectiveTeam())
-                                continue;
-                        }
-
-                        int currentProgress = GetQuestSlotObjectiveData(logSlot, objective);
-                        if (addCount > 0 ? (currentProgress < objective.Amount) : (currentProgress > 0))
-                        {
-                            int newProgress = (int)Math.Clamp(currentProgress + addCount, 0, objective.Amount);
-                            SetQuestObjectiveData(objective, newProgress);
-                            if (addCount > 0 && !objective.Flags.HasAnyFlag(QuestObjectiveFlags.HideCreditMsg))
-                            {
-                                switch (objectiveType)
-                                {
-                                    case QuestObjectiveType.Item:
-                                        break;
-                                    case QuestObjectiveType.PlayerKills:
-                                        SendQuestUpdateAddPlayer(quest, newProgress);
-                                        break;
-                                    default:
-                                        SendQuestUpdateAddCredit(quest, victimGuid, objective, newProgress);
-                                        break;
-                                }
-                            }
-
-                            objectiveIsNowComplete = IsQuestObjectiveComplete(logSlot, quest, objective);
-                        }
+                        Player victim = Global.ObjAccessor.GetPlayer(GetMap(), victimGuid);
+                        if (victim?.GetEffectiveTeam() != GetEffectiveTeam())
+                            continue;
                     }
-                    else if (objective.IsStoringFlag())
-                    {
-                        SetQuestObjectiveData(objective, addCount > 0 ? 1 : 0);
 
-                        if (addCount > 0 && !objective.Flags.HasAnyFlag(QuestObjectiveFlags.HideCreditMsg))
-                            SendQuestUpdateAddCreditSimple(objective);
+                    int currentProgress = GetQuestSlotObjectiveData(logSlot, objective);
+                    if (addCount > 0 ? (currentProgress < objective.Amount) : (currentProgress > 0))
+                    {
+                        int newProgress = (int)Math.Clamp(currentProgress + addCount, 0, objective.Amount);
+                        SetQuestObjectiveData(objective, newProgress);
+                        if (addCount > 0 && !objective.Flags.HasFlag(QuestObjectiveFlags.HideCreditMsg))
+                        {
+                            switch (objectiveType)
+                            {
+                                case QuestObjectiveType.Item:
+                                    break; // case handled by SMSG_ITEM_PUSH_RESULT
+                                case QuestObjectiveType.PlayerKills:
+                                    SendQuestUpdateAddPlayer(quest, newProgress);
+                                    break;
+                                default:
+                                    SendQuestUpdateAddCredit(quest, victimGuid, objective, newProgress);
+                                    break;
+                            }
+                        }
+
+                        objectiveIsNowComplete = IsQuestObjectiveComplete(logSlot, quest, objective);
+                    }
+                }
+                else if (objective.IsStoringFlag())
+                {
+                    SetQuestObjectiveData(objective, addCount > 0 ? 1 : 0);
+
+                    if (addCount > 0 && !objective.Flags.HasFlag(QuestObjectiveFlags.HideCreditMsg))
+                        SendQuestUpdateAddCreditSimple(objective);
 
                         objectiveIsNowComplete = IsQuestObjectiveComplete(logSlot, quest, objective);
                     }
@@ -2484,49 +2509,54 @@ namespace Game.Entities
                                 objectiveIsNowComplete = IsQuestObjectiveProgressBarComplete(logSlot, quest);
                                 break;
                             default:
-                                Cypher.Assert(false, "Unhandled quest objective Type {objectiveType}");
+                                Cypher.Assert(false, $"Unhandled quest objective type {objectiveType}");
                                 break;
                         }
                     }
 
-                    if (objective.Flags.HasAnyFlag(QuestObjectiveFlags.PartOfProgressBar))
+                if (objective.Flags.HasAnyFlag(QuestObjectiveFlags.PartOfProgressBar))
+                {
+                    if (IsQuestObjectiveProgressBarComplete(logSlot, quest))
                     {
-                        if (IsQuestObjectiveProgressBarComplete(logSlot, quest))
-                        {
-                            var progressBarObjective = quest.Objectives.Find(otherObjective => 
-                                otherObjective.Type == QuestObjectiveType.ProgressBar && !otherObjective.Flags.HasAnyFlag(QuestObjectiveFlags.PartOfProgressBar));
-                            if (progressBarObjective != null)
-                                SendQuestUpdateAddCreditSimple(progressBarObjective);
+                        var progressBarObjective = quest.Objectives.Find(otherObjective => otherObjective.Type == QuestObjectiveType.ProgressBar && !otherObjective.Flags.HasFlag(QuestObjectiveFlags.PartOfProgressBar));
+                        if (progressBarObjective != null)
+                            SendQuestUpdateAddCreditSimple(progressBarObjective);
 
-                            objectiveIsNowComplete = true;
-                        }
+                        objectiveIsNowComplete = true;
                     }
-
-                    if (objectiveWasComplete != objectiveIsNowComplete)
-                        anyObjectiveChangedCompletionState = true;
-
-                    if (objectiveIsNowComplete && objective.CompletionEffect != null)
-                    {
-                        if (objective.CompletionEffect.GameEventId.HasValue)
-                            GameEvents.Trigger(objective.CompletionEffect.GameEventId.Value, this, null);
-                        if (objective.CompletionEffect.SpellId.HasValue)
-                            CastSpell(this, objective.CompletionEffect.SpellId.Value, true);
-                        if (objective.CompletionEffect.ConversationId.HasValue)
-                            Conversation.CreateConversation(objective.CompletionEffect.ConversationId.Value, this, GetPosition(), GetGUID());
-                        if (objective.CompletionEffect.UpdatePhaseShift)
-                            updatePhaseShift = true;
-                        if (objective.CompletionEffect.UpdateZoneAuras)
-                            updateZoneAuras = true;
-                    }
-
-                    if (objectiveIsNowComplete)
-                    {
-                        if (CanCompleteQuest(questId, objective.Id))
-                            CompleteQuest(questId);
-                    }
-                    else if (!objective.Flags.HasAnyFlag(QuestObjectiveFlags.Optional) && objectiveStatusData.QuestStatusPair.Status.Status == QuestStatus.Complete)
-                        IncompleteQuest(questId);
                 }
+
+                if (objectiveWasComplete != objectiveIsNowComplete)
+                    anyObjectiveChangedCompletionState = true;
+
+                if (objectiveIsNowComplete && objective.CompletionEffect != null)
+                {
+                    if (objective.CompletionEffect.GameEventId.HasValue)
+                        GameEvents.Trigger(objective.CompletionEffect.GameEventId.Value, this, null);
+                    if (objective.CompletionEffect.SpellId.HasValue)
+                        CastSpell(this, objective.CompletionEffect.SpellId.Value, true);
+                    if (objective.CompletionEffect.ConversationId.HasValue)
+                        Conversation.CreateConversation(objective.CompletionEffect.ConversationId.Value, this, GetPosition(), GetGUID());
+                    if (objective.CompletionEffect.UpdatePhaseShift)
+                        updatePhaseShift = true;
+                    if (objective.CompletionEffect.UpdateZoneAuras)
+                        updateZoneAuras = true;
+                }
+
+                if (objectiveIsNowComplete)
+                {
+                    if (CanCompleteQuest(questId, objective.Id))
+                        CompleteQuest(questId);
+                }
+                else if (!objective.Flags.HasAnyFlag(QuestObjectiveFlags.Optional) && objectiveStatusData.QuestStatusPair.Status.Status == QuestStatus.Complete)
+                    IncompleteQuest(questId);
+
+                if (updatedObjectives != null)
+                    updatedObjectives.Add(objective);
+
+                if (objective.Type == QuestObjectiveType.Item && addCount >= 0 && objective.Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem))
+                    break;
+
             }
 
             if (anyObjectiveChangedCompletionState)
@@ -2545,21 +2575,8 @@ namespace Game.Entities
         public bool HasQuestForItem(int itemid)
         {
             // Search incomplete objective first
-            foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, itemid)))
-            {
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveItr.QuestStatusPair.QuestID);
-                QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveItr.ObjectiveId);
-                if (qInfo == null || objective == null || !IsQuestObjectiveCompletable(objectiveItr.QuestStatusPair.Status.Slot, qInfo, objective))
-                    continue;
-
-                // hide quest if player is in raid-group and quest is no raid quest
-                if (GetGroup() != null && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
-                    if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
-                        continue;
-
-                if (!IsQuestObjectiveComplete(objectiveItr.QuestStatusPair.Status.Slot, qInfo, objective))
-                    return true;
-            }
+            if (GetQuestObjectiveForItem(itemid, true) != null)
+                return true;
 
             // This part - for ItemDrop
             foreach (var questStatus in m_QuestStatus)
@@ -2594,6 +2611,43 @@ namespace Game.Entities
             }
 
             return false;
+        }
+
+        QuestObjective GetQuestObjectiveForItem(int itemId, bool onlyIncomplete)
+        {
+            QuestObjective findObjectiveForItem(int tempItemId)
+            {
+                foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, tempItemId)))
+                {
+                    Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveItr.QuestStatusPair.QuestID);
+                    QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveItr.ObjectiveId);
+                    if (qInfo == null || objective == null || !IsQuestObjectiveCompletable(objectiveItr.QuestStatusPair.Status.Slot, qInfo, objective))
+                        continue;
+
+                    // hide quest if player is in raid-group and quest is no raid quest
+                    if (GetGroup() != null && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                        if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
+                            continue;
+
+                    if (!onlyIncomplete || !IsQuestObjectiveComplete(objectiveItr.QuestStatusPair.Status.Slot, qInfo, objective))
+                        return objective;
+                }
+                return null;
+            };
+
+            QuestObjective objective = findObjectiveForItem(itemId);
+            if (objective != null)
+                return objective;
+
+            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
+            if (itemTemplate != null && itemTemplate.QuestLogItemId != 0)
+            {
+                objective = findObjectiveForItem(itemTemplate.QuestLogItemId);
+                if (objective != null)
+                    return objective;
+            }
+
+            return null;
         }
 
         public int GetQuestObjectiveData(QuestObjective objective)
@@ -2948,6 +3002,26 @@ namespace Game.Entities
             packet.ObjectID = obj.ObjectID;
             packet.ObjectiveType = obj.Type;
             SendPacket(packet);
+        }
+
+        void SendQuestUpdateAddItem(ItemTemplate itemTemplate, QuestObjective obj, ushort count)
+        {
+            ItemPushResult packet = new();
+
+            packet.PlayerGUID = GetGUID();
+
+            packet.Slot = InventorySlots.Bag0;
+            packet.SlotInBag = 0;
+            packet.Item.ItemID = itemTemplate.GetId();
+            packet.QuestLogItemID = itemTemplate.QuestLogItemId;
+            packet.Quantity = count;
+            packet.QuantityInInventory = GetQuestObjectiveData(obj);
+            packet.DisplayText = ItemPushResult.DisplayType.EncounterLoot;
+
+            if (GetGroup() != null && !itemTemplate.HasFlag(ItemFlags3.DontReportLootLogToParty))
+                GetGroup().BroadcastPacket(packet, true);
+            else
+                SendPacket(packet);
         }
 
         public void SendQuestUpdateAddPlayer(Quest quest, int newCount)
