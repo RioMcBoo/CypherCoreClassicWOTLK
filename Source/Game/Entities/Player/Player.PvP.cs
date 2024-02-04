@@ -584,7 +584,7 @@ namespace Game.Entities
 
         public Team GetBGTeam()
         {
-            return m_bgData.bgTeam != 0 ? (Team)m_bgData.bgTeam : GetTeam();
+            return m_bgData.bgTeam != 0 ? m_bgData.bgTeam : GetTeam();
         }
 
         public void LeaveBattleground(bool teleportToEntryPoint = true)

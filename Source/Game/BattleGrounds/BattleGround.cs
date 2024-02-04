@@ -108,7 +108,7 @@ namespace Game.BattleGrounds
                     {
                         if (GetElapsedTime() >= 47 * Time.Minute * Time.InMilliseconds)
                         {
-                            EndBattleground(0);
+                            EndBattleground(Team.Other);
                             return;
                         }
                     }
@@ -212,7 +212,7 @@ namespace Game.BattleGrounds
 
         public virtual Team GetPrematureWinner()
         {
-            Team winner = 0;
+            Team winner = Team.Other;
             if (GetPlayersCountByTeam(Team.Alliance) >= GetMinPlayersPerTeam())
                 winner = Team.Alliance;
             else if (GetPlayersCountByTeam(Team.Horde) >= GetMinPlayersPerTeam())
@@ -447,15 +447,15 @@ namespace Game.BattleGrounds
             return _GetPlayer(pair.Key, pair.Value.OfflineRemoveTime != 0, context);
         }
 
-        Player _GetPlayerForTeam(Team teamId, KeyValuePair<ObjectGuid, BattlegroundPlayer> pair, string context)
+        Player _GetPlayerForTeam(Team team, KeyValuePair<ObjectGuid, BattlegroundPlayer> pair, string context)
         {
             Player player = _GetPlayer(pair, context);
             if (player != null)
             {
-                Team team = pair.Value.Team;
-                if (team == 0)
-                    team = player.GetEffectiveTeam();
-                if (team != teamId)
+                Team playerTeam = pair.Value.Team;
+                if (playerTeam == 0)
+                    playerTeam = player.GetEffectiveTeam();
+                if (playerTeam != team)
                     player = null;
             }
             return player;
@@ -469,7 +469,7 @@ namespace Game.BattleGrounds
 
         public WorldSafeLocsEntry GetTeamStartPosition(int teamId)
         {
-            Cypher.Assert(teamId < TeamId.Neutral);
+            Cypher.Assert(teamId < BatttleGroundTeamId.Neutral);
             return _battlegroundTemplate.StartLocation[teamId];
         }
 
@@ -869,7 +869,7 @@ namespace Game.BattleGrounds
                 // Do next only if found in Battleground
                 player.SetBattlegroundId(0, BattlegroundTypeId.None);  // We're not in BG.
                 // reset destination bg team
-                player.SetBGTeam(0);
+                player.SetBGTeam(Team.Other);
 
                 // remove all criterias on bg leave
                 player.FailCriteria(CriteriaFailEvent.LeaveBattleground, 0);
@@ -918,7 +918,7 @@ namespace Game.BattleGrounds
             Global.BattlegroundMgr.AddBattleground(this);
 
             if (m_IsRated)
-                Log.outDebug(LogFilter.Arena, "Arena match Type: {0} for Team1Id: {1} - Team2Id: {2} started.", m_ArenaType, m_ArenaTeamIds[TeamId.Alliance], m_ArenaTeamIds[TeamId.Horde]);
+                Log.outDebug(LogFilter.Arena, "Arena match type: {0} for Team1Id: {1} - Team2Id: {2} started.", m_ArenaType, m_ArenaTeamIds[BatttleGroundTeamId.Alliance], m_ArenaTeamIds[BatttleGroundTeamId.Horde]);
         }
 
         public void TeleportPlayerToExploitLocation(Player player)
@@ -1141,11 +1141,11 @@ namespace Game.BattleGrounds
 
         // get the number of free slots for team
         // returns the number how many players can join Battleground to MaxPlayersPerTeam
-        public int GetFreeSlotsForTeam(Team Team)
+        public int GetFreeSlotsForTeam(Team team)
         {
             // if BG is starting and WorldCfg.BattlegroundInvitationType == BattlegroundQueueInvitationTypeB.NoBalance, invite anyone
             if (GetStatus() == BattlegroundStatus.WaitJoin && WorldConfig.GetIntValue(WorldCfg.BattlegroundInvitationType) == (int)BattlegroundQueueInvitationType.NoBalance)
-                return (GetInvitedCount(Team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(Team) : 0;
+                return (GetInvitedCount(team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(team) : 0;
 
             // if BG is already started or WorldCfg.BattlegroundInvitationType != BattlegroundQueueInvitationType.NoBalance, do not allow to join too much players of one faction
             int otherTeamInvitedCount;
@@ -1153,7 +1153,7 @@ namespace Game.BattleGrounds
             int otherTeamPlayersCount;
             int thisTeamPlayersCount;
 
-            if (Team == Team.Alliance)
+            if (team == Team.Alliance)
             {
                 thisTeamInvitedCount = GetInvitedCount(Team.Alliance);
                 otherTeamInvitedCount = GetInvitedCount(Team.Horde);
@@ -1393,7 +1393,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        public virtual Creature AddCreature(int entry, int type, float x, float y, float z, float o, int teamIndex = TeamId.Neutral, uint respawntime = 0, Transport transport = null)
+        public virtual Creature AddCreature(int entry, int type, float x, float y, float z, float o, int teamIndex = BatttleGroundTeamId.Neutral, uint respawntime = 0, Transport transport = null)
         {
             Map map = FindBgMap();
             if (map == null)
@@ -1440,7 +1440,7 @@ namespace Game.BattleGrounds
             return creature;
         }
 
-        public Creature AddCreature(int entry, int type, Position pos, int teamIndex = TeamId.Neutral, uint respawntime = 0, Transport transport = null)
+        public Creature AddCreature(int entry, int type, Position pos, int teamIndex = BatttleGroundTeamId.Neutral, uint respawntime = 0, Transport transport = null)
         {
             return AddCreature(entry, type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamIndex, respawntime, transport);
         }
@@ -1499,7 +1499,7 @@ namespace Game.BattleGrounds
 
         public bool AddSpiritGuide(int type, float x, float y, float z, float o, int teamIndex)
         {
-            int entry = (int)(teamIndex == TeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
+            int entry = (int)(teamIndex == BatttleGroundTeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
 
             if (AddCreature(entry, type, x, y, z, o) != null)
                 return true;
@@ -1509,7 +1509,7 @@ namespace Game.BattleGrounds
             return false;
         }
 
-        public bool AddSpiritGuide(int type, Position pos, int teamIndex = TeamId.Neutral)
+        public bool AddSpiritGuide(int type, Position pos, int teamIndex = BatttleGroundTeamId.Neutral)
         {
             return AddSpiritGuide(type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamIndex);
         }
@@ -1596,20 +1596,12 @@ namespace Game.BattleGrounds
             var player = m_Players.LookupByKey(guid);
             if (player != null)
                 return player.Team;
-            return 0;
+            return Team.Other;
         }
 
-        public Team GetOtherTeam(Team teamId)
+        public Team GetOtherTeam(Team team)
         {
-            switch (teamId)
-            {
-                case Team.Alliance:
-                    return Team.Horde;
-                case Team.Horde:
-                    return Team.Alliance;
-                default:
-                    return Team.Other;
-            }
+            return team != 0 ? ((team == Team.Alliance) ? Team.Horde : Team.Alliance) : Team.Other;
         }
 
         public bool IsPlayerInBattleground(ObjectGuid guid)
@@ -1638,12 +1630,12 @@ namespace Game.BattleGrounds
             player.SendPacket(pvpMatchStatistics);
         }
 
-        public uint GetAlivePlayersCountByTeam(Team Team)
+        public uint GetAlivePlayersCountByTeam(Team team)
         {
             uint count = 0;
             foreach (var pair in m_Players)
             {
-                if (pair.Value.Team == Team)
+                if (pair.Value.Team == team)
                 {
                     Player player = Global.ObjAccessor.FindPlayer(pair.Key);
                     if (player != null && player.IsAlive())
@@ -1653,7 +1645,7 @@ namespace Game.BattleGrounds
             return count;
         }
 
-        int GetObjectType(ObjectGuid guid)
+        public int GetObjectType(ObjectGuid guid)
         {
             for (int i = 0; i < BgObjects.Length; ++i)
                 if (BgObjects[i] == guid)
@@ -1662,7 +1654,7 @@ namespace Game.BattleGrounds
             return -1;
         }
 
-        void SetBgRaid(Team team, Group bg_raid)
+        public void SetBgRaid(Team team, Group bg_raid)
         {
             Group old_raid = m_BgRaids[GetTeamIndexByTeamId(team)];
             if (old_raid != null)
@@ -1702,7 +1694,7 @@ namespace Game.BattleGrounds
 
         public int GetTeamScore(int teamIndex)
         {
-            if (teamIndex == TeamId.Alliance || teamIndex == TeamId.Horde)
+            if (teamIndex == BatttleGroundTeamId.Alliance || teamIndex == BatttleGroundTeamId.Horde)
                 return m_TeamScores[teamIndex];
 
             Log.outError(LogFilter.Battleground, "GetTeamScore with wrong Team {0} for BG {1}", teamIndex, GetTypeID());
@@ -1852,7 +1844,7 @@ namespace Game.BattleGrounds
 
         Group GetBgRaid(Team team) { return m_BgRaids[GetTeamIndexByTeamId(team)]; }
 
-        public static int GetTeamIndexByTeamId(Team team) { return team == Team.Alliance ? TeamId.Alliance : TeamId.Horde; }
+        public static int GetTeamIndexByTeamId(Team team) { return team == Team.Alliance ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde; }
         public int GetPlayersCountByTeam(Team team) { return m_PlayersCount[GetTeamIndexByTeamId(team)]; }
         void UpdatePlayersCountByTeam(Team team, bool remove)
         {

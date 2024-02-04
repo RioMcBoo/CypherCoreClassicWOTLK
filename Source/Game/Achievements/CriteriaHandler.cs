@@ -3926,7 +3926,7 @@ namespace Game.Achievements
                 case CriteriaDataType.TTeam:
                     if (target == null || !target.IsTypeId(TypeId.Player))
                         return false;
-                    return (uint)target.ToPlayer().GetTeam() == TeamId.Team;
+                    return target.ToPlayer().GetTeam() == (Team)TeamId.Team;
                 case CriteriaDataType.SDrunk:
                     return Player.GetDrunkenstateByValue(source.GetDrunkValue()) >= (DrunkenState)Drunk.State;
                 case CriteriaDataType.Holiday:
@@ -3939,7 +3939,7 @@ namespace Game.Achievements
                     if (bg == null)
                         return false;
 
-                    int score = bg.GetTeamScore(bg.GetPlayerTeam(source.GetGUID()) == Team.Alliance ? Framework.Constants.TeamId.Horde : Framework.Constants.TeamId.Alliance);
+                    int score = bg.GetTeamScore(bg.GetPlayerTeam(source.GetGUID()) == Team.Alliance ? BatttleGroundTeamId.Horde : BatttleGroundTeamId.Alliance);
                     return score >= BattlegroundScore.Min && score <= BattlegroundScore.Max;
                 }
                 case CriteriaDataType.InstanceScript:
