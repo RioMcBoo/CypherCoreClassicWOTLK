@@ -1850,7 +1850,7 @@ namespace Game
             creature.SpeedWalk = fields.Read<float>(12);
             creature.SpeedRun = fields.Read<float>(13);
             creature.Scale = fields.Read<float>(14);
-            creature.Rank = (CreatureEliteType)fields.Read<int>(15);
+            creature.Classification = (CreatureClassifications)fields.Read<int>(15);
             creature.DmgSchool = (SpellSchools)fields.Read<int>(16);
             creature.BaseAttackTime = fields.Read<uint>(17);
             creature.RangeAttackTime = fields.Read<uint>(18);
@@ -2854,7 +2854,7 @@ namespace Game
                 );
 
                 // TODO: Check if this still applies
-                creatureDifficulty.DamageModifier *= Creature._GetDamageMod(template.Rank);
+                creatureDifficulty.DamageModifier *= Creature.GetDamageMod(template.Classification);
 
                 if (creatureDifficulty.MinLevel == 0 || creatureDifficulty.MaxLevel == 0)
                 {

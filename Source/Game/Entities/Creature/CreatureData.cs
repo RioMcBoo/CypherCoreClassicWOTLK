@@ -31,7 +31,7 @@ namespace Game.Entities
         public float SpeedWalk;
         public float SpeedRun;
         public float Scale;
-        public CreatureEliteType Rank;
+        public CreatureClassifications Classification;
         public SpellSchools DmgSchool;
         public uint BaseAttackTime;
         public uint RangeAttackTime;
@@ -170,7 +170,7 @@ namespace Game.Entities
 
             stats.CreatureType = CreatureType;
             stats.CreatureFamily = Family;
-            stats.Classification = Rank;
+            stats.Classification = Classification;
             stats.PetSpellDataId = PetSpellDataId;
 
             for (int i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)

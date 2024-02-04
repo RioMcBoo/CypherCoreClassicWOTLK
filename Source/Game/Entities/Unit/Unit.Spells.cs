@@ -177,7 +177,7 @@ namespace Game.Entities
 
             // Pet damage?
             if (IsTypeId(TypeId.Unit) && !IsPet())
-                DoneTotalMod *= ToCreature().GetSpellDamageMod(ToCreature().GetCreatureTemplate().Rank);
+                DoneTotalMod *= ToCreature().GetSpellDamageMod(ToCreature().GetCreatureTemplate().Classification);
 
             float maxModDamagePercentSchool = 0.0f;
             Player thisPlayer = ToPlayer();
