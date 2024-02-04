@@ -666,7 +666,7 @@ namespace Game.Entities
     struct QuestObjectiveStatusData
     {
         public (int QuestID, QuestStatusData Status) QuestStatusPair;
-        public QuestObjective Objective;
+        public int ObjectiveId;
     }
 
     public readonly record struct PlayerTalent
