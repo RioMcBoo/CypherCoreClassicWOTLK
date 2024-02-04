@@ -2430,6 +2430,15 @@ namespace Game.Entities
                     Delete();
                     return;
                 }
+                case GameObjectTypes.CapturePoint:
+                {
+                    Player player = user.ToPlayer();
+                    if (player == null)
+                        return;
+
+                    AssaultCapturePoint(player);
+                    return;
+                }
                 case GameObjectTypes.ItemForge:
                 {
                     GameObjectTemplate info = GetGoInfo();
