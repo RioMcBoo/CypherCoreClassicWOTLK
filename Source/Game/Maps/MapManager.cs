@@ -48,6 +48,7 @@ namespace Game.Entities
             Map map = new Map(mapId, i_gridCleanUpDelay, instanceId, Difficulty.None);
             map.LoadRespawnTimes();
             map.LoadCorpseData();
+            map.InitSpawnGroupState();
 
             if (WorldConfig.GetBoolValue(WorldCfg.BasemapLoadGrids))
                 map.LoadAllCells();
@@ -81,6 +82,7 @@ namespace Game.Entities
 
             map.CreateInstanceData();
             map.SetInstanceScenario(Global.ScenarioMgr.CreateInstanceScenario(map, team));
+            map.InitSpawnGroupState();
 
             if (WorldConfig.GetBoolValue(WorldCfg.InstancemapLoadGrids))
                 map.LoadAllCells();
@@ -96,6 +98,7 @@ namespace Game.Entities
             Cypher.Assert(map.IsBattlegroundOrArena());
             map.SetBG(bg);
             bg.SetBgMap(map);
+            map.InitSpawnGroupState();
 
             if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundMapLoadGrids))
                 map.LoadAllCells();
