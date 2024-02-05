@@ -21,21 +21,31 @@ namespace Game.Entities
         {
             return m_movementInfo.HasMovementFlag(MovementFlag.DisableGravity);
         }
+
         public bool IsWalking()
         {
             return m_movementInfo.HasMovementFlag(MovementFlag.Walking);
         }
+
         public bool IsHovering() { return m_movementInfo.HasMovementFlag(MovementFlag.Hover); }
+
         public bool IsStopped() { return !HasUnitState(UnitState.Moving); }
+
         public bool IsMoving() { return m_movementInfo.HasMovementFlag(MovementFlag.MaskMoving); }
+
         public bool IsTurning() { return m_movementInfo.HasMovementFlag(MovementFlag.MaskTurning); }
+
         public virtual bool CanFly() { return false; }
+
         public bool IsFlying() { return m_movementInfo.HasMovementFlag(MovementFlag.Flying | MovementFlag.DisableGravity); }
+
         public bool IsFalling()
         {
             return m_movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar) || MoveSpline.IsFalling();
         }
+
         public virtual bool CanEnterWater() { return false; }
+
         public virtual bool CanSwim()
         {
             // Mirror client behavior, if this method returns false then client will not use swimming animation and for players will apply gravity as if there was no water
@@ -59,6 +69,11 @@ namespace Game.Entities
         public bool IsUnderWater()
         {
             return GetLiquidStatus().HasFlag(ZLiquidStatus.UnderWater);
+        }
+
+        public bool IsOnOceanFloor()
+        {
+            return GetLiquidStatus().HasFlag(ZLiquidStatus.OceanFloor);
         }
 
         void PropagateSpeedChange() { GetMotionMaster().PropagateSpeedChange(); }
@@ -143,7 +158,7 @@ namespace Game.Entities
         {
             return MovementGeneratorType.Idle;
         }
-        
+
         public void StopMoving()
         {
             ClearUnitState(UnitState.Moving);
@@ -236,7 +251,7 @@ namespace Game.Entities
             //GetMotionMaster()->LaunchMoveSpline(std::move(init), EVENT_FACE, MOTION_PRIORITY_HIGHEST);
             init.Launch();
         }
-        
+
         public void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false)
         {
             var initializer = (MoveSplineInit init) =>
@@ -354,7 +369,7 @@ namespace Game.Entities
         {
             // Temporarily disabled for short lived auras that unapply before client had time to ACK applying
             //if (enable == HasUnitMovementFlag2(MovementFlag2.CanTurnWhileFalling))
-                //return false;
+            //return false;
 
             if (enable)
                 AddUnitMovementFlag2(MovementFlag2.CanTurnWhileFalling);
@@ -682,7 +697,7 @@ namespace Game.Entities
         {
             return HasUnitMovementFlag(MovementFlag.Hover) ? m_unitData.HoverHeight : 0.0f;
         }
-        
+
         public bool IsWithinBoundaryRadius(Unit obj)
         {
             if (obj == null || !IsInMap(obj) || !InSamePhase(obj))
@@ -863,9 +878,9 @@ namespace Game.Entities
                         if (!HasAura(capability.ModSpellAuraID))
                             CastSpell(this, capability.ModSpellAuraID, new CastSpellExtraArgs(aurEff));
                 }
+            }
         }
-    }
-        
+
         public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
         {
             ZLiquidStatus oldLiquidStatus = GetLiquidStatus();
@@ -1030,7 +1045,7 @@ namespace Game.Entities
         {
             // Temporarily disabled for short lived auras that unapply before client had time to ACK applying
             //if (enable == HasUnitMovementFlag(MovementFlag.FallingSlow))
-                //return false;
+            //return false;
 
             if (enable)
                 AddUnitMovementFlag(MovementFlag.FallingSlow);
@@ -1169,7 +1184,7 @@ namespace Game.Entities
             {
                 WorldLocation target = new(GetMapId(), pos);
                 ToPlayer().TeleportTo(target, (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet | (casting ? TeleportToOptions.Spell : 0)));
-            }                
+            }
             else
             {
                 SendTeleportPacket(pos);
@@ -1673,7 +1688,7 @@ namespace Game.Entities
         }
 
         public bool IsPlayingHoverAnim() { return _playHoverAnim; }
-        
+
         void SetPlayHoverAnim(bool enable, bool sendUpdate = true)
         {
             if (IsPlayingHoverAnim() == enable)
@@ -1747,7 +1762,7 @@ namespace Game.Entities
         public bool HasExtraUnitMovementFlag2(MovementFlags3 f) { return m_movementInfo.HasExtraMovementFlag2(f); }
         public MovementFlags3 GetExtraUnitMovementFlags2() { return m_movementInfo.GetExtraMovementFlags2(); }
         public void SetExtraUnitMovementFlags2(MovementFlags3 f) { m_movementInfo.SetExtraMovementFlags2(f); }
-        
+
         //Spline
         public bool IsSplineEnabled()
         {
@@ -1784,7 +1799,7 @@ namespace Game.Entities
                 if (animTier.HasValue)
                     SetAnimTier(animTier.Value);
             }
-            
+
             UpdateSplinePosition();
         }
 
