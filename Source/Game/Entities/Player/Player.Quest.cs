@@ -149,6 +149,8 @@ namespace Game.Entities
 
                 if (quest.LimitTime != 0)
                     RemoveTimedQuest(questId);
+
+                SendPacket(new QuestForceRemoved(questId));
             }
 
             // DB data deleted in caller
@@ -186,6 +188,8 @@ namespace Game.Entities
 
                 if (quest.LimitTime != 0)
                     RemoveTimedQuest(questId);
+
+                SendPacket(new QuestForceRemoved(questId));
             }
 
             m_weeklyquests.Clear();

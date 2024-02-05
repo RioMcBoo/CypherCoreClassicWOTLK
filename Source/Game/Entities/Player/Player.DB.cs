@@ -680,6 +680,10 @@ namespace Game.Entities
         void _LoadQuestStatus(SQLResult result)
         {
             ushort slot = 0;
+
+            long lastDailyReset = Global.WorldMgr.GetNextDailyQuestsResetTime() - Time.Day;
+            long lastWeeklyReset = Global.WorldMgr.GetNextWeeklyQuestsResetTime() - Time.Week;
+
             if (!result.IsEmpty())
             {
                 do
@@ -687,64 +691,73 @@ namespace Game.Entities
                     int questId = result.Read<int>(0);
                     // used to be new, no delete?
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
-                    if (quest != null)
+                    if (quest == null)
+                        continue;
+
+                    // find or create
+                    QuestStatusData questStatusData = new();
+
+                    QuestStatus qstatus = (QuestStatus)result.Read<byte>(1);
+                    if (qstatus < QuestStatus.Max)
+                        questStatusData.Status = qstatus;
+                    else
                     {
-                        // find or create
-                        QuestStatusData questStatusData = new();
+                        questStatusData.Status = QuestStatus.Incomplete;
+                        Log.outError(LogFilter.Player, $"Player._LoadQuestStatus: Player '{GetName()}' ({GetGUID()}) has invalid quest {questId} status ({qstatus}), replaced by QUEST_STATUS_INCOMPLETE(3).");
+                    }
 
-                        byte qstatus = result.Read<byte>(1);
-                        if (qstatus < (byte)QuestStatus.Max)
-                            questStatusData.Status = (QuestStatus)qstatus;
-                        else
+                    questStatusData.Explored = result.Read<byte>(2) > 0;
+
+                    questStatusData.AcceptTime = result.Read<long>(3);
+                    if (quest.HasFlag(QuestFlagsEx.RemoveOnPeriodicReset))
+                    {
+                        if ((quest.IsDaily() && questStatusData.AcceptTime < lastDailyReset)
+                            || (quest.IsWeekly() && questStatusData.AcceptTime < lastWeeklyReset))
                         {
-                            questStatusData.Status = QuestStatus.Incomplete;
-                            Log.outError(LogFilter.Player, "Player {0} (GUID: {1}) has invalid quest {2} status ({3}), replaced by QUEST_STATUS_INCOMPLETE(3).",
-                                GetName(), GetGUID().ToString(), questId, qstatus);
+                            questStatusData.Status = QuestStatus.None;
+                            m_QuestStatusSave[questId] = QuestSaveType.Delete;
+                            SendPacket(new QuestForceRemoved(questId));
                         }
+                    }
 
-                        questStatusData.Explored = result.Read<byte>(2) > 0;
+                    long endTime = result.Read<long>(4);
+                    if (quest.LimitTime != 0 && !GetQuestRewardStatus(questId))
+                    {
+                        AddTimedQuest(questId);
 
-                        long acceptTime = result.Read<long>(3);
-                        long endTime = result.Read<long>(4);
-
-                        if (quest.LimitTime != 0 && !GetQuestRewardStatus(questId))
-                        {
-                            AddTimedQuest(questId);
-
-                            if (endTime <= GameTime.GetGameTime())
-                                questStatusData.Timer = 1;
-                            else
-                                questStatusData.Timer = (uint)((endTime - GameTime.GetGameTime()) * Time.InMilliseconds);
-                        }
+                        if (endTime <= GameTime.GetGameTime())
+                            questStatusData.Timer = 1;
                         else
-                            endTime = 0;
+                            questStatusData.Timer = (uint)((endTime - GameTime.GetGameTime()) * Time.InMilliseconds);
+                    }
+                    else
+                        endTime = 0;
 
-                        // add to quest log
-                        if (slot < SharedConst.MaxQuestLogSize && questStatusData.Status != QuestStatus.None)
-                        {
-                            questStatusData.Slot = slot;
+                    // add to quest log
+                    if (slot < SharedConst.MaxQuestLogSize && questStatusData.Status != QuestStatus.None)
+                    {
+                        questStatusData.Slot = slot;
 
-                            foreach (QuestObjective obj in quest.Objectives)
-                                m_questObjectiveStatus.Add((obj.Type, obj.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = (questId, questStatusData), ObjectiveId = obj.Id });
+                        foreach (QuestObjective obj in quest.Objectives)
+                            m_questObjectiveStatus.Add((obj.Type, obj.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = (questId, questStatusData), ObjectiveId = obj.Id });
 
-                            SetQuestSlot(slot, questId);
-                            SetQuestSlotEndTime(slot, endTime);
-                            questStatusData.AcceptTime = acceptTime;
+                        SetQuestSlot(slot, questId);
+                        SetQuestSlotEndTime(slot, endTime);
 
-                            if (questStatusData.Status == QuestStatus.Complete)
-                                SetQuestSlotState(slot, QuestSlotStateMask.Complete);
-                            else if (questStatusData.Status == QuestStatus.Failed)
-                                SetQuestSlotState(slot, QuestSlotStateMask.Fail);
+                        if (questStatusData.Status == QuestStatus.Complete)
+                            SetQuestSlotState(slot, QuestSlotStateMask.Complete);
+                        else if (questStatusData.Status == QuestStatus.Failed)
+                            SetQuestSlotState(slot, QuestSlotStateMask.Fail);
 
-                            if (quest.HasAnyFlag(QuestFlagsEx.RecastAcceptSpellOnLogin) && quest.HasAnyFlag(QuestFlags.PlayerCastAccept) && quest.SourceSpellID > 0)
+                            if (quest.HasFlag(QuestFlagsEx.RecastAcceptSpellOnLogin) && quest.HasFlag(QuestFlags.PlayerCastAccept) && quest.SourceSpellID > 0)
                                 CastSpell(this, quest.SourceSpellID, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
 
-                            ++slot;
-                        }
-
-                        m_QuestStatus[questId] = questStatusData;
-                        Log.outDebug(LogFilter.ServerLoading, "Quest status is {0} for quest {1} for player (GUID: {2})", questStatusData.Status, questId, GetGUID().ToString());
+                        ++slot;
                     }
+
+                    m_QuestStatus[questId] = questStatusData;
+                    Log.outDebug(LogFilter.ServerLoading, "Quest status is {0} for quest {1} for player (GUID: {2})", questStatusData.Status, questId, GetGUID().ToString());
+
                 }
                 while (result.NextRow());
             }

@@ -43,7 +43,7 @@ namespace Game.Networking.Packets
         
         public List<ObjectGuid> QuestGiverGUIDs = new();
     }
-    
+
     public class QuestGiverStatusPkt : ServerPacket
     {
         public QuestGiverStatusPkt() : base(ServerOpcodes.QuestGiverStatus, ConnectionType.Instance)
@@ -431,7 +431,7 @@ namespace Game.Networking.Packets
 
         public int QuestID;
     }
-    
+
     public class QuestGiverQuestDetails : ServerPacket
     {
         public QuestGiverQuestDetails() : base(ServerOpcodes.QuestGiverQuestDetails) { }
@@ -753,6 +753,21 @@ namespace Game.Networking.Packets
         public override void Write() { }
     }
 
+    class QuestForceRemoved : ServerPacket
+    {
+        int QuestID;
+
+        public QuestForceRemoved(int questId) : base(ServerOpcodes.QuestForceRemoved)
+        {
+            QuestID = questId;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(QuestID);
+        }
+    }
+
     class QuestPushResult : ClientPacket
     {
         public QuestPushResult(WorldPacket packet) : base(packet) { }
@@ -839,7 +854,7 @@ namespace Game.Networking.Packets
         }
 
         public int Count;
-    }    
+    } 
 
     class RequestWorldQuestUpdate : ClientPacket
     {
@@ -1353,7 +1368,7 @@ namespace Game.Networking.Packets
     }
 
     class PlayerChoiceResponse
-    {    
+    {
         public int ResponseID;
         public short ResponseIdentifier;
         public int ChoiceArtFileID;
