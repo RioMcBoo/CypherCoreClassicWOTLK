@@ -5008,7 +5008,7 @@ namespace Game
                 return;
 
             Log.outError(LogFilter.Sql,
-                $"Gameobject (Entry: {goInfo.entry} GoType: {goInfo.type}) have data{N}={goInfo.Door.open} but lock (Id: {goInfo.Door.open}) not found.");
+                $"Gameobject (Entry: {goInfo.entry} GoType: {goInfo.type}) have data{N}={dataN} but lock (Id: {dataN}) not found.");
         }
 
         void CheckGOLinkedTrapId(GameObjectTemplate goInfo, int dataN, uint N)
