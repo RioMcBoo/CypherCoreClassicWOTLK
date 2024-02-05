@@ -2182,10 +2182,10 @@ namespace Game.Entities
             if (!objective.IsStoringFlag())
                 return GetQuestSlotCounter(slot, (byte)objective.StorageIndex);
 
-            return (((GetQuestSlotState(slot) & objective.StorageIndex) != 0) ? 1 : 0);
-        }    
+            return ((GetQuestSlotState(slot) & objective.StorageIndex) != 0) ? 1 : 0;
+        }
 
-        int GetQuestSlotObjectiveData(int questId, int objectiveId)
+        int GetQuestObjectiveData(int questId, int objectiveId)
         {
             ushort slot = FindQuestSlot(questId);
             if (slot >= SharedConst.MaxQuestLogSize)
