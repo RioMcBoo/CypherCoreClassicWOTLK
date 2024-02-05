@@ -5738,7 +5738,8 @@ namespace Game.Spells
 
             if (apply)
             {
-                AreaTrigger.CreateAreaTrigger(GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellVisual(), null, this);
+                AreaTriggerId createPropertiesId = new(GetMiscValue(), false);
+                AreaTrigger.CreateAreaTrigger(createPropertiesId, target, GetBase().GetDuration(), GetCaster(), target, GetBase().GetSpellVisual(), GetSpellInfo(), null, this);
             }
             else
             {

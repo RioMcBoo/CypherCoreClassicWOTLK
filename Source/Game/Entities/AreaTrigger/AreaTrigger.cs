@@ -70,31 +70,31 @@ namespace Game.Entities
                 HandleUnitEnterExit(new List<Unit>());
 
                 base.RemoveFromWorld();
-                if (_spawnId != 0)
+                if (IsStaticSpawn())
                     GetMap().GetAreaTriggerBySpawnIdStore().Remove(_spawnId, this);
 
                 GetMap().GetObjectsStore().Remove(GetGUID());
             }
         }
 
-        bool Create(int areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisual spellVisual, Spell spell, AuraEffect aurEff)
+        bool Create(AreaTriggerId areaTriggerCreatePropertiesId, Map map, Position pos, int duration, AreaTriggerSpawn spawnData = null, Unit caster = null, Unit target = null, SpellCastVisual spellVisual = default, SpellInfo spellInfo = null, Spell spell = null, AuraEffect aurEff = null)
         {
             _targetGuid = target != null ? target.GetGUID() : ObjectGuid.Empty;
             _aurEff = aurEff;
 
-            SetMap(caster.GetMap());
+            SetMap(map);
             Relocate(pos);
             RelocateStationaryPosition(pos);
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (areaTriggerCreatePropertiesId: {areaTriggerCreatePropertiesId}) not created. Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");
+                Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (AreaTriggerCreatePropertiesId: (Id: {areaTriggerCreatePropertiesId.Id}, IsCustom: {areaTriggerCreatePropertiesId.IsCustom})) not created. Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");
                 return false;
             }
 
             _areaTriggerCreateProperties = Global.AreaTriggerDataStorage.GetAreaTriggerCreateProperties(areaTriggerCreatePropertiesId);
             if (_areaTriggerCreateProperties == null)
             {
-                Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (areaTriggerCreatePropertiesId {areaTriggerCreatePropertiesId}) not created. Invalid areatrigger create properties id ({areaTriggerCreatePropertiesId})");
+                Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (AreaTriggerCreatePropertiesId: (Id: {areaTriggerCreatePropertiesId.Id}, IsCustom: {areaTriggerCreatePropertiesId.IsCustom})) not created. Invalid areatrigger create properties id");
                 return false;
             }
 
@@ -102,60 +102,72 @@ namespace Game.Entities
 
             _areaTriggerTemplate = _areaTriggerCreateProperties.Template;
 
-            _Create(ObjectGuid.Create(HighGuid.AreaTrigger, GetMapId(), GetTemplate() != null ? GetTemplate().Id.Id : 0, caster.GetMap().GenerateLowGuid(HighGuid.AreaTrigger)));
+            _Create(ObjectGuid.Create(HighGuid.AreaTrigger, GetMapId(), GetTemplate() != null ? GetTemplate().Id.Id : 0, GetMap().GenerateLowGuid(HighGuid.AreaTrigger)));
 
             if (GetTemplate() != null)
                 SetEntry(GetTemplate().Id.Id);
 
-            SetDuration(duration);
-
             SetObjectScale(1.0f);
+            SetDuration(duration);
 
             _shape = GetCreateProperties().Shape;
 
             var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.Caster), caster.GetGUID());
+            if (caster != null)
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.Caster), caster.GetGUID());
             if (spell != null)
                 SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.CreatingEffectGUID), spell.m_castId);
-
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellID), spellInfo.Id);
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), spellInfo.Id);
+            if (spellInfo != null && !IsStaticSpawn())
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellID), spellInfo.Id);
+            if (spellInfo != null)
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), spellInfo.Id);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellXSpellVisualID), spellVisual.SpellXSpellVisualID);
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetScale), GetCreateProperties().TimeToTargetScale != 0 ? GetCreateProperties().TimeToTargetScale : m_areaTriggerData.Duration);
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), GetCreateProperties().GetMaxSearchRadius());
+            if (!IsStaticSpawn())
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetScale), GetCreateProperties().TimeToTargetScale != 0 ? GetCreateProperties().TimeToTargetScale : m_areaTriggerData.Duration);
+            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), GetCreateProperties().Shape.GetMaxSearchRadius());
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), GetCreateProperties().DecalPropertiesId);
+            if (IsServerSide())
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), 24); // Blue decal, for .debug areatrigger visibility
 
-            SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), GetCreateProperties().ExtraScale);
+            AreaTriggerScaleCurveTemplate extraScaleCurve = IsStaticSpawn() ? new AreaTriggerScaleCurveTemplate() : GetCreateProperties().ExtraScale;
+            SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), extraScaleCurve);
 
-            Player modOwner = caster.GetSpellModOwner();
-            if (modOwner != null)
+            if (caster != null)
             {
-                float multiplier = 1.0f;
-                int flat = 0;
-                modOwner.GetSpellModValues(spellInfo, SpellModOp.Radius, spell, (float)m_areaTriggerData.BoundsRadius2D, ref flat, ref multiplier);
-                if (multiplier != 1.0f)
+                Player modOwner = caster.GetSpellModOwner();
+                if (modOwner != null)
                 {
-                    AreaTriggerScaleCurveTemplate overrideScale = new();
-                    overrideScale.Curve = multiplier;
-                    SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.OverrideScaleCurve), overrideScale);
+                    float multiplier = 1.0f;
+                    int flat = 0;
+                    modOwner.GetSpellModValues(spellInfo, SpellModOp.Radius, spell, (float)m_areaTriggerData.BoundsRadius2D, ref flat, ref multiplier);
+                    if (multiplier != 1.0f)
+                    {
+                        AreaTriggerScaleCurveTemplate overrideScale = new();
+                        overrideScale.Curve = multiplier;
+                        SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.OverrideScaleCurve), overrideScale);
+                    }
                 }
             }
 
             VisualAnim visualAnim = areaTriggerData.ModifyValue(m_areaTriggerData.VisualAnim);
             SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), GetCreateProperties().AnimId);
             SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimKitID), GetCreateProperties().AnimKitId);
-            if (GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.Unk3))
+            if (GetCreateProperties() != null && GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.Unk3))
                 SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.Field_C), true);
 
-            PhasingHandler.InheritPhaseShift(this, caster);
-
-            if (target != null && GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
+            if (caster != null)
+                PhasingHandler.InheritPhaseShift(this, caster);
+            else if (IsStaticSpawn() && spawnData != null)
             {
-                m_movementInfo.transport.guid = target.GetGUID();
+                if (spawnData.PhaseUseFlags != 0 || spawnData.PhaseId != 0 || spawnData.PhaseGroup != 0)
+                    PhasingHandler.InitDbPhaseShift(GetPhaseShift(), spawnData.PhaseUseFlags, spawnData.PhaseId, spawnData.PhaseGroup);
             }
 
-            UpdatePositionData();
-            SetZoneScript();
+            if (target != null && GetCreateProperties() != null && GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAttached))
+                m_movementInfo.transport.guid = target.GetGUID();
+
+            if (!IsStaticSpawn())
+                UpdatePositionData();
 
             UpdateShape();
 
@@ -164,7 +176,7 @@ namespace Game.Entities
             if (GetCreateProperties().OrbitInfo != null)
             {
                 AreaTriggerOrbitInfo orbit = GetCreateProperties().OrbitInfo;
-                if (target != null && GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
+                if (target != null && GetCreateProperties() != null && GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAttached))
                     orbit.PathTarget = target.GetGUID();
                 else
                     orbit.Center = new(pos.posX, pos.posY, pos.posZ);
@@ -177,16 +189,21 @@ namespace Game.Entities
             }
 
             // movement on transport of areatriggers on unit is handled by themself
-            ITransport transport = m_movementInfo.transport.guid.IsEmpty() ? caster.GetTransport() : null;
-            if (transport != null)
+            ITransport transport = null;
+            if (caster != null)
             {
-                float x, y, z, o;
-                pos.GetPosition(out x, out y, out z, out o);
-                transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
-                m_movementInfo.transport.pos.Relocate(x, y, z, o);
+                transport = m_movementInfo.transport.guid.IsEmpty() ? caster.GetTransport() : null;
 
-                // This object must be added to transport before adding to map for the client to properly display it
-                transport.AddPassenger(this);
+                if (transport != null)
+                {
+                    float x, y, z, o;
+                    pos.GetPosition(out x, out y, out z, out o);
+                    transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
+                    m_movementInfo.transport.pos.Relocate(x, y, z, o);
+
+                    // This object must be added to transport before adding to map for the client to properly display it
+                    transport.AddPassenger(this);
+                }
             }
 
             AI_Initialize();
@@ -195,24 +212,27 @@ namespace Game.Entities
             if (HasOrbit())
                 Relocate(CalculateOrbitPosition());
 
-            if (!GetMap().AddToMap(this))
-            {         // Returning false will cause the object to be deleted - remove from transport
-                if (transport != null)
-                    transport.RemovePassenger(this);
-                return false;
+            if (!IsStaticSpawn())
+            {
+                if (!GetMap().AddToMap(this))
+                {         // Returning false will cause the object to be deleted - remove from transport
+                    if (transport != null)
+                        transport.RemovePassenger(this);
+                    return false;
+                }
             }
 
-            caster._RegisterAreaTrigger(this);
+            caster?._RegisterAreaTrigger(this);
 
             _ai.OnCreate(spell);
 
             return true;
         }
 
-        public static AreaTrigger CreateAreaTrigger(int areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisual spellVisual, Spell spell = null, AuraEffect aurEff = null)
+        public static AreaTrigger CreateAreaTrigger(AreaTriggerId areaTriggerCreatePropertiesId, Position pos, int duration, Unit caster, Unit target, SpellCastVisual spellVisual = default, SpellInfo spellInfo = null, Spell spell = null, AuraEffect aurEff = null)
         {
             AreaTrigger at = new();
-            if (!at.Create(areaTriggerCreatePropertiesId, caster, target, spellInfo, pos, duration, spellVisual, spell, aurEff))
+            if (!at.Create(areaTriggerCreatePropertiesId, caster.GetMap(), pos, duration, null, caster, target, spellVisual, spellInfo, spell, aurEff))
                 return null;
 
             return at;
@@ -227,63 +247,23 @@ namespace Game.Entities
         {
             _spawnId = spawnId;
 
-            AreaTriggerSpawn position = Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(spawnId);
-            if (position == null)
+            AreaTriggerSpawn spawnData = Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(spawnId);
+            if (spawnData == null)
                 return false;
 
-            AreaTriggerTemplate areaTriggerTemplate = Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(position.TriggerId);
-            if (areaTriggerTemplate == null)
+            AreaTriggerCreateProperties createProperties = Global.AreaTriggerDataStorage.GetAreaTriggerCreateProperties(spawnData.Id);
+            if (createProperties == null)
                 return false;
 
-            return CreateServer(map, areaTriggerTemplate, position);
-        }
-
-        bool CreateServer(Map map, AreaTriggerTemplate areaTriggerTemplate, AreaTriggerSpawn position)
-        {
-            SetMap(map);
-            Relocate(position.SpawnPoint);
-            RelocateStationaryPosition(position.SpawnPoint);
-            if (!IsPositionValid())
+            SpellInfo spellInfo = null;
+            SpellCastVisual spellVisual = default;
+            if (spawnData.SpellForVisuals != 0)
             {
-                Log.outError(LogFilter.AreaTrigger, $"AreaTriggerServer (id {areaTriggerTemplate.Id}) not created. Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");
-                return false;
+                spellInfo = Global.SpellMgr.GetSpellInfo(spawnData.SpellForVisuals.Value, Difficulty.None);
+                if (spellInfo != null)
+                    spellVisual.SpellXSpellVisualID = spellInfo.GetSpellXSpellVisualId();
             }
-
-            SetZoneScript();
-
-            _areaTriggerTemplate = areaTriggerTemplate;
-
-            _Create(ObjectGuid.Create(HighGuid.AreaTrigger, GetMapId(), areaTriggerTemplate.Id.Id, GetMap().GenerateLowGuid(HighGuid.AreaTrigger)));
-
-            SetEntry(areaTriggerTemplate.Id.Id);
-
-            SetObjectScale(1.0f);
-            SetDuration(-1);
-
-            _shape = position.Shape;
-
-            if (position.SpellForVisuals.HasValue)
-                SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), position.SpellForVisuals.Value);
-
-            SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), _shape.GetMaxSearchRadius());
-            if (IsServerSide())
-                SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), 24); // blue decal, for .debug areatrigger visibility
-
-            SetScaleCurve(m_areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), new AreaTriggerScaleCurveTemplate());
-
-            VisualAnim visualAnim = m_areaTriggerData.ModifyValue(m_areaTriggerData.VisualAnim);
-            SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), -1);
-
-            if (position.PhaseUseFlags != 0 || position.PhaseId != 0 || position.PhaseGroup != 0)
-                PhasingHandler.InitDbPhaseShift(GetPhaseShift(), position.PhaseUseFlags, position.PhaseId, position.PhaseGroup);
-
-            UpdateShape();
-
-            AI_Initialize();
-
-            _ai.OnCreate(null);
-
-            return true;
+            return Create(spawnData.Id, map, spawnData.SpawnPoint, -1, spawnData, null, null, spellVisual, spellInfo);
         }
 
         public override void Update(uint diff)
@@ -291,7 +271,7 @@ namespace Game.Entities
             base.Update(diff);
             _timeSinceCreated += diff;
 
-            if (!IsServerSide())
+            if (!IsStaticSpawn())
             {
                 // "If" order matter here, Orbit > Attached > Splines
                 if (HasOverridePosition())
@@ -302,7 +282,7 @@ namespace Game.Entities
                 {
                     UpdateOrbitPosition(diff);
                 }
-                else if (GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
+                else if (GetCreateProperties() != null && GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAttached))
                 {
                     Unit target = GetTarget();
                     if (target != null)
@@ -310,9 +290,9 @@ namespace Game.Entities
                         float orientation = 0.0f;
                         AreaTriggerCreateProperties createProperties = GetCreateProperties();
                         if (createProperties != null && createProperties.FacingCurveId != 0)
-                            orientation = Global.DB2Mgr.GetCurveValueAt((int)createProperties.FacingCurveId, GetProgress());
+                            orientation = Global.DB2Mgr.GetCurveValueAt(createProperties.FacingCurveId, GetProgress());
 
-                        if (GetTemplate() == null || !GetTemplate().HasFlag(AreaTriggerFlags.HasAbsoluteOrientation))
+                        if (GetCreateProperties() == null || !GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation))
                             orientation += target.GetOrientation();
 
                         GetMap().AreaTriggerRelocation(this, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), orientation);
@@ -327,8 +307,8 @@ namespace Game.Entities
                     AreaTriggerCreateProperties createProperties = GetCreateProperties();
                     if (createProperties != null && createProperties.FacingCurveId != 0)
                     {
-                        float orientation = Global.DB2Mgr.GetCurveValueAt((int)createProperties.FacingCurveId, GetProgress());
-                        if (GetTemplate() == null || !GetTemplate().HasFlag(AreaTriggerFlags.HasAbsoluteOrientation))
+                        float orientation = Global.DB2Mgr.GetCurveValueAt(createProperties.FacingCurveId, GetProgress());
+                        if (GetCreateProperties() == null || !GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation))
                             orientation += GetStationaryO();
 
                         SetOrientation(orientation);
@@ -441,7 +421,7 @@ namespace Game.Entities
             {
                 AreaTriggerCreateProperties createProperties = GetCreateProperties();
                 if (createProperties != null && createProperties.ScaleCurveId != 0)
-                    scale *= Math.Max(Global.DB2Mgr.GetCurveValueAt((int)createProperties.ScaleCurveId, GetScaleCurveProgress(m_areaTriggerData.OverrideScaleCurve, m_areaTriggerData.TimeToTargetScale)), 0.000001f);
+                    scale *= Math.Max(Global.DB2Mgr.GetCurveValueAt(createProperties.ScaleCurveId, GetScaleCurveProgress(m_areaTriggerData.OverrideScaleCurve, m_areaTriggerData.TimeToTargetScale)), 0.000001f);
             }
 
             scale *= Math.Max(GetScaleCurveValue(m_areaTriggerData.ExtraScaleCurve, m_areaTriggerData.TimeToTargetExtraScale), 0.000001f);
@@ -587,22 +567,22 @@ namespace Game.Entities
 
             switch (_shape.TriggerType)
             {
-                case AreaTriggerTypes.Sphere:
+                case AreaTriggerShapeType.Sphere:
                     SearchUnitInSphere(targetList);
                     break;
-                case AreaTriggerTypes.Box:
+                case AreaTriggerShapeType.Box:
                     SearchUnitInBox(targetList);
                     break;
-                case AreaTriggerTypes.Polygon:
+                case AreaTriggerShapeType.Polygon:
                     SearchUnitInPolygon(targetList);
                     break;
-                case AreaTriggerTypes.Cylinder:
+                case AreaTriggerShapeType.Cylinder:
                     SearchUnitInCylinder(targetList);
                     break;
-                case AreaTriggerTypes.Disk:
+                case AreaTriggerShapeType.Disk:
                     SearchUnitInDisk(targetList);
                     break;
-                case AreaTriggerTypes.BoundedPlane:
+                case AreaTriggerShapeType.BoundedPlane:
                     SearchUnitInBoundedPlane(targetList);
                     break;
                 default:
@@ -611,7 +591,7 @@ namespace Game.Entities
 
             if (GetTemplate() != null)
             {
-                var conditions = Global.ConditionMgr.GetConditionsForAreaTrigger(GetTemplate().Id.Id, GetTemplate().Id.IsServerSide);
+                var conditions = Global.ConditionMgr.GetConditionsForAreaTrigger(GetTemplate().Id.Id, GetTemplate().Id.IsCustom);
                 if (!conditions.Empty())
                     targetList.RemoveAll(target => !Global.ConditionMgr.IsObjectMeetToConditions(target, conditions));
             }
@@ -622,7 +602,7 @@ namespace Game.Entities
         void SearchUnits(List<Unit> targetList, float radius, bool check3D)
         {
             var check = new AnyUnitInObjectRangeCheck(this, radius, check3D);
-            if (IsServerSide())
+            if (IsStaticSpawn())
             {
                 var searcher = new PlayerListSearcher(this, targetList, check);
                 Cell.VisitWorldObjects(this, searcher, GetMaxSearchRadius());
@@ -639,7 +619,7 @@ namespace Game.Entities
             float progress = GetProgress();
             AreaTriggerCreateProperties createProperties = GetCreateProperties();
             if (createProperties != null && createProperties.MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt((int)createProperties.MorphCurveId, progress);
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             float scale = CalcCurrentScale();
             float radius = MathFunctions.Lerp(_shape.SphereDatas.Radius, _shape.SphereDatas.RadiusTarget, progress) * scale;
@@ -652,7 +632,7 @@ namespace Game.Entities
             float progress = GetProgress();
             AreaTriggerCreateProperties createProperties = GetCreateProperties();
             if (createProperties != null && createProperties.MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt((int)createProperties.MorphCurveId, progress);
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             unsafe
             {
@@ -674,7 +654,7 @@ namespace Game.Entities
             float progress = GetProgress();
             AreaTriggerCreateProperties createProperties = GetCreateProperties();
             if (createProperties != null && createProperties.MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt((int)createProperties.MorphCurveId, progress);
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             float height = MathFunctions.Lerp(_shape.PolygonDatas.Height, _shape.PolygonDatas.HeightTarget, progress);
             float minZ = GetPositionZ() - height;
@@ -690,7 +670,7 @@ namespace Game.Entities
             float progress = GetProgress();
             AreaTriggerCreateProperties createProperties = GetCreateProperties();
             if (createProperties != null && createProperties.MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt((int)createProperties.MorphCurveId, progress);
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             float scale = CalcCurrentScale();
             float radius = MathFunctions.Lerp(_shape.CylinderDatas.Radius, _shape.CylinderDatas.RadiusTarget, progress) * scale;
@@ -710,7 +690,7 @@ namespace Game.Entities
             float progress = GetProgress();
             AreaTriggerCreateProperties createProperties = GetCreateProperties();
             if (createProperties != null && createProperties.MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt((int)createProperties.MorphCurveId, progress);
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             float scale = CalcCurrentScale();
             float innerRadius = MathFunctions.Lerp(_shape.DiskDatas.InnerRadius, _shape.DiskDatas.InnerRadiusTarget, progress) * scale;
@@ -731,7 +711,7 @@ namespace Game.Entities
             float progress = GetProgress();
             AreaTriggerCreateProperties createProperties = GetCreateProperties();
             if (createProperties != null && createProperties.MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt((int)createProperties.MorphCurveId, progress);
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             unsafe
             {
@@ -769,9 +749,9 @@ namespace Game.Entities
                 if (player != null)
                 {
                     if (player.IsDebugAreaTriggers)
-                        player.SendSysMessage(CypherStrings.DebugAreatriggerEntered, GetEntry());
+                        player.SendSysMessage(CypherStrings.DebugAreatriggerEntityEntered, GetEntry(), IsCustom(), IsStaticSpawn(), GetGUID().GetCounter());
 
-                    player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerEnter, (int)GetEntry(), 1);
+                    player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerEnter, GetEntry(), 1);
                 }
 
                 DoActions(unit);
@@ -788,9 +768,9 @@ namespace Game.Entities
                     if (player != null)
                     {
                         if (player.IsDebugAreaTriggers)
-                            player.SendSysMessage(CypherStrings.DebugAreatriggerLeft, GetEntry());
+                            player.SendSysMessage(CypherStrings.DebugAreatriggerEntityLeft, GetEntry(), IsCustom(), IsStaticSpawn(), GetGUID().GetCounter());
 
-                        player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerExit, (int)GetEntry(), 1);
+                        player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerExit, GetEntry(), 1);
                     }
 
                     UndoActions(leavingUnit);
@@ -844,24 +824,25 @@ namespace Game.Entities
         void UpdatePolygonVertices()
         {
             AreaTriggerCreateProperties createProperties = GetCreateProperties();
+            AreaTriggerShapeInfo shape = GetShape();
             float newOrientation = GetOrientation();
 
             // No need to recalculate, orientation didn't change
-            if (MathFunctions.fuzzyEq(_verticesUpdatePreviousOrientation, newOrientation) && (createProperties == null) || createProperties.PolygonVerticesTarget.Empty())
+            if (MathFunctions.fuzzyEq(_verticesUpdatePreviousOrientation, newOrientation) && shape.PolygonVerticesTarget.Empty())
                 return;
 
-            _polygonVertices = createProperties.PolygonVertices;
+            _polygonVertices = shape.PolygonVertices;
 
-            if (!createProperties.PolygonVerticesTarget.Empty())
+            if (!shape.PolygonVerticesTarget.Empty())
             {
                 float progress = GetProgress();
                 if (createProperties.MorphCurveId != 0)
-                    progress = Global.DB2Mgr.GetCurveValueAt((int)createProperties.MorphCurveId, progress);
+                    progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
                 for (var i = 0; i < _polygonVertices.Count; ++i)
                 {
                     Vector2 vertex = _polygonVertices[i];
-                    Vector2 vertexTarget = createProperties.PolygonVerticesTarget[i];
+                    Vector2 vertexTarget = shape.PolygonVerticesTarget[i];
 
                     vertex.X = MathFunctions.Lerp(vertex.X, vertexTarget.X, progress);
                     vertex.Y = MathFunctions.Lerp(vertex.Y, vertexTarget.Y, progress);
@@ -989,12 +970,12 @@ namespace Game.Entities
 
         void DoActions(Unit unit)
         {
-            Unit caster = IsServerSide() ? unit : GetCaster();
+            Unit caster = IsStaticSpawn() ? unit : GetCaster();
             if (caster != null && GetTemplate() != null)
             {
                 foreach (AreaTriggerAction action in GetTemplate().Actions)
                 {
-                    if (IsServerSide() || UnitFitToActionRequirement(unit, caster, action))
+                    if (IsStaticSpawn() || UnitFitToActionRequirement(unit, caster, action))
                     {
                         switch (action.ActionType)
                         {
@@ -1166,7 +1147,7 @@ namespace Game.Entities
             // AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
             float pathProgress = (float)cmi.ElapsedTimeForMovement / cmi.TimeToTarget;
             if (createProperties != null && createProperties.MoveCurveId != 0)
-                pathProgress = Global.DB2Mgr.GetCurveValueAt((int)createProperties.MoveCurveId, pathProgress);
+                pathProgress = Global.DB2Mgr.GetCurveValueAt(createProperties.MoveCurveId, pathProgress);
 
             // We already made one circle and can't loop
             if (!cmi.CanLoop)
@@ -1193,9 +1174,9 @@ namespace Game.Entities
 
             float orientation = 0.0f;
             if (createProperties != null && createProperties.FacingCurveId != 0)
-                orientation = Global.DB2Mgr.GetCurveValueAt((int)createProperties.FacingCurveId, GetProgress());
+                orientation = Global.DB2Mgr.GetCurveValueAt(createProperties.FacingCurveId, GetProgress());
 
-            if (GetTemplate() == null || !GetTemplate().HasFlag(AreaTriggerFlags.HasAbsoluteOrientation))
+            if (GetCreateProperties() == null || !GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation))
             {
                 orientation += angle;
                 orientation += cmi.CounterClockwise ? MathFunctions.PiOver4 : -MathFunctions.PiOver4;
@@ -1248,10 +1229,10 @@ namespace Game.Entities
             AreaTriggerCreateProperties createProperties = GetCreateProperties();
             if (createProperties != null && createProperties.MoveCurveId != 0)
             {
-                float progress = Global.DB2Mgr.GetCurveValueAt((int)GetCreateProperties().MoveCurveId, currentTimePercent);
+                float progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MoveCurveId, currentTimePercent);
                 if (progress < 0.0f || progress > 1.0f)
                 {
-                    Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (Id: {GetEntry()}, AreaTriggerCreatePropertiesId: {createProperties.Id}) has wrong progress ({progress}) caused by curve calculation (MoveCurveId: {createProperties.MorphCurveId})");
+                    Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (Id: {GetEntry()}, AreaTriggerCreatePropertiesId: (Id: {createProperties.Id.Id}, IsCustom: {createProperties.Id.IsCustom})) has wrong progress ({progress}) caused by curve calculation (MoveCurveId: {createProperties.MoveCurveId})");
                 }
                 else
                     currentTimePercent = progress;
@@ -1266,9 +1247,9 @@ namespace Game.Entities
 
             float orientation = GetStationaryO();
             if (createProperties != null && createProperties.FacingCurveId != 0)
-                orientation += Global.DB2Mgr.GetCurveValueAt((int)createProperties.FacingCurveId, GetProgress());
+                orientation += Global.DB2Mgr.GetCurveValueAt(createProperties.FacingCurveId, GetProgress());
 
-            if (GetTemplate() != null && !GetTemplate().HasFlag(AreaTriggerFlags.HasAbsoluteOrientation) && GetTemplate().HasFlag(AreaTriggerFlags.HasFaceMovementDir))
+            if (GetCreateProperties() != null && !GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation) && GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFaceMovementDir))
             {
                 _spline.Evaluate_Derivative(lastPositionIndex, percentFromLastPoint, out Vector3 derivative);
                 if (derivative.X != 0.0f || derivative.Y != 0.0f)
@@ -1297,8 +1278,8 @@ namespace Game.Entities
 
             if (GetCreateProperties().FacingCurveId != 0)
             {
-                orientation = Global.DB2Mgr.GetCurveValueAt((int)GetCreateProperties().FacingCurveId, GetProgress());
-                if (GetTemplate() == null || !GetTemplate().HasFlag(AreaTriggerFlags.HasAbsoluteOrientation))
+                orientation = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().FacingCurveId, GetProgress());
+                if (GetCreateProperties() == null || !GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation))
                     orientation += GetStationaryO();
             }
 
@@ -1327,7 +1308,7 @@ namespace Game.Entities
             if (base.IsNeverVisibleFor(seer, allowServersideObjects))
                 return true;
 
-            if (IsServerSide() && !allowServersideObjects)
+            if (IsCustom() && !allowServersideObjects)
             {
                 Player seerPlayer = seer.ToPlayer();
                 if (seerPlayer != null)
@@ -1403,7 +1384,9 @@ namespace Game.Entities
 
         public T GetAI<T>() where T : AreaTriggerAI { return (T)_ai; }
 
-        public bool IsServerSide() { return _areaTriggerTemplate.Id.IsServerSide; }
+        public bool IsCustom() { return _areaTriggerTemplate.Id.IsCustom; }
+        public bool IsServerSide() { return _areaTriggerTemplate.Flags.HasFlag(AreaTriggerFlag.IsServerSide); }
+        public bool IsStaticSpawn() { return _spawnId != 0; }
 
         [System.Diagnostics.Conditional("DEBUG")]
         void DebugVisualizePosition()

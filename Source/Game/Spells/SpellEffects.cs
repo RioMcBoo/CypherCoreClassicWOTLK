@@ -5070,7 +5070,7 @@ namespace Game.Spells
                 return;
 
             int health = (int)target.CountPctFromMaxHealth(damage);
-            int mana = (int)MathFunctions.CalculatePct(target.GetMaxPower(PowerType.Mana), damage);
+            int mana = MathFunctions.CalculatePct(target.GetMaxPower(PowerType.Mana), damage);
             int resurrectAura = 0;
             if (Global.SpellMgr.HasSpellInfo(effectInfo.TriggerSpell, Difficulty.None))
                 resurrectAura = effectInfo.TriggerSpell;
@@ -5093,8 +5093,9 @@ namespace Game.Spells
             if (unitCaster == null || !m_targets.HasDst())
                 return;
 
+            AreaTriggerId createPropertiesId = new(effectInfo.MiscValue, false);
             int duration = GetSpellInfo().CalcDuration(GetCaster());
-            AreaTrigger.CreateAreaTrigger(effectInfo.MiscValue, unitCaster, null, GetSpellInfo(), destTarget.GetPosition(), duration, m_SpellVisual, this);
+            AreaTrigger.CreateAreaTrigger(createPropertiesId, destTarget.GetPosition(), duration, unitCaster, null, m_SpellVisual, GetSpellInfo(), this);
         }
 
         [SpellEffectHandler(SpellEffectName.RemoveTalent)]
