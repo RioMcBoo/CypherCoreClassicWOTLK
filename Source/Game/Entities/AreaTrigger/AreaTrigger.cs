@@ -749,7 +749,7 @@ namespace Game.Entities
                 if (player != null)
                 {
                     if (player.IsDebugAreaTriggers)
-                        player.SendSysMessage(CypherStrings.DebugAreatriggerEntityEntered, GetEntry(), IsCustom(), IsStaticSpawn(), GetGUID().GetCounter());
+                        player.SendSysMessage(CypherStrings.DebugAreatriggerEntityEntered, GetEntry(), IsCustom(), IsStaticSpawn(), _spawnId);
 
                     player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerEnter, GetEntry(), 1);
                 }
@@ -768,7 +768,7 @@ namespace Game.Entities
                     if (player != null)
                     {
                         if (player.IsDebugAreaTriggers)
-                            player.SendSysMessage(CypherStrings.DebugAreatriggerEntityLeft, GetEntry(), IsCustom(), IsStaticSpawn(), GetGUID().GetCounter());
+                            player.SendSysMessage(CypherStrings.DebugAreatriggerEntityLeft, GetEntry(), IsCustom(), IsStaticSpawn(), _spawnId);
 
                         player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerExit, GetEntry(), 1);
                     }
