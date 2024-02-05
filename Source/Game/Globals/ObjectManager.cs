@@ -2148,8 +2148,8 @@ namespace Game
         public void LoadCreatureTemplateAddons()
         {
             var time = Time.GetMSTime();
-            //                                        0      1        2      3           4         5         6            7         8      9          10               11            12                      13
-            using var result = DB.World.Query("SELECT entry, path_id, mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_template_addon");
+            //                                              0      1       2      3           4         5         6            7         8      9          10               11            12                      13
+            using SQLResult result = DB.World.Query("SELECT entry, PathId, mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_template_addon");
 
             if (result.IsEmpty())
             {
@@ -2168,7 +2168,7 @@ namespace Game
                 }
 
                 CreatureAddon creatureAddon = new();
-                creatureAddon.path_id = result.Read<int>(1);
+                creatureAddon.PathId = result.Read<int>(1);
                 creatureAddon.mount = result.Read<int>(2);
                 creatureAddon.standState = (UnitStandStateType)result.Read<byte>(3);
                 creatureAddon.animTier = (AnimTier)result.Read<byte>(4);
@@ -2288,8 +2288,8 @@ namespace Game
         public void LoadCreatureAddons()
         {
             var time = Time.GetMSTime();
-            //                                          0     1        2      3           4         5         6            7         8      9          10               11            12                      13
-            using var result = DB.World.Query("SELECT guid, path_id, mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_addon");
+            //                                              0     1       2      3           4         5         6            7         8      9          10               11            12                      13
+            using SQLResult result = DB.World.Query("SELECT guid, PathId, mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_addon");
 
             if (result.IsEmpty())
             {
@@ -2310,8 +2310,8 @@ namespace Game
 
                 CreatureAddon creatureAddon = new();
 
-                creatureAddon.path_id = result.Read<int>(1);
-                if (creData.movementType == MovementGeneratorType.Waypoint && creatureAddon.path_id == 0)
+                creatureAddon.PathId = result.Read<int>(1);
+                if (creData.movementType == MovementGeneratorType.Waypoint && creatureAddon.PathId == 0)
                 {
                     creData.movementType = MovementGeneratorType.Idle;
                     Log.outError(LogFilter.Sql, $"Creature (GUID {guid}) has movement type set to WAYPOINTMOTIONTYPE but no path assigned.");

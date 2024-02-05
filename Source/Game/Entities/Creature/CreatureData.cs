@@ -382,7 +382,7 @@ namespace Game.Entities
 
     public class CreatureAddon
     {
-        public int path_id;
+        public int PathId;
         public int mount;
         public UnitStandStateType standState;
         public AnimTier animTier;

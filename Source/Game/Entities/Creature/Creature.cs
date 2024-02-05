@@ -1123,7 +1123,7 @@ namespace Game.Entities
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\nAIName: {GetAIName()} ScriptName: {GetScriptName()} WaypointPath: {GetWaypointPath()} SpawnId: {GetSpawnId()}";
+            return $"{base.GetDebugInfo()}\nAIName: {GetAIName()} ScriptName: {GetScriptName()} WaypointPath: {GetWaypointPathId()} SpawnId: {GetSpawnId()}";
         }
 
         public override void ExitVehicle(Position exitPosition = null)
@@ -2539,8 +2539,8 @@ namespace Game.Entities
                 SetVisibilityDistanceOverride(creatureAddon.visibilityDistanceType);
 
             //Load Path
-            if (creatureAddon.path_id != 0)
-                _waypointPathId = creatureAddon.path_id;
+            if (creatureAddon.PathId != 0)
+                _waypointPathId = creatureAddon.PathId;
 
             if (creatureAddon.auras != null)
             {
@@ -3421,7 +3421,7 @@ namespace Game.Entities
         public void GetTransportHomePosition(out float x, out float y, out float z, out float ori) { m_transportHomePosition.GetPosition(out x, out y, out z, out ori); }
         public Position GetTransportHomePosition() { return m_transportHomePosition; }
 
-        public int GetWaypointPath() { return _waypointPathId; }
+        public int GetWaypointPathId() { return _waypointPathId; }
         public void LoadPath(int pathid) { _waypointPathId = pathid; }
 
         public (int nodeId, int pathId) GetCurrentWaypointInfo() { return _currentWaypointNodeInfo; }
