@@ -378,6 +378,7 @@ namespace Game.Entities
         public int? CreatureIDVisibleToSummoner;
         public int? GroundMountDisplayID;
         public int? FlyingMountDisplayID;
+        public List<int> DespawnOnQuestsRemoved;
     }
 
     public class CreatureAddon

@@ -146,6 +146,7 @@ namespace Game.Entities
                 SetQuestSlot(slot, 0);
                 AbandonQuest(questId);
                 RemoveActiveQuest(questId);
+                DespawnPersonalSummonsForQuest(questId);
 
                 if (quest.LimitTime != 0)
                     RemoveTimedQuest(questId);
@@ -185,6 +186,7 @@ namespace Game.Entities
                 SetQuestSlot(slot, 0);
                 AbandonQuest(questId);
                 RemoveActiveQuest(questId);
+                DespawnPersonalSummonsForQuest(questId);
 
                 if (quest.LimitTime != 0)
                     RemoveTimedQuest(questId);
@@ -2145,6 +2147,23 @@ namespace Game.Entities
                 UpdateObjectVisibility();
         }
 
+        public void DespawnPersonalSummonsForQuest(int questId)
+        {
+            List<Creature> creatureList = GetCreatureListWithOptionsInGrid(100.0f, new FindCreatureOptions() { IgnorePhases = true, PrivateObjectOwnerGuid = GetGUID() }); // we might want to replace this with SummonList in Player at some point
+
+            foreach (Creature creature in creatureList)
+            {
+                CreatureSummonedData summonedData = Global.ObjectMgr.GetCreatureSummonedData(creature.GetEntry());
+                if (summonedData == null)
+                    continue;
+
+                if (summonedData.DespawnOnQuestsRemoved != null)
+                {
+                    if (summonedData.DespawnOnQuestsRemoved.Contains(questId))
+                        creature.DespawnOrUnsummon();
+                }
+            }
+        }
 
         public ushort GetReqKillOrCastCurrentCount(int quest_id, int entry)
         {

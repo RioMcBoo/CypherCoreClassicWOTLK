@@ -1818,8 +1818,6 @@ namespace Game
             // We load the creature models after loading but before checking
             LoadCreatureTemplateModels();
 
-            LoadCreatureSummonedData();
-
             // Checking needs to be done after loading because of the difficulty self referencing
             foreach (var template in creatureTemplateStorage.Values)
                 CheckCreatureTemplate(template);
@@ -2080,13 +2078,13 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template models in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
-
-        void LoadCreatureSummonedData()
+        
+        public void LoadCreatureSummonedData()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0           1                            2                     3
-            using var result = DB.World.Query("SELECT CreatureID, CreatureIDVisibleToSummoner, GroundMountDisplayID, FlyingMountDisplayID FROM creature_summoned_data");
+            //                                              0           1                            2                     3                     4
+            using SQLResult result = DB.World.Query("SELECT CreatureID, CreatureIDVisibleToSummoner, GroundMountDisplayID, FlyingMountDisplayID, DespawnOnQuestsRemoved FROM creature_summoned_data");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature summoned data definitions. DB table `creature_summoned_data` is empty.");
@@ -2138,6 +2136,28 @@ namespace Game
                             $"Table `creature_summoned_data` references non-existing display id {summonedData.FlyingMountDisplayID.Value} in FlyingMountDisplayID for creature {creatureId}, set to 0.");
                         summonedData.GroundMountDisplayID = null;
                     }
+                }
+
+                if (!result.IsNull(4))
+                {
+                    List<int> questList = new();
+                    foreach (string questStr in result.Read<string>(4).Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        if (!int.TryParse(questStr, out int questId))
+                            continue;
+
+                        Quest quest = GetQuestTemplate(questId);
+                        if (quest == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing quest {questId} in DespawnOnQuestsRemoved for creature {creatureId}, skipping.");
+                            continue;
+                        }
+
+                        questList.Add(questId);
+                    }
+
+                    if (!questList.Empty())
+                        summonedData.DespawnOnQuestsRemoved = questList;
                 }
 
             } while (result.NextRow());
