@@ -998,21 +998,21 @@ namespace Game.Entities
                     bf.HandleKill(player, victim);
             }
 
-            //if (victim->GetTypeId() == TYPEID_PLAYER)
-            //    if (OutdoorPvP* pvp = victim->ToPlayer()->GetOutdoorPvP())
-            //        pvp->HandlePlayerActivityChangedpVictim->ToPlayer();
-
-            // Battlegroundthings (do this at the end, so the death state flag will be properly set to handle in the bg.handlekill)
-            if (player != null && player.InBattleground())
+            // battleground things (do this at the end, so the death state flag will be properly set to handle in the bg->handlekill)
+            if (attacker != null)
             {
-                Battleground bg = player.GetBattleground();
-                if (bg != null)
+                BattlegroundMap bgMap = victim.GetMap().ToBattlegroundMap();
+                if (bgMap != null)
                 {
-                    Player playerVictim = victim.ToPlayer();
-                    if (playerVictim != null)
-                        bg.HandleKillPlayer(playerVictim, player);
-                    else
-                        bg.HandleKillUnit(victim.ToCreature(), player);
+                    Battleground bg = bgMap.GetBG();
+                    if (bg != null)
+                    {
+                        Player playerVictim = victim.ToPlayer();
+                        if (playerVictim != null)
+                            bg.HandleKillPlayer(playerVictim, player);
+                        else
+                            bg.HandleKillUnit(victim.ToCreature(), player);
+                    }
                 }
             }
 
