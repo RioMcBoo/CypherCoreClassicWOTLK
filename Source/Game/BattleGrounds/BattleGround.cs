@@ -1868,9 +1868,6 @@ namespace Game.BattleGrounds
 
         public override void ProcessEvent(WorldObject obj, int eventId, WorldObject invoker = null) { }
 
-        // this function can be used by spell to interact with the BG map
-        public virtual void DoAction(uint action, ulong arg) { }
-
         public virtual void HandlePlayerResurrect(Player player) { }
 
         public virtual WorldSafeLocsEntry GetExploitTeleportLocation(Team team) { return null; }
