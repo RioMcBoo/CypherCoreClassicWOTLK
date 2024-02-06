@@ -2902,7 +2902,10 @@ namespace Game.Entities
             return base.GetName(locale);
         }
 
-        public virtual byte GetPetAutoSpellSize() { return 4; }
+        public virtual int GetPetAutoSpellSize()
+        {
+            return SharedConst.MaxSpellCharm;
+        }
 
         public virtual int GetPetAutoSpellOnPos(byte pos)
         {
