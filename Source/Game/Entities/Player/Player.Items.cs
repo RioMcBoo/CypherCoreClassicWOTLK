@@ -2914,6 +2914,8 @@ namespace Game.Entities
                 return false;
             }
 
+            UpdateCriteria(CriteriaType.BuyItemsFromVendors, 1);
+
             if (crItem.maxcount != 0) // bought
             {
                 if (pProto.GetQuality() > ItemQuality.Epic || (pProto.GetQuality() == ItemQuality.Epic && pProto.GetItemLevel() >= GuildConst.MinNewsItemLevel))
@@ -2923,7 +2925,6 @@ namespace Game.Entities
                         guild.AddGuildNews(GuildNews.ItemPurchased, GetGUID(), 0, item);
                 }
 
-                UpdateCriteria(CriteriaType.BuyItemsFromVendors, 1);
                 return true;
             }
 
