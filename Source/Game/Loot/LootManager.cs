@@ -489,7 +489,7 @@ namespace Game.Loots
         public byte groupid;
         public byte mincount;               // mincount for drop items
         public byte maxcount;               // max drop count for the item mincount or Ref multiplicator
-        public List<Condition> conditions;  // additional loot condition
+        public ConditionsReference conditions;  // additional loot condition
 
         public LootStoreItem(int _itemid, int _reference, float _chance, bool _needs_quest, LootModes _lootmode, byte _groupid, byte _mincount, byte _maxcount)
         {
@@ -501,7 +501,6 @@ namespace Game.Loots
             groupid = _groupid;
             mincount = _mincount;
             maxcount = _maxcount;
-            conditions = new List<Condition>();
         }
 
         public bool Roll(bool rate)
@@ -580,7 +579,7 @@ namespace Game.Loots
     }
 
     public class LootStore
-    {        
+    {
         public LootStore(string name, string entryName, bool ratesAllowed = true)
         {
             m_name = name;
@@ -613,12 +612,12 @@ namespace Game.Loots
         {
             // all still listed ids isn't referenced
             foreach (var id in lootIdSet)
-                Log.outError( LogFilter.Sql, "Table '{0}' entry {1} isn't {2} and not referenced from loot, and then useless.", GetName(), id, GetEntryName());
+                Log.outError(LogFilter.Sql, "Table '{0}' entry {1} isn't {2} and not referenced from loot, and then useless.", GetName(), id, GetEntryName());
         }
 
         public void ReportNonExistingId(int lootId, int ownerId)
         {
-            Log.outError( LogFilter.Sql, "Table '{0}' Entry {1} does not exist but it is used by {2} {3}", GetName(), lootId, GetEntryName(), ownerId);
+            Log.outError(LogFilter.Sql, "Table '{0}' Entry {1} does not exist but it is used by {2} {3}", GetName(), lootId, GetEntryName(), ownerId);
         }
 
         public bool HaveLootFor(int loot_id) { return m_LootTemplates.LookupByKey(loot_id) != null; }
@@ -651,15 +650,6 @@ namespace Game.Loots
                 return null;
 
             return tab;
-        }
-
-        public void ResetConditions()
-        {
-            foreach (var pair in m_LootTemplates)
-            {
-                List<Condition> empty = new();
-                pair.Value.CopyConditions(empty);
-            }
         }
 
         public LootTemplate GetLootForConditionFill(int loot_id)
@@ -933,14 +923,6 @@ namespace Game.Loots
             return false;
         }
 
-        public void CopyConditions(List<Condition> conditions)
-        {
-            foreach (var i in Entries)
-                i.conditions.Clear();
-
-            foreach (var group in Groups.Values)
-                group.CopyConditions(conditions);
-        }
         public void CopyConditions(LootItem li)
         {
             // Copies the conditions list from a template item to a LootItem
@@ -1049,21 +1031,16 @@ namespace Game.Loots
             foreach (var group in Groups.Values)
                 group.CheckLootRefs(store, ref_set);
         }
-        public bool AddConditionItem(Condition cond)
-        {
-            if (cond == null || !cond.IsLoaded())//should never happen, checked at loading
-            {
-                Log.outError(LogFilter.Loot, "LootTemplate.addConditionItem: condition is null");
-                return false;
-            }
 
+        public bool LinkConditions(ConditionId id, ConditionsReference reference)
+        {
             if (!Entries.Empty())
             {
-                foreach (var i in Entries)
+                foreach (var item in Entries)
                 {
-                    if (i.itemid == cond.SourceEntry)
+                    if (item.itemid == id.SourceEntry)
                     {
-                        i.conditions.Add(cond);
+                        item.conditions = reference;
                         return true;
                     }
                 }
@@ -1071,7 +1048,7 @@ namespace Game.Loots
 
             if (!Groups.Empty())
             {
-                foreach (var group in Groups.Values)
+                foreach (var (_, group) in Groups)
                 {
                     if (group == null)
                         continue;
@@ -1079,11 +1056,11 @@ namespace Game.Loots
                     LootStoreItemList itemList = group.GetExplicitlyChancedItemList();
                     if (!itemList.Empty())
                     {
-                        foreach (var i in itemList)
+                        foreach (var item in itemList)
                         {
-                            if (i.itemid == cond.SourceEntry)
+                            if (item.itemid == id.SourceEntry)
                             {
-                                i.conditions.Add(cond);
+                                item.conditions = reference;
                                 return true;
                             }
                         }
@@ -1092,11 +1069,11 @@ namespace Game.Loots
                     itemList = group.GetEqualChancedItemList();
                     if (!itemList.Empty())
                     {
-                        foreach (var i in itemList)
+                        foreach (var item in itemList)
                         {
-                            if (i.itemid == cond.SourceEntry)
+                            if (item.itemid == id.SourceEntry)
                             {
-                                i.conditions.Add(cond);
+                                item.conditions = reference;
                                 return true;
                             }
                         }
@@ -1217,14 +1194,6 @@ namespace Game.Loots
             }
             public LootStoreItemList GetExplicitlyChancedItemList() { return ExplicitlyChanced; }
             public LootStoreItemList GetEqualChancedItemList() { return EqualChanced; }
-            public void CopyConditions(List<Condition> conditions)
-            {
-                foreach (var i in ExplicitlyChanced)
-                    i.conditions.Clear();
-
-                foreach (var i in EqualChanced)
-                    i.conditions.Clear();
-            }
 
             LootStoreItemList ExplicitlyChanced = new();                // Entries with chances defined in DB
             LootStoreItemList EqualChanced = new();                     // Zero chances - every entry takes the same Chance

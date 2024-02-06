@@ -934,7 +934,7 @@ namespace Game
 
                 if (conditionObject != null)
                 {
-                    if (!Global.ConditionMgr.IsObjectMeetToConditions(conditionSource, data.Conditions))
+                    if (!data.Conditions.Meets(conditionSource))
                         continue;
 
                     if (entry.Loc.GetMapId() == mapEntry.ParentMapID && !conditionObject.GetPhaseShift().HasVisibleMapId(entry.Loc.GetMapId()))
@@ -943,7 +943,7 @@ namespace Game
                 else if (team != 0)
                 {
                     bool teamConditionMet = true;
-                    foreach (Condition cond in data.Conditions)
+                    foreach (Condition cond in data.Conditions.Conditions)
                     {
                         if (cond.ConditionType != ConditionTypes.Team)
                             continue;
@@ -11998,7 +11998,7 @@ namespace Game
     public class GraveyardData
     {
         public int SafeLocId;
-        public List<Condition> Conditions = new();
+        public ConditionsReference Conditions;
     }
 
     public class QuestPOIBlobData

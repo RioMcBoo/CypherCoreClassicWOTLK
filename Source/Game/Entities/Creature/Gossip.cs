@@ -793,7 +793,7 @@ namespace Game.Misc
         public int BoxBroadcastTextId;
         public int? SpellID;
         public int? OverrideIconID;
-        public List<Condition> Conditions = new();
+        public ConditionsReference Conditions;
     }
 
     public class GossipMenuAddon
@@ -821,6 +821,6 @@ namespace Game.Misc
     {
         public int MenuId;
         public int TextId;
-        public List<Condition> Conditions = new();
+        public ConditionsReference Conditions;
     }
 }

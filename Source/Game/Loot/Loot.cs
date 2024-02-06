@@ -41,10 +41,10 @@ namespace Game.Loots
             return AllowedForPlayer(player, loot, itemid, needs_quest, follow_loot_rules, false, conditions);
         }
 
-        public static bool AllowedForPlayer(Player player, Loot loot, int itemid, bool needs_quest, bool follow_loot_rules, bool strictUsabilityCheck, List<Condition> conditions)
+        public static bool AllowedForPlayer(Player player, Loot loot, int itemid, bool needs_quest, bool follow_loot_rules, bool strictUsabilityCheck, ConditionsReference conditions)
         {
             // DB conditions check
-            if (!Global.ConditionMgr.IsObjectMeetToConditions(player, conditions))
+            if (!conditions.Meets(player))
                 return false;
 
             ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(itemid);
@@ -178,7 +178,7 @@ namespace Game.Loots
         public int LootListId;
         public ItemRandomProperties randomProperties;
         public ItemContext context;
-        public List<Condition> conditions = new();                               // additional loot condition
+        public ConditionsReference conditions;                               // additional loot condition
         public List<ObjectGuid> allowedGUIDs = new();
         public ObjectGuid rollWinnerGUID;                                   // Stores the guid of person who won loot, if his bags are full only he can see the item in loot list!
         public byte count;
@@ -992,7 +992,7 @@ namespace Game.Loots
                 return true;
 
             foreach (LootItem item in items)
-                if (!item.is_looted && item.follow_loot_rules && !item.freeforall && item.conditions.Empty())
+                if (!item.is_looted && item.follow_loot_rules && !item.freeforall && item.conditions.IsEmpty())
                     return true;
 
             return false;

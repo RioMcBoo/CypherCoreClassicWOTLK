@@ -2429,7 +2429,7 @@ namespace Game
             {
                 var gYard = range[i];
                 ConditionSourceInfo conditionSource = new(_player);
-                if (!Global.ConditionMgr.IsObjectMeetToConditions(conditionSource, gYard.Conditions))
+                if (!gYard.Conditions.Meets(conditionSource))
                     continue;
 
                 graveyardIds.Add(i);
