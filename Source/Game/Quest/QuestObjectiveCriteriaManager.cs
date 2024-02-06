@@ -292,6 +292,10 @@ namespace Game
             return Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(type);
         }
 
+        public bool RequiredAchievementSatisfied(int achievementId)
+        {
+            return _owner.HasAchieved(achievementId);
+        }
 
         Player _owner;
         List<int> _completedObjectives = new();
