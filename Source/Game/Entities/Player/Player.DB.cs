@@ -4392,7 +4392,7 @@ namespace Game.Entities
                     stmt.AddValue(0, guid);
                     trans.Append(stmt);
 
-                    Global.CharacterCacheStorage.UpdateCharacterInfoDeleted(playerGuid, true);
+                    Global.CharacterCacheStorage.UpdateCharacterInfoDeleted(playerGuid, true, "");
                     break;
                 }
                 default:
