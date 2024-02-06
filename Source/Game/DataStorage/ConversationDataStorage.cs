@@ -75,14 +75,14 @@ namespace Game.DataStorage
                         bool noActorObject = actorResult.Read<byte>(6) == 1;
                         bool activePlayerObject = actorResult.Read<byte>(7) == 1;
 
-                        if (activePlayerObject)
-                            actor.ActivePlayerTemplate = new();
-                        else if (noActorObject)
-                            actor.NoObjectTemplate = new();
-                        else if (data.SpawnId != 0)
-                            actor.WorldObjectTemplate = new();
-                        else
-                            actor.TalkingHeadTemplate = new();
+                    if (activePlayerObject)
+                        actor.ActivePlayerTemplate = new();
+                    else if (noActorObject)
+                        actor.NoObjectTemplate = new();
+                    else if (data.SpawnId != 0 || data.CreatureId == 0) // @TODO: remove CreatureId check when actor flags are implemented
+                        actor.WorldObjectTemplate = new();
+                    else
+                        actor.TalkingHeadTemplate = new();
 
                         bool valid = data.Invoke(actor);
                         if (!valid)
