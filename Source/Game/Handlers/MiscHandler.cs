@@ -445,7 +445,26 @@ namespace Game
             if (convo != null)
                 Global.ScriptMgr.OnConversationLineStarted(convo, conversationLineStarted.LineID, _player);
         }
-        
+
+        [WorldPacketHandler(ClientOpcodes.QueryCountdownTimer, Processing = PacketProcessing.Inplace)]
+        void HandleQueryCountdownTimer(QueryCountdownTimer queryCountdownTimer)
+        {
+            Group group = _player.GetGroup();
+            if (group == null)
+                return;
+
+            CountdownInfo info = group.GetCountdownInfo(queryCountdownTimer.TimerType);
+            if (info == null)
+                return;
+
+            StartTimer startTimer = new();
+            startTimer.Type = queryCountdownTimer.TimerType;
+            startTimer.TimeLeft = info.GetTimeLeft();
+            startTimer.TotalTime = info.GetTotalTime();
+
+            _player.SendPacket(startTimer);
+        }
+
         [WorldPacketHandler(ClientOpcodes.ChatUnregisterAllAddonPrefixes)]
         void HandleUnregisterAllAddonPrefixes(ChatUnregisterAllAddonPrefixes packet)
         {

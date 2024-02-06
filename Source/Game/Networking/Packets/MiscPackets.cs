@@ -782,7 +782,7 @@ namespace Game.Networking.Packets
     {
         public EnableBarberShop() : base(ServerOpcodes.EnableBarberShop) { }
 
-        public override void Write() 
+        public override void Write()
         {
             _worldPacket.WriteUInt8(CustomizationScope);
         }
@@ -1143,9 +1143,9 @@ namespace Game.Networking.Packets
             Enable = _worldPacket.HasBit();
         }
 
-       public bool Enable;
+        public bool Enable;
     }
-    
+
     class AccountHeirloomUpdate : ServerPacket
     {
         public AccountHeirloomUpdate() : base(ServerOpcodes.AccountHeirloomUpdate, ConnectionType.Instance) { }
@@ -1341,14 +1341,26 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(TotalTime);
-            _worldPacket.WriteUInt64(TimeLeft);
+            _worldPacket.WriteInt64(TotalTime);
+            _worldPacket.WriteInt64(TimeLeft);
             _worldPacket.WriteInt32((int)Type);
         }
 
-        public ulong TotalTime;
-        public ulong TimeLeft;
-        public TimerType Type;
+        public long TotalTime;
+        public long TimeLeft;
+        public CountdownTimerType Type;
+    }
+
+    class QueryCountdownTimer : ClientPacket
+    {
+        public CountdownTimerType TimerType;
+
+        public QueryCountdownTimer(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TimerType = (CountdownTimerType)_worldPacket.ReadInt32();
+        }
     }
 
     class ConversationLineStarted : ClientPacket
