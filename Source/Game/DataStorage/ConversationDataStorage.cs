@@ -1,11 +1,10 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
 using Framework.Database;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Game.Entities;
 
 namespace Game.DataStorage
 {
@@ -120,18 +119,19 @@ namespace Game.DataStorage
             }
 
             {
-                using var templateResult = DB.World.Query("SELECT Id, FirstLineId, TextureKitId, ScriptName FROM conversation_template");
+                using var templateResult = DB.World.Query("SELECT Id, FirstLineId, TextureKitId, Flags, ScriptName FROM conversation_template");
                 if (!templateResult.IsEmpty())
                 {
                     uint oldMSTime = Time.GetMSTime();
 
-                    do
-                    {
-                        ConversationTemplate conversationTemplate = new();
-                        conversationTemplate.Id = templateResult.Read<int>(0);
-                        conversationTemplate.FirstLineId = templateResult.Read<int>(1);
-                        conversationTemplate.TextureKitId = templateResult.Read<int>(2);
-                        conversationTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templateResult.Read<string>(3));
+                do
+                {
+                    ConversationTemplate conversationTemplate = new();
+                    conversationTemplate.Id = templateResult.Read<int>(0);
+                    conversationTemplate.FirstLineId = templateResult.Read<int>(1);
+                    conversationTemplate.TextureKitId = templateResult.Read<int>(2);
+                    conversationTemplate.Flags = (ConversationFlags)templateResult.Read<byte>(3);
+                    conversationTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templateResult.Read<string>(4));
 
                         conversationTemplate.Actors = actorsByConversation.TryGetValue(conversationTemplate.Id, out var actors) ? actors.ToList() : new();
 
@@ -333,6 +333,7 @@ namespace Game.DataStorage
         public int Id;
         public int FirstLineId;     // Link to ConversationLine.db2
         public int TextureKitId;    // Background texture
+        public ConversationFlags Flags = ConversationFlags.None;
         public int ScriptId;
 
         public List<ConversationActorTemplate> Actors = new();
