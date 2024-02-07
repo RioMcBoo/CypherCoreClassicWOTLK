@@ -20,7 +20,11 @@ namespace Game
 {
     public sealed class ConditionManager : Singleton<ConditionManager>
     {
-        ConditionManager() { }
+        ConditionManager()
+        {
+            for (ConditionSourceType i = 0; i < ConditionSourceType.Max; ++i)
+                ConditionStorage[i] = new();
+        }
 
         public GridMapTypeMask GetSearcherTypeMaskForConditionList(List<Condition> conditions)
         {
@@ -42,7 +46,7 @@ namespace Game
                 if (i.ReferenceId != 0) // handle reference
                 {
                     var refe = ConditionStorage[ConditionSourceType.ReferenceCondition].LookupByKey(new ConditionId(i.ReferenceId, 0, 0));
-                    Cypher.Assert(refe.Empty(), "ConditionMgr.GetSearcherTypeMaskForConditionList - incorrect reference");
+                    Cypher.Assert(refe != null, "ConditionMgr.GetSearcherTypeMaskForConditionList - incorrect reference");
                     elseGroupSearcherTypeMasks[i.ElseGroup] &= GetSearcherTypeMaskForConditionList(refe);
                 }
                 else // handle normal condition
@@ -78,7 +82,7 @@ namespace Game
                     if (condition.ReferenceId != 0)//handle reference
                     {
                         var refe = ConditionStorage[ConditionSourceType.ReferenceCondition].LookupByKey(new ConditionId(condition.ReferenceId, 0, 0));
-                        if (!refe.Empty())
+                        if (refe != null)
                         {
                             if (!IsObjectMeetToConditionList(sourceInfo, refe))
                                 elseGroupStore[condition.ElseGroup] = false;
@@ -118,7 +122,7 @@ namespace Game
 
         public bool IsObjectMeetToConditions(ConditionSourceInfo sourceInfo, List<Condition> conditions)
         {
-            if (conditions.Empty())
+            if (conditions == null)
                 return true;
 
             Log.outDebug(LogFilter.Condition, "ConditionMgr.IsObjectMeetToConditions");
@@ -189,7 +193,7 @@ namespace Game
             if (sourceType > ConditionSourceType.None && sourceType < ConditionSourceType.Max)
             {
                 var conditions = ConditionStorage[sourceType].LookupByKey(new ConditionId(0, (int)entry, 0));
-                if (!conditions.Empty())
+                if (conditions != null)
                 {
                     Log.outDebug(LogFilter.Condition, "GetConditionsForNotGroupedEntry: found conditions for Type {0} and entry {1}", sourceType, entry);
                     return IsObjectMeetToConditions(sourceInfo, conditions);
@@ -222,7 +226,7 @@ namespace Game
         public bool IsObjectMeetingSpellClickConditions(int creatureId, int spellId, WorldObject clicker, WorldObject target)
         {
             var conditions = ConditionStorage[ConditionSourceType.SpellClickEvent].LookupByKey(new ConditionId(creatureId, (int)spellId, 0));
-            if (!conditions.Empty())
+            if (conditions != null)
             {
                 Log.outDebug(LogFilter.Condition, "GetConditionsForSpellClickEvent: found conditions for SpellClickEvent entry {0} spell {1}", creatureId, spellId);
                 ConditionSourceInfo sourceInfo = new(clicker, target);
@@ -259,7 +263,7 @@ namespace Game
         public bool IsObjectMeetingSmartEventConditions(long entryOrGuid, int eventId, SmartScriptType sourceType, Unit unit, WorldObject baseObject)
         {
             var conditions = ConditionStorage[ConditionSourceType.SmartEvent].LookupByKey(new ConditionId(eventId + 1, (int)entryOrGuid, (int)sourceType));
-            if (!conditions.Empty())
+            if (conditions != null)
             {
                 Log.outDebug(LogFilter.Condition, $"GetConditionsForSmartEvent: found conditions for Smart Event entry or guid {entryOrGuid} eventId {eventId}");
                 ConditionSourceInfo sourceInfo = new(unit, baseObject);
@@ -272,7 +276,7 @@ namespace Game
         public bool IsObjectMeetingVendorItemConditions(int creatureId, int itemId, Player player, Creature vendor)
         {
             var conditions = ConditionStorage[ConditionSourceType.NpcVendor].LookupByKey(new ConditionId(creatureId, (int)itemId, 0));
-            if (!conditions.Empty())
+            if (conditions != null)
             {
                 Log.outDebug(LogFilter.Condition, "GetConditionsForNpcVendor: found conditions for creature entry {0} item {1}", creatureId, itemId);
                 ConditionSourceInfo sourceInfo = new(player, vendor);
@@ -295,7 +299,7 @@ namespace Game
         public bool IsObjectMeetingTrainerSpellConditions(int trainerId, int spellId, Player player)
         {
             var conditions = ConditionStorage[ConditionSourceType.NpcVendor].LookupByKey(new ConditionId(trainerId, spellId, 0));
-            if (!conditions.Empty())
+            if (conditions != null)
             {
                 Log.outDebug(LogFilter.Condition, $"GetConditionsForTrainerSpell: found conditions for trainer id {trainerId} spell {spellId}");
                 return IsObjectMeetToConditions(player, conditions);
@@ -307,7 +311,7 @@ namespace Game
         public bool IsObjectMeetingVisibilityByObjectIdConditions(TypeId objectType, int entry, WorldObject seer)
         {
             var conditions = ConditionStorage[ConditionSourceType.ObjectIdVisibility].LookupByKey(new ConditionId((int)objectType, entry, 0));
-            if (!conditions.Empty())
+            if (conditions != null)
             {
                 Log.outDebug(LogFilter.Condition, $"IsObjectMeetingVisibilityByObjectIdConditions: found conditions for objectType {objectType} entry {entry}");
                 return IsObjectMeetToConditions(seer, conditions);
@@ -329,8 +333,8 @@ namespace Game
                 Global.ObjectMgr.UnloadPhaseConditions();
             }
 
-            using var result = DB.World.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, " +
-                " ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ErrorTextId, ScriptName FROM conditions");
+            using SQLResult result = DB.World.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, " +
+                "ConditionValue1, ConditionValue2, ConditionValue3, ConditionStringValue1, NegativeCondition, ErrorType, ErrorTextId, ScriptName FROM conditions");
 
             if (result.IsEmpty())
             {
