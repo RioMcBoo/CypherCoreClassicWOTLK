@@ -1111,7 +1111,7 @@ namespace Game.Entities
             data.WriteInt32(MaxItemLevel);
             data.WriteInt32(WildBattlePetLevel);
             data.WriteUInt32(BattlePetCompanionNameTimestamp);
-            data.WriteInt32(InteractSpellID);
+            data.WriteInt32(GetViewerDependentInteractSpellId(this, owner, receiver));
             data.WriteInt32(ScaleDuration);
             data.WriteInt32(LooksLikeMountID);
             data.WriteInt32(LooksLikeCreatureID);
@@ -1622,7 +1622,7 @@ namespace Game.Entities
                 }
                 if (changesMask[101])
                 {
-                    data.WriteInt32(InteractSpellID);
+                    data.WriteInt32(GetViewerDependentInteractSpellId(this, owner, receiver));
                 }
                 if (changesMask[102])
                 {
@@ -2030,6 +2030,29 @@ namespace Game.Entities
             }
 
             return pvpFlags;
+        }
+
+        int GetViewerDependentInteractSpellId(UnitData unitData, Unit unit, Player receiver)
+        {
+            int interactSpellId = unitData.InteractSpellID;
+            if (unitData.NpcFlags[0].HasFlag((uint)NPCFlags1.SpellClick) && interactSpellId == 0)
+            {
+                // this field is not set if there are multiple available spellclick spells
+                var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(unit.GetEntry());
+                foreach (var spellClickInfo in clickBounds)
+                {
+                    if (!spellClickInfo.IsFitToRequirements(receiver, unit))
+                        continue;
+
+                    if (!Global.ConditionMgr.IsObjectMeetingSpellClickConditions(unit.GetEntry(), spellClickInfo.spellId, receiver, unit))
+                        continue;
+
+                    interactSpellId = spellClickInfo.spellId;
+                    break;
+                }
+
+            }
+            return interactSpellId;
         }
     }
 
