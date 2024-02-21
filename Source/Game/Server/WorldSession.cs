@@ -25,7 +25,7 @@ namespace Game
 {
     public partial class WorldSession : IDisposable
     {
-        public WorldSession(int id, string name, int battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, Locale locale, int recruiter, bool isARecruiter)
+        public WorldSession(int id, string name, int battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, TimeSpan timezoneOffset, Locale locale, int recruiter, bool isARecruiter)
         {
             m_muteTime = mute_time;
             AntiDOS = new DosProtection(this);
@@ -39,6 +39,7 @@ namespace Game
             _os = os;
             m_sessionDbcLocale = Global.WorldMgr.GetAvailableDbcLocale(locale);
             m_sessionDbLocaleIndex = locale;
+            _timezoneOffset = timezoneOffset;
             recruiterId = recruiter;
             isRecruiter = isARecruiter;
             expireTime = 60000; // 1 min after socket loss, session is deleted
@@ -896,6 +897,8 @@ namespace Game
         public Locale GetSessionDbcLocale() { return m_sessionDbcLocale; }
         public Locale GetSessionDbLocaleIndex() { return m_sessionDbLocaleIndex; }
 
+        public TimeSpan GetTimezoneOffset() { return _timezoneOffset; }
+
         public uint GetLatency() { return m_latency; }
         public void SetLatency(uint latency) { m_latency = latency; }
         public void ResetTimeOutTime(bool onlyActive)
@@ -955,6 +958,7 @@ namespace Game
         bool m_playerSave;
         Locale m_sessionDbcLocale;
         Locale m_sessionDbLocaleIndex;
+        TimeSpan _timezoneOffset;
         uint m_latency;
         AccountData[] _accountData = new AccountData[(int)AccountDataTypes.Max];
         uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
@@ -1140,7 +1144,7 @@ namespace Game
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.Mounts, stmt);
 
-            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetCharacterCountsByAccountId);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_ACCOUNT_ID);
             stmt.AddValue(0, accountId);
             SetQuery(AccountInfoQueryLoad.GlobalRealmCharacterCounts, stmt);
 

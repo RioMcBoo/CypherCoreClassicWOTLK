@@ -12,10 +12,11 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace BNetServer.Networking
 {
-    partial class Session : SSLSocket
+    public partial class Session : SSLSocket
     {
         AccountInfo accountInfo;
         GameAccountInfo gameAccountInfo;
@@ -40,9 +41,9 @@ namespace BNetServer.Networking
             responseCallbacks = new Dictionary<uint, Action<CodedInputStream>>();
         }
 
-        public override void Accept()
+        public override void Start()
         {
-            string ipAddress = GetRemoteIpEndPoint().ToString();
+            string ipAddress = GetRemoteIpAddress().ToString();
             Log.outInfo(LogFilter.Network, $"{GetClientInfo()} Connection Accepted.");
 
             // Verify that this IP is not in the ip_banned table
@@ -50,9 +51,9 @@ namespace BNetServer.Networking
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_INFO);
             stmt.AddValue(0, ipAddress);
-            stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpEndPoint().Address.GetAddressBytes(), 0));
+            stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpAddress().GetAddressBytes(), 0));
 
-            queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(async result =>            
+            queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(async result =>
             {
                 if (!result.IsEmpty())
                 {
@@ -77,6 +78,18 @@ namespace BNetServer.Networking
 
                 await AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
             }));
+        }
+
+        public async override Task HandshakeHandler(Exception ex = null)
+        {
+            if (ex != null)
+            {
+                Log.outError(LogFilter.Session, $"{GetClientInfo()} SSL Handshake failed {ex.Message}");
+                CloseSocket();
+                return;
+            }
+
+            await AsyncRead();
         }
 
         public override bool Update()
@@ -104,7 +117,7 @@ namespace BNetServer.Networking
                 header.MergeFrom(data, readPos, headerLength);
                 readPos += headerLength;
 
-                var stream = new CodedInputStream(data, readPos, (int)header.Size);                
+                var stream = new CodedInputStream(data, readPos, (int)header.Size);
                 readPos += (int)header.Size;
 
                 if (header.ServiceId != 0xFE && header.ServiceHash != 0)
@@ -182,7 +195,7 @@ namespace BNetServer.Networking
         {
             var size = (ushort)header.CalculateSize();
             byte[] bytes = new byte[2];
-            bytes[0] = (byte)((size >> 8) & 0xff);
+            bytes[0] = (byte)(size >> 8 & 0xff);
             bytes[1] = (byte)(size & 0xff);
 
             var headerSizeBytes = BitConverter.GetBytes((ushort)header.CalculateSize());
@@ -193,7 +206,7 @@ namespace BNetServer.Networking
 
         public string GetClientInfo()
         {
-            string stream = '[' + GetRemoteIpEndPoint().ToString();
+            string stream = '[' + GetRemoteIpAddress().ToString();
             if (accountInfo != null && !accountInfo.Login.IsEmpty())
                 stream += ", Account: " + accountInfo.Login;
 
@@ -207,8 +220,8 @@ namespace BNetServer.Networking
     }
 
     public class AccountInfo
-    {   
-        public uint Id;
+    {
+        public int Id;
         public string Login;
         public bool IsLockedToIP;
         public string LockCountry;
@@ -217,25 +230,25 @@ namespace BNetServer.Networking
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
 
-        public Dictionary<uint, GameAccountInfo> GameAccounts;
+        public Dictionary<int, GameAccountInfo> GameAccounts;
 
         public AccountInfo(SQLResult result)
         {
-            Id = result.Read<uint>(0);
+            Id = result.Read<int>(0);
             Login = result.Read<string>(1);
             IsLockedToIP = result.Read<bool>(2);
             LockCountry = result.Read<string>(3);
             LastIP = result.Read<string>(4);
             LoginTicketExpiry = result.Read<uint>(5);
-            IsBanned = result.Read<ulong>(6) != 0;
-            IsPermanenetlyBanned = result.Read<ulong>(7) != 0;
+            IsBanned = result.Read<long>(6) != 0;
+            IsPermanenetlyBanned = result.Read<long>(7) != 0;
 
-            GameAccounts = new Dictionary<uint, GameAccountInfo>();
+            GameAccounts = new Dictionary<int, GameAccountInfo>();
             const int GameAccountFieldsOffset = 8;
             do
             {
                 var account = new GameAccountInfo(result.GetFields(), GameAccountFieldsOffset);
-                GameAccounts[result.Read<uint>(GameAccountFieldsOffset)] = account;
+                GameAccounts[result.Read<int>(GameAccountFieldsOffset)] = account;
 
             } while (result.NextRow());
         }
@@ -243,7 +256,7 @@ namespace BNetServer.Networking
 
     public class GameAccountInfo
     {
-        public uint Id;
+        public int Id;
         public string Name;
         public string DisplayName;
         public uint UnbanDate;
@@ -251,15 +264,15 @@ namespace BNetServer.Networking
         public bool IsPermanenetlyBanned;
         public AccountTypes SecurityLevel;
 
-        public Dictionary<uint, byte> CharacterCounts;
+        public Dictionary<int, byte> CharacterCounts;
         public Dictionary<string, LastPlayedCharacterInfo> LastPlayedCharacters;
 
         public GameAccountInfo(SQLFields fields, int startColumn)
         {
-            Id = fields.Read<uint>(startColumn + 0);
+            Id = fields.Read<int>(startColumn + 0);
             Name = fields.Read<string>(startColumn + 1);
             UnbanDate = fields.Read<uint>(startColumn + 2);
-            IsPermanenetlyBanned = fields.Read<uint>(startColumn + 3) != 0;
+            IsPermanenetlyBanned = fields.Read<int>(startColumn + 3) != 0;
             IsBanned = IsPermanenetlyBanned || UnbanDate > Time.UnixTime;
             SecurityLevel = (AccountTypes)fields.Read<byte>(startColumn + 4);
 
@@ -269,7 +282,7 @@ namespace BNetServer.Networking
             else
                 DisplayName = Name;
 
-            CharacterCounts = new Dictionary<uint, byte>();
+            CharacterCounts = new Dictionary<int, byte>();
             LastPlayedCharacters = new Dictionary<string, LastPlayedCharacterInfo>();
         }
     }
@@ -278,7 +291,7 @@ namespace BNetServer.Networking
     {
         public RealmId RealmId;
         public string CharacterName;
-        public ulong CharacterGUID;
+        public long CharacterGUID;
         public uint LastPlayedTime;
     }
 }
