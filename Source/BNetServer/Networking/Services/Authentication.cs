@@ -4,11 +4,13 @@
 using Bgs.Protocol;
 using Bgs.Protocol.Authentication.V1;
 using Bgs.Protocol.Challenge.V1;
+using Framework;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Realm;
 using Google.Protobuf;
 using System;
+using System.Text.Json;
 
 namespace BNetServer.Networking
 {
@@ -39,11 +41,23 @@ namespace BNetServer.Networking
             os = logonRequest.Platform;
             build = (uint)logonRequest.ApplicationVersion;
 
-            var hostname = Global.LoginServiceMgr.GetHostnameForClient(GetRemoteIpEndPoint());
+            _timezoneOffset = TimeSpan.Zero;
+            if (logonRequest.HasDeviceId)
+            {
+                var doc = JsonSerializer.Deserialize<JsonDocument>(logonRequest.DeviceId);
+                if (doc != null)
+                {
+                    var itr = doc.RootElement.GetProperty("UTCO");
+                    {
+                        if (itr.TryGetUInt32(out uint value))
+                            _timezoneOffset = Timezone.GetOffsetByHash(value);
+                    }
+                }
+            }
 
             ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";
-            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{Global.LoginServiceMgr.GetHostnameForClient(GetRemoteIpEndPoint())}:{Global.LoginServiceMgr.GetPort()}/bnetserver/login/");
+            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{Global.LoginService.GetHostnameForClient(GetRemoteIpAddress())}:{Global.LoginService.GetPort()}/bnetserver/login/");
 
             SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;
