@@ -4192,6 +4192,8 @@ namespace Game.Spells
             spellExecuteLog.LogData.Initialize(this);
 
             m_caster.SendCombatLogMessage(spellExecuteLog);
+
+            _executeLogEffects.Clear();
         }
 
         public SpellLogEffect GetExecuteLogEffect(SpellEffectName effect)
