@@ -658,11 +658,6 @@ namespace Game.Entities
         {
             AddQuest(quest, questGiver);
 
-            foreach (QuestObjective obj in quest.Objectives)
-                if (obj.Type == QuestObjectiveType.CriteriaTree)
-                    if (m_questObjectiveCriteriaMgr.HasCompletedObjective(obj))
-                        KillCreditCriteriaTreeObjective(obj);
-
             if (CanCompleteQuest(quest.Id))
                 CompleteQuest(quest.Id);
 
@@ -2183,22 +2178,27 @@ namespace Game.Entities
         public void AdjustQuestObjectiveProgress(Quest quest)
         {
             // adjust progress of quest objectives that rely on external counters, like items
-            if (quest.HasQuestObjectiveType(QuestObjectiveType.Item))
+            foreach (QuestObjective obj in quest.Objectives)
             {
-                foreach (QuestObjective obj in quest.Objectives)
+                switch (obj.Type)
                 {
-                    if (obj.Type == QuestObjectiveType.Item && !obj.Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem))
-                    {
-                        int reqItemCount = obj.Amount;
-                        int curItemCount = GetItemCount(obj.ObjectID, true);
-                        SetQuestObjectiveData(obj, Math.Min(curItemCount, reqItemCount));
-                    }
-                    else if (obj.Type == QuestObjectiveType.HaveCurrency)
-                    {
+                    case QuestObjectiveType.Item:
+                        if (!obj.Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem))
+                        {
+                            int reqItemCount = obj.Amount;
+                            int curItemCount = GetItemCount(obj.ObjectID, true);
+                            SetQuestObjectiveData(obj, Math.Min(curItemCount, reqItemCount));
+                        }
+                        break;
+                    case QuestObjectiveType.Currency:
                         int reqCurrencyCount = obj.Amount;
                         int curCurrencyCount = GetCurrencyQuantity(obj.ObjectID);
                         SetQuestObjectiveData(obj, Math.Min(reqCurrencyCount, curCurrencyCount));
-                    }
+                        break;
+                    case QuestObjectiveType.CriteriaTree:
+                        if (m_questObjectiveCriteriaMgr.HasCompletedObjective(obj))
+                            SetQuestObjectiveData(obj, 1);
+                        break;
                 }
             }
         }
