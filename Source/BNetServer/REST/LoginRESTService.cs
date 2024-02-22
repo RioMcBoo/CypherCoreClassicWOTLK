@@ -543,7 +543,7 @@ namespace BNetServer.REST
             {
                 int id = result.Read<int>(0);
 
-                byte[] salt = RandomHelper.GetRandomBytes(SRP6.SaltLength);
+                byte[] salt = new byte[0].GenerateRandomKey(SRP6.SaltLength);
                 BigInteger x = new BigInteger(SHA256.HashData(salt.Combine(result.Read<string>(1).ToByteArray(true))), true);
                 byte[] verifier = BigInteger.ModPow(BnetSRP6v1Base.g, x, BnetSRP6v1Base.N).ToByteArray(true, true);
 
