@@ -288,7 +288,7 @@ namespace Game.Networking.Packets
         public bool Disqualified;
     }
 
-    public struct TraitInspectInfo
+    public class TraitInspectInfo
     {
         public void Write(WorldPacket data)
         {
@@ -299,7 +299,7 @@ namespace Game.Networking.Packets
 
         public int Level;
         public ChrSpecialization ChrSpecializationID;
-        public TraitConfigPacket Config;
+        public TraitConfigPacket Config = new();
     }
 
     public struct AzeriteEssenceData
