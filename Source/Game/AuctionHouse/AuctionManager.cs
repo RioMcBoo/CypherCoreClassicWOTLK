@@ -1558,7 +1558,8 @@ namespace Game
             {
                 WowTime eta = GameTime.GetUtcWowTime();
                 eta += TimeSpan.FromSeconds(WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay));
-                eta += owner.GetSession().GetTimezoneOffset();
+                if (owner != null)
+                    eta += owner.GetSession().GetTimezoneOffset();
 
                 new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Invoice, auction),
                     Global.AuctionHouseMgr.BuildAuctionInvoiceMailBody(auction.Bidder, auction.BidAmount, auction.BuyoutOrUnitPrice, (uint)auction.Deposit,
