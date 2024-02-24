@@ -584,15 +584,10 @@ namespace Game.Movement
             if (enemy == null)
                 return;
 
-            if (_owner.IsCreature())
-            {
-                if (time != TimeSpan.Zero)
-                    Add(new TimedFleeingMovementGenerator(enemy.GetGUID(), time));
-                else
-                    Add(new FleeingMovementGenerator<Creature>(enemy.GetGUID()));
-            }
+            if (_owner.IsCreature() && time > TimeSpan.Zero)
+                Add(new TimedFleeingMovementGenerator(enemy.GetGUID(), time));
             else
-                Add(new FleeingMovementGenerator<Player>(enemy.GetGUID()));
+                Add(new FleeingMovementGenerator(enemy.GetGUID()));
         }
 
         public void MovePoint(int id, Position pos, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
@@ -849,7 +844,7 @@ namespace Game.Movement
                     Vector3 point = new();
                     point.X = (float)(x + radius * Math.Cos(angle));
                     point.Y = (float)(y + radius * Math.Sin(angle));
-          
+
                     if (_owner.IsFlying())
                         point.Z = z;
                     else
@@ -857,7 +852,7 @@ namespace Game.Movement
 
                     init.Path().Add(point);
                 }
-                
+
                 init.SetCyclic();
                 if (_owner.IsFlying())
                 {
@@ -1098,7 +1093,7 @@ namespace Game.Movement
 
             speedZ = (float)Math.Sqrt(2 * gravity * height);
         }
-        
+
         void ResolveDelayedActions()
         {
             while (_delayedActions.Count != 0)
