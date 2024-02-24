@@ -2603,6 +2603,47 @@ namespace Game.Entities
             Global.WorldMgr.SendGlobalMessage(packet, null, (enemy_team == Team.Alliance ? Team.Horde : Team.Alliance));
         }
 
+        public void SetCanMelee(bool canMelee, bool fleeFromMelee = false)
+        {
+            bool wasFleeingFromMelee = HasFlag(CreatureStaticFlags.NoMeleeFlee);
+
+            _staticFlags.ApplyFlag(CreatureStaticFlags.NoMeleeFlee, !canMelee && fleeFromMelee);
+            _staticFlags.ApplyFlag(CreatureStaticFlags4.NoMeleeApproach, !canMelee && !fleeFromMelee);
+
+            if (wasFleeingFromMelee == HasFlag(CreatureStaticFlags.NoMeleeFlee))
+                return;
+
+            Unit victim = GetVictim();
+            if (victim == null)
+                return;
+
+            var currentMovement = GetMotionMaster().GetCurrentMovementGenerator();
+            if (currentMovement == null)
+                return;
+
+            var canChangeMovement = new Func<bool>(() =>
+            {
+                if (wasFleeingFromMelee)
+                    return currentMovement.GetMovementGeneratorType() == MovementGeneratorType.Fleeing && !HasUnitFlag(UnitFlags.Fleeing);
+
+                return currentMovement.GetMovementGeneratorType() == MovementGeneratorType.Chase;
+            })();
+
+            if (!canChangeMovement)
+                return;
+
+            GetMotionMaster().Remove(currentMovement);
+            StartDefaultCombatMovement(victim);
+        }
+
+        public void StartDefaultCombatMovement(Unit victim, float? range = null, float? angle = null)
+        {
+            if (!HasFlag(CreatureStaticFlags.NoMeleeFlee) || IsSummon())
+                GetMotionMaster().MoveChase(victim, range.GetValueOrDefault(0), angle.GetValueOrDefault(0));
+            else
+                GetMotionMaster().MoveFleeing(victim);
+        }
+
         public override bool HasSpell(int spellId)
         {
             return m_spells.Contains(spellId);
@@ -3275,9 +3316,7 @@ namespace Game.Entities
             return GetLevel() / 2 + (int)(GetStat(Stats.Strength) / 20);
         }
 
-        public bool CanMelee() { return !_staticFlags.HasFlag(CreatureStaticFlags.NoMelee); }
-
-        public void SetCanMelee(bool canMelee) { _staticFlags.ApplyFlag(CreatureStaticFlags.NoMelee, !canMelee); }
+        public bool CanMelee() { return !_staticFlags.HasFlag(CreatureStaticFlags.NoMeleeFlee) && !_staticFlags.HasFlag(CreatureStaticFlags4.NoMeleeApproach); }
 
         public bool CanIgnoreLineOfSightWhenCastingOnMe() { return _staticFlags.HasFlag(CreatureStaticFlags4.IgnoreLosWhenCastingOnMe); }
 
