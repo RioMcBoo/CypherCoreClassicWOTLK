@@ -6,6 +6,7 @@ using Game.Entities;
 using Game.Networking.Packets;
 using Game.DataStorage;
 using System.Collections.Generic;
+using System;
 
 namespace Game.BattleGrounds.Zones
 {
@@ -607,6 +608,7 @@ namespace Game.BattleGrounds.Zones
                 UpdateWorldState(WSGWorldStates.FlagCapturesHorde, GetTeamScore(team));
         }
 
+        [Obsolete("Remove me when warsong gluch is updated.")]
         public override void HandleAreaTrigger(Player player, int trigger, bool entered)
         {
             //int SpellId = 0;
