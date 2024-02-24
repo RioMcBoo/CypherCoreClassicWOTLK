@@ -89,7 +89,7 @@ namespace Game.Entities
         SortedSet<AuraApplication> m_visibleAuras = new(new VisibleAuraSlotCompare());
         SortedSet<AuraApplication> m_visibleAurasToUpdate = new(new VisibleAuraSlotCompare());
         MultiMap<uint, AuraApplication> m_appliedAuras = new();
-        MultiMap<uint, Aura> m_ownedAuras = new();
+        MultiMap<int, Aura> m_ownedAuras = new();
         List<Aura> m_scAuras = new();
         protected float[][] m_auraFlatModifiersGroup = new float[(int)UnitMods.End][];
         protected float[][] m_auraPctModifiersGroup = new float[(int)UnitMods.End][];

@@ -37,8 +37,8 @@ namespace Game.Mails
         public MailMessageType messageType;
         public MailStationery stationery;
         public uint mailTemplateId;
-        public ulong sender;
-        public ulong receiver;
+        public long sender;
+        public long receiver;
         public string subject;
         public string body;
         public List<MailItemInfo> items = new();

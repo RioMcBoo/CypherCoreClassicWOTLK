@@ -1383,7 +1383,7 @@ namespace Framework.Constants
         Removed = 3
     }
 
-    public enum ItemVendorType
+    public enum ItemVendorType : byte
     {
         None = 0,
         Item = 1,

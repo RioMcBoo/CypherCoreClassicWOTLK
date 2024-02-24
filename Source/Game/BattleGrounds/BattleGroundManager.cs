@@ -114,7 +114,7 @@ namespace Game.BattleGrounds
             header.Ticket.Time = (int)joinTime;
             header.QueueID.Add(queueId.GetPacked());
             header.RangeMin = 0; // seems to always be 0
-            header.RangeMax = SharedConst.DefaultMaxLevel; // alwyas max level of current expansion. Might be limited to account
+            header.RangeMax = SharedConst.DefaultMaxPlayerLevel; // alwyas max level of current expansion. Might be limited to account
             header.TeamSize = queueId.TeamSize;
             header.InstanceID = 0; // seems to always be 0
             header.RegisteredMatch = queueId.Rated;

@@ -1887,24 +1887,24 @@ namespace Game.Entities
         }
 
         //Unit
-        public void SetLevel(uint lvl, bool sendUpdate = true)
+        public void SetLevel(int lvl, bool sendUpdate = true)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Level), (int)lvl);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Level), lvl);
 
             if (!sendUpdate)
                 return;
 
-            Player player = ToPlayer();
-            if (player != null)
+            if (ToPlayer() is Player player)
             {
                 if (player.GetGroup() != null)
                     player.SetGroupUpdateFlag(GroupUpdateFlags.Level);
 
-                Global.CharacterCacheStorage.UpdateCharacterLevel(ToPlayer().GetGUID(), (byte)lvl);
+                Global.CharacterCacheStorage.UpdateCharacterLevel(GetGUID(), (byte)lvl);
             }
         }
-        public uint GetLevel() { return (uint)m_unitData.Level.GetValue(); }
-        public override uint GetLevelForTarget(WorldObject target) { return GetLevel(); }
+
+        public int GetLevel() { return m_unitData.Level.GetValue(); }
+        public override int GetLevelForTarget(WorldObject target) { return GetLevel(); }
 
         public Race GetRace() { return (Race)(byte)m_unitData.Race; }
         public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Race), (byte)race); }
@@ -1929,9 +1929,9 @@ namespace Game.Entities
 
         public float GetDisplayScale() { return m_unitData.DisplayScale; }
         
-        public uint GetDisplayId() { return m_unitData.DisplayID; }
+        public int GetDisplayId() { return m_unitData.DisplayID; }
 
-        public virtual void SetDisplayId(uint displayId, bool setNative = false)
+        public virtual void SetDisplayId(int displayId, bool setNative = false)
         {
             float displayScale = SharedConst.DefaultPlayerDisplayScale;
 
@@ -1954,7 +1954,7 @@ namespace Game.Entities
             // Set Gender by ModelInfo
             CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(displayId);
             if (modelInfo != null)
-                SetGender((Gender)modelInfo.gender);
+                SetGender(modelInfo.gender);
 
             CalculateHoverHeight();
         }

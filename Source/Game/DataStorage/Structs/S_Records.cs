@@ -245,7 +245,7 @@ namespace Game.DataStorage
         private ushort _skillLine;
         public int Spell;
         public short MinSkillLineRank;
-        public int ClassMask;
+        private int _classMask;
         public int SupercedesSpell;
         private sbyte _acquireMethod;
         public short TrivialSkillLineRankHigh;
@@ -259,7 +259,8 @@ namespace Game.DataStorage
 
         #region Properties
         public RaceMask RaceMask => (RaceMask)_raceMask;
-        public uint SkillLine => _skillLine;
+        public SkillType SkillLine => (SkillType)_skillLine;
+        public ClassMask ClassMask => (ClassMask)_classMask;
         public AbilityLearnType AcquireMethod => (AbilityLearnType)_acquireMethod;
         public SkillLineAbilityFlags Flags => (SkillLineAbilityFlags)_flags;
         public uint SkillupSkillLineID => (uint)_skillupSkillLineID;
@@ -301,7 +302,7 @@ namespace Game.DataStorage
         public SkillRaceClassInfoFlags Flags => (SkillRaceClassInfoFlags)_flags;
         public RaceMask RaceMask => (RaceMask)_raceMask;
         public ClassMask ClassMask => (ClassMask)_classMask;
-        public uint SkillID => (uint)_skillID;
+        public SkillType SkillID => (SkillType)_skillID;
         #endregion
 
         #region Helpers

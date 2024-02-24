@@ -149,15 +149,15 @@ namespace Game.Entities
         uint m_weaponChangeTimer;
 
         //Quest
-        List<uint> m_timedquests = new();
-        List<uint> m_weeklyquests = new();
-        List<uint> m_monthlyquests = new();
-        Dictionary<uint, Dictionary<uint, long>> m_seasonalquests = new();
+        List<int> m_timedquests = new();
+        List<int> m_weeklyquests = new();
+        List<int> m_monthlyquests = new();
+        Dictionary<int, Dictionary<uint, long>> m_seasonalquests = new();
         Dictionary<int, QuestStatusData> m_QuestStatus = new();
         MultiMap<(QuestObjectiveType Type, int ObjectID), QuestObjectiveStatusData> m_questObjectiveStatus = new();
-        Dictionary<uint, QuestSaveType> m_QuestStatusSave = new();
-        List<uint> m_DFQuests = new();
-        List<uint> m_RewardedQuests = new();
+        Dictionary<int, QuestSaveType> m_QuestStatusSave = new();
+        List<int> m_DFQuests = new();
+        List<int> m_RewardedQuests = new();
         Dictionary<uint, QuestSaveType> m_RewardedQuestsSave = new();
 
         bool m_DailyQuestChanged;
@@ -290,8 +290,8 @@ namespace Game.Entities
         public List<SkillRaceClassInfoRecord> skills = new();
 
         public int? introMovieId;
-        public uint? introSceneId;
-        public uint? introSceneIdNPE;
+        public int? introSceneId;
+        public int? introSceneIdNPE;
 
         public PlayerLevelInfo[] levelInfo = new PlayerLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
 

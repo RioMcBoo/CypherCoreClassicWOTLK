@@ -292,7 +292,7 @@ namespace Game.Entities
             return false;
         }
 
-        public bool IsQuestRewarded(uint quest_id)
+        public bool IsQuestRewarded(int quest_id)
         {
             return m_RewardedQuests.Contains(quest_id);
         }
@@ -873,12 +873,12 @@ namespace Game.Entities
             }
         }
 
-        public uint GetQuestMoneyReward(Quest quest)
+        public int GetQuestMoneyReward(Quest quest)
         {
-            return (uint)(quest.MoneyValue(this) * WorldConfig.GetFloatValue(WorldCfg.RateMoneyQuest));
+            return (int)(quest.MoneyValue(this) * WorldConfig.GetFloatValue(WorldCfg.RateMoneyQuest));
         }
 
-        public uint GetQuestXPReward(Quest quest)
+        public int GetQuestXPReward(Quest quest)
         {
             bool rewarded = IsQuestRewarded(quest.Id) && !quest.IsDFQuest();
 
@@ -964,13 +964,13 @@ namespace Game.Entities
             }
         }
 
-        public void RewardQuest(Quest quest, LootItemType rewardType, uint rewardId, WorldObject questGiver, bool announce = true)
+        public void RewardQuest(Quest quest, LootItemType rewardType, int rewardId, WorldObject questGiver, bool announce = true)
         {
             //this THING should be here to protect code from quest, which cast on player far teleport as a reward
             //should work fine, cause far teleport will be executed in Update()
             SetCanDelayTeleport(true);
 
-            uint questId = quest.Id;
+            int questId = quest.Id;
             QuestStatus oldStatus = GetQuestStatus(questId);
 
             foreach (QuestObjective obj in quest.Objectives)
@@ -997,9 +997,9 @@ namespace Game.Entities
                 {
                     if (quest.ItemDrop[i] != 0)
                     {
-                        uint count = quest.ItemDropQuantity[i];
+                        int count = quest.ItemDropQuantity[i];
                         if (count == 0)
-                            count = uint.MaxValue;
+                            count = int.MaxValue;
                         DestroyItemCount(quest.ItemDrop[i], count, true);
                     }
                 }
@@ -1174,12 +1174,12 @@ namespace Game.Entities
             }
             else
             {
-                for (uint i = 0; i < SharedConst.QuestRewardDisplaySpellCount; ++i)
+                for (int i = 0; i < SharedConst.QuestRewardDisplaySpellCount; ++i)
                 {
-                    if (quest.RewardDisplaySpell[(int)i] == 0)
+                    if (quest.RewardDisplaySpell[i] == 0)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardDisplaySpell[(int)i], GetMap().GetDifficultyID());
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardDisplaySpell[i], GetMap().GetDifficultyID());
                     Unit caster = this;
                     if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasAnyFlag(QuestFlags.PlayerCastComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
                     {

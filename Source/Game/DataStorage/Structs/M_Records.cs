@@ -16,7 +16,7 @@ namespace Game.DataStorage
 
     public sealed class MapRecord
     {
-        public uint Id;
+        public int Id;
         public string Directory;
         public LocalizedString MapName;
         /// <summary>
@@ -31,7 +31,7 @@ namespace Game.DataStorage
         public LocalizedString PvpLongDescription;
         public byte MapType;
         private sbyte _instanceType;
-        public byte ExpansionID;
+        private byte _expansionID;
         public ushort AreaTableID;
         public short LoadingScreenID;
         public short TimeOfDayOverride;
@@ -53,7 +53,7 @@ namespace Game.DataStorage
         public MapTypes InstanceType => (MapTypes)_instanceType;
         public MapFlags Flags => (MapFlags)_flags[0];
         public MapFlags2 Flags2 => (MapFlags2)_flags[1];
-        public Expansion Expansion => (Expansion)ExpansionID;        
+        public Expansion Expansion => (Expansion)_expansionID;
         #endregion
 
         #region Helpers

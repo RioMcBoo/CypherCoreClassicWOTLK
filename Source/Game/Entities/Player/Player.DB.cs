@@ -2539,15 +2539,18 @@ namespace Game.Entities
             stmt.AddValue(index++, m_activePlayerData.ParryPercentage);
             stmt.AddValue(index++, m_activePlayerData.CritPercentage);
             stmt.AddValue(index++, m_activePlayerData.RangedCritPercentage);
-            // @TODO 340 fixme
-            //stmt.AddValue(index++, m_activePlayerData.SpellCritPercentage);
+            // @TODO (3.4.3): in wotlk spell crit percentage was split by spell school
+            stmt.AddValue(index++, 0.0f); // m_activePlayerData.SpellCritPercentage);
             stmt.AddValue(index++, m_unitData.AttackPower);
             stmt.AddValue(index++, m_unitData.RangedAttackPower);
             stmt.AddValue(index++, GetBaseSpellPowerBonus());
-            stmt.AddValue(index, m_activePlayerData.CombatRatings[(int)CombatRating.ResiliencePlayerDamage]);
+            stmt.AddValue(index, 0); // m_activePlayerData.CombatRatings[(int)CombatRating.ResiliencePlayerDamage]);
+            stmt.AddValue(index++, m_activePlayerData.Mastery);
+            stmt.AddValue(index++, m_activePlayerData.Versatility);
 
             trans.Append(stmt);
         }
+
         public void SaveGoldToDB(SQLTransaction trans)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_MONEY);
@@ -2555,12 +2558,14 @@ namespace Game.Entities
             stmt.AddValue(1, GetGUID().GetCounter());
             trans.Append(stmt);
         }
+
         public void SaveInventoryAndGoldToDB(SQLTransaction trans)
         {
             _SaveInventory(trans);
             _SaveCurrency(trans);
             SaveGoldToDB(trans);
         }
+
         void _SaveEquipmentSets(SQLTransaction trans)
         {
             foreach (var pair in _equipmentSets)
@@ -3917,7 +3922,7 @@ namespace Game.Entities
             if (pet != null)
                 pet.SavePetToDB(PetSaveMode.AsCurrent);
         }
-        void DeleteSpellFromAllPlayers(uint spellId)
+        void DeleteSpellFromAllPlayers(int spellId)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_SPELL_SPELLS);
             stmt.AddValue(0, spellId);
@@ -3945,7 +3950,7 @@ namespace Game.Entities
                 if (posResult.IsEmpty())
                     return 0;
 
-                uint map = posResult.Read<ushort>(0);
+                int map = posResult.Read<short>(0);
                 float posx = posResult.Read<float>(1);
                 float posy = posResult.Read<float>(2);
                 float posz = posResult.Read<float>(3);

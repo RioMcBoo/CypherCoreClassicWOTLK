@@ -30,8 +30,8 @@ namespace Game.DataStorage
 
     public sealed class QuestMoneyRewardRecord
     {
-        public uint Id;
-        public uint[] Difficulty = new uint[10];
+        public int Id;
+        public int[] Difficulty = new int[10];
     }
 
     public sealed class QuestPackageItemRecord

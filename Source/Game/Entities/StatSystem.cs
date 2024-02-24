@@ -387,7 +387,7 @@ namespace Game.Entities
 
         public uint GetCreateMana() { return m_unitData.BaseMana; }
 
-        public void SetCreateMana(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseMana), val); }
+        public void SetCreateMana(int val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseMana), val); }
 
         public int GetArmor()
         {
@@ -489,7 +489,7 @@ namespace Game.Entities
         //Health  
         public uint GetCreateHealth() { return m_unitData.BaseHealth; }
 
-        public void SetCreateHealth(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseHealth), val); }
+        public void SetCreateHealth(int val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseHealth), val); }
 
         public long GetHealth() { return m_unitData.Health; }
 

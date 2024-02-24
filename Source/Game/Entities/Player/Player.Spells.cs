@@ -33,7 +33,7 @@ namespace Game.Entities
 
                 if (Global.SpellMgr.GetSkillRangeType(rcEntry) == SkillRangeType.Level)
                 {
-                    if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                    if (rcEntry.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                         SetSkillRank(pair.Value.Pos, maxSkill);
 
                     SetSkillMaxRank(pair.Value.Pos, maxSkill);
@@ -1712,14 +1712,14 @@ namespace Game.Entities
         public uint GetLastPotionId() { return m_lastPotionId; }
         public void SetLastPotionId(uint item_id) { m_lastPotionId = item_id; }
 
-        public void LearnSkillRewardedSpells(uint skillId, uint skillValue, Race race)
+        public void LearnSkillRewardedSpells(SkillType skillId, uint skillValue, Race race)
         {
-            uint classMask = GetClassMask();
+            Class class_ = GetClass();
 
             List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
             foreach (var ability in skillLineAbilities)
             {
-                if ((SkillType)ability.SkillLine != skillId)
+                if (ability.SkillLine != skillId)
                     continue;
 
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ability.Spell, Difficulty.None);
@@ -1745,12 +1745,12 @@ namespace Game.Entities
                     continue;
 
                 // Check race if set
-                var raceMask = new RaceMask<long>(ability.RaceMask);
-                if (!raceMask.IsEmpty() && !raceMask.HasRace(race))
+                var raceMask = ability.RaceMask;
+                if (raceMask != RaceMask.None && !raceMask.HasRace(race))
                     continue;
 
                 // Check class if set
-                if (ability.ClassMask != 0 && !Convert.ToBoolean(ability.ClassMask & classMask))
+                if (ability.ClassMask != 0 && !ability.ClassMask.HasClass(class_))
                     continue;
 
                 // check level, skip class spells if not high enough
@@ -2256,7 +2256,7 @@ namespace Game.Entities
                 UpdateQuestObjectiveProgress(QuestObjectiveType.LearnSpell, (int)spellId, 1);
         }
 
-        public void RemoveSpell(uint spellId, bool disabled = false, bool learnLowRank = true, bool suppressMessaging = false)
+        public void RemoveSpell(int spellId, bool disabled = false, bool learnLowRank = true, bool suppressMessaging = false)
         {
             var pSpell = m_spells.LookupByKey(spellId);
             if (pSpell == null)
@@ -2266,7 +2266,7 @@ namespace Game.Entities
                 return;
 
             // unlearn non talent higher ranks (recursive)
-            uint nextSpell = Global.SpellMgr.GetNextSpellInChain(spellId);
+            int nextSpell = Global.SpellMgr.GetNextSpellInChain(spellId);
             if (nextSpell != 0)
             {
                 SpellInfo spellInfo1 = Global.SpellMgr.GetSpellInfo(nextSpell, Difficulty.None);
@@ -2536,7 +2536,7 @@ namespace Game.Entities
             return null;
         }
 
-        bool AddSpell(uint spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, uint fromSkill = 0, bool favorite = false, int? traitDefinitionId = null)
+        bool AddSpell(int spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, SkillType fromSkill = 0, bool favorite = false, int? traitDefinitionId = null)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)

@@ -5781,7 +5781,7 @@ namespace Game.Entities
 
             int exp_max_lvl = (int)ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
             int conf_max_lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
-            if (exp_max_lvl == SharedConst.DefaultMaxLevel || exp_max_lvl >= conf_max_lvl)
+            if (exp_max_lvl == SharedConst.DefaultMaxPlayerLevel || exp_max_lvl >= conf_max_lvl)
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), conf_max_lvl);
             else
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), exp_max_lvl);
@@ -7241,9 +7241,9 @@ namespace Game.Entities
 
             return 1.0f - 0.05f * (rank - ReputationRank.Neutral);
         }
-        public bool IsSpellFitByClassAndRace(uint spell_id)
+        public bool IsSpellFitByClassAndRace(int spell_id)
         {
-            uint classmask = GetClassMask();
+            Class class_ = GetClass();
 
             var bounds = SpellMgr.GetSkillLineAbilityMapBounds(spell_id);
 
@@ -7253,7 +7253,7 @@ namespace Game.Entities
             foreach (var _spell_idx in bounds)
             {
                 // skip wrong race skills
-                var raceMask = new RaceMask<long>(_spell_idx.RaceMask);
+                var raceMask = _spell_idx.RaceMask;
                 if (!raceMask.IsEmpty() && !raceMask.HasRace(GetRace()))
                     continue;
 

@@ -395,12 +395,12 @@ namespace Game
 
             if (reload)
             {
-                int val = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxLevel);
+                int val = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxPlayerLevel);
                 if (val != (int)Values[WorldCfg.MaxPlayerLevel])
                     Log.outError(LogFilter.ServerLoading, "MaxPlayerLevel option can't be changed at config reload, using current value ({0}).", Values[WorldCfg.MaxPlayerLevel]);
             }
             else
-                Values[WorldCfg.MaxPlayerLevel] = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxLevel);
+                Values[WorldCfg.MaxPlayerLevel] = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxPlayerLevel);
 
             if ((int)Values[WorldCfg.MaxPlayerLevel] > SharedConst.MaxLevel)
             {

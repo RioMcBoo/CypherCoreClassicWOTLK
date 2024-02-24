@@ -37,7 +37,7 @@ namespace System.Collections.Generic
             }
         }
 
-        public void Add(KeyValuePair<TKey, TValue> item)
+        public void Add(int entry, KeyValuePair<TKey, TValue> item)
         {
             if (!_interalStorage.ContainsKey(item.Key))
             {

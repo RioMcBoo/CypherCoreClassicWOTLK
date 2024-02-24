@@ -1527,7 +1527,7 @@ namespace Game.Entities
         public int GetDuration() { return m_duration; }
 
         public void SetPetExperience(uint xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetExperience), xp); }
-        public void SetPetNextLevelExperience(uint xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNextLevelExperience), xp); }
+        public void SetPetNextLevelExperience(int xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNextLevelExperience), xp); }
 
         public ushort GetSpecialization() { return m_petSpecialization; }
 

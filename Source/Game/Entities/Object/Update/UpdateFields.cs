@@ -881,8 +881,8 @@ namespace Game.Entities
         public UpdateField<byte> AnimTier = new(32, 59);
         public UpdateField<uint> PetNumber = new(32, 60);
         public UpdateField<uint> PetNameTimestamp = new(32, 61);
-        public UpdateField<uint> PetExperience = new(32, 62);
-        public UpdateField<uint> PetNextLevelExperience = new(32, 63);
+        public UpdateField<int> PetExperience = new(32, 62);
+        public UpdateField<int> PetNextLevelExperience = new(32, 63);
         public UpdateField<float> ModCastingSpeed = new(64, 65);
         public UpdateField<float> ModSpellHaste = new(64, 66);
         public UpdateField<float> ModHaste = new(64, 67);
@@ -2041,20 +2041,20 @@ namespace Game.Entities
 
         public ChrCustomizationChoice(WorldPacket data)
         {
-            ChrCustomizationOptionID = data.ReadUInt32();
-            ChrCustomizationChoiceID = data.ReadUInt32();
+            ChrCustomizationOptionID = data.ReadInt32();
+            ChrCustomizationChoiceID = data.ReadInt32();
         }
 
         public void WriteCreate(WorldPacket data, WorldObject owner, Player receiver)
         {
-            data.WriteUInt32(ChrCustomizationOptionID);
-            data.WriteUInt32(ChrCustomizationChoiceID);
+            data.WriteInt32(ChrCustomizationOptionID);
+            data.WriteInt32(ChrCustomizationChoiceID);
         }
 
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, WorldObject owner, Player receiver)
         {
-            data.WriteUInt32(ChrCustomizationOptionID);
-            data.WriteUInt32(ChrCustomizationChoiceID);
+            data.WriteInt32(ChrCustomizationOptionID);
+            data.WriteInt32(ChrCustomizationChoiceID);
         }        
 
         public int CompareTo(ChrCustomizationChoice other)
@@ -2062,8 +2062,8 @@ namespace Game.Entities
             return ChrCustomizationOptionID.CompareTo(other.ChrCustomizationOptionID);
         }
 
-        public uint ChrCustomizationOptionID;
-        public uint ChrCustomizationChoiceID;
+        public int ChrCustomizationOptionID;
+        public int ChrCustomizationChoiceID;
     }
 
     public class QuestLog : HasChangesMask

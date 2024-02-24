@@ -4593,7 +4593,7 @@ namespace Game.Entities
                     if (pItem.GetQuality() == ItemQuality.Heirloom)
                         requiredLevels = Global.DB2Mgr.GetContentTuningData(pItem.GetScalingContentTuningId(), 0, true);
 
-                    if (requiredLevels.HasValue && requiredLevels.Value.MaxLevel < SharedConst.DefaultMaxLevel && requiredLevels.Value.MaxLevel < GetLevel() && Global.DB2Mgr.GetHeirloomByItemId(pProto.GetId()) == null)
+                    if (requiredLevels.HasValue && requiredLevels.Value.MaxLevel < SharedConst.DefaultMaxPlayerLevel && requiredLevels.Value.MaxLevel < GetLevel() && Global.DB2Mgr.GetHeirloomByItemId(pProto.GetId()) == null)
                         return InventoryResult.NotEquippable;
 
                     byte eslot = FindEquipSlot(pItem, slot, swap);

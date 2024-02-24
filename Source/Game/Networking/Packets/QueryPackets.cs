@@ -31,7 +31,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(CreatureID);
+            _worldPacket.WriteInt32(CreatureID);
             _worldPacket.WriteBit(Allow);
             _worldPacket.FlushBits();
 
@@ -107,7 +107,7 @@ namespace Game.Networking.Packets
 
         public bool Allow;
         public CreatureStats Stats;
-        public uint CreatureID;
+        public int CreatureID;
     }
 
     public class QueryPlayerNames : ClientPacket
@@ -242,11 +242,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            GameObjectID = _worldPacket.ReadUInt32();
+            GameObjectID = _worldPacket.ReadInt32();
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public uint GameObjectID;
+        public int GameObjectID;
         public ObjectGuid Guid;
     }
 
@@ -256,7 +256,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(GameObjectID);
+            _worldPacket.WriteInt32(GameObjectID);
             _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WriteBit(Allow);
             _worldPacket.FlushBits();
@@ -264,8 +264,8 @@ namespace Game.Networking.Packets
             ByteBuffer statsData = new();
             if (Allow)
             {
-                statsData.WriteUInt32(Stats.Type);
-                statsData.WriteUInt32(Stats.DisplayID);
+                statsData.WriteInt32((int)Stats.Type);
+                statsData.WriteInt32(Stats.DisplayID);
                 for (int i = 0; i < 4; i++)
                     statsData.WriteCString(Stats.Name[i]);
 
@@ -289,7 +289,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBytes(statsData);
         }
 
-        public uint GameObjectID;
+        public int GameObjectID;
         public ObjectGuid Guid;
         public bool Allow;
         public GameObjectStats Stats;
@@ -707,14 +707,14 @@ namespace Game.Networking.Packets
 
     public class CreatureXDisplay
     {
-        public CreatureXDisplay(uint creatureDisplayID, float displayScale, float probability)
+        public CreatureXDisplay(int creatureDisplayID, float displayScale, float probability)
         {
             CreatureDisplayID = creatureDisplayID;
             Scale = displayScale;
             Probability = probability;
         }
 
-        public uint CreatureDisplayID;
+        public int CreatureDisplayID;
         public float Scale = 1.0f;
         public float Probability = 1.0f;
     }
@@ -730,26 +730,26 @@ namespace Game.Networking.Packets
         public string Title;
         public string TitleAlt;
         public string CursorName;
-        public int CreatureType;
-        public int CreatureFamily;
-        public int Classification;
-        public uint PetSpellDataId;
+        public CreatureType CreatureType;
+        public CreatureFamily CreatureFamily;
+        public CreatureEliteType Classification;
+        public int PetSpellDataId;
         public CreatureDisplayStats Display = new();
         public float HpMulti;
         public float EnergyMulti;
         public bool Civilian;
         public bool Leader;
-        public List<uint> QuestItems = new();
-        public uint CreatureMovementInfoID;
+        public List<int> QuestItems = new();
+        public int CreatureMovementInfoID;
         public int HealthScalingExpansion;
-        public uint RequiredExpansion;
-        public uint VignetteID;
-        public int Class;
+        public Expansion RequiredExpansion;
+        public int VignetteID;
+        public Class Class;
         public int CreatureDifficultyID;
         public int WidgetSetID;
         public int WidgetSetUnitConditionID;
         public uint[] Flags = new uint[2];
-        public uint[] ProxyCreatureID = new uint[SharedConst.MaxCreatureKillCredit];
+        public int[] ProxyCreatureID = new int[SharedConst.MaxCreatureKillCredit];
         public StringArray Name = new(SharedConst.MaxCreatureNames);
         public StringArray NameAlt = new(SharedConst.MaxCreatureNames);
     }
@@ -765,11 +765,11 @@ namespace Game.Networking.Packets
         public string IconName;
         public string CastBarCaption;
         public string UnkString;
-        public uint Type;
-        public uint DisplayID;
+        public GameObjectTypes Type;
+        public int DisplayID;
         public int[] Data = new int[SharedConst.MaxGOData];
         public float Size;
-        public List<uint> QuestItems = new();
+        public List<int> QuestItems = new();
         public uint ContentTuningId;
     }
 

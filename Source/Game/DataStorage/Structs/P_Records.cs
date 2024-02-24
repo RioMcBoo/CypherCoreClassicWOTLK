@@ -21,7 +21,7 @@ namespace Game.DataStorage
 
     public sealed class PhaseRecord
     {
-        public uint Id;
+        public int Id;
         private ushort _flags;
 
         #region Properties

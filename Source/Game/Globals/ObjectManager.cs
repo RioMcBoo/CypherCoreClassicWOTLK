@@ -96,7 +96,7 @@ namespace Game
 
         public static ResponseCodes CheckPlayerName(string name, Locale locale, bool create = false)
         {
-            if (name.Length > 12)
+            if (name.Length > SharedConst.MaxPlayerNameLenght)
                 return ResponseCodes.CharNameTooLong;
 
             uint minName = WorldConfig.GetUIntValue(WorldCfg.MinPlayerName);
@@ -115,9 +115,23 @@ namespace Game
             return Global.DB2Mgr.ValidateName(name, locale);
         }
 
+        public static bool IsValidCharterName(string name)
+        {
+            if (name.Length > SharedConst.MaxCharterNameLenght)
+                return false;
+
+            uint minName = WorldConfig.GetUIntValue(WorldCfg.MinCharterName);
+            if (name.Length < minName)
+                return false;
+
+            uint strictMask = WorldConfig.GetUIntValue(WorldCfg.StrictCharterNames);
+
+            return IsValidString(name, strictMask, true);
+        }
+
         public static PetNameInvalidReason CheckPetName(string name)
         {
-            if (name.Length > 12)
+            if (name.Length > SharedConst.MaxPetNameLenght)
                 return PetNameInvalidReason.TooLong;
 
             uint minName = WorldConfig.GetUIntValue(WorldCfg.MinPetName);
@@ -129,21 +143,7 @@ namespace Game
                 return PetNameInvalidReason.MixedLanguages;
 
             return PetNameInvalidReason.Success;
-        }
-
-        public static bool IsValidCharterName(string name)
-        {
-            if (name.Length > 24)
-                return false;
-
-            uint minName = WorldConfig.GetUIntValue(WorldCfg.MinCharterName);
-            if (name.Length < minName)
-                return false;
-
-            uint strictMask = WorldConfig.GetUIntValue(WorldCfg.StrictCharterNames);
-
-            return IsValidString(name, strictMask, true);
-        }
+        }        
 
         public static void AddLocaleString(string value, Locale locale, StringArray data)
         {
@@ -290,7 +290,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} CypherStrings in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} CypherStrings in {Time.GetMSTimeDiffToNow(time)} ms.");
             return true;
         }
 
@@ -307,20 +307,20 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        byte raceID = result.Read<byte>(0);
-                        byte expansion = result.Read<byte>(1);
+                        Race raceID = (Race)result.Read<byte>(0);
+                        Expansion expansion = (Expansion)result.Read<sbyte>(1);
                         int achievementId = result.Read<int>(2);
 
-                        ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(raceID);
+                        ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey((int)raceID);
                         if (raceEntry == null)
                         {
-                            Log.outError(LogFilter.Sql, "Race {0} defined in `race_unlock_requirement` does not exists, skipped.", raceID);
+                            Log.outError(LogFilter.Sql, $"Race {raceID} defined in `race_unlock_requirement` does not exists, skipped.");
                             continue;
                         }
 
-                        if (expansion >= (int)Expansion.MaxAccountExpansions)
+                        if (expansion >= Expansion.MaxAccountExpansions)
                         {
-                            Log.outError(LogFilter.Sql, "Race {0} defined in `race_unlock_requirement` has incorrect expansion {1}, skipped.", raceID, expansion);
+                            Log.outError(LogFilter.Sql, $"Race {raceID} defined in `race_unlock_requirement` has incorrect expansion {expansion}, skipped.");
                             continue;
                         }
 
@@ -339,7 +339,7 @@ namespace Game
                         ++count;
                     }
                     while (result.NextRow());
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} race expansion requirements in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} race expansion requirements in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
                 else
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 race expansion requirements. DB table `race_expansion_requirement` is empty.");
@@ -353,24 +353,24 @@ namespace Game
             {
                 if (!result.IsEmpty())
                 {
-                    Dictionary<byte, Dictionary<byte, Tuple<byte, byte>>> temp = new();
-                    Array<byte> minRequirementForClass = new((int)Expansion.MaxAccountExpansions);
+                    Dictionary<Race, Dictionary<Class, (byte activeExpansionLevel, byte accountExpansionLevel)>> temp = new();
+                    Dictionary<Class, byte> minRequirementForClass = new((int)Expansion.MaxAccountExpansions);
                     uint count = 0;
                     do
                     {
-                        byte classID = result.Read<byte>(0);
-                        byte raceID = result.Read<byte>(1);
+                        Class classID = (Class)result.Read<byte>(0);
+                        Race raceID = (Race)result.Read<byte>(1);
                         byte activeExpansionLevel = result.Read<byte>(2);
                         byte accountExpansionLevel = result.Read<byte>(3);
 
-                        ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(classID);
+                        ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)classID);
                         if (classEntry == null)
                         {
                             Log.outError(LogFilter.Sql, $"Class {classID} (race {raceID}) defined in `class_expansion_requirement` does not exists, skipped.");
                             continue;
                         }
 
-                        ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(raceID);
+                        ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey((int)raceID);
                         if (raceEntry == null)
                         {
                             Log.outError(LogFilter.Sql, $"Race {raceID} (class {classID}) defined in `class_expansion_requirement` does not exists, skipped.");
@@ -379,20 +379,22 @@ namespace Game
 
                         if (activeExpansionLevel >= (int)Expansion.Max)
                         {
-                            Log.outError(LogFilter.Sql, $"Class {classID} Race {raceID} defined in `class_expansion_requirement` has incorrect ActiveExpansionLevel {activeExpansionLevel}, skipped.");
+                            Log.outError(LogFilter.Sql,
+                                $"Class {classID} Race {raceID} defined in `class_expansion_requirement` has incorrect ActiveExpansionLevel {activeExpansionLevel}, skipped.");
                             continue;
                         }
 
                         if (accountExpansionLevel >= (int)Expansion.MaxAccountExpansions)
                         {
-                            Log.outError(LogFilter.Sql, $"Class {classID} Race {raceID} defined in `class_expansion_requirement` has incorrect AccountExpansionLevel {accountExpansionLevel}, skipped.");
+                            Log.outError(LogFilter.Sql,
+                                $"Class {classID} Race {raceID} defined in `class_expansion_requirement` has incorrect AccountExpansionLevel {accountExpansionLevel}, skipped.");
                             continue;
                         }
 
                         if (!temp.ContainsKey(raceID))
-                            temp[raceID] = new Dictionary<byte, Tuple<byte, byte>>();
+                            temp[raceID] = new Dictionary<Class, (byte, byte)>();
 
-                        temp[raceID][classID] = Tuple.Create(activeExpansionLevel, accountExpansionLevel);
+                        temp[raceID][classID] = (activeExpansionLevel, accountExpansionLevel);
                         minRequirementForClass[classID] = Math.Min(minRequirementForClass[classID], activeExpansionLevel);
 
                         ++count;
@@ -408,8 +410,8 @@ namespace Game
                         {
                             ClassAvailability classAvailability = new();
                             classAvailability.ClassID = class_.Key;
-                            classAvailability.ActiveExpansionLevel = class_.Value.Item1;
-                            classAvailability.AccountExpansionLevel = class_.Value.Item2;
+                            classAvailability.ActiveExpansionLevel = class_.Value.activeExpansionLevel;
+                            classAvailability.AccountExpansionLevel = class_.Value.accountExpansionLevel;
                             classAvailability.MinActiveExpansionLevel = minRequirementForClass[class_.Key];
 
                             raceClassAvailability.Classes.Add(classAvailability);
@@ -445,15 +447,15 @@ namespace Game
             return GetCypherString((uint)cmd, locale);
         }
 
-        public Dictionary<byte, RaceUnlockRequirement> GetRaceUnlockRequirements() { return _raceUnlockRequirementStorage; }
-        public RaceUnlockRequirement GetRaceUnlockRequirement(Race race) { return _raceUnlockRequirementStorage.LookupByKey((byte)race); }
+        public Dictionary<Race, RaceUnlockRequirement> GetRaceUnlockRequirements() { return _raceUnlockRequirementStorage; }
+        public RaceUnlockRequirement GetRaceUnlockRequirement(Race race) { return _raceUnlockRequirementStorage.LookupByKey(race); }
         public List<RaceClassAvailability> GetClassExpansionRequirements() { return _classExpansionRequirementStorage; }
 
         public ClassAvailability GetClassExpansionRequirement(Race raceId, Class classId)
         {
             var raceClassAvailability = _classExpansionRequirementStorage.Find(raceClass =>
             {
-                return raceClass.RaceID == (byte)raceId;
+                return raceClass.RaceID == raceId;
             });
 
             if (raceClassAvailability == null)
@@ -461,7 +463,7 @@ namespace Game
 
             var classAvailability = raceClassAvailability.Classes.Find(availability =>
             {
-                return availability.ClassID == (byte)classId;
+                return availability.ClassID == classId;
             });
 
             if (classAvailability == null)
@@ -470,7 +472,7 @@ namespace Game
             return classAvailability;
         }
 
-        public ClassAvailability GetClassExpansionRequirementFallback(byte classId)
+        public ClassAvailability GetClassExpansionRequirementFallback(Class classId)
         {
             foreach (RaceClassAvailability raceClassAvailability in _classExpansionRequirementStorage)
                 foreach (ClassAvailability classAvailability in raceClassAvailability.Classes)
@@ -496,7 +498,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             gossipMenusStorage.Clear();
-
+            //                                          0       1
             using var result = DB.World.Query("SELECT MenuId, TextId FROM gossip_menu");
             if (result.IsEmpty())
             {
@@ -508,12 +510,12 @@ namespace Game
             {
                 GossipMenus gMenu = new();
 
-                gMenu.MenuId = result.Read<uint>(0);
-                gMenu.TextId = result.Read<uint>(1);
+                gMenu.MenuId = result.Read<int>(0);
+                gMenu.TextId = result.Read<int>(1);
 
                 if (GetNpcText(gMenu.TextId) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table gossip_menu: Id {0} is using non-existing TextId {1}", gMenu.MenuId, gMenu.TextId);
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu: Id {gMenu.MenuId} is using non-existing TextId {gMenu.TextId}.");
                     continue;
                 }
 
@@ -521,7 +523,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gossip_menu Ids in {1} ms", gossipMenusStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {gossipMenusStorage.Count} gossip_menu Ids in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadGossipMenuItems()
@@ -543,31 +545,31 @@ namespace Game
                 return;
             }
 
-            Dictionary<int, uint> optionToNpcOption = new();
-            foreach (var (_, npcOption) in CliDB.GossipNPCOptionStorage)
+            Dictionary<int, int> optionToNpcOption = new();
+            foreach (var npcOption in CliDB.GossipNPCOptionStorage.Values)
                 optionToNpcOption[npcOption.GossipOptionID] = npcOption.Id;
 
             do
             {
                 GossipMenuItems gMenuItem = new();
 
-                gMenuItem.MenuID = result.Read<uint>(0);
+                gMenuItem.MenuID = result.Read<int>(0);
                 gMenuItem.GossipOptionID = result.Read<int>(1);
-                gMenuItem.OrderIndex = result.Read<uint>(2);
+                gMenuItem.OrderIndex = result.Read<int>(2);
                 gMenuItem.OptionNpc = (GossipOptionNpc)result.Read<byte>(3);
                 gMenuItem.OptionText = result.Read<string>(4);
                 gMenuItem.OptionBroadcastTextId = result.Read<int>(5);
                 gMenuItem.Language = result.Read<int>(6);
                 gMenuItem.Flags = (GossipOptionFlags)result.Read<int>(7);
-                gMenuItem.ActionMenuID = result.Read<uint>(8);
-                gMenuItem.ActionPoiID = result.Read<uint>(9);
+                gMenuItem.ActionMenuID = result.Read<int>(8);
+                gMenuItem.ActionPoiID = result.Read<int>(9);
                 if (!result.IsNull(10))
                     gMenuItem.GossipNpcOptionID = result.Read<int>(10);
 
                 gMenuItem.BoxCoded = result.Read<bool>(11);
                 gMenuItem.BoxMoney = result.Read<uint>(12);
                 gMenuItem.BoxText = result.Read<string>(13);
-                gMenuItem.BoxBroadcastTextId = result.Read<uint>(14);
+                gMenuItem.BoxBroadcastTextId = result.Read<int>(14);
                 if (!result.IsNull(15))
                     gMenuItem.SpellID = result.Read<int>(15);
 
@@ -576,7 +578,8 @@ namespace Game
 
                 if (gMenuItem.OptionNpc >= GossipOptionNpc.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} has unknown NPC option id {gMenuItem.OptionNpc}. Replacing with GossipOptionNpc.None");
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} has unknown NPC option " +
+                        $"id {gMenuItem.OptionNpc}. Replacing with GossipOptionNpc.None");
                     gMenuItem.OptionNpc = GossipOptionNpc.None;
                 }
 
@@ -584,20 +587,23 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.OptionBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuID}, OptionIndex {gMenuItem.OrderIndex} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuID}, OptionIndex {gMenuItem.OrderIndex} has non-existing " +
+                            $"or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
                         gMenuItem.OptionBroadcastTextId = 0;
                     }
                 }
 
                 if (gMenuItem.Language != 0 && !CliDB.LanguagesStorage.ContainsKey(gMenuItem.Language))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing Language {gMenuItem.Language}, ignoring");
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing " +
+                        $"Language {gMenuItem.Language}, ignoring.");
                     gMenuItem.Language = 0;
                 }
 
                 if (gMenuItem.ActionMenuID != 0 && gMenuItem.OptionNpc != GossipOptionNpc.None)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} can not use ActionMenuID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} can not use ActionMenuID " +
+                        $"for GossipOptionNpc different from GossipOptionNpc.None, ignoring.");
                     gMenuItem.ActionMenuID = 0;
                 }
 
@@ -605,12 +611,14 @@ namespace Game
                 {
                     if (gMenuItem.OptionNpc != GossipOptionNpc.None)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} can not use ActionPoiID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} can not use ActionPoiID " +
+                            $"for GossipOptionNpc different from GossipOptionNpc.None, ignoring.");
                         gMenuItem.ActionPoiID = 0;
                     }
                     else if (GetPointOfInterest(gMenuItem.ActionPoiID) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing ActionPoiID {gMenuItem.ActionPoiID}, ignoring");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing " +
+                            $"ActionPoiID {gMenuItem.ActionPoiID}, ignoring.");
                         gMenuItem.ActionPoiID = 0;
                     }
                 }
@@ -619,31 +627,34 @@ namespace Game
                 {
                     if (!CliDB.GossipNPCOptionStorage.ContainsKey(gMenuItem.GossipNpcOptionID.Value))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing GossipNPCOption {gMenuItem.GossipNpcOptionID}, ignoring");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing " +
+                            $"GossipNPCOption {gMenuItem.GossipNpcOptionID}, ignoring.");
                         gMenuItem.GossipNpcOptionID = null;
                     }
                 }
                 else
                 {
-                    uint npcOptionId = optionToNpcOption.LookupByKey(gMenuItem.GossipOptionID);
+                    int npcOptionId = optionToNpcOption.LookupByKey(gMenuItem.GossipOptionID);
                     if (npcOptionId != 0)
-                        gMenuItem.GossipNpcOptionID = (int)npcOptionId;
+                        gMenuItem.GossipNpcOptionID = npcOptionId;
                 }
 
                 if (gMenuItem.BoxBroadcastTextId != 0)
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.BoxBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuID}, OptionIndex {gMenuItem.OrderIndex} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuID}, OptionIndex {gMenuItem.OrderIndex} has " +
+                            $"non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
                         gMenuItem.BoxBroadcastTextId = 0;
                     }
                 }
 
                 if (gMenuItem.SpellID.HasValue)
                 {
-                    if (!Global.SpellMgr.HasSpellInfo((uint)gMenuItem.SpellID.Value, Difficulty.None))
+                    if (!Global.SpellMgr.HasSpellInfo(gMenuItem.SpellID.Value, Difficulty.None))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing Spell {gMenuItem.SpellID}, ignoring");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing " +
+                            $"Spell {gMenuItem.SpellID}, ignoring.");
                         gMenuItem.SpellID = null;
                     }
                 }
@@ -651,7 +662,7 @@ namespace Game
                 gossipMenuItemsStorage.Add(gMenuItem.MenuID, gMenuItem);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {gossipMenuItemsStorage.Count} gossip_menu_option entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {gossipMenuItemsStorage.Count} gossip_menu_option entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadGossipMenuAddon()
@@ -670,7 +681,7 @@ namespace Game
 
             do
             {
-                uint menuID = result.Read<uint>(0);
+                int menuID = result.Read<int>(0);
                 GossipMenuAddon addon = new();
                 addon.FriendshipFactionID = result.Read<int>(1);
 
@@ -679,58 +690,22 @@ namespace Game
                 {
                     if (!CliDB.FriendshipReputationStorage.ContainsKey(faction.FriendshipRepID))
                     {
-                        Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using FriendshipFactionID {addon.FriendshipFactionID} referencing non-existing FriendshipRepID {faction.FriendshipRepID}");
+                        Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using FriendshipFactionID {addon.FriendshipFactionID} " +
+                            $"referencing non-existing FriendshipRepID {faction.FriendshipRepID}.");
                         addon.FriendshipFactionID = 0;
                     }
                 }
                 else
                 {
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using non-existing FriendshipFactionID {addon.FriendshipFactionID}");
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using non-existing FriendshipFactionID {addon.FriendshipFactionID}.");
                     addon.FriendshipFactionID = 0;
                 }
 
                 _gossipMenuAddonStorage[menuID] = addon;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gossipMenuAddonStorage.Count} gossip_menu_addon IDs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-        }
-
-        public void LoadGossipMenuItemAddon()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            _gossipMenuItemAddonStorage.Clear();
-
-            //                                         0       1         2
-            using var result = DB.World.Query("SELECT MenuID, OptionId, GarrTalentTreeID FROM gossip_menu_option_addon");
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gossip_menu_option_addon IDs. DB table `gossip_menu_option_addon` is empty!");
-                return;
-            }
-
-            do
-            {
-                uint menuId = result.Read<uint>(0);
-                uint optionId = result.Read<uint>(1);
-                GossipMenuItemAddon  addon = new();
-                if (!result.IsNull(2))
-                {
-                    addon.GarrTalentTreeID = result.Read<int>(2);
-
-                    if (!CliDB.GarrTalentTreeStorage.ContainsKey(addon.GarrTalentTreeID.Value))
-                    {
-                        Log.outError(LogFilter.Sql, $"Table gossip_menu_option_addon: MenuID {menuId} OptionID {optionId} is using non-existing GarrTalentTree {addon.GarrTalentTreeID.Value}");
-                        addon.GarrTalentTreeID = null;
-                    }
-                }
-
-                _gossipMenuItemAddonStorage[Tuple.Create(menuId, optionId)] = addon;
-
-            } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gossipMenuItemAddonStorage.Count} gossip_menu_option_addon IDs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-        }
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gossipMenuAddonStorage.Count} gossip_menu_addon IDs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+        }        
 
         public void LoadPointsOfInterest()
         {
@@ -749,7 +724,7 @@ namespace Game
             uint count = 0;
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
 
                 PointOfInterest POI = new();
                 POI.Id = id;
@@ -771,25 +746,25 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Points of Interest definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Points of Interest definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public List<GossipMenus> GetGossipMenusMapBounds(uint uiMenuId)
+        public List<GossipMenus> GetGossipMenusMapBounds(int uiMenuId)
         {
             return gossipMenusStorage.LookupByKey(uiMenuId);
         }
 
-        public List<GossipMenuItems> GetGossipMenuItemsMapBounds(uint uiMenuId)
+        public List<GossipMenuItems> GetGossipMenuItemsMapBounds(int uiMenuId)
         {
             return gossipMenuItemsStorage.LookupByKey(uiMenuId);
         }
 
-        public GossipMenuAddon GetGossipMenuAddon(uint menuId)
+        public GossipMenuAddon GetGossipMenuAddon(int menuId)
         {
             return _gossipMenuAddonStorage.LookupByKey(menuId);
         }
 
-        public PointOfInterest GetPointOfInterest(uint id)
+        public PointOfInterest GetPointOfInterest(int id)
         {
             return pointsOfInterestStorage.LookupByKey(id);
         }
@@ -813,7 +788,7 @@ namespace Game
 
             do
             {
-                uint safeLocId = result.Read<uint>(0);
+                int safeLocId = result.Read<int>(0);
                 int zoneId = result.Read<int>(1);
 
                 WorldSafeLocsEntry entry = GetWorldSafeLoc(safeLocId);
@@ -836,7 +811,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} graveyard-zone links in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} graveyard-zone links in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadWorldSafeLocs()
@@ -853,11 +828,11 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 WorldLocation loc = new(result.Read<int>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), MathFunctions.DegToRad(result.Read<float>(5)));
                 if (!GridDefines.IsValidMapCoord(loc))
                 {
-                    Log.outError(LogFilter.Sql, $"World location (ID: {id}) has a invalid position MapID: {loc.GetMapId()} {loc}, skipped");
+                    Log.outError(LogFilter.Sql, $"World location (ID: {id}) has a invalid position MapID: {loc.GetMapId()} {loc}, skipped.");
                     continue;
                 }
 
@@ -868,15 +843,15 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldSafeLocs.Count} world locations {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldSafeLocs.Count} world locations {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public WorldSafeLocsEntry GetDefaultGraveyard(Team team)
         {            
             if (team == Team.Horde)
-                return GetWorldSafeLoc((uint)DefaultGraveyard.HORDE_GRAVEYARD);
+                return GetWorldSafeLoc((int)DefaultGraveyard.HORDE_GRAVEYARD);
             else if (team == Team.Alliance)
-                return GetWorldSafeLoc((uint)DefaultGraveyard.ALLIANCE_GRAVEYARD);
+                return GetWorldSafeLoc((int)DefaultGraveyard.ALLIANCE_GRAVEYARD);
             else return null;
         }
 
@@ -891,7 +866,7 @@ namespace Game
             {
                 if (pos.Z > -500)
                 {
-                    Log.outError(LogFilter.Server, $"ZoneId not found for map {MapId} coords ({pos.X}, {pos.Y}, {pos.Z})");
+                    Log.outError(LogFilter.Server, $"ZoneId not found for map {MapId} coords ({pos.X}, {pos.Y}, {pos.Z}).");
                     return GetDefaultGraveyard(team);
                 }
             }
@@ -1053,7 +1028,7 @@ namespace Game
             return entryFar;
         }
 
-        public GraveyardData FindGraveyardData(uint id, int zoneId)
+        public GraveyardData FindGraveyardData(int id, int zoneId)
         {
             var range = GraveyardStorage.LookupByKey(zoneId);
             foreach (var data in range)
@@ -1064,17 +1039,17 @@ namespace Game
             return null;
         }
 
-        public WorldSafeLocsEntry GetWorldSafeLoc(uint id)
+        public WorldSafeLocsEntry GetWorldSafeLoc(int id)
         {
             return _worldSafeLocs.LookupByKey(id);
         }
 
-        public Dictionary<uint, WorldSafeLocsEntry> GetWorldSafeLocs()
+        public Dictionary<int, WorldSafeLocsEntry> GetWorldSafeLocs()
         {
             return _worldSafeLocs;
         }
 
-        public bool AddGraveyardLink(uint id, int zoneId, Team team, bool persist = true)
+        public bool AddGraveyardLink(int id, int zoneId, Team team, bool persist = true)
         {
             if (FindGraveyardData(id, zoneId) != null)
                 return false;
@@ -1155,7 +1130,7 @@ namespace Game
                 areaTriggerScriptStorage[triggerId] = GetScriptId(scriptName);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} areatrigger scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} areatrigger scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         void LoadScripts(ScriptsType type)
@@ -1191,9 +1166,9 @@ namespace Game
             {
                 ScriptInfo tmp = new();
                 tmp.type = type;
-                tmp.id = result.Read<uint>(0);
+                tmp.id = result.Read<int>(0);
                 if (isSpellScriptTable)
-                    tmp.id |= result.Read<uint>(10) << 24;
+                    tmp.id |= result.Read<int>(10) << 24;
                 tmp.delay = result.Read<uint>(1);
                 tmp.command = (ScriptCommands)result.Read<uint>(2);
                 unsafe
@@ -1215,13 +1190,13 @@ namespace Game
                             if (tmp.Talk.ChatType > ChatMsg.RaidBossWhisper)
                             {
                                 Log.outError(LogFilter.Sql,
-                                    $"Table `{tableName}` has invalid talk Type (datalong = {tmp.Talk.ChatType}) in SCRIPT_COMMAND_TALK for script id {tmp.id}");
+                                    $"Table `{tableName}` has invalid talk Type (datalong = {tmp.Talk.ChatType}) in SCRIPT_COMMAND_TALK for script id {tmp.id}.");
                                 continue;
                             }
                             if (!CliDB.BroadcastTextStorage.ContainsKey(tmp.Talk.TextID))
                             {
                                 Log.outError(LogFilter.Sql,
-                                    $"Table `{tableName}` has invalid talk text id (dataint = {tmp.Talk.TextID}) in SCRIPT_COMMAND_TALK for script id {tmp.id}");
+                                    $"Table `{tableName}` has invalid talk text id (dataint = {tmp.Talk.TextID}) in SCRIPT_COMMAND_TALK for script id {tmp.id}.");
                                 continue;
                             }
                             break;
@@ -1232,7 +1207,7 @@ namespace Game
                             if (!CliDB.EmotesStorage.ContainsKey(tmp.Emote.EmoteID))
                             {
                                 Log.outError(LogFilter.Sql,
-                                    $"Table `{tableName}` has invalid emote id (datalong = {tmp.Emote.EmoteID}) in SCRIPT_COMMAND_EMOTE for script id {tmp.id}");
+                                    $"Table `{tableName}` has invalid emote id (datalong = {tmp.Emote.EmoteID}) in SCRIPT_COMMAND_EMOTE for script id {tmp.id}.");
                                 continue;
                             }
                             break;
@@ -1243,14 +1218,14 @@ namespace Game
                             if (!CliDB.MapStorage.ContainsKey(tmp.TeleportTo.MapID))
                             {
                                 Log.outError(LogFilter.Sql,
-                                    $"Table `{tableName}` has invalid map (Id: {tmp.TeleportTo.MapID}) in SCRIPT_COMMAND_TELEPORT_TO for script id {tmp.id}");
+                                    $"Table `{tableName}` has invalid map (Id: {tmp.TeleportTo.MapID}) in SCRIPT_COMMAND_TELEPORT_TO for script id {tmp.id}.");
                                 continue;
                             }
 
                             if (!GridDefines.IsValidMapCoord(tmp.TeleportTo.DestX, tmp.TeleportTo.DestY, tmp.TeleportTo.DestZ, tmp.TeleportTo.Orientation))
                             {
                                 Log.outError(LogFilter.Sql, $"Table `{tableName}` has invalid coordinates (X: {tmp.TeleportTo.DestX} Y: {tmp.TeleportTo.DestY} " +
-                                    $"Z: {tmp.TeleportTo.DestZ} O: {tmp.TeleportTo.Orientation}) in SCRIPT_COMMAND_TELEPORT_TO for script id {tmp.id}");
+                                    $"Z: {tmp.TeleportTo.DestZ} O: {tmp.TeleportTo.Orientation}) in SCRIPT_COMMAND_TELEPORT_TO for script id {tmp.id}.");
                                 continue;
                             }
                             break;
@@ -1262,7 +1237,7 @@ namespace Game
                         if (quest == null)
                         {
                             Log.outError(LogFilter.Sql,
-                                $"Table `{tableName}` has invalid quest (ID: {tmp.QuestExplored.QuestID}) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {tmp.id}");
+                                $"Table `{tableName}` has invalid quest (ID: {tmp.QuestExplored.QuestID}) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {tmp.id}.");
                             continue;
                         }
 
@@ -1277,7 +1252,7 @@ namespace Game
                         if (tmp.QuestExplored.Distance > SharedConst.DefaultVisibilityDistance)
                         {
                             Log.outError(LogFilter.Sql, $"Table `{tableName}` has too large distance ({tmp.QuestExplored.Distance}) for exploring objective complete in " +
-                                $"`datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {tmp.id}");
+                                $"`datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {tmp.id}.");
                             continue;
                         }
 
@@ -1285,7 +1260,7 @@ namespace Game
                         {
                             Log.outError(LogFilter.Sql, $"Table `{tableName}` has too large distance ({tmp.QuestExplored.Distance}) for exploring objective complete in " +
                                 $"`datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {tmp.id}, max distance is {SharedConst.DefaultVisibilityDistance} " +
-                                "or 0 for disable distance check");
+                                "or 0 for disable distance check.");
                             continue;
                         }
 
@@ -1293,7 +1268,7 @@ namespace Game
                         {
                             Log.outError(LogFilter.Sql, $"Table `{tableName}` has too small distance ({tmp.QuestExplored.Distance}) for exploring objective complete in " +
                                 $"`datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {tmp.id}, min distance is {SharedConst.InteractionDistance} " +
-                                "or 0 for disable distance check");
+                                "or 0 for disable distance check.");
                             continue;
                         }
 
@@ -1305,7 +1280,7 @@ namespace Game
                             if (GetCreatureTemplate(tmp.KillCredit.CreatureEntry) == null)
                             {
                                 Log.outError(LogFilter.Sql, $"Table `{tableName}` has invalid creature (Entry: {tmp.KillCredit.CreatureEntry}) in " +
-                                    $"SCRIPT_COMMAND_KILL_CREDIT for script id {tmp.id}");
+                                    $"SCRIPT_COMMAND_KILL_CREDIT for script id {tmp.id}.");
                                 continue;
                             }
                             break;
@@ -1317,7 +1292,7 @@ namespace Game
                         if (data == null)
                         {
                             Log.outError(LogFilter.Sql, $"Table `{tableName}` has invalid gameobject (GUID: {tmp.RespawnGameObject.GOGuid}) in " +
-                                $"SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {tmp.id}");
+                                $"SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {tmp.id}.");
                             continue;
                         }
 
@@ -1325,7 +1300,7 @@ namespace Game
                         if (info == null)
                         {
                             Log.outError(LogFilter.Sql, $"Table `{tableName}` has gameobject with invalid entry (GUID: {tmp.RespawnGameObject.GOGuid} Entry: {data.Id}) in " +
-                                $"SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {tmp.id}");
+                                $"SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {tmp.id}.");
                             continue;
                         }
 
@@ -1336,7 +1311,7 @@ namespace Game
                             info.type == GameObjectTypes.Trap)
                         {
                             Log.outError(LogFilter.Sql, $"Table `{tableName}` have gameobject Type ({info.entry}) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT " +
-                                $"for script id {tmp.id}");
+                                $"for script id {tmp.id}.");
                             continue;
                         }
                         break;
@@ -1347,14 +1322,14 @@ namespace Game
                             if (!GridDefines.IsValidMapCoord(tmp.TempSummonCreature.PosX, tmp.TempSummonCreature.PosY, tmp.TempSummonCreature.PosZ, tmp.TempSummonCreature.Orientation))
                             {
                                 Log.outError(LogFilter.Sql, $"Table `{tableName}` has invalid coordinates (X: {tmp.TempSummonCreature.PosX} Y: {tmp.TempSummonCreature.PosY} " +
-                                    $"Z: {tmp.TempSummonCreature.PosZ} O: {tmp.TempSummonCreature.Orientation}) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {tmp.id}");
+                                    $"Z: {tmp.TempSummonCreature.PosZ} O: {tmp.TempSummonCreature.Orientation}) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {tmp.id}.");
                                 continue;
                             }
 
                             if (GetCreatureTemplate(tmp.TempSummonCreature.CreatureEntry) == null)
                             {
                                 Log.outError(LogFilter.Sql, $"Table `{tableName}` has invalid creature (Entry: {tmp.TempSummonCreature.CreatureEntry}) in " +
-                                    $"SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {tmp.id}");
+                                    $"SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {tmp.id}.");
                                 continue;
                             }
                             break;
@@ -1367,7 +1342,7 @@ namespace Game
                             if (data == null)
                             {
                                 Log.outError(LogFilter.Sql, 
-                                    $"Table `{tableName}` has invalid gameobject (GUID: {tmp.ToggleDoor.GOGuid}) in {tmp.command} for script id {tmp.id}");
+                                    $"Table `{tableName}` has invalid gameobject (GUID: {tmp.ToggleDoor.GOGuid}) in {tmp.command} for script id {tmp.id}.");
                                 continue;
                             }
 
@@ -1376,14 +1351,14 @@ namespace Game
                             {
                                 Log.outError(LogFilter.Sql, 
                                     $"Table `{tableName}` has gameobject with invalid entry (GUID: {tmp.ToggleDoor.GOGuid} Entry: {data.Id}) in {tmp.command} " +
-                                    $"for script id {tmp.id}");
+                                    $"for script id {tmp.id}.");
                                 continue;
                             }
 
                             if (info.type != GameObjectTypes.Door)
                             {
                                 Log.outError(LogFilter.Sql, 
-                                    $"Table `{tableName}` has gameobject Type ({info.entry}) non supported by command {tmp.command} for script id {tmp.id}");
+                                    $"Table `{tableName}` has gameobject Type ({info.entry}) non supported by command {tmp.command} for script id {tmp.id}.");
                                 continue;
                             }
 
@@ -1395,13 +1370,13 @@ namespace Game
                             if (!Global.SpellMgr.HasSpellInfo(tmp.RemoveAura.SpellID, Difficulty.None))
                             {
                                 Log.outError(LogFilter.Sql, 
-                                    $"Table `{tableName}` using non-existent spell (id: {tmp.RemoveAura.SpellID}) in SCRIPT_COMMAND_REMOVE_AURA for script id {tmp.id}");
+                                    $"Table `{tableName}` using non-existent spell (id: {tmp.RemoveAura.SpellID}) in SCRIPT_COMMAND_REMOVE_AURA for script id {tmp.id}.");
                                 continue;
                             }
                             if (tmp.RemoveAura.Flags.HasAnyFlag(~eScriptFlags.AllRemoveAura))
                             {
                                 Log.outError(LogFilter.Sql, 
-                                    $"Table `{tableName}` using unknown flags in datalong2 ({tmp.RemoveAura.Flags}) in SCRIPT_COMMAND_REMOVE_AURA for script id {tmp.id}");
+                                    $"Table `{tableName}` using unknown flags in datalong2 ({tmp.RemoveAura.Flags}) in SCRIPT_COMMAND_REMOVE_AURA for script id {tmp.id}.");
                                 continue;
                             }
                             break;
@@ -1412,25 +1387,25 @@ namespace Game
                         if (!Global.SpellMgr.HasSpellInfo(tmp.CastSpell.SpellID, Difficulty.None))
                         {
                             Log.outError(LogFilter.Sql,
-                                $"Table `{tableName}` using non-existent spell (id: {tmp.CastSpell.SpellID}) in SCRIPT_COMMAND_CAST_SPELL for script id {tmp.id}");
+                                $"Table `{tableName}` using non-existent spell (id: {tmp.CastSpell.SpellID}) in SCRIPT_COMMAND_CAST_SPELL for script id {tmp.id}.");
                             continue;
                         }
                         if (tmp.CastSpell.Flags > eScriptFlags.CastSpellTargetLast)                      // targeting Type
                         {
                             Log.outError(LogFilter.Sql,
-                                $"Table `{tableName}` using unknown target in datalong2 ({tmp.CastSpell.Flags}) in SCRIPT_COMMAND_CAST_SPELL for script id {tmp.id}");
+                                $"Table `{tableName}` using unknown target in datalong2 ({tmp.CastSpell.Flags}) in SCRIPT_COMMAND_CAST_SPELL for script id {tmp.id}.");
                             continue;
                         }
                         if (tmp.CastSpell.Flags != eScriptFlags.CastspellSearchCreature && tmp.CastSpell.CreatureEntry.HasAnyFlag(~(int)eScriptFlags.AllCastspell))                      // 1 bit (0, 1)
                         {
                             Log.outError(LogFilter.Sql,
-                                $"Table `{tableName}` using unknown flags in dataint ({tmp.CastSpell.CreatureEntry}) in SCRIPT_COMMAND_CAST_SPELL for script id {tmp.id}");
+                                $"Table `{tableName}` using unknown flags in dataint ({tmp.CastSpell.CreatureEntry}) in SCRIPT_COMMAND_CAST_SPELL for script id {tmp.id}.");
                             continue;
                         }
                         else if (tmp.CastSpell.Flags == eScriptFlags.CastSpellTargetLast && GetCreatureTemplate(tmp.CastSpell.CreatureEntry) == null)
                         {
                             Log.outError(LogFilter.Sql,
-                                $"Table `{tableName}` using invalid creature entry in dataint ({tmp.CastSpell.CreatureEntry}) in SCRIPT_COMMAND_CAST_SPELL for script id {tmp.id}");
+                                $"Table `{tableName}` using invalid creature entry in dataint ({tmp.CastSpell.CreatureEntry}) in SCRIPT_COMMAND_CAST_SPELL for script id {tmp.id}.");
                             continue;
                         }
                         break;
@@ -1441,13 +1416,13 @@ namespace Game
                             if (GetItemTemplate(tmp.CreateItem.ItemEntry) == null)
                             {
                                 Log.outError(LogFilter.Sql, 
-                                    $"Table `{tableName}` has nonexistent item (entry: {tmp.CreateItem.ItemEntry}) in SCRIPT_COMMAND_CREATE_ITEM for script id {tmp.id}");
+                                    $"Table `{tableName}` has nonexistent item (entry: {tmp.CreateItem.ItemEntry}) in SCRIPT_COMMAND_CREATE_ITEM for script id {tmp.id}.");
                                 continue;
                             }
                             if (tmp.CreateItem.Amount == 0)
                             {
                                 Log.outError(LogFilter.Sql, 
-                                    $"Table `{tableName}` SCRIPT_COMMAND_CREATE_ITEM but amount is {tmp.CreateItem.Amount} for script id {tmp.id}");
+                                    $"Table `{tableName}` SCRIPT_COMMAND_CREATE_ITEM but amount is {tmp.CreateItem.Amount} for script id {tmp.id}.");
                                 continue;
                             }
                             break;
@@ -1457,7 +1432,7 @@ namespace Game
                             if (!CliDB.AnimKitStorage.ContainsKey(tmp.PlayAnimKit.AnimKitID))
                             {
                                 Log.outError(LogFilter.Sql, 
-                                    $"Table `{tableName}` has invalid AnimKid id (datalong = {tmp.PlayAnimKit.AnimKitID}) in SCRIPT_COMMAND_PLAY_ANIMKIT for script id {tmp.id}");
+                                    $"Table `{tableName}` has invalid AnimKid id (datalong = {tmp.PlayAnimKit.AnimKitID}) in SCRIPT_COMMAND_PLAY_ANIMKIT for script id {tmp.id}.");
                                 continue;
                             }
                             break;
@@ -1466,7 +1441,7 @@ namespace Game
                     case ScriptCommands.FlagSetDeprecated:
                     case ScriptCommands.FlagRemoveDeprecated:
                         {
-                            Log.outError(LogFilter.Sql, $"Table `{tableName}` uses deprecated direct updatefield modify command {tmp.command} for script id {tmp.id}");
+                            Log.outError(LogFilter.Sql, $"Table `{tableName}` uses deprecated direct updatefield modify command {tmp.command} for script id {tmp.id}.");
                             continue;
                         }
                     default:
@@ -1532,7 +1507,7 @@ namespace Game
                     {
                         if (spellEffectInfo.IsEffect(SpellEffectName.SendEvent))
                             if (spellEffectInfo.MiscValue != 0)
-                                _eventStorage.Add((uint)spellEffectInfo.MiscValue);
+                                _eventStorage.Add(spellEffectInfo.MiscValue);
                     }
                 }
             }
@@ -1557,7 +1532,7 @@ namespace Game
             {
                 foreach (Criteria criteria in criteriaList)
                     if (criteria.Entry.Asset != 0)
-                        _eventStorage.Add((uint)criteria.Entry.Asset);
+                        _eventStorage.Add(criteria.Entry.Asset);
             };
 
             CriteriaType[] eventCriteriaTypes = { CriteriaType.PlayerTriggerGameEvent, CriteriaType.AnyoneTriggerGameEventScenario };
@@ -1574,11 +1549,11 @@ namespace Game
 
             foreach (var (gameEventId, _) in Global.CriteriaMgr.GetCriteriaByStartEvent(CriteriaStartEvent.SendEvent))
                 if (gameEventId != 0)
-                    _eventStorage.Add((uint)gameEventId);
+                    _eventStorage.Add(gameEventId);
 
             foreach (var (gameEventId, _) in Global.CriteriaMgr.GetCriteriaByFailEvent(CriteriaFailEvent.SendEvent))
                 if (gameEventId != 0)
-                    _eventStorage.Add((uint)gameEventId);
+                    _eventStorage.Add(gameEventId);
         }
 
         public void LoadEventScripts()
@@ -1594,7 +1569,7 @@ namespace Game
             {
                 if (!IsValidEvent(script.Key))
                     Log.outError(LogFilter.Sql, $"Table `event_scripts` has script (Id: {script.Key}) not referring to any gameobject_template " +
-                        $"(data field referencing GameEvent), any taxi path node or any spell effect {SpellEffectName.SendEvent}");
+                        $"(data field referencing GameEvent), any taxi path node or any spell effect {SpellEffectName.SendEvent}.");
             }
 
             uint oldMSTime = Time.GetMSTime();
@@ -1610,47 +1585,19 @@ namespace Game
 
             do
             {
-                uint eventId = result.Read<uint>(0);
+                int eventId = result.Read<int>(0);
                 string scriptName = result.Read<string>(1);
 
                 if (!IsValidEvent(eventId))
                 {
                     Log.outError(LogFilter.Sql, $"Event (ID: {eventId}) not referring to any gameobject_template (data field referencing GameEvent), " +
-                        $"any taxi path node or any spell effect {SpellEffectName.SendEvent}");
+                        $"any taxi path node or any spell effect {SpellEffectName.SendEvent}.");
                     continue;
                 }
                 _eventScriptStorage[eventId] = GetScriptId(scriptName);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_eventScriptStorage.Count} event scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-        }
-
-        //Load WP Scripts
-        public void LoadWaypointScripts()
-        {
-            LoadScripts(ScriptsType.Waypoint);
-
-            List<uint> actionSet = new();
-
-            foreach (var script in sWaypointScripts)
-                actionSet.Add(script.Key);
-
-            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_ACTION);
-            using var result = DB.World.Query(stmt);
-
-            if (!result.IsEmpty())
-            {
-                do
-                {
-                    uint action = result.Read<uint>(0);
-
-                    actionSet.Remove(action);
-                }
-                while (result.NextRow());
-            }
-
-            foreach (var id in actionSet)
-                Log.outError(LogFilter.Sql, "There is no waypoint which links to the waypoint script {0}", id);
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_eventScriptStorage.Count} event scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadSpellScriptNames()
@@ -1742,7 +1689,7 @@ namespace Game
 
                     if (spellScript == null)
                     {
-                        Log.outError(LogFilter.Scripts, $"Functions GetSpellScript() of script `{GetScriptName(pair.Value)}` do not return object - script skipped");
+                        Log.outError(LogFilter.Scripts, $"Functions GetSpellScript() of script `{GetScriptName(pair.Value)}` do not return object - script skipped.");
                         valid = false;
                     }
 
@@ -1766,7 +1713,7 @@ namespace Game
 
                     if (auraScript == null)
                     {
-                        Log.outError(LogFilter.Scripts, $"Functions GetAuraScript() of script `{GetScriptName(pair.Value)}` do not return object - script skipped");
+                        Log.outError(LogFilter.Scripts, $"Functions GetAuraScript() of script `{GetScriptName(pair.Value)}` do not return object - script skipped.");
                         valid = false;
                     }
 
@@ -1784,20 +1731,20 @@ namespace Game
                 ++count;
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Validated {count} scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Validated {count} scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public bool IsValidEvent(uint eventId)
+        public bool IsValidEvent(int eventId)
         {
             return _eventStorage.Contains(eventId);
         }
 
-        public List<uint> GetSpellScriptsBounds(uint spellId)
+        public List<int> GetSpellScriptsBounds(int spellId)
         {
-            return spellScriptsStorage.LookupByKey((int)spellId);
+            return spellScriptsStorage.LookupByKey(spellId);
         }
 
-        public uint GetEventScriptId(uint eventId)
+        public int GetEventScriptId(int eventId)
         {
             return _eventScriptStorage.LookupByKey(eventId);
         }
@@ -1825,17 +1772,17 @@ namespace Game
             return false;
         }
 
-        public uint GetScriptId(string name, bool isDatabaseBound = true)
+        public int GetScriptId(string name, bool isDatabaseBound = true)
         {
             return _scriptNamesStorage.Insert(name, isDatabaseBound);
         }
 
-        public uint GetAreaTriggerScriptId(uint triggerid)
+        public int GetAreaTriggerScriptId(int triggerid)
         {
             return areaTriggerScriptStorage.LookupByKey(triggerid);
         }
 
-        public Dictionary<uint, MultiMap<uint, ScriptInfo>> GetScriptsMapByType(ScriptsType type)
+        public Dictionary<int, MultiMap<uint, ScriptInfo>> GetScriptsMapByType(ScriptsType type)
         {
             switch (type)
             {
@@ -1905,40 +1852,40 @@ namespace Game
 
         public void LoadCreatureTemplate(SQLFields fields)
         {
-            uint entry = fields.Read<uint>(0);
+            int entry = fields.Read<int>(0);
 
             CreatureTemplate creature = new();
             creature.Entry = entry;
 
             for (var i = 0; i < 2; ++i)
-                creature.KillCredit[i] = fields.Read<uint>(1 + i);
+                creature.KillCredit[i] = fields.Read<int>(1 + i);
 
             creature.Name = fields.Read<string>(3);
             creature.FemaleName = fields.Read<string>(4);
             creature.SubName = fields.Read<string>(5);
             creature.TitleAlt = fields.Read<string>(6);
             creature.IconName = fields.Read<string>(7);
-            creature.RequiredExpansion = fields.Read<uint>(8);
-            creature.VignetteID = fields.Read<uint>(9);
-            creature.Faction = fields.Read<uint>(10);
-            creature.Npcflag = fields.Read<ulong>(11);
+            creature.RequiredExpansion = (Expansion)fields.Read<int>(8);
+            creature.VignetteID = fields.Read<int>(9);
+            creature.Faction = fields.Read<int>(10);
+            creature.Npcflag = (NPCFlags)fields.Read<long>(11);
             creature.SpeedWalk = fields.Read<float>(12);
             creature.SpeedRun = fields.Read<float>(13);
             creature.Scale = fields.Read<float>(14);
-            creature.Rank = (CreatureEliteType)fields.Read<uint>(15);
-            creature.DmgSchool = fields.Read<uint>(16);
+            creature.Rank = (CreatureEliteType)fields.Read<int>(15);
+            creature.DmgSchool = (SpellSchools)fields.Read<int>(16);
             creature.BaseAttackTime = fields.Read<uint>(17);
             creature.RangeAttackTime = fields.Read<uint>(18);
             creature.BaseVariance = fields.Read<float>(19);
             creature.RangeVariance = fields.Read<float>(20);
-            creature.UnitClass = fields.Read<uint>(21);
+            creature.UnitClass = (Class)fields.Read<int>(21);
             creature.UnitFlags = (UnitFlags)fields.Read<uint>(22);
-            creature.UnitFlags2 = fields.Read<uint>(23);
-            creature.UnitFlags3 = fields.Read<uint>(24);
+            creature.UnitFlags2 = (UnitFlags2)fields.Read<uint>(23);
+            creature.UnitFlags3 = (UnitFlags3)fields.Read<uint>(24);
             creature.Family = (CreatureFamily)fields.Read<uint>(25);
             creature.TrainerClass = (Class)fields.Read<byte>(26);
             creature.CreatureType = (CreatureType)fields.Read<byte>(27);
-            creature.PetSpellDataId = fields.Read<uint>(28);
+            creature.PetSpellDataId = fields.Read<int>(28);
 
             for (var i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
                 creature.Resistance[i] = 0;
@@ -1946,9 +1893,9 @@ namespace Game
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 creature.Spells[i] = 0;
 
-            creature.VehicleId = fields.Read<uint>(29);
+            creature.VehicleId = fields.Read<int>(29);
             creature.AIName = fields.Read<string>(30);
-            creature.MovementType = fields.Read<uint>(31);
+            creature.MovementType = (MovementGeneratorType)fields.Read<int>(31);
 
             if (!fields.IsNull(32))
                 creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(32);
@@ -1974,12 +1921,12 @@ namespace Game
             creature.ModExperience = fields.Read<float>(39);
             creature.Civilian = fields.Read<bool>(40);
             creature.RacialLeader = fields.Read<bool>(41);
-            creature.MovementId = fields.Read<uint>(42);
+            creature.MovementId = fields.Read<int>(42);
             creature.WidgetSetID = fields.Read<int>(43);
             creature.WidgetSetUnitConditionID = fields.Read<int>(44);
             creature.RegenHealth = fields.Read<bool>(45);
             creature.MechanicImmuneMask = fields.Read<ulong>(46);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(47);
+            creature.SpellSchoolImmuneMask = (SpellSchoolMask)fields.Read<int>(47);
             creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(48);
             creature.ScriptID = GetScriptId(fields.Read<string>(49));
             creature.StringId = fields.Read<string>(50);
@@ -2003,20 +1950,20 @@ namespace Game
 
             do
             {
-                uint creatureID = result.Read<uint>(0);
-                uint menuID = result.Read<uint>(1);
+                int creatureID = result.Read<int>(0);
+                int menuID = result.Read<int>(1);
 
                 var creatureTemplate = creatureTemplateStorage.LookupByKey(creatureID);
                 if (creatureTemplate == null)
                 {
-                    Log.outError(LogFilter.Sql, $"creature_template_gossip has gossip definitions for creature {creatureID} but this creature doesn't exist");
+                    Log.outError(LogFilter.Sql, $"creature_template_gossip has gossip definitions for creature {creatureID} but this creature doesn't exist.");
                     continue;
                 }
 
                 var menuBounds = GetGossipMenusMapBounds(menuID);
                 if (menuBounds.Empty())
                 {
-                    Log.outError(LogFilter.Sql, $"creature_template_gossip has gossip definitions for menu id {menuID} but this menu doesn't exist");
+                    Log.outError(LogFilter.Sql, $"creature_template_gossip has gossip definitions for menu id {menuID} but this menu doesn't exist.");
                     continue;
                 }
 
@@ -2026,7 +1973,7 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template gossip menus in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template gossip menus in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         void LoadCreatureTemplateResistances()
@@ -2045,17 +1992,17 @@ namespace Game
 
             do
             {
-                uint creatureID = result.Read<uint>(0);
+                int creatureID = result.Read<int>(0);
                 SpellSchools school = (SpellSchools)result.Read<byte>(1);
                 if (school == SpellSchools.Normal || school >= SpellSchools.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this school {school} doesn't exist");
+                    Log.outError(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this school {school} doesn't exist.");
                     continue;
                 }
 
                 if (creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
                 {
-                    Log.outError(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this creature doesn't exist");
+                    Log.outError(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this creature doesn't exist.");
                     continue;
                 }
 
@@ -2065,7 +2012,7 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template resistances in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template resistances in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         void LoadCreatureTemplateSpells()
@@ -2084,28 +2031,28 @@ namespace Game
 
             do
             {
-                uint creatureID = result.Read<uint>(0);
+                int creatureID = result.Read<int>(0);
                 byte index = result.Read<byte>(1);
 
                 if (index >= SharedConst.MaxCreatureSpells)
                 {
-                    Log.outError(LogFilter.Sql, $"creature_template_spell has spell definitions for creature {creatureID} with a incorrect index {index}");
+                    Log.outError(LogFilter.Sql, $"creature_template_spell has spell definitions for creature {creatureID} with a incorrect index {index}.");
                     continue;
                 }
 
                 if (creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
                 {
-                    Log.outError(LogFilter.Sql, $"creature_template_spell has spell definitions for creature {creatureID} but this creature doesn't exist");
+                    Log.outError(LogFilter.Sql, $"creature_template_spell has spell definitions for creature {creatureID} but this creature doesn't exist.");
                     continue;
                 }
 
-                creatureTemplate.Spells[index] = result.Read<uint>(2);
+                creatureTemplate.Spells[index] = result.Read<int>(2);
 
                 ++count;
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template spells in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template spells in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         void LoadCreatureTemplateModels()
@@ -2122,7 +2069,7 @@ namespace Game
             uint count = 0;
             do
             {
-                uint creatureId = result.Read<uint>(0);
+                int creatureId = result.Read<int>(0);
                 int creatureDisplayId = result.Read<int>(1);
                 float displayScale = result.Read<float>(2);
                 float probability = result.Read<float>(3);
@@ -2130,7 +2077,7 @@ namespace Game
                 CreatureTemplate cInfo = GetCreatureTemplate(creatureId);
                 if (cInfo == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {creatureId}) does not exist but has a record in `creature_template_model`");
+                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {creatureId}) does not exist but has a record in `creature_template_model`.");
                     continue;
                 }
 
@@ -2153,7 +2100,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template models in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template models in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         void LoadCreatureSummonedData()
@@ -2170,10 +2117,10 @@ namespace Game
 
             do
             {
-                uint creatureId = result.Read<uint>(0);
+                int creatureId = result.Read<int>(0);
                 if (GetCreatureTemplate(creatureId) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing creature {creatureId}, skipped");
+                    Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing creature {creatureId}, skipped.");
                     continue;
                 }
 
@@ -2184,10 +2131,11 @@ namespace Game
 
                 if (!result.IsNull(1))
                 {
-                    summonedData.CreatureIDVisibleToSummoner = result.Read<uint>(1);
+                    summonedData.CreatureIDVisibleToSummoner = result.Read<int>(1);
                     if (GetCreatureTemplate(summonedData.CreatureIDVisibleToSummoner.Value) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing creature {summonedData.CreatureIDVisibleToSummoner.Value} in CreatureIDVisibleToSummoner for creature {creatureId}, set to 0");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `creature_summoned_data` references non-existing creature {summonedData.CreatureIDVisibleToSummoner.Value} in CreatureIDVisibleToSummoner for creature {creatureId}, set to 0.");
                         summonedData.CreatureIDVisibleToSummoner = null;
                     }
                 }
@@ -2197,7 +2145,8 @@ namespace Game
                     summonedData.GroundMountDisplayID = result.Read<int>(2);
                     if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(summonedData.GroundMountDisplayID.Value))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing display id {summonedData.GroundMountDisplayID.Value} in GroundMountDisplayID for creature {creatureId}, set to 0");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `creature_summoned_data` references non-existing display id {summonedData.GroundMountDisplayID.Value} in GroundMountDisplayID for creature {creatureId}, set to 0.");
                         summonedData.CreatureIDVisibleToSummoner = null;
                     }
                 }
@@ -2207,14 +2156,15 @@ namespace Game
                     summonedData.FlyingMountDisplayID = result.Read<int>(3);
                     if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(summonedData.FlyingMountDisplayID.Value))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_summoned_data` references non-existing display id {summonedData.FlyingMountDisplayID.Value} in FlyingMountDisplayID for creature {creatureId}, set to 0");
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `creature_summoned_data` references non-existing display id {summonedData.FlyingMountDisplayID.Value} in FlyingMountDisplayID for creature {creatureId}, set to 0.");
                         summonedData.GroundMountDisplayID = null;
                     }
                 }
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {creatureSummonedDataStorage.Count} creature summoned data definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {creatureSummonedDataStorage.Count} creature summoned data definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadCreatureTemplateAddons()
@@ -2232,20 +2182,20 @@ namespace Game
             uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
+                int entry = result.Read<int>(0);
                 if (GetCreatureTemplate(entry) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_addon`");
+                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_addon`.");
                     continue;
                 }
 
                 CreatureAddon creatureAddon = new();
                 creatureAddon.path_id = result.Read<uint>(1);
                 creatureAddon.mount = result.Read<int>(2);
-                creatureAddon.standState = result.Read<byte>(3);
-                creatureAddon.animTier = result.Read<byte>(4);
+                creatureAddon.standState = (UnitStandStateType)result.Read<byte>(3);
+                creatureAddon.animTier = (AnimTier)result.Read<byte>(4);
                 creatureAddon.visFlags = result.Read<byte>(5);
-                creatureAddon.sheathState = result.Read<byte>(6);
+                creatureAddon.sheathState = (SheathState)result.Read<byte>(6);
                 creatureAddon.pvpFlags = result.Read<byte>(7);
                 creatureAddon.emote = result.Read<int>(8);
                 creatureAddon.aiAnimKit = result.Read<ushort>(9);
@@ -2257,7 +2207,7 @@ namespace Game
                 for (var c = 0; c < tokens.Length; ++c)
                 {
                     string id = tokens[c].Trim().Replace(",", "");
-                    if (!uint.TryParse(id, out uint spellId))
+                    if (!int.TryParse(id, out int spellId))
                         continue;
 
                     SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
@@ -2268,7 +2218,8 @@ namespace Game
                     }
 
                     if (AdditionalSpellInfo.HasAura(AuraType.ControlVehicle))
-                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has SPELL_AURA_CONTROL_VEHICLE aura {spellId} defined in `auras` field in `creature_template_addon`.");
+                        Log.outError(LogFilter.Sql, 
+                            $"Creature (Entry: {entry}) has SPELL_AURA_CONTROL_VEHICLE aura {spellId} defined in `auras` field in `creature_template_addon`.");
 
                     if (creatureAddon.auras.Contains(spellId))
                     {
@@ -2289,26 +2240,30 @@ namespace Game
                 {
                     if (CliDB.CreatureDisplayInfoStorage.LookupByKey(creatureAddon.mount) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid displayInfoId ({creatureAddon.mount}) for mount defined in `creature_template_addon`");
+                        Log.outError(LogFilter.Sql, 
+                            $"Creature (Entry: {entry}) has invalid displayInfoId ({creatureAddon.mount}) for mount defined in `creature_template_addon`");
                         creatureAddon.mount = 0;
                     }
                 }
 
-                if (creatureAddon.standState >= (int)UnitStandStateType.Max)
+                if (creatureAddon.standState >= UnitStandStateType.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid unit stand state ({creatureAddon.standState}) defined in `creature_template_addon`. Truncated to 0.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Creature (Entry: {entry}) has invalid unit stand state ({creatureAddon.standState}) defined in `creature_template_addon`. Truncated to 0.");
                     creatureAddon.standState = 0;
                 }
 
-                if (creatureAddon.animTier >= (int)AnimTier.Max)
+                if (creatureAddon.animTier >= AnimTier.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid animation tier ({creatureAddon.animTier}) defined in `creature_template_addon`. Truncated to 0.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Creature (Entry: {entry}) has invalid animation tier ({creatureAddon.animTier}) defined in `creature_template_addon`. Truncated to 0.");
                     creatureAddon.animTier = 0;
                 }
 
-                if (creatureAddon.sheathState >= (int)SheathState.Max)
+                if (creatureAddon.sheathState >= SheathState.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid sheath state ({creatureAddon.sheathState}) defined in `creature_template_addon`. Truncated to 0.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Creature (Entry: {entry}) has invalid sheath state ({creatureAddon.sheathState}) defined in `creature_template_addon`. Truncated to 0.");
                     creatureAddon.sheathState = 0;
                 }
 
@@ -2340,7 +2295,8 @@ namespace Game
 
                 if (creatureAddon.visibilityDistanceType >= VisibilityDistanceType.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid visibilityDistanceType ({creatureAddon.visibilityDistanceType}) defined in `creature_template_addon`.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Creature (Entry: {entry}) has invalid visibilityDistanceType ({creatureAddon.visibilityDistanceType}) defined in `creature_template_addon`.");
                     creatureAddon.visibilityDistanceType = VisibilityDistanceType.Normal;
                 }
 
@@ -2348,7 +2304,7 @@ namespace Game
                 count++;
             }
             while (result.NextRow());
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template addons in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template addons in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
         public void LoadCreatureAddons()
@@ -2366,11 +2322,11 @@ namespace Game
             uint count = 0;
             do
             {
-                ulong guid = result.Read<ulong>(0);
+                long guid = result.Read<long>(0);
                 CreatureData creData = GetCreatureData(guid);
                 if (creData == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) does not exist but has a record in `creatureaddon`");
+                    Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) does not exist but has a record in `creatureaddon`.");
                     continue;
                 }
 
@@ -2380,14 +2336,14 @@ namespace Game
                 if (creData.movementType == MovementGeneratorType.Waypoint && creatureAddon.path_id == 0)
                 {
                     creData.movementType = MovementGeneratorType.Idle;
-                    Log.outError(LogFilter.Sql, $"Creature (GUID {guid}) has movement type set to WAYPOINTMOTIONTYPE but no path assigned");
+                    Log.outError(LogFilter.Sql, $"Creature (GUID {guid}) has movement type set to WAYPOINTMOTIONTYPE but no path assigned.");
                 }
 
                 creatureAddon.mount = result.Read<int>(2);
-                creatureAddon.standState = result.Read<byte>(3);
-                creatureAddon.animTier = result.Read<byte>(4);
+                creatureAddon.standState = (UnitStandStateType)result.Read<byte>(3);
+                creatureAddon.animTier = (AnimTier)result.Read<byte>(4);
                 creatureAddon.visFlags = result.Read<byte>(5);
-                creatureAddon.sheathState = result.Read<byte>(6);
+                creatureAddon.sheathState = (SheathState)result.Read<byte>(6);
                 creatureAddon.pvpFlags = result.Read<byte>(7);
                 creatureAddon.emote = result.Read<int>(8);
                 creatureAddon.aiAnimKit = result.Read<ushort>(9);
@@ -2399,7 +2355,7 @@ namespace Game
                 for (var c = 0; c < tokens.Length; ++c)
                 {
                     string id = tokens[c].Trim().Replace(",", "");
-                    if (!uint.TryParse(id, out uint spellId))
+                    if (!int.TryParse(id, out int spellId))
                         continue;
 
                     SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
@@ -2431,7 +2387,7 @@ namespace Game
                 {
                     if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(creatureAddon.mount))
                     {
-                        Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has invalid displayInfoId ({creatureAddon.mount}) for mount defined in `creatureaddon`");
+                        Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has invalid displayInfoId ({creatureAddon.mount}) for mount defined in `creatureaddon`.");
                         creatureAddon.mount = 0;
                     }
                 }
@@ -2490,15 +2446,15 @@ namespace Game
                 count++;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature addons in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature addons in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
         public void LoadCreatureQuestItems()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                          0              1      2
-            using var result = DB.World.Query("SELECT CreatureEntry, ItemId, Idx FROM creature_questitem ORDER BY Idx ASC");
+            //                                          0              1             2      3
+            using var result = DB.World.Query("SELECT CreatureEntry, DifficultyID, ItemId, Idx FROM creature_questitem ORDER BY Idx ASC");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature quest items. DB table `creature_questitem` is empty.");
@@ -2508,20 +2464,22 @@ namespace Game
             uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
+                int entry = result.Read<int>(0);
                 Difficulty difficulty = (Difficulty)result.Read<byte>(1);
-                uint item = result.Read<uint>(2);
-                uint idx = result.Read<uint>(3);
+                int item = result.Read<int>(2);
+                int idx = result.Read<int>(3);
 
                 if (creatureTemplateStorage.ContainsKey(entry))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_questitem` has data for nonexistent creature (entry: {entry}, difficulty: {difficulty} idx: {idx}), skipped");
+                    Log.outError(LogFilter.Sql,
+                        $"Table `creature_questitem` has data for nonexistent creature (entry: {entry}, difficulty: {difficulty} idx: {idx}), skipped.");
                     continue;
                 }
 
                 if (!CliDB.ItemStorage.ContainsKey(item))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_questitem` has nonexistent item (ID: {item}) in creature (entry: {entry}, difficulty: {difficulty} idx: {idx}), skipped");
+                    Log.outError(LogFilter.Sql,
+                        $"Table `creature_questitem` has nonexistent item (ID: {item}) in creature (entry: {entry}, difficulty: {difficulty} idx: {idx}), skipped.");
                     continue;
                 }
 
@@ -2531,7 +2489,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature quest items in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature quest items in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadEquipmentTemplates()
@@ -2552,7 +2510,7 @@ namespace Game
             uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
+                int entry = result.Read<int>(0);
 
                 if (GetCreatureTemplate(entry) == null)
                 {
@@ -2560,7 +2518,7 @@ namespace Game
                     continue;
                 }
 
-                uint id = result.Read<uint>(1);
+                int id = result.Read<int>(1);
 
                 EquipmentInfo equipmentInfo = new();
 
@@ -2576,7 +2534,8 @@ namespace Game
                     var dbcItem = CliDB.ItemStorage.LookupByKey(equipmentInfo.Items[i].ItemId);
                     if (dbcItem == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Unknown item (ID: {equipmentInfo.Items[i].ItemId}) in creature_equip_template.ItemID{i + 1} for CreatureID  = {entry}, forced to 0.");
+                        Log.outError(LogFilter.Sql, 
+                            $"Unknown item (ID: {equipmentInfo.Items[i].ItemId}) in creature_equip_template.ItemID{i + 1} for CreatureID  = {entry}, forced to 0.");
                         equipmentInfo.Items[i].ItemId = 0;
                         continue;
                     }
@@ -2612,12 +2571,12 @@ namespace Game
                     }
                 }
 
-                equipmentInfoStorage.Add(entry, Tuple.Create(id, equipmentInfo));
+                equipmentInfoStorage.Add(entry, (id, equipmentInfo));
                 ++count;
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} equipment templates in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} equipment templates in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
         public void LoadCreatureMovementOverrides()
@@ -2648,10 +2607,10 @@ namespace Game
 
             do
             {
-                ulong spawnId = result.Read<ulong>(0);
+                long spawnId = result.Read<long>(0);
                 if (GetCreatureData(spawnId) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (GUID: {spawnId}) does not exist but has a record in `creature_movement_override`");
+                    Log.outError(LogFilter.Sql, $"Creature (GUID: {spawnId}) does not exist but has a record in `creature_movement_override`.");
                     continue;
                 }
 
@@ -2677,7 +2636,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {creatureMovementOverrides.Count} movement overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {creatureMovementOverrides.Count} movement overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadCreatureClassLevelStats()
@@ -2698,33 +2657,54 @@ namespace Game
             do
             {
                 byte Level = result.Read<byte>(0);
-                byte _class = result.Read<byte>(1);
+                Class class_ = (Class)result.Read<byte>(1);
 
-                if (_class == 0 || ((1 << (_class - 1)) & (int)Class.ClassMaskAllCreatures) == 0)
-                    Log.outError(LogFilter.Sql, "Creature base stats for level {0} has invalid class {1}", Level, _class);
+                if (class_ == Class.None || !ClassMask.Creatures.HasClass(class_))
+                    Log.outError(LogFilter.Sql, $"Creature base stats for level {Level} has invalid class {class_}.");
 
                 CreatureBaseStats stats = new();
 
-                stats.BaseMana = result.Read<uint>(2);
-                stats.AttackPower = result.Read<ushort>(3);
-                stats.RangedAttackPower = result.Read<ushort>(4);
+                for (byte i = 0; i <= (byte)Expansion.Current; ++i)
+                {
+                    stats.BaseHealth[i] = result.Read<ushort>(2 + i);
 
-                creatureBaseStatsStorage.Add(MathFunctions.MakePair16(Level, _class), stats);
+                    if (stats.BaseHealth[i] == 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Creature base stats for class {class_}, level {Level} has invalid zero base HP[{i}] - set to 1.");
+                        stats.BaseHealth[i] = 1;
+                    }
+
+                    stats.BaseDamage[i] = result.Read<float>(9 + i);
+                    if (stats.BaseDamage[i] < 0.0f)
+                    {
+                        Log.outError(LogFilter.Sql, $"Creature base stats for class {class_}, level {Level} has invalid negative base damage[{i}] - set to 0.0.");
+                        stats.BaseDamage[i] = 0.0f;
+                    }
+                }
+
+                stats.BaseMana = result.Read<ushort>(5);
+                stats.BaseArmor = result.Read<ushort>(6);
+                stats.AttackPower = result.Read<ushort>(7);
+                stats.RangedAttackPower = result.Read<ushort>(8);
+
+                creatureBaseStatsStorage.Add((Level, class_), stats);
 
                 ++count;
             } while (result.NextRow());
 
-            for (byte unitLevel = 1; unitLevel <= SharedConst.DefaultMaxLevel + 3; ++unitLevel)
+            for (byte unitLevel = 1; unitLevel <= SharedConst.DefaultMaxUnitLevel; ++unitLevel)
             {
-                for (byte unitClass = 1; unitClass <= SharedConst.MaxUnitClasses; ++unitClass)
+                for (Class unitClass = Class.None; unitClass < Class.Max; ++unitClass)
                 {
-                    uint unitClassMask = 1u << (unitClass - 1);
-                    if (creatureBaseStatsStorage.ContainsKey(MathFunctions.MakePair16(unitLevel, unitClassMask)))
-                        Log.outError(LogFilter.Sql, $"Missing base stats for creature class {unitClassMask} level {unitLevel}");
+                    if (ClassMask.Creatures.HasClass(unitClass))
+                    {
+                        if (creatureBaseStatsStorage.ContainsKey((unitLevel, unitClass)))
+                            Log.outError(LogFilter.Sql, $"Missing base stats for creature class {unitClass} level {unitLevel}.");
+                    }
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature base stats in {1} ms", count, Time.GetMSTimeDiffToNow(time));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature base stats in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
         public void LoadCreatureModelInfo()
@@ -2794,7 +2774,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature model based info in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature model based info in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
         public void LoadCreatureTemplateSparring()
@@ -2812,18 +2792,19 @@ namespace Game
             uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
+                int entry = result.Read<int>(0);
                 float noNPCDamageBelowHealthPct = result.Read<float>(1);
 
                 if (GetCreatureTemplate(entry) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_sparring`");
+                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_sparring`.");
                     continue;
                 }
 
                 if (noNPCDamageBelowHealthPct <= 0 || noNPCDamageBelowHealthPct > 100)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid NoNPCDamageBelowHealthPct ({noNPCDamageBelowHealthPct}) defined in `creature_template_sparring`. Skipping");
+                    Log.outError(LogFilter.Sql, 
+                        $"Creature (Entry: {entry}) has invalid NoNPCDamageBelowHealthPct ({noNPCDamageBelowHealthPct}) defined in `creature_template_sparring`. Skipping.");
                     continue;
                 }
                 _creatureTemplateSparringStorage.Add(entry, noNPCDamageBelowHealthPct);
@@ -2831,7 +2812,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template sparring rows in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template sparring rows in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadCreatureTemplateDifficulty()
@@ -2857,13 +2838,13 @@ namespace Game
             uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
+                int entry = result.Read<int>(0);
                 Difficulty difficulty = (Difficulty)result.Read<byte>(1);
 
                 var template = creatureTemplateStorage.LookupByKey(entry);
                 if (template == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_difficulty`");
+                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_difficulty`.");
                     continue;
                 }
 
@@ -2901,13 +2882,15 @@ namespace Game
                 {
                     if (creatureDifficulty.MinLevel == 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_template_difficulty` lists creature (ID: {entry}) has MinLevel set to 0 but the allowed minimum is 1. Ignored and set to 1.");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `creature_template_difficulty` lists creature (ID: {entry}) has MinLevel set to 0 but the allowed minimum is 1. Ignored and set to 1.");
                         creatureDifficulty.MinLevel = 1;
                     }
 
                     if (creatureDifficulty.MaxLevel == 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_template_difficulty` lists creature (ID: {entry}) has MaxLevel set to 0 but the allowed minimum is 1. Ignored and set to 1.");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `creature_template_difficulty` lists creature (ID: {entry}) has MaxLevel set to 0 but the allowed minimum is 1. Ignored and set to 1.");
                         creatureDifficulty.MaxLevel = 1;
                     }
                 }
@@ -2921,13 +2904,15 @@ namespace Game
 
                 if (creatureDifficulty.HealthScalingExpansion < (int)Expansion.LevelCurrent || creatureDifficulty.HealthScalingExpansion >= (int)Expansion.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_template_difficulty` lists creature (ID: {entry}) with invalid `HealthScalingExpansion` {creatureDifficulty.HealthScalingExpansion}. Ignored and set to 0.");
+                    Log.outError(LogFilter.Sql,$"Table `creature_template_difficulty` lists creature (ID: {entry}) with invalid `HealthScalingExpansion` " +
+                        $"{creatureDifficulty.HealthScalingExpansion}. Ignored and set to 0.");
                     creatureDifficulty.HealthScalingExpansion = 0;
                 }
 
                 if (creatureDifficulty.GoldMin > creatureDifficulty.GoldMax)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_template_difficulty` lists creature (ID: {entry}) with `GoldMin` {creatureDifficulty.GoldMin} greater than `GoldMax` {creatureDifficulty.GoldMax}, setting `GoldMax` to {creatureDifficulty.GoldMin}.");
+                    Log.outError(LogFilter.Sql, $"Table `creature_template_difficulty` lists creature (ID: {entry}) with `GoldMin` {creatureDifficulty.GoldMin} " +
+                        $"greater than `GoldMax` {creatureDifficulty.GoldMax}, setting `GoldMax` to {creatureDifficulty.GoldMin}.");
                     creatureDifficulty.GoldMax = creatureDifficulty.GoldMin;
                 }
 
@@ -2936,7 +2921,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template difficulty data in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template difficulty data in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void CheckCreatureTemplate(CreatureTemplate cInfo)
@@ -2946,7 +2931,7 @@ namespace Game
 
             if (!CliDB.FactionTemplateStorage.ContainsKey(cInfo.Faction))
             {
-                Log.outError(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has non-existing faction template ({cInfo.Faction}). This can lead to crashes, set to faction 35");
+                Log.outError(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has non-existing faction template ({cInfo.Faction}). This can lead to crashes, set to faction 35.");
                 cInfo.Faction = 35;
             }
 
@@ -3050,7 +3035,7 @@ namespace Game
 
             if (cInfo.MovementType >= MovementGeneratorType.MaxDB)
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong movement generator Type ({1}), ignored and set to IDLE.", cInfo.Entry, cInfo.MovementType);
+                Log.outError(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has wrong movement generator Type ({cInfo.MovementType}), ignored and set to IDLE.");
                 cInfo.MovementType = (uint)MovementGeneratorType.Idle;
             }
 
@@ -3066,7 +3051,8 @@ namespace Game
             CreatureFlagsExtra badFlags = (cInfo.FlagsExtra & ~CreatureFlagsExtra.DBAllowed);
             if (badFlags != 0)
             {
-                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `flags_extra` {badFlags} [{(uint)badFlags}], removing incorrect flag.");
+                Log.outError(LogFilter.Sql,
+                    $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `flags_extra` {badFlags} [{(uint)badFlags}], removing incorrect flag.");
                 cInfo.FlagsExtra &= CreatureFlagsExtra.DBAllowed;
             }
 
@@ -3100,7 +3086,7 @@ namespace Game
                 Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has npcflag UNIT_NPC_FLAG_GOSSIP, but gossip menu is unassigned.");
         }
 
-        void CheckCreatureMovement(string table, ulong id, CreatureMovementData creatureMovement)
+        void CheckCreatureMovement(string table, long id, CreatureMovementData creatureMovement)
         {
             if (creatureMovement.Ground >= CreatureGroundMovementType.Max)
             {
@@ -3142,8 +3128,8 @@ namespace Game
 
             do
             {
-                ulong guidLow = result.Read<ulong>(0);
-                ulong linkedGuidLow = result.Read<ulong>(1);
+                long guidLow = result.Read<long>(0);
+                long linkedGuidLow = result.Read<long>(1);
                 CreatureLinkedRespawnType linkType = (CreatureLinkedRespawnType)result.Read<byte>(2);
 
                 ObjectGuid guid = ObjectGuid.Empty;
@@ -3156,7 +3142,7 @@ namespace Game
                             CreatureData slave = GetCreatureData(guidLow);
                             if (slave == null)
                             {
-                                Log.outError(LogFilter.Sql, $"Couldn't get creature data for GUIDLow {guidLow}");
+                                Log.outError(LogFilter.Sql, $"Couldn't get creature data for GUIDLow {guidLow}.");
                                 error = true;
                                 break;
                             }
@@ -3164,7 +3150,7 @@ namespace Game
                             CreatureData master = GetCreatureData(linkedGuidLow);
                             if (master == null)
                             {
-                                Log.outError(LogFilter.Sql, $"Couldn't get creature data for GUIDLow {linkedGuidLow}");
+                                Log.outError(LogFilter.Sql, $"Couldn't get creature data for GUIDLow {linkedGuidLow}.");
                                 error = true;
                                 break;
                             }
@@ -3180,7 +3166,7 @@ namespace Game
                             // they must have a possibility to meet (normal/heroic difficulty)
                             if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                             {
-                                Log.outError(LogFilter.Sql, $"LinkedRespawn: Creature '{guidLow}' linking to '{linkedGuidLow}' with not corresponding spawnMask");
+                                Log.outError(LogFilter.Sql, $"LinkedRespawn: Creature '{guidLow}' linking to '{linkedGuidLow}' with not corresponding spawnMask.");
                                 error = true;
                                 break;
                             }
@@ -3194,7 +3180,7 @@ namespace Game
                             CreatureData slave = GetCreatureData(guidLow);
                             if (slave == null)
                             {
-                                Log.outError(LogFilter.Sql, $"Couldn't get creature data for GUIDLow {guidLow}");
+                                Log.outError(LogFilter.Sql, $"Couldn't get creature data for GUIDLow {guidLow}.");
                                 error = true;
                                 break;
                             }
@@ -3202,7 +3188,7 @@ namespace Game
                             GameObjectData master = GetGameObjectData(linkedGuidLow);
                             if (master == null)
                             {
-                                Log.outError(LogFilter.Sql, $"Couldn't get gameobject data for GUIDLow {linkedGuidLow}");
+                                Log.outError(LogFilter.Sql, $"Couldn't get gameobject data for GUIDLow {linkedGuidLow}.");
                                 error = true;
                                 break;
                             }
@@ -3218,7 +3204,7 @@ namespace Game
                             // they must have a possibility to meet (normal/heroic difficulty)
                             if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                             {
-                                Log.outError(LogFilter.Sql, $"LinkedRespawn: Creature '{guidLow}' linking to '{linkedGuidLow}' with not corresponding spawnMask");
+                                Log.outError(LogFilter.Sql, $"LinkedRespawn: Creature '{guidLow}' linking to '{linkedGuidLow}' with not corresponding spawnMask.");
                                 error = true;
                                 break;
                             }
@@ -3232,7 +3218,7 @@ namespace Game
                             GameObjectData slave = GetGameObjectData(guidLow);
                             if (slave == null)
                             {
-                                Log.outError(LogFilter.Sql, $"Couldn't get gameobject data for GUIDLow {guidLow}");
+                                Log.outError(LogFilter.Sql, $"Couldn't get gameobject data for GUIDLow {guidLow}.");
                                 error = true;
                                 break;
                             }
@@ -3240,7 +3226,7 @@ namespace Game
                             GameObjectData master = GetGameObjectData(linkedGuidLow);
                             if (master == null)
                             {
-                                Log.outError(LogFilter.Sql, $"Couldn't get gameobject data for GUIDLow {linkedGuidLow}");
+                                Log.outError(LogFilter.Sql, $"Couldn't get gameobject data for GUIDLow {linkedGuidLow}.");
                                 error = true;
                                 break;
                             }
@@ -3256,7 +3242,7 @@ namespace Game
                             // they must have a possibility to meet (normal/heroic difficulty)
                             if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                             {
-                                Log.outError(LogFilter.Sql, $"LinkedRespawn: Creature '{guidLow}' linking to '{linkedGuidLow}' with not corresponding spawnMask");
+                                Log.outError(LogFilter.Sql, $"LinkedRespawn: Creature '{guidLow}' linking to '{linkedGuidLow}' with not corresponding spawnMask.");
                                 error = true;
                                 break;
                             }
@@ -3270,7 +3256,7 @@ namespace Game
                             GameObjectData slave = GetGameObjectData(guidLow);
                             if (slave == null)
                             {
-                                Log.outError(LogFilter.Sql, $"Couldn't get gameobject data for GUIDLow {guidLow}");
+                                Log.outError(LogFilter.Sql, $"Couldn't get gameobject data for GUIDLow {guidLow}.");
                                 error = true;
                                 break;
                             }
@@ -3278,7 +3264,7 @@ namespace Game
                             CreatureData master = GetCreatureData(linkedGuidLow);
                             if (master == null)
                             {
-                                Log.outError(LogFilter.Sql, $"Couldn't get creature data for GUIDLow {linkedGuidLow}");
+                                Log.outError(LogFilter.Sql, $"Couldn't get creature data for GUIDLow {linkedGuidLow}.");
                                 error = true;
                                 break;
                             }
@@ -3294,7 +3280,7 @@ namespace Game
                             // they must have a possibility to meet (normal/heroic difficulty)
                             if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                             {
-                                Log.outError(LogFilter.Sql, $"LinkedRespawn: Creature '{guidLow}' linking to '{linkedGuidLow}' with not corresponding spawnMask");
+                                Log.outError(LogFilter.Sql, $"LinkedRespawn: Creature '{guidLow}' linking to '{linkedGuidLow}' with not corresponding spawnMask.");
                                 error = true;
                                 break;
                             }
@@ -3310,7 +3296,7 @@ namespace Game
                     linkedRespawnStorage[guid] = linkedGuid;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {linkedRespawnStorage.Count} linked respawns in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {linkedRespawnStorage.Count} linked respawns in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadNPCText()
@@ -3330,7 +3316,7 @@ namespace Game
 
             do
             {
-                uint textID = result.Read<uint>(0);
+                int textID = result.Read<int>(0);
                 if (textID == 0)
                 {
                     Log.outError(LogFilter.Sql, "Table `npc_text` has record wit reserved id 0, ignore.");
@@ -3350,7 +3336,7 @@ namespace Game
                     {
                         if (!CliDB.BroadcastTextStorage.ContainsKey(npcText.Data[i].BroadcastTextID))
                         {
-                            Log.outError(LogFilter.Sql, $"NPCText (Id: {textID}) has a non-existing BroadcastText (ID: {npcText.Data[i].BroadcastTextID}, Index: {i})");
+                            Log.outError(LogFilter.Sql, $"NPCText (Id: {textID}) has a non-existing BroadcastText (ID: {npcText.Data[i].BroadcastTextID}, Index: {i}).");
                             npcText.Data[i].Probability = 0.0f;
                             npcText.Data[i].BroadcastTextID = 0;
                         }
@@ -3361,7 +3347,7 @@ namespace Game
                 {
                     if (npcText.Data[i].Probability > 0 && npcText.Data[i].BroadcastTextID == 0)
                     {
-                        Log.outError(LogFilter.Sql, $"NPCText (ID: {textID}) has a probability (Index: {i}) set, but no BroadcastTextID to go with it");
+                        Log.outError(LogFilter.Sql, $"NPCText (ID: {textID}) has a probability (Index: {i}) set, but no BroadcastTextID to go with it.");
                         npcText.Data[i].Probability = 0;
                     }
                 }
@@ -3376,7 +3362,7 @@ namespace Game
                 npcTextStorage[textID] = npcText;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {npcTextStorage.Count} npc texts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {npcTextStorage.Count} npc texts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadTrainers()
@@ -3386,7 +3372,8 @@ namespace Game
             // For reload case
             trainers.Clear();
 
-            MultiMap<uint, TrainerSpell> spellsByTrainer = new();
+            MultiMap<int, TrainerSpell> spellsByTrainer = new();
+            //                                                      0           1       2           3               4           5               6           7           8
             using (var trainerSpellsResult = DB.World.Query("SELECT TrainerId, SpellId, MoneyCost, ReqSkillLine, ReqSkillRank, ReqAbility1, ReqAbility2, ReqAbility3, ReqLevel FROM trainer_spell"))
             {
                 if (!trainerSpellsResult.IsEmpty())
@@ -3394,36 +3381,39 @@ namespace Game
                     do
                     {
                         TrainerSpell spell = new();
-                        uint trainerId = trainerSpellsResult.Read<uint>(0);
-                        spell.SpellId = trainerSpellsResult.Read<uint>(1);
+                        int trainerId = trainerSpellsResult.Read<int>(0);
+                        spell.SpellId = trainerSpellsResult.Read<int>(1);
                         spell.MoneyCost = trainerSpellsResult.Read<uint>(2);
-                        spell.ReqSkillLine = trainerSpellsResult.Read<uint>(3);
+                        spell.ReqSkillLine = trainerSpellsResult.Read<int>(3);
                         spell.ReqSkillRank = trainerSpellsResult.Read<uint>(4);
-                        spell.ReqAbility[0] = trainerSpellsResult.Read<uint>(5);
-                        spell.ReqAbility[1] = trainerSpellsResult.Read<uint>(6);
-                        spell.ReqAbility[2] = trainerSpellsResult.Read<uint>(7);
+                        spell.ReqAbility[0] = trainerSpellsResult.Read<int>(5);
+                        spell.ReqAbility[1] = trainerSpellsResult.Read<int>(6);
+                        spell.ReqAbility[2] = trainerSpellsResult.Read<int>(7);
                         spell.ReqLevel = trainerSpellsResult.Read<byte>(8);
 
                         SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell.SpellId, Difficulty.None);
                         if (spellInfo == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing spell (SpellId: {spell.SpellId}) for TrainerId {trainerId}, ignoring");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `trainer_spell` references non-existing spell (SpellId: {spell.SpellId}) for TrainerId {trainerId}, ignoring.");
                             continue;
                         }
 
                         if (spell.ReqSkillLine != 0 && !CliDB.SkillLineStorage.ContainsKey(spell.ReqSkillLine))
                         {
-                            Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing skill (ReqSkillLine: {spell.ReqSkillLine}) for TrainerId {trainerId} and SpellId {spell.SpellId}, ignoring");
+                            Log.outError(LogFilter.Sql, 
+                                $"Table `trainer_spell` references non-existing skill (ReqSkillLine: {spell.ReqSkillLine}) for TrainerId {trainerId} and SpellId {spell.SpellId}, ignoring.");
                             continue;
                         }
 
                         bool allReqValid = true;
                         for (var i = 0; i < spell.ReqAbility.Count; ++i)
                         {
-                            uint requiredSpell = spell.ReqAbility[i];
+                            int requiredSpell = spell.ReqAbility[i];
                             if (requiredSpell != 0 && !Global.SpellMgr.HasSpellInfo(requiredSpell, Difficulty.None))
                             {
-                                Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing spell (ReqAbility {i + 1}: {requiredSpell}) for TrainerId {trainerId} and SpellId {spell.SpellId}, ignoring");
+                                Log.outError(LogFilter.Sql, 
+                                    $"Table `trainer_spell` references non-existing spell (ReqAbility {i + 1}: {requiredSpell}) for TrainerId {trainerId} and SpellId {spell.SpellId}, ignoring.");
                                 allReqValid = false;
                             }
                         }
@@ -3443,7 +3433,7 @@ namespace Game
                 {
                     do
                     {
-                        uint trainerId = trainersResult.Read<uint>(0);
+                        int trainerId = trainersResult.Read<int>(0);
                         TrainerType trainerType = (TrainerType)trainersResult.Read<byte>(1);
                         string greeting = trainersResult.Read<string>(2);
                         List<TrainerSpell> spells = new();
@@ -3462,7 +3452,8 @@ namespace Game
 
             foreach (var unusedSpells in spellsByTrainer)
             {
-                Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing trainer (TrainerId: {unusedSpells.Key}) for SpellId {unusedSpells.Value.SpellId}, ignoring");
+                Log.outError(LogFilter.Sql, 
+                    $"Table `trainer_spell` references non-existing trainer (TrainerId: {unusedSpells.Key}) for SpellId {unusedSpells.Value.SpellId}, ignoring.");
             }
 
             using (var trainerLocalesResult = DB.World.Query("SELECT Id, locale, Greeting_lang FROM trainer_locale"))
@@ -3471,23 +3462,24 @@ namespace Game
                 {
                     do
                     {
-                        uint trainerId = trainerLocalesResult.Read<uint>(0);
+                        int trainerId = trainerLocalesResult.Read<int>(0);
                         string localeName = trainerLocalesResult.Read<string>(1);
 
                         Locale locale = localeName.ToEnum<Locale>();
-                        if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                        if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                             continue;
 
                         Trainer trainer = trainers.LookupByKey(trainerId);
                         if (trainer != null)
-                            trainer.AddGreetingLocale(locale, trainerLocalesResult.Read<String>(2));
+                            trainer.AddGreetingLocale(locale, trainerLocalesResult.Read<string>(2));
                         else
-                            Log.outError(LogFilter.Sql, $"Table `trainer_locale` references non-existing trainer (TrainerId: {trainerId}) for locale {localeName}, ignoring");
+                            Log.outError(LogFilter.Sql,
+                                $"Table `trainer_locale` references non-existing trainer (TrainerId: {trainerId}) for locale {localeName}, ignoring.");
 
                     } while (trainerLocalesResult.NextRow());
                 }
             }
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {trainers.Count} Trainers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {trainers.Count} Trainers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadCreatureTrainers()
@@ -3501,20 +3493,21 @@ namespace Game
             {
                 do
                 {
-                    uint creatureId = result.Read<uint>(0);
-                    uint trainerId = result.Read<uint>(1);
-                    uint gossipMenuId = result.Read<uint>(2);
-                    uint gossipOptionIndex = result.Read<uint>(3);
+                    int creatureId = result.Read<int>(0);
+                    int trainerId = result.Read<int>(1);
+                    int gossipMenuId = result.Read<int>(2);
+                    int gossipOptionIndex = result.Read<int>(3);
 
                     if (GetCreatureTemplate(creatureId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing creature template (CreatureId: {creatureId}), ignoring");
+                        Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing creature template (CreatureId: {creatureId}), ignoring.");
                         continue;
                     }
 
                     if (GetTrainer(trainerId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing trainer (TrainerId: {trainerId}) for CreatureId {creatureId} MenuId {gossipMenuId} OptionIndex {gossipOptionIndex}, ignoring");
+                        Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing trainer (TrainerId: {trainerId}) for CreatureId {creatureId} " +
+                            $"MenuId {gossipMenuId} OptionIndex {gossipOptionIndex}, ignoring.");
                         continue;
                     }
 
@@ -3528,7 +3521,8 @@ namespace Game
 
                         if (gossipOptionItr == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing gossip menu option (MenuId {gossipMenuId} OptionIndex {gossipOptionIndex}) for CreatureId {creatureId} and TrainerId {trainerId}, ignoring");
+                            Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing gossip menu option (MenuId {gossipMenuId} " +
+                                $"OptionIndex {gossipOptionIndex}) for CreatureId {creatureId} and TrainerId {trainerId}, ignoring.");
                             continue;
                         }
                     }
@@ -3537,7 +3531,7 @@ namespace Game
                 } while (result.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_creatureDefaultTrainers.Count} default trainers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_creatureDefaultTrainers.Count} default trainers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadVendors()
@@ -3546,8 +3540,8 @@ namespace Game
             // For reload case
             cacheVendorItemStorage.Clear();
 
-            List<uint> skipvendors = new();
-
+            List<int> skipvendors = new();
+            //                                          0      1    2           3           4          5        6           7                   8   
             using var result = DB.World.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost, Type, BonusListIDs, PlayerConditionID, IgnoreFiltering FROM npc_vendor ORDER BY entry, slot ASC");
             if (result.IsEmpty())
             {
@@ -3559,21 +3553,21 @@ namespace Game
 
             do
             {
-                uint entry = result.Read<uint>(0);
+                int entry = result.Read<int>(0);
                 int itemid = result.Read<int>(1);
 
                 // if item is a negative, its a reference
                 if (itemid < 0)
-                    count += LoadReferenceVendor((int)entry, -itemid, skipvendors);
+                    count += LoadReferenceVendor(entry, -itemid, skipvendors);
                 else
                 {
                     VendorItem vItem = new();
-                    vItem.item = (uint)itemid;
-                    vItem.maxcount = result.Read<uint>(2);
+                    vItem.item = itemid;
+                    vItem.maxcount = result.Read<int>(2);
                     vItem.incrtime = result.Read<uint>(3);
-                    vItem.ExtendedCost = result.Read<uint>(4);
+                    vItem.ExtendedCost = result.Read<int>(4);
                     vItem.Type = (ItemVendorType)result.Read<byte>(5);
-                    vItem.PlayerConditionId = result.Read<uint>(7);
+                    vItem.PlayerConditionId = result.Read<int>(7);
                     vItem.IgnoreFiltering = result.Read<bool>(8);
 
                     var bonusListIDsTok = new StringArray(result.Read<string>(6), ' ');
@@ -3596,10 +3590,10 @@ namespace Game
                 }
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Vendors in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Vendors in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
-        uint LoadReferenceVendor(int vendor, int item, List<uint> skip_vendors)
+        uint LoadReferenceVendor(int vendor, int item, List<int> skip_vendors)
         {
             // find all items from the reference vendor
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_NPC_VENDOR_REF);
@@ -3620,12 +3614,12 @@ namespace Game
                 else
                 {
                     VendorItem vItem = new();
-                    vItem.item = (uint)item_id;
-                    vItem.maxcount = result.Read<uint>(1);
+                    vItem.item = item_id;
+                    vItem.maxcount = result.Read<int>(1);
                     vItem.incrtime = result.Read<uint>(2);
-                    vItem.ExtendedCost = result.Read<uint>(3);
+                    vItem.ExtendedCost = result.Read<int>(3);
                     vItem.Type = (ItemVendorType)result.Read<byte>(4);
-                    vItem.PlayerConditionId = result.Read<uint>(6);
+                    vItem.PlayerConditionId = result.Read<int>(6);
                     vItem.IgnoreFiltering = result.Read<bool>(7);
 
                     var bonusListIDsTok = new StringArray(result.Read<string>(5), ' ');
@@ -3639,10 +3633,10 @@ namespace Game
                         }
                     }
 
-                    if (!IsVendorItemValid((uint)vendor, vItem, null, skip_vendors))
+                    if (!IsVendorItemValid(vendor, vItem, null, skip_vendors))
                         continue;
 
-                    VendorItemData vList = cacheVendorItemStorage.LookupByKey((uint)vendor);
+                    VendorItemData vList = cacheVendorItemStorage.LookupByKey(vendor);
                     if (vList == null)
                         continue;
 
@@ -3690,7 +3684,7 @@ namespace Game
             uint count = 0;
             do
             {
-                ulong guid = result.Read<ulong>(0);
+                long guid = result.Read<long>(0);
                 int entry = result.Read<int>(1);
 
                 CreatureTemplate cInfo = GetCreatureTemplate(entry);
@@ -3705,17 +3699,17 @@ namespace Game
                 data.Id = entry;
                 data.MapId = result.Read<ushort>(2);
                 data.SpawnPoint = new Position(result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));
-                data.displayid = result.Read<uint>(7);
+                data.displayid = result.Read<int>(7);
                 data.equipmentId = result.Read<sbyte>(8);
                 data.spawntimesecs = result.Read<int>(9);
                 data.WanderDistance = result.Read<float>(10);
                 data.currentwaypoint = result.Read<uint>(11);
-                data.curhealth = result.Read<uint>(12);
-                data.curmana = result.Read<uint>(13);
+                data.curhealth = result.Read<int>(12);
+                data.curmana = result.Read<int>(13);
                 data.movementType = (MovementGeneratorType)result.Read<byte>(14);
                 data.SpawnDifficulties = ParseSpawnDifficulties(result.Read<string>(15), "creature", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
                 short gameEvent = result.Read<short>(16);
-                data.poolId = result.Read<uint>(17);
+                data.poolId = result.Read<int>(17);
 
                 if (!result.IsNull(18))
                     data.npcflag = (NPCFlags)result.Read<ulong>(18);
@@ -3728,7 +3722,7 @@ namespace Game
 
                 data.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(22);
                 data.PhaseId = result.Read<int>(23);
-                data.PhaseGroup = result.Read<uint>(24);
+                data.PhaseGroup = result.Read<int>(24);
                 data.terrainSwapMap = result.Read<int>(25);
                 data.ScriptId = GetScriptId(result.Read<string>(26));
                 data.StringId = result.Read<string>(27);
@@ -3770,7 +3764,8 @@ namespace Game
                 {
                     if (GetEquipmentInfo(data.Id, data.equipmentId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature` have creature (Entry: {data.Id}) with equipmentid {data.equipmentId} not found in table `creatureequiptemplate`, set to no equipment.");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `creature` have creature (Entry: {data.Id}) with equipmentid {data.equipmentId} not found in table `creatureequiptemplate`, set to no equipment.");
                         data.equipmentId = 0;
                     }
                 }
@@ -3823,7 +3818,7 @@ namespace Game
                 if (data.PhaseGroup != 0 && data.PhaseId != 0)
                 {
                     Log.outError(LogFilter.Sql, $"Table `creature` have creature (GUID: {guid} Entry: {data.Id}) with both `phaseid` and " +
-                        $"`phasegroup` set, `phasegroup` set to 0");
+                        $"`phasegroup` set, `phasegroup` set to 0.");
                     data.PhaseGroup = 0;
                 }
 
@@ -3832,7 +3827,7 @@ namespace Game
                     if (!CliDB.PhaseStorage.ContainsKey(data.PhaseId))
                     {
                         Log.outError(LogFilter.Sql, $"Table `creature` have creature (GUID: {guid} Entry: {data.Id}) with `phaseid` " +
-                            $"{data.PhaseId} does not exist, set to 0");
+                            $"{data.PhaseId} does not exist, set to 0.");
                         data.PhaseId = 0;
                     }
                 }
@@ -3842,7 +3837,7 @@ namespace Game
                     if (Global.DB2Mgr.GetPhasesForGroup(data.PhaseGroup).Empty())
                     {
                         Log.outError(LogFilter.Sql, $"Table `creature` have creature (GUID: {guid} Entry: {data.Id}) with `phasegroup` " +
-                            $"{data.PhaseGroup} does not exist, set to 0");
+                            $"{data.PhaseGroup} does not exist, set to 0.");
                         data.PhaseGroup = 0;
                     }
                 }
@@ -3853,13 +3848,13 @@ namespace Game
                     if (terrainSwapEntry == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `creature` have creature (GUID: {guid} Entry: {data.Id}) with `terrainSwapMap` " +
-                            $"{data.terrainSwapMap} does not exist, set to -1");
+                            $"{data.terrainSwapMap} does not exist, set to -1.");
                         data.terrainSwapMap = -1;
                     }
                     else if (terrainSwapEntry.ParentMapID != data.MapId)
                     {
                         Log.outError(LogFilter.Sql, $"Table `creature` have creature (GUID: {guid} Entry: {data.Id}) with `terrainSwapMap` " +
-                            $"{data.terrainSwapMap} which cannot be used on spawn map, set to -1");
+                            $"{data.terrainSwapMap} which cannot be used on spawn map, set to -1.");
                         data.terrainSwapMap = -1;
                     }
                 }
@@ -3900,7 +3895,7 @@ namespace Game
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))
                 {
                     PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
-                    Global.TerrainMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.MapId, data.SpawnPoint);
+                    Global.TerrainMgr.GetZoneAndAreaId(phaseShift, out int zoneId, out int areaId, data.MapId, data.SpawnPoint);
 
                     PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -3918,7 +3913,7 @@ namespace Game
                 count++;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creatures in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creatures in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
         public bool HasPersonalSpawns(int mapid, Difficulty spawnMode, int phaseId)
@@ -4007,7 +4002,7 @@ namespace Game
             RemoveSpawnDataFromGrid(data);
         }
 
-        public CreatureAddon GetCreatureAddon(ulong lowguid)
+        public CreatureAddon GetCreatureAddon(long lowguid)
         {
             return creatureAddonStorage.LookupByKey(lowguid);
         }
@@ -4017,29 +4012,29 @@ namespace Game
             return creatureTemplateStorage.LookupByKey(entry);
         }
 
-        public CreatureAddon GetCreatureTemplateAddon(uint entry)
+        public CreatureAddon GetCreatureTemplateAddon(int entry)
         {
             return creatureTemplateAddonStorage.LookupByKey(entry);
         }
 
-        public uint GetCreatureDefaultTrainer(uint creatureId)
+        public int GetCreatureDefaultTrainer(int creatureId)
         {
             return GetCreatureTrainerForGossipOption(creatureId, 0, 0);
         }
 
-        public uint GetCreatureTrainerForGossipOption(uint creatureId, uint gossipMenuId, uint gossipOptionIndex)
+        public int GetCreatureTrainerForGossipOption(int creatureId, int gossipMenuId, int gossipOptionIndex)
         {
             return _creatureDefaultTrainers.LookupByKey((creatureId, gossipMenuId, gossipOptionIndex));
         }
 
-        public Dictionary<uint, CreatureTemplate> GetCreatureTemplates()
+        public Dictionary<int, CreatureTemplate> GetCreatureTemplates()
         {
             return creatureTemplateStorage;
         }
 
-        public Dictionary<ulong, CreatureData> GetAllCreatureData() { return creatureDataStorage; }
+        public Dictionary<long, CreatureData> GetAllCreatureData() { return creatureDataStorage; }
 
-        public CreatureData GetCreatureData(ulong spawnId)
+        public CreatureData GetCreatureData(long spawnId)
         {
             return creatureDataStorage.LookupByKey(spawnId);
         }
@@ -4052,7 +4047,7 @@ namespace Game
             return retGuid;
         }
 
-        public bool SetCreatureLinkedRespawn(ulong guidLow, ulong linkedGuidLow)
+        public bool SetCreatureLinkedRespawn(long guidLow, long linkedGuidLow)
         {
             if (guidLow == 0)
                 return false;
@@ -4104,14 +4099,14 @@ namespace Game
             return true;
         }
 
-        public CreatureData NewOrExistCreatureData(ulong spawnId)
+        public CreatureData NewOrExistCreatureData(long spawnId)
         {
             if (creatureDataStorage.ContainsKey(spawnId))
                 creatureDataStorage[spawnId] = new CreatureData();
             return creatureDataStorage[spawnId];
         }
 
-        public void DeleteCreatureData(ulong spawnId)
+        public void DeleteCreatureData(long spawnId)
         {
             CreatureData data = GetCreatureData(spawnId);
             if (data != null)
@@ -4123,9 +4118,9 @@ namespace Game
             creatureDataStorage.Remove(spawnId);
         }
 
-        public CreatureBaseStats GetCreatureBaseStats(uint level, uint unitClass)
+        public CreatureBaseStats GetCreatureBaseStats(int level, Class unitClass)
         {
-            var stats = creatureBaseStatsStorage.LookupByKey(MathFunctions.MakePair16(level, unitClass));
+            var stats = creatureBaseStatsStorage.LookupByKey((level, unitClass));
             if (stats != null)
                 return stats;
 
@@ -4143,7 +4138,8 @@ namespace Game
             {
                 CreatureModelInfo minfotmp = GetCreatureModelInfo(modelInfo.DisplayIdOtherGender);
                 if (minfotmp == null)
-                    Log.outError(LogFilter.Sql, $"Model (Entry: {model.CreatureDisplayID}) has modelidothergender {modelInfo.DisplayIdOtherGender} not found in table `creaturemodelinfo`. ");
+                    Log.outError(LogFilter.Sql,
+                        $"Model (Entry: {model.CreatureDisplayID}) has modelidothergender {modelInfo.DisplayIdOtherGender} not found in table `creaturemodelinfo`.");
                 else
                 {
                     // DisplayID changed
@@ -4170,12 +4166,12 @@ namespace Game
             return creatureModelStorage.LookupByKey(modelId);
         }
 
-        public CreatureSummonedData GetCreatureSummonedData(uint entryId)
+        public CreatureSummonedData GetCreatureSummonedData(int entryId)
         {
             return creatureSummonedDataStorage.LookupByKey(entryId);
         }
 
-        public NpcText GetNpcText(uint textId)
+        public NpcText GetNpcText(int textId)
         {
             return npcTextStorage.LookupByKey(textId);
         }
@@ -4381,7 +4377,7 @@ namespace Game
                 }
                 while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gameObjectTemplateStorage.Count} game object templates in {Time.GetMSTimeDiffToNow(time)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gameObjectTemplateStorage.Count} game object templates in {Time.GetMSTimeDiffToNow(time)} ms.");
             }
         }
 
@@ -4405,7 +4401,7 @@ namespace Game
                 GameObjectTemplate got = GetGameObjectTemplate(entry);
                 if (got == null)
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject template (Entry: {entry}) does not exist but has a record in `gameobject_template_addon`");
+                    Log.outError(LogFilter.Sql, $"GameObject template (Entry: {entry}) does not exist but has a record in `gameobject_template_addon`.");
                     continue;
                 }
 
@@ -4451,13 +4447,15 @@ namespace Game
 
                 if (gameObjectAddon.WorldEffectID != 0 && !CliDB.WorldEffectStorage.ContainsKey(gameObjectAddon.WorldEffectID))
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject (Entry: {entry}) has invalid WorldEffectID ({gameObjectAddon.WorldEffectID}) defined in `gameobject_template_addon`, set to 0.");
+                    Log.outError(LogFilter.Sql, 
+                        $"GameObject (Entry: {entry}) has invalid WorldEffectID ({gameObjectAddon.WorldEffectID}) defined in `gameobject_template_addon`, set to 0.");
                     gameObjectAddon.WorldEffectID = 0;
                 }
 
                 if (gameObjectAddon.AIAnimKitID != 0 && !CliDB.AnimKitStorage.ContainsKey(gameObjectAddon.AIAnimKitID))
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject (Entry: {entry}) has invalid AIAnimKitID ({gameObjectAddon.AIAnimKitID}) defined in `gameobject_template_addon`, set to 0.");
+                    Log.outError(LogFilter.Sql, 
+                        $"GameObject (Entry: {entry}) has invalid AIAnimKitID ({gameObjectAddon.AIAnimKitID}) defined in `gameobject_template_addon`, set to 0.");
                     gameObjectAddon.AIAnimKitID = 0;
                 }
 
@@ -4466,7 +4464,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} game object template addons in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} game object template addons in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadGameObjectOverrides()
@@ -4488,7 +4486,7 @@ namespace Game
                 GameObjectData goData = GetGameObjectData(spawnId);
                 if (goData == null)
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject (SpawnId: {spawnId}) does not exist but has a record in `gameobject_overrides`");
+                    Log.outError(LogFilter.Sql, $"GameObject (SpawnId: {spawnId}) does not exist but has a record in `gameobject_overrides`.");
                     continue;
                 }
 
@@ -4504,7 +4502,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobject faction and flags overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobject faction and flags overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadGameObjects()
@@ -4591,7 +4589,7 @@ namespace Game
                 if (mapEntry == null)
                 {
                     Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) spawned on " +
-                        $"a non-existed map (Id: {data.MapId}), skip");
+                        $"a non-existed map (Id: {data.MapId}), skip.");
                     continue;
                 }
 
@@ -4628,7 +4626,7 @@ namespace Game
                     if (gInfo.type != GameObjectTypes.Transport || gostate > GameObjectState.TransportFrameLast)
                     {
                         Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid `state` " +
-                            $"({gostate}) value, skip");
+                            $"({gostate}) value, skip.");
                         continue;
                     }
                 }
@@ -4642,10 +4640,10 @@ namespace Game
                 }
 
                 short gameEvent = result.Read<sbyte>(15);
-                data.poolId = result.Read<uint>(16);
+                data.poolId = result.Read<int>(16);
                 data.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(17);
                 data.PhaseId = result.Read<int>(18);
-                data.PhaseGroup = result.Read<uint>(19);
+                data.PhaseGroup = result.Read<int>(19);
 
                 if ((data.PhaseUseFlags & ~PhaseUseFlagsValues.All) != 0)
                 {
@@ -4663,7 +4661,7 @@ namespace Game
                 if (data.PhaseGroup != 0 && data.PhaseId != 0)
                 {
                     Log.outError(LogFilter.Sql, $"Table `gameobject` have gameobject (GUID: {guid} Entry: {data.Id}) with both `phaseid` and " +
-                        $"`phasegroup` set, `phasegroup` set to 0");
+                        $"`phasegroup` set, `phasegroup` set to 0.");
                     data.PhaseGroup = 0;
                 }
 
@@ -4672,7 +4670,7 @@ namespace Game
                     if (!CliDB.PhaseStorage.ContainsKey(data.PhaseId))
                     {
                         Log.outError(LogFilter.Sql, $"Table `gameobject` have gameobject (GUID: {guid} Entry: {data.Id}) with `phaseid` {data.PhaseId} " +
-                            $"does not exist, set to 0");
+                            $"does not exist, set to 0.");
                         data.PhaseId = 0;
                     }
                 }
@@ -4682,7 +4680,7 @@ namespace Game
                     if (Global.DB2Mgr.GetPhasesForGroup(data.PhaseGroup).Empty())
                     {
                         Log.outError(LogFilter.Sql, $"Table `gameobject` have gameobject (GUID: {guid} Entry: {data.Id}) with `phaseGroup` {data.PhaseGroup} " +
-                            $"does not exist, set to 0");
+                            $"does not exist, set to 0.");
                         data.PhaseGroup = 0;
                     }
                 }
@@ -4694,13 +4692,13 @@ namespace Game
                     if (terrainSwapEntry == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `gameobject` have gameobject (GUID: {guid} Entry: {data.Id}) with `terrainSwapMap` " +
-                            $"{data.terrainSwapMap} does not exist, set to -1");
+                            $"{data.terrainSwapMap} does not exist, set to -1.");
                         data.terrainSwapMap = -1;
                     }
                     else if (terrainSwapEntry.ParentMapID != data.MapId)
                     {
                         Log.outError(LogFilter.Sql, $"Table `gameobject` have gameobject (GUID: {guid} Entry: {data.Id}) with `terrainSwapMap` " +
-                            $"{data.terrainSwapMap} which cannot be used on spawn map, set to -1");
+                            $"{data.terrainSwapMap} which cannot be used on spawn map, set to -1.");
                         data.terrainSwapMap = -1;
                     }
                 }
@@ -4710,44 +4708,45 @@ namespace Game
 
                 if (data.rotation.X < -1.0f || data.rotation.X > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotationX ({data.rotation.X}) value, skip");
+                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotationX ({data.rotation.X}) value, skip.");
                     continue;
                 }
 
                 if (data.rotation.Y < -1.0f || data.rotation.Y > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotationY ({data.rotation.Y}) value, skip");
+                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotationY ({data.rotation.Y}) value, skip.");
                     continue;
                 }
 
                 if (data.rotation.Z < -1.0f || data.rotation.Z > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotationZ ({data.rotation.Z}) value, skip");
+                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotationZ ({data.rotation.Z}) value, skip.");
                     continue;
                 }
 
                 if (data.rotation.W < -1.0f || data.rotation.W > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotationW ({data.rotation.W}) value, skip");
+                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotationW ({data.rotation.W}) value, skip.");
                     continue;
                 }
 
                 if (!GridDefines.IsValidMapCoord(data.MapId, data.SpawnPoint))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid coordinates, skip");
+                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid coordinates, skip.");
                     continue;
                 }
 
                 if (!(Math.Abs(Quaternion.Dot(data.rotation, data.rotation) - 1) < 1e-5))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotation quaternion (non-unit), defaulting to orientation on Z axis only");
+                    Log.outError(LogFilter.Sql,
+                        $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotation quaternion (non-unit), defaulting to orientation on Z axis only.");
                     data.rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(data.SpawnPoint.GetOrientation(), 0f, 0f));
                 }
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateGameobjectZoneAreaData))
                 {
                     PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
-                    Global.TerrainMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.MapId, data.SpawnPoint);
+                    Global.TerrainMgr.GetZoneAndAreaId(phaseShift, out int zoneId, out int areaId, data.MapId, data.SpawnPoint);
 
                     PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_GAMEOBJECT_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -4764,7 +4763,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobjects in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobjects in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
         public void LoadGameObjectAddons()
@@ -4784,12 +4783,12 @@ namespace Game
             uint count = 0;
             do
             {
-                ulong guid = result.Read<ulong>(0);
+                long guid = result.Read<long>(0);
 
                 GameObjectData goData = GetGameObjectData(guid);
                 if (goData == null)
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) does not exist but has a record in `gameobject_addon`");
+                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) does not exist but has a record in `gameobject_addon`.");
                     continue;
                 }
 
@@ -4797,25 +4796,25 @@ namespace Game
                 gameObjectAddon.ParentRotation = new Quaternion(result.Read<float>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4));
                 gameObjectAddon.invisibilityType = (InvisibilityType)result.Read<byte>(5);
                 gameObjectAddon.invisibilityValue = result.Read<uint>(6);
-                gameObjectAddon.WorldEffectID = result.Read<uint>(7);
-                gameObjectAddon.AIAnimKitID = result.Read<uint>(8);
+                gameObjectAddon.WorldEffectID = result.Read<int>(7);
+                gameObjectAddon.AIAnimKitID = result.Read<int>(8);
 
                 if (gameObjectAddon.invisibilityType >= InvisibilityType.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has invalid InvisibilityType in `gameobject_addon`, disabled invisibility");
+                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has invalid InvisibilityType in `gameobject_addon`, disabled invisibility.");
                     gameObjectAddon.invisibilityType = InvisibilityType.General;
                     gameObjectAddon.invisibilityValue = 0;
                 }
 
                 if (gameObjectAddon.invisibilityType != 0 && gameObjectAddon.invisibilityValue == 0)
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has InvisibilityType set but has no InvisibilityValue in `gameobject_addon`, set to 1");
+                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has InvisibilityType set but has no InvisibilityValue in `gameobject_addon`, set to 1.");
                     gameObjectAddon.invisibilityValue = 1;
                 }
 
                 if (!(Math.Abs(Quaternion.Dot(gameObjectAddon.ParentRotation, gameObjectAddon.ParentRotation) - 1) < 1e-5))
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has invalid parent rotation in `gameobject_addon`, set to default");
+                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has invalid parent rotation in `gameobject_addon`, set to default.");
                     gameObjectAddon.ParentRotation = Quaternion.Identity;
                 }
 
@@ -4836,14 +4835,14 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobject addons in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobject addons in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadGameObjectQuestItems()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                           0                1
+            //                                           0                1     2
             using var result = DB.World.Query("SELECT GameObjectEntry, ItemId, Idx FROM gameobject_questitem ORDER BY Idx ASC");
             if (result.IsEmpty())
             {
@@ -4854,19 +4853,19 @@ namespace Game
             uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
-                uint item = result.Read<uint>(1);
-                uint idx = result.Read<uint>(2);
+                int entry = result.Read<int>(0);
+                int item = result.Read<int>(1);
+                int idx = result.Read<int>(2);
 
                 if (!_gameObjectTemplateStorage.ContainsKey(entry))
                 {
-                    Log.outError(LogFilter.Sql, "Table `gameobject_questitem` has data for nonexistent gameobject (entry: {0}, idx: {1}), skipped", entry, idx);
+                    Log.outError(LogFilter.Sql, $"Table `gameobject_questitem` has data for nonexistent gameobject (entry: {entry}, idx: {idx}), skipped.");
                     continue;
                 }
 
                 if (!CliDB.ItemStorage.ContainsKey(item))
                 {
-                    Log.outError(LogFilter.Sql, "Table `gameobject_questitem` has nonexistent item (ID: {0}) in gameobject (entry: {1}, idx: {2}), skipped", item, entry, idx);
+                    Log.outError(LogFilter.Sql, $"Table `gameobject_questitem` has nonexistent item (ID: {item}) in gameobject (entry: {entry}, idx: {idx}), skipped.");
                     continue;
                 }
 
@@ -4876,7 +4875,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobject quest items in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobject quest items in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadGameObjectForQuests()
@@ -4887,7 +4886,7 @@ namespace Game
 
             if (GetGameObjectTemplates().Empty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 GameObjects for quests");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 GameObjects for quests.");
                 return;
             }
 
@@ -4942,7 +4941,7 @@ namespace Game
                 ++count;
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObjects for quests in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} GameObjects for quests in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void AddGameObjectToGrid(GameObjectData data)
@@ -4955,17 +4954,17 @@ namespace Game
             RemoveSpawnDataFromGrid(data);
         }
 
-        public GameObjectAddon GetGameObjectAddon(ulong lowguid)
+        public GameObjectAddon GetGameObjectAddon(long lowguid)
         {
             return _gameObjectAddonStorage.LookupByKey(lowguid);
         }
 
-        public List<uint> GetGameObjectQuestItemList(uint id)
+        public List<int> GetGameObjectQuestItemList(int id)
         {
             return _gameObjectQuestItemStorage.LookupByKey(id);
         }
 
-        MultiMap<uint, uint> GetGameObjectQuestItemMap() { return _gameObjectQuestItemStorage; }
+        MultiMap<int, int> GetGameObjectQuestItemMap() { return _gameObjectQuestItemStorage; }
 
         public Dictionary<long, GameObjectData> GetAllGameObjectData() { return gameObjectDataStorage; }
 
@@ -5014,7 +5013,7 @@ namespace Game
             return _gameObjectTemplateStorage;
         }
 
-        public bool IsGameObjectForQuests(uint entry)
+        public bool IsGameObjectForQuests(int entry)
         {
             return _gameObjectForQuestStorage.Contains(entry);
         }
@@ -5080,7 +5079,7 @@ namespace Game
                 $"Gameobject (Entry: {goInfo.entry} GoType: {goInfo.type}) have data{N}={dataN} but expected boolean (0/1) consumable field value.");
         }
 
-        public List<Difficulty> ParseSpawnDifficulties(string difficultyString, string table, ulong spawnId, int mapId, List<Difficulty> mapDifficulties)
+        public List<Difficulty> ParseSpawnDifficulties(string difficultyString, string table, long spawnId, int mapId, List<Difficulty> mapDifficulties)
         {
             List<Difficulty> difficulties = new();
             StringArray tokens = new(difficultyString, ',');
@@ -5090,7 +5089,7 @@ namespace Game
             bool isTransportMap = IsTransportMap(mapId);
             foreach (string token in tokens)
             {
-                Difficulty difficultyId = (Difficulty)System.Enum.Parse(typeof(Difficulty), token);
+                Difficulty difficultyId = (Difficulty)Enum.Parse(typeof(Difficulty), token);
                 if (difficultyId != 0 && !CliDB.DifficultyStorage.ContainsKey((int)difficultyId))
                 {
                     Log.outError(LogFilter.Sql, $"Table `{table}` has {table} (GUID: {spawnId}) with non invalid difficulty id {difficultyId}, skipped.");
@@ -5189,7 +5188,7 @@ namespace Game
                 ItemTemplateStorage.Add(sparse.Id, itemTemplate);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {sparseCount} item templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {sparseCount} item templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         static float[] qualityMultipliers = new float[]
@@ -5261,7 +5260,7 @@ namespace Game
             0.66f, // ITEM_SUBCLASS_WEAPON_FISHING_POLE
         };
 
-        uint FillMaxDurability(ItemClass itemClass, uint itemSubClass, InventoryType inventoryType, ItemQuality quality, uint itemLevel)
+        uint FillMaxDurability(ItemClass itemClass, ItemSubClass itemSubClass, InventoryType inventoryType, ItemQuality quality, uint itemLevel)
         {
             if (itemClass != ItemClass.Armor && itemClass != ItemClass.Weapon)
                 return 0;
@@ -5278,7 +5277,7 @@ namespace Game
                 return 5 * (uint)(Math.Round(25.0f * qualityMultipliers[(int)quality] * armorMultipliers[(int)inventoryType] * levelPenalty));
             }
 
-            return 5 * (uint)(Math.Round(18.0f * qualityMultipliers[(int)quality] * weaponMultipliers[itemSubClass] * levelPenalty));
+            return 5 * (uint)(Math.Round(18.0f * qualityMultipliers[(int)quality] * weaponMultipliers[itemSubClass.data] * levelPenalty));
         }
 
         public void LoadItemTemplateAddon()
@@ -5293,7 +5292,7 @@ namespace Game
             {
                 do
                 {
-                    uint itemId = result.Read<uint>(0);
+                    int itemId = result.Read<int>(0);
                     ItemTemplate itemTemplate = GetItemTemplate(itemId);
                     if (itemTemplate == null)
                     {
@@ -5319,7 +5318,7 @@ namespace Game
                 } while (result.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} item addon templates in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} item addon templates in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
         public void LoadItemScriptNames()
@@ -5344,7 +5343,7 @@ namespace Game
                 } while (result.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} item script names in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} item script names in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public ItemTemplate GetItemTemplate(int ItemId)
@@ -5357,12 +5356,12 @@ namespace Game
             return ItemTemplateStorage;
         }
 
-        public Trainer GetTrainer(uint trainerId)
+        public Trainer GetTrainer(int trainerId)
         {
             return trainers.LookupByKey(trainerId);
         }
 
-        public void AddVendorItem(uint entry, VendorItem vItem, bool persist = true)
+        public void AddVendorItem(int entry, VendorItem vItem, bool persist = true)
         {
             VendorItemData vList = cacheVendorItemStorage[entry];
             vList.AddItem(vItem);
@@ -5382,7 +5381,7 @@ namespace Game
             }
         }
 
-        public bool RemoveVendorItem(uint entry, uint item, ItemVendorType type, bool persist = true)
+        public bool RemoveVendorItem(int entry, int item, ItemVendorType type, bool persist = true)
         {
             var iter = cacheVendorItemStorage.LookupByKey(entry);
             if (iter == null)
@@ -5405,7 +5404,7 @@ namespace Game
             return true;
         }
 
-        public bool IsVendorItemValid(uint vendorentry, VendorItem vItem, Player player = null, List<uint> skipvendors = null, ulong ORnpcflag = 0)
+        public bool IsVendorItemValid(int vendorentry, VendorItem vItem, Player player = null, List<int> skipvendors = null, NPCFlags ORnpcflag = 0)
         {
             CreatureTemplate cInfo = GetCreatureTemplate(vendorentry);
             if (cInfo == null)
@@ -5413,18 +5412,18 @@ namespace Game
                 if (player != null)
                     player.SendSysMessage(CypherStrings.CommandVendorselection);
                 else
-                    Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` have data for not existed creature template (Entry: {0}), ignore", vendorentry);
+                    Log.outError(LogFilter.Sql, $"Table `(gameevent)npcvendor` have data for not existed creature template (Entry: {vendorentry}), ignore.");
                 return false;
             }
 
-            if (!Convert.ToBoolean(((ulong)cInfo.Npcflag | ORnpcflag) & (ulong)NPCFlags.Vendor))
+            if (!(cInfo.Npcflag | ORnpcflag).HasAnyFlag(NPCFlags.Vendor))
             {
                 if (skipvendors == null || skipvendors.Count == 0)
                 {
                     if (player != null)
                         player.SendSysMessage(CypherStrings.CommandVendorselection);
                     else
-                        Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` have data for not creature template (Entry: {0}) without vendor flag, ignore", vendorentry);
+                        Log.outError(LogFilter.Sql, $"Table `(gameevent)npcvendor` have data for not creature template (Entry: {vendorentry}) without vendor flag, ignore");
 
                     if (skipvendors != null)
                         skipvendors.Add(vendorentry);
@@ -5438,13 +5437,15 @@ namespace Game
                 if (player != null)
                     player.SendSysMessage(CypherStrings.ItemNotFound, vItem.item, vItem.Type);
                 else
-                    Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` for Vendor (Entry: {0}) have in item list non-existed item ({1}, Type {2}), ignore", vendorentry, vItem.item, vItem.Type);
+                    Log.outError(LogFilter.Sql,
+                        $"Table `(gameevent)npcvendor` for Vendor (Entry: {vendorentry}) have in item list non-existed item ({vItem.item}, Type {vItem.Type}), ignore.");
                 return false;
             }
 
             if (vItem.PlayerConditionId != 0 && !CliDB.PlayerConditionStorage.ContainsKey(vItem.PlayerConditionId))
             {
-                Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` has Item (Entry: {0}) with invalid PlayerConditionId ({1}) for vendor ({2}), ignore", vItem.item, vItem.PlayerConditionId, vendorentry);
+                Log.outError(LogFilter.Sql,
+                    $"Table `(game_event_)npc_vendor` has Item (Entry: {vItem.item}) with invalid PlayerConditionId ({vItem.PlayerConditionId}) for vendor ({vendorentry}), ignore.");
                 return false;
             }
 
@@ -5453,7 +5454,8 @@ namespace Game
                 if (player != null)
                     player.SendSysMessage(CypherStrings.ExtendedCostNotExist, vItem.ExtendedCost);
                 else
-                    Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` have Item (Entry: {0}) with wrong ExtendedCost ({1}) for vendor ({2}), ignore", vItem.item, vItem.ExtendedCost, vendorentry);
+                    Log.outError(LogFilter.Sql,
+                        $"Table `(gameevent)npcvendor` have Item (Entry: {vItem.item}) with wrong ExtendedCost ({vItem.ExtendedCost}) for vendor ({vendorentry}), ignore.");
                 return false;
             }
 
@@ -5462,9 +5464,10 @@ namespace Game
                 if (vItem.maxcount > 0 && vItem.incrtime == 0)
                 {
                     if (player != null)
-                        player.SendSysMessage("MaxCount != 0 ({0}) but IncrTime == 0", vItem.maxcount);
+                        player.SendSysMessage($"MaxCount != 0 ({vItem.maxcount}) but IncrTime == 0.");
                     else
-                        Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` has `maxcount` ({0}) for item {1} of vendor (Entry: {2}) but `incrtime`=0, ignore", vItem.maxcount, vItem.item, vendorentry);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `(gameevent)npcvendor` has `maxcount` ({vItem.maxcount}) for item {vItem.item} of vendor (Entry: {vendorentry}) but `incrtime`=0, ignore.");
                     return false;
                 }
                 else if (vItem.maxcount == 0 && vItem.incrtime > 0)
@@ -5472,15 +5475,17 @@ namespace Game
                     if (player != null)
                         player.SendSysMessage("MaxCount == 0 but IncrTime<>= 0");
                     else
-                        Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` has `maxcount`=0 for item {0} of vendor (Entry: {0}) but `incrtime`<>0, ignore", vItem.item, vendorentry);
+                        Log.outError(LogFilter.Sql, 
+                            $"Table `(gameevent)npcvendor` has `maxcount`=0 for item {vItem.item} of vendor (Entry: {vendorentry}) but `incrtime`<>0, ignore.");
                     return false;
                 }
 
-                foreach (uint bonusListId in vItem.BonusListIDs)
+                foreach (int bonusListId in vItem.BonusListIDs)
                 {
                     if (ItemBonusMgr.GetItemBonuses(bonusListId).Empty())
                     {
-                        Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` have Item (Entry: {0}) with invalid bonus {1} for vendor ({2}), ignore", vItem.item, bonusListId, vendorentry);
+                        Log.outError(LogFilter.Sql,
+                            $"Table `(game_event_)npc_vendor` have Item (Entry: {vItem.item}) with invalid bonus {bonusListId} for vendor ({vendorentry}), ignore.");
                         return false;
                     }
                 }
@@ -5495,30 +5500,32 @@ namespace Game
                 if (player != null)
                     player.SendSysMessage(CypherStrings.ItemAlreadyInList, vItem.item, vItem.ExtendedCost, vItem.Type);
                 else
-                    Log.outError(LogFilter.Sql, "Table `npcvendor` has duplicate items {0} (with extended cost {1}, Type {2}) for vendor (Entry: {3}), ignoring", vItem.item, vItem.ExtendedCost, vItem.Type, vendorentry);
+                    Log.outError(LogFilter.Sql,
+                        $"Table `npcvendor` has duplicate items {vItem.item} (with extended cost {vItem.ExtendedCost}, Type {vItem.Type}) for vendor (Entry: {vendorentry}), ignoring.");
                 return false;
             }
 
             if (vItem.Type == ItemVendorType.Currency && vItem.maxcount == 0)
             {
-                Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` have Item (Entry: {0}, Type: {1}) with missing maxcount for vendor ({2}), ignore", vItem.item, vItem.Type, vendorentry);
+                Log.outError(LogFilter.Sql,
+                    $"Table `(game_event_)npc_vendor` have Item (Entry: {vItem.item}, Type: {vItem.Type}) with missing maxcount for vendor ({vendorentry}), ignore.");
                 return false;
             }
 
             return true;
         }
 
-        public VendorItemData GetNpcVendorItemList(uint entry)
+        public VendorItemData GetNpcVendorItemList(int entry)
         {
             return cacheVendorItemStorage.LookupByKey(entry);
         }
 
-        public List<float> GetCreatureTemplateSparringValues(uint entry)
+        public List<float> GetCreatureTemplateSparringValues(int entry)
         {
             return _creatureTemplateSparringStorage.LookupByKey(entry);
         }
 
-        public CreatureMovementData GetCreatureMovementOverride(ulong spawnId)
+        public CreatureMovementData GetCreatureMovementOverride(long spawnId)
         {
             return creatureMovementOverrides.LookupByKey(spawnId);
         }
@@ -5532,7 +5539,7 @@ namespace Game
             if (id == -1)
                 return equip[RandomHelper.IRand(0, equip.Count - 1)].Item2;
             else
-                return equip.Find(p => p.Item1 == id)?.Item2;
+                return equip.Find(p => p.Item1 == id).Item2;
         }
 
         //Maps
@@ -5551,7 +5558,7 @@ namespace Game
             uint count = 0;
             do
             {
-                uint mapID = result.Read<uint>(0);
+                int mapID = result.Read<int>(0);
 
                 if (!Global.MapMgr.IsValidMAP(mapID))
                 {
@@ -5568,7 +5575,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} instance templates in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} instance templates in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
         public void LoadGameTele()
@@ -5577,7 +5584,7 @@ namespace Game
 
             gameTeleStorage.Clear();
 
-            //                                          0       1           2           3           4        5     6
+            //                                        0       1           2           3           4        5     6
             using var result = DB.World.Query("SELECT id, position_x, position_y, position_z, orientation, map, name FROM game_tele");
 
             if (result.IsEmpty())
@@ -5590,7 +5597,7 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
 
                 GameTele gt = new();
 
@@ -5598,21 +5605,21 @@ namespace Game
                 gt.posY = result.Read<float>(2);
                 gt.posZ = result.Read<float>(3);
                 gt.orientation = result.Read<float>(4);
-                gt.mapId = result.Read<uint>(5);
+                gt.mapId = result.Read<int>(5);
                 gt.name = result.Read<string>(6);
 
                 gt.nameLow = gt.name.ToLowerInvariant();
 
                 if (!GridDefines.IsValidMapCoord(gt.mapId, gt.posX, gt.posY, gt.posZ, gt.orientation))
                 {
-                    Log.outError(LogFilter.Sql, "Wrong position for id {0} (name: {1}) in `game_tele` table, ignoring.", id, gt.name);
+                    Log.outError(LogFilter.Sql, $"Wrong position for id {id} (name: {gt.name}) in `game_tele` table, ignoring.");
                     continue;
                 }
                 gameTeleStorage.Add(id, gt);
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameTeleports in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} GameTeleports in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadAreaTriggerTeleports()
@@ -5635,12 +5642,12 @@ namespace Game
                 ++count;
 
                 int Trigger_ID = result.Read<int>(0);
-                uint PortLocID = result.Read<uint>(1);
+                int PortLocID = result.Read<int>(1);
 
                 WorldSafeLocsEntry portLoc = GetWorldSafeLoc(PortLocID);
                 if (portLoc == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Area Trigger (ID: {Trigger_ID}) has a non-existing Port Loc (ID: {PortLocID}) in WorldSafeLocs.dbc, skipped");
+                    Log.outError(LogFilter.Sql, $"Area Trigger (ID: {Trigger_ID}) has a non-existing Port Loc (ID: {PortLocID}) in WorldSafeLocs.dbc, skipped.");
                     continue;
                 }
 
@@ -5662,7 +5669,7 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} area trigger teleport definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} area trigger teleport definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadAccessRequirements()
@@ -5692,7 +5699,7 @@ namespace Game
                 Difficulty difficulty = (Difficulty)result.Read<byte>(1);
                 if (Global.DB2Mgr.GetMapDifficultyData(mapid, difficulty) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Map {mapid} referenced in `access_requirement` does not have difficulty {difficulty}, skipped");
+                    Log.outError(LogFilter.Sql, $"Map {mapid} referenced in `access_requirement` does not have difficulty {difficulty}, skipped.");
                     continue;
                 }
 
@@ -5759,7 +5766,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} access requirement definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} access requirement definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadInstanceEncounters()
@@ -5775,13 +5782,13 @@ namespace Game
             }
 
             uint count = 0;
-            Dictionary<uint, Tuple<uint, DungeonEncounterRecord>> dungeonLastBosses = new();
+            Dictionary<int, (int, DungeonEncounterRecord)> dungeonLastBosses = new();
             do
             {
-                uint entry = result.Read<uint>(0);
+                int entry = result.Read<int>(0);
                 EncounterCreditType creditType = (EncounterCreditType)result.Read<byte>(1);
-                uint creditEntry = result.Read<uint>(2);
-                uint lastEncounterDungeon = result.Read<uint>(3);
+                int creditEntry = result.Read<int>(2);
+                int lastEncounterDungeon = result.Read<int>(3);
                 DungeonEncounterRecord dungeonEncounter = CliDB.DungeonEncounterStorage.LookupByKey(entry);
                 if (dungeonEncounter == null)
                 {
@@ -5799,14 +5806,14 @@ namespace Game
                 var pair = dungeonLastBosses.LookupByKey(lastEncounterDungeon);
                 if (lastEncounterDungeon != 0)
                 {
-                    if (pair != null)
+                    if (pair != default)
                     {
                         Log.outError(LogFilter.Sql, "Table `instance_encounters` specified encounter {0} ({1}) as last encounter but {2} ({3}) is already marked as one, skipped!",
                             entry, dungeonEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()], pair.Item1, pair.Item2.Name[Global.WorldMgr.GetDefaultDbcLocale()]);
                         continue;
                     }
 
-                    dungeonLastBosses[lastEncounterDungeon] = Tuple.Create(entry, dungeonEncounter);
+                    dungeonLastBosses[lastEncounterDungeon] = (entry, dungeonEncounter);
                 }
 
                 switch (creditType)
@@ -5841,17 +5848,17 @@ namespace Game
                 {
                     foreach (var difficulty in CliDB.DifficultyStorage.Values)
                     {
-                        if (Global.DB2Mgr.GetMapDifficultyData((uint)dungeonEncounter.MapID, (Difficulty)difficulty.Id) != null)
-                            _dungeonEncounterStorage.Add(MathFunctions.MakePair64((uint)dungeonEncounter.MapID, difficulty.Id), new DungeonEncounter(dungeonEncounter, creditType, creditEntry, lastEncounterDungeon));
+                        if (Global.DB2Mgr.GetMapDifficultyData(dungeonEncounter.MapID, difficulty.Id) != null)
+                            _dungeonEncounterStorage.Add((dungeonEncounter.MapID, difficulty.Id), new DungeonEncounter(dungeonEncounter, creditType, creditEntry, lastEncounterDungeon));
                     }
                 }
                 else
-                    _dungeonEncounterStorage.Add(MathFunctions.MakePair64((uint)dungeonEncounter.MapID, (uint)dungeonEncounter.DifficultyID), new DungeonEncounter(dungeonEncounter, creditType, creditEntry, lastEncounterDungeon));
+                    _dungeonEncounterStorage.Add((dungeonEncounter.MapID, dungeonEncounter.DifficultyID), new DungeonEncounter(dungeonEncounter, creditType, creditEntry, lastEncounterDungeon));
 
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} instance encounters in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} instance encounters in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadSpawnGroupTemplates()
@@ -5864,7 +5871,7 @@ namespace Game
             {
                 do
                 {
-                    uint groupId = result.Read<uint>(0);
+                    int groupId = result.Read<int>(0);
                     SpawnGroupTemplateData group = new();
                     group.groupId = groupId;
                     group.name = result.Read<string>(1);
@@ -5909,7 +5916,7 @@ namespace Game
             }
 
             if (!result.IsEmpty())
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_spawnGroupDataStorage.Count} spawn group templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_spawnGroupDataStorage.Count} spawn group templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
             else
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spawn group templates. DB table `spawn_group_template` is empty.");
         }
@@ -5929,14 +5936,14 @@ namespace Game
             uint numMembers = 0;
             do
             {
-                uint groupId = result.Read<uint>(0);
+                int groupId = result.Read<int>(0);
                 SpawnObjectType spawnType = (SpawnObjectType)result.Read<byte>(1);
                 if (!SpawnData.TypeIsValid(spawnType))
                 {
                     Log.outError(LogFilter.Sql, $"Spawn data with invalid Type {spawnType} listed for spawn group {groupId}. Skipped.");
                     continue;
                 }
-                ulong spawnId = result.Read<ulong>(2);
+                long spawnId = result.Read<long>(2);
 
                 SpawnMetadata data = GetSpawnMetadata(spawnType, spawnId);
                 if (data == null)
@@ -5946,7 +5953,8 @@ namespace Game
                 }
                 else if (data.spawnGroupData.groupId != 0)
                 {
-                    Log.outError(LogFilter.Sql, $"Spawn with ID ({spawnType},{spawnId}) is listed as a member of spawn group {groupId}, but is already a member of spawn group {data.spawnGroupData.groupId}. Skipping.");
+                    Log.outError(LogFilter.Sql, 
+                        $"Spawn with ID ({spawnType},{spawnId}) is listed as a member of spawn group {groupId}, but is already a member of spawn group {data.spawnGroupData.groupId}. Skipping.");
                     continue;
                 }
                 var groupTemplate = _spawnGroupDataStorage.LookupByKey(groupId);
@@ -5964,7 +5972,8 @@ namespace Game
                     }
                     else if (groupTemplate.mapId != data.MapId && !groupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
                     {
-                        Log.outError(LogFilter.Sql, $"Spawn group {groupId} has map ID {groupTemplate.mapId}, but spawn ({spawnType},{spawnId}) has map id {data.MapId} - spawn NOT added to group!");
+                        Log.outError(LogFilter.Sql, 
+                            $"Spawn group {groupId} has map ID {groupTemplate.mapId}, but spawn ({spawnType},{spawnId}) has map id {data.MapId} - spawn NOT added to group!");
                         continue;
                     }
                     data.spawnGroupData = groupTemplate;
@@ -5974,7 +5983,7 @@ namespace Game
                 }
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {numMembers} spawn group members in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {numMembers} spawn group members in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadInstanceSpawnGroups()
@@ -5993,7 +6002,7 @@ namespace Game
             do
             {
                 int instanceMapId = result.Read<ushort>(0);
-                uint spawnGroupId = result.Read<uint>(3);
+                int spawnGroupId = result.Read<int>(3);
                 var spawnGroupTemplate = _spawnGroupDataStorage.LookupByKey(spawnGroupId);
                 if (spawnGroupTemplate == null || spawnGroupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
                 {
@@ -6033,7 +6042,8 @@ namespace Game
                 if (flags.HasFlag(InstanceSpawnGroupFlags.AllianceOnly | InstanceSpawnGroupFlags.HordeOnly))
                 {
                     info.Flags = flags & ~(InstanceSpawnGroupFlags.AllianceOnly | InstanceSpawnGroupFlags.HordeOnly);
-                    Log.outError(LogFilter.Sql, $"Instance spawn group ({instanceMapId},{spawnGroupId}) FLAG_ALLIANCE_ONLY and FLAG_HORDE_ONLY may not be used together in a single entry - truncated to {info.Flags}.");
+                    Log.outError(LogFilter.Sql,
+                        $"Instance spawn group ({instanceMapId},{spawnGroupId}) FLAG_ALLIANCE_ONLY and FLAG_HORDE_ONLY may not be used together in a single entry - truncated to {info.Flags}.");
                 }
 
                 _instanceSpawnGroupStorage.Add(instanceMapId, info);
@@ -6041,7 +6051,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} instance spawn groups in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} instance spawn groups in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         void OnDeleteSpawnData(SpawnData data)
@@ -6064,14 +6074,14 @@ namespace Game
             Cypher.Assert(false, $"Spawn data ({data.type},{data.SpawnId}) being removed is member of spawn group {data.spawnGroupData.groupId}, but not actually listed in the lookup table for that group!");
         }
 
-        public Dictionary<uint, InstanceTemplate> GetInstanceTemplates() { return instanceTemplateStorage; }
+        public Dictionary<int, InstanceTemplate> GetInstanceTemplates() { return instanceTemplateStorage; }
 
         public InstanceTemplate GetInstanceTemplate(int mapID)
         {
             return instanceTemplateStorage.LookupByKey(mapID);
         }
 
-        public GameTele GetGameTele(uint id)
+        public GameTele GetGameTele(int id)
         {
             return gameTeleStorage.LookupByKey(id);
         }
@@ -6082,7 +6092,7 @@ namespace Game
 
             // Alternative first GameTele what contains wnameLow as substring in case no GameTele location found
             GameTele alt = null;
-            foreach (var (_, tele) in gameTeleStorage)
+            foreach (var tele in gameTeleStorage.Values)
             {
                 if (tele.nameLow == name)
                     return tele;
@@ -6096,7 +6106,7 @@ namespace Game
         public GameTele GetGameTeleExactName(string name)
         {
             name = name.ToLower();
-            foreach (var (_, tele) in gameTeleStorage)
+            foreach (var tele in gameTeleStorage.Values)
             {
                 if (tele.nameLow == name)
                     return tele;
@@ -6108,10 +6118,10 @@ namespace Game
         public bool AddGameTele(GameTele tele)
         {
             // find max id
-            uint newId = 0;
-            foreach (var itr in gameTeleStorage)
-                if (itr.Key > newId)
-                    newId = itr.Key;
+            int newId = 0;
+            foreach (var itr in gameTeleStorage.Keys)
+                if (itr > newId)
+                    newId = itr;
 
             // use next
             ++newId;
@@ -6137,7 +6147,9 @@ namespace Game
         {
             name = name.ToLowerInvariant();
 
-            foreach (var pair in gameTeleStorage.ToList())
+            int? keyToDelete = null;
+
+            foreach (var pair in gameTeleStorage)
             {
                 if (pair.Value.nameLow == name)
                 {
@@ -6145,24 +6157,30 @@ namespace Game
                     stmt.AddValue(0, pair.Value.name);
                     DB.World.Execute(stmt);
 
-                    gameTeleStorage.Remove(pair.Key);
-                    return true;
+                    keyToDelete = pair.Key;
+                    break;
                 }
             }
 
+            if (keyToDelete.HasValue)
+            {
+                gameTeleStorage.Remove(keyToDelete.Value);
+                return true;
+            }
+            
             return false;
         }
 
-        public List<DungeonEncounter> GetDungeonEncounterList(uint mapId, Difficulty difficulty)
+        public List<DungeonEncounter> GetDungeonEncounterList(int mapId, Difficulty difficulty)
         {
-            return _dungeonEncounterStorage.LookupByKey(MathFunctions.MakePair64(mapId, (uint)difficulty));
+            return _dungeonEncounterStorage.LookupByKey((mapId, difficulty));
         }
 
         public bool IsTransportMap(int mapId) { return _transportMaps.Contains((ushort)mapId); }
 
-        public SpawnGroupTemplateData GetSpawnGroupData(uint groupId) { return _spawnGroupDataStorage.LookupByKey(groupId); }
+        public SpawnGroupTemplateData GetSpawnGroupData(int groupId) { return _spawnGroupDataStorage.LookupByKey(groupId); }
 
-        public SpawnGroupTemplateData GetSpawnGroupData(SpawnObjectType type, ulong spawnId)
+        public SpawnGroupTemplateData GetSpawnGroupData(SpawnObjectType type, long spawnId)
         {
             SpawnMetadata data = GetSpawnMetadata(type, spawnId);
             return data != null ? data.spawnGroupData : null;
@@ -6170,10 +6188,10 @@ namespace Game
 
         public SpawnGroupTemplateData GetDefaultSpawnGroup() { return _spawnGroupDataStorage.ElementAt(0).Value; }
         public SpawnGroupTemplateData GetLegacySpawnGroup() { return _spawnGroupDataStorage.ElementAt(1).Value; }
-        public List<SpawnMetadata> GetSpawnMetadataForGroup(uint groupId) { return _spawnGroupMapStorage.LookupByKey(groupId); }
-        public List<uint> GetSpawnGroupsForMap(uint mapId) { return _spawnGroupsByMap.LookupByKey(mapId); }
+        public List<SpawnMetadata> GetSpawnMetadataForGroup(int groupId) { return _spawnGroupMapStorage.LookupByKey(groupId); }
+        public List<int> GetSpawnGroupsForMap(int mapId) { return _spawnGroupsByMap.LookupByKey(mapId); }
 
-        public SpawnMetadata GetSpawnMetadata(SpawnObjectType type, ulong spawnId)
+        public SpawnMetadata GetSpawnMetadata(SpawnObjectType type, long spawnId)
         {
             if (SpawnData.TypeHasData(type))
                 return GetSpawnData(type, spawnId);
@@ -6181,7 +6199,7 @@ namespace Game
                 return null;
         }
 
-        public SpawnData GetSpawnData(SpawnObjectType type, ulong spawnId)
+        public SpawnData GetSpawnData(SpawnObjectType type, long spawnId)
         {
             if (!SpawnData.TypeHasData(type))
                 return null;
@@ -6200,7 +6218,7 @@ namespace Game
             }
         }
 
-        public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroupsForMap(uint mapId) { return _instanceSpawnGroupStorage.LookupByKey(mapId); }
+        public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroupsForMap(int mapId) { return _instanceSpawnGroupStorage.LookupByKey(mapId); }
 
         //Player
         public void LoadPlayerInfo()
@@ -6279,13 +6297,15 @@ namespace Game
 
                         if (!CliDB.MapStorage.ContainsKey(info.createPositionNPE.Value.Loc.GetMapId()))
                         {
-                            Log.outError(LogFilter.Sql, $"Invalid NPE map id {info.createPositionNPE.Value.Loc.GetMapId()} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Invalid NPE map id {info.createPositionNPE.Value.Loc.GetMapId()} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                             info.createPositionNPE = null;
                         }
 
                         if (info.createPositionNPE.HasValue && info.createPositionNPE.Value.TransportGuid.HasValue && Global.TransportMgr.GetTransportSpawn(info.createPositionNPE.Value.TransportGuid.Value) == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Invalid NPE transport spawn id {info.createPositionNPE.Value.TransportGuid.Value} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                            Log.outError(LogFilter.Sql,
+                                $"Invalid NPE transport spawn id {info.createPositionNPE.Value.TransportGuid.Value} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                             info.createPositionNPE = null; // remove entire NPE data - assume user put transport offsets into npe_position fields
                         }
                     }
@@ -6296,33 +6316,36 @@ namespace Game
                         if (CliDB.MovieStorage.ContainsKey(introMovieId))
                             info.introMovieId = introMovieId;
                         else
-                            Log.outError(LogFilter.Sql, $"Invalid intro movie id {introMovieId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Invalid intro movie id {introMovieId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
 
                     if (!result.IsNull(14))
                     {
-                        uint introSceneId = result.Read<uint>(14);
+                        int introSceneId = result.Read<int>(14);
                         if (GetSceneTemplate(introSceneId) != null)
                             info.introSceneId = introSceneId;
                         else
-                            Log.outError(LogFilter.Sql, $"Invalid intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Invalid intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
 
                     if (!result.IsNull(15))
                     {
-                        uint introSceneId = result.Read<uint>(15);
+                        int introSceneId = result.Read<int>(15);
                         if (GetSceneTemplate(introSceneId) != null)
                             info.introSceneIdNPE = introSceneId;
                         else
-                            Log.outError(LogFilter.Sql, $"Invalid NPE intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                            Log.outError(LogFilter.Sql, 
+                                $"Invalid NPE intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
 
-                    _playerInfo[Tuple.Create(currentrace, currentclass)] = info;
+                    _playerInfo[(currentrace, currentclass)] = info;
 
                     ++count;
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} player create definitions in {Time.GetMSTimeDiffToNow(time)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} player create definitions in {Time.GetMSTimeDiffToNow(time)} ms.");
             }
 
             time = Time.GetMSTime();
@@ -6354,7 +6377,7 @@ namespace Game
                         if (!raceMask.HasRace(raceIndex))
                             continue;
 
-                        var playerInfo = _playerInfo.LookupByKey(Tuple.Create(raceIndex, characterLoadout.ChrClassID));
+                        var playerInfo = _playerInfo.LookupByKey((raceIndex, characterLoadout.ChrClassID));
                         if (playerInfo != null)
                         {
                             playerInfo.itemContext = characterLoadout.ItemContext;
@@ -6419,7 +6442,8 @@ namespace Game
                         int itemid = result.Read<int>(2);
                         if (GetItemTemplate(itemid).GetId() == 0)
                         {
-                            Log.outError(LogFilter.Sql, $"Item id {itemid} (race {currentrace} class {currentclass}) in `playercreateinfo_item` table but not listed in `itemtemplate`, ignoring.");
+                            Log.outError(LogFilter.Sql,
+                                $"Item id {itemid} (race {currentrace} class {currentclass}) in `playercreateinfo_item` table but not listed in `itemtemplate`, ignoring.");
                             continue;
                         }
 
@@ -6427,7 +6451,8 @@ namespace Game
 
                         if (amount == 0)
                         {
-                            Log.outError(LogFilter.Sql, $"Item id {itemid} (class {currentrace} race {currentclass}) have amount == 0 in `playercreateinfo_item` table, ignoring.");
+                            Log.outError(LogFilter.Sql,
+                                $"Item id {itemid} (class {currentrace} race {currentclass}) have amount == 0 in `playercreateinfo_item` table, ignoring.");
                             continue;
                         }
 
@@ -6448,7 +6473,7 @@ namespace Game
                         ++count;
                     } while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} custom player create items in {Time.GetMSTimeDiffToNow(time)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} custom player create items in {Time.GetMSTimeDiffToNow(time)} ms.");
                 }
             }
 
@@ -6470,7 +6495,7 @@ namespace Game
                                 {
                                     if (rcInfo.ClassMask.HasClass(classIndex))
                                     {
-                                        if (_playerInfo.LookupByKey(Tuple.Create(raceIndex, classIndex)) is PlayerInfo info)
+                                        if (_playerInfo.LookupByKey((raceIndex, classIndex)) is PlayerInfo info)
                                             info.skills.Add(rcInfo);
                                     }
                                 }
@@ -6478,7 +6503,7 @@ namespace Game
                         }
                     }
                 }
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded player create skills in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded player create skills in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
             }
 
             // Load playercreate custom spells
@@ -6521,7 +6546,7 @@ namespace Game
                                 {
                                     if (classMask == ClassMask.None || classMask.HasClass(classIndex))
                                     {
-                                        PlayerInfo playerInfo = _playerInfo.LookupByKey(Tuple.Create(raceIndex, classIndex));
+                                        PlayerInfo playerInfo = _playerInfo.LookupByKey((raceIndex, classIndex));
                                         if (playerInfo != null)
                                         {
                                             playerInfo.customSpells.Add(spellId);
@@ -6538,7 +6563,7 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} custom player create spells in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} custom player create spells in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
 
@@ -6589,7 +6614,7 @@ namespace Game
                                 {
                                     if (classMask == ClassMask.None || classMask.HasClass(classIndex))
                                     {
-                                        if (_playerInfo.LookupByKey(Tuple.Create(raceIndex, classIndex)) is PlayerInfo info)
+                                        if (_playerInfo.LookupByKey((raceIndex, classIndex)) is PlayerInfo info)
                                         {
                                             info.castSpells[(int)playerCreateMode].Add(spellId);
                                             ++count;
@@ -6600,7 +6625,7 @@ namespace Game
                         }
                     } while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} player create cast spells in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} player create cast spells in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
 
@@ -6632,13 +6657,13 @@ namespace Game
                             continue;
                         }
 
-                        if (_playerInfo.LookupByKey(Tuple.Create(currentrace, currentclass)) is PlayerInfo info)
+                        if (_playerInfo.LookupByKey((currentrace, currentclass)) is PlayerInfo info)
                             info.action.Add(new PlayerCreateInfoAction(result.Read<byte>(2), result.Read<uint>(3), result.Read<byte>(4)));
 
                         ++count;
                     } while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} player create actions in {Time.GetMSTimeDiffToNow(time)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} player create actions in {Time.GetMSTimeDiffToNow(time)} ms.");
                 }
             }
 
@@ -6709,7 +6734,7 @@ namespace Game
 
                         for (var race = 0; race < raceStatModifiers.Length; ++race)
                         {
-                            if (_playerInfo.LookupByKey(Tuple.Create((Race)race, currentclass)) is PlayerInfo playerInfo)
+                            if (_playerInfo.LookupByKey(((Race)race, currentclass)) is PlayerInfo playerInfo)
                             {
                                 for (var i = 0; i < (int)Stats.Max; i++)
                                     playerInfo.levelInfo[currentlevel - 1].stats[i] = (ushort)(result.Read<ushort>(i + 2) + raceStatModifiers[race][i]);
@@ -6733,7 +6758,7 @@ namespace Game
                             if (CliDB.ChrClassesStorage.LookupByKey((int)class_) == null)
                                 continue;
 
-                            var playerInfo = _playerInfo.LookupByKey(Tuple.Create(race, class_));
+                            var playerInfo = _playerInfo.LookupByKey((race, class_));
                             if (playerInfo == null)
                                 continue;
 
@@ -6773,7 +6798,7 @@ namespace Game
                             }
                         }
                     }
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} level stats definitions in {Time.GetMSTimeDiffToNow(time)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} level stats definitions in {Time.GetMSTimeDiffToNow(time)} ms.");
                 }
             }
 
@@ -6781,7 +6806,7 @@ namespace Game
             // Loading xp per level data
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create XP Data...");
             {
-                _playerXPperLevel = new uint[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
+                _playerXPperLevel = new int[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
 
                 //                                          0      1
                 using var result = DB.World.Query("SELECT Level, Experience FROM player_xp_for_level");
@@ -6798,8 +6823,8 @@ namespace Game
 
                 do
                 {
-                    uint currentlevel = result.Read<byte>(0);
-                    uint currentxp = result.Read<uint>(1);
+                    int currentlevel = result.Read<byte>(0);
+                    int currentxp = result.Read<int>(1);
 
                     if (currentlevel >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                     {
@@ -6827,7 +6852,7 @@ namespace Game
                     }
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} xp for level definition(s) from database in {Time.GetMSTimeDiffToNow(time)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} xp for level definition(s) from database in {Time.GetMSTimeDiffToNow(time)} ms.");
             }
         }
 
@@ -6842,7 +6867,7 @@ namespace Game
             GtOCTRegenHPRecord octRegenHP = CliDB.OCTRegenHPGameTable.GetRow(level);
             if (octRegenHP is null)
             {
-                Log.outError(LogFilter.Misc, $"Tried to get non-existant Class-Level combination data from OCTRegenHP. Class {class_} Level {level}");
+                Log.outError(LogFilter.Misc, $"Tried to get non-existant Class-Level combination data from OCTRegenHP. Class {class_} Level {level}.");
                 return 0.0f;
             }
 
@@ -6860,7 +6885,7 @@ namespace Game
             GtRegenHPPerSptRecord regenHPPerSpt = CliDB.RegenHPPerSptGameTable.GetRow(level);
             if (regenHPPerSpt is null)
             {
-                Log.outError(LogFilter.Misc, $"Tried to get non-existant Class-Level combination data from RegenHPPerSpt. Class {class_} Level {level}");
+                Log.outError(LogFilter.Misc, $"Tried to get non-existant Class-Level combination data from RegenHPPerSpt. Class {class_} Level {level}.");
                 return 0.0f;
             }
             return CliDB.GetGameTableColumnForClass(regenHPPerSpt, class_);
@@ -6877,7 +6902,7 @@ namespace Game
             GtRegenMPPerSptRecord regenMPPerSpt = CliDB.RegenMPPerSptGameTable.GetRow(level);
             if (regenMPPerSpt is null)
             {
-                Log.outError(LogFilter.Misc, $"Tried to get non-existant Class-Level combination data from RegenMPPerSpt. Class {class_} Level {level}");
+                Log.outError(LogFilter.Misc, $"Tried to get non-existant Class-Level combination data from RegenMPPerSpt. Class {class_} Level {level}.");
                 return 0.0f;
             }
 
@@ -6886,7 +6911,7 @@ namespace Game
 
         void PlayerCreateInfoAddItemHelper(Race race, Class class_, int itemId, int count)
         {
-            var playerInfo = _playerInfo.LookupByKey(Tuple.Create(race, class_));
+            var playerInfo = _playerInfo.LookupByKey((race, class_));
             if (playerInfo == null)
                 return;
 
@@ -6909,14 +6934,14 @@ namespace Game
             if (classId >= Class.Max)
                 return null;
 
-            var info = _playerInfo.LookupByKey(Tuple.Create(raceId, classId));
+            var info = _playerInfo.LookupByKey((raceId, classId));
             if (info == null)
                 return null;
 
             return info;
         }
 
-        public void GetPlayerClassLevelInfo(Class _class, int level, out uint baseMana)
+        public void GetPlayerClassLevelInfo(Class _class, int level, out int baseMana)
         {
             baseMana = 0;
             if (level < 1 || _class >= Class.Max)
@@ -6928,11 +6953,11 @@ namespace Game
             GtBaseMPRecord mp = CliDB.BaseMPGameTable.GetRow(level);
             if (mp == null)
             {
-                Log.outError(LogFilter.Sql, $"Tried to get non-existant Class-Level combination data for base mp. Class {_class} Level {level}");
+                Log.outError(LogFilter.Sql, $"Tried to get non-existant Class-Level combination data for base mp. Class {_class} Level {level}.");
                 return;
             }
 
-            baseMana = (uint)CliDB.GetGameTableColumnForClass(mp, _class);
+            baseMana = (int)CliDB.GetGameTableColumnForClass(mp, _class);
         }
 
         public PlayerLevelInfo GetPlayerLevelInfo(Race race, Class _class, int level)
@@ -6940,7 +6965,7 @@ namespace Game
             if (level < 1 || race >= Race.Max || _class >= Class.Max)
                 return null;
 
-            PlayerInfo pInfo = _playerInfo.LookupByKey(Tuple.Create(race, _class));
+            PlayerInfo pInfo = _playerInfo.LookupByKey((race, _class));
             if (pInfo == null)
                 return null;
 
@@ -6953,7 +6978,7 @@ namespace Game
         PlayerLevelInfo BuildPlayerLevelInfo(Race race, Class _class, int level)
         {
             // base data (last known level)
-            var info = _playerInfo.LookupByKey(Tuple.Create(race, _class)).levelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1];
+            var info = _playerInfo.LookupByKey((race, _class)).levelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1];
 
             for (int lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1; lvl < level; ++lvl)
             {
@@ -7067,13 +7092,13 @@ namespace Game
                     pInfoMapEntry = new PetLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
 
                 PetLevelInfo pLevelInfo = new();
-                pLevelInfo.health = result.Read<uint>(2);
-                pLevelInfo.mana = result.Read<uint>(3);
-                pLevelInfo.armor = result.Read<uint>(9);
+                pLevelInfo.health = result.Read<int>(2);
+                pLevelInfo.mana = result.Read<int>(3);
+                pLevelInfo.armor = result.Read<int>(9);
 
                 for (int i = 0; i < (int)Stats.Max; i++)
                 {
-                    pLevelInfo.stats[i] = result.Read<uint>(i + 4);
+                    pLevelInfo.stats[i] = result.Read<int>(i + 4);
                 }
 
                 pInfoMapEntry[currentlevel - 1] = pLevelInfo;
@@ -7104,7 +7129,7 @@ namespace Game
                     }
                 }
             }
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} level pet stats definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} level pet stats definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadPetNames()
@@ -7124,7 +7149,7 @@ namespace Game
             do
             {
                 string word = result.Read<string>(0);
-                uint entry = result.Read<uint>(1);
+                int entry = result.Read<int>(1);
                 bool half = result.Read<bool>(2);
                 if (half)
                     _petHalfName1.Add(entry, word);
@@ -7134,7 +7159,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} pet name parts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} pet name parts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadPetNumber()
@@ -7145,13 +7170,13 @@ namespace Game
             if (!result.IsEmpty())
                 _hiPetNumber = result.Read<uint>(0) + 1;
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded the max pet number: {_hiPetNumber - 1} in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded the max pet number: {_hiPetNumber - 1} in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public PetLevelInfo GetPetLevelInfo(int creatureid, uint level)
+        public PetLevelInfo GetPetLevelInfo(int creatureid, int level)
         {
             if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                level = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
+                level = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
 
             var petinfo = petInfoStore.LookupByKey(creatureid);
 
@@ -7186,7 +7211,7 @@ namespace Game
         {
             if (_hiPetNumber >= (uint.MaxValue - 1))
             {
-                Log.outError(LogFilter.Misc, "_hiPetNumber Id overflow!! Can't continue, shutting down server. ");
+                Log.outError(LogFilter.Misc, "_hiPetNumber Id overflow!! Can't continue, shutting down server.");
                 Global.WorldMgr.StopNow(ShutdownExitCode.Error);
             }
             return _hiPetNumber++;
@@ -7207,13 +7232,13 @@ namespace Game
             uint count = 0;
             do
             {
-                uint alliance = result.Read<uint>(0);
-                uint horde = result.Read<uint>(1);
+                int alliance = result.Read<int>(0);
+                int horde = result.Read<int>(1);
 
                 if (!CliDB.AchievementStorage.ContainsKey(alliance))
-                    Log.outError(LogFilter.Sql, "Achievement {0} (alliance_id) referenced in `player_factionchange_achievement` does not exist, pair skipped!", alliance);
+                    Log.outError(LogFilter.Sql, $"Achievement {alliance} (alliance_id) referenced in `player_factionchange_achievement` does not exist, pair skipped!");
                 else if (!CliDB.AchievementStorage.ContainsKey(horde))
-                    Log.outError(LogFilter.Sql, "Achievement {0} (horde_id) referenced in `player_factionchange_achievement` does not exist, pair skipped!", horde);
+                    Log.outError(LogFilter.Sql, $"Achievement {horde} (horde_id) referenced in `player_factionchange_achievement` does not exist, pair skipped!");
                 else
                     FactionChangeAchievements[alliance] = horde;
 
@@ -7221,7 +7246,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} faction change achievement pairs in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} faction change achievement pairs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadFactionChangeItems()
@@ -7243,7 +7268,7 @@ namespace Game
                 ++count;
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} faction change item pairs in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} faction change item pairs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadFactionChangeQuests()
@@ -7260,13 +7285,13 @@ namespace Game
             uint count = 0;
             do
             {
-                uint alliance = result.Read<uint>(0);
-                uint horde = result.Read<uint>(1);
+                int alliance = result.Read<int>(0);
+                int horde = result.Read<int>(1);
 
                 if (GetQuestTemplate(alliance) == null)
-                    Log.outError(LogFilter.Sql, "Quest {0} (alliance_id) referenced in `player_factionchange_quests` does not exist, pair skipped!", alliance);
+                    Log.outError(LogFilter.Sql, $"Quest {alliance} (alliance_id) referenced in `player_factionchange_quests` does not exist, pair skipped!");
                 else if (GetQuestTemplate(horde) == null)
-                    Log.outError(LogFilter.Sql, "Quest {0} (horde_id) referenced in `player_factionchange_quests` does not exist, pair skipped!", horde);
+                    Log.outError(LogFilter.Sql, $"Quest {horde} (horde_id) referenced in `player_factionchange_quests` does not exist, pair skipped!");
                 else
                     FactionChangeQuests[alliance] = horde;
 
@@ -7274,7 +7299,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} faction change quest pairs in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} faction change quest pairs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadFactionChangeReputations()
@@ -7291,13 +7316,13 @@ namespace Game
             uint count = 0;
             do
             {
-                uint alliance = result.Read<uint>(0);
-                uint horde = result.Read<uint>(1);
+                int alliance = result.Read<int>(0);
+                int horde = result.Read<int>(1);
 
                 if (!CliDB.FactionStorage.ContainsKey(alliance))
-                    Log.outError(LogFilter.Sql, "Reputation {0} (alliance_id) referenced in `player_factionchange_reputations` does not exist, pair skipped!", alliance);
+                    Log.outError(LogFilter.Sql, $"Reputation {alliance} (alliance_id) referenced in `player_factionchange_reputations` does not exist, pair skipped!");
                 else if (!CliDB.FactionStorage.ContainsKey(horde))
-                    Log.outError(LogFilter.Sql, "Reputation {0} (horde_id) referenced in `player_factionchange_reputations` does not exist, pair skipped!", horde);
+                    Log.outError(LogFilter.Sql, $"Reputation {horde} (horde_id) referenced in `player_factionchange_reputations` does not exist, pair skipped!");
                 else
                     FactionChangeReputation[alliance] = horde;
 
@@ -7305,7 +7330,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} faction change reputation pairs in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} faction change reputation pairs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadFactionChangeSpells()
@@ -7322,13 +7347,13 @@ namespace Game
             uint count = 0;
             do
             {
-                uint alliance = result.Read<uint>(0);
-                uint horde = result.Read<uint>(1);
+                int alliance = result.Read<int>(0);
+                int horde = result.Read<int>(1);
 
                 if (!Global.SpellMgr.HasSpellInfo(alliance, Difficulty.None))
-                    Log.outError(LogFilter.Sql, "Spell {0} (alliance_id) referenced in `player_factionchange_spells` does not exist, pair skipped!", alliance);
+                    Log.outError(LogFilter.Sql, $"Spell {alliance} (alliance_id) referenced in `player_factionchange_spells` does not exist, pair skipped!");
                 else if (!Global.SpellMgr.HasSpellInfo(horde, Difficulty.None))
-                    Log.outError(LogFilter.Sql, "Spell {0} (horde_id) referenced in `player_factionchange_spells` does not exist, pair skipped!", horde);
+                    Log.outError(LogFilter.Sql, $"Spell {horde} (horde_id) referenced in `player_factionchange_spells` does not exist, pair skipped!");
                 else
                     FactionChangeSpells[alliance] = horde;
 
@@ -7336,7 +7361,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} faction change spell pairs in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} faction change spell pairs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadFactionChangeTitles()
@@ -7353,13 +7378,13 @@ namespace Game
             uint count = 0;
             do
             {
-                uint alliance = result.Read<uint>(0);
-                uint horde = result.Read<uint>(1);
+                int alliance = result.Read<int>(0);
+                int horde = result.Read<int>(1);
 
                 if (!CliDB.CharTitlesStorage.ContainsKey(alliance))
-                    Log.outError(LogFilter.Sql, "Title {0} (alliance_id) referenced in `player_factionchange_title` does not exist, pair skipped!", alliance);
+                    Log.outError(LogFilter.Sql, $"Title {alliance} (alliance_id) referenced in `player_factionchange_title` does not exist, pair skipped!");
                 else if (!CliDB.CharTitlesStorage.ContainsKey(horde))
-                    Log.outError(LogFilter.Sql, "Title {0} (horde_id) referenced in `player_factionchange_title` does not exist, pair skipped!", horde);
+                    Log.outError(LogFilter.Sql, $"Title {horde} (horde_id) referenced in `player_factionchange_title` does not exist, pair skipped!");
                 else
                     FactionChangeTitles[alliance] = horde;
 
@@ -7367,7 +7392,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} faction change title pairs in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} faction change title pairs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         //Quests
@@ -7456,7 +7481,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadRewardChoiceItems(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_reward_choice_items` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_reward_choice_items` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7480,7 +7505,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadRewardDisplaySpell(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_reward_display_spell` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_reward_display_spell` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7504,7 +7529,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadQuestDetails(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_details` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_details` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7528,7 +7553,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadQuestRequestItems(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_request_items` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_request_items` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7552,7 +7577,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadQuestOfferReward(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_offer_reward` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_offer_reward` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7581,7 +7606,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadQuestTemplateAddon(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_template_addon` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_template_addon` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7605,7 +7630,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadQuestMailSender(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_mail_sender` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_mail_sender` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7632,7 +7657,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadQuestObjective(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_objectives` has objective for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_objectives` has objective for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7657,7 +7682,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadConditionalConditionalQuestDescription(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_description_conditional` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_description_conditional` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7682,7 +7707,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadConditionalConditionalRequestItemsText(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_request_items_conditional` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_request_items_conditional` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7707,7 +7732,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadConditionalConditionalOfferRewardText(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_offer_reward_conditional` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_offer_reward_conditional` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7732,7 +7757,7 @@ namespace Game
                         if (quest != null)
                             quest.LoadConditionalConditionalQuestCompletionLog(result.GetFields());
                         else
-                            Log.outError(LogFilter.Sql, $"Table `quest_completion_log_conditional` has data for quest {questId} but such quest does not exist");
+                            Log.outError(LogFilter.Sql, $"Table `quest_completion_log_conditional` has data for quest {questId} but such quest does not exist.");
                     } while (result.NextRow());
                 }
             }
@@ -7792,7 +7817,8 @@ namespace Game
 
                 if (qinfo.SpecialFlags.HasAnyFlag(~QuestSpecialFlags.DbAllowed))
                 {
-                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `SpecialFlags` = {qinfo.SpecialFlags} > max allowed value. Correct `SpecialFlags` to value <= {QuestSpecialFlags.DbAllowed}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Quest {qinfo.Id} has `SpecialFlags` = {qinfo.SpecialFlags} > max allowed value. Correct `SpecialFlags` to value <= {QuestSpecialFlags.DbAllowed}.");
                     qinfo.SpecialFlags &= QuestSpecialFlags.DbAllowed;
                 }
 
@@ -7869,7 +7895,8 @@ namespace Game
                     {
                         if (qinfo.RequiredSkillId != skillid)
                         {
-                            Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `ZoneOrSort` = {qinfo.QuestSortID} but `RequiredSkillId` does not have a corresponding value ({skillid}).");
+                            Log.outError(LogFilter.Sql,
+                                $"Quest {qinfo.Id} has `ZoneOrSort` = {qinfo.QuestSortID} but `RequiredSkillId` does not have a corresponding value ({skillid}).");
                             //override, and force proper value here?
                         }
                     }
@@ -7880,7 +7907,8 @@ namespace Game
                 {
                     if (!qinfo.AllowableClasses.HasAnyFlag(ClassMask.Playable))
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} does not contain any playable classes in `RequiredClasses` ({qinfo.AllowableClasses}), value set to 0 (all classes).");
+                        Log.outError(LogFilter.Sql, 
+                            $"Quest {qinfo.Id} does not contain any playable classes in `RequiredClasses` ({qinfo.AllowableClasses}), value set to 0 (all classes).");
                         qinfo.AllowableClasses = ClassMask.None;
                     }
                 }
@@ -7890,7 +7918,8 @@ namespace Game
                 {
                     if (qinfo.AllowableRaces != RaceMask.None && !qinfo.AllowableRaces.HasAnyFlag(RaceMask.Playable))
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} does not contain any playable races in `RequiredRaces` ({qinfo.AllowableRaces}), value set to -1 (all races).");
+                        Log.outError(LogFilter.Sql, 
+                            $"Quest {qinfo.Id} does not contain any playable races in `RequiredRaces` ({qinfo.AllowableRaces}), value set to -1 (all races).");
                         qinfo.AllowableRaces = (RaceMask)(-1);
                     }
                 }
@@ -7900,7 +7929,7 @@ namespace Game
                 {
                     if (!CliDB.SkillLineStorage.ContainsKey((int)qinfo.RequiredSkillId))
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RequiredSkillId` = {qinfo.RequiredSkillId} but this skill does not exist");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RequiredSkillId` = {qinfo.RequiredSkillId} but this skill does not exist.");
                     }
                 }
 
@@ -7945,13 +7974,15 @@ namespace Game
 
                 if (qinfo.RequiredMinRepFaction == 0 && qinfo.RequiredMinRepValue != 0)
                 {
-                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RequiredMinRepValue` = {qinfo.RequiredMinRepValue} but `RequiredMinRepFaction` is 0, value has no effect");
+                    Log.outError(LogFilter.Sql, 
+                        $"Quest {qinfo.Id} has `RequiredMinRepValue` = {qinfo.RequiredMinRepValue} but `RequiredMinRepFaction` is 0, value has no effect.");
                     // warning
                 }
 
                 if (qinfo.RequiredMaxRepFaction == 0 && qinfo.RequiredMaxRepValue != 0)
                 {
-                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RequiredMaxRepValue` = {qinfo.RequiredMaxRepValue} but `RequiredMaxRepFaction` is 0, value has no effect");
+                    Log.outError(LogFilter.Sql, 
+                        $"Quest {qinfo.Id} has `RequiredMaxRepValue` = {qinfo.RequiredMaxRepValue} but `RequiredMaxRepFaction` is 0, value has no effect.");
                     // warning
                 }
 
@@ -7967,18 +7998,21 @@ namespace Game
                 {
                     if (GetItemTemplate(qinfo.SourceItemId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `SourceItemId` = {qinfo.SourceItemId} but item with entry {qinfo.SourceItemId} does not exist, quest can't be done.");
+                        Log.outError(LogFilter.Sql,
+                            $"Quest {qinfo.Id} has `SourceItemId` = {qinfo.SourceItemId} but item with entry {qinfo.SourceItemId} does not exist, quest can't be done.");
                         qinfo.SourceItemId = 0;                       // quest can't be done for this requirement
                     }
                     else if (qinfo.SourceItemIdCount <= 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `StartItem` = {qinfo.SourceItemId} but `ProvidedItemCount` = 0, set to 1 but need fix in DB.");
+                        Log.outError(LogFilter.Sql,
+                            $"Quest {qinfo.Id} has `StartItem` = {qinfo.SourceItemId} but `ProvidedItemCount` = 0, set to 1 but need fix in DB.");
                         qinfo.SourceItemIdCount = 1;                    // update to 1 for allow quest work for backward compatibility with DB
                     }
                 }
                 else if (qinfo.SourceItemIdCount > 0)
                 {
-                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `SourceItemId` = 0 but `SourceItemIdCount` = {qinfo.SourceItemIdCount}, useless value.");
+                    Log.outError(LogFilter.Sql,
+                        $"Quest {qinfo.Id} has `SourceItemId` = 0 but `SourceItemIdCount` = {qinfo.SourceItemIdCount}, useless value.");
                     qinfo.SourceItemIdCount = 0;                          // no quest work changes in fact
                 }
 
@@ -7987,12 +8021,14 @@ namespace Game
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(qinfo.SourceSpellID, Difficulty.None);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `SourceSpellid` = {qinfo.SourceSpellID} but spell {qinfo.SourceSpellID} doesn't exist, quest can't be done.");
+                        Log.outError(LogFilter.Sql,
+                            $"Quest {qinfo.Id} has `SourceSpellid` = {qinfo.SourceSpellID} but spell {qinfo.SourceSpellID} doesn't exist, quest can't be done.");
                         qinfo.SourceSpellID = 0;                        // quest can't be done for this requirement
                     }
                     else if (!Global.SpellMgr.IsSpellValid(spellInfo))
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `SourceSpellid` = {qinfo.SourceSpellID} but spell {qinfo.SourceSpellID} is broken, quest can't be done.");
+                        Log.outError(LogFilter.Sql,
+                            $"Quest {qinfo.Id} has `SourceSpellid` = {qinfo.SourceSpellID} but spell {qinfo.SourceSpellID} is broken, quest can't be done.");
                         qinfo.SourceSpellID = 0;                        // quest can't be done for this requirement
                     }
                 }
@@ -8015,7 +8051,7 @@ namespace Game
                             case QuestObjectiveType.AreaTrigger:
                             case QuestObjectiveType.WinPetBattleAgainstNpc:
                             case QuestObjectiveType.ObtainCurrency:
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has invalid StorageIndex = {obj.StorageIndex} for objective Type {obj.Type}");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has invalid StorageIndex = {obj.StorageIndex} for objective Type {obj.Type}.");
                                 break;
                             default:
                                 break;
@@ -8044,23 +8080,23 @@ namespace Game
                         case QuestObjectiveType.MaxReputation:
                         case QuestObjectiveType.IncreaseReputation:
                             if (!CliDB.FactionStorage.ContainsKey(obj.ObjectID))
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing faction id {obj.ObjectID}");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing faction id {obj.ObjectID}.");
                             break;
                         case QuestObjectiveType.PlayerKills:
                             if (obj.Amount <= 0)
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has invalid player kills count {obj.Amount}");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has invalid player kills count {obj.Amount}.");
                             break;
                         case QuestObjectiveType.Currency:
                         case QuestObjectiveType.HaveCurrency:
                         case QuestObjectiveType.ObtainCurrency:
                             if (!CliDB.CurrencyTypesStorage.ContainsKey(obj.ObjectID))
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing currency {obj.ObjectID}");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing currency {obj.ObjectID}.");
                             if (obj.Amount <= 0)
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has invalid currency amount {obj.Amount}");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has invalid currency amount {obj.Amount}.");
                             break;
                         case QuestObjectiveType.LearnSpell:
                             if (!Global.SpellMgr.HasSpellInfo(obj.ObjectID, Difficulty.None))
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing spell id {obj.ObjectID}");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing spell id {obj.ObjectID}.");
                             break;
                         case QuestObjectiveType.WinPetBattleAgainstNpc:
                             if (obj.ObjectID != 0 && GetCreatureTemplate(obj.ObjectID) == null)
@@ -8068,27 +8104,27 @@ namespace Game
                             break;
                         case QuestObjectiveType.DefeatBattlePet:
                             if (!CliDB.BattlePetSpeciesStorage.ContainsKey(obj.ObjectID))
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing battlepet species id {obj.ObjectID}");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing battlepet species id {obj.ObjectID}.");
                             break;
                         case QuestObjectiveType.CriteriaTree:
                             if (!CliDB.CriteriaTreeStorage.ContainsKey(obj.ObjectID))
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing criteria tree id {obj.ObjectID}");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing criteria tree id {obj.ObjectID}.");
                             break;
                         case QuestObjectiveType.AreaTrigger:
                             if (!CliDB.AreaTriggerStorage.ContainsKey(obj.ObjectID) && obj.ObjectID != -1)
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing AreaTrigger.db2 id {obj.ObjectID}");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing AreaTrigger.db2 id {obj.ObjectID}.");
                             break;
                         case QuestObjectiveType.AreaTriggerEnter:
                         case QuestObjectiveType.AreaTriggerExit:
                             if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId(obj.ObjectID, false)) == null && Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId(obj.ObjectID, true)) == null)
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing areatrigger id {obj.ObjectID}");
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing areatrigger id {obj.ObjectID}.");
                             break;
                         case QuestObjectiveType.Money:
                         case QuestObjectiveType.WinPvpPetBattles:
                         case QuestObjectiveType.ProgressBar:
                             break;
                         default:
-                            Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has unhandled Type {obj.Type}");
+                            Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has unhandled Type {obj.Type}.");
                             break;
                     }
 
@@ -8103,7 +8139,8 @@ namespace Game
                     {
                         if (GetItemTemplate(id) == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RequiredSourceItemId{j + 1}` = {id} but item with entry {id} does not exist, quest can't be done.");
+                            Log.outError(LogFilter.Sql,
+                                $"Quest {qinfo.Id} has `RequiredSourceItemId{j + 1}` = {id} but item with entry {id} does not exist, quest can't be done.");
                             // no changes, quest can't be done for this requirement
                         }
                     }
@@ -8111,7 +8148,8 @@ namespace Game
                     {
                         if (qinfo.ItemDropQuantity[j] > 0)
                         {
-                            Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RequiredSourceItemId{j + 1}` = 0 but `RequiredSourceItemCount{j + 1}` = {qinfo.ItemDropQuantity[j]}.");
+                            Log.outError(LogFilter.Sql,
+                                $"Quest {qinfo.Id} has `RequiredSourceItemId{j + 1}` = 0 but `RequiredSourceItemCount{j + 1}` = {qinfo.ItemDropQuantity[j]}.");
                             // no changes, quest ignore this data
                         }
                     }
@@ -8127,19 +8165,22 @@ namespace Game
                             case LootItemType.Item:
                                 if (GetItemTemplate(id) == null)
                                 {
-                                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = {id} but item with entry {id} does not exist, quest will not reward this item.");
+                                    Log.outError(LogFilter.Sql,
+                                        $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = {id} but item with entry {id} does not exist, quest will not reward this item.");
                                     qinfo.RewardChoiceItemId[j] = 0;          // no changes, quest will not reward this
                                 }
                                 break;
                             case LootItemType.Currency:
                                 if (!CliDB.CurrencyTypesStorage.HasRecord(id))
                                 {
-                                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = {id} but currency with id {id} does not exist, quest will not reward this currency.");
+                                    Log.outError(LogFilter.Sql,
+                                        $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = {id} but currency with id {id} does not exist, quest will not reward this currency.");
                                     qinfo.RewardChoiceItemId[j] = 0;          // no changes, quest will not reward this
                                 }
                                 break;
                             default:
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemType{j + 1}` = {qinfo.RewardChoiceItemType[j]} but it is not a valid item Type, reward removed.");
+                                Log.outError(LogFilter.Sql,
+                                    $"Quest {qinfo.Id} has `RewardChoiceItemType{j + 1}` = {qinfo.RewardChoiceItemType[j]} but it is not a valid item Type, reward removed.");
                                 qinfo.RewardChoiceItemId[j] = 0;
                                 break;
                         }
@@ -8149,7 +8190,8 @@ namespace Game
                     }
                     else if (qinfo.RewardChoiceItemCount[j] > 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = 0 but `RewardChoiceItemCount{j + 1}` = {qinfo.RewardChoiceItemCount[j]}.");
+                        Log.outError(LogFilter.Sql,
+                            $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = 0 but `RewardChoiceItemCount{j + 1}` = {qinfo.RewardChoiceItemCount[j]}.");
                         // no changes, quest ignore this data
                     }
                 }
@@ -8161,13 +8203,15 @@ namespace Game
                     {
                         if (GetItemTemplate(id) == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardItemId{j + 1}` = {id} but item with entry {id} does not exist, quest will not reward this item.");
+                            Log.outError(LogFilter.Sql,
+                                $"Quest {qinfo.Id} has `RewardItemId{j + 1}` = {id} but item with entry {id} does not exist, quest will not reward this item.");
                             qinfo.RewardItemId[j] = 0;                // no changes, quest will not reward this item
                         }
 
                         if (qinfo.RewardItemCount[j] == 0)
                         {
-                            Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardItemId{j + 1}` = {id} but `RewardItemIdCount{j + 1}` = 0, quest will not reward this item.");
+                            Log.outError(LogFilter.Sql,
+                                $"Quest {qinfo.Id} has `RewardItemId{j + 1}` = {id} but `RewardItemIdCount{j + 1}` = 0, quest will not reward this item.");
                             // no changes
                         }
                     }
@@ -8302,11 +8346,11 @@ namespace Game
                 {
                     if (!CliDB.SkillLineStorage.ContainsKey(qinfo.RewardSkillId))
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardSkillId` = {qinfo.RewardSkillId} but this skill does not exist");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardSkillId` = {qinfo.RewardSkillId} but this skill does not exist.");
                     }
                     if (qinfo.RewardSkillPoints == 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardSkillId` = {qinfo.RewardSkillId} but `RewardSkillPoints` is 0");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardSkillId` = {qinfo.RewardSkillId} but `RewardSkillPoints` is 0.");
                     }
                 }
 
@@ -8320,7 +8364,7 @@ namespace Game
                     }
                     if (qinfo.RewardSkillId == 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardSkillPoints` = {qinfo.RewardSkillPoints} but `RewardSkillId` is 0");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardSkillPoints` = {qinfo.RewardSkillPoints} but `RewardSkillId` is 0.");
                     }
                 }
 
@@ -8330,9 +8374,9 @@ namespace Game
                 {
                     var prevQuestItr = _questTemplates.LookupByKey(prevQuestId);
                     if (prevQuestItr == null)
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has PrevQuestId {prevQuestId}, but no such quest");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has PrevQuestId {prevQuestId}, but no such quest.");
                     else if (prevQuestItr.BreadcrumbForQuestId != 0)
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} should not be unlocked by breadcrumb quest {prevQuestId}");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} should not be unlocked by breadcrumb quest {prevQuestId}.");
                     else if (qinfo.PrevQuestId > 0)
                         qinfo.DependentPreviousQuests.Add(prevQuestId);
                 }
@@ -8341,7 +8385,7 @@ namespace Game
                 {
                     var nextquest = _questTemplates.LookupByKey(qinfo.NextQuestId);
                     if (nextquest == null)
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has NextQuestId {qinfo.NextQuestId}, but no such quest");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has NextQuestId {qinfo.NextQuestId}, but no such quest.");
                     else
                         nextquest.DependentPreviousQuests.Add(qinfo.Id);
                 }
@@ -8351,11 +8395,11 @@ namespace Game
                 {
                     if (!_questTemplates.ContainsKey(breadcrumbForQuestId))
                     {
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} is a breadcrumb for quest {breadcrumbForQuestId}, but no such quest exists");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} is a breadcrumb for quest {breadcrumbForQuestId}, but no such quest exists.");
                         qinfo.BreadcrumbForQuestId = 0;
                     }
                     if (qinfo.NextQuestId != 0)
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} is a breadcrumb, should not unlock quest {qinfo.NextQuestId}");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} is a breadcrumb, should not unlock quest {qinfo.NextQuestId}.");
                 }
 
                 if (qinfo.ExclusiveGroup != 0)
@@ -8379,7 +8423,7 @@ namespace Game
                     //breadcrumb loop found!
                     if (questSet.Contains(qinfo.Id))
                     {
-                        Log.outError(LogFilter.Sql, $"Breadcrumb quests {qid} and {breadcrumbForQuestId} are in a loop");
+                        Log.outError(LogFilter.Sql, $"Breadcrumb quests {qid} and {breadcrumbForQuestId} are in a loop.");
                         qinfo.BreadcrumbForQuestId = 0;
                         break;
                     }
@@ -8405,7 +8449,7 @@ namespace Game
                     quest.SetSpecialFlag(QuestSpecialFlags.Repeatable);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questTemplates.Count} quests definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questTemplates.Count} quests definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadQuestStartersAndEnders()
@@ -8514,7 +8558,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} quest relations from {table} in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} quest relations from {table} in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadQuestPOI()
@@ -8570,7 +8614,7 @@ namespace Game
                 bool alwaysAllowMergingBlobs = result.Read<bool>(14);
 
                 if (GetQuestTemplate(questID) == null)
-                    Log.outError(LogFilter.Sql, $"`quest_poi` quest id ({questID}) Idx1 ({idx1}) does not exist in `quest_template`");
+                    Log.outError(LogFilter.Sql, $"`quest_poi` quest id ({questID}) Idx1 ({idx1}) does not exist in `quest_template`.");
 
                 var blobs = allPoints.LookupByKey(questID);
                 if (blobs != null)
@@ -8588,11 +8632,11 @@ namespace Game
                         continue;
                     }
                 }
-                Log.outError(LogFilter.Sql, $"Table quest_poi references unknown quest points for quest {questID} POI id {blobIndex}");
+                Log.outError(LogFilter.Sql, $"Table quest_poi references unknown quest points for quest {questID} POI id {blobIndex}.");
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questPOIStorage.Count} quest POI definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questPOIStorage.Count} quest POI definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadQuestAreaTriggers()
@@ -8649,7 +8693,7 @@ namespace Game
                     _questAreaTriggerStorage.Add(objective.ObjectID, objective.QuestID);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} quest trigger points in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} quest trigger points in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadQuestGreetings()
@@ -8702,7 +8746,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} quest_greeting in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} quest_greeting in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public Quest GetQuestTemplate(int questId)
@@ -8720,21 +8764,21 @@ namespace Game
             return _questTemplatesAutoPush;
         }
 
-        public MultiMap<uint, uint> GetGOQuestRelationMapHACK() { return _goQuestRelations; }
+        public MultiMap<int, int> GetGOQuestRelationMapHACK() { return _goQuestRelations; }
 
-        public QuestRelationResult GetGOQuestRelations(uint entry) { return GetQuestRelationsFrom(_goQuestRelations, entry, true); }
+        public QuestRelationResult GetGOQuestRelations(int entry) { return GetQuestRelationsFrom(_goQuestRelations, entry, true); }
 
-        public QuestRelationResult GetGOQuestInvolvedRelations(uint entry) { return GetQuestRelationsFrom(_goQuestInvolvedRelations, entry, false); }
+        public QuestRelationResult GetGOQuestInvolvedRelations(int entry) { return GetQuestRelationsFrom(_goQuestInvolvedRelations, entry, false); }
 
-        public List<uint> GetGOQuestInvolvedRelationReverseBounds(uint questId) { return _goQuestInvolvedRelationsReverse.LookupByKey(questId); }
+        public List<int> GetGOQuestInvolvedRelationReverseBounds(int questId) { return _goQuestInvolvedRelationsReverse.LookupByKey(questId); }
 
-        public MultiMap<uint, uint> GetCreatureQuestRelationMapHACK() { return _creatureQuestRelations; }
+        public MultiMap<int, int> GetCreatureQuestRelationMapHACK() { return _creatureQuestRelations; }
 
-        public QuestRelationResult GetCreatureQuestRelations(uint entry) { return GetQuestRelationsFrom(_creatureQuestRelations, entry, true); }
+        public QuestRelationResult GetCreatureQuestRelations(int entry) { return GetQuestRelationsFrom(_creatureQuestRelations, entry, true); }
 
-        public QuestRelationResult GetCreatureQuestInvolvedRelations(uint entry) { return GetQuestRelationsFrom(_creatureQuestInvolvedRelations, entry, false); }
+        public QuestRelationResult GetCreatureQuestInvolvedRelations(int entry) { return GetQuestRelationsFrom(_creatureQuestInvolvedRelations, entry, false); }
 
-        public List<uint> GetCreatureQuestInvolvedRelationReverseBounds(uint questId) { return _creatureQuestInvolvedRelationsReverse.LookupByKey(questId); }
+        public List<int> GetCreatureQuestInvolvedRelationReverseBounds(int questId) { return _creatureQuestInvolvedRelationsReverse.LookupByKey(questId); }
 
         public QuestPOIData GetQuestPOIData(int questId)
         {
@@ -8777,14 +8821,14 @@ namespace Game
             return _questGreetingLocaleStorage[typeIndex].LookupByKey(id);
         }
 
-        public List<uint> GetExclusiveQuestGroupBounds(int exclusiveGroupId)
+        public List<int> GetExclusiveQuestGroupBounds(int exclusiveGroupId)
         {
             return _exclusiveQuestGroups.LookupByKey(exclusiveGroupId);
         }
 
-        QuestRelationResult GetQuestRelationsFrom(MultiMap<uint, uint> map, uint key, bool onlyActive) { return new QuestRelationResult(map.LookupByKey(key), onlyActive); }
+        QuestRelationResult GetQuestRelationsFrom(MultiMap<int, int> map, int key, bool onlyActive) { return new QuestRelationResult(map.LookupByKey(key), onlyActive); }
 
-        public List<uint> GetCreatureQuestItemList(int creatureEntry, Difficulty difficulty)
+        public List<int> GetCreatureQuestItemList(int creatureEntry, Difficulty difficulty)
         {
             var itr = creatureQuestItemStorage.LookupByKey((creatureEntry, difficulty));
             if (itr != null)
@@ -8840,16 +8884,16 @@ namespace Game
             uint count = 0;
             do
             {
-                uint mapId = result.Read<uint>(0);
-                uint uiMapPhaseId = result.Read<uint>(1);
+                int mapId = result.Read<int>(0);
+                int uiMapPhaseId = result.Read<int>(1);
 
                 if (!CliDB.MapStorage.ContainsKey(mapId))
                 {
-                    Log.outError(LogFilter.Sql, "TerrainSwapMap {0} defined in `terrain_worldmap` does not exist, skipped.", mapId);
+                    Log.outError(LogFilter.Sql, $"TerrainSwapMap {mapId} defined in `terrain_worldmap` does not exist, skipped.");
                     continue;
                 }
 
-                if (!Global.DB2Mgr.IsUiMapPhase((int)uiMapPhaseId))
+                if (!Global.DB2Mgr.IsUiMapPhase(uiMapPhaseId))
                 {
                     Log.outError(LogFilter.Sql, $"Phase {uiMapPhaseId} defined in `terrain_worldmap` is not a valid terrain swap phase, skipped.");
                     continue;
@@ -8865,13 +8909,13 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} terrain world maps in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} terrain world maps in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         void LoadTerrainSwapDefaults()
         {
             uint oldMSTime = Time.GetMSTime();
-
+            //                                        0       1
             using var result = DB.World.Query("SELECT MapId, TerrainSwapMap FROM `terrain_swap_defaults`");
             if (result.IsEmpty())
             {
@@ -8882,17 +8926,17 @@ namespace Game
             uint count = 0;
             do
             {
-                uint mapId = result.Read<uint>(0);
+                int mapId = result.Read<int>(0);
                 if (!CliDB.MapStorage.ContainsKey(mapId))
                 {
-                    Log.outError(LogFilter.Sql, "Map {0} defined in `terrain_swap_defaults` does not exist, skipped.", mapId);
+                    Log.outError(LogFilter.Sql, $"Map {mapId} defined in `terrain_swap_defaults` does not exist, skipped.");
                     continue;
                 }
 
-                uint terrainSwap = result.Read<uint>(1);
+                int terrainSwap = result.Read<int>(1);
                 if (!CliDB.MapStorage.ContainsKey(terrainSwap))
                 {
-                    Log.outError(LogFilter.Sql, "TerrainSwapMap {0} defined in `terrain_swap_defaults` does not exist, skipped.", terrainSwap);
+                    Log.outError(LogFilter.Sql, $"TerrainSwapMap {terrainSwap} defined in `terrain_swap_defaults` does not exist, skipped.");
                     continue;
                 }
 
@@ -8903,7 +8947,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} terrain swap defaults in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} terrain swap defaults in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         void LoadAreaPhases()
@@ -8918,7 +8962,7 @@ namespace Game
                 return;
             }
 
-            PhaseInfoStruct getOrCreatePhaseIfMissing(uint phaseId)
+            PhaseInfoStruct getOrCreatePhaseIfMissing(int phaseId)
             {
                 PhaseInfoStruct phaseInfo = _phaseInfoById[phaseId];
                 phaseInfo.Id = phaseId;
@@ -8928,8 +8972,8 @@ namespace Game
             uint count = 0;
             do
             {
-                uint area = result.Read<uint>(0);
-                uint phaseId = result.Read<uint>(1);
+                int area = result.Read<int>(0);
+                int phaseId = result.Read<int>(1);
 
                 if (!CliDB.AreaTableStorage.ContainsKey(area))
                 {
@@ -8952,7 +8996,7 @@ namespace Game
 
             foreach (var pair in _phaseInfoByArea)
             {
-                uint parentAreaId = pair.Key;
+                int parentAreaId = pair.Key;
                 do
                 {
                     AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(parentAreaId);
@@ -9030,12 +9074,13 @@ namespace Game
             {
                 if (creature.Npcflag.HasAnyFlag(NPCFlags.SpellClick) && !_spellClickInfoStorage.ContainsKey(creature.Entry))
                 {
-                    Log.outError(LogFilter.Sql, $"npc_spellclick_spells: Creature template {creature.Entry} has UNIT_NPC_FLAG_SPELLCLICK but no data in spellclick table! Removing flag.");
+                    Log.outError(LogFilter.Sql,
+                        $"npc_spellclick_spells: Creature template {creature.Entry} has UNIT_NPC_FLAG_SPELLCLICK but no data in spellclick table! Removing flag.");
                     creature.Npcflag &= ~NPCFlags.SpellClick;
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spellclick definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spellclick definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadFishingBaseSkillLevel()
@@ -9055,13 +9100,13 @@ namespace Game
             uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
+                int entry = result.Read<int>(0);
                 int skill = result.Read<int>(1);
 
                 AreaTableRecord fArea = CliDB.AreaTableStorage.LookupByKey(entry);
                 if (fArea == null)
                 {
-                    Log.outError(LogFilter.Sql, "AreaId {0} defined in `skill_fishing_base_level` does not exist", entry);
+                    Log.outError(LogFilter.Sql, $"AreaId {entry} defined in `skill_fishing_base_level` does not exist.");
                     continue;
                 }
 
@@ -9070,7 +9115,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} areas for fishing base skill level in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} areas for fishing base skill level in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadSkillTiers()
@@ -9090,29 +9135,29 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 SkillTiersEntry tier = new();
                 for (int i = 0; i < SkillConst.MaxSkillStep; ++i)
-                    tier.Value[i] = result.Read<uint>(1 + i);
+                    tier.Value[i] = result.Read<int>(1 + i);
 
                 _skillTiers[id] = tier;
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skill max values in {1} ms", _skillTiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_skillTiers.Count} skill max values in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public PhaseInfoStruct GetPhaseInfo(uint phaseId)
+        public PhaseInfoStruct GetPhaseInfo(int phaseId)
         {
             return _phaseInfoById.LookupByKey(phaseId);
         }
 
-        public List<PhaseAreaInfo> GetPhasesForArea(uint areaId)
+        public List<PhaseAreaInfo> GetPhasesForArea(int areaId)
         {
             return _phaseInfoByArea.LookupByKey(areaId);
         }
 
-        public TerrainSwapInfo GetTerrainSwapInfo(uint terrainSwapId)
+        public TerrainSwapInfo GetTerrainSwapInfo(int terrainSwapId)
         {
             return _terrainSwapInfoById.LookupByKey(terrainSwapId);
         }
@@ -9121,12 +9166,13 @@ namespace Game
         {
             return _spellClickInfoStorage.LookupByKey(creature_id);
         }
-        public SkillTiersEntry GetSkillTier(uint skillTierId)
+
+        public SkillTiersEntry GetSkillTier(int skillTierId)
         {
             return _skillTiers.LookupByKey(skillTierId);
         }
 
-        public MultiMap<uint, TerrainSwapInfo> GetTerrainSwaps() { return _terrainSwapInfoByMap; }
+        public MultiMap<int, TerrainSwapInfo> GetTerrainSwaps() { return _terrainSwapInfoByMap; }
 
         //Locales
         public void LoadCreatureLocales()
@@ -9143,10 +9189,10 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                     continue;
 
                 if (!_creatureLocaleStorage.ContainsKey(id))
@@ -9160,7 +9206,7 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature locale strings in {1} ms", _creatureLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_creatureLocaleStorage.Count} creature locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadGameObjectLocales()
@@ -9176,10 +9222,10 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                     continue;
 
                 if (!_gameObjectLocaleStorage.ContainsKey(id))
@@ -9192,7 +9238,7 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gameObjectLocaleStorage.Count} gameobject_template_locale locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gameObjectLocaleStorage.Count} gameobject_template_locale locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadQuestTemplateLocale()
@@ -9209,10 +9255,10 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                     continue;
 
                 if (!_questTemplateLocaleStorage.ContainsKey(id))
@@ -9230,7 +9276,7 @@ namespace Game
                 AddLocaleString(result.Read<string>(10), locale, data.QuestCompletionLog);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questTemplateLocaleStorage.Count} Quest Tempalate locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questTemplateLocaleStorage.Count} Quest Tempalate locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadQuestObjectivesLocale()
@@ -9245,10 +9291,10 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                     continue;
 
                 if (!_questObjectivesLocaleStorage.ContainsKey(id))
@@ -9259,7 +9305,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questObjectivesLocaleStorage.Count} Quest Objectives locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questObjectivesLocaleStorage.Count} Quest Objectives locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadQuestGreetingLocales()
@@ -9267,7 +9313,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             for (var i = 0; i < 2; ++i)
-                _questGreetingLocaleStorage[i] = new Dictionary<uint, QuestGreetingLocale>();
+                _questGreetingLocaleStorage[i] = new Dictionary<int, QuestGreetingLocale>();
 
             //                                         0   1     2       3
             using var result = DB.World.Query("SELECT Id, Type, locale, Greeting FROM quest_greeting_locale");
@@ -9302,7 +9348,7 @@ namespace Game
                 string localeName = result.Read<string>(2);
 
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                     continue;
 
                 if (!_questGreetingLocaleStorage[type].ContainsKey(id))
@@ -9314,7 +9360,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Quest Greeting locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Quest Greeting locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadQuestOfferRewardLocale()
@@ -9329,10 +9375,10 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                     continue;
 
                 if (!_questOfferRewardLocaleStorage.ContainsKey(id))
@@ -9342,7 +9388,7 @@ namespace Game
                 AddLocaleString(result.Read<string>(2), locale, data.RewardText);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questOfferRewardLocaleStorage.Count} Quest Offer Reward locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questOfferRewardLocaleStorage.Count} Quest Offer Reward locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadQuestRequestItemsLocale()
@@ -9357,10 +9403,10 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                     continue;
 
                 if (!_questRequestItemsLocaleStorage.ContainsKey(id))
@@ -9370,7 +9416,7 @@ namespace Game
                 AddLocaleString(result.Read<string>(2), locale, data.CompletionText);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questRequestItemsLocaleStorage.Count} Quest Request Items locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_questRequestItemsLocaleStorage.Count} Quest Request Items locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadGossipMenuItemsLocales()
@@ -9386,23 +9432,23 @@ namespace Game
 
             do
             {
-                uint menuId = result.Read<uint>(0);
-                uint optionIndex = result.Read<uint>(1);
+                int menuId = result.Read<int>(0);
+                int optionIndex = result.Read<int>(1);
                 string localeName = result.Read<string>(2);
 
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                     continue;
 
                 GossipMenuItemsLocale data = new();
                 AddLocaleString(result.Read<string>(3), locale, data.OptionText);
                 AddLocaleString(result.Read<string>(4), locale, data.BoxText);
 
-                _gossipMenuItemsLocaleStorage[Tuple.Create(menuId, optionIndex)] = data;
+                _gossipMenuItemsLocaleStorage[(menuId, optionIndex)] = data;
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gossip_menu_option locale strings in {1} ms", _gossipMenuItemsLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_gossipMenuItemsLocaleStorage.Count} gossip_menu_option locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadPageTextLocales()
@@ -9418,10 +9464,10 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                     continue;
 
                 if (!_pageTextLocaleStorage.ContainsKey(id))
@@ -9431,7 +9477,7 @@ namespace Game
                 AddLocaleString(result.Read<string>(2), locale, data.Text);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_pageTextLocaleStorage.Count} PageText locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_pageTextLocaleStorage.Count} PageText locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadPointOfInterestLocales()
@@ -9447,10 +9493,10 @@ namespace Game
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                     continue;
 
                 if (!_pointOfInterestLocaleStorage.ContainsKey(id))
@@ -9461,50 +9507,50 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} points_of_interest locale strings in {1} ms", _pointOfInterestLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_pointOfInterestLocaleStorage.Count} points_of_interest locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public CreatureLocale GetCreatureLocale(uint entry)
+        public CreatureLocale GetCreatureLocale(int entry)
         {
             return _creatureLocaleStorage.LookupByKey(entry);
         }
 
-        public GameObjectLocale GetGameObjectLocale(uint entry)
+        public GameObjectLocale GetGameObjectLocale(int entry)
         {
             return _gameObjectLocaleStorage.LookupByKey(entry);
         }
 
-        public QuestTemplateLocale GetQuestLocale(uint entry)
+        public QuestTemplateLocale GetQuestLocale(int entry)
         {
             return _questTemplateLocaleStorage.LookupByKey(entry);
         }
 
-        public QuestOfferRewardLocale GetQuestOfferRewardLocale(uint entry)
+        public QuestOfferRewardLocale GetQuestOfferRewardLocale(int entry)
         {
             return _questOfferRewardLocaleStorage.LookupByKey(entry);
         }
 
-        public QuestRequestItemsLocale GetQuestRequestItemsLocale(uint entry)
+        public QuestRequestItemsLocale GetQuestRequestItemsLocale(int entry)
         {
             return _questRequestItemsLocaleStorage.LookupByKey(entry);
         }
 
-        public QuestObjectivesLocale GetQuestObjectivesLocale(uint entry)
+        public QuestObjectivesLocale GetQuestObjectivesLocale(int entry)
         {
             return _questObjectivesLocaleStorage.LookupByKey(entry);
         }
 
-        public GossipMenuItemsLocale GetGossipMenuItemsLocale(uint menuId, uint optionIndex)
+        public GossipMenuItemsLocale GetGossipMenuItemsLocale(int menuId, int optionIndex)
         {
-            return _gossipMenuItemsLocaleStorage.LookupByKey(Tuple.Create(menuId, optionIndex));
+            return _gossipMenuItemsLocaleStorage.LookupByKey((menuId, optionIndex));
         }
 
-        public PageTextLocale GetPageTextLocale(uint entry)
+        public PageTextLocale GetPageTextLocale(int entry)
         {
             return _pageTextLocaleStorage.LookupByKey(entry);
         }
 
-        public PointOfInterestLocale GetPointOfInterestLocale(uint id)
+        public PointOfInterestLocale GetPointOfInterestLocale(int id)
         {
             return _pointOfInterestLocaleStorage.LookupByKey(id);
         }
@@ -9541,49 +9587,56 @@ namespace Game
                 FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
                 if (factionEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Faction (faction.dbc) {factionId} does not exist but is used in `reputation_reward_rate`");
+                    Log.outError(LogFilter.Sql, $"Faction (faction.dbc) {factionId} does not exist but is used in `reputation_reward_rate`.");
                     continue;
                 }
 
                 if (repRate.questRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table reputation_reward_rate has quest_rate with invalid rate {repRate.questRate}, skipping data for faction {factionId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table reputation_reward_rate has quest_rate with invalid rate {repRate.questRate}, skipping data for faction {factionId}.");
                     continue;
                 }
 
                 if (repRate.questDailyRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table reputation_reward_rate has quest_daily_rate with invalid rate {repRate.questDailyRate}, skipping data for faction {factionId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table reputation_reward_rate has quest_daily_rate with invalid rate {repRate.questDailyRate}, skipping data for faction {factionId}.");
                     continue;
                 }
 
                 if (repRate.questWeeklyRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table reputation_reward_rate has quest_weekly_rate with invalid rate {repRate.questWeeklyRate}, skipping data for faction {factionId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table reputation_reward_rate has quest_weekly_rate with invalid rate {repRate.questWeeklyRate}, skipping data for faction {factionId}.");
                     continue;
                 }
 
                 if (repRate.questMonthlyRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table reputation_reward_rate has quest_monthly_rate with invalid rate {repRate.questMonthlyRate}, skipping data for faction {factionId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table reputation_reward_rate has quest_monthly_rate with invalid rate {repRate.questMonthlyRate}, skipping data for faction {factionId}.");
                     continue;
                 }
 
                 if (repRate.questRepeatableRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table reputation_reward_rate has quest_repeatable_rate with invalid rate {repRate.questRepeatableRate}, skipping data for faction {factionId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table reputation_reward_rate has quest_repeatable_rate with invalid rate {repRate.questRepeatableRate}, skipping data for faction {factionId}.");
                     continue;
                 }
 
                 if (repRate.creatureRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table reputation_reward_rate has creature_rate with invalid rate {repRate.creatureRate}, skipping data for faction {factionId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table reputation_reward_rate has creature_rate with invalid rate {repRate.creatureRate}, skipping data for faction {factionId}.");
                     continue;
                 }
 
                 if (repRate.spellRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table reputation_reward_rate has spell_rate with invalid rate {repRate.spellRate}, skipping data for faction {factionId}");
+                    Log.outError(LogFilter.Sql, 
+                        $"Table reputation_reward_rate has spell_rate with invalid rate {repRate.spellRate}, skipping data for faction {factionId}.");
                     continue;
                 }
 
@@ -9593,7 +9646,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} reputation_reward_rate in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} reputation_reward_rate in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadReputationOnKill()
@@ -9632,7 +9685,7 @@ namespace Game
 
                 if (GetCreatureTemplate(creature_id) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_onkill_reputation` have data for not existed creature entry ({creature_id}), skipped");
+                    Log.outError(LogFilter.Sql, $"Table `creature_onkill_reputation` have data for not existed creature entry ({creature_id}), skipped.");
                     continue;
                 }
 
@@ -9641,7 +9694,7 @@ namespace Game
                     FactionRecord factionEntry1 = CliDB.FactionStorage.LookupByKey(repOnKill.RepFaction1);
                     if (factionEntry1 == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Faction (faction.dbc) {repOnKill.RepFaction1} does not exist but is used in `creature_onkill_reputation`");
+                        Log.outError(LogFilter.Sql, $"Faction (faction.dbc) {repOnKill.RepFaction1} does not exist but is used in `creature_onkill_reputation`.");
                         continue;
                     }
                 }
@@ -9651,7 +9704,7 @@ namespace Game
                     FactionRecord factionEntry2 = CliDB.FactionStorage.LookupByKey(repOnKill.RepFaction2);
                     if (factionEntry2 == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Faction (faction.dbc) {repOnKill.RepFaction2} does not exist but is used in `creature_onkill_reputation`");
+                        Log.outError(LogFilter.Sql, $"Faction (faction.dbc) {repOnKill.RepFaction2} does not exist but is used in `creature_onkill_reputation`.");
                         continue;
                     }
                 }
@@ -9661,7 +9714,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature award reputation definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature award reputation definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadReputationSpilloverTemplate()
@@ -9710,7 +9763,7 @@ namespace Game
 
                 if (factionEntry.ParentFactionID == 0)
                 {
-                    Log.outError(LogFilter.Sql, $"Faction (faction.dbc) {factionId} in `reputation_spillover_template` does not belong to any team, skipping");
+                    Log.outError(LogFilter.Sql, $"Faction (faction.dbc) {factionId} in `reputation_spillover_template` does not belong to any team, skipping.");
                     continue;
                 }
 
@@ -9723,7 +9776,7 @@ namespace Game
                         if (factionSpillover == null || factionSpillover.Id == 0)
                         {
                             Log.outError(LogFilter.Sql, $"Spillover faction (faction.dbc) {repTemplate.faction[i]} does not exist but is used in `reputation_spillover_template` " +
-                                $"for faction {factionId}, skipping");
+                                $"for faction {factionId}, skipping.");
                             invalidSpilloverFaction = true;
                             break;
                         }
@@ -9731,7 +9784,7 @@ namespace Game
                         if (!factionSpillover.CanHaveReputation)
                         {
                             Log.outError(LogFilter.Sql, $"Spillover faction (faction.dbc) {repTemplate.faction[i]} for faction {factionId} in `reputation_spillover_template` " +
-                                $"can not be listed for client, and then useless, skipping");
+                                $"can not be listed for client, and then useless, skipping.");
                             invalidSpilloverFaction = true;
                             break;
                         }
@@ -9739,7 +9792,7 @@ namespace Game
                         if (repTemplate.faction_rank[i] >= (uint)ReputationRank.Max)
                         {
                             Log.outError(LogFilter.Sql, 
-                                $"Rank {repTemplate.faction_rank[i]} used in `reputation_spillover_template` for spillover faction {repTemplate.faction[i]} is not valid, skipping");
+                                $"Rank {repTemplate.faction_rank[i]} used in `reputation_spillover_template` for spillover faction {repTemplate.faction[i]} is not valid, skipping.");
                             invalidSpilloverFaction = true;
                             break;
                         }
@@ -9753,7 +9806,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} reputation_spillover_template in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} reputation_spillover_template in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadTavernAreaTriggers()
@@ -9787,7 +9840,7 @@ namespace Game
                 _tavernAreaTriggerStorage.Add(Trigger_ID);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} tavern triggers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} tavern triggers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadMailLevelRewards()
@@ -9810,30 +9863,33 @@ namespace Game
             {
                 byte level = result.Read<byte>(0);
                 RaceMask raceMask = (RaceMask)result.Read<ulong>(1);
-                uint mailTemplateId = result.Read<uint>(2);
-                uint senderEntry = result.Read<uint>(3);
+                int mailTemplateId = result.Read<int>(2);
+                int senderEntry = result.Read<int>(3);
 
                 if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 {
-                    Log.outError(LogFilter.Sql, "Table `mail_level_reward` have data for level {0} that more supported by client ({1}), ignoring.", level, WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel));
+                    Log.outError(LogFilter.Sql,
+                        $"Table `mail_level_reward` have data for level {level} that more supported by client ({WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)}), ignoring.");
                     continue;
                 }
 
                 if (!raceMask.HasAnyFlag(RaceMask.Playable))
                 {
-                    Log.outError(LogFilter.Sql, "Table `mail_level_reward` have raceMask ({0}) for level {1} that not include any player races, ignoring.", raceMask, level);
+                    Log.outError(LogFilter.Sql, $"Table `mail_level_reward` have raceMask ({raceMask}) for level {level} that not include any player races, ignoring.");
                     continue;
                 }
 
                 if (!CliDB.MailTemplateStorage.ContainsKey(mailTemplateId))
                 {
-                    Log.outError(LogFilter.Sql, "Table `mail_level_reward` have invalid mailTemplateId ({0}) for level {1} that invalid not include any player races, ignoring.", mailTemplateId, level);
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `mail_level_reward` have invalid mailTemplateId ({mailTemplateId}) for level {level} that invalid not include any player races, ignoring.");
                     continue;
                 }
 
                 if (GetCreatureTemplate(senderEntry) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table `mail_level_reward` have not existed sender creature entry ({0}) for level {1} that invalid not include any player races, ignoring.", senderEntry, level);
+                    Log.outError(LogFilter.Sql, 
+                        $"Table `mail_level_reward` have not existed sender creature entry ({senderEntry}) for level {level} that invalid not include any player races, ignoring.");
                     continue;
                 }
 
@@ -9843,7 +9899,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} level dependent mail rewards in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} level dependent mail rewards in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadExplorationBaseXP()
@@ -9862,13 +9918,13 @@ namespace Game
             do
             {
                 byte level = result.Read<byte>(0);
-                uint basexp = result.Read<uint>(1);
+                int basexp = result.Read<int>(1);
                 _baseXPTable[level] = basexp;
                 ++count;
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} BaseXP definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} BaseXP definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadTempSummons()
@@ -9956,7 +10012,7 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} temp summons in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} temp summons in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadPageTexts()
@@ -9975,11 +10031,11 @@ namespace Game
             uint count = 0;
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
 
                 PageText pageText = new();
                 pageText.Text = result.Read<string>(1);
-                pageText.NextPageID = result.Read<uint>(2);
+                pageText.NextPageID = result.Read<int>(2);
                 pageText.PlayerConditionID = result.Read<int>(3);
                 pageText.Flags = result.Read<byte>(4);
 
@@ -10077,14 +10133,14 @@ namespace Game
                 uint returnedCount = 0;
                 do
                 {
-                    ulong receiver = result.Read<ulong>(3);
+                    long receiver = result.Read<long>(3);
                     if (serverUp && Global.ObjAccessor.FindConnectedPlayer(ObjectGuid.Create(HighGuid.Player, receiver)) != null)
                         continue;
 
                     Mail m = new();
                     m.messageID = result.Read<ulong>(0);
                     m.messageType = (MailMessageType)result.Read<byte>(1);
-                    m.sender = result.Read<ulong>(2);
+                    m.sender = result.Read<long>(2);
                     m.receiver = receiver;
                     bool has_items = result.Read<bool>(4);
                     m.expire_time = result.Read<long>(5);
@@ -10148,7 +10204,7 @@ namespace Game
                 while (result.NextRow());
 
                 Log.outInfo(LogFilter.ServerLoading, $"Processed {deletedCount + returnedCount} expired mails: {deletedCount} deleted and {returnedCount} " +
-                    $"returned in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                    $"returned in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
             }
         }
 
@@ -10156,7 +10212,7 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
             _sceneTemplateStorage.Clear();
-
+            //                                        0         1       2               3           4
             using var result = DB.World.Query("SELECT SceneId, Flags, ScriptPackageID, Encrypted, ScriptName FROM scene_template");
             if (result.IsEmpty())
             {
@@ -10167,11 +10223,11 @@ namespace Game
             uint count = 0;
             do
             {
-                uint sceneId = result.Read<uint>(0);
+                int sceneId = result.Read<int>(0);
                 SceneTemplate sceneTemplate = new();
                 sceneTemplate.SceneId = sceneId;
-                sceneTemplate.PlaybackFlags = (SceneFlags)result.Read<uint>(1);
-                sceneTemplate.ScenePackageId = result.Read<uint>(2);
+                sceneTemplate.PlaybackFlags = (SceneFlags)result.Read<int>(1);
+                sceneTemplate.ScenePackageId = result.Read<int>(2);
                 sceneTemplate.Encrypted = result.Read<byte>(3) != 0;
                 sceneTemplate.ScriptId = GetScriptId(result.Read<string>(4));
 
@@ -10179,14 +10235,14 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} scene templates in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} scene templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadPlayerChoices()
         {
             uint oldMSTime = Time.GetMSTime();
             _playerChoices.Clear();
-
+            //                                                     0               1           2                3         4         5                  6                   7                    8
             using var choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, SoundKitId, CloseSoundKitId, Duration, Question, PendingChoiceText, HideWarboardHeader, KeepOpenAfterChoice FROM playerchoice");
             if (choiceResult.IsEmpty())
             {
@@ -10207,8 +10263,8 @@ namespace Game
                 PlayerChoice choice = new();
                 choice.ChoiceId = choiceResult.Read<int>(0);
                 choice.UiTextureKitId = choiceResult.Read<int>(1);
-                choice.SoundKitId = choiceResult.Read<uint>(2);
-                choice.CloseSoundKitId = choiceResult.Read<uint>(3);
+                choice.SoundKitId = choiceResult.Read<int>(2);
+                choice.CloseSoundKitId = choiceResult.Read<int>(3);
                 choice.Duration = choiceResult.Read<long>(4);
                 choice.Question = choiceResult.Read<string>(5);
                 choice.PendingChoiceText = choiceResult.Read<string>(6);
@@ -10219,9 +10275,9 @@ namespace Game
 
             } while (choiceResult.NextRow());
 
-            //                                            0         1           2                   3                4      5
+            //                                                  0           1                   2               3       4            5
             using var responses = DB.World.Query("SELECT ChoiceId, ResponseId, ResponseIdentifier, ChoiceArtFileId, Flags, WidgetSetID, " +
-                //6                        7           8        9               10      11      12         13              14           15            16
+                //                     6           7        8               9      10      11        12              13          14            15              16
                 "UiTextureAtlasElementID, SoundKitID, GroupID, UiTextureKitID, Answer, Header, SubHeader, ButtonTooltip, Description, Confirmation, RewardQuestID " +
                 "FROM playerchoice_response ORDER BY `Index` ASC");
             if (!responses.IsEmpty())
@@ -10233,7 +10289,7 @@ namespace Game
 
                     if (!_playerChoices.ContainsKey(choiceId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped.");
                         continue;
                     }
 
@@ -10241,12 +10297,12 @@ namespace Game
                     PlayerChoiceResponse response = new();
 
                     response.ResponseId = responseId;
-                    response.ResponseIdentifier = responses.Read<ushort>(2);
+                    response.ResponseIdentifier = responses.Read<short>(2);
                     response.ChoiceArtFileId = responses.Read<int>(3);
                     response.Flags = responses.Read<int>(4);
-                    response.WidgetSetID = responses.Read<uint>(5);
-                    response.UiTextureAtlasElementID = responses.Read<uint>(6);
-                    response.SoundKitID = responses.Read<uint>(7);
+                    response.WidgetSetID = responses.Read<int>(5);
+                    response.UiTextureAtlasElementID = responses.Read<int>(6);
+                    response.SoundKitID = responses.Read<int>(7);
                     response.GroupID = responses.Read<byte>(8);
                     response.UiTextureKitID = responses.Read<int>(9);
                     response.Answer = responses.Read<string>(10);
@@ -10256,7 +10312,7 @@ namespace Game
                     response.Description = responses.Read<string>(14);
                     response.Confirmation = responses.Read<string>(15);
                     if (!responses.IsNull(16))
-                        response.RewardQuestID = responses.Read<uint>(16);
+                        response.RewardQuestID = responses.Read<int>(16);
 
                     choice.Responses.Add(response);
 
@@ -10265,6 +10321,7 @@ namespace Game
                 } while (responses.NextRow());
             }
 
+            //                                                0           1        2          3            4               5                 6               7      8    9
             using var rewards = DB.World.Query("SELECT ChoiceId, ResponseId, TitleId, PackageId, SkillLineId, SkillPointCount, ArenaPointCount, HonorPointCount, Money, Xp FROM playerchoice_response_reward");
             if (!rewards.IsEmpty())
             {
@@ -10275,7 +10332,7 @@ namespace Game
 
                     if (!_playerChoices.ContainsKey(choiceId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped.");
                         continue;
                     }
 
@@ -10283,7 +10340,7 @@ namespace Game
                     var response = choice.Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped.");
                         continue;
                     }
 
@@ -10291,27 +10348,30 @@ namespace Game
                     reward.TitleId = rewards.Read<int>(2);
                     reward.PackageId = rewards.Read<int>(3);
                     reward.SkillLineId = rewards.Read<int>(4);
-                    reward.SkillPointCount = rewards.Read<uint>(5);
-                    reward.ArenaPointCount = rewards.Read<uint>(6);
-                    reward.HonorPointCount = rewards.Read<uint>(7);
-                    reward.Money = rewards.Read<ulong>(8);
-                    reward.Xp = rewards.Read<uint>(9);
+                    reward.SkillPointCount = rewards.Read<int>(5);
+                    reward.ArenaPointCount = rewards.Read<int>(6);
+                    reward.HonorPointCount = rewards.Read<int>(7);
+                    reward.Money = rewards.Read<long>(8);
+                    reward.Xp = rewards.Read<int>(9);
 
                     if (reward.TitleId != 0 && !CliDB.CharTitlesStorage.ContainsKey(reward.TitleId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing Title {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward` references non-existing Title {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0.");
                         reward.TitleId = 0;
                     }
 
-                    if (reward.PackageId != 0 && Global.DB2Mgr.GetQuestPackageItems((uint)reward.PackageId) == null)
+                    if (reward.PackageId != 0 && Global.DB2Mgr.GetQuestPackageItems(reward.PackageId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing QuestPackage {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward` references non-existing QuestPackage {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0.");
                         reward.PackageId = 0;
                     }
 
                     if (reward.SkillLineId != 0 && !CliDB.SkillLineStorage.ContainsKey(reward.SkillLineId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing SkillLine {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward` references non-existing SkillLine {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0.");
                         reward.SkillLineId = 0;
                         reward.SkillPointCount = 0;
                     }
@@ -10322,6 +10382,7 @@ namespace Game
                 } while (rewards.NextRow());
             }
 
+            //                                                   0           1       2             4        5
             using var rewardItem = DB.World.Query("SELECT ChoiceId, ResponseId, ItemId, BonusListIDs, Quantity FROM playerchoice_response_reward_item ORDER BY `Index` ASC");
             if (!rewardItem.IsEmpty())
             {
@@ -10329,7 +10390,7 @@ namespace Game
                 {
                     int choiceId = rewardItem.Read<int>(0);
                     int responseId = rewardItem.Read<int>(1);
-                    uint itemId = rewardItem.Read<uint>(2);
+                    int itemId = rewardItem.Read<int>(2);
                     StringArray bonusListIDsTok = new(rewardItem.Read<string>(3), ' ');
                     List<int> bonusListIds = new();
                     if (!bonusListIDsTok.IsEmpty())
@@ -10343,26 +10404,30 @@ namespace Game
                     PlayerChoice choice = _playerChoices[choiceId];
                     if (choice == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_item` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped.");
                         continue;
                     }
 
                     var response = choice.Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_item` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped.");
                         continue;
                     }
 
                     if (response.Reward == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_item` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped.");
                         continue;
                     }
 
                     if (GetItemTemplate(itemId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing item {itemId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_item` references non-existing item {itemId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped.");
                         continue;
                     }
 
@@ -10372,6 +10437,7 @@ namespace Game
                 } while (rewardItem.NextRow());
             }
 
+            //                                                       0           1           2        3
             using var rewardCurrency = DB.World.Query("SELECT ChoiceId, ResponseId, CurrencyId, Quantity FROM playerchoice_response_reward_currency ORDER BY `Index` ASC");
             if (!rewardCurrency.IsEmpty())
             {
@@ -10379,32 +10445,36 @@ namespace Game
                 {
                     int choiceId = rewardCurrency.Read<int>(0);
                     int responseId = rewardCurrency.Read<int>(1);
-                    uint currencyId = rewardCurrency.Read<uint>(2);
+                    int currencyId = rewardCurrency.Read<int>(2);
                     int quantity = rewardCurrency.Read<int>(3);
 
                     PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
                     if (choice == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_currency` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped.");
                         continue;
                     }
 
                     var response = choice.Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_currency` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped.");
                         continue;
                     }
 
                     if (response.Reward == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_currency` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped.");
                         continue;
                     }
 
                     if (!CliDB.CurrencyTypesStorage.ContainsKey(currencyId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing currency {currencyId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_currency` references non-existing currency {currencyId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped.");
                         continue;
                     }
 
@@ -10414,6 +10484,7 @@ namespace Game
                 } while (rewardCurrency.NextRow());
             }
 
+            //                                                      0          1          2         3
             using var rewardFaction = DB.World.Query("SELECT ChoiceId, ResponseId, FactionId, Quantity FROM playerchoice_response_reward_faction ORDER BY `Index` ASC");
             if (!rewardFaction.IsEmpty())
             {
@@ -10421,32 +10492,36 @@ namespace Game
                 {
                     int choiceId = rewardFaction.Read<int>(0);
                     int responseId = rewardFaction.Read<int>(1);
-                    uint factionId = rewardFaction.Read<uint>(2);
+                    int factionId = rewardFaction.Read<int>(2);
                     int quantity = rewardFaction.Read<int>(3);
 
                     PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
                     if (choice == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_faction` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped.");
                         continue;
                     }
 
                     var response = choice.Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_faction` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped.");
                         continue;
                     }
 
                     if (response.Reward == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_faction` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped.");
                         continue;
                     }
 
                     if (!CliDB.FactionStorage.ContainsKey(factionId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing faction {factionId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_faction` references non-existing faction {factionId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped.");
                         continue;
                     }
 
@@ -10456,6 +10531,7 @@ namespace Game
                 } while (rewardFaction.NextRow());
             }
 
+            //                                                    0           1       2            3         4
             using var rewardItems = DB.World.Query("SELECT ChoiceId, ResponseId, ItemId, BonusListIDs, Quantity FROM playerchoice_response_reward_item_choice ORDER BY `Index` ASC");
             if (!rewardItems.IsEmpty())
             {
@@ -10463,7 +10539,7 @@ namespace Game
                 {
                     int choiceId = rewardItems.Read<int>(0);
                     int responseId = rewardItems.Read<int>(1);
-                    uint itemId = rewardItems.Read<uint>(2);
+                    int itemId = rewardItems.Read<int>(2);
                     StringArray bonusListIDsTok = new(rewardItems.Read<string>(3), ' ');
                     List<int> bonusListIds = new();
                     foreach (int token in bonusListIDsTok)
@@ -10474,26 +10550,30 @@ namespace Game
                     PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
                     if (choice == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item_choice` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_item_choice` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped.");
                         continue;
                     }
 
                     var response = choice.Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item_choice` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_item_choice` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped.");
                         continue;
                     }
 
                     if (response.Reward == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item_choice` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_item_choice` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped.");
                         continue;
                     }
 
                     if (GetItemTemplate(itemId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item_choice` references non-existing item {itemId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        Log.outError(LogFilter.Sql,
+                            $"Table `playerchoice_response_reward_item_choice` references non-existing item {itemId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped.");
                         continue;
                     }
 
@@ -10503,6 +10583,7 @@ namespace Game
                 } while (rewards.NextRow());
             }
 
+            //                                                        0          1               2      3             4       5          6
             using var mawPowersResult = DB.World.Query("SELECT ChoiceId, ResponseId, TypeArtFileID, Rarity, RarityColor, SpellID, MaxStacks FROM playerchoice_response_maw_power");
             if (!mawPowersResult.IsEmpty())
             {
@@ -10514,14 +10595,14 @@ namespace Game
                     PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
                     if (choice == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_maw_power` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_maw_power` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped.");
                         continue;
                     }
 
                     var response = choice.Responses.Find(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
                     if (response == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_maw_power` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_maw_power` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped.");
                         continue;
                     }
 
@@ -10530,7 +10611,7 @@ namespace Game
                     if (!mawPowersResult.IsNull(3))
                         mawPower.Rarity = mawPowersResult.Read<int>(3);
                     if (!mawPowersResult.IsNull(4))
-                        mawPower.RarityColor = mawPowersResult.Read<uint>(4);
+                        mawPower.RarityColor = mawPowersResult.Read<int>(4);
                     mawPower.SpellID = mawPowersResult.Read<int>(5);
                     mawPower.MaxStacks = mawPowersResult.Read<int>(6);
                     response.MawPower = mawPower;
@@ -10561,12 +10642,12 @@ namespace Game
                         int choiceId = result.Read<int>(0);
                         string localeName = result.Read<string>(1);
                         Locale locale = localeName.ToEnum<Locale>();
-                        if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                        if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                             continue;
 
                         if (GetPlayerChoice(choiceId) == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ChoiceId: {choiceId} for locale {localeName}, skipped");
+                            Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ChoiceId: {choiceId} for locale {localeName}, skipped.");
                             continue;
                         }
 
@@ -10577,7 +10658,7 @@ namespace Game
                         AddLocaleString(result.Read<string>(2), locale, data.Question);
                     } while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoiceLocales.Count} Player Choice locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoiceLocales.Count} Player Choice locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
 
             }
@@ -10596,20 +10677,22 @@ namespace Game
                         int responseId = result.Read<int>(1);
                         string localeName = result.Read<string>(2);
                         Locale locale = localeName.ToEnum<Locale>();
-                        if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                        if (!SharedConst.IsValidLocale(locale) || locale == Locale.Default)
                             continue;
 
                         var playerChoiceLocale = _playerChoiceLocales.LookupByKey(choiceId);
                         if (playerChoiceLocale == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ChoiceId: {choiceId} for ResponseId {responseId} locale {localeName}, skipped");
+                            Log.outError(LogFilter.Sql,
+                                $"Table `playerchoice_locale` references non-existing ChoiceId: {choiceId} for ResponseId {responseId} locale {localeName}, skipped.");
                             continue;
                         }
 
                         PlayerChoice playerChoice = GetPlayerChoice(choiceId);
                         if (playerChoice.GetResponse(responseId) == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ResponseId: {responseId} for ChoiceId {choiceId} locale {localeName}, skipped");
+                            Log.outError(LogFilter.Sql,
+                                $"Table `playerchoice_locale` references non-existing ResponseId: {responseId} for ChoiceId {choiceId} locale {localeName}, skipped.");
                             continue;
                         }
 
@@ -10623,7 +10706,7 @@ namespace Game
                         count++;
                     } while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Player Choice Response locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Player Choice Response locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
         }
@@ -10659,7 +10742,7 @@ namespace Game
                 foreach (var poiPair in _questPOIStorage)
                     poiPair.Value.InitializeQueryData();
 
-            Log.outInfo(LogFilter.ServerLoading, $"Initialized query cache data in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Initialized query cache data in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadJumpChargeParams()
@@ -10680,9 +10763,9 @@ namespace Game
                 float speed = result.Read<float>(1);
                 bool treatSpeedAsMoveTimeSeconds = result.Read<bool>(2);
                 float jumpGravity = result.Read<float>(3);
-                uint? spellVisualId = null;
-                uint? progressCurveId = null;
-                uint? parabolicCurveId = null;
+                int? spellVisualId = null;
+                int? progressCurveId = null;
+                int? parabolicCurveId = null;
 
                 if (speed <= 0.0f)
                 {
@@ -10698,26 +10781,26 @@ namespace Game
 
                 if (!result.IsNull(4))
                 {
-                    if (CliDB.SpellVisualStorage.ContainsKey(result.Read<uint>(4)))
-                        spellVisualId = result.Read<uint>(4);
+                    if (CliDB.SpellVisualStorage.ContainsKey(result.Read<int>(4)))
+                        spellVisualId = result.Read<int>(4);
                     else
-                        Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing SpellVisual: {result.Read<uint>(4)} for id {id}, ignored.");
+                        Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing SpellVisual: {result.Read<int>(4)} for id {id}, ignored.");
                 }
 
                 if (!result.IsNull(5))
                 {
-                    if (CliDB.CurveStorage.ContainsKey(result.Read<uint>(5)))
-                        progressCurveId = result.Read<uint>(5);
+                    if (CliDB.CurveStorage.ContainsKey(result.Read<int>(5)))
+                        progressCurveId = result.Read<int>(5);
                     else
-                        Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing progress Curve: {result.Read<uint>(5)} for id {id}, ignored.");
+                        Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing progress Curve: {result.Read<int>(5)} for id {id}, ignored.");
                 }
 
                 if (!result.IsNull(6))
                 {
-                    if (CliDB.CurveStorage.ContainsKey(result.Read<uint>(6)))
-                        parabolicCurveId = result.Read<uint>(6);
+                    if (CliDB.CurveStorage.ContainsKey(result.Read<int>(6)))
+                        parabolicCurveId = result.Read<int>(6);
                     else
-                        Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing parabolic Curve: {result.Read<uint>(6)} for id {id}, ignored.");
+                        Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing parabolic Curve: {result.Read<int>(6)} for id {id}, ignored.");
                 }
 
                 JumpChargeParams jumpParams = new();
@@ -10731,7 +10814,7 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_jumpChargeParams.Count} Jump Charge Params in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_jumpChargeParams.Count} Jump Charge Params in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadPhaseNames()
@@ -10750,7 +10833,7 @@ namespace Game
             uint count = 0;
             do
             {
-                uint phaseId = result.Read<uint>(0);
+                int phaseId = result.Read<int>(0);
                 string name = result.Read<string>(1);
 
                 _phaseNameStorage[phaseId] = name;
@@ -10761,7 +10844,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} phase names in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public MailLevelReward GetMailLevelReward(uint level, Race race)
+        public MailLevelReward GetMailLevelReward(int level, Race race)
         {
             var mailList = _mailLevelRewardStorage.LookupByKey((byte)level);
             if (mailList.Empty())
@@ -10774,17 +10857,17 @@ namespace Game
             return null;
         }
 
-        public RepRewardRate GetRepRewardRate(uint factionId)
+        public RepRewardRate GetRepRewardRate(int factionId)
         {
             return _repRewardRateStorage.LookupByKey(factionId);
         }
 
-        public RepSpilloverTemplate GetRepSpillover(uint factionId)
+        public RepSpilloverTemplate GetRepSpillover(int factionId)
         {
             return _repSpilloverTemplateStorage.LookupByKey(factionId);
         }
 
-        public ReputationOnKillEntry GetReputationOnKilEntry(uint id)
+        public ReputationOnKillEntry GetReputationOnKilEntry(int id)
         {
             return _repOnKillStorage.LookupByKey(id);
         }
@@ -10945,12 +11028,12 @@ namespace Game
             return _guidGenerators[high];
         }
 
-        public uint GetBaseXP(uint level)
+        public int GetBaseXP(int level)
         {
             return _baseXPTable.ContainsKey(level) ? _baseXPTable[level] : 0;
         }
 
-        public uint GetXPForLevel(uint level)
+        public int GetXPForLevel(int level)
         {
             if (level < _playerXPperLevel.Length)
                 return _playerXPperLevel[level];
@@ -11022,12 +11105,12 @@ namespace Game
             return mapObjectGuidsStore.LookupByKey(key);
         }
 
-        public PageText GetPageText(uint pageEntry)
+        public PageText GetPageText(int pageEntry)
         {
             return _pageTextStorage.LookupByKey(pageEntry);
         }
 
-        public uint GetNearestTaxiNode(Vector3 point3d, uint mapid, Team team)
+        public uint GetNearestTaxiNode(Vector3 point3d, int mapid, Team team)
         {
             bool found = false;
             float dist = 10000;
@@ -11147,7 +11230,7 @@ namespace Game
 
         public AreaTriggerStruct GetGoBackTrigger(int Map)
         {
-            uint? parentId = null;
+            int? parentId = null;
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(Map);
             if (mapEntry == null || mapEntry.CorpseMapID < 0)
                 return null;
@@ -11159,7 +11242,7 @@ namespace Game
                     parentId = iTemplate.Parent;
             }
 
-            uint entrance_map = parentId.GetValueOrDefault((uint)mapEntry.CorpseMapID);
+            int entrance_map = parentId.GetValueOrDefault(mapEntry.CorpseMapID);
             foreach (var pair in _areaTriggerStorage)
             {
                 if (pair.Value.target_mapId == entrance_map)
@@ -11186,7 +11269,7 @@ namespace Game
             return null;
         }
 
-        public SceneTemplate GetSceneTemplate(uint sceneId)
+        public SceneTemplate GetSceneTemplate(int sceneId)
         {
             return _sceneTemplateStorage.LookupByKey(sceneId);
         }
@@ -11207,7 +11290,7 @@ namespace Game
             return _jumpChargeParams.LookupByKey(id);
         }
 
-        public string GetPhaseName(uint phaseId)
+        public string GetPhaseName(int phaseId)
         {
             return _phaseNameStorage.TryGetValue(phaseId, out string value) ? value : "Unknown Name";
         }
@@ -11230,7 +11313,7 @@ namespace Game
             do
             {
                 Vector2 corpse;
-                uint mapId = result.Read<uint>(0);
+                int mapId = result.Read<int>(0);
                 corpse.X = result.Read<float>(1);
                 corpse.Y = result.Read<float>(2);
 
@@ -11238,7 +11321,7 @@ namespace Game
 
                 ++count;
             } while (result.NextRow());
-            Log.outInfo(LogFilter.ServerLoading, "Loaded %u map corpse positions in %u ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} map corpse positions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         //Vehicles
@@ -11272,7 +11355,7 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_vehicleTemplateStore.Count} Vehicle Template entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_vehicleTemplateStore.Count} Vehicle Template entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadVehicleTemplateAccessories()
@@ -11314,7 +11397,7 @@ namespace Game
 
                 if (!_spellClickInfoStorage.ContainsKey(entry))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `vehicle_template_accessory`: creature template entry {entry} has no data in npc_spellclick_spells");
+                    Log.outError(LogFilter.Sql, $"Table `vehicle_template_accessory`: creature template entry {entry} has no data in npc_spellclick_spells.");
                     continue;
                 }
 
@@ -11324,7 +11407,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Vehicle Template Accessories in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Vehicle Template Accessories in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadVehicleAccessories()
@@ -11340,7 +11423,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded 0 Vehicle Accessories in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded 0 Vehicle Accessories in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 return;
             }
 
@@ -11365,7 +11448,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Vehicle Accessories in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Vehicle Accessories in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadVehicleSeatAddon()
@@ -11417,10 +11500,10 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Vehicle Seat Addon entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Vehicle Seat Addon entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public Vector2 GetMapCorpsePosition(uint mapId)
+        public Vector2 GetMapCorpsePosition(int mapId)
         {
             return _mapCorpsePositionStorage.LookupByKey(mapId);
         }
@@ -11445,7 +11528,7 @@ namespace Game
             return _vehicleTemplateAccessoryStore.LookupByKey(veh.GetCreatureEntry());
         }
 
-        public VehicleSeatAddon GetVehicleSeatAddon(uint seatId)
+        public VehicleSeatAddon GetVehicleSeatAddon(int seatId)
         {
             return _vehicleSeatAddonStore.LookupByKey(seatId);
         }
@@ -11459,14 +11542,14 @@ namespace Game
         MultiMap<byte, MailLevelReward> _mailLevelRewardStorage = new();
         MultiMap<Tuple<int, SummonerType, byte>, TempSummonData> _tempSummonDataStorage = new();
         Dictionary<int /*choiceId*/, PlayerChoice> _playerChoices = new();
-        Dictionary<uint, PageText> _pageTextStorage = new();
+        Dictionary<int, PageText> _pageTextStorage = new();
         List<string> _reservedNamesStorage = new();
-        Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new();
+        Dictionary<int, SceneTemplate> _sceneTemplateStorage = new();
         Dictionary<int, JumpChargeParams> _jumpChargeParams = new();
-        Dictionary<uint, string> _phaseNameStorage = new();
-        Dictionary<uint, Vector2> _mapCorpsePositionStorage = new();
+        Dictionary<int, string> _phaseNameStorage = new();
+        Dictionary<int, Vector2> _mapCorpsePositionStorage = new();
 
-        Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new();
+        Dictionary<Race, RaceUnlockRequirement> _raceUnlockRequirementStorage = new();
         List<RaceClassAvailability> _classExpansionRequirementStorage = new();
 
         //Quest
@@ -11487,82 +11570,82 @@ namespace Game
 
         //Scripts
         ScriptNameContainer _scriptNamesStorage = new();
-        MultiMap<int, uint> spellScriptsStorage = new();
+        MultiMap<int, int> spellScriptsStorage = new();
         public Dictionary<int, MultiMap<uint, ScriptInfo>> sSpellScripts = new();
-        public Dictionary<uint, MultiMap<uint, ScriptInfo>> sEventScripts = new();
-        public Dictionary<uint, MultiMap<uint, ScriptInfo>> sWaypointScripts = new();
-        Dictionary<int, uint> areaTriggerScriptStorage = new();
-        List<uint> _eventStorage = new();
-        Dictionary<uint, uint> _eventScriptStorage = new();
+        public Dictionary<int, MultiMap<uint, ScriptInfo>> sEventScripts = new();
+        public Dictionary<int, MultiMap<uint, ScriptInfo>> sWaypointScripts = new();
+        Dictionary<int, int> areaTriggerScriptStorage = new();
+        List<int> _eventStorage = new();
+        Dictionary<int, int> _eventScriptStorage = new();
 
         //Maps
-        public Dictionary<uint, GameTele> gameTeleStorage = new();
+        public Dictionary<int, GameTele> gameTeleStorage = new();
         Dictionary<(int mapId, Difficulty difficulty), Dictionary<uint, CellObjectGuids>> mapObjectGuidsStore = new();
         Dictionary<(int mapId, Difficulty diffuculty, int phaseId), Dictionary<uint, CellObjectGuids>> mapPersonalObjectGuidsStore = new();
-        Dictionary<uint, InstanceTemplate> instanceTemplateStorage = new();
+        Dictionary<int, InstanceTemplate> instanceTemplateStorage = new();
         public MultiMap<int, GraveyardData> GraveyardStorage = new();
         List<ushort> _transportMaps = new();
-        Dictionary<uint, SpawnGroupTemplateData> _spawnGroupDataStorage = new();
-        MultiMap<uint, SpawnMetadata> _spawnGroupMapStorage = new();
-        MultiMap<int, uint> _spawnGroupsByMap = new();
+        Dictionary<int, SpawnGroupTemplateData> _spawnGroupDataStorage = new();
+        MultiMap<int, SpawnMetadata> _spawnGroupMapStorage = new();
+        MultiMap<int, int> _spawnGroupsByMap = new();
         MultiMap<int, InstanceSpawnGroupInfo> _instanceSpawnGroupStorage = new();
 
         //Spells /Skills / Phases
-        Dictionary<uint, PhaseInfoStruct> _phaseInfoById = new();
-        Dictionary<uint, TerrainSwapInfo> _terrainSwapInfoById = new();
-        MultiMap<uint, PhaseAreaInfo> _phaseInfoByArea = new();
-        MultiMap<uint, TerrainSwapInfo> _terrainSwapInfoByMap = new();
+        Dictionary<int, PhaseInfoStruct> _phaseInfoById = new();
+        Dictionary<int, TerrainSwapInfo> _terrainSwapInfoById = new();
+        MultiMap<int, PhaseAreaInfo> _phaseInfoByArea = new();
+        MultiMap<int, TerrainSwapInfo> _terrainSwapInfoByMap = new();
         MultiMap<int, SpellClickInfo> _spellClickInfoStorage = new();
         Dictionary<int, int> _fishingBaseForAreaStorage = new();
-        Dictionary<uint, SkillTiersEntry> _skillTiers = new();
+        Dictionary<int, SkillTiersEntry> _skillTiers = new();
 
         //Gossip
-        MultiMap<uint, GossipMenus> gossipMenusStorage = new();
-        MultiMap<uint, GossipMenuItems> gossipMenuItemsStorage = new();
-        Dictionary<uint, GossipMenuAddon> _gossipMenuAddonStorage = new();
-        Dictionary<uint, PointOfInterest> pointsOfInterestStorage = new();
+        MultiMap<int, GossipMenus> gossipMenusStorage = new();
+        MultiMap<int, GossipMenuItems> gossipMenuItemsStorage = new();
+        Dictionary<int, GossipMenuAddon> _gossipMenuAddonStorage = new();
+        Dictionary<int, PointOfInterest> pointsOfInterestStorage = new();
 
         //Creature
         Dictionary<int, CreatureTemplate> creatureTemplateStorage = new();
         Dictionary<int, CreatureModelInfo> creatureModelStorage = new();
-        Dictionary<uint, CreatureSummonedData> creatureSummonedDataStorage = new();
-        Dictionary<ulong, CreatureData> creatureDataStorage = new();
-        Dictionary<ulong, CreatureAddon> creatureAddonStorage = new();
-        MultiMap<(int, Difficulty), uint> creatureQuestItemStorage = new();
-        Dictionary<uint, CreatureAddon> creatureTemplateAddonStorage = new();
-        MultiMap<uint, float> _creatureTemplateSparringStorage = new();
-        Dictionary<ulong, CreatureMovementData> creatureMovementOverrides = new();
-        MultiMap<uint, Tuple<uint, EquipmentInfo>> equipmentInfoStorage = new();
+        Dictionary<int, CreatureSummonedData> creatureSummonedDataStorage = new();
+        Dictionary<long, CreatureData> creatureDataStorage = new();
+        Dictionary<long, CreatureAddon> creatureAddonStorage = new();
+        MultiMap<(int, Difficulty), int> creatureQuestItemStorage = new();
+        Dictionary<int, CreatureAddon> creatureTemplateAddonStorage = new();
+        MultiMap<int, float> _creatureTemplateSparringStorage = new();
+        Dictionary<long, CreatureMovementData> creatureMovementOverrides = new();
+        MultiMap<int, (int, EquipmentInfo)> equipmentInfoStorage = new();
         Dictionary<ObjectGuid, ObjectGuid> linkedRespawnStorage = new();
-        Dictionary<uint, CreatureBaseStats> creatureBaseStatsStorage = new();
-        Dictionary<uint, VendorItemData> cacheVendorItemStorage = new();
-        Dictionary<uint, Trainer> trainers = new();
-        Dictionary<(uint creatureId, uint gossipMenuId, uint gossipOptionIndex), uint> _creatureDefaultTrainers = new();
-        Dictionary<uint, NpcText> npcTextStorage = new();
+        Dictionary<(int, Class), CreatureBaseStats> creatureBaseStatsStorage = new();
+        Dictionary<int, VendorItemData> cacheVendorItemStorage = new();
+        Dictionary<int, Trainer> trainers = new();
+        Dictionary<(int creatureId, int gossipMenuId, int gossipOptionIndex), int> _creatureDefaultTrainers = new();
+        Dictionary<int, NpcText> npcTextStorage = new();
 
         //GameObject
         Dictionary<int, GameObjectTemplate> _gameObjectTemplateStorage = new();
         Dictionary<long, GameObjectData> gameObjectDataStorage = new();
         Dictionary<int, GameObjectTemplateAddon> _gameObjectTemplateAddonStorage = new();
         Dictionary<long, GameObjectOverride> _gameObjectOverrideStorage = new();
-        Dictionary<ulong, GameObjectAddon> _gameObjectAddonStorage = new();
-        MultiMap<uint, uint> _gameObjectQuestItemStorage = new();
-        List<uint> _gameObjectForQuestStorage = new();
+        Dictionary<long, GameObjectAddon> _gameObjectAddonStorage = new();
+        MultiMap<int, int> _gameObjectQuestItemStorage = new();
+        List<int> _gameObjectForQuestStorage = new();
 
         //Item
         Dictionary<int, ItemTemplate> ItemTemplateStorage = new();
 
         //Player
-        Dictionary<Tuple<Race, Class>, PlayerInfo> _playerInfo = new();
+        Dictionary<(Race, Class), PlayerInfo> _playerInfo = new();
 
         //Faction Change
-        public Dictionary<uint, uint> FactionChangeAchievements = new();
-        public Dictionary<uint, uint> FactionChangeItemsAllianceToHorde = new();
-        public Dictionary<uint, uint> FactionChangeItemsHordeToAlliance = new();
-        public Dictionary<uint, uint> FactionChangeQuests = new();
-        public Dictionary<uint, uint> FactionChangeReputation = new();
-        public Dictionary<uint, uint> FactionChangeSpells = new();
-        public Dictionary<uint, uint> FactionChangeTitles = new();
+        public Dictionary<int /*alliance*/, int /*horde*/> FactionChangeAchievements = new();
+        public Dictionary<int, int> FactionChangeItemsAllianceToHorde = new();
+        public Dictionary<int, int> FactionChangeItemsHordeToAlliance = new();
+        public Dictionary<int /*alliance*/, int /*horde*/> FactionChangeQuests = new();
+        public Dictionary<int /*alliance*/, int /*horde*/> FactionChangeReputation = new();
+        public Dictionary<int /*alliance*/, int /*horde*/> FactionChangeSpells = new();
+        public Dictionary<int /*alliance*/, int /*horde*/> FactionChangeTitles = new();
 
         //Pets
         Dictionary<int, PetLevelInfo[]> petInfoStore = new();
@@ -11576,22 +11659,22 @@ namespace Game
         Dictionary<int, VehicleSeatAddon> _vehicleSeatAddonStore = new();
 
         //Locales
-        Dictionary<uint, CreatureLocale> _creatureLocaleStorage = new();
-        Dictionary<uint, GameObjectLocale> _gameObjectLocaleStorage = new();
-        Dictionary<uint, QuestTemplateLocale> _questTemplateLocaleStorage = new();
-        Dictionary<uint, QuestObjectivesLocale> _questObjectivesLocaleStorage = new();
-        Dictionary<uint, QuestOfferRewardLocale> _questOfferRewardLocaleStorage = new();
-        Dictionary<uint, QuestRequestItemsLocale> _questRequestItemsLocaleStorage = new();
-        Dictionary<Tuple<uint, uint>, GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new();
-        Dictionary<uint, PageTextLocale> _pageTextLocaleStorage = new();
-        Dictionary<uint, PointOfInterestLocale> _pointOfInterestLocaleStorage = new();
+        Dictionary<int, CreatureLocale> _creatureLocaleStorage = new();
+        Dictionary<int, GameObjectLocale> _gameObjectLocaleStorage = new();
+        Dictionary<int, QuestTemplateLocale> _questTemplateLocaleStorage = new();
+        Dictionary<int, QuestObjectivesLocale> _questObjectivesLocaleStorage = new();
+        Dictionary<int, QuestOfferRewardLocale> _questOfferRewardLocaleStorage = new();
+        Dictionary<int, QuestRequestItemsLocale> _questRequestItemsLocaleStorage = new();
+        Dictionary<(int, int), GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new();
+        Dictionary<int, PageTextLocale> _pageTextLocaleStorage = new();
+        Dictionary<int, PointOfInterestLocale> _pointOfInterestLocaleStorage = new();
         Dictionary<int, PlayerChoiceLocale> _playerChoiceLocales = new();
 
         List<int> _tavernAreaTriggerStorage = new();
         Dictionary<int, AreaTriggerStruct> _areaTriggerStorage = new();
         Dictionary<(int, Difficulty), AccessRequirement> _accessRequirementStorage = new();
-        MultiMap<ulong, DungeonEncounter> _dungeonEncounterStorage = new();
-        Dictionary<uint, WorldSafeLocsEntry> _worldSafeLocs = new();
+        MultiMap<(int,Difficulty), DungeonEncounter> _dungeonEncounterStorage = new();
+        Dictionary<int, WorldSafeLocsEntry> _worldSafeLocs = new();
 
         Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new();
         // first free id for selected id Type
@@ -11602,8 +11685,8 @@ namespace Game
         ulong _creatureSpawnId;
         ulong _gameObjectSpawnId;
         ulong _voidItemId;
-        uint[] _playerXPperLevel;
-        Dictionary<uint, uint> _baseXPTable = new();
+        int[] _playerXPperLevel;
+        Dictionary<int, int> _baseXPTable = new();
         #endregion
     }
 
@@ -11614,7 +11697,7 @@ namespace Game
         public ScriptsType type;
 
         [FieldOffset(4)]
-        public uint id;
+        public int id;
 
         [FieldOffset(8)]
         public uint delay;
@@ -11897,8 +11980,8 @@ namespace Game
 
     public class CellObjectGuids
     {
-        public SortedSet<ulong> creatures = new();
-        public SortedSet<ulong> gameobjects = new();
+        public SortedSet<long> creatures = new();
+        public SortedSet<long> gameobjects = new();
 
         public void AddSpawn(SpawnData data)
         {
@@ -11933,7 +12016,7 @@ namespace Game
         public float posY;
         public float posZ;
         public float orientation;
-        public uint mapId;
+        public int mapId;
         public string name;
         public string nameLow;
     }
@@ -11946,17 +12029,17 @@ namespace Game
             mana = 0;
         }
 
-        public uint[] stats = new uint[(int)Stats.Max];
-        public uint health;
-        public uint mana;
-        public uint armor;
+        public int[] stats = new int[(int)Stats.Max];
+        public int health;
+        public int mana;
+        public int armor;
     }
 
     public struct InstanceSpawnGroupInfo
     {
         public byte BossStateId;
         public EncounterStateMask BossStates;
-        public uint SpawnGroupId;
+        public int SpawnGroupId;
         public InstanceSpawnGroupFlags Flags;
     }
 
@@ -12005,13 +12088,13 @@ namespace Game
 
     public class WorldSafeLocsEntry
     {
-        public uint Id;
+        public int Id;
         public WorldLocation Loc;
     }
 
     public class GraveyardData
     {
-        public uint SafeLocId;
+        public int SafeLocId;
         public List<Condition> Conditions = new();
     }
 
@@ -12129,7 +12212,7 @@ namespace Game
 
     public class DungeonEncounter
     {
-        public DungeonEncounter(DungeonEncounterRecord _dbcEntry, EncounterCreditType _creditType, uint _creditEntry, uint _lastEncounterDungeon)
+        public DungeonEncounter(DungeonEncounterRecord _dbcEntry, EncounterCreditType _creditType, int _creditEntry, int _lastEncounterDungeon)
         {
             dbcEntry = _dbcEntry;
             creditType = _creditType;
@@ -12139,13 +12222,13 @@ namespace Game
 
         public DungeonEncounterRecord dbcEntry;
         public EncounterCreditType creditType;
-        public uint creditEntry;
-        public uint lastEncounterDungeon;
+        public int creditEntry;
+        public int lastEncounterDungeon;
     }
 
     public class MailLevelReward
     {
-        public MailLevelReward(RaceMask _raceMask, uint _mailTemplateId = 0, uint _senderEntry = 0)
+        public MailLevelReward(RaceMask _raceMask, int _mailTemplateId = 0, int _senderEntry = 0)
         {
             raceMask = _raceMask;
             mailTemplateId = _mailTemplateId;
@@ -12153,14 +12236,14 @@ namespace Game
         }
 
         public RaceMask raceMask;
-        public uint mailTemplateId;
-        public uint senderEntry;
+        public int mailTemplateId;
+        public int senderEntry;
     }
 
     public class PageText
     {
         public string Text;
-        public uint NextPageID;
+        public int NextPageID;
         public int PlayerConditionID;
         public byte Flags;
     }
@@ -12220,7 +12303,7 @@ namespace Game
             if (item.ClassID == ItemClass.Weapon)
             {
                 ItemType = 5;
-                switch ((ItemSubClassWeapon)item.SubclassID)
+                switch (item.SubclassID.Weapon)
                 {
                     case ItemSubClassWeapon.Axe:
                         AddStat(ItemSpecStat.OneHandedAxe);
@@ -12276,7 +12359,7 @@ namespace Game
             }
             else if (item.ClassID == ItemClass.Armor)
             {
-                switch ((ItemSubClassArmor)item.SubclassID)
+                switch (item.SubclassID.Armor)
                 {
                     case ItemSubClassArmor.Cloth:
                         if (sparse.InventoryType != InventoryType.Cloak)
@@ -12298,12 +12381,12 @@ namespace Game
                         ItemType = 4;
                         break;
                     default:
-                        if (item.SubclassID == (int)ItemSubClassArmor.Shield)
+                        if (item.SubclassID.Armor == ItemSubClassArmor.Shield)
                         {
                             ItemType = 6;
                             AddStat(ItemSpecStat.Shield);
                         }
-                        else if (item.SubclassID > (int)ItemSubClassArmor.Shield && item.SubclassID <= (int)ItemSubClassArmor.Relic)
+                        else if (item.SubclassID.Armor > ItemSubClassArmor.Shield && item.SubclassID.Armor <= ItemSubClassArmor.Relic)
                         {
                             ItemType = 6;
                             AddStat(ItemSpecStat.Relic);
@@ -12332,7 +12415,7 @@ namespace Game
             if (ItemSpecStatCount >= ItemConst.MaxStats)
                 return;
 
-            for (uint i = 0; i < ItemConst.MaxStats; ++i)
+            for (int i = 0; i < ItemConst.MaxStats; ++i)
                 if (ItemSpecStatTypes[i] == statType)
                     return;
 
@@ -12400,10 +12483,10 @@ namespace Game
 
     public class SkillTiersEntry
     {
-        public uint Id;
-        public uint[] Value = new uint[SkillConst.MaxSkillStep];
+        public int Id;
+        public int[] Value = new int[SkillConst.MaxSkillStep];
 
-        public uint GetValueForTierIndex(int tierIndex)
+        public int GetValueForTierIndex(int tierIndex)
         {
             if (tierIndex >= SkillConst.MaxSkillStep)
                 tierIndex = SkillConst.MaxSkillStep - 1;
@@ -12418,29 +12501,29 @@ namespace Game
     public class TerrainSwapInfo
     {
         public TerrainSwapInfo() { }
-        public TerrainSwapInfo(uint id)
+        public TerrainSwapInfo(int id)
         {
             Id = id;
         }
 
-        public uint Id;
-        public List<uint> UiMapPhaseIDs = new();
+        public int Id;
+        public List<int> UiMapPhaseIDs = new();
     }
 
     public class PhaseInfoStruct
     {
-        public PhaseInfoStruct(uint id)
+        public PhaseInfoStruct(int id)
         {
             Id = id;
         }
 
-        public bool IsAllowedInArea(uint areaId)
+        public bool IsAllowedInArea(int areaId)
         {
             return Areas.Any(areaToCheck => Global.DB2Mgr.IsInArea(areaId, areaToCheck));
         }
 
-        public uint Id;
-        public List<uint> Areas = new();
+        public int Id;
+        public List<int> Areas = new();
     }
 
     public class PhaseAreaInfo
@@ -12451,29 +12534,23 @@ namespace Game
         }
 
         public PhaseInfoStruct PhaseInfo;
-        public List<uint> SubAreaExclusions = new();
+        public List<int> SubAreaExclusions = new();
         public List<Condition> Conditions = new();
     }
 
     public class SceneTemplate
     {
-        public uint SceneId;
+        public int SceneId;
         public SceneFlags PlaybackFlags;
-        public uint ScenePackageId;
+        public int ScenePackageId;
         public bool Encrypted;
-        public uint ScriptId;
+        public int ScriptId;
     }
 
     public class DefaultCreatureBaseStats : CreatureBaseStats
     {
         public DefaultCreatureBaseStats()
-        {
-            BaseArmor = 1;
-            for (int j = 0; j < (int)Expansion.Max; ++j)
-            {
-                BaseHealth[j] = 1;
-                BaseDamage[j] = 0.0f;
-            }
+        {            
             BaseMana = 0;
             AttackPower = 0;
             RangedAttackPower = 0;
@@ -12505,27 +12582,27 @@ namespace Game
     public class PlayerChoiceResponseRewardItem
     {
         public PlayerChoiceResponseRewardItem() { }
-        public PlayerChoiceResponseRewardItem(uint id, List<int> bonusListIDs, int quantity)
+        public PlayerChoiceResponseRewardItem(int id, List<int> bonusListIDs, int quantity)
         {
             Id = id;
             BonusListIDs = bonusListIDs;
             Quantity = quantity;
         }
 
-        public uint Id;
+        public int Id;
         public List<int> BonusListIDs = new();
         public int Quantity;
     }
 
     public class PlayerChoiceResponseRewardEntry
     {
-        public PlayerChoiceResponseRewardEntry(uint id, int quantity)
+        public PlayerChoiceResponseRewardEntry(int id, int quantity)
         {
             Id = id;
             Quantity = quantity;
         }
 
-        public uint Id;
+        public int Id;
         public int Quantity;
     }
 
@@ -12534,11 +12611,11 @@ namespace Game
         public int TitleId;
         public int PackageId;
         public int SkillLineId;
-        public uint SkillPointCount;
-        public uint ArenaPointCount;
-        public uint HonorPointCount;
-        public ulong Money;
-        public uint Xp;
+        public int SkillPointCount;
+        public int ArenaPointCount;
+        public int HonorPointCount;
+        public long Money;
+        public int Xp;
 
         public List<PlayerChoiceResponseRewardItem> Items = new();
         public List<PlayerChoiceResponseRewardEntry> Currency = new();
@@ -12550,7 +12627,7 @@ namespace Game
     {
         public int TypeArtFileID;
         public int? Rarity;
-        public uint? RarityColor;
+        public int? RarityColor;
         public int SpellID;
         public int MaxStacks;
     }
@@ -12558,12 +12635,12 @@ namespace Game
     public class PlayerChoiceResponse
     {
         public int ResponseId;
-        public ushort ResponseIdentifier;
+        public short ResponseIdentifier;
         public int ChoiceArtFileId;
         public int Flags;
-        public uint WidgetSetID;
-        public uint UiTextureAtlasElementID;
-        public uint SoundKitID;
+        public int WidgetSetID;
+        public int UiTextureAtlasElementID;
+        public int SoundKitID;
         public byte GroupID;
         public int UiTextureKitID;
         public string Answer;
@@ -12573,7 +12650,7 @@ namespace Game
         public string Description;
         public string Confirmation;
         public PlayerChoiceResponseReward Reward;
-        public uint? RewardQuestID;
+        public int? RewardQuestID;
         public PlayerChoiceResponseMawPower? MawPower;
     }
 
@@ -12581,8 +12658,8 @@ namespace Game
     {
         public int ChoiceId;
         public int UiTextureKitId;
-        public uint SoundKitId;
-        public uint CloseSoundKitId;
+        public int SoundKitId;
+        public int CloseSoundKitId;
         public long Duration;
         public string Question;
         public string PendingChoiceText;
@@ -12603,7 +12680,7 @@ namespace Game
 
     public class ClassAvailability
     {
-        public byte ClassID;
+        public Class ClassID;
         public byte ActiveExpansionLevel;
         public byte AccountExpansionLevel;
         public byte MinActiveExpansionLevel;
@@ -12611,13 +12688,13 @@ namespace Game
 
     public class RaceClassAvailability
     {
-        public byte RaceID;
+        public Race RaceID;
         public List<ClassAvailability> Classes = new();
     }
 
     public class RaceUnlockRequirement
     {
-        public byte Expansion;
+        public Expansion Expansion;
         public int AchievementId;
     }
 
@@ -12647,14 +12724,14 @@ namespace Game
         {
             // We insert an empty placeholder here so we can use the
             // script id 0 as dummy for "no script found".
-            uint id = Insert("", false);
+            int id = Insert("", false);
 
-            Cypher.Assert(id == 0);
+            Cypher.Assert(id <= 0);
         }
 
-        public uint Insert(string scriptName, bool isScriptNameBound)
+        public int Insert(string scriptName, bool isScriptNameBound)
         {
-            Entry entry = new((uint)NameToIndex.Count, isScriptNameBound, scriptName);
+            Entry entry = new(NameToIndex.Count, isScriptNameBound, scriptName);
             var result = NameToIndex.TryAdd(scriptName, entry);
             if (result)
             {
@@ -12697,11 +12774,11 @@ namespace Game
 
         public class Entry
         {
-            public uint Id;
+            public int Id;
             public bool IsScriptDatabaseBound;
             public string Name;
 
-            public Entry(uint id, bool isScriptDatabaseBound, string name)
+            public Entry(int id, bool isScriptDatabaseBound, string name)
             {
                 Id = id;
                 IsScriptDatabaseBound = isScriptDatabaseBound;
@@ -12712,8 +12789,8 @@ namespace Game
 
     public class InstanceTemplate
     {
-        public uint Parent;
-        public uint ScriptId;
+        public int Parent;
+        public int ScriptId;
     }
 
     enum DefaultGraveyard

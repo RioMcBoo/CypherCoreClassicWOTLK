@@ -581,7 +581,7 @@ namespace Game.Entities
         }
 
         // @todo Move stat mods code to pet passive auras
-        public bool InitStatsForLevel(uint petlevel)
+        public bool InitStatsForLevel(int petlevel)
         {
             CreatureTemplate cinfo = GetCreatureTemplate();
             Cypher.Assert(cinfo != null);
@@ -605,11 +605,11 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Unit, "Unknown Type pet {0} is summoned by player class {1}", GetEntry(), GetOwner().GetClass());
+                    Log.outError(LogFilter.Unit, $"Unknown Type pet {GetEntry()} is summoned by player class {GetOwner().GetClass()}");
                 }
             }
 
-            uint creature_ID = (petType == PetType.Hunter) ? 1 : cinfo.Entry;
+            int creature_ID = (petType == PetType.Hunter) ? 1 : cinfo.Entry;
 
             SetMeleeDamageSchool((SpellSchools)cinfo.DmgSchool);
 
@@ -651,12 +651,15 @@ namespace Game.Entities
             {
                 // remove elite bonuses included in DB values
                 CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(petlevel, cinfo.UnitClass);
-                ApplyLevelScaling();
-
                 CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-                SetCreateHealth((uint)Math.Max(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, petlevel, creatureDifficulty.GetHealthScalingExpansion(), m_unitData.ContentTuningID, (Class)cinfo.UnitClass, 0) * creatureDifficulty.HealthModifier * GetHealthMod(cinfo.Rank), 1.0f));
-                SetCreateMana(stats.BaseMana);
 
+                float healthmod = GetHealthMod(cinfo.Rank);
+                int basehp = stats.GenerateHealth(GetCreatureDifficulty());
+                int health = (int)(basehp * healthmod);
+                int mana = stats.GenerateMana(creatureDifficulty);
+
+                SetCreateHealth(health);
+                SetCreateMana(mana);
                 SetCreateStat(Stats.Strength, 22);
                 SetCreateStat(Stats.Agility, 22);
                 SetCreateStat(Stats.Stamina, 25);
@@ -688,7 +691,7 @@ namespace Game.Entities
                 }
                 case PetType.Hunter:
                 {
-                    ToPet().SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(petlevel) * 0.05f));
+                    ToPet().SetPetNextLevelExperience((int)(Global.ObjectMgr.GetXPForLevel(petlevel) * 0.05f));
                     //these formula may not be correct; however, it is designed to be close to what it should be
                     //this makes dps 0.5 of pets level
                     SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
@@ -813,7 +816,8 @@ namespace Game.Entities
                              * should be copied here (or moved to another method or if that function should be called here
                              * or not just for this default case)
                              */
-                            float basedamage = GetBaseDamageForLevel(petlevel);
+                            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(petlevel, cinfo.UnitClass);
+                            float basedamage = stats.GenerateBaseDamage(GetCreatureDifficulty());
 
                             float weaponBaseMinDamage = basedamage;
                             float weaponBaseMaxDamage = basedamage * 1.5f;

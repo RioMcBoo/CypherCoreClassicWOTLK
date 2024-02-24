@@ -142,7 +142,7 @@ namespace Framework.Constants
         GoinfoAddon = 85,
         GoinfoModel = 86,
         UnknownError = 87,
-    TwoFACommandsNotSetup = 88,
+        TwoFACommandsNotSetup = 88,
         TwoFAAlreadySetup = 89,
         TwoFAInvalidToken = 90,
         TwoFASecretSuggestion = 91,

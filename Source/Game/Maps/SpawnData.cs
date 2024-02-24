@@ -9,7 +9,7 @@ namespace Game.Maps
 {
     public class SpawnGroupTemplateData
     {
-        public uint groupId;
+        public int groupId;
         public string name;
         public int mapId;
         public SpawnGroupFlags flags;
@@ -21,12 +21,12 @@ namespace Game.Maps
         public Position SpawnPoint;
         public PhaseUseFlagsValues PhaseUseFlags;
         public int PhaseId;
-        public uint PhaseGroup;
+        public int PhaseGroup;
         public int terrainSwapMap;
-        public uint poolId;
+        public int poolId;
         public int spawntimesecs;
         public List<Difficulty> SpawnDifficulties;
-        public uint ScriptId;
+        public int ScriptId;
         public string StringId;
 
         public SpawnData(SpawnObjectType t) : base(t)

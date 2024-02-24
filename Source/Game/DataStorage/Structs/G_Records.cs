@@ -330,7 +330,7 @@ namespace Game.DataStorage
 
     public sealed class GossipNPCOptionRecord
     {
-        public uint Id;
+        public int Id;
         public int GossipNpcOption;
         public int LFGDungeonsID;
         public int Unk341_1;

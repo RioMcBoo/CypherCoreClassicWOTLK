@@ -862,8 +862,6 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            uint classMask = (1u << ((int)playerClass - 1));
-
             for (int i = 0; i < 4; i++)
             {
                 var raceMask = (RaceMask)factionEntry.ReputationRaceMask[i];

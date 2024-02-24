@@ -588,12 +588,12 @@ namespace Game.Entities
 
         public Unit GetBase() { return _me; }
         public VehicleRecord GetVehicleInfo() { return _vehicleInfo; }
-        public uint GetCreatureEntry() { return _creatureEntry; }
+        public int GetCreatureEntry() { return _creatureEntry; }
 
         Unit _me;
         VehicleRecord _vehicleInfo;                   //< DBC data for vehicle
 
-        uint _creatureEntry;                              //< Can be different than the entry of _me in case of players
+        int _creatureEntry;                              //< Can be different than the entry of _me in case of players
         Status _status;                                     //< Internal variable for sanity checks
 
         List<VehicleJoinEvent> _pendingJoinEvents = new();

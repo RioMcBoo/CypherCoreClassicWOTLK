@@ -774,21 +774,21 @@ namespace Game.Misc
 
     public class GossipMenuItems
     {
-        public uint MenuID;
+        public int MenuID;
         public int GossipOptionID;
-        public uint OrderIndex;
+        public int OrderIndex;
         public GossipOptionNpc OptionNpc;
         public string OptionText;
         public int OptionBroadcastTextId;
         public int Language;
         public GossipOptionFlags Flags;
-        public uint ActionMenuID;
-        public uint ActionPoiID;
+        public int ActionMenuID;
+        public int ActionPoiID;
         public int? GossipNpcOptionID;
         public bool BoxCoded;
         public uint BoxMoney;
         public string BoxText;
-        public uint BoxBroadcastTextId;
+        public int BoxBroadcastTextId;
         public int? SpellID;
         public int? OverrideIconID;
         public List<Condition> Conditions = new();
@@ -801,7 +801,7 @@ namespace Game.Misc
 
     public class PointOfInterest
     {
-        public uint Id;
+        public int Id;
         public Vector3 Pos;
         public uint Icon;
         public uint Flags;
@@ -817,8 +817,8 @@ namespace Game.Misc
 
     public class GossipMenus
     {
-        public uint MenuId;
-        public uint TextId;
+        public int MenuId;
+        public int TextId;
         public List<Condition> Conditions = new();
     }
 }

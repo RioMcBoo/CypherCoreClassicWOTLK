@@ -616,12 +616,14 @@ namespace Game.Loots
             foreach (var id in lootIdSet)
                 Log.outError( LogFilter.Sql, "Table '{0}' entry {1} isn't {2} and not referenced from loot, and then useless.", GetName(), id, GetEntryName());
         }
+
         public void ReportNonExistingId(uint lootId, uint ownerId)
         {
             Log.outError( LogFilter.Sql, "Table '{0}' Entry {1} does not exist but it is used by {2} {3}", GetName(), lootId, GetEntryName(), ownerId);
         }
 
         public bool HaveLootFor(uint loot_id) { return m_LootTemplates.LookupByKey(loot_id) != null; }
+
         public bool HaveQuestLootFor(uint loot_id)
         {
             var lootTemplate = m_LootTemplates.LookupByKey(loot_id);
@@ -631,6 +633,7 @@ namespace Game.Loots
             // scan loot for quest items
             return lootTemplate.HasQuestDrop(m_LootTemplates);
         }
+
         public bool HaveQuestLootForPlayer(uint loot_id, Player player)
         {
             var tab = m_LootTemplates.LookupByKey(loot_id);
@@ -650,6 +653,7 @@ namespace Game.Loots
 
             return tab;
         }
+
         public void ResetConditions()
         {
             foreach (var pair in m_LootTemplates)
@@ -658,6 +662,7 @@ namespace Game.Loots
                 pair.Value.CopyConditions(empty);
             }
         }
+
         public LootTemplate GetLootForConditionFill(uint loot_id)
         {
             var tab = m_LootTemplates.LookupByKey(loot_id);

@@ -306,7 +306,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool IsValidMAP(uint mapId)
+        public bool IsValidMAP(int mapId)
         {
             return CliDB.MapStorage.ContainsKey(mapId);
         }

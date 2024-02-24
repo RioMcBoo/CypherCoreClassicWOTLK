@@ -1841,7 +1841,7 @@ namespace Game.Guilds
             stmt.AddValue(0, m_id);
             trans.Append(stmt);
 
-            _CreateRank(trans, Global.ObjectMgr.GetCypherString( CypherStrings.GuildMaster, loc), GuildRankRights.All);
+            _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildMaster, loc), GuildRankRights.All);
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildOfficer, loc), GuildRankRights.All);
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildVeteran, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildMember, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);

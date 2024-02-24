@@ -12,6 +12,10 @@ namespace Framework.Constants
     public class SharedConst
     {
         public const int SpilloverFactionsMax = 5;
+        public const int MaxPlayerNameLenght = 12;
+        public const int MaxPetNameLenght = 12;
+        public const int MaxCharterNameLenght = 24;
+
         /// <summary>
         /// CliDB Const
         /// </summary>
@@ -25,7 +29,8 @@ namespace Framework.Constants
         public const int MaxHolidayDurations = 10;
         public const int MaxHolidayDates = 16;
         public const int MaxHolidayFlags = 10;
-        public const int DefaultMaxLevel = 80;
+        public const int DefaultMaxPlayerLevel = 80;
+        public const int DefaultMaxUnitLevel = 83;
         public const int MinLevel = 1;
         public const int MaxLevel = 123;
         public const int StrongMaxLevel = 255;
@@ -464,6 +469,7 @@ namespace Framework.Constants
         
         AllLanguages = -1,
         Reserved = Total,
+        Default = enUS,
     }
 
     [Flags]
@@ -848,7 +854,7 @@ namespace Framework.Constants
         All = Playable,
     }
 
-    public enum Expansion
+    public enum Expansion : sbyte
     {
         LevelCurrent = -1,
         Classic = 0,
@@ -926,7 +932,7 @@ namespace Framework.Constants
         Max = 5
     }
 
-    public enum TrainerType
+    public enum TrainerType : byte
     {
         None = 0,
         Talent = 1,

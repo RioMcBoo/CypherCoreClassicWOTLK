@@ -398,13 +398,13 @@ namespace Game.DataStorage
             return null;
         }
 
-        public AreaTriggerSpawn GetAreaTriggerSpawn(ulong spawnId)
+        public AreaTriggerSpawn GetAreaTriggerSpawn(long spawnId)
         {
             return _areaTriggerSpawnsBySpawnId.LookupByKey(spawnId);
         }
 
         Dictionary<(uint, Difficulty), Dictionary<uint, SortedSet<ulong>>> _areaTriggerSpawnsByLocation = new();
-        Dictionary<ulong, AreaTriggerSpawn> _areaTriggerSpawnsBySpawnId = new();
+        Dictionary<long, AreaTriggerSpawn> _areaTriggerSpawnsBySpawnId = new();
         Dictionary<AreaTriggerId, AreaTriggerTemplate> _areaTriggerTemplateStore = new();
         Dictionary<uint, AreaTriggerCreateProperties> _areaTriggerCreateProperties = new();
     }

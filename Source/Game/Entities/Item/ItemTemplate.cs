@@ -288,11 +288,11 @@ namespace Game.Entities
         public uint GetRandomProperty()  { return ExtendedData.RandomSelect; }
         public uint GetRandomSuffix()  { return ExtendedData.ItemRandomSuffixGroupID; }
 
-        public uint GetId() { return BasicData.Id; }
+        public int GetId() { return BasicData.Id; }
         public ItemClass GetClass() { return BasicData.ClassID; }
         public ItemSubClass GetSubClass() { return BasicData.SubclassID; }
         public ItemQuality GetQuality() { return ExtendedData.OverallQualityID; }
-        public uint GetOtherFactionItemId() { return (uint)ExtendedData.OppositeFactionItemID; }
+        public int GetOtherFactionItemId() { return ExtendedData.FactionRelated; }
         public float GetPriceRandomValue() { return ExtendedData.PriceRandomValue; }
         public float GetPriceVariance() { return ExtendedData.PriceVariance; }
         public uint GetBuyCount() { return Math.Max(ExtendedData.VendorStackCount, 1u); }
@@ -368,7 +368,7 @@ namespace Game.Entities
         public List<ItemEffectRecord> Effects = new();
 
         // extra fields, not part of db2 files
-        public uint ScriptId;
+        public int ScriptId;
         public uint FoodType;
         public uint MinMoneyLoot;
         public uint MaxMoneyLoot;
@@ -385,7 +385,7 @@ namespace Game.Entities
     public struct ItemSubClass
     {
         [FieldOffset(0)]
-        private int data;
+        public int data;
         [FieldOffset(0)]
         public ItemSubClassConsumable Consumable;
         [FieldOffset(0)]

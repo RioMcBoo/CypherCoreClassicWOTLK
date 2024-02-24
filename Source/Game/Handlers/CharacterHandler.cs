@@ -1785,7 +1785,7 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
-                RaceMask<ulong> raceMaskDisabled = new(WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask));
+                RaceMask raceMaskDisabled = (RaceMask)WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
                 if (raceMaskDisabled.HasRace(factionChangeInfo.RaceID))
                 {
                     SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
@@ -2104,7 +2104,7 @@ namespace Game
                         var questTemplates = Global.ObjectMgr.GetQuestTemplates();
                         foreach (Quest quest in questTemplates.Values)
                         {
-                            RaceMask<ulong> newRaceMask = newTeamId == TeamId.Alliance ? RaceMask.Alliance : RaceMask.Horde;
+                            RaceMask newRaceMask = newTeamId == TeamId.Alliance ? RaceMask.Alliance : RaceMask.Horde;
                             if (quest.AllowableRaces.RawValue != unchecked((ulong)-1) && (quest.AllowableRaces & newRaceMask).IsEmpty())
                             {
                                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);

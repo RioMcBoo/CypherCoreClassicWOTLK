@@ -2791,8 +2791,8 @@ namespace Game.Maps
                     return;
 
 
-                MultiMap<ulong, uint> phases = new();
-                MultiMap<ulong, ChrCustomizationChoice> customizations = new();
+                MultiMap<long, int> phases = new();
+                MultiMap<long, ChrCustomizationChoice> customizations = new();
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CORPSE_PHASES);
                 stmt.AddValue(0, GetId());
@@ -2827,11 +2827,11 @@ namespace Game.Maps
                     {
                         do
                         {
-                            ulong guid = customizationResult.Read<ulong>(0);
+                            long guid = customizationResult.Read<long>(0);
 
                             ChrCustomizationChoice choice = new();
-                            choice.ChrCustomizationOptionID = customizationResult.Read<uint>(1);
-                            choice.ChrCustomizationChoiceID = customizationResult.Read<uint>(2);
+                            choice.ChrCustomizationOptionID = customizationResult.Read<int>(1);
+                            choice.ChrCustomizationChoiceID = customizationResult.Read<int>(2);
                             customizations.Add(guid, choice);
 
                         } while (customizationResult.NextRow());
@@ -2844,7 +2844,7 @@ namespace Game.Maps
                     ulong guid = result.Read<ulong>(15);
                     if (type >= CorpseType.Max || type == CorpseType.Bones)
                     {
-                        Log.outError(LogFilter.Maps, "Corpse (guid: {0}) have wrong corpse Type ({1}), not loading.", guid, type);
+                        Log.outError(LogFilter.Maps, $"Corpse (guid: {guid}) have wrong corpse Type ({type}), not loading.");
                         continue;
                     }
 
@@ -2986,13 +2986,13 @@ namespace Game.Maps
             }
         }
 
-        public void SendZoneDynamicInfo(uint zoneId, Player player)
+        public void SendZoneDynamicInfo(int zoneId, Player player)
         {
             var zoneInfo = _zoneDynamicInfo.LookupByKey(zoneId);
             if (zoneInfo == null)
                 return;
 
-            uint music = zoneInfo.MusicId;
+            int music = zoneInfo.MusicId;
             if (music != 0)
                 player.SendPacket(new PlayMusic(music));
 
@@ -3008,7 +3008,7 @@ namespace Game.Maps
             }
         }
 
-        public void SendZoneWeather(uint zoneId, Player player)
+        public void SendZoneWeather(int zoneId, Player player)
         {
             if (!player.HasAuraType(AuraType.ForceWeather))
             {
@@ -3036,7 +3036,7 @@ namespace Game.Maps
                 Weather.SendFineWeatherUpdateToPlayer(player);
         }
 
-        public void SetZoneMusic(uint zoneId, uint musicId)
+        public void SetZoneMusic(int zoneId, int musicId)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
@@ -3054,7 +3054,7 @@ namespace Game.Maps
             }
         }
 
-        public Weather GetOrGenerateZoneDefaultWeather(uint zoneId)
+        public Weather GetOrGenerateZoneDefaultWeather(int zoneId)
         {
             WeatherData weatherData = Global.WeatherMgr.GetWeatherData(zoneId);
             if (weatherData == null)
@@ -3074,7 +3074,7 @@ namespace Game.Maps
             return info.DefaultWeather;
         }
 
-        public WeatherState GetZoneWeather(uint zoneId)
+        public WeatherState GetZoneWeather(int zoneId)
         {
             ZoneDynamicInfo zoneDynamicInfo = _zoneDynamicInfo.LookupByKey(zoneId);
             if (zoneDynamicInfo != null)
@@ -3089,7 +3089,7 @@ namespace Game.Maps
             return WeatherState.Fine;
         }
 
-        public void SetZoneWeather(uint zoneId, WeatherState weatherId, float intensity)
+        public void SetZoneWeather(int zoneId, WeatherState weatherId, float intensity)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
@@ -3111,7 +3111,7 @@ namespace Game.Maps
             }
         }
 
-        public void SetZoneOverrideLight(uint zoneId, uint areaLightId, uint overrideLightId, TimeSpan transitionTime)
+        public void SetZoneOverrideLight(int zoneId, int areaLightId, int overrideLightId, TimeSpan transitionTime)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
@@ -3126,7 +3126,7 @@ namespace Game.Maps
                 ZoneDynamicInfo.LightOverride lightOverride = new();
                 lightOverride.AreaLightId = areaLightId;
                 lightOverride.OverrideLightId = overrideLightId;
-                lightOverride.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
+                lightOverride.TransitionMilliseconds = (int)transitionTime.TotalMilliseconds;
                 info.LightOverrides.Add(lightOverride);
             }
 
@@ -3137,7 +3137,7 @@ namespace Game.Maps
                 OverrideLight overrideLight = new();
                 overrideLight.AreaLightID = areaLightId;
                 overrideLight.OverrideLightID = overrideLightId;
-                overrideLight.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
+                overrideLight.TransitionMilliseconds = (int)transitionTime.TotalMilliseconds;
 
                 foreach (var player in players)
                     if (player.GetZoneId() == zoneId)
@@ -3235,34 +3235,34 @@ namespace Game.Maps
             return Global.DB2Mgr.GetMapDifficultyData(GetId(), GetDifficultyID());
         }
 
-        public uint GetId()
+        public int GetId()
         {
             return i_mapRecord.Id;
         }
 
         public bool Instanceable()
         {
-            return i_mapRecord != null && i_mapRecord.Instanceable();
+            return i_mapRecord != null && i_mapRecord.Instanceable;
         }
 
         public bool IsDungeon()
         {
-            return i_mapRecord != null && i_mapRecord.IsDungeon();
+            return i_mapRecord != null && i_mapRecord.IsDungeon;
         }
 
         public bool IsNonRaidDungeon()
         {
-            return i_mapRecord != null && i_mapRecord.IsNonRaidDungeon();
+            return i_mapRecord != null && i_mapRecord.IsNonRaidDungeon;
         }
 
         public bool IsRaid()
         {
-            return i_mapRecord != null && i_mapRecord.IsRaid();
+            return i_mapRecord != null && i_mapRecord.IsRaid;
         }
 
         public bool IsHeroic()
         {
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(i_spawnMode);
+            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey((int)i_spawnMode);
             if (difficulty != null)
                 return difficulty.Flags.HasAnyFlag(DifficultyFlags.Heroic);
             return false;
@@ -3276,30 +3276,30 @@ namespace Game.Maps
 
         public bool IsBattleground()
         {
-            return i_mapRecord != null && i_mapRecord.IsBattleground();
+            return i_mapRecord != null && i_mapRecord.IsBattleground;
         }
 
         public bool IsBattleArena()
         {
-            return i_mapRecord != null && i_mapRecord.IsBattleArena();
+            return i_mapRecord != null && i_mapRecord.IsBattleArena;
         }
 
         public bool IsBattlegroundOrArena()
         {
-            return i_mapRecord != null && i_mapRecord.IsBattlegroundOrArena();
+            return i_mapRecord != null && i_mapRecord.IsBattlegroundOrArena;
         }
 
         public bool IsScenario()
         {
-            return i_mapRecord != null && i_mapRecord.IsScenario();
+            return i_mapRecord != null && i_mapRecord.IsScenario;
         }
 
         public bool IsGarrison()
         {
-            return i_mapRecord != null && i_mapRecord.IsGarrison();
+            return i_mapRecord != null && i_mapRecord.IsGarrison;
         }
 
-        private bool GetEntrancePos(out uint mapid, out Vector2 pos)
+        private bool GetEntrancePos(out int mapid, out Vector2 pos)
         {
             mapid = 0;
             pos = new Vector2();
@@ -3311,7 +3311,7 @@ namespace Game.Maps
                 return false;
 
             Vector2 corpse = Global.ObjectMgr.GetMapCorpsePosition(i_mapRecord.Id);
-            mapid = (uint)i_mapRecord.CorpseMapID;
+            mapid = i_mapRecord.CorpseMapID;
             pos = corpse;
             return true;
         }
@@ -4696,14 +4696,14 @@ namespace Game.Maps
         public float m_VisibleDistance;
         internal uint m_unloadTimer;
 
-        Dictionary<uint, ZoneDynamicInfo> _zoneDynamicInfo = new();
+        Dictionary<int, ZoneDynamicInfo> _zoneDynamicInfo = new();
         IntervalTimer _weatherUpdateTimer;
         Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new();
         SpawnedPoolData _poolData;
         Dictionary<ObjectGuid, WorldObject> _objectsStore = new();
-        MultiMap<ulong, Creature> _creatureBySpawnIdStore = new();
-        MultiMap<ulong, GameObject> _gameobjectBySpawnIdStore = new();
-        MultiMap<ulong, AreaTrigger> _areaTriggerBySpawnIdStore = new();
+        MultiMap<long, Creature> _creatureBySpawnIdStore = new();
+        MultiMap<long, GameObject> _gameobjectBySpawnIdStore = new();
+        MultiMap<long, AreaTrigger> _areaTriggerBySpawnIdStore = new();
         MultiMap<uint, Corpse> _corpsesByCell = new();
         Dictionary<ObjectGuid, Corpse> _corpsesByPlayer = new();
         List<Corpse> _corpseBones = new();
@@ -5234,7 +5234,7 @@ namespace Game.Maps
 
     public class ZoneDynamicInfo
     {
-        public uint MusicId;
+        public int MusicId;
         public Weather DefaultWeather;
         public WeatherState WeatherId;
         public float Intensity;
@@ -5242,9 +5242,9 @@ namespace Game.Maps
 
         public struct LightOverride
         {
-            public uint AreaLightId;
-            public uint OverrideLightId;
-            public uint TransitionMilliseconds;
+            public int AreaLightId;
+            public int OverrideLightId;
+            public int TransitionMilliseconds;
         }
     }
 

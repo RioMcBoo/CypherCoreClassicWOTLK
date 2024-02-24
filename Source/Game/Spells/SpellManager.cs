@@ -200,7 +200,7 @@ namespace Game.Entities
             return spell_id;
         }
 
-        public uint GetNextSpellInChain(uint spell_id)
+        public int GetNextSpellInChain(int spell_id)
         {
             var node = GetSpellChainNode(spell_id);
             if (node != null)
@@ -248,12 +248,12 @@ namespace Game.Entities
             return mSpellReq.LookupByKey(spell_id);
         }
 
-        public List<uint> GetSpellsRequiringSpellBounds(uint spell_id)
+        public List<int> GetSpellsRequiringSpellBounds(int spell_id)
         {
             return mSpellsReqSpell.LookupByKey(spell_id);
         }
 
-        public bool IsSpellRequiringSpell(uint spellid, uint req_spellid)
+        public bool IsSpellRequiringSpell(int spellid, int req_spellid)
         {
             var spellsRequiringSpell = GetSpellsRequiringSpellBounds(req_spellid);
 
@@ -265,7 +265,7 @@ namespace Game.Entities
             return false;
         }
 
-        public SpellLearnSkillNode GetSpellLearnSkill(uint spell_id)
+        public SpellLearnSkillNode GetSpellLearnSkill(int spell_id)
         {
             return mSpellLearnSkills.LookupByKey(spell_id);
         }
@@ -539,12 +539,12 @@ namespace Game.Entities
             }
         }
 
-        public List<SkillLineAbilityRecord> GetSkillLineAbilityMapBounds(uint spell_id)
+        public List<SkillLineAbilityRecord> GetSkillLineAbilityMapBounds(int spell_id)
         {
             return mSkillLineAbilityMap.LookupByKey(spell_id);
         }
 
-        public PetAura GetPetAura(uint spell_id, byte eff)
+        public PetAura GetPetAura(int spell_id, byte eff)
         {
             return mSpellPetAuraMap.LookupByKey((spell_id << 8) + eff);
         }
@@ -554,7 +554,7 @@ namespace Game.Entities
             return mSpellEnchantProcEventMap.LookupByKey(enchId);
         }
 
-        public bool IsArenaAllowedEnchancment(uint ench_id)
+        public bool IsArenaAllowedEnchancment(int ench_id)
         {
             var enchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(ench_id);
             if (enchantment != null)
@@ -570,7 +570,7 @@ namespace Game.Entities
 
         public MultiMap<uint, uint> GetPetLevelupSpellList(CreatureFamily petFamily)
         {
-            return mPetLevelupSpellMap.LookupByKey(petFamily);
+            return mPetLevelupSpellMap.LookupByKey((int)petFamily);
         }
 
         public PetDefaultSpellsEntry GetPetDefaultSpellsEntry(int id)
@@ -4739,7 +4739,7 @@ namespace Game.Entities
             if (Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID) != null)
                 return SkillRangeType.Rank;
 
-            if (rcEntry.SkillID == (uint)SkillType.Runeforging)
+            if (rcEntry.SkillID == (int)SkillType.Runeforging)
                 return SkillRangeType.Mono;
 
             switch (skill.CategoryID)
@@ -4803,9 +4803,9 @@ namespace Game.Entities
 
         #region Fields
         Dictionary<int, SpellChainNode> mSpellChains = new();
-        MultiMap<uint, uint> mSpellsReqSpell = new();
+        MultiMap<int, int> mSpellsReqSpell = new();
         MultiMap<uint, uint> mSpellReq = new();
-        Dictionary<uint, SpellLearnSkillNode> mSpellLearnSkills = new();
+        Dictionary<int, SpellLearnSkillNode> mSpellLearnSkills = new();
         MultiMap<uint, SpellLearnSpellNode> mSpellLearnSpells = new();
         Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition> mSpellTargetPositions = new();
         MultiMap<uint, SpellGroup> mSpellSpellGroup = new();
@@ -4815,7 +4815,7 @@ namespace Game.Entities
         List<ServersideSpellName> mServersideSpellNames = new();
         Dictionary<(uint id, Difficulty difficulty), SpellProcEntry> mSpellProcMap = new();
         Dictionary<uint, SpellThreatEntry> mSpellThreatMap = new();
-        Dictionary<uint, PetAura> mSpellPetAuraMap = new();
+        Dictionary<int, PetAura> mSpellPetAuraMap = new();
         MultiMap<(SpellLinkedType, uint), int> mSpellLinkedMap = new();
         Dictionary<uint, SpellEnchantProcEntry> mSpellEnchantProcEventMap = new();
         MultiMap<uint, SpellArea> mSpellAreaMap = new();
@@ -4823,9 +4823,9 @@ namespace Game.Entities
         MultiMap<uint, SpellArea> mSpellAreaForQuestEndMap = new();
         MultiMap<uint, SpellArea> mSpellAreaForAuraMap = new();
         MultiMap<uint, SpellArea> mSpellAreaForAreaMap = new();
-        MultiMap<uint, SkillLineAbilityRecord> mSkillLineAbilityMap = new();
+        MultiMap<int, SkillLineAbilityRecord> mSkillLineAbilityMap = new();
         Dictionary<uint, MultiMap<uint, uint>> mPetLevelupSpellMap = new();
-        Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new();           // only spells not listed in related mPetLevelupSpellMap entry
+        Dictionary<int, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new();           // only spells not listed in related mPetLevelupSpellMap entry
         MultiMap<int, SpellInfo> mSpellInfoMap = new();
         Dictionary<Tuple<uint, byte>, uint> mSpellTotemModel = new();
 

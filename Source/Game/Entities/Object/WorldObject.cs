@@ -2438,12 +2438,12 @@ namespace Game.Entities
             return my_faction.IsNeutralToAll();
         }
 
-        public SpellCastResult CastSpell(CastSpellTargetArg targets, uint spellId)
+        public SpellCastResult CastSpell(CastSpellTargetArg targets, int spellId)
         {
             return CastSpell(targets, spellId, new CastSpellExtraArgs());
         }
 
-        public SpellCastResult CastSpell(CastSpellTargetArg targets, uint spellId, CastSpellExtraArgs args)
+        public SpellCastResult CastSpell(CastSpellTargetArg targets, int spellId, CastSpellExtraArgs args)
         {
             SpellInfo info = Global.SpellMgr.GetSpellInfo(spellId, args.CastDifficulty != Difficulty.None ? args.CastDifficulty : GetMap().GetDifficultyID());
             if (info == null)

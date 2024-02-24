@@ -39,7 +39,7 @@ namespace Game.DataStorage
 
     public sealed class ItemRecord
     {
-        public uint Id;
+        public int Id;
         private byte _classID;
         private byte _subclassID;
         public byte Material;
@@ -413,7 +413,7 @@ namespace Game.DataStorage
     public sealed class ItemSparseRecord
     {
         public int Id;
-        private long _raceMask;
+        private long _allowableRace;
         public LocalizedString Description;
         public LocalizedString Display3;
         public LocalizedString Display2;
@@ -488,7 +488,7 @@ namespace Game.DataStorage
         public sbyte RequiredLevel;
 
         #region Properties
-        public RaceMask RaceMask => (RaceMask)_raceMask;
+        public RaceMask AllowableRace => (RaceMask)_allowableRace;
         public ClassMask AllowableClass => (ClassMask)_allowableClass;
         public ItemModType StatModifierBonusStat(int itemStatSlot) => (ItemModType)_statModifierBonusStat[itemStatSlot];
         public InventoryType InventoryType => (InventoryType)_inventoryType;

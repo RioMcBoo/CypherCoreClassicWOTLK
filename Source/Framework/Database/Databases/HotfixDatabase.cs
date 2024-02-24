@@ -209,13 +209,8 @@ namespace Framework.Database
                             " AND locale = ?");
 
             // CfgCategories.db2
-            PrepareStatement(HotfixStatements.SEL_CFG_CATEGORIES, "SELECT ID, Name, LocaleMask, CreateCharsetMask, ExistingCharsetMask, Flags, `Order`" +
-                            " FROM cfg_categories WHERE (`VerifiedBuild` > 0) = ?");
-            PrepareStatement(HotfixStatements.SEL_CFG_CATEGORIES_LOCALE, "SELECT ID, Name_lang FROM cfg_categories_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
-
-            // CfgCategories.db2
             PrepareStatement(HotfixStatements.SEL_CFG_CATEGORIES, "SELECT ID, Name, LocaleMask, CreateCharsetMask, ExistingCharsetMask, Flags, `Order`" +        
-                " FROM cfg_categories WHERE (`VerifiedBuild` > 0) = ?");
+                            " FROM cfg_categories WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_CFG_CATEGORIES_LOCALE, "SELECT ID, Name_lang FROM cfg_categories_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // CfgRegions.db2
@@ -1667,9 +1662,6 @@ namespace Framework.Database
 
         SEL_BROADCAST_TEXT,
         SEL_BROADCAST_TEXT_LOCALE,
-
-        SEL_CFG_CATEGORIES,
-        SEL_CFG_CATEGORIES_LOCALE,
 
         SEL_CFG_CATEGORIES,
         SEL_CFG_CATEGORIES_LOCALE,

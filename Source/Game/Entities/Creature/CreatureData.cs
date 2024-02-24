@@ -14,17 +14,17 @@ namespace Game.Entities
     public class CreatureTemplate
     {
         public int Entry;
-        public uint[] KillCredit = new uint[SharedConst.MaxCreatureKillCredit];
+        public int[] KillCredit = new int[SharedConst.MaxCreatureKillCredit];
         public List<CreatureModel> Models = new();
         public string Name;
         public string FemaleName;
         public string SubName;
         public string TitleAlt;
         public string IconName;
-        public List<uint> GossipMenuIds = new();
+        public List<int> GossipMenuIds = new();
         public Dictionary<Difficulty, CreatureDifficulty> difficultyStorage = new();
         public Expansion RequiredExpansion;
-        public uint VignetteID; // @todo Read Vignette.db2
+        public int VignetteID; // @todo Read Vignette.db2
         public int Faction;
         public NPCFlags Npcflag;
         public float SpeedWalk;
@@ -43,7 +43,7 @@ namespace Game.Entities
         public CreatureFamily Family;
         public Class TrainerClass;
         public CreatureType CreatureType;
-        public uint PetSpellDataId;
+        public int PetSpellDataId;
         public int[] Resistance = new int[(int)SpellSchools.Max];
         public int[] Spells = new int[SharedConst.MaxCreatureSpells];
         public int VehicleId;
@@ -53,14 +53,14 @@ namespace Game.Entities
         public float ModExperience;
         public bool Civilian;
         public bool RacialLeader;
-        public uint MovementId;
+        public int MovementId;
         public int WidgetSetID;
         public int WidgetSetUnitConditionID;
         public bool RegenHealth;
         public ulong MechanicImmuneMask;
-        public uint SpellSchoolImmuneMask;
+        public SpellSchoolMask SpellSchoolImmuneMask;
         public CreatureFlagsExtra FlagsExtra;
-        public uint ScriptID;
+        public int ScriptID;
         public string StringId;
 
         public QueryCreatureResponse[] QueryData = new QueryCreatureResponse[(int)Locale.Total];
@@ -96,7 +96,7 @@ namespace Game.Entities
             return null;
         }
 
-        public CreatureModel GetModelWithDisplayId(uint displayId)
+        public CreatureModel GetModelWithDisplayId(int displayId)
         {
             foreach (CreatureModel model in Models)
                 if (displayId == model.CreatureDisplayID)
@@ -167,9 +167,9 @@ namespace Game.Entities
             stats.Flags[0] = (uint)creatureDifficulty.TypeFlags;
             stats.Flags[1] = creatureDifficulty.TypeFlags2;
 
-            stats.CreatureType = (int)CreatureType;
-            stats.CreatureFamily = (int)Family;
-            stats.Classification = (int)Rank;
+            stats.CreatureType = CreatureType;
+            stats.CreatureFamily = Family;
+            stats.Classification = Rank;
             stats.PetSpellDataId = PetSpellDataId;
 
             for (uint i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
@@ -188,7 +188,7 @@ namespace Game.Entities
             stats.RequiredExpansion = RequiredExpansion;
             stats.HealthScalingExpansion = creatureDifficulty.HealthScalingExpansion;
             stats.VignetteID = VignetteID;
-            stats.Class = (int)UnitClass;
+            stats.Class = UnitClass;
             stats.CreatureDifficultyID = creatureDifficulty.CreatureDifficultyID;
             stats.WidgetSetID = WidgetSetID;
             stats.WidgetSetUnitConditionID = WidgetSetUnitConditionID;
@@ -197,10 +197,10 @@ namespace Game.Entities
             stats.TitleAlt = TitleAlt;
             stats.CursorName = IconName;
 
-            if (Global.ObjectMgr.GetCreatureQuestItemList(Entry, difficulty) is List<uint> items)
+            if (Global.ObjectMgr.GetCreatureQuestItemList(Entry, difficulty) is List<int> items)
                 stats.QuestItems.AddRange(items);
 
-            if (locale != Locale.enUS)
+            if (locale != Locale.Default)
             {
                 CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(Entry);
                 if (creatureLocale != null)
@@ -226,9 +226,9 @@ namespace Game.Entities
                 return creatureDifficulty;
 
             // If there is no data for the difficulty, try to get data for the fallback difficulty
-            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
             if (difficultyEntry != null)
-                return GetDifficulty((Difficulty)difficultyEntry.FallbackDifficultyID);
+                return GetDifficulty(difficultyEntry.FallbackDifficultyID);
 
             return new CreatureDifficulty();
         }
@@ -236,11 +236,37 @@ namespace Game.Entities
 
     public class CreatureBaseStats
     {
-        public uint[] BaseHealth = new uint[(int)Expansion.Max];
-        public uint BaseMana;
-        public uint BaseArmor;
-        public uint AttackPower;
-        public uint RangedAttackPower;
+        public int[] BaseHealth = new int[(int)Expansion.Current + 1];
+        public int BaseMana;
+        public int BaseArmor;
+        public int AttackPower;
+        public int RangedAttackPower;
+        public float[] BaseDamage = new float[(int)Expansion.Current + 1];
+
+        //Helpers
+        public int GenerateHealth(CreatureDifficulty  difficulty)
+        { 
+            return (int)Math.Ceiling(BaseHealth[difficulty.GetHealthScalingExpansion()] * difficulty.HealthModifier); 
+        }
+
+        public int GenerateMana(CreatureDifficulty difficulty)
+        {
+            // Mana can be 0.
+            if (BaseMana == 0)
+                return 0;
+
+            return (int)Math.Ceiling(BaseMana * difficulty.ManaModifier);
+        }
+
+        public int GenerateArmor(CreatureDifficulty difficulty)
+        { 
+            return (int)Math.Ceiling(BaseArmor * difficulty.ArmorModifier); 
+        }
+
+        public float GenerateBaseDamage(CreatureDifficulty difficulty) 
+        { 
+            return BaseDamage[difficulty.GetHealthScalingExpansion()]; 
+        }
     }
 
     public class CreatureLocale
@@ -265,12 +291,12 @@ namespace Game.Entities
 
     public class CreatureData : SpawnData
     {
-        public uint displayid;
+        public int displayid;
         public sbyte equipmentId;
         public float WanderDistance;
         public uint currentwaypoint;
-        public uint curhealth;
-        public uint curmana;
+        public int curhealth;
+        public int curmana;
         public MovementGeneratorType movementType;
         public NPCFlags? npcflag;
         public UnitFlags? unit_flags;
@@ -346,7 +372,7 @@ namespace Game.Entities
 
     public class CreatureSummonedData
     {
-        public uint? CreatureIDVisibleToSummoner;
+        public int? CreatureIDVisibleToSummoner;
         public int? GroundMountDisplayID;
         public int? FlyingMountDisplayID;
     }
@@ -364,29 +390,29 @@ namespace Game.Entities
         public ushort aiAnimKit;
         public ushort movementAnimKit;
         public ushort meleeAnimKit;
-        public List<uint> auras = new();
+        public List<int> auras = new();
         public VisibilityDistanceType visibilityDistanceType;
     }
 
     public class VendorItem
     {
         public VendorItem() { }
-        public VendorItem(uint _item, int _maxcount, uint _incrtime, uint _ExtendedCost, ItemVendorType _Type)
+        public VendorItem(int _item, int _maxcount, uint _incrtime, int _ExtendedCost, ItemVendorType _Type)
         {
             item = _item;
-            maxcount = (uint)_maxcount;
+            maxcount = _maxcount;
             incrtime = _incrtime;
             ExtendedCost = _ExtendedCost;
             Type = _Type;
         }
 
-        public uint item;
-        public uint maxcount;                                        // 0 for infinity item amount
+        public int item;
+        public int maxcount;                                        // 0 for infinity item amount
         public uint incrtime;                                        // time for restore items amount if maxcount != 0
-        public uint ExtendedCost;
+        public int ExtendedCost;
         public ItemVendorType Type;
         public List<int> BonusListIDs = new();
-        public uint PlayerConditionId;
+        public int PlayerConditionId;
         public bool IgnoreFiltering;
     }
 
@@ -413,7 +439,7 @@ namespace Game.Entities
         {
             m_items.Add(vItem);
         }
-        public bool RemoveItem(uint item_id, ItemVendorType type)
+        public bool RemoveItem(int item_id, ItemVendorType type)
         {
             int i = m_items.RemoveAll(p => p.item == item_id && p.Type == type);
             if (i == 0)
@@ -421,7 +447,7 @@ namespace Game.Entities
             else
                 return true;
         }
-        public VendorItem FindItemCostPair(uint item_id, uint extendedCost, ItemVendorType type)
+        public VendorItem FindItemCostPair(int item_id, int extendedCost, ItemVendorType type)
         {
             return m_items.Find(p => p.item == item_id && p.ExtendedCost == extendedCost && p.Type == type);
         }
@@ -452,6 +478,8 @@ namespace Game.Entities
 
         public CreatureDifficulty()
         {
+            MinLevel = 1;
+            MaxLevel = 1;
             HealthModifier = 1.0f;
             ManaModifier = 1.0f;
             ArmorModifier = 1.0f;

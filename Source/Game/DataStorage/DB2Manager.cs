@@ -808,7 +808,7 @@ namespace Game.DataStorage
             return _areaGroupMembers.LookupByKey(areaGroupId);
         }
 
-        public bool IsInArea(uint objectAreaId, uint areaId)
+        public bool IsInArea(int objectAreaId, int areaId)
         {
             do
             {
@@ -1584,9 +1584,9 @@ namespace Game.DataStorage
             return _mountDisplays.LookupByKey(mountId);
         }
 
-        public string GetNameGenEntry(uint race, uint gender)
+        public string GetNameGenEntry(Race race, Gender gender)
         {
-            Cypher.Assert(gender < (int)Gender.None);
+            Cypher.Assert(gender < Gender.None);
             var listNameGen = _nameGenData.LookupByKey(race);
             if (listNameGen == null)
                 return "";
@@ -1611,7 +1611,7 @@ namespace Game.DataStorage
             return ResponseCodes.CharNameSuccess;
         }
 
-        public uint GetNumTalentsAtLevel(uint level, Class playerClass)
+        public int GetNumTalentsAtLevel(int level, Class playerClass)
         {
             NumTalentsAtLevelRecord numTalentsAtLevel = NumTalentsAtLevelStorage.LookupByKey(level);
             if (numTalentsAtLevel == null)
@@ -1628,12 +1628,12 @@ namespace Game.DataStorage
             return 0;
         }
 
-        public ParagonReputationRecord GetParagonReputation(uint factionId)
+        public ParagonReputationRecord GetParagonReputation(int factionId)
         {
             return _paragonReputations.LookupByKey(factionId);
         }
 
-        public PvpDifficultyRecord GetBattlegroundBracketByLevel(uint mapid, uint level)
+        public PvpDifficultyRecord GetBattlegroundBracketByLevel(int mapid, uint level)
         {
             PvpDifficultyRecord maxEntry = null;              // used for level > max listed level case
             foreach (var entry in PvpDifficultyStorage.Values)
@@ -1654,7 +1654,7 @@ namespace Game.DataStorage
             return maxEntry;
         }
 
-        public PvpDifficultyRecord GetBattlegroundBracketById(uint mapid, BattlegroundBracketId id)
+        public PvpDifficultyRecord GetBattlegroundBracketById(int mapid, BattlegroundBracketId id)
         {
             foreach (var entry in PvpDifficultyStorage.Values)
                 if (entry.MapID == mapid && entry.BracketId() == id)
@@ -1663,7 +1663,7 @@ namespace Game.DataStorage
             return null;
         }
 
-        public uint GetRequiredLevelForPvpTalentSlot(byte slot, Class class_)
+        public int GetRequiredLevelForPvpTalentSlot(byte slot, Class class_)
         {
             Cypher.Assert(slot < PlayerConst.MaxPvpTalentSlots);
             if (_pvpTalentSlotUnlock[slot] != null)
@@ -1683,7 +1683,7 @@ namespace Game.DataStorage
             return 0;
         }
 
-        public int GetPvpTalentNumSlotsAtLevel(uint level, Class class_)
+        public int GetPvpTalentNumSlotsAtLevel(int level, Class class_)
         {
             int slots = 0;
             for (byte slot = 0; slot < PlayerConst.MaxPvpTalentSlots; ++slot)
@@ -1697,7 +1697,7 @@ namespace Game.DataStorage
             return _questsByQuestLine.LookupByKey(questLineId);
         }
 
-        public List<QuestPackageItemRecord> GetQuestPackageItems(uint questPackageID)
+        public List<QuestPackageItemRecord> GetQuestPackageItems(int questPackageID)
         {
             if (_questPackages.ContainsKey(questPackageID))
                 return _questPackages[questPackageID].Item1;
@@ -1705,12 +1705,12 @@ namespace Game.DataStorage
             return null;
         }
 
-        public List<QuestPackageItemRecord> GetQuestPackageItemsFallback(uint questPackageID)
+        public List<QuestPackageItemRecord> GetQuestPackageItemsFallback(int questPackageID)
         {
             return _questPackages.LookupByKey(questPackageID).Item2;
         }
 
-        public uint GetQuestUniqueBitFlag(uint questId)
+        public uint GetQuestUniqueBitFlag(int questId)
         {
             QuestV2Record v2 = QuestV2Storage.LookupByKey(questId);
             if (v2 == null)
@@ -1719,7 +1719,7 @@ namespace Game.DataStorage
             return v2.UniqueBitFlag;
         }
 
-        public List<uint> GetPhasesForGroup(uint group)
+        public List<int> GetPhasesForGroup(int group)
         {
             return _phasesByGroup.LookupByKey(group);
         }
@@ -1783,10 +1783,10 @@ namespace Game.DataStorage
             var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
             foreach (var skllRaceClassInfo in bounds)
             {
-                var raceMask = new RaceMask<long>(skllRaceClassInfo.RaceMask);
-                if (!raceMask.IsEmpty() && !raceMask.HasRace(race))
+                var raceMask = skllRaceClassInfo.RaceMask;
+                if (raceMask != RaceMask.None && !raceMask.HasRace(race))
                     continue;
-                if (skllRaceClassInfo.ClassMask != 0 && !Convert.ToBoolean(skllRaceClassInfo.ClassMask & (1 << ((byte)class_ - 1))))
+                if (skllRaceClassInfo.ClassMask != ClassMask.None && !skllRaceClassInfo.ClassMask.HasClass(class_))
                     continue;
 
                 return skllRaceClassInfo;
@@ -1795,7 +1795,7 @@ namespace Game.DataStorage
             return null;
         }
 
-        public List<SkillRaceClassInfoRecord> GetSkillRaceClassInfo(uint skill)
+        public List<SkillRaceClassInfoRecord> GetSkillRaceClassInfo(SkillType skill)
         {
             return _skillRaceClassInfoBySkill.LookupByKey(skill);
         }
@@ -2250,24 +2250,24 @@ namespace Game.DataStorage
         Dictionary<uint, ItemEffectRecord> _itemEffectsByItemId = new();
         List<JournalTierRecord> _journalTiersByIndex = new();
         Dictionary<int, Dictionary<Difficulty, MapDifficultyRecord>> _mapDifficulties = new();
-        MultiMap<uint, Tuple<uint, PlayerConditionRecord>> _mapDifficultyConditions = new();
-        Dictionary<uint, MountRecord> _mountsBySpellId = new();
-        MultiMap<uint, MountTypeXCapabilityRecord> _mountCapabilitiesByType = new();
-        MultiMap<uint, MountXDisplayRecord> _mountDisplays = new();
-        Dictionary<uint, List<NameGenRecord>[]> _nameGenData = new();
+        MultiMap<int, Tuple<uint, PlayerConditionRecord>> _mapDifficultyConditions = new();
+        Dictionary<int, MountRecord> _mountsBySpellId = new();
+        MultiMap<int, MountTypeXCapabilityRecord> _mountCapabilitiesByType = new();
+        MultiMap<int, MountXDisplayRecord> _mountDisplays = new();
+        Dictionary<int, List<NameGenRecord>[]> _nameGenData = new();
         List<string>[] _nameValidators = new List<string>[(int)Locale.Total + 1];
         Dictionary<uint, ParagonReputationRecord> _paragonReputations = new();
-        MultiMap<uint, uint> _phasesByGroup = new();
+        MultiMap<int, int> _phasesByGroup = new();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new();
         Dictionary<uint, byte> _pvpItemBonus = new();
         PvpTalentSlotUnlockRecord[] _pvpTalentSlotUnlock = new PvpTalentSlotUnlockRecord[PlayerConst.MaxPvpTalentSlots];
         MultiMap<uint, QuestLineXQuestRecord> _questsByQuestLine = new();
-        Dictionary<uint, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>> _questPackages = new();
+        Dictionary<int, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>> _questPackages = new();
         MultiMap<uint, RewardPackXCurrencyTypeRecord> _rewardPackCurrencyTypes = new();
         MultiMap<uint, RewardPackXItemRecord> _rewardPackItems = new();
-        MultiMap<uint, SkillLineRecord> _skillLinesByParentSkillLine = new();
-        MultiMap<uint, SkillLineAbilityRecord> _skillLineAbilitiesBySkillupSkill = new();
-        MultiMap<uint, SkillRaceClassInfoRecord> _skillRaceClassInfoBySkill = new();
+        MultiMap<SkillType, SkillLineRecord> _skillLinesByParentSkillLine = new();
+        MultiMap<SkillType, SkillLineAbilityRecord> _skillLineAbilitiesBySkillupSkill = new();
+        MultiMap<SkillType, SkillRaceClassInfoRecord> _skillRaceClassInfoBySkill = new();
         MultiMap<uint, SpecializationSpellsRecord> _specializationSpellsBySpec = new();
         List<Tuple<int, uint>> _specsBySpecSet = new();
         List<byte> _spellFamilyNames = new();

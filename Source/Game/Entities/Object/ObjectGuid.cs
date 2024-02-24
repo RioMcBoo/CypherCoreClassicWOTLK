@@ -22,7 +22,7 @@ namespace Game.Entities
             _high = high;
         }
 
-        public static ObjectGuid Create(HighGuid type, ulong dbId)
+        public static ObjectGuid Create(HighGuid type, long dbId)
         {
             switch (type)
             {
@@ -128,7 +128,7 @@ namespace Game.Entities
             return ObjectGuidFactory.CreateClubFinder(0, clubType, clubFinderId, counter);
         }
 
-        public static ObjectGuid Create(HighGuid type, int mapId, uint entry, ulong counter)
+        public static ObjectGuid Create(HighGuid type, int mapId, int entry, long counter)
         {
             switch (type)
             {
@@ -478,12 +478,12 @@ namespace Game.Entities
 
         public static ObjectGuid CreateUniq(ulong id)
         {
-            return new ObjectGuid((ulong)((ulong)HighGuid.Uniq << 58), id);
+            return new ObjectGuid(((long)HighGuid.Uniq << 58), id);
         }
 
         public static ObjectGuid CreatePlayer(uint realmId, ulong dbId)
         {
-            return new ObjectGuid((ulong)(((ulong)HighGuid.Player << 58) | ((ulong)(GetRealmIdForObjectGuid(realmId)) << 42)), dbId);
+            return new ObjectGuid((ulong)(((long)HighGuid.Player << 58) | ((ulong)(GetRealmIdForObjectGuid(realmId)) << 42)), dbId);
         }
 
         public static ObjectGuid CreateItem(uint realmId, ulong dbId)
@@ -551,7 +551,7 @@ namespace Game.Entities
             return new ObjectGuid((ulong)(((ulong)HighGuid.ClubFinder << 58) | (type == 1 ? ((ulong)(GetRealmIdForObjectGuid(realmId) & 0x1FFF) << 42) : 0ul) | ((ulong)(type & 0xFF) << 33) | ((ulong)(clubFinderId & 0xFFFFFFFF))), dbId);
         }
 
-        public static ObjectGuid CreateToolsClient(uint mapId, uint serverId, ulong counter)
+        public static ObjectGuid CreateToolsClient(int mapId, int serverId, long counter)
         {
             return new ObjectGuid((ulong)(((ulong)HighGuid.ToolsClient << 58) | (ulong)mapId), (ulong)(((ulong)(serverId & 0xFFFFFF) << 40) | (counter & 0xFFFFFFFFFF)));
         }

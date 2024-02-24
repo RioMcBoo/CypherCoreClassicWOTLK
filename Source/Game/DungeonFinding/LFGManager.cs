@@ -148,7 +148,7 @@ namespace Game.DungeonFinding
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} lfg dungeon rewards in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        LFGDungeonData GetLFGDungeon(uint id)
+        LFGDungeonData GetLFGDungeon(int id)
         {
             return LfgDungeonStore.LookupByKey(id);
         }
@@ -162,7 +162,7 @@ namespace Game.DungeonFinding
             // Initialize Dungeon map with data from dbcs
             foreach (var dungeon in CliDB.LFGDungeonsStorage.Values)
             {
-                if (Global.DB2Mgr.GetMapDifficultyData((uint)dungeon.MapID, dungeon.DifficultyID) == null)
+                if (Global.DB2Mgr.GetMapDifficultyData(dungeon.MapID, dungeon.DifficultyID) == null)
                     continue;
 
                 switch (dungeon.TypeID)
@@ -2059,7 +2059,7 @@ namespace Game.DungeonFinding
             return false;
         }
 
-        public uint GetLFGDungeonEntry(uint id)
+        public int GetLFGDungeonEntry(int id)
         {
             if (id != 0)
             {
@@ -2071,9 +2071,9 @@ namespace Game.DungeonFinding
             return 0;
         }
 
-        public List<uint> GetRandomAndSeasonalDungeons(uint level, uint expansion, uint contentTuningReplacementConditionMask)
+        public List<int> GetRandomAndSeasonalDungeons(int level, Expansion expansion, uint contentTuningReplacementConditionMask)
         {
-            List<uint> randomDungeons = new();
+            List<int> randomDungeons = new();
             foreach (var dungeon in LfgDungeonStore.Values)
             {
                 if (!(dungeon.type == LfgType.Random || (dungeon.seasonal && Global.LFGMgr.IsSeasonActive(dungeon.id))))
@@ -2098,11 +2098,11 @@ namespace Game.DungeonFinding
         Dictionary<byte, LFGQueue> QueuesStore = new();                     //< Queues
         MultiMap<byte, uint> CachedDungeonMapStore = new(); //< Stores all dungeons by groupType
         // Reward System
-        MultiMap<uint, LfgReward> RewardMapStore = new();                    //< Stores rewards for random dungeons
-        Dictionary<uint, LFGDungeonData> LfgDungeonStore = new();
+        MultiMap<int, LfgReward> RewardMapStore = new();                    //< Stores rewards for random dungeons
+        Dictionary<int, LFGDungeonData> LfgDungeonStore = new();
         // Rolecheck - Proposal - Vote Kicks
         Dictionary<ObjectGuid, LfgRoleCheck> RoleChecksStore = new();       //< Current Role checks
-        Dictionary<uint, LfgProposal> ProposalsStore = new();            //< Current Proposals
+        Dictionary<int, LfgProposal> ProposalsStore = new();            //< Current Proposals
         Dictionary<ObjectGuid, LfgPlayerBoot> BootsStore = new();          //< Current player kicks
         Dictionary<ObjectGuid, LFGPlayerData> PlayersStore = new();        //< Player data
         Dictionary<ObjectGuid, LFGGroupData> GroupsStore = new();           //< Group data
@@ -2288,7 +2288,7 @@ namespace Game.DungeonFinding
         public string name;
         public uint map;
         public LfgType type;
-        public uint expansion;
+        public Expansion expansion;
         public uint group;
         public byte minlevel;
         public byte maxlevel;

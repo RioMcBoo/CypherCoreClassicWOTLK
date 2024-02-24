@@ -571,7 +571,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetDungeonDifficulty)]
         void HandleSetDungeonDifficulty(SetDungeonDifficulty setDungeonDifficulty)
         {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(setDungeonDifficulty.DifficultyID);
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)setDungeonDifficulty.DifficultyID);
             if (difficultyEntry == null)
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent an invalid instance mode {1}!",

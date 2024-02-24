@@ -109,7 +109,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
             _worldPacket.WriteBit(Allow);
             _worldPacket.FlushBits();
 
@@ -250,7 +250,7 @@ namespace Game.Networking.Packets
 
         public bool Allow;
         public QuestInfo Info = new();
-        public uint QuestID;
+        public int QuestID;
     }
 
     public class QuestUpdateAddCredit : ServerPacket
@@ -946,25 +946,11 @@ namespace Game.Networking.Packets
         public int DisplayID;
     }
 
-    public struct QuestCompleteDisplaySpell
-    {
-        public uint SpellID;
-        public uint PlayerConditionID;
-        public int Type;
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteUInt32(SpellID);
-            data.WriteUInt32(PlayerConditionID);
-            data.WriteInt32(Type);
-        }
-    }
-
     public class ConditionalQuestText
     {
         public int PlayerConditionID;
         public int QuestGiverCreatureID;
-        public string Text = "";
+        public string Text = string.Empty;
 
         public ConditionalQuestText(int playerConditionID, int questGiverCreatureID, string text)
         {
@@ -1000,7 +986,7 @@ namespace Game.Networking.Packets
         }
 
         public int QuestID;
-        public int QuestType; // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
+        public QuestType QuestType; // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
         public int QuestLevel; // may be -1, static data, in other cases must be used dynamic level: Player::GetQuestLevel (0 is not known, but assuming this is no longer valid for quest intended for client)
         public int QuestScalingFactionGroup;
         public int QuestMaxScalingLevel = 255;
@@ -1024,9 +1010,9 @@ namespace Game.Networking.Packets
         public float RewardArtifactXPMultiplier;
         public int RewardArtifactCategoryID;
         public int StartItem;
-        public uint Flags;
-        public uint FlagsEx;
-        public uint FlagsEx2;
+        public QuestFlags Flags;
+        public QuestFlagsEx FlagsEx;
+        public QuestFlagsEx2 FlagsEx2;
         public int POIContinent;
         public float POIx;
         public float POIy;
@@ -1069,8 +1055,8 @@ namespace Game.Networking.Packets
         public int[] RewardFactionValue = new int[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionOverride = new int[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionCapIn = new int[SharedConst.QuestRewardReputationsCount];
-        public uint[] RewardCurrencyID = new uint[SharedConst.QuestRewardCurrencyCount];
-        public uint[] RewardCurrencyQty = new uint[SharedConst.QuestRewardCurrencyCount];
+        public int[] RewardCurrencyID = new int[SharedConst.QuestRewardCurrencyCount];
+        public int[] RewardCurrencyQty = new int[SharedConst.QuestRewardCurrencyCount];
     }
 
     public struct QuestChoiceItem

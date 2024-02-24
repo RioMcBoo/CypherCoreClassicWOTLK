@@ -468,11 +468,11 @@ namespace Game
             return true;
         }
 
-        public uint MoneyValue(Player player)
+        public int MoneyValue(Player player)
         {
             QuestMoneyRewardRecord money = CliDB.QuestMoneyRewardStorage.LookupByKey(player.GetQuestLevel(this));
             if (money != null)
-                return (uint)(money.Difficulty[RewardMoneyDifficulty] * RewardMoneyMultiplier);
+                return (int)(money.Difficulty[RewardMoneyDifficulty] * RewardMoneyMultiplier);
             else
                 return 0;
         }
@@ -490,9 +490,9 @@ namespace Game
             return 0;
         }
 
-        public uint GetMaxMoneyReward()
+        public int GetMaxMoneyReward()
         {
-            return (uint)(MaxMoneyValue() * WorldConfig.GetFloatValue(WorldCfg.RateMoneyQuest));
+            return (int)(MaxMoneyValue() * WorldConfig.GetFloatValue(WorldCfg.RateMoneyQuest));
         }
 
         public QuestTagType? GetQuestTag()
@@ -654,20 +654,6 @@ namespace Game
             response.Info.PortraitTurnInText = PortraitTurnInText;
             response.Info.PortraitTurnInName = PortraitTurnInName;
 
-            response.Info.ConditionalQuestDescription = ConditionalQuestDescription.Select(text =>
-            {
-                string content = text.Text[(int)Locale.enUS];
-                ObjectManager.GetLocaleString(text.Text, loc, ref content);
-                return new ConditionalQuestText(text.PlayerConditionId, text.QuestgiverCreatureId, content);
-            }).ToList();
-
-            response.Info.ConditionalQuestCompletionLog = ConditionalQuestCompletionLog.Select(text =>
-            {
-                string content = text.Text[(int)Locale.enUS];
-                ObjectManager.GetLocaleString(text.Text, loc, ref content);
-                return new ConditionalQuestText(text.PlayerConditionId, text.QuestgiverCreatureId, content);
-            }).ToList();
-
             if (loc != Locale.enUS)
             {
                 var questTemplateLocale = Global.ObjectMgr.GetQuestLocale(Id);
@@ -686,7 +672,7 @@ namespace Game
             }
 
             response.Info.QuestID = Id;
-            response.Info.QuestType = (int)Type;
+            response.Info.QuestType = Type;
             response.Info.QuestLevel = Level;
             response.Info.QuestScalingFactionGroup = ScalingFactionGroup;
             response.Info.QuestMaxScalingLevel = MaxScalingLevel;
@@ -700,33 +686,26 @@ namespace Game
             response.Info.RewardXPMultiplier = RewardXPMultiplier;
 
             if (!HasAnyFlag(QuestFlags.HideReward))
-                response.Info.RewardMoney = (int)(player != null ? player.GetQuestMoneyReward(this) : GetMaxMoneyReward());
+                response.Info.RewardMoney = player != null ? player.GetQuestMoneyReward(this) : GetMaxMoneyReward();
 
             response.Info.RewardMoneyDifficulty = RewardMoneyDifficulty;
             response.Info.RewardMoneyMultiplier = RewardMoneyMultiplier;
             response.Info.RewardBonusMoney = RewardBonusMoney;
-            foreach (QuestRewardDisplaySpell displaySpell in RewardDisplaySpell)
-            {
-                QuestCompleteDisplaySpell rewardDisplaySpell = new();
-                rewardDisplaySpell.SpellID = displaySpell.SpellId;
-                rewardDisplaySpell.PlayerConditionID = displaySpell.PlayerConditionId;
-                rewardDisplaySpell.Type = (int)displaySpell.Type;
-                response.Info.RewardDisplaySpell.Add(rewardDisplaySpell);
-            }
+            response.Info.RewardDisplaySpell = RewardDisplaySpell;
 
             response.Info.RewardSpell = RewardSpell;
 
             response.Info.RewardHonor = RewardHonor;
             response.Info.RewardKillHonor = RewardKillHonor;
 
-            response.Info.RewardArtifactXPDifficulty = (int)RewardArtifactXPDifficulty;
+            response.Info.RewardArtifactXPDifficulty = RewardArtifactXPDifficulty;
             response.Info.RewardArtifactXPMultiplier = RewardArtifactXPMultiplier;
-            response.Info.RewardArtifactCategoryID = (int)RewardArtifactCategoryID;
+            response.Info.RewardArtifactCategoryID = RewardArtifactCategoryID;
 
             response.Info.StartItem = SourceItemId;
-            response.Info.Flags = (uint)Flags;
-            response.Info.FlagsEx = (uint)FlagsEx;
-            response.Info.FlagsEx2 = (uint)FlagsEx2;
+            response.Info.Flags = Flags;
+            response.Info.FlagsEx = FlagsEx;
+            response.Info.FlagsEx2 = FlagsEx2;
             response.Info.RewardTitle = RewardTitleId;
             response.Info.RewardArenaPoints = RewardArenaPoints;
             response.Info.RewardSkillLineID = RewardSkillId;
@@ -739,8 +718,8 @@ namespace Game
 
             for (byte i = 0; i < SharedConst.QuestItemDropCount; ++i)
             {
-                response.Info.ItemDrop[i] = (int)ItemDrop[i];
-                response.Info.ItemDropQuantity[i] = (int)ItemDropQuantity[i];
+                response.Info.ItemDrop[i] = ItemDrop[i];
+                response.Info.ItemDropQuantity[i] = ItemDropQuantity[i];
             }
 
             if (!HasAnyFlag(QuestFlags.HideReward))
@@ -861,58 +840,58 @@ namespace Game
     #region Fields
         public int Id;
         public QuestType Type;
-        public uint PackageID;
+        public int PackageID;
         public uint ContentTuningId;
         public int QuestSortID;
         public int QuestInfoID;
-        public uint SuggestedPlayers;
+        public int SuggestedPlayers;
         public int NextQuestInChain { get; set; }
-        public uint RewardXPDifficulty;
+        public int RewardXPDifficulty;
         public float RewardXPMultiplier;
-        public uint RewardMoneyDifficulty;
+        public int RewardMoneyDifficulty;
         public float RewardMoneyMultiplier;
-        public uint RewardBonusMoney;
+        public int RewardBonusMoney;
         public int[] RewardDisplaySpell = new int[SharedConst.QuestRewardDisplaySpellCount];
         public int RewardSpell { get; set; }
-        public uint RewardHonor;
-        public uint RewardKillHonor;
-        public uint RewardArtifactXPDifficulty;
+        public int RewardHonor;
+        public int RewardKillHonor;
+        public int RewardArtifactXPDifficulty;
         public float RewardArtifactXPMultiplier;
-        public uint RewardArtifactCategoryID;
+        public int RewardArtifactCategoryID;
         public int SourceItemId { get; set; }
         public QuestFlags Flags { get; set; }
         public QuestFlagsEx FlagsEx;
         public QuestFlagsEx2 FlagsEx2;
         public int[] RewardItemId = new int[SharedConst.QuestRewardItemCount];
-        public int[] RewardItemCount = new uint[SharedConst.QuestRewardItemCount];
+        public int[] RewardItemCount = new int[SharedConst.QuestRewardItemCount];
         public int[] ItemDrop = new int[SharedConst.QuestItemDropCount];
-        public uint[] ItemDropQuantity = new uint[SharedConst.QuestItemDropCount];
+        public int[] ItemDropQuantity = new int[SharedConst.QuestItemDropCount];
         public LootItemType[] RewardChoiceItemType = new LootItemType[SharedConst.QuestRewardChoicesCount];
         public int[] RewardChoiceItemId = new int[SharedConst.QuestRewardChoicesCount];
-        public int[] RewardChoiceItemCount = new uint[SharedConst.QuestRewardChoicesCount];
+        public int[] RewardChoiceItemCount = new int[SharedConst.QuestRewardChoicesCount];
         public uint[] RewardChoiceItemDisplayId = new uint[SharedConst.QuestRewardChoicesCount];
-        public uint POIContinent;
+        public int POIContinent;
         public float POIx;
         public float POIy;
-        public uint POIPriority;
+        public int POIPriority;
         public int RewardTitleId { get; set; }
         public int RewardArenaPoints;
         public int RewardSkillId;
         public int RewardSkillPoints;
-        public uint QuestGiverPortrait;
-        public uint QuestGiverPortraitMount;
+        public int QuestGiverPortrait;
+        public int QuestGiverPortraitMount;
         public int QuestGiverPortraitModelSceneId;
-        public uint QuestTurnInPortrait;
+        public int QuestTurnInPortrait;
         public int[] RewardFactionId = new int[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionValue = new int[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionOverride = new int[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionCapIn = new int[SharedConst.QuestRewardReputationsCount];
-        public uint RewardReputationMask;
+        public int RewardReputationMask;
         public int[] RewardCurrencyId = new int[SharedConst.QuestRewardCurrencyCount];
-        public int[] RewardCurrencyCount = new uint[SharedConst.QuestRewardCurrencyCount];
+        public int[] RewardCurrencyCount = new int[SharedConst.QuestRewardCurrencyCount];
         public int SoundAccept { get; set; }
         public int SoundTurnIn { get; set; }
-        public uint AreaGroupID;
+        public int AreaGroupID;
         public long LimitTime;
         public RaceMask AllowableRaces { get; set; }
         public int TreasurePickerID;

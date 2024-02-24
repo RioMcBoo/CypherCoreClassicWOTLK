@@ -130,8 +130,8 @@ namespace Game.DataStorage
         public ushort ContinentID;
         private int _flags;
         public uint Delay;
-        public uint ArrivalEventID;
-        public uint DepartureEventID;
+        public int ArrivalEventID;
+        public int DepartureEventID;
 
         #region Properties
         public TaxiNodeFlags Flags => (TaxiNodeFlags)_flags;

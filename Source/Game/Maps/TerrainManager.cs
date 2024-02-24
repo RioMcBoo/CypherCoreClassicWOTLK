@@ -17,11 +17,11 @@ namespace Game.Maps
         Dictionary<int, TerrainInfo> _terrainMaps = new();
 
         // parent map links
-        MultiMap<uint, uint> _parentMapData = new();
+        MultiMap<int, int> _parentMapData = new();
 
         TerrainManager() { }
 
-        public void InitializeParentMapData(MultiMap<uint, uint> mapData)
+        public void InitializeParentMapData(MultiMap<int, int> mapData)
         {
             _parentMapData = mapData;
         }
@@ -89,11 +89,11 @@ namespace Game.Maps
             return 0;
         }
 
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, int mapid, Position pos) { GetZoneAndAreaId(phaseShift, out zoneid, out areaid, mapid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()); }
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out int zoneid, out int areaid, int mapid, Position pos) { GetZoneAndAreaId(phaseShift, out zoneid, out areaid, mapid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()); }
 
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, WorldLocation loc) { GetZoneAndAreaId(phaseShift, out zoneid, out areaid, loc.GetMapId(), loc); }
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out int zoneid, out int areaid, WorldLocation loc) { GetZoneAndAreaId(phaseShift, out zoneid, out areaid, loc.GetMapId(), loc); }
 
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, int mapid, float x, float y, float z)
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out int zoneid, out int areaid, int mapid, float x, float y, float z)
         {
             zoneid = areaid = 0;
 
@@ -102,19 +102,19 @@ namespace Game.Maps
                 terrain.GetZoneAndAreaId(phaseShift, mapid, out zoneid, out areaid, x, y, z);
         }
 
-        TerrainInfo LoadTerrainImpl(uint mapId)
+        TerrainInfo LoadTerrainImpl(int mapId)
         {
             TerrainInfo rootTerrain = new TerrainInfo(mapId);
 
             rootTerrain.DiscoverGridMapFiles();
 
-            foreach (uint childMapId in _parentMapData[mapId])
+            foreach (int childMapId in _parentMapData[mapId])
                 rootTerrain.AddChildTerrain(LoadTerrainImpl(childMapId));
 
             return rootTerrain;
         }
 
-        public static bool ExistMapAndVMap(uint mapid, float x, float y)
+        public static bool ExistMapAndVMap(int mapid, float x, float y)
         {
             GridCoord p = GridDefines.ComputeGridCoord(x, y);
 

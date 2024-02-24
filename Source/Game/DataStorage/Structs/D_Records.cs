@@ -36,7 +36,7 @@ namespace Game.DataStorage
 
     public sealed class DifficultyRecord
     {
-        public uint Id;
+        private int _id;
         public LocalizedString Name;
         private byte _instanceType;
         public byte OrderIndex;
@@ -52,6 +52,7 @@ namespace Game.DataStorage
         public ushort GroupSizeSpellPointsCurveID;
 
         #region Properties
+        public Difficulty Id => (Difficulty)_id;
         public MapTypes InstanceType => (MapTypes)_instanceType;
         public Difficulty FallbackDifficultyID => (Difficulty)_fallbackDifficultyID;
         public DifficultyFlags Flags => (DifficultyFlags)_flags;
@@ -74,12 +75,17 @@ namespace Game.DataStorage
     {
         public LocalizedString Name;
         public uint Id;
-        public short MapID;
-        public int DifficultyID;
+        private short _mapID;
+        private int _difficultyID;
         public int OrderIndex;
         public sbyte Bit;
         public int Flags;
         public int Faction;
+
+        #region Properties
+        public int MapID => _mapID;
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        #endregion
     }
 
     public sealed class DurabilityCostsRecord

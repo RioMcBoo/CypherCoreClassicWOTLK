@@ -12,10 +12,7 @@ namespace Game.Entities
 {
     class ItemBonusMgr
     {
-        static MultiMap<uint /*azeriteUnlockMappingSetId*/, AzeriteUnlockMappingRecord> _azeriteUnlockMappings = new();
-        static MultiMap<uint /*itemBonusTreeId*/, ChallengeModeItemBonusOverrideRecord> _challengeModeItemBonusOverrides = new();
-        static MultiMap<uint /*itemBonusListId*/, ItemBonusRecord> _itemBonusLists = new();
-        static MultiMap<int, ItemBonusListGroupEntryRecord> _itemBonusListGroupEntries = new();
+        static MultiMap<int /*itemBonusListId*/, ItemBonusRecord> _itemBonusLists = new();
         static Dictionary<short /*itemLevelDelta*/, uint /*itemBonusListId*/> _itemLevelDeltaToBonusListContainer = new();
         static SortedMultiMap<uint /*itemLevelSelectorQualitySetId*/, ItemLevelSelectorQualityRecord> _itemLevelQualitySelectorQualities = new();
         static MultiMap<uint /*itemBonusTreeId*/, ItemBonusTreeNodeRecord> _itemBonusTrees = new();
@@ -23,17 +20,8 @@ namespace Game.Entities
 
         public static void Load()
         {
-            foreach (var azeriteUnlockMapping in CliDB.AzeriteUnlockMappingStorage.Values)
-                _azeriteUnlockMappings.Add(azeriteUnlockMapping.AzeriteUnlockMappingSetID, azeriteUnlockMapping);
-
-            foreach (var challengeModeItemBonusOverride in CliDB.ChallengeModeItemBonusOverrideStorage.Values)
-                _challengeModeItemBonusOverrides.Add(challengeModeItemBonusOverride.SrcItemBonusTreeID, challengeModeItemBonusOverride);
-
             foreach (var bonus in CliDB.ItemBonusStorage.Values)
                 _itemBonusLists.Add(bonus.ParentItemBonusListID, bonus);
-
-            foreach (var bonusListGroupEntry in CliDB.ItemBonusListGroupEntryStorage.Values)
-                _itemBonusListGroupEntries.Add(bonusListGroupEntry.ItemBonusListGroupID, bonusListGroupEntry);
 
             foreach (var itemBonusListLevelDelta in CliDB.ItemBonusListLevelDeltaStorage.Values)
                 _itemLevelDeltaToBonusListContainer[itemBonusListLevelDelta.ItemLevelDelta] = itemBonusListLevelDelta.Id;
@@ -60,7 +48,7 @@ namespace Game.Entities
             }
 
             ItemContext context = ItemContext.None;
-            var difficulty = CliDB.DifficultyStorage.LookupByKey(mapDifficulty.DifficultyID);
+            var difficulty = CliDB.DifficultyStorage.LookupByKey((int)mapDifficulty.DifficultyID);
             if (difficulty != null)
                 context = evalContext(context, (ItemContext)difficulty.ItemContext);
 
@@ -107,7 +95,7 @@ namespace Game.Entities
             return context;
         }
 
-        public static List<ItemBonusRecord> GetItemBonuses(uint bonusListId)
+        public static List<ItemBonusRecord> GetItemBonuses(int bonusListId)
         {
             return _itemBonusLists.LookupByKey(bonusListId);
         }

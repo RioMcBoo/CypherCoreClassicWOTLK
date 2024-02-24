@@ -728,7 +728,7 @@ namespace Game.Networking.Packets
 
     public class PlayMusic : ServerPacket
     {
-        public PlayMusic(uint soundKitID) : base(ServerOpcodes.PlayMusic)
+        public PlayMusic(int soundKitID) : base(ServerOpcodes.PlayMusic)
         {
             SoundKitID = soundKitID;
         }
@@ -738,7 +738,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SoundKitID);
         }
 
-        uint SoundKitID;
+        int SoundKitID;
     }
 
     public class RandomRollClient : ClientPacket

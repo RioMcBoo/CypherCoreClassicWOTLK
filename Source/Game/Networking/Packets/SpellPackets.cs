@@ -1322,35 +1322,9 @@ namespace Game.Networking.Packets
 
         public bool GenerateDataForUnits(Unit attacker, Unit target)
         {
-            Player playerAttacker = attacker.ToPlayer();
-            Creature creatureAttacker = attacker.ToCreature();
-            if (playerAttacker != null)
-            {
-                Player playerTarget = target.ToPlayer();
-                Creature creatureTarget = target.ToCreature();
-                if (playerTarget != null)
+            if (attacker.ToPlayer() is Player playerAttacker)
+                if (target.ToPlayer() is Player playerTarget)
                     return GenerateDataPlayerToPlayer(playerAttacker, playerTarget);
-                else if (creatureTarget != null)
-                {
-                    if (creatureTarget.HasScalableLevels())
-                        return GenerateDataPlayerToCreature(playerAttacker, creatureTarget);
-                }
-            }
-            else if (creatureAttacker != null)
-            {
-                Player playerTarget = target.ToPlayer();
-                Creature creatureTarget = target.ToCreature();
-                if (playerTarget != null)
-                {
-                    if (creatureAttacker.HasScalableLevels())
-                        return GenerateDataCreatureToPlayer(creatureAttacker, playerTarget);
-                }
-                else if (creatureTarget != null)
-                {
-                    if (creatureAttacker.HasScalableLevels() || creatureTarget.HasScalableLevels())
-                        return GenerateDataCreatureToCreature(creatureAttacker, creatureTarget);
-                }
-            }
 
             return false;
         }

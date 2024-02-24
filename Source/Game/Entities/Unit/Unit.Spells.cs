@@ -3167,7 +3167,7 @@ namespace Game.Entities
             }
         }
         // All aura base removes should go through this function!
-        public void RemoveOwnedAura(KeyValuePair<uint, Aura> keyValuePair, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        public void RemoveOwnedAura(KeyValuePair<int, Aura> keyValuePair, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             Aura aura = keyValuePair.Value;
 
@@ -3182,7 +3182,8 @@ namespace Game.Entities
 
             aura._Remove(removeMode);
         }
-        public void RemoveOwnedAura(uint spellId, ObjectGuid casterGUID = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+
+        public void RemoveOwnedAura(int spellId, ObjectGuid casterGUID = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             foreach (var pair in GetOwnedAuras())
             {
@@ -3193,6 +3194,7 @@ namespace Game.Entities
                     RemoveOwnedAura(pair, removeMode);
             }
         }
+
         public void RemoveOwnedAura(Aura auraToRemove, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             if (auraToRemove.IsRemoved())

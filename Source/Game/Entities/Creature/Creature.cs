@@ -210,7 +210,7 @@ namespace Game.Entities
             }
         }
 
-        public bool InitEntry(uint entry, CreatureData data = null)
+        public bool InitEntry(int entry, CreatureData data = null)
         {
             CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (creatureInfo == null)
@@ -1447,12 +1447,12 @@ namespace Game.Entities
         public void SelectLevel()
         {
             // Level
-            ApplyLevelScaling();
-            int levelWithDelta = m_unitData.ScalingLevelMax + m_unitData.ScalingLevelDelta;
-            byte level = (byte)MathFunctions.RoundToInterval(ref levelWithDelta, 1, SharedConst.StrongMaxLevel);
-            SetLevel(level);
-
-            UpdateLevelDependantStats();
+            // Level
+            CreatureDifficulty difficulty = GetCreatureDifficulty();
+            if (difficulty.MinLevel != difficulty.MaxLevel)
+                SetLevel(RandomHelper.IRand(difficulty.MinLevel, difficulty.MaxLevel));
+            else
+                SetLevel(difficulty.MinLevel);
         }
 
         void UpdateLevelDependantStats()
@@ -1465,8 +1465,8 @@ namespace Game.Entities
             // health
             float healthmod = GetHealthMod(rank);
 
-            uint basehp = (uint)GetMaxHealthByLevel(level);
-            uint health = (uint)(basehp * healthmod);
+            int basehp = (uint)GetMaxHealthByLevel(level);
+            int health = (uint)(basehp * healthmod);
 
             SetCreateHealth(health);
             SetMaxHealth(health);
@@ -2713,88 +2713,9 @@ namespace Game.Entities
                 m_corpseRemoveTime = now + (uint)(m_corpseDelay * decayRate);
 
             m_respawnTime = Math.Max(m_corpseRemoveTime + m_respawnDelay, m_respawnTime);
-        }
+        }        
 
-        public bool HasScalableLevels()
-        {
-            return m_unitData.ContentTuningID != 0;
-        }
-
-        public void ApplyLevelScaling()
-        {
-            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            var levels = Global.DB2Mgr.GetContentTuningData(creatureDifficulty.ContentTuningID, 0);
-            if (levels.HasValue)
-            {
-                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), levels.Value.MinLevel);
-                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), levels.Value.MaxLevel);
-            }
-
-            int mindelta = Math.Min(creatureDifficulty.MaxLevel, creatureDifficulty.MinLevel);
-            int maxdelta = Math.Max(creatureDifficulty.MaxLevel, creatureDifficulty.MinLevel);
-            int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), delta);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ContentTuningID), creatureDifficulty.ContentTuningID);
-        }
-
-        ulong GetMaxHealthByLevel(uint level)
-        {
-            CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
-
-            return (ulong)Math.Max(baseHealth * creatureDifficulty.HealthModifier, 1.0f);
-        }
-
-        public override float GetHealthMultiplierForTarget(WorldObject target)
-        {
-            if (!HasScalableLevels())
-                return 1.0f;
-
-            uint levelForTarget = GetLevelForTarget(target);
-            if (GetLevel() < levelForTarget)
-                return 1.0f;
-
-            return (float)GetMaxHealthByLevel(levelForTarget) / GetCreateHealth();
-        }
-
-        public float GetBaseDamageForLevel(uint level)
-        {
-            CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
-        }
-
-        public override float GetDamageMultiplierForTarget(WorldObject target)
-        {
-            if (!HasScalableLevels())
-                return 1.0f;
-
-            uint levelForTarget = GetLevelForTarget(target);
-
-            return GetBaseDamageForLevel(levelForTarget) / GetBaseDamageForLevel(GetLevel());
-        }
-
-        float GetBaseArmorForLevel(uint level)
-        {
-            CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
-            return baseArmor * creatureDifficulty.ArmorModifier;
-        }
-
-        public override float GetArmorMultiplierForTarget(WorldObject target)
-        {
-            if (!HasScalableLevels())
-                return 1.0f;
-
-            uint levelForTarget = GetLevelForTarget(target);
-
-            return GetBaseArmorForLevel(levelForTarget) / GetBaseArmorForLevel(GetLevel());
-        }
-
-        public override uint GetLevelForTarget(WorldObject target)
+        public override int GetLevelForTarget(WorldObject target)
         {
             Unit unitTarget = target.ToUnit();
             if (unitTarget != null)
@@ -2802,38 +2723,8 @@ namespace Game.Entities
                 if (IsWorldBoss())
                 {
                     int level = (int)(unitTarget.GetLevel() + WorldConfig.GetIntValue(WorldCfg.WorldBossLevelDiff));
-                    return (uint)MathFunctions.RoundToInterval(ref level, 1u, 255u);
+                    return MathFunctions.RoundToInterval(ref level, 1u, 255u);
                 }
-
-                // If this creature should scale level, adapt level depending of target level
-                // between UNIT_FIELD_SCALING_LEVEL_MIN and UNIT_FIELD_SCALING_LEVEL_MAX
-                if (HasScalableLevels())
-                {
-                    int scalingLevelMin = m_unitData.ScalingLevelMin;
-                    int scalingLevelMax = m_unitData.ScalingLevelMax;
-                    int scalingLevelDelta = m_unitData.ScalingLevelDelta;
-                    int scalingFactionGroup = m_unitData.ScalingFactionGroup;
-                    int targetLevel = unitTarget.m_unitData.EffectiveLevel;
-                    if (targetLevel == 0)
-                        targetLevel = (int)unitTarget.GetLevel();
-
-                    int targetLevelDelta = 0;
-
-                    Player playerTarget = target.ToPlayer();
-                    if (playerTarget != null)
-                    {
-                        if (scalingFactionGroup != 0 && CliDB.FactionTemplateStorage.LookupByKey(CliDB.ChrRacesStorage.LookupByKey(playerTarget.GetRace()).FactionID).FactionGroup != scalingFactionGroup)
-                            scalingLevelMin = scalingLevelMax;
-
-                        int maxCreatureScalingLevel = playerTarget.m_activePlayerData.MaxCreatureScalingLevel;
-                        targetLevelDelta = Math.Min(maxCreatureScalingLevel > 0 ? maxCreatureScalingLevel - targetLevel : 0, playerTarget.m_activePlayerData.ScalingPlayerLevelDelta);
-                    }
-
-                    int levelWithDelta = targetLevel + targetLevelDelta;
-                    int level = MathFunctions.RoundToInterval(ref levelWithDelta, scalingLevelMin, scalingLevelMax) + scalingLevelDelta;
-                    return (uint)MathFunctions.RoundToInterval(ref level, 1, SharedConst.MaxLevel + 3);
-                }
-
             }
 
             return base.GetLevelForTarget(target);
@@ -3098,7 +2989,7 @@ namespace Game.Entities
             }
         }
 
-        public override void SetDisplayId(uint modelId, bool setNative = false)
+        public override void SetDisplayId(int modelId, bool setNative = false)
         {
             base.SetDisplayId(modelId, setNative);
 
