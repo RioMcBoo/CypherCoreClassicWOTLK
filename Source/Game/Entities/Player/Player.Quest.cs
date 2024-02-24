@@ -797,6 +797,8 @@ namespace Game.Entities
 
             Global.ScriptMgr.OnQuestStatusChange(this, questId);
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
+
+            UpdateNearbyCreatureNpcFlags();
         }
 
         public void CompleteQuest(int quest_id)
@@ -1183,6 +1185,8 @@ namespace Game.Entities
             if (quest.HasAnyFlag(QuestFlags.UpdatePhaseshift))
                 updateVisibility = PhasingHandler.OnConditionChange(this, false);
 
+            UpdateNearbyCreatureNpcFlags();
+
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
 
@@ -1213,6 +1217,8 @@ namespace Game.Entities
 
             if (updateVisibility)
                 UpdateObjectVisibility();
+
+            UpdateNearbyCreatureNpcFlags();
         }
 
         public void SetRewardedQuest(int questId)
@@ -1864,6 +1870,8 @@ namespace Game.Entities
                 Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, status);
             }
 
+            UpdateNearbyCreatureNpcFlags();
+
             if (update)
                 SendQuestUpdate(questId);
         }
@@ -2138,6 +2146,8 @@ namespace Game.Entities
 
             if (updateVisibility)
                 UpdateObjectVisibility();
+
+            UpdateNearbyCreatureNpcFlags();
         }
 
         public void DespawnPersonalSummonsForQuest(int questId)
@@ -2639,6 +2649,8 @@ namespace Game.Entities
             if (updatePhaseShift)
                 PhasingHandler.OnConditionChange(this);
 
+            UpdateNearbyCreatureNpcFlags();
+
             if (updateZoneAuras)
             {
                 UpdateZoneDependentAuras(GetZoneId());
@@ -2684,6 +2696,39 @@ namespace Game.Entities
                 }
             }
 
+            return false;
+        }
+
+        public bool CanSeeGossipOn(Creature creature)
+        {
+            if (creature.HasNpcFlag(NPCFlags1.Gossip))
+            {
+                if (GetGossipMenuForSource(creature) != 0)
+                    return true;
+            }
+
+            // for cases with questgiver/ender without gossip menus
+            if (creature.HasNpcFlag(NPCFlags1.QuestGiver))
+            {
+                QuestRelationResult objectQIR = Global.ObjectMgr.GetCreatureQuestInvolvedRelations(creature.GetEntry());
+                foreach (var quest_id in objectQIR)
+                {
+                    QuestStatus status = GetQuestStatus(quest_id);
+                    if (status == QuestStatus.Complete || status == QuestStatus.Incomplete)
+                        return true;
+                }
+
+                QuestRelationResult objectQR = Global.ObjectMgr.GetCreatureQuestRelations(creature.GetEntry());
+                foreach (var quest_id in objectQR)
+                {
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
+                    if (quest == null)
+                        continue;
+
+                    if (CanTakeQuest(quest, false))
+                        return true;
+                }
+            }
             return false;
         }
 
