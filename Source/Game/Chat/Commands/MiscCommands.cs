@@ -231,7 +231,7 @@ namespace Game.Chat
             Player attacker = handler.GetSession().GetPlayer();
 
             // flat melee damage without resistence/etc reduction
-            if (school.HasValue)
+            if (!school.HasValue)
             {
                 Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
                 if (target != attacker)
