@@ -215,7 +215,10 @@ namespace Game.Entities
             init.SetFacing(ori);
 
             //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementGeneratorPriority.Highest);
-            init.Launch();
+            UpdateSplineMovement((uint)init.Launch());
+            Creature creature = ToCreature();
+            if (creature != null)
+                creature.GetAI().MovementInform(MovementGeneratorType.Effect, EventId.Face);
         }
 
         public void SetFacingToObject(WorldObject obj, bool force = true)
@@ -230,7 +233,10 @@ namespace Game.Entities
             init.SetFacing(GetAbsoluteAngle(obj));   // when on transport, GetAbsoluteAngle will still return global coordinates (and angle) that needs transforming
 
             //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementGeneratorPriority.Highest);
-            init.Launch();
+            UpdateSplineMovement((uint)init.Launch());
+            Creature creature = ToCreature();
+            if (creature != null)
+                creature.GetAI().MovementInform(MovementGeneratorType.Effect, EventId.Face);
         }
 
         void SetFacingToPoint(Position point, bool force = true)
@@ -247,7 +253,10 @@ namespace Game.Entities
             init.SetFacing(point.GetPositionX(), point.GetPositionY(), point.GetPositionZ());
 
             //GetMotionMaster()->LaunchMoveSpline(std::move(init), EVENT_FACE, MOTION_PRIORITY_HIGHEST);
-            init.Launch();
+            UpdateSplineMovement((uint)init.Launch());
+            Creature creature = ToCreature();
+            if (creature != null)
+                creature.GetAI().MovementInform(MovementGeneratorType.Effect, EventId.Face);
         }
 
         public void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false)
