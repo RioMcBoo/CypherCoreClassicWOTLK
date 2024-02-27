@@ -283,6 +283,9 @@ namespace Game.Entities
             ApplyAllStaticFlags(m_creatureDifficulty.StaticFlags);
 
             _staticFlags.ApplyFlag(CreatureStaticFlags.NoXp, creatureInfo.CreatureType == CreatureType.Critter || IsPet() || IsTotem() || creatureInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.NoXP));
+
+            // TODO: migrate these in DB
+            _staticFlags.ApplyFlag(CreatureStaticFlags2.AllowMountedCombat, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.AllowMountedCombat));
             _staticFlags.ApplyFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit));
 
             return true;
@@ -1060,7 +1063,7 @@ namespace Game.Entities
         {
             base.AtEngage(target);
 
-            if (!GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.AllowMountedCombat))
+            if (!HasFlag(CreatureStaticFlags2.AllowMountedCombat))
                 Dismount();
 
             RefreshCanSwimFlag();
@@ -2523,8 +2526,9 @@ namespace Game.Entities
             CreatureAddon creatureAddon = GetCreatureAddon();
             if (creatureAddon == null)
                 return false;
-
-            if (creatureAddon.mount != 0)
+            
+            int mountDisplayId = _defaultMountDisplayIdOverride.GetValueOrDefault(creatureAddon.mount);
+            if ( mountDisplayId != 0)
                 Mount(creatureAddon.mount);
 
             SetStandState(creatureAddon.standState);
@@ -3014,6 +3018,14 @@ namespace Game.Entities
 
             if (cannotReach)
                 Log.outDebug(LogFilter.Unit, $"Creature::SetCannotReachTarget() called with true. Details: {GetDebugInfo()}");
+        }
+
+        void SetDefaultMount(int? mountCreatureDisplayId)
+        {
+            if (mountCreatureDisplayId.HasValue && !CliDB.CreatureDisplayInfoStorage.HasRecord(mountCreatureDisplayId.Value))
+                mountCreatureDisplayId = null;
+
+            _defaultMountDisplayIdOverride = mountCreatureDisplayId;
         }
 
         public float GetAggroRange(Unit target)

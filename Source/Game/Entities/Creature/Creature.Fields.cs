@@ -29,6 +29,7 @@ namespace Game.Entities
 
         bool _isMissingCanSwimFlagOutOfCombat;
 
+        int? _defaultMountDisplayIdOverride;
         int _gossipMenuId;
         int? _trainerId;
         float _sparringHealthPct;
