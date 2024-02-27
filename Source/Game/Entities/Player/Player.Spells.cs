@@ -832,7 +832,7 @@ namespace Game.Entities
             }
 
             // visualize enchantment at player and equipped items
-            if (slot == EnchantmentSlot.EnhancementPermanent)
+            if (slot == EnchantmentSlot.EnhancementPermanent && item.InventorySlot < m_playerData.VisibleItems.GetSize())
             {
                 VisibleItem visibleItem = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VisibleItems, item.InventorySlot);
                 SetUpdateFieldValue(visibleItem.ModifyValue(visibleItem.ItemVisual), item.GetVisibleItemVisual(this));
