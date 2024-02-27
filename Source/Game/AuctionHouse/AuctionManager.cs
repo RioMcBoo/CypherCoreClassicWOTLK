@@ -1327,7 +1327,7 @@ namespace Game
             }
 
             player.ModifyMoney(-totalPrice);
-            player.SaveGoldToDB(trans);
+            player.SaveInventoryAndGoldToDB(trans);
 
             foreach (MailedItemsBatch batch in items)
             {

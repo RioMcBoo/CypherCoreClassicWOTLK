@@ -531,7 +531,7 @@ namespace Game
 
             // save money and mail to prevent cheating
             SQLTransaction trans = new();
-            player.SaveGoldToDB(trans);
+            player.SaveInventoryAndGoldToDB(trans);
             player._SaveMail(trans);
             DB.Characters.CommitTransaction(trans);
         }
