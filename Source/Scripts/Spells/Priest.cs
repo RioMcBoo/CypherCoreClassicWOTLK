@@ -41,6 +41,8 @@ namespace Scripts.Spells.Priest
         public const int DarkReprimandDamage = 373130;
         public const int DarkReprimandHealing = 400187;
         public const int DazzlingLight = 196810;
+        public const int DivineAegis = 47515;
+        public const int DivineAegisAbsorb = 47753;
         public const int DivineBlessing = 40440;
         public const int DivineHymnHeal = 64844;
         public const int DivineImageSummon = 392990;
@@ -1712,7 +1714,7 @@ namespace Scripts.Spells.Priest
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.StrengthOfSoul, SpellIds.StrengthOfSoulEffect, SpellIds.AtonementEffect, SpellIds.TrinityEffect, SpellIds.ShieldDiscipline, SpellIds.ShieldDisciplineEffect, SpellIds.PvpRulesEnabledHardcoded)
-                && ValidateSpellEffect((SpellIds.MasteryGrace, 0), (SpellIds.Rapture, 1), (SpellIds.Benevolence, 0));
+                && ValidateSpellEffect((SpellIds.MasteryGrace, 0), (SpellIds.Rapture, 1), (SpellIds.Benevolence, 0), (SpellIds.DivineAegis, 1));
         }
 
         void CalculateAmount(AuraEffect auraEffect, ref int amount, ref bool canBeRecalculated)
@@ -1735,12 +1737,30 @@ namespace Scripts.Spells.Priest
                         if (GetUnitOwner().HasAura(SpellIds.AtonementEffect) || GetUnitOwner().HasAura(SpellIds.TrinityEffect))
                             MathFunctions.AddPct(ref modifiedAmount, masteryGraceEffect.GetAmount());
 
-                    if (player.GetPrimarySpecialization() != ChrSpecialization.PriestHoly)
+                    switch (player.GetPrimarySpecialization())
                     {
-                        modifiedAmount *= 1.25f;
-                        if (caster.HasAura(SpellIds.PvpRulesEnabledHardcoded))
-                            modifiedAmount *= 0.8f;
+                        case ChrSpecialization.PriestDiscipline:
+                            modifiedAmount *= 1.37f;
+                            break;
+                        case ChrSpecialization.PriestShadow:
+                            modifiedAmount *= 1.25f;
+                            if (caster.HasAura(SpellIds.PvpRulesEnabledHardcoded))
+                                modifiedAmount *= 0.8f;
+                            break;
                     }
+                }
+
+                float critChanceDone = caster.SpellCritChanceDone(null, auraEffect, GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
+                float critChanceTaken = GetUnitOwner().SpellCritChanceTaken(caster, null, auraEffect, GetSpellInfo().GetSchoolMask(), critChanceDone, GetSpellInfo().GetAttackType());
+
+                if (RandomHelper.randChance(critChanceTaken))
+                {
+                    modifiedAmount *= 2;
+
+                    // Divine Aegis
+                    AuraEffect divineEff = caster.GetAuraEffect(SpellIds.DivineAegis, 1);
+                    if (divineEff != null)
+                        MathFunctions.AddPct(ref modifiedAmount, divineEff.GetAmount());
                 }
 
                 // Rapture talent (Tbd: move into DoEffectCalcDamageAndHealing hook).
@@ -1784,6 +1804,39 @@ namespace Scripts.Spells.Priest
             DoEffectCalcAmount.Add(new(CalculateAmount, 0, AuraType.SchoolAbsorb));
             AfterEffectApply.Add(new(HandleOnApply, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.RealOrReapplyMask));
             AfterEffectRemove.Add(new(HandleOnRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 47515 - Divine Aegis
+    class spell_pri_divine_aegis : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((SpellIds.DivineAegisAbsorb, 0));
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetHealInfo() != null;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit caster = eventInfo.GetActor();
+            if (caster == null)
+                return;
+
+            int aegisAmount = (int)MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
+
+            CastSpellExtraArgs args = new(aurEff);
+            args.SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
+            args.AddSpellMod(SpellValueMod.BasePoint0, aegisAmount);
+            caster.CastSpell(eventInfo.GetProcTarget(), SpellIds.DivineAegisAbsorb, args);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
     }
 
