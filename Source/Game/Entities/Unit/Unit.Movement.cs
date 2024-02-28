@@ -1830,7 +1830,7 @@ namespace Game.Entities
                     return;
             }
 
-            if (HasUnitState(UnitState.CannotTurn))
+            if (HasUnitState(UnitState.LostControl | UnitState.Focusing))
                 loc.W = GetOrientation();
 
             UpdatePosition(loc.X, loc.Y, loc.Z, loc.W);
