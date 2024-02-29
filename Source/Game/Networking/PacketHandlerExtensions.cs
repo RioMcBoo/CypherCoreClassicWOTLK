@@ -301,21 +301,7 @@ public static class PacketHandlerExtensions
             data.WriteBit(moveSpline.spell_effect_extra != null);  // HasSpellEffectExtraData
             bool hasJumpExtraData = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0));
             data.WriteBit(moveSpline.anim_tier != null);                   // HasAnimTierTransition
-            data.WriteBit(false);                                                   // HasUnknown901
             data.FlushBits();
-
-            //if (HasSplineFilterKey)
-            //{
-            //    data << uint32(FilterKeysCount);
-            //    for (var i = 0; i < FilterKeysCount; ++i)
-            //    {
-            //        data << float(In);
-            //        data << float(Out);
-            //    }
-
-            //    data.WriteBits(FilterFlags, 2);
-            //    data.FlushBits();
-            //}
 
             switch (moveSpline.facing.type)
             {
