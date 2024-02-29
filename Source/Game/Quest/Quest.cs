@@ -131,7 +131,8 @@ namespace Game
 
             if (idx >= SharedConst.QuestRewardDisplaySpellCount)
             {                
-                Log.outError(LogFilter.Sql, $"Table `quest_reward_display_spell` uses `Idx`= {idx} for quest {questId} (max allowed Idx is {SharedConst.QuestRewardDisplaySpellCount - 1}). Skipped.");
+                Log.outError(LogFilter.Sql, 
+                    $"Table `quest_reward_display_spell` has a Spell ({spellId}) set for quest {questId} at Index {idx} which is out of bounds. Skipped.");                
                 return;
             }
 
@@ -496,20 +497,7 @@ namespace Game
             rewards.ArtifactCategoryID = RewardArtifactCategoryID;
             rewards.Title = RewardTitleId;
             rewards.FactionFlags = RewardReputationMask;
-
-            var displaySpellIndex = 0;
-            foreach (QuestRewardDisplaySpell displaySpell in RewardDisplaySpell)
-            {
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(displaySpell.PlayerConditionId);
-                if (playerCondition != null)
-                    if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
-                        continue;
-
-                rewards.SpellCompletionDisplayID[displaySpellIndex] = (int)displaySpell.SpellId;
-                if (++displaySpellIndex >= rewards.SpellCompletionDisplayID.Length)
-                    break;
-            }
-
+            rewards.SpellCompletionDisplayID = RewardDisplaySpell;
             rewards.SpellCompletionID = RewardSpell;
             rewards.SkillLineID = RewardSkillId;
             rewards.NumSkillUps = RewardSkillPoints;
@@ -544,14 +532,14 @@ namespace Game
             }
         }
 
-        public uint GetRewMoneyMaxLevel()
+        public int GetRewMoneyMaxLevel()
         {
             // If Quest has flag to not give money on max level, it's 0
             if (HasAnyFlag(QuestFlags.NoMoneyForXp))
                 return 0;
 
             // Else, return the rewarded copper sum modified by the rate
-            return (uint)(RewardBonusMoney * WorldConfig.GetFloatValue(WorldCfg.RateMoneyMaxLevelQuest));
+            return (int)(RewardBonusMoney * WorldConfig.GetFloatValue(WorldCfg.RateMoneyMaxLevelQuest));
         }
 
         public bool IsAutoAccept()
@@ -664,7 +652,7 @@ namespace Game
 
             response.Info.RewardMoneyDifficulty = RewardMoneyDifficulty;
             response.Info.RewardMoneyMultiplier = RewardMoneyMultiplier;
-            response.Info.RewardBonusMoney = RewardBonusMoney;
+            response.Info.RewardBonusMoney = GetRewMoneyMaxLevel();
             response.Info.RewardDisplaySpell = RewardDisplaySpell;
 
             response.Info.RewardSpell = RewardSpell;
@@ -1005,20 +993,6 @@ namespace Game
     public class QuestOfferRewardLocale
     {
         public StringArray RewardText = new((int)Locale.Total);
-    }
-
-    public struct QuestRewardDisplaySpell
-    {    
-        public int SpellId;
-        public uint PlayerConditionId;
-        public QuestCompleteSpellType Type;
-
-        public QuestRewardDisplaySpell(int spellId, uint playerConditionId, QuestCompleteSpellType type)
-        {
-            SpellId = spellId;
-            PlayerConditionId = playerConditionId;
-            Type = type;
-        }
     }
 
     public class QuestConditionalText
