@@ -7630,15 +7630,7 @@ namespace Game.Entities
                         continue;
 
                     m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
-                }
-
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
-                }
+                }                
             }
 
             base.BuildCreateUpdateBlockForPlayer(data, target);

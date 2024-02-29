@@ -5780,14 +5780,6 @@ namespace Game.Entities
                             return false;
                 }
 
-                for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-                {
-                    Item item = GetItemByPos(i);
-                    if (item != null)
-                        if (!callback(item))
-                            return false;
-                }
-
                 for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
                 {
                     Bag bag = GetBagByPos(i);
