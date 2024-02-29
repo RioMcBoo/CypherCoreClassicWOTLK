@@ -316,7 +316,7 @@ namespace Framework.Constants
         FFAPvP = 0x40
     }
 
-    public enum ActionButtonUpdateState : uint
+    public enum ActionButtonUpdateState : byte
     {
         UnChanged = 0,
         Changed = 1,
@@ -324,7 +324,7 @@ namespace Framework.Constants
         Deleted = 3
     }
 
-    public enum ActionButtonType : uint
+    public enum ActionButtonType : byte
     {
         Spell = 0x00,
         C = 0x01,                         // click?

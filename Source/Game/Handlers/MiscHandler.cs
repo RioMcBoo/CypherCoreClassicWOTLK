@@ -99,13 +99,13 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetActionButton)]
         void HandleSetActionButton(SetActionButton packet)
         {
-            uint action = UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packet.Action);
-            uint type = UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(packet.Action);
+            int action = UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packet.Action);
+            byte type = UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(packet.Action);
 
             if (packet.Action == 0)
                 GetPlayer().RemoveActionButton(packet.Index);
             else
-                GetPlayer().AddActionButton(packet.Index, action, type);
+                GetPlayer().AddActionButton(packet.Index, action, (ActionButtonType)type);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetActionBarToggles)]

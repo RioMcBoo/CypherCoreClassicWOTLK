@@ -1714,7 +1714,7 @@ namespace Game.Entities
         public void SetCurrentUnslottedPetIndex(uint index) { CurrentPetIndex = index | UnslottedPetIndexMask; }
     }
     
-    public enum ActiveStates
+    public enum ActiveStates : byte
     {
         Passive = 0x01,                                    // 0x01 - passive
         Disabled = 0x81,                                    // 0x80 - castable

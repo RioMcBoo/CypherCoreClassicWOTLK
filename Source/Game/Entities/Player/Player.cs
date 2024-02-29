@@ -1599,7 +1599,7 @@ namespace Game.Entities
             return (byte)_CUFProfiles.Count(p => p != null);
         }
 
-        bool IsActionButtonDataValid(byte button, ulong action, uint type)
+        bool IsActionButtonDataValid(byte button, int action, ActionButtonType type)
         {
             if (button >= PlayerConst.MaxActionButtons)
             {
@@ -1613,17 +1613,17 @@ namespace Game.Entities
                 return false;
             }
 
-            switch ((ActionButtonType)type)
+            switch (type)
             {
                 case ActionButtonType.Spell:
-                    if (!SpellMgr.HasSpellInfo((uint)action, Difficulty.None))
+                    if (!SpellMgr.HasSpellInfo(action, Difficulty.None))
                     {
                         Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Spell action {action} not added into button {button} for player {GetName()} ({GetGUID()}): spell not exist");
                         return false;
                     }
                     break;
                 case ActionButtonType.Item:
-                    if (ObjectMgr.GetItemTemplate((uint)action) == null)
+                    if (ObjectMgr.GetItemTemplate(action) == null)
                     {
                         Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Item action {action} not added into button {button} for player {GetName()} ({GetGUID()}): item not exist");
                         return false;
@@ -1667,7 +1667,7 @@ namespace Game.Entities
 
         public void SetMultiActionBars(byte mask) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MultiActionBars), mask); }
 
-        public ActionButton AddActionButton(byte button, uint action, uint type)
+        public ActionButton AddActionButton(byte button, int action, ActionButtonType type)
         {
             if (!IsActionButtonDataValid(button, action, type))
                 return null;
@@ -1679,11 +1679,12 @@ namespace Game.Entities
             var ab = m_actionButtons[button];
 
             // set data and update to CHANGED if not NEW
-            ab.SetActionAndType(action, (ActionButtonType)type);
+            ab.SetActionAndType(action, type);
 
             Log.outDebug(LogFilter.Player, $"Player::AddActionButton: Player '{GetName()}' ({GetGUID()}) added action '{action}' (Type {type}) to button '{button}'");
             return ab;
         }
+
         public void RemoveActionButton(byte _button)
         {
             var button = m_actionButtons.LookupByKey(_button);
@@ -1697,6 +1698,7 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Player, "Action Button '{0}' Removed from Player '{1}'", button, GetGUID().ToString());
         }
+
         public ActionButton GetActionButton(byte _button)
         {
             var button = m_actionButtons.LookupByKey(_button);
@@ -1705,7 +1707,9 @@ namespace Game.Entities
 
             return button;
         }
+
         void SendInitialActionButtons() { SendActionButtons(0); }
+
         void SendActionButtons(uint state)
         {
             UpdateActionButtons packet = new();

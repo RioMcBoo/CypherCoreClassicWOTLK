@@ -641,12 +641,14 @@ namespace Game.Entities
                 _currencyStorage.Add(currencyID, cur);
             } while (result.NextRow());
         }
+
         void LoadActions(SQLResult result)
         {
             _LoadActions(result);
 
             SendActionButtons(1);
         }
+
         void _LoadActions(SQLResult result)
         {
             m_actionButtons.Clear();
@@ -655,8 +657,8 @@ namespace Game.Entities
                 do
                 {
                     byte button = result.Read<byte>(0);
-                    uint action = (uint)result.Read<ulong>(1);
-                    byte type = result.Read<byte>(2);
+                    int action = result.Read<int>(1);
+                    ActionButtonType type = (ActionButtonType)result.Read<byte>(2);
 
                     ActionButton ab = AddActionButton(button, action, type);
                     if (ab != null)
@@ -672,6 +674,7 @@ namespace Game.Entities
                 } while (result.NextRow());
             }
         }
+
         void _LoadQuestStatus(SQLResult result)
         {
             ushort slot = 0;

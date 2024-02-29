@@ -411,11 +411,11 @@ namespace Game.Entities
 
         public ActionButtonType GetButtonType() { return (ActionButtonType)UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(packedData); }
 
-        public uint GetAction() { return UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packedData); }
+        public int GetAction() { return UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packedData); }
 
-        public void SetActionAndType(uint action, ActionButtonType type)
+        public void SetActionAndType(int action, ActionButtonType type)
         {
-            uint newData = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(action, (uint)type);
+            int newData = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(action, (byte)type);
             
             if (newData != packedData || uState == ActionButtonUpdateState.Deleted)
             {
@@ -425,7 +425,7 @@ namespace Game.Entities
             }
         }
 
-        public uint packedData;
+        public int packedData;
         public ActionButtonUpdateState uState;
     }
 

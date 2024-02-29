@@ -140,11 +140,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Action = _worldPacket.ReadUInt32();
+            Action = _worldPacket.ReadInt32();
             Index = _worldPacket.ReadUInt8();
         }
 
-        public uint Action; // two packed values (action and Type)
+        public int Action; // two packed values (action and Type)
         public byte Index;
     }
 
