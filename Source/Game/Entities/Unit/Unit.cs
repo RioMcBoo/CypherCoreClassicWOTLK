@@ -4063,16 +4063,7 @@ namespace Game.Entities
             if (attType != WeaponAttackType.RangedAttack)
                 TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMeleeDamageTakenPct);
             else
-                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModRangedDamageTakenPct);
-
-            // Versatility
-            Player modOwner = GetSpellModOwner();
-            if (modOwner != null)
-            {
-                // only 50% of SPELL_AURA_MOD_VERSATILITY for damage reduction
-                float versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;
-                MathFunctions.AddPct(ref TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
-            }
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModRangedDamageTakenPct);            
 
             // Sanctified Wrath (bypass damage reduction)
             if (TakenTotalMod < 1.0f)

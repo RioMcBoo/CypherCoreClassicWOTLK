@@ -4244,18 +4244,7 @@ namespace Game.Spells
                             tempValue = ItemEnchantmentManager.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
                     }
                     else
-                        tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), Scaling.Class);
-
-                    if (Scaling.Class == ScalingClass.Item2)
-                    {
-                        GtGenericMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
-                        if (ratingMult != null)
-                        {
-                            ItemSparseRecord itemSparse = CliDB.ItemSparseStorage.LookupByKey(itemId);
-                            if (itemSparse != null)
-                                tempValue *= CliDB.GetIlvlStatMultiplier(ratingMult, itemSparse.InventoryType);
-                        }
-                    }
+                        tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), Scaling.Class);                    
                 }
 
                 tempValue *= Scaling.Coefficient;

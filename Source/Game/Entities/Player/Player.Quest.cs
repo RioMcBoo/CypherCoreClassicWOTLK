@@ -2217,7 +2217,7 @@ namespace Game.Entities
             if (!objective.IsStoringFlag())
                 return GetQuestSlotCounter(slot, (byte)objective.StorageIndex);
 
-            return (int)(GetQuestSlotState(slot) > objective.StorageIndex) != 0);
+            return (GetQuestSlotState(slot) & objective.StorageIndex) != 0) ? 1, 0);
         }
     
 

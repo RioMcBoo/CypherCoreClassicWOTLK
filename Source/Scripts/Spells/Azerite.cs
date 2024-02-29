@@ -574,9 +574,9 @@ namespace Scripts.Spells.Azerite
 
         void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            Player player = GetUnitOwner().ToPlayer();
-            amount = (int)MathFunctions.Clamp(10.0f + player.GetRatingBonusValue(CombatRating.Corruption) - player.GetRatingBonusValue(CombatRating.CorruptionResistance), 0.0f, 99.0f);
-            canBeRecalculated = false;
+            //Player player = GetUnitOwner().ToPlayer();
+            //amount = (int)MathFunctions.Clamp(10.0f + player.GetRatingBonusValue(CombatRating.Corruption) - player.GetRatingBonusValue(CombatRating.CorruptionResistance), 0.0f, 99.0f);
+            //canBeRecalculated = false;
         }
 
         public override void Register()

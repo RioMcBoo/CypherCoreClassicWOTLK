@@ -800,7 +800,7 @@ namespace Game.Entities
         }
         
         // player or player's pet resilience (-1%)
-        uint GetDamageReduction(uint damage) { return GetCombatRatingDamageReduction(CombatRating.ResiliencePlayerDamage, 1.0f, 100.0f, damage); }
+        uint GetDamageReduction(uint damage) { return 0; }
 
         float GetCombatRatingReduction(CombatRating cr)
         {
@@ -1436,7 +1436,7 @@ namespace Game.Entities
 
             float versaDmgMod = 1.0f;
 
-            MathFunctions.AddPct(ref versaDmgMod, GetRatingBonusValue(CombatRating.VersatilityDamageDone) + (float)GetTotalAuraModifier(AuraType.ModVersatility));
+            //MathFunctions.AddPct(ref versaDmgMod, GetRatingBonusValue(CombatRating.VersatilityDamageDone) + (float)GetTotalAuraModifier(AuraType.ModVersatility));
 
             SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetShapeshiftForm());
             if (shapeshift != null && shapeshift.CombatRoundTime != 0)
@@ -1712,7 +1712,7 @@ namespace Game.Entities
 
             switch (cr)
             {
-                case CombatRating.Amplify:
+                case CombatRating.WeaponSkill:
                 case CombatRating.DefenseSkill:
                     break;
                 case CombatRating.Dodge:
@@ -1748,8 +1748,13 @@ namespace Game.Entities
                     if (affectStats)
                         UpdateSpellCritChance();
                     break;
-                case CombatRating.Corruption:
-                case CombatRating.CorruptionResistance:
+                case CombatRating.HitTakenMelee:    // Implemented in Unit::MeleeMissChanceCalc
+                case CombatRating.HitTakenRanged:
+                    break;
+                case CombatRating.CritTakenMelee:   // Implemented in Unit::RollMeleeOutcomeAgainst (only for chance to crit)
+                case CombatRating.CritTakenRanged:
+                    break;
+                case CombatRating.CritTakenSpell:   // Implemented in Unit::SpellCriticalBonus (only for chance to crit)
                     break;
                 case CombatRating.HasteMelee:
                 case CombatRating.HasteRanged:
@@ -1782,6 +1787,10 @@ namespace Game.Entities
                         }
                         break;
                     }
+                case CombatRating.WeaponSkillMainhand:  // Implemented in Unit::RollMeleeOutcomeAgainst
+                case CombatRating.WeaponSkillOffhand:
+                case CombatRating.WeaponSkillRanged:
+                    break;
                 case CombatRating.Expertise:
                     if (affectStats)
                     {
@@ -1792,15 +1801,6 @@ namespace Game.Entities
                 case CombatRating.ArmorPenetration:
                     if (affectStats)
                         UpdateArmorPenetration(amount);
-                    break;
-                case CombatRating.Mastery:
-                    UpdateMastery();
-                    break;
-                case CombatRating.VersatilityDamageDone:
-                    UpdateVersatilityDamageDone();
-                    break;
-                case CombatRating.VersatilityHealingDone:
-                    UpdateHealingDonePercentMod();
                     break;
             }
         }
@@ -1814,7 +1814,7 @@ namespace Game.Entities
             }
 
             float value = GetTotalAuraModifier(AuraType.Mastery);
-            value += GetRatingBonusValue(CombatRating.Mastery);
+            //value += GetRatingBonusValue(CombatRating.Mastery);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Mastery), value);
 
             ChrSpecializationRecord chrSpec = GetPrimarySpecializationEntry();
@@ -1841,7 +1841,7 @@ namespace Game.Entities
         public void UpdateVersatilityDamageDone()
         {
             // No proof that CR_VERSATILITY_DAMAGE_DONE is allways = ActivePlayerData::Versatility
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Versatility), (int)m_activePlayerData.CombatRatings[(int)CombatRating.VersatilityDamageDone]);
+            //SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Versatility), (int)m_activePlayerData.CombatRatings[(int)CombatRating.VersatilityDamageDone]);
 
             if (GetClass() == Class.Hunter)
                 UpdateDamagePhysical(WeaponAttackType.RangedAttack);
@@ -1853,7 +1853,7 @@ namespace Game.Entities
         {
             float value = 1.0f;
 
-            MathFunctions.AddPct(ref value, GetRatingBonusValue(CombatRating.VersatilityHealingDone) + GetTotalAuraModifier(AuraType.ModVersatility));
+            //MathFunctions.AddPct(ref value, GetRatingBonusValue(CombatRating.VersatilityHealingDone) + GetTotalAuraModifier(AuraType.ModVersatility));
 
             foreach (AuraEffect auraEffect in GetAuraEffectsByType(AuraType.ModHealingDonePercent))
                 MathFunctions.AddPct(ref value, auraEffect.GetAmount());
@@ -2066,8 +2066,8 @@ namespace Game.Entities
         {
             switch (rating)
             {
-                case CombatRating.Amplify:
-                    return row.Amplify;
+                case CombatRating.WeaponSkill:
+                    return row.WeaponSkill;
                 case CombatRating.DefenseSkill:
                     return row.DefenseSkill;
                 case CombatRating.Dodge:
@@ -2088,48 +2088,24 @@ namespace Game.Entities
                     return row.CritRanged;
                 case CombatRating.CritSpell:
                     return row.CritSpell;
-                case CombatRating.Corruption:
-                    return row.Corruption;
-                case CombatRating.CorruptionResistance:
-                    return row.CorruptionResistance;
-                case CombatRating.Speed:
-                    return row.Speed;
-                case CombatRating.ResilienceCritTaken:
-                    return row.ResilienceCritTaken;
-                case CombatRating.ResiliencePlayerDamage:
-                    return row.ResiliencePlayerDamage;
-                case CombatRating.Lifesteal:
-                    return row.Lifesteal;
+                case CombatRating.HitTakenMelee:
+                    return row.HitTakenMelee;
+                case CombatRating.HitTakenRanged:
+                    return row.HitTakenRanged;
+                case CombatRating.HitTakenSpell:
+                    return row.HitTakenSpell;
+                case CombatRating.CritTakenMelee:
+                    return row.CritTakenMelee;
+                case CombatRating.CritTakenRanged:
+                    return row.CritTakenRanged;
+                case CombatRating.CritTakenSpell:
+                    return row.CritTakenSpell;
                 case CombatRating.HasteMelee:
                     return row.HasteMelee;
                 case CombatRating.HasteRanged:
                     return row.HasteRanged;
                 case CombatRating.HasteSpell:
                     return row.HasteSpell;
-                case CombatRating.Avoidance:
-                    return row.Avoidance;
-                case CombatRating.Studiness:
-                    return row.Sturdiness;
-                case CombatRating.Unused7:
-                    return row.Unused7;
-                case CombatRating.Expertise:
-                    return row.Expertise;
-                case CombatRating.ArmorPenetration:
-                    return row.ArmorPenetration;
-                case CombatRating.Mastery:
-                    return row.Mastery;
-                case CombatRating.PvpPower:
-                    return row.PvPPower;
-                case CombatRating.Cleave:
-                    return row.Cleave;
-                case CombatRating.VersatilityDamageDone:
-                    return row.VersatilityDamageDone;
-                case CombatRating.VersatilityHealingDone:
-                    return row.VersatilityHealingDone;
-                case CombatRating.VersatilityDamageTaken:
-                    return row.VersatilityDamageTaken;
-                case CombatRating.Unused12:
-                    return row.Unused12;
                 default:
                     break;
             }

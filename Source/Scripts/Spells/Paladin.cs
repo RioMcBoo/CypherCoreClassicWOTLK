@@ -1229,9 +1229,9 @@ namespace Scripts.Spells.Paladin
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             amount = (int)MathFunctions.CalculatePct(GetUnitOwner().GetMaxHealth(), GetEffectInfo(1).CalcValue());
-            Player player = GetUnitOwner().ToPlayer();
-            if (player != null)
-                MathFunctions.AddPct(ref amount, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + player.GetTotalAuraModifier(AuraType.ModVersatility));
+            //Player player = GetUnitOwner().ToPlayer();
+            //if (player != null)
+            //    MathFunctions.AddPct(ref amount, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + player.GetTotalAuraModifier(AuraType.ModVersatility));
 
             _initialAmount = amount;
         }

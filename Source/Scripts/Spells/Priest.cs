@@ -1780,7 +1780,7 @@ namespace Scripts.Spells.Priest
                 Player player = caster.ToPlayer();
                 if (player != null)
                 {
-                    MathFunctions.AddPct(ref modifiedAmount, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
+                    //MathFunctions.AddPct(ref modifiedAmount, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
 
                     // Mastery: Grace (Tbd: move into DoEffectCalcDamageAndHealing hook with a new SpellScript and AuraScript).
                     AuraEffect masteryGraceEffect = caster.GetAuraEffect(SpellIds.MasteryGrace, 0);

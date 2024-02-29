@@ -3276,9 +3276,6 @@ namespace Game.Entities
 
             uint itemLevel = item.GetItemLevel(this);
             float combatRatingMultiplier = 1.0f;
-            GtGenericMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(itemLevel);
-            if (ratingMult != null)
-                combatRatingMultiplier = CliDB.GetIlvlStatMultiplier(ratingMult, proto.GetInventoryType());
 
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
             {
@@ -3310,10 +3307,10 @@ namespace Game.Entities
                         HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, (float)val, apply);
                         UpdateStatBuffMod(Stats.Intellect);
                         break;
-                    case ItemModType.Spirit:                           //modify spirit
-                        HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Base, (float)val, apply);
-                        UpdateStatBuffMod(Stats.Spirit);
-                        break;
+                    //case ItemModType.Spirit:                           //modify spirit
+                    //    HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Base, (float)val, apply);
+                    //    UpdateStatBuffMod(Stats.Spirit);
+                    //    break;
                     case ItemModType.Stamina:                          //modify stamina
                         HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, (float)val, apply);
                         UpdateStatBuffMod(Stats.Stamina);
@@ -3348,9 +3345,24 @@ namespace Game.Entities
                     case ItemModType.CritSpellRating:
                         ApplyRatingMod(CombatRating.CritSpell, (int)(val * combatRatingMultiplier), apply);
                         break;
-                    case ItemModType.CritTakenRangedRating:
-                        ApplyRatingMod(CombatRating.CritRanged, (int)val, apply);
-                        break;
+                    //case ItemModType.HitTakenMeleeRating:
+                    //    ApplyRatingMod(CombatRating.HitTakenMelee, (int)val, apply);
+                    //    break;
+                    //case ItemModType.HitTakenRangedRating:
+                    //    ApplyRatingMod(CombatRating.HitTakenRanged, (int)val, apply);
+                    //    break;
+                    //case ItemModType.HitTakenSpellRating:
+                    //    ApplyRatingMod(CombatRating.HitTakenSpell, (int)val, apply);
+                    //    break;
+                    //case ItemModType.CritTakenMeleeRating:
+                    //    ApplyRatingMod(CombatRating.CritTakenMelee, (int)val, apply);
+                    //    break;
+                    //case ItemModType.CritTakenRangedRating:
+                    //    ApplyRatingMod(CombatRating.CritTakenRanged, (int)val, apply);
+                    //    break;
+                    //case ItemModType.CritTakenSpellRating:
+                    //    ApplyRatingMod(CombatRating.CritTakenSpell, (int)val, apply);
+                    //    break;
                     case ItemModType.HasteMeleeRating:
                         ApplyRatingMod(CombatRating.HasteMelee, (int)val, apply);
                         break;
@@ -3370,9 +3382,19 @@ namespace Game.Entities
                         ApplyRatingMod(CombatRating.CritRanged, (int)(val * combatRatingMultiplier), apply);
                         ApplyRatingMod(CombatRating.CritSpell, (int)(val * combatRatingMultiplier), apply);
                         break;
-                    case ItemModType.ResilienceRating:
-                        ApplyRatingMod(CombatRating.ResiliencePlayerDamage, (int)(val * combatRatingMultiplier), apply);
-                        break;
+                    //case ItemModType.HitTakenRating: // Unused since 3.3.5
+                    //    ApplyRatingMod(CombatRating.HitTakenMelee, (int)val, apply);
+                    //    ApplyRatingMod(CombatRating.HitTakenRanged, (int)val, apply);
+                    //    ApplyRatingMod(CombatRating.HitTakenSpell, (int)val, apply);
+                    //    break;
+                    //case ItemModType.CritTakenRating: // Unused since 3.3.5
+                    //    ApplyRatingMod(CombatRating.CritTakenMelee, (int)val, apply);
+                    //    ApplyRatingMod(CombatRating.CritTakenRanged, (int)val, apply);
+                    //    ApplyRatingMod(CombatRating.CritTakenSpell, (int)val, apply);
+                    //    break;
+                    //case ItemModType.ResilienceRating:
+                    //    ApplyRatingMod(CombatRating.ResiliencePlayerDamage, (int)(val * combatRatingMultiplier), apply);
+                    //    break;
                     case ItemModType.HasteRating:
                         ApplyRatingMod(CombatRating.HasteMelee, (int)(val * combatRatingMultiplier), apply);
                         ApplyRatingMod(CombatRating.HasteRanged, (int)(val * combatRatingMultiplier), apply);
@@ -3387,12 +3409,7 @@ namespace Game.Entities
                         break;
                     case ItemModType.RangedAttackPower:
                         HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, (float)val, apply);
-                        break;
-                    case ItemModType.Versatility:
-                        ApplyRatingMod(CombatRating.VersatilityDamageDone, (int)(val * combatRatingMultiplier), apply);
-                        ApplyRatingMod(CombatRating.VersatilityDamageTaken, (int)(val * combatRatingMultiplier), apply);
-                        ApplyRatingMod(CombatRating.VersatilityHealingDone, (int)(val * combatRatingMultiplier), apply);
-                        break;
+                        break;                    
                     case ItemModType.ManaRegeneration:
                         ApplyManaRegenBonus((int)val, apply);
                         break;
@@ -3411,9 +3428,9 @@ namespace Game.Entities
                     case ItemModType.BlockValue:
                         HandleBaseModFlatValue(BaseModGroup.ShieldBlockValue, (float)val, apply);
                         break;
-                    case ItemModType.MasteryRating:
-                        ApplyRatingMod(CombatRating.Mastery, (int)(val * combatRatingMultiplier), apply);
-                        break;
+                    //case ItemModType.MasteryRating:
+                    //    ApplyRatingMod(CombatRating.Mastery, (int)(val * combatRatingMultiplier), apply);
+                    //    break;
                     case ItemModType.ExtraArmor:
                         HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, (float)val, apply);
                         break;
@@ -3434,28 +3451,7 @@ namespace Game.Entities
                         break;
                     case ItemModType.ArcaneResistance:
                         HandleStatFlatModifier(UnitMods.ResistanceArcane, UnitModifierFlatType.Base, (float)val, apply);
-                        break;
-                    case ItemModType.PvpPower:
-                        ApplyRatingMod(CombatRating.PvpPower, (int)val, apply);
-                        break;
-                    case ItemModType.Corruption:
-                        ApplyRatingMod(CombatRating.Corruption, (int)val, apply);
-                        break;
-                    case ItemModType.CorruptionResistance:
-                        ApplyRatingMod(CombatRating.CorruptionResistance, (int)val, apply);
-                        break;
-                    case ItemModType.CrSpeed:
-                        ApplyRatingMod(CombatRating.Speed, (int)(val * combatRatingMultiplier), apply);
-                        break;
-                    case ItemModType.CrLifesteal:
-                        ApplyRatingMod(CombatRating.Lifesteal, (int)(val * combatRatingMultiplier), apply);
-                        break;
-                    case ItemModType.CrAvoidance:
-                        ApplyRatingMod(CombatRating.Avoidance, (int)(val * combatRatingMultiplier), apply);
-                        break;
-                    case ItemModType.CrSturdiness:
-                        ApplyRatingMod(CombatRating.Studiness, (int)(val * combatRatingMultiplier), apply);
-                        break;
+                        break;           
                     case ItemModType.AgiStrInt:
                         HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
                         HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);

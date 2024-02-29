@@ -179,11 +179,6 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Unit) && !IsPet())
                 DoneTotalMod *= ToCreature().GetSpellDamageMod(ToCreature().GetCreatureTemplate().Rank);
 
-            // Versatility
-            Player modOwner = GetSpellModOwner();
-            if (modOwner != null)
-                MathFunctions.AddPct(ref DoneTotalMod, modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + modOwner.GetTotalAuraModifier(AuraType.ModVersatility));
-
             float maxModDamagePercentSchool = 0.0f;
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
@@ -281,15 +276,6 @@ namespace Game.Entities
             // Spells with SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS should only benefit from mechanic damage mod auras.
             if (!spellProto.HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
-                // Versatility
-                Player modOwner = GetSpellModOwner();
-                if (modOwner != null)
-                {
-                    // only 50% of SPELL_AURA_MOD_VERSATILITY for damage reduction
-                    float versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;
-                    MathFunctions.AddPct(ref TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
-                }
-
                 // from positive and negative SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN
                 // multiplicative bonus, for example Dispersion + Shadowform (0.10*0.85=0.085)
                 TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentTaken, (uint)spellProto.GetSchoolMask());

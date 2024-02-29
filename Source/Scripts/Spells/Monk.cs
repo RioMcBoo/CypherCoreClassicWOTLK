@@ -125,9 +125,9 @@ namespace Scripts.Spells.Monk
         void CalculateAbsorb(uint effIndex)
         {
             int absorb = (int)GetCaster().CountPctFromMaxHealth(GetEffectValue());
-            Player player = GetCaster().ToPlayer();
-            if (player != null)
-                MathFunctions.AddPct(ref absorb, player.GetRatingBonusValue(CombatRating.VersatilityHealingDone));
+            //Player player = GetCaster().ToPlayer();
+            //if (player != null)
+            //    MathFunctions.AddPct(ref absorb, player.GetRatingBonusValue(CombatRating.VersatilityHealingDone));
 
             AuraEffect calmingCoalescence = GetCaster().GetAuraEffect(SpellIds.CalmingCoalescence, 0, GetCaster().GetGUID());
             if (calmingCoalescence != null)
