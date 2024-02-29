@@ -116,11 +116,12 @@ namespace Game.Networking.Packets
             if (Allow)
             {
                 _worldPacket.WriteInt32(Info.QuestID);
-                _worldPacket.WriteInt32(Info.QuestType);
+                _worldPacket.WriteInt32((int)Info.QuestType);
                 _worldPacket.WriteInt32(Info.QuestLevel);
                 _worldPacket.WriteInt32(Info.QuestScalingFactionGroup);
                 _worldPacket.WriteInt32(Info.QuestMaxScalingLevel);
                 _worldPacket.WriteInt32(Info.QuestPackageID);
+                _worldPacket.WriteInt32(Info.QuestMinLevel);
                 _worldPacket.WriteInt32(Info.QuestSortID);
                 _worldPacket.WriteInt32(Info.QuestInfoID);
                 _worldPacket.WriteInt32(Info.SuggestedGroupNum);
@@ -140,9 +141,9 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteFloat(Info.RewardArtifactXPMultiplier);
                 _worldPacket.WriteInt32(Info.RewardArtifactCategoryID);
                 _worldPacket.WriteInt32(Info.StartItem);
-                _worldPacket.WriteUInt32(Info.Flags);
-                _worldPacket.WriteUInt32(Info.FlagsEx);
-                _worldPacket.WriteUInt32(Info.FlagsEx2);
+                _worldPacket.WriteInt32((int)Info.Flags);
+                _worldPacket.WriteInt32((int)Info.FlagsEx);
+                _worldPacket.WriteInt32((int)Info.FlagsEx2);
 
                 for (uint i = 0; i < SharedConst.QuestRewardItemCount; ++i)
                 {
@@ -186,8 +187,8 @@ namespace Game.Networking.Packets
 
                 for (uint i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
                 {
-                    _worldPacket.WriteUInt32(Info.RewardCurrencyID[i]);
-                    _worldPacket.WriteUInt32(Info.RewardCurrencyQty[i]);
+                    _worldPacket.WriteInt32(Info.RewardCurrencyID[i]);
+                    _worldPacket.WriteInt32(Info.RewardCurrencyQty[i]);
                 }
 
                 _worldPacket.WriteInt32(Info.AcceptedSoundKitID);
@@ -989,7 +990,7 @@ namespace Game.Networking.Packets
         public QuestType QuestType; // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
         public int QuestLevel; // may be -1, static data, in other cases must be used dynamic level: Player::GetQuestLevel (0 is not known, but assuming this is no longer valid for quest intended for client)
         public int QuestScalingFactionGroup;
-        public int QuestMaxScalingLevel = 255;
+        public int QuestMaxScalingLevel;
         public int QuestPackageID;
         public int QuestMinLevel;
         public int QuestSortID; // zone or sort to display in quest log

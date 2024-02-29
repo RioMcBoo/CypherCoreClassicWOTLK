@@ -823,11 +823,11 @@ namespace Game
             if (paragonReputation == null)
                 return false;
 
-            Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)paragonReputation.QuestID);
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(paragonReputation.QuestID);
             if (quest == null)
                 return false;
 
-            return _player.GetLevel() >= _player.GetQuestMinLevel(quest);
+            return _player.GetLevel() >= quest.MinLevel;
         }
         
         public byte GetVisibleFactionCount() { return _visibleFactionCount; }

@@ -417,44 +417,39 @@ namespace Game
             ObjectManager.AddLocaleString(text, locale, qct.Text);
         }
 
-        public uint XPValue(Player player)
+        public int XPValue(Player player)
         {
-            return XPValue(player, ContentTuningId, RewardXPDifficulty, RewardXPMultiplier, Expansion);
+            return XPValue(player, player.GetQuestLevel(this), RewardXPDifficulty, RewardXPMultiplier);
         }
 
-        public static uint XPValue(Player player, uint contentTuningId, uint xpDifficulty, float xpMultiplier = 1.0f, int expansion = -1)
+        public static int XPValue(Player player, int questLevel, int xpDifficulty, float xpMultiplier = 1.0f)
         {
-            if (player != null)
+            if (player == null)
+                return 0;
+
+            QuestXPRecord questXp = CliDB.QuestXPStorage.LookupByKey(questLevel);
+            if (questXp == null || xpDifficulty >= 10)
+                return 0;
+
+            float multiplier = 1.0f;
+            if (questLevel != player.GetLevel())
+                multiplier = CliDB.XpGameTable.GetRow(Math.Min(player.GetLevel(), questLevel)).Divisor / CliDB.XpGameTable.GetRow(player.GetLevel()).Divisor;
+
+            int diffFactor = 2 * (questLevel - player.GetLevel()) + 20;
+            if (diffFactor < 1)
+                diffFactor = 1;
+            else if (diffFactor > 10)
+                diffFactor = 10;
+
+            int xp = RoundXPValue(diffFactor * questXp.Difficulty[xpDifficulty] / 10 * multiplier);
+
+            if (WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) != 0)
             {
-                uint questLevel = (uint)player.GetQuestLevel(contentTuningId);
-                QuestXPRecord questXp = CliDB.QuestXPStorage.LookupByKey(questLevel);
-                if (questXp == null || xpDifficulty >= 10)
-                    return 0;
-
-                uint xp = questXp.Difficulty[xpDifficulty];
-
-                int diffFactor = (int)(2 * (questLevel - player.GetLevel()) + 12);
-                if (diffFactor < 1)
-                    diffFactor = 1;
-                else if (diffFactor > 10)
-                    diffFactor = 10;
-
-                xp = (uint)(diffFactor * xp * xpMultiplier / 10);
-                if (player.GetLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion - 1) && player.GetSession().GetExpansion() == PlayerConst.CurrentExpansion && expansion >= 0 && expansion < (int)PlayerConst.CurrentExpansion)
-                    xp = (uint)(xp / 9.0f);
-
-                xp = RoundXPValue(xp);
-
-                if (WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) != 0)
-                {
-                    uint minScaledXP = RoundXPValue((uint)(questXp.Difficulty[xpDifficulty] * xpMultiplier)) * WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) / 100;
-                    xp = Math.Max(minScaledXP, xp);
-                }
-
-                return xp;
+                int minScaledXP = RoundXPValue(questXp.Difficulty[xpDifficulty] * xpMultiplier) * WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) / 100;
+                xp = Math.Max(minScaledXP, xp);
             }
 
-            return 0;
+            return xp;
         }
 
         public static bool IsTakingQuestEnabled(int questId)
@@ -472,25 +467,7 @@ namespace Game
                 return (int)(money.Difficulty[RewardMoneyDifficulty] * RewardMoneyMultiplier);
             else
                 return 0;
-        }
-
-        public uint MaxMoneyValue()
-        {
-            int questLevel = Level;
-            if (questLevel >= 0)
-            {
-                var money = CliDB.QuestMoneyRewardStorage.LookupByKey(questLevel);
-                if (money != null)
-                    return (uint)(money.Difficulty[RewardMoneyDifficulty] * RewardMoneyMultiplier);
-            }
-
-            return 0;
-        }
-
-        public int GetMaxMoneyReward()
-        {
-            return (int)(MaxMoneyValue() * WorldConfig.GetFloatValue(WorldCfg.RateMoneyQuest));
-        }
+        }        
 
         public QuestTagType? GetQuestTag()
         {
@@ -683,7 +660,7 @@ namespace Game
             response.Info.RewardXPMultiplier = RewardXPMultiplier;
 
             if (!HasAnyFlag(QuestFlags.HideReward))
-                response.Info.RewardMoney = player != null ? player.GetQuestMoneyReward(this) : GetMaxMoneyReward();
+                response.Info.RewardMoney = player != null ? player.GetQuestMoneyReward(this) : 0;
 
             response.Info.RewardMoneyDifficulty = RewardMoneyDifficulty;
             response.Info.RewardMoneyMultiplier = RewardMoneyMultiplier;
@@ -838,7 +815,6 @@ namespace Game
         public int Id;
         public QuestType Type;
         public int PackageID;
-        public uint ContentTuningId;
         public int QuestSortID;
         public int QuestInfoID;
         public int SuggestedPlayers;

@@ -36,50 +36,11 @@ namespace Game.Entities
         public List<uint> GetRewardedQuests() { return m_RewardedQuests; }
         Dictionary<uint, QuestStatusData> GetQuestStatusMap() { return m_QuestStatus; }
 
-        public int GetQuestMinLevel(Quest quest)
-        {
-            return GetQuestMinLevel(quest.ContentTuningId);
-        }
-
-        int GetQuestMinLevel(uint contentTuningId)
-        {
-            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, 0);
-            if (questLevels.HasValue)
-            {
-                ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(GetRace());
-                FactionTemplateRecord raceFaction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
-                int questFactionGroup = CliDB.ContentTuningStorage.LookupByKey(contentTuningId).GetScalingFactionGroup();
-                if (questFactionGroup != 0 && raceFaction.FactionGroup != questFactionGroup)
-                    return questLevels.Value.MaxLevel;
-
-                if (raceFaction.FactionGroup != quest.ScalingFactionGroup)
-                    return quest.MaxScalingLevel;
-            }
-
-            return quest.MinLevel;
-        }
-
         public int GetQuestLevel(Quest quest)
         {
             if (quest == null)
-                return 0;
-            return GetQuestLevel(quest.ContentTuningId);
-        }
-
-        public int GetQuestLevel(uint contentTuningId)
-        {
-            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, 0);
-            if (questLevels.HasValue)
-            {
-                int minLevel = GetQuestMinLevel(contentTuningId);
-                int maxLevel = questLevels.Value.MaxLevel;
-                int level = (int)GetLevel();
-                if (level >= minLevel)
-                    return Math.Min(level, maxLevel);
-                return minLevel;
-            }
-
-            return 0;
+                return GetLevel();
+            return quest.Level > 0 ? quest.Level : Math.Min(GetLevel(), quest.MaxScalingLevel);
         }
 
         public int GetRewardedQuestCount() { return m_RewardedQuests.Count; }

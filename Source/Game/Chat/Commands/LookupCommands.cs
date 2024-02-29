@@ -1031,8 +1031,9 @@ namespace Game.Chat
                                 {
                                     handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
                                         handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
-                                        handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
-                                        qInfo.MaxLevel, qInfo.ScalingFactionGroup,
+                                        qInfo.MinLevel,
+                                        qInfo.MaxScalingLevel,
+                                        qInfo.ScalingFactionGroup,
                                         title, statusStr);
                                 }
                                 else
@@ -1084,8 +1085,9 @@ namespace Game.Chat
                         {
                             handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
                                 handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
-                                handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
-                                qInfo.MaxLevel, qInfo.ScalingFactionGroup,
+                                qInfo.MinLevel,
+                                qInfo.MaxScalingLevel,
+                                qInfo.ScalingFactionGroup,
                                 _title, statusStr);
                         }
                         else
@@ -1142,8 +1144,9 @@ namespace Game.Chat
                     {
                         handler.SendSysMessage(CypherStrings.QuestListChat, id, id,
                             handler.GetSession().GetPlayer().GetQuestLevel(quest),
-                            handler.GetSession().GetPlayer().GetQuestMinLevel(quest),
-                            quest.MaxLevel, quest.ScalingFactionGroup,
+                            quest.MinLevel,
+                            quest.MaxScalingLevel,
+                            quest.ScalingFactionGroup,
                             title, statusStr);
                     }
                     else

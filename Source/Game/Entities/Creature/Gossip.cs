@@ -278,6 +278,7 @@ namespace Game.Misc
                 {
                     ClientGossipText gossipText = new();
                     gossipText.QuestID = questID;
+                    gossipText.ContentTuningID = 0;
                     gossipText.QuestType = item.QuestIcon;
                     gossipText.QuestLevel = quest.Level;
                     gossipText.QuestMaxScalingLevel = quest.MaxScalingLevel;
@@ -372,6 +373,7 @@ namespace Game.Misc
                 {
                     ClientGossipText text = new();
                     text.QuestID = questID;
+                    text.ContentTuningID = 0;
                     text.QuestLevel = quest.Level;
                     text.QuestMaxScalingLevel = quest.MaxScalingLevel;
                     text.QuestType = questMenuItem.QuestIcon;
