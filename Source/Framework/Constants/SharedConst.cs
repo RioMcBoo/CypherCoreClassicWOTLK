@@ -303,25 +303,7 @@ namespace Framework.Constants
             9, 10, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, 21, -1, 23, 24, 25, 26, 27, 28,
             29, 30, 31, -1, 11, 12, 13, 14
-        };
-
-        //Todo move these else where
-        /// <summary>
-        /// Method Const
-        /// </summary>
-        public static SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
-        {
-            for (SpellSchools i = 0; i < SpellSchools.Max; ++i)
-                if (mask.HasAnyFlag(GetSpellSchoolMask(i)))
-                    return i;
-
-            return SpellSchools.Normal;
-        }
-
-        public static SpellSchoolMask GetSpellSchoolMask(SpellSchools school)
-        {
-            return (SpellSchoolMask)(1 << (int)school);
-        }
+        };               
 
         public static SkillType SkillByQuestSort(int sort)
         {

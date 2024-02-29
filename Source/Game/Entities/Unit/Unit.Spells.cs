@@ -600,7 +600,7 @@ namespace Game.Entities
                         crit_chance = 0.0f;
                     // For other schools
                     else if (IsTypeId(TypeId.Player))
-                        crit_chance = ToPlayer().m_activePlayerData.SpellCritPercentage[(int)SharedConst.GetFirstSchoolInMask(schoolMask)];
+                        crit_chance = ToPlayer().m_activePlayerData.SpellCritPercentage[(int)schoolMask.GetFirstSchool()];
                     else
                         crit_chance = BaseSpellCritChance;
                     break;

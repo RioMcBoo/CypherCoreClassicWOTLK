@@ -4787,15 +4787,6 @@ namespace Game.Entities
             return false;
         }
 
-        public SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
-        {
-            for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                if (Convert.ToBoolean((int)mask & (1 << i)))
-                    return (SpellSchools)i;
-
-            return SpellSchools.Normal;
-        }
-
         public uint GetModelForTotem(uint spellId, Race race)
         {
             return mSpellTotemModel.LookupByKey(Tuple.Create(spellId, (byte)race));

@@ -907,6 +907,7 @@ namespace Game.Entities
                 case Stats.Intellect:
                     UpdateMaxPower(PowerType.Mana);
                     break;
+                case Stats.Spirit:
                 default:
                     break;
             }

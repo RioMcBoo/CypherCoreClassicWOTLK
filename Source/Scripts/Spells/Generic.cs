@@ -62,7 +62,7 @@ namespace Scripts.Spells.Generic
             if (GetTarget().GetAuraEffect(AuraType.ModManaRegenInterrupt, SpellFamilyNames.Mage, new FlagArray128(0x10000000, 0x0, 0x0)) == null)
                 return false;
 
-            return SharedConst.GetFirstSchoolInMask(eventInfo.GetSchoolMask()) switch
+            return eventInfo.GetSchoolMask().GetFirstSchool() switch
             {
                 SpellSchools.Normal or SpellSchools.Holy => false,
                 _ => true
@@ -73,7 +73,7 @@ namespace Scripts.Spells.Generic
         {
             PreventDefaultAction();
 
-            uint spellId = SharedConst.GetFirstSchoolInMask(eventInfo.GetSchoolMask()) switch
+            uint spellId = eventInfo.GetSchoolMask().GetFirstSchool() switch
             {
                 SpellSchools.Fire => SpellGenAdaptiveWardingFire,
                 SpellSchools.Nature                   => SpellGenAdaptiveWardingNature,
@@ -2294,7 +2294,7 @@ namespace Scripts.Spells.Generic
             if (eventInfo.GetSpellInfo() == null)
                 return false;
 
-            if (SharedConst.GetFirstSchoolInMask(eventInfo.GetSchoolMask()) == SpellSchools.Normal)
+            if (eventInfo.GetSchoolMask().GetFirstSchool() == SpellSchools.Normal)
                 return false;
 
             return true;
@@ -2305,7 +2305,7 @@ namespace Scripts.Spells.Generic
             PreventDefaultAction();
 
             uint spellId;
-            switch (SharedConst.GetFirstSchoolInMask(eventInfo.GetSchoolMask()))
+            switch (eventInfo.GetSchoolMask().GetFirstSchool())
             {
                 case SpellSchools.Holy:
                     spellId = SpellGenObsidianArmorHoly;

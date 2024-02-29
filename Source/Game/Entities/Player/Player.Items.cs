@@ -3307,10 +3307,10 @@ namespace Game.Entities
                         HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, (float)val, apply);
                         UpdateStatBuffMod(Stats.Intellect);
                         break;
-                    //case ItemModType.Spirit:                           //modify spirit
-                    //    HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Base, (float)val, apply);
-                    //    UpdateStatBuffMod(Stats.Spirit);
-                    //    break;
+                    case ItemModType.Spirit:                           //modify spirit
+                        HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Base, (float)val, apply);
+                        UpdateStatBuffMod(Stats.Spirit);
+                        break;
                     case ItemModType.Stamina:                          //modify stamina
                         HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, (float)val, apply);
                         UpdateStatBuffMod(Stats.Stamina);

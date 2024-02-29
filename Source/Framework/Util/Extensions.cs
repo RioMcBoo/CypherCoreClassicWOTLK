@@ -125,6 +125,20 @@ namespace System
             return (mask & (SpellSchoolMask)(1 << (int)_school)) != 0;            
         }
 
+        //public static SpellSchoolMask GetSpellSchoolMask(this SpellSchools school)
+        //{
+        //    return (SpellSchoolMask)(1 << (int)school);
+        //}
+
+        public static SpellSchools GetFirstSchool(this SpellSchoolMask mask)
+        {
+            for (SpellSchools i = 0; i < SpellSchools.Max; ++i)
+                if (mask.HasSchool(i))
+                    return i;
+
+            return SpellSchools.Normal;
+        }        
+
         public static bool HasState(this EncounterStateMask mask, EncounterState _state)
         {
             return (mask & (EncounterStateMask)(1 << (int)_state)) != 0;
