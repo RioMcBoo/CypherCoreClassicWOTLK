@@ -59,7 +59,6 @@ namespace Game.Entities
                     SetTaximaskNode(23);    // Orgrimmar, Durotar
                     SetTaximaskNode(69);    // Moonglade (Horde)
                     SetTaximaskNode(82);    // Silvermoon City
-                    SetTaximaskNode(384);   // The Bulwark, Tirisfal
                     break;
             }
 
