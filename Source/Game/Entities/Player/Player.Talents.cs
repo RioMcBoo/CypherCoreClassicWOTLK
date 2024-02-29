@@ -634,6 +634,7 @@ namespace Game.Entities
             packet.UnspentTalentPoints = GetFreeTalentPoints();
             packet.ActiveGroup = 0;
 
+            /*
             for (byte specIdx = 0; specIdx < GetTalentGroupCount(); ++specIdx)
             {
                 TalentGroupInfo groupInfoPkt = new();
@@ -684,7 +685,7 @@ namespace Game.Entities
 
                 packet.TalentGroupInfos.Add(groupInfoPkt);
             }
-
+            */
             SendPacket(packet);
         }
 
