@@ -1874,7 +1874,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.SetSilencedSchoolMask((SpellSchoolMask)GetMiscValue());
+                target.SetUnitFlag(UnitFlags.Silenced);
 
                 // call functions which may have additional effects after changing state of unit
                 // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
@@ -1889,14 +1889,11 @@ namespace Game.Spells
             }
             else
             {
-                int silencedSchoolMask = 0;
-                foreach (AuraEffect auraEffect in target.GetAuraEffectsByType(AuraType.ModSilence))
-                    silencedSchoolMask |= auraEffect.GetMiscValue();
+                // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
+                if (target.HasAuraType(AuraType.ModSilence) || target.HasAuraType(AuraType.ModPacifySilence))
+                    return;
 
-                foreach (AuraEffect auraEffect in target.GetAuraEffectsByType(AuraType.ModPacifySilence))
-                    silencedSchoolMask |= auraEffect.GetMiscValue();
-
-                target.ReplaceAllSilencedSchoolMask((SpellSchoolMask)silencedSchoolMask);
+                target.RemoveUnitFlag(UnitFlags.Silenced);
             }
         }
 
@@ -5937,11 +5934,6 @@ namespace Game.Spells
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
-            if (apply)
-                aurApp.GetTarget().SetCosmeticMountDisplayId((uint)GetMiscValue());
-            else
-                aurApp.GetTarget().SetCosmeticMountDisplayId(0); // set cosmetic mount to 0, even if multiple auras are active; tested with zandalari racial + divine steed
-
             Player playerTarget = aurApp.GetTarget().ToPlayer();
             if (playerTarget == null)
                 return;
@@ -5957,18 +5949,7 @@ namespace Game.Spells
 
             Player playerTarget = aurApp.GetTarget().ToPlayer();
             if (playerTarget == null)
-                return;
-
-            if (apply)
-                playerTarget.SetRequiredMountCapabilityFlag((byte)GetMiscValue());
-            else
-            {
-                int mountCapabilityFlags = 0;
-                foreach (AuraEffect otherAura in playerTarget.GetAuraEffectsByType(GetAuraType()))
-                    mountCapabilityFlags |= otherAura.GetMiscValue();
-
-                playerTarget.ReplaceAllRequiredMountCapabilityFlags((byte)mountCapabilityFlags);
-            }
+                return;            
         }
         
         [AuraEffectHandler(AuraType.SuppressItemPassiveEffectBySpellLabel)]

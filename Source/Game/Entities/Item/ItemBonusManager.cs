@@ -56,7 +56,7 @@ namespace Game.Entities
 
             if (mapDifficulty.ItemContextPickerID != 0)
             {
-                uint contentTuningId = Global.DB2Mgr.GetRedirectedContentTuningId((uint)mapDifficulty.ContentTuningID, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                int contentTuningId = mapDifficulty.ContentTuningID;
 
                 ItemContextPickerEntryRecord selectedPickerEntry = null;
                 foreach (var itemContextPickerEntry in CliDB.ItemContextPickerEntryStorage.Values)
@@ -79,9 +79,6 @@ namespace Game.Entities
                         meetsPlayerCondition = !meetsPlayerCondition;
 
                     if (!meetsPlayerCondition)
-                        continue;
-
-                    if (itemContextPickerEntry.LabelID != 0 && !Global.DB2Mgr.HasContentTuningLabel(contentTuningId, itemContextPickerEntry.LabelID))
                         continue;
 
                     if (selectedPickerEntry == null || selectedPickerEntry.OrderIndex < itemContextPickerEntry.OrderIndex)
@@ -107,35 +104,12 @@ namespace Game.Entities
 
         public static bool CanApplyBonusTreeToItem(ItemTemplate itemTemplate, uint itemBonusTreeId, ItemBonusGenerationParams generationParams)
         {
-            var bonusTree = CliDB.ItemBonusTreeStorage.LookupByKey(itemBonusTreeId);
-            if (bonusTree != null)
-            {
-                if (bonusTree.InventoryTypeSlotMask != 0)
-                    if ((1 << (int)itemTemplate.GetInventoryType() & bonusTree.InventoryTypeSlotMask) == 0)
-                        return false;
-
-                if ((bonusTree.Flags & 0x8) != 0 && !itemTemplate.HasFlag(ItemFlags2.CasterWeapon))
-                    return false;
-                if ((bonusTree.Flags & 0x10) != 0 && itemTemplate.HasFlag(ItemFlags2.CasterWeapon))
-                    return false;
-                if ((bonusTree.Flags & 0x20) != 0 && !itemTemplate.HasFlag(ItemFlags4.CcTrinket))
-                    return false;
-                if ((bonusTree.Flags & 0x40) != 0 && itemTemplate.HasFlag(ItemFlags4.CcTrinket))
-                    return false;
-
-                if ((bonusTree.Flags & 0x4) != 0)
-                    return true;
-            }
-
             var bonusTreeNodes = _itemBonusTrees.LookupByKey(itemBonusTreeId);
             if (!bonusTreeNodes.Empty())
             {
                 bool anyNodeMatched = false;
                 foreach (var bonusTreeNode in bonusTreeNodes)
                 {
-                    if (bonusTreeNode.MinMythicPlusLevel > 0)
-                        continue;
-
                     ItemContext nodeContext = (ItemContext)bonusTreeNode.ItemContext;
                     if (nodeContext == ItemContext.None || nodeContext == generationParams.Context)
                     {
@@ -152,94 +126,6 @@ namespace Game.Entities
 
         public static uint GetBonusTreeIdOverride(uint itemBonusTreeId, ItemBonusGenerationParams generationParams)
         {
-            // TODO: configure seasons globally
-            var mythicPlusSeason = CliDB.MythicPlusSeasonStorage.LookupByKey(0);
-            if (mythicPlusSeason != null)
-            {
-                int selectedLevel = -1;
-                int selectedMilestoneSeason = -1;
-                ChallengeModeItemBonusOverrideRecord selectedItemBonusOverride = null;
-                foreach (var itemBonusOverride in _challengeModeItemBonusOverrides.LookupByKey(itemBonusTreeId))
-                {
-                    if (itemBonusOverride.Type != 0)
-                        continue;
-
-                    if (itemBonusOverride.Value > generationParams.MythicPlusKeystoneLevel.GetValueOrDefault(-1))
-                        continue;
-
-                    if (itemBonusOverride.MythicPlusSeasonID != 0)
-                    {
-                        var overrideSeason = CliDB.MythicPlusSeasonStorage.LookupByKey(itemBonusOverride.MythicPlusSeasonID);
-                        if (overrideSeason == null)
-                            continue;
-
-                        if (mythicPlusSeason.MilestoneSeason < overrideSeason.MilestoneSeason)
-                            continue;
-
-                        if (selectedMilestoneSeason > overrideSeason.MilestoneSeason)
-                            continue;
-
-                        if (selectedMilestoneSeason == overrideSeason.MilestoneSeason)
-                            if (selectedLevel > itemBonusOverride.Value)
-                                continue;
-
-                        selectedMilestoneSeason = overrideSeason.MilestoneSeason;
-                    }
-                    else if (selectedLevel > itemBonusOverride.Value)
-                        continue;
-
-                    selectedLevel = itemBonusOverride.Value;
-                    selectedItemBonusOverride = itemBonusOverride;
-                }
-
-                if (selectedItemBonusOverride != null && selectedItemBonusOverride.DstItemBonusTreeID != 0)
-                    itemBonusTreeId = (uint)selectedItemBonusOverride.DstItemBonusTreeID;
-            }
-
-            // TODO: configure seasons globally
-            var pvpSeason = CliDB.PvpSeasonStorage.LookupByKey(0);
-            if (pvpSeason != null)
-            {
-                int selectedLevel = -1;
-                int selectedMilestoneSeason = -1;
-                ChallengeModeItemBonusOverrideRecord selectedItemBonusOverride = null;
-                foreach (var itemBonusOverride in _challengeModeItemBonusOverrides.LookupByKey(itemBonusTreeId))
-                {
-                    if (itemBonusOverride.Type != 1)
-                        continue;
-
-                    if (itemBonusOverride.Value > generationParams.PvpTier.GetValueOrDefault(-1))
-                        continue;
-
-                    if (itemBonusOverride.PvPSeasonID != 0)
-                    {
-                        var overrideSeason = CliDB.PvpSeasonStorage.LookupByKey(itemBonusOverride.PvPSeasonID);
-                        if (overrideSeason == null)
-                            continue;
-
-                        if (pvpSeason.MilestoneSeason < overrideSeason.MilestoneSeason)
-                            continue;
-
-                        if (selectedMilestoneSeason > overrideSeason.MilestoneSeason)
-                            continue;
-
-                        if (selectedMilestoneSeason == overrideSeason.MilestoneSeason)
-                            if (selectedLevel > itemBonusOverride.Value)
-                                continue;
-
-                        selectedMilestoneSeason = overrideSeason.MilestoneSeason;
-                    }
-                    else if (selectedLevel > itemBonusOverride.Value)
-                        continue;
-
-                    selectedLevel = itemBonusOverride.Value;
-                    selectedItemBonusOverride = itemBonusOverride;
-                }
-
-                if (selectedItemBonusOverride != null && selectedItemBonusOverride.DstItemBonusTreeID != 0)
-                    itemBonusTreeId = (uint)selectedItemBonusOverride.DstItemBonusTreeID;
-            }
-
             return itemBonusTreeId;
         }
 
@@ -262,143 +148,19 @@ namespace Game.Entities
                 ItemContext nodeContext = (ItemContext)bonusTreeNode.ItemContext;
                 ItemContext requiredContext = nodeContext != ItemContext.ForceToNone ? nodeContext : ItemContext.None;
                 if (nodeContext != ItemContext.None && generationParams.Context != requiredContext)
-                    continue;
-
-                if (generationParams.MythicPlusKeystoneLevel != 0)
-                {
-                    if (bonusTreeNode.MinMythicPlusLevel != 0 && generationParams.MythicPlusKeystoneLevel < bonusTreeNode.MinMythicPlusLevel)
-                        continue;
-
-                    if (bonusTreeNode.MaxMythicPlusLevel != 0 && generationParams.MythicPlusKeystoneLevel > bonusTreeNode.MaxMythicPlusLevel)
-                        continue;
-                }
+                    continue;               
 
                 if (bonusTreeNode.ChildItemBonusTreeID != 0)
                     ApplyBonusTreeHelper(itemTemplate, bonusTreeNode.ChildItemBonusTreeID, generationParams, sequenceLevel, ref itemLevelSelectorId, bonusListIDs);
                 else if (bonusTreeNode.ChildItemBonusListID != 0)
                     bonusListIDs.Add(bonusTreeNode.ChildItemBonusListID);
                 else if (bonusTreeNode.ChildItemLevelSelectorID != 0)
-                    itemLevelSelectorId = bonusTreeNode.ChildItemLevelSelectorID;
-                else if (bonusTreeNode.ChildItemBonusListGroupID != 0)
-                {
-                    int resolvedSequenceLevel = sequenceLevel;
-                    switch (originalItemBonusTreeId)
-                    {
-                        case 4001:
-                            resolvedSequenceLevel = 1;
-                            break;
-                        case 4079:
-                            if (generationParams.MythicPlusKeystoneLevel != 0)
-                            {
-                                switch (bonusTreeNode.IblGroupPointsModSetID)
-                                {
-                                    case 2909: // MythicPlus_End_of_Run levels 2-8
-                                        resolvedSequenceLevel = (int)Global.DB2Mgr.GetCurveValueAt(62951, generationParams.MythicPlusKeystoneLevel.Value);
-                                        break;
-                                    case 2910: // MythicPlus_End_of_Run levels 9-16
-                                        resolvedSequenceLevel = (int)Global.DB2Mgr.GetCurveValueAt(62952, generationParams.MythicPlusKeystoneLevel.Value);
-                                        break;
-                                    case 2911: // MythicPlus_End_of_Run levels 17-20
-                                        resolvedSequenceLevel = (int)Global.DB2Mgr.GetCurveValueAt(62954, generationParams.MythicPlusKeystoneLevel.Value);
-                                        break;
-                                    case 3007: // MythicPlus_Jackpot (weekly reward) levels 2-7
-                                        resolvedSequenceLevel = (int)Global.DB2Mgr.GetCurveValueAt(64388, generationParams.MythicPlusKeystoneLevel.Value);
-                                        break;
-                                    case 3008: // MythicPlus_Jackpot (weekly reward) levels 8-15
-                                        resolvedSequenceLevel = (int)Global.DB2Mgr.GetCurveValueAt(64389, generationParams.MythicPlusKeystoneLevel.Value);
-                                        break;
-                                    case 3009: // MythicPlus_Jackpot (weekly reward) levels 16-20
-                                        resolvedSequenceLevel = (int)Global.DB2Mgr.GetCurveValueAt(64395, generationParams.MythicPlusKeystoneLevel.Value);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                            break;
-                        case 4125:
-                            resolvedSequenceLevel = 2;
-                            break;
-                        case 4126:
-                            resolvedSequenceLevel = 3;
-                            break;
-                        case 4127:
-                            resolvedSequenceLevel = 4;
-                            break;
-                        case 4128:
-                            switch (generationParams.Context)
-                            {
-                                case ItemContext.RaidNormal:
-                                case ItemContext.RaidRaidFinder:
-                                case ItemContext.RaidHeroic:
-                                    resolvedSequenceLevel = 2;
-                                    break;
-                                case ItemContext.RaidMythic:
-                                    resolvedSequenceLevel = 6;
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        case 4140:
-                            switch (generationParams.Context)
-                            {
-                                case ItemContext.DungeonNormal:
-                                    resolvedSequenceLevel = 2;
-                                    break;
-                                case ItemContext.DungeonHeroic:
-                                    resolvedSequenceLevel = 4;
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-
-                    foreach (var bonusListGroupEntry in _itemBonusListGroupEntries.LookupByKey(bonusTreeNode.ChildItemBonusListGroupID))
-                    {
-                        if ((resolvedSequenceLevel > 0 || bonusListGroupEntry.SequenceValue <= 0) && resolvedSequenceLevel != bonusListGroupEntry.SequenceValue)
-                            continue;
-
-                        itemLevelSelectorId = (uint)bonusListGroupEntry.ItemLevelSelectorID;
-                        bonusListIDs.Add((uint)bonusListGroupEntry.ItemBonusListID);
-                        break;
-                    }
-                }
+                    itemLevelSelectorId = bonusTreeNode.ChildItemLevelSelectorID;                
             }
         }
 
         public static uint GetAzeriteUnlockBonusList(ushort azeriteUnlockMappingSetId, ushort minItemLevel, InventoryType inventoryType)
         {
-            AzeriteUnlockMappingRecord selectedAzeriteUnlockMapping = null;
-            foreach (var azeriteUnlockMapping in _azeriteUnlockMappings.LookupByKey(azeriteUnlockMappingSetId))
-            {
-                if (minItemLevel < azeriteUnlockMapping.ItemLevel)
-                    continue;
-
-                if (selectedAzeriteUnlockMapping != null && selectedAzeriteUnlockMapping.ItemLevel > azeriteUnlockMapping.ItemLevel)
-                    continue;
-
-                selectedAzeriteUnlockMapping = azeriteUnlockMapping;
-            }
-
-            if (selectedAzeriteUnlockMapping != null)
-            {
-                switch (inventoryType)
-                {
-                    case InventoryType.Head:
-                        return selectedAzeriteUnlockMapping.ItemBonusListHead;
-                    case InventoryType.Shoulders:
-                        return selectedAzeriteUnlockMapping.ItemBonusListShoulders;
-                    case InventoryType.Chest:
-                    case InventoryType.Robe:
-                        return selectedAzeriteUnlockMapping.ItemBonusListChest;
-                    default:
-                        break;
-                }
-            }
-
             return 0;
         }
 
@@ -442,10 +204,6 @@ namespace Game.Entities
                             bonusListIDs.Add(itemSelectorQuality.QualityItemBonusListID);
                     }
                 }
-
-                uint azeriteUnlockBonusListId = GetAzeriteUnlockBonusList(selector.AzeriteUnlockMappingSet, selector.MinItemLevel, itemTemplate.GetInventoryType());
-                if (azeriteUnlockBonusListId != 0)
-                    bonusListIDs.Add(azeriteUnlockBonusListId);
             }
 
             return bonusListIDs;

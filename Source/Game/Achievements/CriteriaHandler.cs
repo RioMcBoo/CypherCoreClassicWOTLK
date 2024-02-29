@@ -1706,20 +1706,9 @@ namespace Game.Achievements
                     if (!referencePlayer.GetSession().GetBattlePetMgr().HasJournalLock())
                         return false;
                     break;
-                case ModifierTreeType.FriendshipRepReactionIsMet: // 94
-                {
-                    var friendshipRepReaction = CliDB.FriendshipRepReactionStorage.LookupByKey(reqValue);
-                    if (friendshipRepReaction == null)
+                case ModifierTreeType.FriendshipRepReactionIsMet: // 94                
                         return false;
-
-                    var friendshipReputation = CliDB.FriendshipReputationStorage.LookupByKey(friendshipRepReaction.FriendshipRepID);
-                    if (friendshipReputation == null)
-                        return false;
-
-                    if (referencePlayer.GetReputation((uint)friendshipReputation.FactionID) < friendshipRepReaction.ReactionThreshold)
-                        return false;
-                    break;
-                }
+                 
                 case ModifierTreeType.ReputationWithFactionIsEqualOrGreaterThan: // 95
                     if (referencePlayer.GetReputationMgr().GetReputation(reqValue) < reqValue)
                         return false;
@@ -2470,7 +2459,9 @@ namespace Game.Achievements
                     break;
                 }
                 case ModifierTreeType.PlayerIsQnQuestLinkedToScheduledWorldStateGroup: // 237
+                {
                     return false; // OBSOLETE (db2 removed)
+                }
                 case ModifierTreeType.PlayerIsInRaidGroup: // 238
                 {
                     var group = referencePlayer.GetGroup();
@@ -2603,25 +2594,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.FriendshipRepReactionEqual: // 254
                 {
-                    var friendshipRepReaction = CliDB.FriendshipRepReactionStorage.LookupByKey(reqValue);
-                    if (friendshipRepReaction == null)
-                        return false;
-
-                    var friendshipReputation = CliDB.FriendshipReputationStorage.LookupByKey(friendshipRepReaction.FriendshipRepID);
-                    if (friendshipReputation == null)
-                        return false;
-
-                    var friendshipReactions = Global.DB2Mgr.GetFriendshipRepReactions(reqValue);
-                    if (friendshipReactions == null)
-                        return false;
-
-                    int rank = (int)referencePlayer.GetReputationRank((uint)friendshipReputation.FactionID);
-                    if (rank >= friendshipReactions.Count)
-                        return false;
-
-                    if (friendshipReactions[rank].Id != reqValue)
-                        return false;
-                    break;
+                    return false;
                 }
                 case ModifierTreeType.PlayerAuraStackCountEqual: // 255
                     if (referencePlayer.GetAuraCount((uint)secondaryAsset) != reqValue)
@@ -3092,9 +3065,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.PlayerHasPerksProgramPendingReward: // 350
-                    if (!referencePlayer.m_activePlayerData.HasPerksProgramPendingReward)
                         return false;
-                    break;
                 case ModifierTreeType.PlayerCanUseItem: // 351
                 {
                     ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(reqValue);

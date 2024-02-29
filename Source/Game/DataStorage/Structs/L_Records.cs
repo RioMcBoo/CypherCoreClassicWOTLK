@@ -38,7 +38,7 @@ namespace Game.DataStorage
         public int IconTextureFileID;
         public int RewardsBgTextureFileID;
         public int PopupBgTextureFileID;
-        public byte ExpansionLevel;
+        private byte _expansionLevel;
         public short MapID;
         private byte _difficultyID;
         public float MinGear;
@@ -64,6 +64,7 @@ namespace Game.DataStorage
 
         #region Properties
         public LfgType TypeID => (LfgType)_typeID;
+        public Expansion ExpansionLevel => (Expansion)_expansionLevel;
         public Difficulty DifficultyID => (Difficulty)_difficultyID;
         public LfgFlags Flags => (LfgFlags)_flags[0];
         #endregion

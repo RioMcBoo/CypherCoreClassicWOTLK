@@ -2298,13 +2298,6 @@ namespace Game.Entities
 
                                     artifactPower = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ArtifactPowers, artifactPowerIndex);
                                     SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
-
-                                    if (IsEquipped())
-                                    {
-                                        ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)artifactPower.ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
-                                        if (artifactPowerRank != null)
-                                            owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
-                                    }
                                 }
                             }
                         }
@@ -2322,13 +2315,6 @@ namespace Game.Entities
 
                                 ArtifactPower artifactPower = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ArtifactPowers, artifactPowerIndex);
                                 SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
-
-                                if (IsEquipped())
-                                {
-                                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)m_itemData.ArtifactPowers[artifactPowerIndex].ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
-                                    if (artifactPowerRank != null)
-                                        owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
-                                }
                             }
                         }
                         break;
@@ -2354,13 +2340,6 @@ namespace Game.Entities
 
                                                 artifactPower = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ArtifactPowers, artifactPowerIndex);
                                                 SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
-
-                                                if (IsEquipped())
-                                                {
-                                                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)artifactPower.ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
-                                                    if (artifactPowerRank != null)
-                                                        owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
-                                                }
                                             }
                                         }
                                     }

@@ -418,11 +418,6 @@ namespace Game.Entities
             return m_unitData.Resistances[(int)school];
         }
 
-        public int GetBonusResistanceMod(SpellSchools school)
-        {
-            return m_unitData.BonusResistanceMods[(int)school];
-        }
-
         public int GetResistance(SpellSchoolMask mask)
         {
             int? resist = null;
@@ -438,8 +433,6 @@ namespace Game.Entities
         }
 
         public void SetResistance(SpellSchools school, int val) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Resistances, (int)school), val); }
-
-        public void SetBonusResistanceMod(SpellSchools school, int val) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BonusResistanceMods, (int)school), val); }
 
         public void SetModCastingSpeed(float castingSpeed) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeed), castingSpeed); }
 
@@ -846,12 +839,6 @@ namespace Game.Entities
         public void SetRangedAttackPowerModNeg(int attackPowerMod) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerModNeg), attackPowerMod); }
 
         public void SetRangedAttackPowerMultiplier(float attackPowerMult) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerMultiplier), attackPowerMult); }
-
-        public void SetMainHandWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MainHandWeaponAttackPower), attackPower); }
-
-        public void SetOffHandWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.OffHandWeaponAttackPower), attackPower); }
-
-        public void SetRangedWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedWeaponAttackPower), attackPower); }
 
         //Chances
         public override float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
@@ -1439,7 +1426,7 @@ namespace Game.Entities
 
             float attackPowerMod = Math.Max(GetAPMultiplier(attType, normalized), 0.25f);
 
-            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType, false) / 3.5f * attackPowerMod;
+            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType) / 3.5f * attackPowerMod;
             float basePct = GetPctModifierValue(unitMod, UnitModifierPctType.Base);
             float totalValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
             float totalPct = addTotalPct ? GetPctModifierValue(unitMod, UnitModifierPctType.Total) : 1.0f;
@@ -1770,8 +1757,8 @@ namespace Game.Entities
                     {
                         // explicit affected values
                         float multiplier = GetRatingMultiplier(cr);
-                        float oldVal = ApplyRatingDiminishing(cr, oldRating * multiplier);
-                        float newVal = ApplyRatingDiminishing(cr, amount * multiplier);
+                        float oldVal = oldRating * multiplier;
+                        float newVal = amount * multiplier;
                         switch (cr)
                         {
                             case CombatRating.HasteMelee:
@@ -2451,9 +2438,8 @@ namespace Game.Entities
                 weaponMaxDamage = 0.0f;
             }
 
-            float attackPower = GetTotalAttackPowerValue(attType, false);
+            float attackPower = GetTotalAttackPowerValue(attType);
             float attackSpeedMulti = Math.Max(GetAPMultiplier(attType, normalized), 0.25f);
-
             float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + (attackPower / 3.5f) * variance;
             float basePct = GetPctModifierValue(unitMod, UnitModifierPctType.Base) * attackSpeedMulti;
             float totalValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);

@@ -754,12 +754,13 @@ namespace Game.Entities
 
         public PVPInfo GetPvpInfoForBracket(byte bracket)
         {
-            int index = m_activePlayerData.PvpInfo.FindIndexIf(pvpInfo =>
+            foreach (var info in m_activePlayerData.PvpInfo)
             {
-                return pvpInfo.Bracket == bracket && !pvpInfo.Disqualified;
-            });
-            if (index >= 0)
-                return m_activePlayerData.PvpInfo[index];
+                if (info.Bracket == bracket && !info.Disqualified)
+                {
+                    return info;
+                }
+            }
 
             return null;
         }

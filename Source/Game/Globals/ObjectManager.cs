@@ -967,8 +967,7 @@ namespace Game
                     // if find graveyard at different map from where entrance placed (or no entrance data), use any first
                     if (mapEntry == null
                         || mapEntry.CorpseMapID < 0
-                        || mapEntry.CorpseMapID != entry.Loc.GetMapId()
-                        || (mapCorpsePosition is Vector2 { X: 0, Y: 0 }))  // Check X and Y
+                        || mapEntry.CorpseMapID != entry.Loc.GetMapId())
 
                     {
                         // not have any corrdinates for check distance anyway
@@ -983,16 +982,13 @@ namespace Game
 
                     if (foundEntr)
                     {
-                        if (dist2 < distEntr)
-                        {
-                            distEntr = dist2;
-                            entryEntr = entry;
-                        }
+                        distEntr = 0.0f;
+                        entryEntr = entry;
                     }
                     else
                     {
                         foundEntr = true;
-                        distEntr = dist2;
+                        distEntr = 0.0f;
                         entryEntr = entry;
                     }
                 }

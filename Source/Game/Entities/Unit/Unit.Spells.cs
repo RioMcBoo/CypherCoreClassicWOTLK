@@ -521,16 +521,8 @@ namespace Game.Entities
             float DoneTotalMod = 1.0f;
 
             // Healing done percent
-            Player thisPlayer = ToPlayer();
-            if (thisPlayer != null)
-            {
-                float maxModDamagePercentSchool = 0.0f;
-                for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                    if (((int)spellProto.GetSchoolMask() & (1 << i)) != 0)
-                        maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModHealingDonePercent);
-
-                DoneTotalMod *= maxModDamagePercentSchool;
-            }
+            if (ToPlayer() is Player thisPlayer)
+                DoneTotalMod *= thisPlayer.m_activePlayerData.ModHealingDonePercent;
             else // SPELL_AURA_MOD_HEALING_DONE_PERCENT is included in m_activePlayerData->ModHealingDonePercent for players
                 DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingDonePercent);
 
@@ -941,12 +933,6 @@ namespace Game.Entities
             return base.GetCastSpellXSpellVisualId(spellInfo);
         }
 
-        public bool IsSilenced(SpellSchoolMask schoolMask) { return (m_unitData.SilencedSchoolMask & (uint)schoolMask) != 0; }
-
-        public void SetSilencedSchoolMask(SpellSchoolMask schoolMask) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SilencedSchoolMask), (uint)schoolMask); }
-
-        public void ReplaceAllSilencedSchoolMask(SpellSchoolMask schoolMask) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SilencedSchoolMask), (uint)schoolMask); }
-        
         public SpellHistory GetSpellHistory() { return _spellHistory; }
 
         public static ProcFlagsHit CreateProcHitMask(SpellNonMeleeDamage damageInfo, SpellMissInfo missCondition)

@@ -52,13 +52,7 @@ namespace Game.Entities
 
             if (GetDuration() > TimeSpan.FromMilliseconds(diff))
             {
-                _duration -= TimeSpan.FromMilliseconds(diff);
-                DoWithSuppressingObjectUpdates(() =>
-                {
-                    // Only sent in CreateObject
-                    ApplyModUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Progress), diff, true);
-                    m_conversationData.ClearChanged(m_conversationData.Progress);
-                });
+                _duration -= TimeSpan.FromMilliseconds(diff);                
             }
             else
             {
@@ -128,11 +122,10 @@ namespace Game.Entities
                     continue;
 
                 ConversationLine lineField = new();
-                lineField.ConversationLineID = (int)line.Id;
-                lineField.UiCameraID = (int)line.UiCameraID;
+                lineField.ConversationLineID = line.Id;
+                lineField.UiCameraID = line.UiCameraID;
                 lineField.ActorIndex = line.ActorIdx;
                 lineField.Flags = line.Flags;
-                lineField.ChatType = line.ChatType;
 
                 ConversationLineRecord convoLine = CliDB.ConversationLineStorage.LookupByKey(line.Id); // never null for conversationTemplate->Lines
 
@@ -166,7 +159,7 @@ namespace Game.Entities
             foreach (ConversationLine line in m_conversationData.Lines.GetValue())
             {
                 ConversationActorField actor = line.ActorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[line.ActorIndex] : null;
-                if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty() && actor.NoActorObject == 0))
+                if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty()))
                 {
                     Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {GetEntry()}) due to missing actor (Idx: {line.ActorIndex}).");
                     return false;
@@ -219,11 +212,7 @@ namespace Game.Entities
                 return 0;
             }
 
-            int textDuration = Global.DB2Mgr.GetBroadcastTextDuration((int)convoLine.BroadcastTextID, locale);
-            if (textDuration == 0)
-                return 0;
-
-            return textDuration + convoLine.AdditionalDuration;
+            return 0;
         }
 
         public TimeSpan GetLineEndTime(Locale locale, int lineId)

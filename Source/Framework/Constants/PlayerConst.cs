@@ -561,7 +561,7 @@ namespace Framework.Constants
         // first slot for item stored (in any way in player items data)
         Start = 0,
         // last+1 slot for item stored (in any way in player items data)
-        End = 129,
+        End = 141,
         Count = (End - Start)
     }
 

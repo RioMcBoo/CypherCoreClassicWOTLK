@@ -1151,11 +1151,13 @@ namespace Game.Entities
         {
             if (pet != null)
             {
+                SetSummonedBattlePetGUID(pet.PacketInfo.Guid);
                 SetCurrentBattlePetBreedQuality(pet.PacketInfo.Quality);
                 SetWildBattlePetLevel(pet.PacketInfo.Level);
             }
             else
             {
+                SetSummonedBattlePetGUID(ObjectGuid.Empty);
                 SetCurrentBattlePetBreedQuality((byte)BattlePetBreedQuality.Poor);
                 SetWildBattlePetLevel(0);
             }
@@ -1373,10 +1375,6 @@ namespace Game.Entities
                 return;
             }
 
-            uint oldTotalCount = 0;
-            uint oldWeekCount = 0;
-            uint oldTrackedCount = 0;
-
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
             {
@@ -1564,11 +1562,9 @@ namespace Game.Entities
                 return 0;
 
             uint maxQuantity = currency.MaxQty;
-            if (currency.MaxQtyWorldStateID != 0)
-                maxQuantity = (uint)WorldStateMgr.GetValue(currency.MaxQtyWorldStateID, GetMap());
-
             uint increasedCap = 0;
-            if (currency.GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum))
+
+            if (currency.HasFlag(CurrencyTypesFlags.DynamicMaximum))
                 increasedCap = GetCurrencyIncreasedCapQuantity(currency.Id);
 
             return maxQuantity + increasedCap;
@@ -1828,9 +1824,7 @@ namespace Game.Entities
                     LFGDungeonsRecord dungeon = DB2Mgr.GetLfgDungeon(map.GetId(), map.GetDifficultyID());
                     if (dungeon != null)
                     {
-                        var dungeonLevels = DB2Mgr.GetContentTuningData(dungeon.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
-                        if (dungeonLevels.HasValue)
-                            if (dungeonLevels.Value.TargetLevelMax == ObjectMgr.GetMaxLevelForExpansion(Expansion.WrathOfTheLichKing))
+                        if (dungeon.TargetLevel == ObjectMgr.GetMaxLevelForExpansion(Expansion.WrathOfTheLichKing))
                                 ChampioningFaction = GetChampioningFaction();
                     }
                 }
@@ -6337,48 +6331,6 @@ namespace Game.Entities
                 SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, offset), val);
 
                 UpdateCriteria(CriteriaType.RevealWorldMapOverlay, GetAreaId());
-
-                var areaLevels = DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
-                if (areaLevels.HasValue)
-                {
-                    if (IsMaxLevel())
-                    {
-                        SendExplorationExperience(areaId, 0);
-                    }
-                    else
-                    {
-                        ushort areaLevel = (ushort)Math.Min(Math.Max((ushort)GetLevel(), areaLevels.Value.MinLevel), areaLevels.Value.MaxLevel);
-                        int diff = (int)GetLevel() - areaLevel;
-                        uint XP;
-                        if (diff < -5)
-                        {
-                            XP = (uint)(ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
-                        }
-                        else if (diff > 5)
-                        {
-                            int exploration_percent = 100 - ((diff - 5) * 5);
-                            if (exploration_percent < 0)
-                                exploration_percent = 0;
-
-                            XP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
-                        }
-                        else
-                        {
-                            XP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
-                        }
-
-                        if (WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) != 0)
-                        {
-                            uint minScaledXP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
-                            XP = Math.Max(minScaledXP, XP);
-                        }
-
-                        GiveXP(XP, null);
-                        SendExplorationExperience(areaId, XP);
-                    }
-                    Log.outInfo(LogFilter.Player, "Player {0} discovered a new area: {1}", GetGUID().ToString(), areaId);
-
-                }
             }
         }
 
@@ -7589,9 +7541,9 @@ namespace Game.Entities
         public void SetHeirloom(int slot, uint itemId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms, slot), (int)itemId); }
         public void SetHeirloomFlags(int slot, uint flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HeirloomFlags, slot), flags); }
 
-        public void AddToy(uint itemId, uint flags)
+        public void AddToy(int itemId, uint flags)
         {
-            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Toys), (int)itemId);
+            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Toys), itemId);
         }
 
         public void AddTransmogBlock(uint blockValue) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Transmog), blockValue); }
@@ -7637,9 +7589,6 @@ namespace Game.Entities
         public void RemoveAuraVision(PlayerFieldByte2Flags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
 
         public void SetTransportServerTime(int transportServerTime) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransportServerTime), transportServerTime); }
-        
-        public void SetRequiredMountCapabilityFlag(byte flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RequiredMountCapabilityFlags), flag); }
-        public void ReplaceAllRequiredMountCapabilityFlags(byte flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RequiredMountCapabilityFlags), flags); }
         
         public bool CanTameExoticPets() { return IsGameMaster() || HasAuraType(AuraType.AllowTamePetType); }
 

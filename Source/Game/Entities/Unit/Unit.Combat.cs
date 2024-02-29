@@ -1473,7 +1473,7 @@ namespace Game.Entities
             }
         }
 
-        public float GetTotalAttackPowerValue(WeaponAttackType attType, bool includeWeapon = true)
+        public float GetTotalAttackPowerValue(WeaponAttackType attType)
         {
             if (attType == WeaponAttackType.RangedAttack)
             {
@@ -1485,12 +1485,6 @@ namespace Game.Entities
             else
             {
                 float ap = m_unitData.AttackPower + m_unitData.AttackPowerModPos + m_unitData.AttackPowerModNeg;
-                if (includeWeapon)
-                {
-                    if (attType != WeaponAttackType.BaseAttack)
-                        ap /= 2;                  
-                }
-
                 if (ap < 0)
                     return 0.0f;
                 return ap * (1.0f + m_unitData.AttackPowerMultiplier);

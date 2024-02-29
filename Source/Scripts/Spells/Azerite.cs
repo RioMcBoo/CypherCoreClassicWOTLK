@@ -551,8 +551,6 @@ namespace Scripts.Spells.Azerite
             Player target = GetTarget().ToPlayer();
             if (target != null)
             {
-                target.ApplyAllAzeriteEmpoweredItemMods(equipped);
-
                 PlayerAzeriteItemEquippedStatusChanged statusChanged = new();
                 statusChanged.IsHeartEquipped = equipped;
                 target.SendPacket(statusChanged);

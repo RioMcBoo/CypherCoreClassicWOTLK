@@ -119,11 +119,6 @@ namespace Game.Entities
 
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellID), spellInfo.Id);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), spellInfo.Id);
-
-            SpellCastVisualField spellCastVisual = areaTriggerData.ModifyValue(m_areaTriggerData.SpellVisual);
-            SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, spellVisual.SpellXSpellVisualID);
-            SetUpdateFieldValue(ref spellCastVisual.ScriptVisualID, spellVisual.ScriptVisualID);
-
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetScale), GetCreateProperties().TimeToTargetScale != 0 ? GetCreateProperties().TimeToTargetScale : m_areaTriggerData.Duration);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), GetMaxSearchRadius());
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), GetCreateProperties().DecalPropertiesId);
@@ -253,10 +248,6 @@ namespace Game.Entities
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(position.SpellForVisuals.Value, Difficulty.None);
                 SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), position.SpellForVisuals.Value);
-
-                SpellCastVisualField spellCastVisual = m_areaTriggerData.ModifyValue(m_areaTriggerData.SpellVisual);
-                SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, spellInfo.GetSpellXSpellVisualId());
-                SetUpdateFieldValue(ref spellCastVisual.ScriptVisualID, 0u);
             }
 
             if (IsServerSide())
@@ -639,9 +630,6 @@ namespace Game.Entities
                     _ai.OnUnitExit(leavingUnit);
                 }
             }
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.NumUnitsInside), _insideUnits.Count);
-            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.NumPlayersInside), _insideUnits.Count(guid => guid.IsPlayer()));
         }
 
         public AreaTriggerTemplate GetTemplate()

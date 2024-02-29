@@ -2274,7 +2274,7 @@ namespace Game.DungeonFinding
         {
             id = dbc.Id;
             name = dbc.Name[Global.WorldMgr.GetDefaultDbcLocale()];
-            map = (uint)dbc.MapID;
+            map = dbc.MapID;
             type = dbc.TypeID;
             expansion = dbc.ExpansionLevel;
             group = dbc.GroupID;
@@ -2286,7 +2286,7 @@ namespace Game.DungeonFinding
 
         public uint id;
         public string name;
-        public uint map;
+        public int map;
         public LfgType type;
         public Expansion expansion;
         public uint group;

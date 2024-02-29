@@ -95,8 +95,6 @@ namespace Game
 
             if (artifact.IsEquipped())
             {
-                _player.ApplyArtifactPowerRank(artifact, artifactPowerRank, true);
-
                 foreach (ArtifactPower power in artifact.m_itemData.ArtifactPowers)
                 {
                     ArtifactPowerRecord scaledArtifactPowerEntry = CliDB.ArtifactPowerStorage.LookupByKey(power.ArtifactPowerId);
@@ -108,9 +106,6 @@ namespace Game
                         continue;
 
                     artifact.SetArtifactPower((ushort)power.ArtifactPowerId, power.PurchasedRank, (byte)(power.CurrentRankWithBonus + 1));
-
-                    _player.ApplyArtifactPowerRank(artifact, scaledArtifactPowerRank, false);
-                    _player.ApplyArtifactPowerRank(artifact, scaledArtifactPowerRank, true);
                 }
             }
 
@@ -222,13 +217,7 @@ namespace Game
                     continue;
 
                 artifact.SetArtifactPower((ushort)artifactPower.ArtifactPowerId, (byte)(artifactPower.PurchasedRank - oldPurchasedRank), (byte)(artifactPower.CurrentRankWithBonus - oldPurchasedRank));
-
-                if (artifact.IsEquipped())
-                {
-                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)artifactPower.ArtifactPowerId, 0);
-                    if (artifactPowerRank != null)
-                        _player.ApplyArtifactPowerRank(artifact, artifactPowerRank, false);
-                }
+                
             }
 
             foreach (ArtifactPower power in artifact.m_itemData.ArtifactPowers)
@@ -242,8 +231,6 @@ namespace Game
                     continue;
 
                 artifact.SetArtifactPower((ushort)power.ArtifactPowerId, power.PurchasedRank, 0);
-
-                _player.ApplyArtifactPowerRank(artifact, scaledArtifactPowerRank, false);
             }
 
             artifact.SetArtifactXP(newAmount);

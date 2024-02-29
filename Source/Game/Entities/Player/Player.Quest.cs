@@ -43,7 +43,7 @@ namespace Game.Entities
 
         int GetQuestMinLevel(uint contentTuningId)
         {
-            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, 0);
             if (questLevels.HasValue)
             {
                 ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(GetRace());
@@ -68,7 +68,7 @@ namespace Game.Entities
 
         public int GetQuestLevel(uint contentTuningId)
         {
-            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, 0);
             if (questLevels.HasValue)
             {
                 int minLevel = GetQuestMinLevel(contentTuningId);
@@ -2200,13 +2200,6 @@ namespace Game.Entities
             return m_playerData.QuestLog[slot].EndTime;
         }
 
-        bool GetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
-        {
-            if (objectiveIndex < SharedConst.MaxQuestCounts)
-                return ((m_playerData.QuestLog[slot].ObjectiveFlags) & (1 << objectiveIndex)) != 0;
-            return false;
-        }
-
         public int GetQuestSlotObjectiveData(ushort slot, QuestObjective objective)
         {
             if (objective.StorageIndex < 0)
@@ -2224,8 +2217,9 @@ namespace Game.Entities
             if (!objective.IsStoringFlag())
                 return GetQuestSlotCounter(slot, (byte)objective.StorageIndex);
 
-            return 0;
+            return (int)(GetQuestSlotState(slot) > objective.StorageIndex) != 0);
         }
+    
 
         public void SetQuestSlot(ushort slot, uint quest_id)
         {
@@ -2233,8 +2227,6 @@ namespace Game.Entities
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.QuestID), (int)quest_id);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.StateFlags), 0u);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.EndTime), 0u);
-            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.ObjectiveFlags), 0u);
-            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.AcceptTime), 0u);
 
             for (int i = 0; i < SharedConst.MaxQuestCounts; ++i)
                 SetUpdateFieldValue(ref questLogField.ModifyValue(questLogField.ObjectiveProgress, i), (ushort)0);
@@ -2266,18 +2258,6 @@ namespace Game.Entities
         {
             QuestLog questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
             SetUpdateFieldValue(questLog.ModifyValue(questLog.EndTime), (uint)endTime);
-        }
-
-        void SetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
-        {
-            QuestLog questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
-            SetUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
-        }
-
-        void RemoveQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
-        {
-            QuestLog questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
-            RemoveUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
         }
 
         void SetQuestCompletedBit(uint questBit, bool completed)
@@ -2680,6 +2660,10 @@ namespace Game.Entities
             // Update quest fields
             if (!objective.IsStoringFlag())
                 SetQuestSlotCounter(status.Slot, (byte)objective.StorageIndex, (ushort)data);
+            else if (data != 0)
+                SetQuestSlotState(status.Slot, 256 << objective.StorageIndex);
+            else
+                RemoveQuestSlotState(status.Slot, 256 << objective.StorageIndex);
         }
 
         public bool IsQuestObjectiveCompletable(ushort slot, Quest quest, QuestObjective objective)

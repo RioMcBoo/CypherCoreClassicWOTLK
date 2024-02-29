@@ -4232,7 +4232,6 @@ namespace Game.Spells
             {
                 unitCaster.ClearChannelObjects();
                 unitCaster.SetChannelSpellId(0);
-                unitCaster.SetChannelSpellXSpellVisual(0);
             }
 
             SpellChannelUpdate spellChannelUpdate = new();
@@ -4311,7 +4310,6 @@ namespace Game.Spells
                         creatureCaster.SetSpellFocus(this, Global.ObjAccessor.GetWorldObject(creatureCaster, unitCaster.m_unitData.ChannelObjects[0]));
 
             unitCaster.SetChannelSpellId(m_spellInfo.Id);
-            unitCaster.SetChannelSpellXSpellVisual((uint)m_SpellVisual.SpellXSpellVisualID);
         }
 
         void SendResurrectRequest(Player target)
@@ -5629,20 +5627,7 @@ namespace Game.Spells
                                     if (battlePetType != 0)
                                         if ((battlePetType & (1 << battlePetSpecies.PetTypeEnum)) == 0)
                                             return SpellCastResult.WrongBattlePetType;
-
-                                    if (spellEffectInfo.Effect == SpellEffectName.ChangeBattlepetQuality)
-                                    {
-                                        var qualityRecord = CliDB.BattlePetBreedQualityStorage.Values.FirstOrDefault(a1 => a1.MaxQualityRoll < spellEffectInfo.BasePoints);
-
-                                        BattlePetBreedQuality quality = BattlePetBreedQuality.Poor;
-                                        if (qualityRecord != null)
-                                            quality = (BattlePetBreedQuality)qualityRecord.QualityEnum;
-
-                                        if (battlePet.PacketInfo.Quality >= (byte)quality)
-                                            return SpellCastResult.CantUpgradeBattlePet;
-
-                                    }
-
+                                    
                                     if (spellEffectInfo.Effect == SpellEffectName.GrantBattlepetLevel || spellEffectInfo.Effect == SpellEffectName.GrantBattlepetExperience)
                                         if (battlePet.PacketInfo.Level >= SharedConst.MaxBattlePetLevel)
                                             return SpellCastResult.GrantPetLevelFail;
@@ -5949,7 +5934,7 @@ namespace Game.Spells
                 else if ((m_spellInfo.Mechanic & Mechanics.ImmuneShield) != 0 && m_caster.IsUnit() && m_caster.ToUnit().HasAuraWithMechanic(1 << (int)Mechanics.Banish))
                     result = SpellCastResult.Stunned;
             }
-            else if (unitCaster.IsSilenced(m_spellSchoolMask) && (m_spellInfo.PreventionType & SpellPreventionType.Silence) != 0 && !CheckSpellCancelsSilence(ref param1))
+            else if (unitCaster.HasUnitFlag(UnitFlags.Silenced) && (m_spellInfo.PreventionType & SpellPreventionType.Silence) != 0 && !CheckSpellCancelsSilence(ref param1))
                 result = SpellCastResult.Silenced;
             else if (unitflag.HasAnyFlag(UnitFlags.Pacified) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify) && !CheckSpellCancelsPacify(ref param1))
                 result = SpellCastResult.Pacified;

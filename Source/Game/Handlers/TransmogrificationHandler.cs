@@ -115,33 +115,7 @@ namespace Game
                     resetAppearanceItems.Add(itemTransmogrified);
 
                 if (transmogItem.SpellItemEnchantmentID != 0)
-                {
-                    if (transmogItem.Slot != EquipmentSlot.MainHand && transmogItem.Slot != EquipmentSlot.OffHand)
-                    {
-                        Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion into non-weapon slot ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
-                        return;
-                    }
-
-                    TransmogIllusionRecord illusion = Global.DB2Mgr.GetTransmogIllusionForEnchantment((uint)transmogItem.SpellItemEnchantmentID);
-                    if (illusion == null)
-                    {
-                        Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion using invalid enchant ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.SpellItemEnchantmentID);
-                        return;
-                    }
-
-                    var condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.UnlockConditionID);
-                    if (condition != null)
-                    {
-                        if (!ConditionManager.IsPlayerMeetingCondition(player, condition))
-                        {
-                            Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion using not allowed enchant ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.SpellItemEnchantmentID);
-                            return;
-                        }
-                    }
-
-                    illusionItems[itemTransmogrified] = (uint)transmogItem.SpellItemEnchantmentID;
-                    cost += illusion.TransmogCost;
-                }
+                    return;
                 else
                     resetIllusionItems.Add(itemTransmogrified);
             }

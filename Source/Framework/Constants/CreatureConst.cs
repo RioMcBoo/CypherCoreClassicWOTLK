@@ -48,7 +48,7 @@ namespace Framework.Constants
         Looting = 0x400,
         PetInCombat = 0x800,
         PvpEnabling = 0x1000,
-        ForceNameplate = 0x2000,
+        Silenced = 0x2000,
         CantSwim = 0x4000,
         CanSwim = 0x8000, // shows swim animation in water
         NonAttackable2 = 0x10000,

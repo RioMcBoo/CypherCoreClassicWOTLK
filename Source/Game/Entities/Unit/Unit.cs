@@ -2385,7 +2385,7 @@ namespace Game.Entities
         {
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, (int)channelSpellId);
         }
-        public uint GetChannelSpellXSpellVisualId() { return (uint)m_unitData.ChannelData.GetValue().SpellXSpellVisualID; }
+
         public void SetChannelSpellXSpellVisual(uint spellXSpellVisualId)
         {
             UnitChannel unitChannel = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData);

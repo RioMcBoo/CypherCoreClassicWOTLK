@@ -2150,7 +2150,7 @@ namespace Game.Spells
             }
 
             // select enchantment duration
-            uint duration = (uint)pEnchant.Duration;
+            uint duration = m_damage;
 
             // item can be in trade slot and have owner diff. from caster
             Player item_owner = itemTarget.GetOwner();
@@ -3558,7 +3558,7 @@ namespace Game.Spells
                 if (contentTuning == null)
                     return;
 
-                uint skinningSkill = player.GetProfessionSkillForExp(skill, contentTuning.ExpansionID);
+                uint skinningSkill = player.GetProfessionSkillForExp(skill, 0);
                 if (skinningSkill == 0)
                     return;
 
@@ -5308,15 +5308,7 @@ namespace Game.Spells
                 return;
 
             if (unitTarget == null || !unitTarget.IsCreature())
-                return;
-
-            var qualityRecord = CliDB.BattlePetBreedQualityStorage.Values.FirstOrDefault(a1 => a1.MaxQualityRoll < damage);
-
-            BattlePetBreedQuality quality = BattlePetBreedQuality.Poor;
-            if (qualityRecord != null)
-                quality = (BattlePetBreedQuality)qualityRecord.QualityEnum;
-
-            playerCaster.GetSession().GetBattlePetMgr().ChangeBattlePetQuality(unitTarget.GetBattlePetCompanionGUID(), quality);
+                return;            
         }
 
         [SpellEffectHandler(SpellEffectName.LaunchQuestChoice)]
@@ -5668,23 +5660,6 @@ namespace Game.Spells
                 return;
 
             playerCaster.GetSession().GetBattlePetMgr().GrantBattlePetExperience(unitTarget.GetBattlePetCompanionGUID(), (ushort)damage, BattlePetXpSource.SpellEffect);
-        }
-
-        [SpellEffectHandler(SpellEffectName.LearnTransmogIllusion)]
-        void EffectLearnTransmogIllusion()
-        {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            Player player = unitTarget?.ToPlayer();
-            if (player == null)
-                return;
-
-            uint illusionId = (uint)effectInfo.MiscValue;
-            if (!CliDB.TransmogIllusionStorage.ContainsKey(illusionId))
-                return;
-
-            player.GetSession().GetCollectionMgr().AddTransmogIllusion(illusionId);
         }
 
         [SpellEffectHandler(SpellEffectName.ModifyAuraStacks)]

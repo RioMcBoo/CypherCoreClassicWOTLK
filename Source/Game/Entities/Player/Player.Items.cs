@@ -3247,7 +3247,7 @@ namespace Game.Entities
             if (item.IsBroken())
                 return;
 
-            Log.outInfo(LogFilter.Player, "applying mods for item {0} ", item.GetGUID().ToString());
+            Log.outInfo(LogFilter.Player, $"Applying mods for item {item.GetGUID()}.");
 
             if (item.GetSocketColor(0) != 0)                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
                 CorrectMetaGemEnchants(slot, apply);
@@ -3263,11 +3263,11 @@ namespace Game.Entities
                     UpdateWeaponDependentAuras(attackType);
             }
 
-            ApplyArtifactPowers(item, apply);
             ApplyEnchantment(item, apply);
 
             Log.outDebug(LogFilter.Player, "_ApplyItemMods complete.");
         }
+
         public void _ApplyItemBonuses(Item item, byte slot, bool apply)
         {
             ItemTemplate proto = item.GetTemplate();
@@ -3645,7 +3645,6 @@ namespace Game.Entities
 
                     ApplyItemEquipSpell(m_items[i], false);
                     ApplyEnchantment(m_items[i], false);
-                    ApplyArtifactPowers(m_items[i], false);
                 }
             }
 
@@ -3700,7 +3699,6 @@ namespace Game.Entities
                         continue;
 
                     ApplyItemEquipSpell(m_items[i], true);
-                    ApplyArtifactPowers(m_items[i], true);
                     ApplyEnchantment(m_items[i], true);
                 }
             }
@@ -4832,96 +4830,7 @@ namespace Game.Entities
                 return InventoryResult.DestroyNonemptyBag;
 
             return InventoryResult.Ok;
-        }
-
-        //Artifact
-        void ApplyArtifactPowers(Item item, bool apply)
-        {
-            if (item.IsArtifactDisabled())
-                return;
-
-            foreach (ArtifactPower artifactPower in item.m_itemData.ArtifactPowers)
-            {
-                byte rank = artifactPower.CurrentRankWithBonus;
-                if (rank == 0)
-                    continue;
-
-                if (CliDB.ArtifactPowerStorage[(uint)artifactPower.ArtifactPowerId].Flags.HasAnyFlag(ArtifactPowerFlag.ScalesWithNumPowers))
-                    rank = 1;
-
-                ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)artifactPower.ArtifactPowerId, (byte)(rank - 1));
-                if (artifactPowerRank == null)
-                    continue;
-
-                ApplyArtifactPowerRank(item, artifactPowerRank, apply);
-            }
-
-            ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(item.GetModifier(ItemModifier.ArtifactAppearanceId));
-            if (artifactAppearance != null)
-                if (artifactAppearance.OverrideShapeshiftDisplayID != 0 && GetShapeshiftForm() == (ShapeShiftForm)artifactAppearance.OverrideShapeshiftFormID)
-                    RestoreDisplayId();
-        }
-
-        public void ApplyArtifactPowerRank(Item artifact, ArtifactPowerRankRecord artifactPowerRank, bool apply)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(artifactPowerRank.SpellID, Difficulty.None);
-            if (spellInfo == null)
-                return;
-
-            if (spellInfo.IsPassive())
-            {
-                AuraApplication powerAura = GetAuraApplication(artifactPowerRank.SpellID, ObjectGuid.Empty, artifact.GetGUID());
-                if (powerAura != null)
-                {
-                    if (apply)
-                    {
-                        foreach (AuraEffect auraEffect in powerAura.GetBase().GetAuraEffects())
-                        {
-                            if (auraEffect == null)
-                                continue;
-
-                            if (powerAura.HasEffect(auraEffect.GetEffIndex()))
-                                auraEffect.ChangeAmount((int)(artifactPowerRank.AuraPointsOverride != 0 ? artifactPowerRank.AuraPointsOverride : auraEffect.GetSpellEffectInfo().CalcValue()));
-                        }
-                    }
-                    else
-                        RemoveAura(powerAura);
-                }
-                else if (apply)
-                {
-                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                    args.SetCastItem(artifact);
-                    if (artifactPowerRank.AuraPointsOverride != 0)
-                    {
-                        foreach (var spellEffectInfo in spellInfo.GetEffects())
-                            args.AddSpellMod(SpellValueMod.BasePoint0 + (int)spellEffectInfo.EffectIndex, (int)artifactPowerRank.AuraPointsOverride);
-                    }
-
-                    CastSpell(this, artifactPowerRank.SpellID, args);
-                }
-            }
-            else
-            {
-                if (apply && !HasSpell(artifactPowerRank.SpellID))
-                {
-                    AddTemporarySpell(artifactPowerRank.SpellID);
-                    LearnedSpells learnedSpells = new();
-                    LearnedSpellInfo learnedSpellInfo = new();
-                    learnedSpellInfo.SpellID = artifactPowerRank.SpellID;
-                    learnedSpells.SuppressMessaging = true;
-                    learnedSpells.ClientLearnedSpellData.Add(learnedSpellInfo);
-                    SendPacket(learnedSpells);
-                }
-                else if (!apply)
-                {
-                    RemoveTemporarySpell(artifactPowerRank.SpellID);
-                    UnlearnedSpells unlearnedSpells = new();
-                    unlearnedSpells.SuppressMessaging = true;
-                    unlearnedSpells.SpellID.Add(artifactPowerRank.SpellID);
-                    SendPacket(unlearnedSpells);
-                }
-            }
-        }
+        }        
 
         public bool HasItemOrGemWithIdEquipped(uint item, uint count, byte except_slot = ItemSlot.Null)
         {
@@ -5475,8 +5384,8 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NumBackpackSlots), slots);
         }
 
-        public byte GetBankBagSlotCount() { return m_activePlayerData.NumBankSlots; }
-        public void SetBankBagSlotCount(byte count) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NumBankSlots), count); }
+        public byte GetBankBagSlotCount() { return m_playerData.NumBankSlots; }
+        public void SetBankBagSlotCount(byte count) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.NumBankSlots), count); }
 
         //Loot
         public ObjectGuid GetLootGUID() { return m_playerData.LootTargetGUID; }

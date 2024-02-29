@@ -8,6 +8,7 @@ using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -105,10 +106,6 @@ namespace Game.Spells
                 TargetAuraSpell = _aura.TargetAuraSpell;
                 ExcludeCasterAuraSpell = _aura.ExcludeCasterAuraSpell;
                 ExcludeTargetAuraSpell = _aura.ExcludeTargetAuraSpell;
-                CasterAuraType = (AuraType)_aura.CasterAuraType;
-                TargetAuraType = (AuraType)_aura.TargetAuraType;
-                ExcludeCasterAuraType = (AuraType)_aura.ExcludeCasterAuraType;
-                ExcludeTargetAuraType = (AuraType)_aura.ExcludeTargetAuraType;
             }
 
             RequiredAreasID = -1;
@@ -150,7 +147,6 @@ namespace Game.Spells
                 RecoveryTime = _cooldowns.RecoveryTime;
                 CategoryRecoveryTime = _cooldowns.CategoryRecoveryTime;
                 StartRecoveryTime = _cooldowns.StartRecoveryTime;
-                CooldownAuraSpellId = _cooldowns.AuraSpellID;
             }
 
             EquippedItemClass = ItemClass.None;
@@ -2876,36 +2872,7 @@ namespace Game.Spells
             }
             else
             {
-                powerCost = (int)power.OptionalCost;
-
-                if (power.OptionalCostPct != 0)
-                {
-                    switch (power.PowerType)
-                    {
-                        // health as power used
-                        case PowerType.Health:
-                            powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetMaxHealth(), power.OptionalCostPct);
-                            break;
-                        case PowerType.Mana:
-                            powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetCreateMana(), power.OptionalCostPct);
-                            break;
-                        case PowerType.AlternatePower:
-                            Log.outError(LogFilter.Spells, $"SpellInfo::CalcPowerCost: Unsupported power type POWER_ALTERNATE_POWER in spell {Id} for optional cost percent");
-                            return null;
-                        default:
-                        {
-                            var powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(power.PowerType);
-                            if (powerTypeEntry != null)
-                            {
-                                powerCost += (int)MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, power.OptionalCostPct);
-                                break;
-                            }
-
-                            Log.outError(LogFilter.Spells, $"SpellInfo::CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id} for optional cost percent");
-                            return null;
-                        }
-                    }
-                }
+                powerCost = (int)power.OptionalCost;           
 
                 powerCost += unitCaster.GetTotalAuraModifier(AuraType.ModAdditionalPowerCost, aurEff =>
                 {
@@ -3089,6 +3056,7 @@ namespace Game.Spells
 
             float crit = player.m_activePlayerData.CritPercentage;
             float rangedCrit = player.m_activePlayerData.RangedCritPercentage;
+            float spellCrit = player.m_activePlayerData.SpellCritPercentage[0];
 
             switch (mod.Param)
             {
@@ -3099,7 +3067,7 @@ namespace Game.Spells
                 case 3:
                     return 0.0f;
                 case 4:
-                    return Math.Min(crit, rangedCrit) * mod.Coeff * 0.01f;
+                    return Math.Min(Math.Min(crit, rangedCrit), spellCrit) * mod.Coeff * 0.01f;
                 default:
                     break;
             }
@@ -4112,6 +4080,7 @@ namespace Game.Spells
                 TriggerSpell = effect.EffectTriggerSpell;
                 SpellClassMask = effect.EffectSpellClassMask;
                 BonusCoefficientFromAP = effect.BonusCoefficientFromAP;
+                Scaling.Class = ScalingClass.None;
                 Scaling.Coefficient = effect.Coefficient;
                 Scaling.Variance = effect.Variance;
                 Scaling.ResourceCoefficient = effect.ResourceCoefficient;
@@ -4269,7 +4238,7 @@ namespace Game.Spells
                             if (randPropPoints == null)
                                 randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(CliDB.RandPropPointsStorage.GetNumRows() - 1);
 
-                            tempValue = Scaling.Class == ScalingClass.Unknown ? randPropPoints.DamageReplaceStat : 0;
+                            tempValue = randPropPoints.DamageReplaceStat;
                         }
                         else
                             tempValue = ItemEnchantmentManager.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
@@ -4298,19 +4267,6 @@ namespace Game.Spells
             else
             {
                 float tempValue = BasePoints;
-                ExpectedStatType stat = GetScalingExpectedStat();
-                if (stat != ExpectedStatType.None)
-                {
-                    if (_spellInfo.HasAttribute(SpellAttr0.ScalesWithCreatureLevel))
-                        stat = ExpectedStatType.CreatureAutoAttackDps;
-
-                    // TODO - add expansion and content tuning id args?
-                    int expansion = -2;
-
-                    uint level = caster != null && caster.IsUnit() ? caster.ToUnit().GetLevel() : 1;
-                    tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, expansion, 0, Class.None, 0) * BasePoints / 100.0f;
-                }
-
                 return (int)Math.Round(tempValue);
             }
         }

@@ -432,9 +432,6 @@ namespace Game
                     return 0;
 
                 uint xp = questXp.Difficulty[xpDifficulty];
-                var contentTuning = CliDB.ContentTuningStorage.LookupByKey(contentTuningId);
-                if (contentTuning != null)
-                    xp = (uint)(xp * contentTuning.QuestXpMultiplier);
 
                 int diffFactor = (int)(2 * (questLevel - player.GetLevel()) + 12);
                 if (diffFactor < 1)

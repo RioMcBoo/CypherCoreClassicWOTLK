@@ -41,38 +41,23 @@ namespace Game.Entities
                     Item item = _LoadItem(trans, zoneId, timeDiff, result.GetFields());
                     if (item != null)
                     {
-                        ulong counter = result.Read<ulong>(52);
-                        ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;
-                        byte slot = result.Read<byte>(53);
+                        ObjectGuid bagGuid = result.Read<long>(46) != 0 ? ObjectGuid.Create(HighGuid.Item, result.Read<long>(44)) : ObjectGuid.Empty;
+                        byte slot = result.Read<byte>(47);
 
                         GetSession().GetCollectionMgr().CheckHeirloomUpgrades(item);
                         GetSession().GetCollectionMgr().AddItemAppearance(item);
 
                         InventoryResult err = InventoryResult.Ok;
-                        if (item.HasItemFlag(ItemFieldFlags.Child))
-                        {
-                            Item parent = GetItemByGuid(item.GetCreator());
-                            if (parent != null)
-                            {
-                                parent.SetChildItem(item.GetGUID());
-                                item.CopyArtifactDataFromParent(parent);
-                            }
-                            else
-                            {
-                                Log.outError(LogFilter.Player, $"Player._LoadInventory: Player '{GetName()}' ({GetGUID()}) has child item ({item.GetGUID()}, entry: {item.GetEntry()}) which can't be loaded into inventory because parent item was not found (Bag {bagGuid}, slot: {slot}). Item will be sent by mail.");
-                                item.DeleteFromInventoryDB(trans);
-                                problematicItems.Enqueue(item);
-                                continue;
-                            }
-                        }
 
                         // Item is not in bag
                         if (bagGuid.IsEmpty())
                         {
                             item.SetContainer(null);
                             item.InventorySlot = slot;
+
                             ItemPos itemPos = new(slot);
                             List<ItemPosCount> dest;
+
                             if (itemPos.IsInventoryPos)
                             {
                                 err = CanStoreItem(itemPos, out dest, item);
@@ -165,6 +150,7 @@ namespace Game.Entities
 
             _ApplyAllItemMods();
         }
+
         Item _LoadItem(SQLTransaction trans, uint zoneId, uint timeDiff, SQLFields fields)
         {
             Item item = null;
@@ -297,6 +283,7 @@ namespace Game.Entities
             }
             return item;
         }
+
         void _LoadSkills(SQLResult result)
         {
             Race race = GetRace();
@@ -761,6 +748,7 @@ namespace Game.Entities
             for (ushort i = slot; i < SharedConst.MaxQuestLogSize; ++i)
                 SetQuestSlot(i, 0);
         }
+
         void _LoadQuestStatusObjectives(SQLResult result)
         {
             if (!result.IsEmpty())
@@ -782,6 +770,8 @@ namespace Game.Entities
                             int data = result.Read<int>(2);
                             if (!objective.IsStoringFlag())
                                 SetQuestSlotCounter(questStatusData.Slot, storageIndex, (ushort)data);
+                            else if (data != 0)
+                                SetQuestSlotState(questStatusData.Slot, 256 << storageIndex);
                         }
                         else
                             Log.outError(LogFilter.Player, $"Player {GetName()} ({GetGUID()}) has quest {questID} out of range objective index {storageIndex}.");
@@ -792,6 +782,7 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
+
         void _LoadQuestStatusRewarded(SQLResult result)
         {
             if (!result.IsEmpty())
@@ -1373,6 +1364,7 @@ namespace Game.Entities
 
             return item;
         }
+
         void _LoadDeclinedNames(SQLResult result)
         {
             if (result.IsEmpty())
@@ -1382,6 +1374,7 @@ namespace Game.Entities
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                 _declinedname.name[i] = result.Read<string>(i);
         }
+
         void _LoadArenaTeamInfo(SQLResult result)
         {
             // arenateamid, played_week, played_season, personal_rating
@@ -2478,6 +2471,7 @@ namespace Game.Entities
 
             m_mailsUpdated = false;
         }
+
         void _SaveStoredAuraTeleportLocations(SQLTransaction trans)
         {
             foreach (var pair in m_storedAuraTeleportLocations.ToList())
@@ -2861,14 +2855,15 @@ namespace Game.Entities
             // player should be able to load/delete character only with correct account!
             if (accountId != GetSession().GetAccountId())
             {
-                Log.outError(LogFilter.Player, "Player (GUID: {0}) loading from wrong account (is: {1}, should be: {2})", GetGUID().ToString(), GetSession().GetAccountId(), accountId);
+                Log.outError(LogFilter.Player, 
+                    $"Player (GUID: {GetGUID()}) loading from wrong account (is: {GetSession().GetAccountId()}, should be: {accountId}).");
                 return false;
             }
 
             SQLResult banResult = holder.GetResult(PlayerLoginQueryLoad.Banned);
             if (!banResult.IsEmpty())
             {
-                Log.outError(LogFilter.Player, "{0} is banned, can't load.", guid.ToString());
+                Log.outError(LogFilter.Player, $"{guid} is banned, can't load.");
                 return false;
             }
 
@@ -2887,12 +2882,12 @@ namespace Game.Entities
                 return false;
             }
 
-
             SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.WowAccount), GetSession().GetAccountGUID());
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.BnetAccount), GetSession().GetBattlenetAccountGUID());
 
             if (gender >= Gender.None)
             {
-                Log.outError(LogFilter.Player, "Player {0} has wrong gender ({1}), can't be loaded.", guid.ToString(), gender);
+                Log.outError(LogFilter.Player, $"Player {guid} has wrong gender ({gender}), can't be loaded.");
                 return false;
             }
 

@@ -4844,7 +4844,7 @@ namespace Scripts.Spells.Generic
             if (contentTuning == null)
                 return;
 
-            uint skinningSkill = player.GetProfessionSkillForExp(SkillType.Skinning, contentTuning.ExpansionID);
+            uint skinningSkill = player.GetProfessionSkillForExp(SkillType.Skinning, 0);
             if (skinningSkill == 0)
                 return;
 

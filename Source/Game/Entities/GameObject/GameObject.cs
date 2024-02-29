@@ -2016,16 +2016,12 @@ namespace Game.Entities
                             }
 
                             // Update the correct fishing skill according to the area's ContentTuning
-                            ContentTuningRecord areaContentTuning = Global.DB2Mgr.GetContentTuningForArea(areaEntry);
-                            if (areaContentTuning == null)
-                                break;
-
-                            player.UpdateFishingSkill(areaContentTuning.ExpansionID);
+                            player.UpdateFishingSkill(0);
 
                             // Send loot
                             int areaFishingLevel = Global.ObjectMgr.GetFishingBaseSkillLevel(areaEntry);
 
-                            uint playerFishingSkill = player.GetProfessionSkillForExp(SkillType.Fishing, areaContentTuning.ExpansionID);
+                            uint playerFishingSkill = player.GetProfessionSkillForExp(SkillType.Fishing, 0);
                             int playerFishingLevel = player.GetSkillValue(playerFishingSkill);
 
                             int roll = RandomHelper.IRand(1, 100);
@@ -2442,43 +2438,7 @@ namespace Game.Entities
                     PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(info.ItemForge.conditionID1);
                     if (playerCondition != null)
                         if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
-                            return;
-
-                    switch (info.ItemForge.ForgeType)
-                    {
-                        case 0: // Artifact Forge
-                        case 1: // Relic Forge
-                        {
-
-                            Aura artifactAura = player.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
-                            Item item = artifactAura != null ? player.GetItemByGuid(artifactAura.GetCastItemGUID()) : null;
-                            if (item == null)
-                            {
-                                player.SendPacket(new DisplayGameError(GameError.MustEquipArtifact));
-                                return;
-                            }
-
-                            OpenArtifactForge openArtifactForge = new();
-                            openArtifactForge.ArtifactGUID = item.GetGUID();
-                            openArtifactForge.ForgeGUID = GetGUID();
-                            player.SendPacket(openArtifactForge);
-                            break;
-                        }
-                        case 2: // Heart Forge
-                        {
-                            Item item = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                            if (item == null)
-                                return;
-
-                            GameObjectInteraction openHeartForge = new();
-                            openHeartForge.ObjectGUID = GetGUID();
-                            openHeartForge.InteractionType = PlayerInteractionType.AzeriteForge;
-                            player.SendPacket(openHeartForge);
-                            break;
-                        }
-                        default:
-                            break;
-                    }
+                            return;                    
                     break;
                 }
                 case GameObjectTypes.UILink:
