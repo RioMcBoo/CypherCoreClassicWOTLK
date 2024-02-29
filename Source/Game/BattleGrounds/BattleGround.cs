@@ -352,9 +352,12 @@ namespace Game.BattleGrounds
 
                 foreach (var (guid, _) in GetPlayers())
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    Player player = Global.ObjAccessor.GetPlayer(GetBgMap(), guid);
                     if (player != null)
+                    {
+                        player.StartCriteria(CriteriaStartEvent.StartBattleground, GetBgMap().GetId());
                         player.AtStartOfEncounter(EncounterType.Battleground);
+                    }
                 }
 
                 // Remove preparation
@@ -874,12 +877,12 @@ namespace Game.BattleGrounds
                 player.SetBGTeam(0);
 
                 // remove all criterias on bg leave
-                player.ResetCriteria(CriteriaFailEvent.LeaveBattleground, GetMapId(), true);
+                player.FailCriteria(CriteriaFailEvent.LeaveBattleground, 0);
 
                 if (Transport)
                     player.TeleportToBGEntryPoint();
 
-                Log.outDebug(LogFilter.Battleground, "Removed player {0} from Battleground.", player.GetName());
+                Log.outDebug(LogFilter.Battleground, $"Removed player {player.GetName()} from Battleground.");
             }
 
             //Battleground object will be deleted next Battleground.Update() call
@@ -1040,10 +1043,6 @@ namespace Game.BattleGrounds
                     player.SetPlayerFlagEx(PlayerFlagsEx.MercenaryMode);
                 }
             }
-
-            // reset all map criterias on map enter
-            if (!isInBattleground)
-                player.ResetCriteria(CriteriaFailEvent.LeaveBattleground, GetMapId(), true);
 
             // setup BG group membership
             PlayerAddedToBGCheckIfBGIsRunning(player);

@@ -2161,21 +2161,16 @@ namespace Game.Spells
 
             CallScriptBeforeHitHandlers(hitInfo.MissCondition);
 
-            Player player = unit.ToPlayer();
-            if (player != null)
+            if (unit.ToPlayer() is Player player)
             {
-                player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, m_spellInfo.Id);
+                player.FailCriteria(CriteriaFailEvent.BeSpellTarget, m_spellInfo.Id);
+                player.StartCriteria(CriteriaStartEvent.BeSpellTarget, m_spellInfo.Id);
                 player.UpdateCriteria(CriteriaType.BeSpellTarget, m_spellInfo.Id, 0, 0, m_caster);
-                player.UpdateCriteria(CriteriaType.GainAura, m_spellInfo.Id);
             }
 
-            Player casterPlayer = m_caster.ToPlayer();
-            if (casterPlayer != null)
-            {
-                casterPlayer.StartCriteriaTimer(CriteriaStartEvent.CastSpell, m_spellInfo.Id);
+            if (m_caster.ToPlayer() is Player casterPlayer)
                 casterPlayer.UpdateCriteria(CriteriaType.LandTargetedSpellOnTarget, m_spellInfo.Id, 0, 0, unit);
-            }
-
+            
             if (m_caster != unit)
             {
                 // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
@@ -2913,12 +2908,14 @@ namespace Game.Spells
             Player player = m_caster.ToPlayer();
             if (player != null)
             {
-                if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreCastItem) && m_CastItem != null)
+                if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastItem) && m_CastItem != null)
                 {
-                    player.StartCriteriaTimer(CriteriaStartEvent.UseItem, m_CastItem.GetEntry());
+                    player.StartCriteria(CriteriaStartEvent.UseItem, m_CastItem.GetEntry());
                     player.UpdateCriteria(CriteriaType.UseItem, m_CastItem.GetEntry());
                 }
 
+                player.FailCriteria(CriteriaFailEvent.CastSpell, m_spellInfo.Id);
+                player.StartCriteria(CriteriaStartEvent.CastSpell, m_spellInfo.Id);
                 player.UpdateCriteria(CriteriaType.CastSpell, m_spellInfo.Id);
             }
 

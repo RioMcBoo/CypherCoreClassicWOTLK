@@ -158,7 +158,7 @@ namespace Game.Entities
 
         public void DailyReset()
         {
-            foreach (uint questId in m_activePlayerData.DailyQuestsCompleted)
+            foreach (int questId in m_activePlayerData.DailyQuestsCompleted)
             {
                 uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
                 if (questBit != 0)
@@ -175,7 +175,7 @@ namespace Game.Entities
 
             for (ushort slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
             {
-                uint questId = GetQuestSlotQuestId(slot);
+                int questId = GetQuestSlotQuestId(slot);
                 if (questId == 0)
                     continue;
 
@@ -194,6 +194,8 @@ namespace Game.Entities
             // DB data deleted in caller
             m_DailyQuestChanged = false;
             m_lastDailyQuestTime = 0;
+
+            FailCriteria(CriteriaFailEvent.DailyQuestsCleared, 0);
         }
 
         public void ResetWeeklyQuestStatus()
@@ -836,7 +838,7 @@ namespace Game.Entities
 
             m_QuestStatusSave[questId] = QuestSaveType.Default;
 
-            StartCriteriaTimer(CriteriaStartEvent.AcceptQuest, questId);
+            StartCriteria(CriteriaStartEvent.AcceptQuest, questId);
 
             SendQuestUpdate(questId);
 
@@ -1139,6 +1141,7 @@ namespace Game.Entities
                 SetDailyQuestStatus(questId);
                 if (quest.IsDaily())
                 {
+                    StartCriteria(CriteriaStartEvent.CompleteDailyQuest, 0);
                     UpdateCriteria(CriteriaType.CompleteDailyQuest, questId);
                     UpdateCriteria(CriteriaType.CompleteAnyDailyQuestPerDay, questId);
                 }
@@ -2384,7 +2387,7 @@ namespace Game.Entities
                     real_entry = killed.GetEntry();
             }
 
-            StartCriteriaTimer(CriteriaStartEvent.KillNPC, real_entry);   // MUST BE CALLED FIRST
+            StartCriteria(CriteriaStartEvent.KillNPC, real_entry);   // MUST BE CALLED FIRST
             UpdateCriteria(CriteriaType.KillCreature, real_entry, addKillCount, 0, killed);
 
             UpdateQuestObjectiveProgress(QuestObjectiveType.Monster, (int)entry, 1, guid);
@@ -2392,6 +2395,7 @@ namespace Game.Entities
 
         public void KilledPlayerCredit(ObjectGuid victimGuid)
         {
+            StartCriteria(CriteriaStartEvent.KillPlayer, 0);
             UpdateQuestObjectiveProgress(QuestObjectiveType.PlayerKills, 0, 1, victimGuid);
         }
 

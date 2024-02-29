@@ -437,9 +437,8 @@ namespace Game
                     GetPlayer().TakeQuestSourceItem(questId, true); // remove quest src item from player
                     GetPlayer().AbandonQuest(questId); // remove all quest items player received before abandoning quest. Note, this does not remove normal drop items that happen to be quest requirements. 
                     GetPlayer().RemoveActiveQuest(questId);
-                    GetPlayer().RemoveCriteriaTimer(CriteriaStartEvent.AcceptQuest, questId);
 
-                    Log.outInfo(LogFilter.Network, "Player {0} abandoned quest {1}", GetPlayer().GetGUID().ToString(), questId);
+                    Log.outInfo(LogFilter.Network, $"Player {GetPlayer().GetGUID()} abandoned quest {questId}");
 
                     Global.ScriptMgr.OnQuestStatusChange(_player, questId);
 

@@ -417,7 +417,7 @@ namespace Game.Entities
                 }
             }
 
-            m_achievementSys.UpdateTimedCriteria(diff);
+            m_achievementSys.UpdateTimedCriteria(TimeSpan.FromMilliseconds(diff));
 
             if (HasUnitState(UnitState.MeleeAttacking) && !HasUnitState(UnitState.Casting | UnitState.Charging))
             {
@@ -663,7 +663,7 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaType.DieInInstance, 1);
 
                 // reset all death criterias
-                ResetCriteria(CriteriaFailEvent.Death, 0);
+                FailCriteria(CriteriaFailEvent.Death, 0);
             }
 
             base.SetDeathState(s);
@@ -5316,6 +5316,7 @@ namespace Game.Entities
                 DB.Characters.CommitTransaction(trans);
             }
 
+            StartCriteria(CriteriaStartEvent.ReachLevel, level);
             UpdateCriteria(CriteriaType.ReachLevel);
             UpdateCriteria(CriteriaType.ActivelyReachLevel, level);
 
@@ -5328,6 +5329,7 @@ namespace Game.Entities
         {
             return m_canParry;
         }
+
         public bool CanBlock()
         {
             return m_canBlock;
@@ -5344,6 +5346,7 @@ namespace Game.Entities
             if (!IsGameMaster() && IsAFK() && InBattleground() && !InArena())
                 LeaveBattleground();
         }
+
         public void ToggleDND()
         {
             if (IsDND())
@@ -5351,6 +5354,7 @@ namespace Game.Entities
             else
                 SetPlayerFlag(PlayerFlags.DND);
         }
+
         public bool IsAFK() { return HasPlayerFlag(PlayerFlags.AFK); }
         public bool IsDND() { return HasPlayerFlag(PlayerFlags.DND); }
 

@@ -10,6 +10,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace Game.Entities
@@ -3770,10 +3771,13 @@ namespace Game.Entities
 
             aura.HandleAuraSpecificMods(aurApp, caster, false, false);
 
-            Player player = ToPlayer();
-            if (player != null)
+            if (ToPlayer() is Player player)
+            {
                 if (Global.ConditionMgr.IsSpellUsedInSpellClickConditions(aurApp.GetBase().GetId()))
                     player.UpdateVisibleGameobjectsOrSpellClicks();
+
+                player.FailCriteria(CriteriaFailEvent.LoseAura, aurApp.GetBase().GetId());
+            }
         }
 
         public void _UnapplyAura(AuraApplication aurApp, AuraRemoveMode removeMode)
@@ -3986,10 +3990,15 @@ namespace Game.Entities
                     aurApp._HandleEffect(i, true);
             }
 
-            Player player = ToPlayer();
-            if (player != null)
+            if (ToPlayer() is Player player)
+            {
                 if (Global.ConditionMgr.IsSpellUsedInSpellClickConditions(aurApp.GetBase().GetId()))
                     player.UpdateVisibleGameobjectsOrSpellClicks();
+
+                player.FailCriteria(CriteriaFailEvent.GainAura, aurApp.GetBase().GetId());
+                player.StartCriteria(CriteriaStartEvent.GainAura, aurApp.GetBase().GetId());
+                player.UpdateCriteria(CriteriaType.GainAura, aurApp.GetBase().GetId());
+            }
         }
 
         public void _AddAura(UnitAura aura, Unit caster)
@@ -4388,10 +4397,19 @@ namespace Game.Entities
         public void _RegisterAuraEffect(AuraEffect aurEff, bool apply)
         {
             if (apply)
+            {
                 m_modAuras.Add(aurEff.GetAuraType(), aurEff);
+                
+                if (ToPlayer() is Player player)
+                {
+                    player.StartCriteria(CriteriaStartEvent.GainAuraEffect, (int)aurEff.GetAuraType());
+                    player.FailCriteria(CriteriaFailEvent.GainAuraEffect, (int)aurEff.GetAuraType());
+                }
+            }
             else
                 m_modAuras.Remove(aurEff.GetAuraType(), aurEff);
         }
+
         public float GetTotalAuraModValue(UnitMods unitMod)
         {
             if (unitMod >= UnitMods.End)
