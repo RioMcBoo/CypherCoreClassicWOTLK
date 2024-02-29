@@ -1716,21 +1716,6 @@ namespace Game.Networking.Packets
         public int[] Misc = new int[2];
     }
 
-    public struct SpellHitStatus
-    {
-        public SpellHitStatus(SpellMissInfo reason)
-        {
-            Reason = reason;
-        }
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteUInt8((byte)Reason);
-        }
-
-        public SpellMissInfo Reason;
-    }
-
     public struct SpellMissStatus
     {
         public SpellMissStatus(SpellMissInfo reason, SpellMissInfo reflectStatus)

@@ -3985,7 +3985,6 @@ namespace Game.Spells
                 if (targetInfo.MissCondition == SpellMissInfo.None || (targetInfo.MissCondition == SpellMissInfo.Block && !m_spellInfo.HasAttribute(SpellAttr3.CompletelyBlocked))) // Add only hits and partial blocked
                 {
                     data.HitTargets.Add(targetInfo.TargetGUID);
-                    data.HitStatus.Add(new SpellHitStatus(SpellMissInfo.None));
 
                     m_channelTargetEffectMask |= targetInfo.EffectMask;
                 }
