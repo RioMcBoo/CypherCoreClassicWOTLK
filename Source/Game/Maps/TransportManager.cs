@@ -42,13 +42,14 @@ namespace Game.Maps
                 GameObjectTemplate goInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
                 if (goInfo == null)
                 {
-                    Log.outError(LogFilter.Sql, "Transport {0} has no associated GameObjectTemplate from `gameobject_template` , skipped.", entry);
+                    Log.outError(LogFilter.Sql, $"Transport {entry} has no associated GameObjectTemplate from `gameobject_template` , skipped.");
                     continue;
                 }
 
                 if (!CliDB.TaxiPathNodesByPath.ContainsKey(goInfo.MoTransport.taxiPathID))
                 {
-                    Log.outError(LogFilter.Sql, "Transport {0} (name: {1}) has an invalid path specified in `gameobject_template`.`data0` ({2}) field, skipped.", entry, goInfo.name, goInfo.MoTransport.taxiPathID);
+                    Log.outError(LogFilter.Sql, 
+                        $"Transport {entry} (name: {goInfo.name}) has an invalid path specified in `gameobject_template`.`data0` ({goInfo.MoTransport.taxiPathID}) field, skipped.");
                     continue;
                 }
 
@@ -57,7 +58,25 @@ namespace Game.Maps
                                 
                 if (!CliDB.TaxiPathStorage.ContainsKey(goInfo.MoTransport.taxiPathID))
                 {
-                    Log.outError(LogFilter.Sql, "Transport {0} (name: {1}) has an invalid path specified in `gameobject_template`.`Data0` ({2}) field, skipped.", entry, goInfo.name, goInfo.MoTransport.taxiPathID);
+                    Log.outError(LogFilter.Sql, 
+                        $"Transport {entry} (name: {goInfo.name}) has an invalid path specified in `gameobject_template`.`Data0` ({goInfo.MoTransport.taxiPathID}) field, skipped.");
+                    continue;
+                }
+
+                bool hasValidMaps = true;
+                foreach(var mapId in _transportTemplates.Keys)
+                {
+                    if (!CliDB.MapStorage.ContainsKey(mapId))
+                    {
+                        hasValidMaps = false;
+                        break;
+                    }
+                }
+
+                if (!hasValidMaps)
+                {
+                    Log.outError(LogFilter.Sql, $"Transport {entry} (name: {goInfo.name}) is trying to spawn on a map which does not exist, skipped.");
+                    _transportTemplates.Remove(entry);
                     continue;
                 }
 
@@ -69,7 +88,7 @@ namespace Game.Maps
             } while (result.NextRow());
 
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} transports in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} transports in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadTransportAnimationAndRotation()
