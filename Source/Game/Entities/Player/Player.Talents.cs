@@ -226,6 +226,7 @@ namespace Game.Entities
 
         public void ResetTalentSpecialization()
         {
+            /*
             // Reset only talents that have different spells for each spec
             Class class_ = GetClass();
             for (uint t = 0; t < PlayerConst.MaxTalentTiers; ++t)
@@ -251,6 +252,7 @@ namespace Game.Entities
 
             SendTalentsInfoData(false);
             UpdateItemSetAuras(false);
+            */
         }
 
         bool HasTalent(uint talentId, byte group)
