@@ -3794,6 +3794,11 @@ namespace Game
                     Log.outError(LogFilter.Sql, $"Table `creature` have creature (GUID: {guid} Entry: {data.Id}) with `wander_distance`< 0, set to 0.");
                     data.WanderDistance = 0.0f;
                 }
+                else if (data.WanderDistance > 0.0f && data.WanderDistance < 0.1f)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid} Entry: {data.Id}) with `wander_distance` below the allowed minimum distance of 0.1, set to 0.");
+                    data.WanderDistance = 0.0f;
+                }
                 else if (data.movementType == MovementGeneratorType.Random)
                 {
                     if (MathFunctions.fuzzyEq(data.WanderDistance, 0.0f))
