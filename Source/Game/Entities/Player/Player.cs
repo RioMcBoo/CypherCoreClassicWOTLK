@@ -6320,6 +6320,47 @@ namespace Game.Entities
                 SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, offset), val);
 
                 UpdateCriteria(CriteriaType.RevealWorldMapOverlay, GetAreaId());
+
+                var areaLevels = DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                if (areaLevels.HasValue)
+                {
+                    if (IsMaxLevel())
+                    {
+                        SendExplorationExperience(areaId, 0);
+                    }
+                    else
+                    {
+                        ushort areaLevel = (ushort)Math.Min(Math.Max((ushort)GetLevel(), areaLevels.Value.MinLevel), areaLevels.Value.MaxLevel);
+                        int diff = (int)GetLevel() - areaLevel;
+                        uint XP;
+                        if (diff < -5)
+                        {
+                            XP = (uint)(ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                        }
+                        else if (diff > 5)
+                        {
+                            int exploration_percent = 100 - ((diff - 5) * 5);
+                            if (exploration_percent < 0)
+                                exploration_percent = 0;
+
+                            XP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                        }
+                        else
+                        {
+                            XP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                        }
+
+                        if (WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) != 0)
+                        {
+                            uint minScaledXP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
+                            XP = Math.Max(minScaledXP, XP);
+                        }
+
+                        GiveXP(XP, null);
+                        SendExplorationExperience(areaId, XP);
+                    }
+                    Log.outInfo(LogFilter.Player, $"Player {GetGUID()} discovered a new area: {areaId}.");
+                }
             }
         }
 
