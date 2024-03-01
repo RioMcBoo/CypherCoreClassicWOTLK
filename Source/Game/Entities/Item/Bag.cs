@@ -261,14 +261,14 @@ namespace Game.Entities
             return null;
         }
 
-        public uint GetBagSize() { return m_containerData.NumSlots; }
+        public byte GetBagSize() { return (byte)m_containerData.NumSlots; }
         public bool IsValidSlot(ItemSlot slotInThisBag) => slotInThisBag < GetBagSize();
         void SetBagSize(uint numSlots) { SetUpdateFieldValue(m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.NumSlots), numSlots); }
 
         void SetSlot(int slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.Slots, slot), guid); }
 
         ContainerData m_containerData;
-        Item[] m_bagslot = new Item[36];
+        Item[] m_bagslot = new Item[ItemConst.MaxBagSize];
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
         {

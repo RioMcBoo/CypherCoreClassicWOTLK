@@ -16,16 +16,24 @@ namespace Game.Entities
         public override string ToString() => Value.ToString();
 
         #region Helpers
-        public bool IsSpecific => Value != Null;
+        public bool IsExplicitSlot => Value != Null;
         public bool IsEquipSlot => Value < EquipmentSlot.End;
-        public bool IsEquipBagSlot => Value >= InventorySlots.BagStart && Value < InventorySlots.BagEnd;
-        public bool IsItemSlot => Value >= InventorySlots.ItemStart && Value < InventorySlots.ItemEnd;
-        public bool IsValidItemSlot(byte backPackCapacity) => Value >= InventorySlots.ItemStart && Value < InventorySlots.ItemStart + backPackCapacity;
-        public bool IsValidBagSlot => Value <= ItemConst.MaxBagSize || Value == Null;
+        public bool IsBagSlot => Value >= InventorySlots.BagStart && Value < InventorySlots.BagEnd;
+        public bool IsItemSlot => Value >= InventorySlots.ItemStart && Value < InventorySlots.ItemEnd;        
         public bool IsBankItemSlot => Value >= InventorySlots.BankItemStart && Value < InventorySlots.BankItemEnd;
         public bool IsBankBagSlot => Value >= InventorySlots.BankBagStart && Value < InventorySlots.BankBagEnd;
         public bool IsKeyringSlot => Value >= InventorySlots.KeyringStart && Value < InventorySlots.KeyringEnd;
         public bool IsBuyBackSlot => Value >= InventorySlots.BuyBackStart && Value < InventorySlots.BuyBackEnd;
+        public bool IsReagentBagSlot => Value >= InventorySlots.ReagentBagStart && Value < InventorySlots.ReagentBagEnd;
+        public bool IsChildEquipmentSlot => Value >= InventorySlots.ChildEquipmentStart && Value < InventorySlots.ChildEquipmentEnd;
+        public bool IsProfessionSlot => Value >= ProfessionSlots.Start && Value < ProfessionSlots.End;
+
+        public bool IsItemSlotExactly(byte backPackCapacity)
+        {
+            Cypher.Assert(InventorySlots.ItemStart + backPackCapacity < InventorySlots.ItemEnd);
+
+            return Value >= InventorySlots.ItemStart && Value < InventorySlots.ItemStart + backPackCapacity;
+        }
 
         public static implicit operator ItemSlot(byte slot) => new(slot);
         public static implicit operator byte(ItemSlot slot) => slot.Value;

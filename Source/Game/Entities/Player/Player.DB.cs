@@ -3602,8 +3602,8 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
                 stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
-                stmt.AddValue(index++, m_playerData.PlayerFlags);
-                stmt.AddValue(index++, m_playerData.PlayerFlagsEx);
+                stmt.AddValue(index++, (uint)m_playerData.PlayerFlags.GetValue());
+                stmt.AddValue(index++, (uint)m_playerData.PlayerFlagsEx.GetValue());
                 stmt.AddValue(index++, (ushort)GetMapId());
                 stmt.AddValue(index++, GetInstanceId());
                 stmt.AddValue(index++, (byte)GetDungeonDifficultyID());

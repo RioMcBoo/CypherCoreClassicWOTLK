@@ -1757,8 +1757,8 @@ namespace Game.Guilds
         
         public void SwapItems(Player player, ItemPos src, ItemPos dest, uint splitedAmount)
         {
-            if (src.BagSlot >= _GetPurchasedTabsSize() || src.Slot >= GuildConst.MaxBankSlots ||
-                dest.BagSlot >= _GetPurchasedTabsSize() || dest.Slot >= GuildConst.MaxBankSlots)
+            if (src.Container >= _GetPurchasedTabsSize() || src.Slot >= GuildConst.MaxBankSlots ||
+                dest.Container >= _GetPurchasedTabsSize() || dest.Slot >= GuildConst.MaxBankSlots)
                 return;
 
             if (src == dest)
@@ -1771,7 +1771,7 @@ namespace Game.Guilds
 
         public void SwapItemsWithInventory(Player player, bool toChar, ItemPos source, ItemPos playerInvPos, uint splitedAmount)
         {
-            if ((source.Slot >= GuildConst.MaxBankSlots && source.Slot != ItemSlot.Null) || source.BagSlot >= _GetPurchasedTabsSize())
+            if ((source.Slot >= GuildConst.MaxBankSlots && source.Slot != ItemSlot.Null) || source.Container >= _GetPurchasedTabsSize())
                 return;
 
             BankMoveItemData bankData = new(this, player, source);
@@ -2087,7 +2087,7 @@ namespace Game.Guilds
 
         Item _GetItem(ItemPos pos)
         {
-            BankTab tab = GetBankTab(pos.BagSlot);
+            BankTab tab = GetBankTab(pos.Container);
             if (tab != null)
                 return tab.GetItem(pos.Slot);
             return null;
@@ -2095,7 +2095,7 @@ namespace Game.Guilds
 
         void _RemoveItem(SQLTransaction trans, ItemPos itemPos)
         {
-            BankTab pTab = GetBankTab(itemPos.BagSlot);
+            BankTab pTab = GetBankTab(itemPos.Container);
             if (pTab != null)
                 pTab.SetItem(trans, itemPos.Slot, null);
         }
@@ -3664,7 +3664,7 @@ namespace Game.Guilds
             protected abstract InventoryResult CanStore(Item pItem, bool swap);
 
             public Item GetItem(bool isCloned = false) { return isCloned ? m_pClonedItem : m_pItem; }
-            public byte Container => m_itemPos.BagSlot; 
+            public byte Container => m_itemPos.Container; 
             public byte Slot => m_itemPos.Slot;
             public ItemPos Position => m_itemPos;
 

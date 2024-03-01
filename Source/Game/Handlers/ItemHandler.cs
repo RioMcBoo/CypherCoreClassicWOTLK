@@ -89,7 +89,7 @@ namespace Game
         void HandleAutoEquipItemSlot(AutoEquipItemSlot packet)
         {
             ItemPos dstPos = packet.ItemDstSlot;
-            ItemPos srcPos = new(packet.Inv.Items[0].BagSlot, packet.Inv.Items[0].Slot);
+            ItemPos srcPos = new(packet.Inv.Items[0].Container, packet.Inv.Items[0].Slot);
 
             // cheating attempt, client should never send opcode in that case
             if (packet.Inv.Items.Count != 1 || !dstPos.IsEquipmentPos)
@@ -205,7 +205,7 @@ namespace Game
                     {
                         msg = player.CanStoreItem(src, out sSrc, dstItem, forSwap: true);
                         if (msg != InventoryResult.Ok)
-                            msg = player.CanStoreItem(new(ItemSlot.Null, src.BagSlot), out sSrc, dstItem, forSwap: true);
+                            msg = player.CanStoreItem(new(ItemSlot.Null, src.Container), out sSrc, dstItem, forSwap: true);
                         if (msg != InventoryResult.Ok)
                             msg = player.CanStoreItem(ItemPos.Undefined, out sSrc, dstItem, forSwap: true);
                     }
@@ -213,7 +213,7 @@ namespace Game
                     {
                         msg = player.CanBankItem(src, out sSrc, dstItem, true);
                         if (msg != InventoryResult.Ok)
-                            msg = player.CanBankItem(new(ItemSlot.Null, src.BagSlot), out sSrc, dstItem, true);
+                            msg = player.CanBankItem(new(ItemSlot.Null, src.Container), out sSrc, dstItem, true);
                         if (msg != InventoryResult.Ok)
                             msg = player.CanBankItem(ItemPos.Undefined, out sSrc, dstItem, true);
                     }
@@ -624,8 +624,8 @@ namespace Game
                 return;
             }
             
-            ItemPos giftPos = new(packet.Inv.Items[0].Slot, packet.Inv.Items[0].BagSlot);            
-            ItemPos itemPos = new(packet.Inv.Items[1].Slot, packet.Inv.Items[1].BagSlot);
+            ItemPos giftPos = new(packet.Inv.Items[0].Slot, packet.Inv.Items[0].Container);            
+            ItemPos itemPos = new(packet.Inv.Items[1].Slot, packet.Inv.Items[1].Container);
 
             Item gift = GetPlayer().GetItemByPos(giftPos);
             if (gift == null)

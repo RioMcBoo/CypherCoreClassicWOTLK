@@ -687,23 +687,7 @@ namespace Game.Entities
                     m_items[i].DestroyForPlayer(target);
                 }
 
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].DestroyForPlayer(target);
-                }
-
-                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].DestroyForPlayer(target);
-                }
-
-                for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
+                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.ChildEquipmentEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
@@ -712,6 +696,7 @@ namespace Game.Entities
                 }
             }
         }
+
         public override void CleanupsBeforeDelete(bool finalCleanup = true)
         {
             TradeCancel(false);
@@ -7612,7 +7597,7 @@ namespace Game.Entities
         {
             if (target == this)
             {
-                for (byte i = 0; i < EquipmentSlot.End; ++i)
+                for (byte i = EquipmentSlot.Start; i < InventorySlots.BankBagEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
@@ -7620,15 +7605,7 @@ namespace Game.Entities
                     m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
                 }
 
-                for (byte i = InventorySlots.BagStart; i < InventorySlots.BankBagEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
-                }
-
-                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
+                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.ChildEquipmentEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
