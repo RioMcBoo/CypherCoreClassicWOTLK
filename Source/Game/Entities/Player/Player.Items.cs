@@ -3717,6 +3717,10 @@ namespace Game.Entities
                 if (current == skip)
                     continue;
 
+                // Reagent bags are not supported in Classic
+                if (new ItemSlot(j).IsReagentBagSlot)
+                    continue;
+
                 InventoryResult res = CanStoreItem_InSlot(null, current, dest, pProto, ref count, pSrcItem, merge, history);
 
                 if (res == InventoryResult.WrongSlot)
@@ -3826,6 +3830,10 @@ namespace Game.Entities
                 // empty specific slot | ignore move items
                 if (destItem == null)
                 {
+                    // Reagent bags are not supported in Classic
+                    if (pos.Slot.IsReagentBagSlot)
+                        return InventoryResult.WrongBagType;
+
                     if (!pos.IsContainerPos)
                     {
                         // keyring case
