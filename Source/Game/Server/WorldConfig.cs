@@ -1002,6 +1002,9 @@ namespace Game
             // Specifies if IP addresses can be logged to the database
             Values[WorldCfg.AllowLogginIpAddressesInDatabase] = GetDefaultValue("AllowLoggingIPAddressesInDatabase", true);
 
+            //Loot Settings
+            Values[WorldCfg.EnableAELoot] = GetDefaultValue("EnableAELoot", false);
+
             // call ScriptMgr if we're reloading the configuration
             if (reload)
                 Global.ScriptMgr.OnConfigLoad(reload);

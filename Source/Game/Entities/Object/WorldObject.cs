@@ -721,7 +721,7 @@ namespace Game.Entities
 
                 bool HasSceneInstanceIDs = !player.GetSceneMgr().GetSceneTemplateByInstanceMap().Empty();
                 bool HasRuneState = ToUnit().GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
-                bool HasActionButtons = player.IsLoading(); // ActionButtons in MovementUpdate is only sent on login
+                bool HasActionButtons = true;
 
                 data.WriteBit(HasSceneInstanceIDs);
                 data.WriteBit(HasRuneState);

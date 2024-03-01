@@ -1659,6 +1659,7 @@ namespace Framework.Constants
         ArenaWinRatingModifier2,
         ArenaLoseRatingModifier,
         ArenaMatchmakerRatingModifier,
+        EnableAELoot,
         AuctionLevelReq,
         AuctionReplicateDelay,
         AuctionSearchDelay,
