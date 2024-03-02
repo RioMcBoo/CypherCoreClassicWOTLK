@@ -3572,7 +3572,7 @@ namespace Game.Entities
             return newFlag.GetState();
         }
 
-        ObjectGuid GetFlagCarrierGUID()
+        public ObjectGuid GetFlagCarrierGUID()
         {
             if (GetGoType() != GameObjectTypes.NewFlag)
                 return ObjectGuid.Empty;

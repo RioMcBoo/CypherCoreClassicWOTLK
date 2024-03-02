@@ -2,11 +2,11 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
-using Game.DataStorage;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 namespace Game.BattleGrounds.Zones
 {
@@ -410,7 +410,7 @@ namespace Game.BattleGrounds.Zones
 
             if (set)
             {
-                player.CastSpell(player, BattlegroundConst.SpellRecentlyDroppedFlag, true);
+                player.CastSpell(player, BattlegroundConst.SpellRecentlyDroppedNeutralFlag, true);
                 UpdateFlagState(team, WSGFlagState.OnGround);
 
                 if (team == Team.Alliance)
