@@ -1395,19 +1395,19 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Vendor = _worldPacket.ReadPackedGuid();
-            EStyle = _worldPacket.ReadUInt32();
-            EColor = _worldPacket.ReadUInt32();
-            BStyle = _worldPacket.ReadUInt32();
-            BColor = _worldPacket.ReadUInt32();
-            Bg = _worldPacket.ReadUInt32();
+            EStyle = _worldPacket.ReadInt32();
+            EColor = _worldPacket.ReadInt32();
+            BStyle = _worldPacket.ReadInt32();
+            BColor = _worldPacket.ReadInt32();
+            Bg = _worldPacket.ReadInt32();
         }
 
         public ObjectGuid Vendor;
-        public uint BStyle;
-        public uint EStyle;
-        public uint BColor;
-        public uint EColor;
-        public uint Bg;
+        public int BStyle;
+        public int EStyle;
+        public int BColor;
+        public int EColor;
+        public int Bg;
     }
 
     public class PlayerSaveGuildEmblem : ServerPacket

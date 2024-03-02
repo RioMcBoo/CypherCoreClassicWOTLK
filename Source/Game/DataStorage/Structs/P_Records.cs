@@ -9,14 +9,10 @@ namespace Game.DataStorage
 {
     public sealed class ParagonReputationRecord
     {
-        public uint Id;
-        private int _factionID;
+        public int Id;
+        public int FactionID;
         public int LevelThreshold;
         public int QuestID;
-
-        #region Properties
-        public uint FactionID => (uint)_factionID;
-        #endregion
     }
 
     public sealed class PhaseRecord
@@ -45,7 +41,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public ushort PhaseId;
-        public uint PhaseGroupID;
+        public int PhaseGroupID;
     }
 
     public sealed class PlayerConditionRecord
@@ -92,7 +88,7 @@ namespace Game.DataStorage
         public ushort MaxAvgEquippedItemLevel;
         public byte PhaseUseFlags;
         public ushort PhaseID;
-        public uint PhaseGroupID;
+        public int PhaseGroupID;
         public byte Flags;
         public sbyte ChrSpecializationIndex;
         private sbyte _chrSpecializationRole;
@@ -112,9 +108,9 @@ namespace Game.DataStorage
         public ushort[] MaxSkill = new ushort[4];
         public int[] MinFactionID = new int[3];
         public byte[] MinReputation = new byte[3];
-        public uint[] PrevQuestID = new uint[4];
-        public uint[] CurrQuestID = new uint[4];
-        public uint[] CurrentCompletedQuestID = new uint[4];
+        public int[] PrevQuestID = new int[4];
+        public int[] CurrQuestID = new int[4];
+        public int[] CurrentCompletedQuestID = new int[4];
         public int[] SpellID = new int[4];
         public int[] ItemID = new int[4];
         public uint[] ItemCount = new uint[4];
@@ -127,7 +123,7 @@ namespace Game.DataStorage
         public byte[] LfgStatus = new byte[4];
         public byte[] LfgCompare = new byte[4];
         public uint[] LfgValue = new uint[4];
-        public uint[] CurrencyID = new uint[4];
+        public int[] CurrencyID = new int[4];
         public uint[] CurrencyCount = new uint[4];
         public uint[] QuestKillMonster = new uint[6];
         public int[] MovementFlags = new int[2];

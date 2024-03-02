@@ -30,10 +30,10 @@ namespace Game.Scripting
             return true;
         }
 
-        public bool ValidateSpellInfo(params uint[] spellIds)
+        public bool ValidateSpellInfo(params int[] spellIds)
         {
             bool allValid = true;
-            foreach (uint spellId in spellIds)
+            foreach (var spellId in spellIds)
             {
                 if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                 {
@@ -45,7 +45,7 @@ namespace Game.Scripting
             return allValid;
         }
 
-        public bool ValidateSpellEffect(params (uint spellId, uint effectIndex)[] pairs)
+        public bool ValidateSpellEffect(params (int spellId, int effectIndex)[] pairs)
         {
             bool allValid = true;
             foreach (var (spellId, effectIndex) in pairs)
@@ -56,7 +56,7 @@ namespace Game.Scripting
             return allValid;
         }
 
-        public bool ValidateSpellEffect(uint spellId, uint effectIndex)
+        public bool ValidateSpellEffect(int spellId, int effectIndex)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
@@ -80,6 +80,7 @@ namespace Game.Scripting
             Register();
             m_currentScriptState = (byte)SpellScriptState.None;
         }
+
         public void _Unload()
         {
             m_currentScriptState = (byte)SpellScriptState.Unloading;
@@ -87,12 +88,13 @@ namespace Game.Scripting
             m_currentScriptState = (byte)SpellScriptState.None;
         }
 
-        public void _Init(string scriptname, uint spellId)
+        public void _Init(string scriptname, int spellId)
         {
             m_currentScriptState = (byte)SpellScriptState.None;
             m_scriptName = scriptname;
             m_scriptSpellId = spellId;
         }
+
         public string GetScriptName()
         {
             return m_scriptName;
@@ -100,7 +102,7 @@ namespace Game.Scripting
 
         public abstract class EffectHook
         {
-            protected EffectHook(uint effIndex)
+            protected EffectHook(int effIndex)
             {
                 // effect index must be in range <0;2>, allow use of special effindexes
                 Cypher.Assert(_effIndex == SpellConst.EffectAll || _effIndex == SpellConst.EffectFirstFound || _effIndex < SpellConst.MaxEffects);
@@ -123,24 +125,24 @@ namespace Game.Scripting
                 else
                 {
                     if (CheckEffect(spellInfo, _effIndex))
-                        mask |= 1u << (int)_effIndex;
+                        mask |= 1u << _effIndex;
                 }
                 return mask;
             }
 
-            public bool IsEffectAffected(SpellInfo spellInfo, uint effIndex)
+            public bool IsEffectAffected(SpellInfo spellInfo, int effIndex)
             {
-                return Convert.ToBoolean(GetAffectedEffectsMask(spellInfo) & (1 << (int)effIndex));
+                return GetAffectedEffectsMask(spellInfo).HasAnyFlag(1u << effIndex);
             }
 
-            public abstract bool CheckEffect(SpellInfo spellInfo, uint effIndex);
+            public abstract bool CheckEffect(SpellInfo spellInfo, int effIndex);
 
-            uint _effIndex;
+            int _effIndex;
         }
 
         public byte m_currentScriptState { get; set; }
         public string m_scriptName { get; set; }
-        public uint m_scriptSpellId { get; set; }
+        public int m_scriptSpellId { get; set; }
 
         //
         // SpellScript/AuraScript interface base
@@ -165,8 +167,8 @@ namespace Game.Scripting
         // DO NOT OVERRIDE THESE IN SCRIPTS
         public delegate SpellCastResult SpellCheckCastFnType();
         public delegate void DamageAndHealingCalcFnType(Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod);
-        public delegate void SpellOnResistAbsorbCalculateFnType(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount);
-        public delegate void SpellEffectFnType(uint index);
+        public delegate void SpellOnResistAbsorbCalculateFnType(DamageInfo damageInfo, ref int resistAmount, ref int absorbAmount);
+        public delegate void SpellEffectFnType(int index);
         public delegate void SpellBeforeHitFnType(SpellMissInfo missInfo);
         public delegate void SpellHitFnType();
         public delegate void SpellOnCalcCritChanceFnType(Unit victim, ref float chance);
@@ -226,7 +228,7 @@ namespace Game.Scripting
                 _callImpl = callImpl;
             }
 
-            public void Call(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
+            public void Call(DamageInfo damageInfo, ref int resistAmount, ref int absorbAmount)
             {
                 _callImpl(damageInfo, ref resistAmount, ref absorbAmount);
             }
@@ -237,13 +239,13 @@ namespace Game.Scripting
             SpellEffectName _effName;
             SpellEffectFnType _callImpl;
 
-            public EffectHandler(SpellEffectFnType callImpl, uint effIndex, SpellEffectName effName) : base(effIndex)
+            public EffectHandler(SpellEffectFnType callImpl, int effIndex, SpellEffectName effName) : base(effIndex)
             {
                 _callImpl = callImpl;
                 _effName = effName;
             }
 
-            public override bool CheckEffect(SpellInfo spellInfo, uint effIndex)
+            public override bool CheckEffect(SpellInfo spellInfo, int effIndex)
             {
                 if (spellInfo.GetEffects().Count <= effIndex)
                     return false;
@@ -256,7 +258,7 @@ namespace Game.Scripting
                 return (_effName == SpellEffectName.Any) || (spellEffectInfo.Effect == _effName);
             }
 
-            public void Call(uint effIndex)
+            public void Call(int effIndex)
             {
                 _callImpl(effIndex);
             }
@@ -313,14 +315,14 @@ namespace Game.Scripting
             bool _area;
             bool _dest;
 
-            public TargetHook(uint effectIndex, Targets targetType, bool area, bool dest = false) : base(effectIndex)
+            public TargetHook(int effectIndex, Targets targetType, bool area, bool dest = false) : base(effectIndex)
             {
                 _targetType = targetType;
                 _area = area;
                 _dest = dest;
             }
 
-            public override bool CheckEffect(SpellInfo spellInfo, uint effIndexToCheck)
+            public override bool CheckEffect(SpellInfo spellInfo, int effIndexToCheck)
             {
                 if (_targetType == 0)
                     return false;
@@ -380,7 +382,7 @@ namespace Game.Scripting
         {
             SpellObjectAreaTargetSelectFnType _callImpl;
 
-            public ObjectAreaTargetSelectHandler(SpellObjectAreaTargetSelectFnType callImpl, uint effIndex, Targets targetType) : base(effIndex, targetType, true)
+            public ObjectAreaTargetSelectHandler(SpellObjectAreaTargetSelectFnType callImpl, int effIndex, Targets targetType) : base(effIndex, targetType, true)
             {
                 _callImpl = callImpl;
             }
@@ -395,7 +397,7 @@ namespace Game.Scripting
         {
             SpellObjectTargetSelectFnType _callImpl;
 
-            public ObjectTargetSelectHandler(SpellObjectTargetSelectFnType callImpl, uint _effIndex, Targets _targetType) : base(_effIndex, _targetType, false)
+            public ObjectTargetSelectHandler(SpellObjectTargetSelectFnType callImpl, int _effIndex, Targets _targetType) : base(_effIndex, _targetType, false)
             {
                 _callImpl = callImpl;
             }
@@ -410,7 +412,7 @@ namespace Game.Scripting
         {
             SpellDestinationTargetSelectFnType _callImpl;
 
-            public DestinationTargetSelectHandler(SpellDestinationTargetSelectFnType callImpl, uint _effIndex, Targets _targetType) : base(_effIndex, _targetType, false, true)
+            public DestinationTargetSelectHandler(SpellDestinationTargetSelectFnType callImpl, int _effIndex, Targets _targetType) : base(_effIndex, _targetType, false, true)
             {
                 _callImpl = callImpl;
             }
@@ -633,7 +635,7 @@ namespace Game.Scripting
         public Difficulty GetCastDifficulty() { return m_spell.GetCastDifficulty(); }
         public SpellValue GetSpellValue() { return m_spell.m_spellValue; }
 
-        public SpellEffectInfo GetEffectInfo(uint effIndex)
+        public SpellEffectInfo GetEffectInfo(int effIndex)
         {
             return GetSpellInfo().GetEffect(effIndex);
         }
@@ -1139,12 +1141,12 @@ namespace Game.Scripting
         {
             AuraType _effAurName;
 
-            public EffectBase(uint effIndex, AuraType auraType) : base(effIndex)
+            public EffectBase(int effIndex, AuraType auraType) : base(effIndex)
             {
                 _effAurName = auraType;
             }
 
-            public override bool CheckEffect(SpellInfo spellInfo, uint effIndex)
+            public override bool CheckEffect(SpellInfo spellInfo, int effIndex)
             {
                 if (spellInfo.GetEffects().Count <= effIndex)
                     return false;
@@ -1194,7 +1196,7 @@ namespace Game.Scripting
         {
             public AuraEffectCalcAmountDelegate _callImpl;
 
-            public EffectCalcAmountHandler(AuraEffectCalcAmountDelegate callImpl, uint _effIndex, AuraType _effName) : base(_effIndex, _effName)
+            public EffectCalcAmountHandler(AuraEffectCalcAmountDelegate callImpl, int _effIndex, AuraType _effName) : base(_effIndex, _effName)
             {
                 _callImpl = callImpl;
             }
@@ -1362,7 +1364,7 @@ namespace Game.Scripting
         {
             AuraCheckEffectProcDelegate _callImpl;
 
-            public CheckEffectProcHandler(AuraCheckEffectProcDelegate callImpl, uint effIndex, AuraType effName) : base(effIndex, effName)
+            public CheckEffectProcHandler(AuraCheckEffectProcDelegate callImpl, int effIndex, AuraType effName) : base(effIndex, effName)
             {
                 _callImpl = callImpl;
             }
@@ -1761,13 +1763,13 @@ namespace Game.Scripting
         // returns proto of the spell
         public SpellInfo GetSpellInfo() { return m_aura.GetSpellInfo(); }
 
-        public SpellEffectInfo GetEffectInfo(uint effIndex)
+        public SpellEffectInfo GetEffectInfo(int effIndex)
         {
             return m_aura.GetSpellInfo().GetEffect(effIndex);
         }
 
         // returns spellid of the spell
-        public uint GetId() { return m_aura.GetId(); }
+        public int GetId() { return m_aura.GetId(); }
 
         // returns guid of object which casted the aura (m_originalCaster of the Spell class)
         public ObjectGuid GetCasterGUID() { return m_aura.GetCasterGUID(); }

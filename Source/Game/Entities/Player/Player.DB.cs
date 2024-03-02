@@ -56,7 +56,7 @@ namespace Game.Entities
                             item.InventorySlot = slot;
 
                             ItemPos itemPos = new(slot);
-                            List<ItemPosCount> dest;
+                            List<(ItemPos item, int count)> dest;
 
                             if (itemPos.IsInventoryPos)
                             {
@@ -98,7 +98,7 @@ namespace Game.Entities
                             var bag = bagMap.LookupByKey(bagGuid);
                             if (bag != null)
                             {
-                                err = CanStoreItem(new(slot, bag.InventorySlot), out List<ItemPosCount> dest, item);
+                                err = CanStoreItem(new(slot, bag.InventorySlot), out List<(ItemPos item, int count)> dest, item);
                                 if (err == InventoryResult.Ok)
                                     item = StoreItem(dest, item, true);
                             }
@@ -3927,9 +3927,9 @@ namespace Game.Entities
             DB.Characters.Execute(stmt);
         }
 
-        public static uint GetZoneIdFromDB(ObjectGuid guid)
+        public static int GetZoneIdFromDB(ObjectGuid guid)
         {
-            ulong guidLow = guid.GetCounter();
+            long guidLow = guid.GetCounter();
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_ZONE);
             stmt.AddValue(0, guidLow);
             using var result = DB.Characters.Query(stmt);
@@ -3937,7 +3937,7 @@ namespace Game.Entities
             if (result.IsEmpty())
                 return 0;
 
-            uint zone = result.Read<ushort>(0);
+            int zone = result.Read<ushort>(0);
             if (zone == 0)
             {
                 // stored zone is zero, use generic and slow zone detection
@@ -4064,23 +4064,23 @@ namespace Game.Entities
                         {
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_ARTIFACT);
                             stmt.AddValue(0, guid);
-                            SQLResult artifactResult = DB.Characters.Query(stmt);
+                            using var artifactResult = DB.Characters.Query(stmt);
 
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE);
                             stmt.AddValue(0, guid);
-                            SQLResult azeriteResult = DB.Characters.Query(stmt);
+                            using var azeriteResult = DB.Characters.Query(stmt);
 
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_MILESTONE_POWER);
                             stmt.AddValue(0, guid);
-                            SQLResult azeriteItemMilestonePowersResult = DB.Characters.Query(stmt);
+                            using var azeriteItemMilestonePowersResult = DB.Characters.Query(stmt);
 
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE);
                             stmt.AddValue(0, guid);
-                            SQLResult azeriteItemUnlockedEssencesResult = DB.Characters.Query(stmt);
+                            using var azeriteItemUnlockedEssencesResult = DB.Characters.Query(stmt);
 
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED);
                             stmt.AddValue(0, guid);
-                            SQLResult azeriteEmpoweredItemResult = DB.Characters.Query(stmt);
+                            using var azeriteEmpoweredItemResult = DB.Characters.Query(stmt);
 
                             Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
                             ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);

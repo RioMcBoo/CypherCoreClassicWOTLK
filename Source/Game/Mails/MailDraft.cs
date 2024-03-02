@@ -11,7 +11,7 @@ namespace Game.Mails
 {
     public class MailDraft
     {
-        public MailDraft(uint mailTemplateId, bool need_items = true)
+        public MailDraft(int mailTemplateId, bool need_items = true)
         {
             m_mailTemplateId = mailTemplateId;
             m_mailTemplateItemsNeed = need_items;
@@ -216,7 +216,7 @@ namespace Game.Mails
                 DeleteIncludedItems(null);
         }
 
-        uint GetMailTemplateId() { return m_mailTemplateId; }
+        int GetMailTemplateId() { return m_mailTemplateId; }
         string GetSubject() { return m_subject; }
         ulong GetMoney() { return m_money; }
         ulong GetCOD() { return m_COD; }
@@ -233,7 +233,7 @@ namespace Game.Mails
             return this;
         }
 
-        uint m_mailTemplateId;
+        int m_mailTemplateId;
         bool m_mailTemplateItemsNeed;
         string m_subject;
         string m_body;

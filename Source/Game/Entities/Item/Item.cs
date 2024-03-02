@@ -31,7 +31,7 @@ namespace Game.Entities
             m_lastPlayedTimeUpdate = GameTime.GetGameTime();
         }
 
-        public virtual bool Create(ulong guidlow, uint itemId, ItemContext context, Player owner)
+        public virtual bool Create(long guidlow, int itemId, ItemContext context, Player owner)
         {
             _Create(ObjectGuid.Create(HighGuid.Item, guidlow));
 
@@ -384,7 +384,7 @@ namespace Game.Entities
             SetState(ItemUpdateState.Unchanged);
         }
 
-        public virtual bool LoadFromDB(ulong guid, ObjectGuid ownerGuid, SQLFields fields, uint entry)
+        public virtual bool LoadFromDB(long guid, ObjectGuid ownerGuid, SQLFields fields, int entry)
         {
             // create item before any checks for store correct guid
             // and allow use "FSetState(ITEM_REMOVED); SaveToDB();" for deleting item from DB
@@ -405,7 +405,7 @@ namespace Game.Entities
 
             uint itemFlags = fields.Read<uint>(7);
             bool need_save = false;
-            ulong creator = fields.Read<ulong>(2);
+            long creator = fields.Read<long>(2);
             if (creator != 0)
             {
                 if (!Convert.ToBoolean(itemFlags & (int)ItemFieldFlags.Child))
@@ -414,7 +414,7 @@ namespace Game.Entities
                     SetCreator(ObjectGuid.Create(HighGuid.Item, creator));
             }
 
-            ulong giftCreator = fields.Read<ulong>(3);
+            long giftCreator = fields.Read<long>(3);
             if (giftCreator != 0)
                 SetGiftCreator(ObjectGuid.Create(HighGuid.Player, giftCreator));
 
@@ -496,7 +496,7 @@ namespace Game.Entities
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
                 gemData[i] = new ItemDynamicFieldGems();
-                gemData[i].ItemId = fields.Read<uint>(38 + i * gemFields);
+                gemData[i].ItemId = fields.Read<int>(38 + i * gemFields);
                 var gemBonusListIDs = new StringArray(fields.Read<string>(39 + i * gemFields), ' ');
                 if (!gemBonusListIDs.IsEmpty())
                 {
@@ -510,7 +510,7 @@ namespace Game.Entities
 
                 gemData[i].Context = fields.Read<byte>(40 + i * gemFields);
                 if (gemData[i].ItemId != 0)
-                    SetGem((ushort)i, gemData[i], fields.Read<uint>(41 + i * gemFields));
+                    SetGem((ushort)i, gemData[i], fields.Read<int>(41 + i * gemFields));
             }
 
             SetModifier(ItemModifier.TimewalkerLevel, fields.Read<uint>(50));
@@ -560,7 +560,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void LoadArtifactData(Player owner, ulong xp, uint artifactAppearanceId, uint artifactTier, List<ArtifactPowerData> powers)
+        public void LoadArtifactData(Player owner, ulong xp, int artifactAppearanceId, uint artifactTier, List<ArtifactPowerData> powers)
         {
             for (byte i = 0; i <= artifactTier; ++i)
                 InitArtifactPowers(GetTemplate().GetArtifactID(), i);
@@ -880,7 +880,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void SetCount(uint value)
+        public void SetCount(int value)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.StackCount), value);
 
@@ -1111,7 +1111,7 @@ namespace Game.Entities
             return slot < m_itemData.Gems.Size() ? m_itemData.Gems[slot] : null;
         }
 
-        public void SetGem(ushort slot, ItemDynamicFieldGems gem, uint gemScalingLevel)
+        public void SetGem(ushort slot, ItemDynamicFieldGems gem, int gemScalingLevel)
         {
             //ASSERT(slot < MAX_GEM_SOCKETS);
             m_gemScalingLevels[slot] = gemScalingLevel;
@@ -1187,7 +1187,7 @@ namespace Game.Entities
 
                 SocketColor GemColor = 0;
 
-                ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate((uint)gemData.ItemId.GetValue());
+                ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId.GetValue());
                 if (gemProto != null)
                 {
                     GemPropertiesRecord gemProperty = CliDB.GemPropertiesStorage.LookupByKey(gemProto.GetGemProperties());
@@ -1201,18 +1201,18 @@ namespace Game.Entities
             return true;
         }
 
-        public byte GetGemCountWithID(uint GemID)
+        public byte GetGemCountWithID(int GemID)
         {
             var list = (List<SocketedGem>)m_itemData.Gems;
             return (byte)list.Count(gemData => gemData.ItemId == GemID);
         }
 
-        public byte GetGemCountWithLimitCategory(uint limitCategory)
+        public byte GetGemCountWithLimitCategory(int limitCategory)
         {
             var list = (List<SocketedGem>)m_itemData.Gems;
             return (byte)list.Count(gemData =>
             {
-                ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate((uint)gemData.ItemId.GetValue());
+                ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId.GetValue());
                 if (gemProto == null)
                     return false;
 
@@ -1220,7 +1220,7 @@ namespace Game.Entities
             });
         }
 
-        public bool IsLimitedToAnotherMapOrZone(uint cur_mapId, uint cur_zoneId)
+        public bool IsLimitedToAnotherMapOrZone(int cur_mapId, int cur_zoneId)
         {
             ItemTemplate proto = GetTemplate();
             return proto != null && ((proto.GetMap() != 0 && proto.GetMap() != cur_mapId) ||
@@ -1247,7 +1247,7 @@ namespace Game.Entities
             owner.SendPacket(itemTimeUpdate);
         }
 
-        public static Item CreateItem(uint itemEntry, uint count, ItemContext context, Player player = null, bool addDefaultBonuses = true)
+        public static Item CreateItem(int itemEntry, int count, ItemContext context, Player player = null, bool addDefaultBonuses = true)
         {
             if (count < 1)
                 return null;                                        //don't create item at zero count
@@ -1272,7 +1272,7 @@ namespace Game.Entities
             return null;
         }
 
-        public Item CloneItem(uint count, Player player = null)
+        public Item CloneItem(int count, Player player = null)
         {
             Item newItem = CreateItem(GetEntry(), count, GetContext(), player, false);
             if (newItem == null)
@@ -2020,7 +2020,7 @@ namespace Game.Entities
             return Global.DB2Mgr.GetItemModifiedAppearance(GetEntry(), _bonusData.AppearanceModID);
         }
 
-        public uint GetModifier(ItemModifier modifier)
+        public int GetModifier(ItemModifier modifier)
         {
             int modifierIndex = m_itemData.Modifiers._value.Values.FindIndexIf(mod =>
             {
@@ -2028,12 +2028,12 @@ namespace Game.Entities
             });
 
             if (modifierIndex != -1)
-                return (uint)m_itemData.Modifiers._value.Values[modifierIndex].Value;
+                return m_itemData.Modifiers._value.Values[modifierIndex].Value;
 
             return 0;
         }
 
-        public void SetModifier(ItemModifier modifier, uint value)
+        public void SetModifier(ItemModifier modifier, int value)
         {
             int modifierIndex = m_itemData.Modifiers._value.Values.FindIndexIf(mod =>
             {
@@ -2045,7 +2045,7 @@ namespace Game.Entities
                 if (modifierIndex == -1)
                 {
                     ItemMod mod = new();
-                    mod.Value = (int)value;
+                    mod.Value = value;
                     mod.Type = (byte)modifier;
 
                     AddDynamicUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Modifiers)._value.ModifyValue(m_itemData.Modifiers._value.Values), mod);
@@ -2066,9 +2066,9 @@ namespace Game.Entities
             }
         }
 
-        public uint GetVisibleEntry(Player owner)
+        public int GetVisibleEntry(Player owner)
         {
-            uint itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            int itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
             if (itemModifiedAppearanceId == 0)
                 itemModifiedAppearanceId = GetModifier(ItemModifier.TransmogAppearanceAllSpecs);
 
@@ -2081,7 +2081,7 @@ namespace Game.Entities
 
         public ushort GetVisibleAppearanceModId(Player owner)
         {
-            uint itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            int itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
             if (itemModifiedAppearanceId == 0)
                 itemModifiedAppearanceId = GetModifier(ItemModifier.TransmogAppearanceAllSpecs);
 
@@ -2092,9 +2092,9 @@ namespace Game.Entities
             return (ushort)GetAppearanceModId();
         }
 
-        uint GetVisibleModifiedAppearanceId(Player owner)
+        int GetVisibleModifiedAppearanceId(Player owner)
         {
-            uint itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            int itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
             if (itemModifiedAppearanceId == 0)
                 itemModifiedAppearanceId = GetModifier(ItemModifier.TransmogAppearanceAllSpecs);
 
@@ -2108,18 +2108,18 @@ namespace Game.Entities
             return itemModifiedAppearanceId;
         }
         
-        public uint GetVisibleSecondaryModifiedAppearanceId(Player owner)
+        public int GetVisibleSecondaryModifiedAppearanceId(Player owner)
         {
-            uint itemModifiedAppearanceId = GetModifier(ItemConst.SecondaryAppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            int itemModifiedAppearanceId = GetModifier(ItemConst.SecondaryAppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
             if (itemModifiedAppearanceId == 0)
                 itemModifiedAppearanceId = GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs);
 
             return itemModifiedAppearanceId;
         }
 
-        public uint GetVisibleEnchantmentId(Player owner)
+        public int GetVisibleEnchantmentId(Player owner)
         {
-            uint enchantmentId = GetModifier(ItemConst.IllusionModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            int enchantmentId = GetModifier(ItemConst.IllusionModifierSlotBySpec[owner.GetActiveTalentGroup()]);
             if (enchantmentId == 0)
                 enchantmentId = GetModifier(ItemModifier.EnchantIllusionAllSpecs);
 
@@ -2452,7 +2452,7 @@ namespace Game.Entities
         public static void AddItemsSetItem(Player player, Item item)
         {
             ItemTemplate proto = item.GetTemplate();
-            uint setid = proto.GetItemSet();
+            int setid = proto.GetItemSet();
 
             ItemSetRecord set = CliDB.ItemSetStorage.LookupByKey(setid);
             if (set == null)
@@ -2537,7 +2537,7 @@ namespace Game.Entities
 
         public static void RemoveItemsSetItem(Player player, Item item)
         {
-            uint setid = item.GetTemplate().GetItemSet();
+            int setid = item.GetTemplate().GetItemSet();
 
             ItemSetRecord set = CliDB.ItemSetStorage.LookupByKey(setid);
             if (set == null)
@@ -2637,8 +2637,8 @@ namespace Game.Entities
         public bool IsInTrade() { return mb_in_trade != 0; }
         public bool IsInTradeHolded() { return mb_in_trade == 1; }
 
-        public uint GetCount() { return m_itemData.StackCount; }
-        public uint GetMaxStackCount() { return GetTemplate().GetMaxStackSize(); }
+        public int GetCount() { return m_itemData.StackCount; }
+        public int GetMaxStackCount() { return GetTemplate().GetMaxStackSize(); }
 
         public byte InventorySlot { get => m_slot; set => m_slot = value; }
         public byte InventoryBagSlot { get => m_container != null ? m_container.InventorySlot : ItemSlot.Null; }
@@ -2674,8 +2674,8 @@ namespace Game.Entities
             uState = state;
         }
 
-        public override bool HasQuest(uint quest_id) { return GetTemplate().GetStartQuest() == quest_id; }
-        public override bool HasInvolvedQuest(uint quest_id) { return false; }
+        public override bool HasQuest(int quest_id) { return GetTemplate().GetStartQuest() == quest_id; }
+        public override bool HasInvolvedQuest(int quest_id) { return false; }
         public bool IsPotion() { return GetTemplate().IsPotion(); }
         public bool IsVellum() { return GetTemplate().IsVellum(); }
         public bool IsConjuredConsumable() { return GetTemplate().IsConjuredConsumable(); }
@@ -2694,7 +2694,7 @@ namespace Game.Entities
         public uint GetAppearanceModId() { return m_itemData.ItemAppearanceModID; }
         public void SetAppearanceModId(uint appearanceModId) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)appearanceModId); }
         public float GetRepairCostMultiplier() { return _bonusData.RepairCostMultiplier; }
-        public uint GetScalingContentTuningId() { return _bonusData.ContentTuningId; }
+        public int GetScalingContentTuningId() { return _bonusData.ContentTuningId; }
 
         public void SetRefundRecipient(ObjectGuid guid) { m_refundRecipient = guid; }
         public void SetPaidMoney(ulong money) { m_paidMoney = money; }
@@ -2704,7 +2704,7 @@ namespace Game.Entities
         public ulong GetPaidMoney() { return m_paidMoney; }
         public uint GetPaidExtendedCost() { return m_paidExtendedCost; }
 
-        public uint GetScriptId() { return GetTemplate().ScriptId; }
+        public int GetScriptId() { return GetTemplate().ScriptId; }
 
         public ObjectGuid GetChildItem() { return m_childItem; }
         public void SetChildItem(ObjectGuid childItem) { m_childItem = childItem; }
@@ -2722,44 +2722,44 @@ namespace Game.Entities
             switch (pBagProto.GetClass())
             {
                 case ItemClass.Container:
-                    switch ((ItemSubClassContainer)pBagProto.GetSubClass())
+                    switch (pBagProto.GetSubClass().Container)
                     {
                         case ItemSubClassContainer.Container:
                             return true;
                         case ItemSubClassContainer.SoulContainer:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.SoulShards))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.SoulShards))
                                 return false;
                             return true;
                         case ItemSubClassContainer.HerbContainer:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.Herbs))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.Herbs))
                                 return false;
                             return true;
                         case ItemSubClassContainer.EnchantingContainer:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.EnchantingSupp))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.EnchantingSupp))
                                 return false;
                             return true;
                         case ItemSubClassContainer.MiningContainer:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.MiningSupp))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.MiningSupp))
                                 return false;
                             return true;
                         case ItemSubClassContainer.EngineeringContainer:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.EngineeringSupp))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.EngineeringSupp))
                                 return false;
                             return true;
                         case ItemSubClassContainer.GemContainer:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.Gems))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.Gems))
                                 return false;
                             return true;
                         case ItemSubClassContainer.LeatherworkingContainer:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.LeatherworkingSupp))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.LeatherworkingSupp))
                                 return false;
                             return true;
                         case ItemSubClassContainer.InscriptionContainer:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.InscriptionSupp))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.InscriptionSupp))
                                 return false;
                             return true;
                         case ItemSubClassContainer.TackleContainer:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.FishingSupp))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.FishingSupp))
                                 return false;
                             return true;
                         case ItemSubClassContainer.CookingContainer:
@@ -2773,14 +2773,14 @@ namespace Game.Entities
                     }
                 //can remove?
                 case ItemClass.Quiver:
-                    switch ((ItemSubClassQuiver)pBagProto.GetSubClass())
+                    switch (pBagProto.GetSubClass().Quiver)
                     {
                         case ItemSubClassQuiver.Quiver:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.Arrows))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.Arrows))
                                 return false;
                             return true;
                         case ItemSubClassQuiver.AmmoPouch:
-                            if (!Convert.ToBoolean(pProto.GetBagFamily() & BagFamilyMask.Bullets))
+                            if (!pProto.GetBagFamily().HasAnyFlag(BagFamilyMask.Bullets))
                                 return false;
                             return true;
                         default:
@@ -2850,7 +2850,7 @@ namespace Game.Entities
 
     public class ItemSetEffect
     {
-        public uint ItemSetID;
+        public int ItemSetID;
         public List<Item> EquippedItems = new();
         public List<ItemSetSpellRecord> SetBonuses = new();
     }
@@ -2865,16 +2865,16 @@ namespace Game.Entities
             Quality = proto.GetQuality();
             ItemLevelBonus = 0;
             RequiredLevel = proto.GetBaseRequiredLevel();
-            for (uint i = 0; i < ItemConst.MaxStats; ++i)
+            for (int i = 0; i < ItemConst.MaxStats; ++i)
                 ItemStatType[i] = proto.GetStatModifierBonusStat(i);
 
-            for (uint i = 0; i < ItemConst.MaxStats; ++i)
+            for (int i = 0; i < ItemConst.MaxStats; ++i)
                 StatPercentEditor[i] = proto.GetStatPercentEditor(i);
 
-            for (uint i = 0; i < ItemConst.MaxStats; ++i)
+            for (int i = 0; i < ItemConst.MaxStats; ++i)
                 ItemStatSocketCostMultiplier[i] = proto.GetStatPercentageOfSocket(i);
 
-            for (uint i = 0; i < ItemConst.MaxGemSockets; ++i)
+            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
                 socketColor[i] = proto.GetSocketColor(i);
                 GemItemLevelBonus[i] = 0;
@@ -2913,12 +2913,12 @@ namespace Game.Entities
         {
             if (itemInstance.ItemBonus != null)
             {
-                foreach (uint bonusListID in itemInstance.ItemBonus.BonusListIDs)
+                foreach (var bonusListID in itemInstance.ItemBonus.BonusListIDs)
                     AddBonusList(bonusListID);
             }
         }
 
-        public void AddBonusList(uint bonusListId)
+        public void AddBonusList(int bonusListId)
         {
             foreach (var bonus in ItemBonusMgr.GetItemBonuses(bonusListId))
                 AddBonus(bonus.Type, bonus.Value);
@@ -2933,7 +2933,7 @@ namespace Game.Entities
                     break;
                 case ItemBonusType.Stat:
                 {
-                    uint statIndex;
+                    int statIndex;
                     for (statIndex = 0; statIndex < ItemConst.MaxStats; ++statIndex)
                         if (ItemStatType[statIndex] == values[0] || ItemStatType[statIndex] == -1)
                             break;
@@ -2951,19 +2951,19 @@ namespace Game.Entities
                         Quality = (ItemQuality)values[0];
                         _state.HasQualityBonus = true;
                     }
-                    else if ((uint)Quality < values[0])
+                    else if ((int)Quality < values[0])
                         Quality = (ItemQuality)values[0];
                     break;
                 case ItemBonusType.Suffix:
                     if (values[1] < _state.SuffixPriority)
                     {
-                        Suffix = (uint)values[0];
+                        Suffix = values[0];
                         _state.SuffixPriority = values[1];
                     }
                     break;
                 case ItemBonusType.Socket:
                 {
-                    uint socketCount = (uint)values[0];
+                    int socketCount = values[0];
                     for (uint i = 0; i < ItemConst.MaxGemSockets && socketCount != 0; ++i)
                     {
                         if (socketColor[i] == 0)
@@ -2977,7 +2977,7 @@ namespace Game.Entities
                 case ItemBonusType.Appearance:
                     if (values[1] < _state.AppearanceModPriority)
                     {
-                        AppearanceModID = Convert.ToUInt32(values[0]);
+                        AppearanceModID = values[0];
                         _state.AppearanceModPriority = values[1];
                     }
                     break;
@@ -2991,8 +2991,8 @@ namespace Game.Entities
                 case ItemBonusType.ScalingStatDistributionFixed:
                     if (values[1] < _state.ScalingStatDistributionPriority)
                     {
-                        ContentTuningId = (uint)values[2];
-                        PlayerLevelToItemLevelCurveId = (uint)values[3];
+                        ContentTuningId = values[2];
+                        PlayerLevelToItemLevelCurveId = values[3];
                         _state.ScalingStatDistributionPriority = values[1];
                         HasFixedLevel = type == ItemBonusType.ScalingStatDistributionFixed;
                     }
@@ -3022,10 +3022,10 @@ namespace Game.Entities
                 case ItemBonusType.RequiredLevelCurve:
                     if (values[2] < _state.RequiredLevelCurvePriority)
                     {
-                        RequiredLevelCurve = (uint)values[0];
+                        RequiredLevelCurve = values[0];
                         _state.RequiredLevelCurvePriority = values[2];
                         if (values[1] != 0)
-                            ContentTuningId = (uint)values[1];
+                            ContentTuningId = values[1];
                     }
                     break;
             }
@@ -3034,24 +3034,24 @@ namespace Game.Entities
         public ItemQuality Quality;
         public int ItemLevelBonus;
         public int RequiredLevel;
-        public int[] ItemStatType = new int[ItemConst.MaxStats];
+        public ItemModType[] ItemStatType = new ItemModType[ItemConst.MaxStats];
         public int[] StatPercentEditor = new int[ItemConst.MaxStats];
         public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
         public SocketColor[] socketColor = new SocketColor[ItemConst.MaxGemSockets];
         public ItemBondingType Bonding;
-        public uint AppearanceModID;
+        public int AppearanceModID;
         public float RepairCostMultiplier;
-        public uint ContentTuningId;
-        public uint PlayerLevelToItemLevelCurveId;
-        public uint DisenchantLootId;
-        public uint[] GemItemLevelBonus = new uint[ItemConst.MaxGemSockets];
+        public int ContentTuningId;
+        public int PlayerLevelToItemLevelCurveId;
+        public int DisenchantLootId;
+        public int[] GemItemLevelBonus = new int[ItemConst.MaxGemSockets];
         public int[] GemRelicType = new int[ItemConst.MaxGemSockets];
         public ushort[] GemRelicRankBonus = new ushort[ItemConst.MaxGemSockets];
         public int RelicType;
         public int RequiredLevelOverride;
         public uint AzeriteTierUnlockSetId;
-        public uint Suffix;
-        public uint RequiredLevelCurve;
+        public int Suffix;
+        public int RequiredLevelCurve;
         public ItemEffectRecord[] Effects = new ItemEffectRecord[13];
         public int EffectCount;
         public bool CanDisenchant;
@@ -3072,7 +3072,7 @@ namespace Game.Entities
 
     public class ArtifactPowerData
     {
-        public uint ArtifactPowerId;
+        public int ArtifactPowerId;
         public byte PurchasedRank;
         public byte CurrentRankWithBonus;
     }
@@ -3118,7 +3118,7 @@ namespace Game.Entities
                     info.Artifact.ArtifactTierId = artifactResult.Read<uint>(3);
 
                     ArtifactPowerData artifactPowerData = new();
-                    artifactPowerData.ArtifactPowerId = artifactResult.Read<uint>(4);
+                    artifactPowerData.ArtifactPowerId = artifactResult.Read<int>(4);
                     artifactPowerData.PurchasedRank = artifactResult.Read<byte>(5);
 
                     ArtifactPowerRecord artifactPower = CliDB.ArtifactPowerStorage.LookupByKey(artifactPowerData.ArtifactPowerId);
@@ -3145,7 +3145,7 @@ namespace Game.Entities
     [StructLayout(LayoutKind.Sequential)]
     public class ItemDynamicFieldGems
     {
-        public uint ItemId;
+        public int ItemId;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public ushort[] BonusListIDs = new ushort[16];
         public byte Context;

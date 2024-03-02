@@ -17,7 +17,7 @@ namespace Game.Entities
 {
     public abstract partial class Unit
     {
-        public virtual bool HasSpell(uint spellId) { return false; }
+        public virtual bool HasSpell(int spellId) { return false; }
 
         public void SetInstantCast(bool set) { _instantCast = set; }
         public bool CanInstantCast() { return _instantCast; }
@@ -1146,7 +1146,7 @@ namespace Game.Entities
             return dots;
         }
 
-        public void SendEnergizeSpellLog(Unit victim, uint spellId, int amount, int overEnergize, PowerType powerType)
+        public void SendEnergizeSpellLog(Unit victim, int spellId, int amount, int overEnergize, PowerType powerType)
         {
             SpellEnergizeLog data = new();
             data.CasterGUID = GetGUID();
@@ -1167,7 +1167,7 @@ namespace Game.Entities
             {
                 var powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
                 if (powerTypeEntry != null)
-                    if (powerTypeEntry.GetFlags().HasFlag(PowerTypeFlags.UseRegenInterrupt))
+                    if (powerTypeEntry.HasFlag(PowerTypeFlags.UseRegenInterrupt))
                         player.InterruptPowerRegen(powerType);
             }
 
@@ -1178,22 +1178,22 @@ namespace Game.Entities
             SendEnergizeSpellLog(victim, spellInfo.Id, gain, overEnergize, powerType);
         }
 
-        public void ApplySpellImmune(uint spellId, SpellImmunity op, SpellSchoolMask type, bool apply)
+        public void ApplySpellImmune(int spellId, SpellImmunity op, SpellSchoolMask type, bool apply)
         {
-            ApplySpellImmune(spellId, op, (uint)type, apply);
+            ApplySpellImmune(spellId, op, type, apply);
         }
 
-        public void ApplySpellImmune(uint spellId, SpellImmunity op, AuraType type, bool apply)
+        public void ApplySpellImmune(int spellId, SpellImmunity op, AuraType type, bool apply)
         {
-            ApplySpellImmune(spellId, op, (uint)type, apply);
+            ApplySpellImmune(spellId, op, type, apply);
         }
 
-        public void ApplySpellImmune(uint spellId, SpellImmunity op, SpellEffectName type, bool apply)
+        public void ApplySpellImmune(int spellId, SpellImmunity op, SpellEffectName type, bool apply)
         {
-            ApplySpellImmune(spellId, op, (uint)type, apply);
+            ApplySpellImmune(spellId, op, type, apply);
         }
 
-        public void ApplySpellImmune(uint spellId, SpellImmunity op, uint type, bool apply)
+        public void ApplySpellImmune(int spellId, SpellImmunity op, int type, bool apply)
         {
             if (apply)
             {
@@ -1218,7 +1218,7 @@ namespace Game.Entities
             if (spellInfo == null)
                 return false;
 
-            bool hasImmunity(MultiMap<uint, uint> container, uint key)
+            bool hasImmunity(MultiMap<int, int> container, int key)
             {
                 var range = container.LookupByKey(key);
                 if (!requireImmunityPurgesEffectAttribute)
@@ -1242,7 +1242,7 @@ namespace Game.Entities
             if (spellInfo.HasAttribute(SpellAttr0.NoImmunities))
                 return false;
 
-            uint dispel = (uint)spellInfo.Dispel;
+            int dispel = (int)spellInfo.Dispel;
             if (dispel != 0)
             {
                 var dispelList = m_spellImmune[(int)SpellImmunity.Dispel];
@@ -1251,7 +1251,7 @@ namespace Game.Entities
             }
 
             // Spells that don't have effectMechanics.
-            uint mechanic = (uint)spellInfo.Mechanic;
+            int mechanic = (int)spellInfo.Mechanic;
             if (mechanic != 0)
             {
                 var mechanicList = m_spellImmune[(int)SpellImmunity.Mechanic];
@@ -1280,14 +1280,14 @@ namespace Game.Entities
             if (immuneToAllEffects) //Return immune only if the target is immune to all spell effects.
                 return true;
 
-            uint schoolMask = (uint)spellInfo.GetSchoolMask();
+            int schoolMask = (int)spellInfo.GetSchoolMask();
             if (schoolMask != 0)
             {
-                uint schoolImmunityMask = 0;
+                int schoolImmunityMask = 0;
                 var schoolList = m_spellImmune[(int)SpellImmunity.School];
                 foreach (var pair in schoolList)
                 {
-                    if ((pair.Key & schoolMask) == 0)
+                    if (!pair.Key.HasAnyFlag(schoolMask))
                         continue;
 
                     SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value, GetMap().GetDifficultyID());
@@ -1302,30 +1302,31 @@ namespace Game.Entities
                             schoolImmunityMask |= pair.Key;
                 }
 
-                if ((schoolImmunityMask & schoolMask) == schoolMask)
+                if (schoolImmunityMask.HasFlag(schoolMask))
                     return true;
             }
 
             return false;
         }
+
         public uint GetSchoolImmunityMask()
         {
-            uint mask = 0;
+            int mask = 0;
             var schoolList = m_spellImmune[(int)SpellImmunity.School];
             foreach (var pair in schoolList)
                 mask |= pair.Key;
 
-            return mask;
+            return (uint)mask;
         }
 
         public uint GetDamageImmunityMask()
         {
-            uint mask = 0;
+            int mask = 0;
             var damageList = m_spellImmune[(int)SpellImmunity.Damage];
             foreach (var pair in damageList)
                 mask |= pair.Key;
 
-            return mask;
+            return (uint)mask;
         }
 
         public ulong GetMechanicImmunityMask()
@@ -1346,7 +1347,7 @@ namespace Game.Entities
             if (spellInfo.HasAttribute(SpellAttr0.NoImmunities))
                 return false;
 
-            bool hasImmunity(MultiMap<uint, uint> container, uint key)
+            bool hasImmunity(MultiMap<int, int> container, int key)
             {
                 var range = container.LookupByKey(key);
                 if (!requireImmunityPurgesEffectAttribute)
@@ -1365,10 +1366,10 @@ namespace Game.Entities
 
             // If m_immuneToEffect Type contain this effect Type, IMMUNE effect.
             var effectList = m_spellImmune[(int)SpellImmunity.Effect];
-            if (hasImmunity(effectList, (uint)spellEffectInfo.Effect))
+            if (hasImmunity(effectList, (int)spellEffectInfo.Effect))
                 return true;
 
-            uint mechanic = (uint)spellEffectInfo.Mechanic;
+            int mechanic = (int)spellEffectInfo.Mechanic;
             if (mechanic != 0)
             {
                 var mechanicList = m_spellImmune[(int)SpellImmunity.Mechanic];
@@ -1382,7 +1383,7 @@ namespace Game.Entities
                 if (!spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
                 {
                     var list = m_spellImmune[(int)SpellImmunity.State];
-                    if (hasImmunity(list, (uint)aura))
+                    if (hasImmunity(list, (int)aura))
                         return true;
                 }
 
@@ -1430,11 +1431,11 @@ namespace Game.Entities
             if (spellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                 return false;
 
-            uint schoolMask = (uint)spellInfo.GetSchoolMask();
+            int schoolMask = (int)spellInfo.GetSchoolMask();
             if (schoolMask != 0)
             {
                 // If m_immuneToSchool Type contain this school Type, IMMUNE damage.
-                uint schoolImmunityMask = 0;
+                int schoolImmunityMask = 0;
                 var schoolList = m_spellImmune[(int)SpellImmunity.School];
                 foreach (var pair in schoolList)
                     if (Convert.ToBoolean(pair.Key & schoolMask) && !spellInfo.CanPierceImmuneAura(Global.SpellMgr.GetSpellInfo(pair.Value, GetMap().GetDifficultyID())))
@@ -2504,16 +2505,16 @@ namespace Game.Entities
 
         // Auras
         public List<Aura> GetSingleCastAuras() { return m_scAuras; }
-        public List<KeyValuePair<uint, Aura>> GetOwnedAuras()
+        public List<KeyValuePair<int, Aura>> GetOwnedAuras()
         {
             return m_ownedAuras.KeyValueList;
         }
-        public List<KeyValuePair<uint, AuraApplication>> GetAppliedAuras()
+        public List<KeyValuePair<int, AuraApplication>> GetAppliedAuras()
         {
             return m_appliedAuras.KeyValueList;
         }
 
-        public Aura AddAura(uint spellId, Unit target)
+        public Aura AddAura(int spellId, Unit target)
         {
             if (target == null)
                 return null;
@@ -2566,7 +2567,7 @@ namespace Game.Entities
         {
             bool spellClickHandled = false;
 
-            uint spellClickEntry = GetVehicleKit() != null ? GetVehicleKit().GetCreatureEntry() : GetEntry();
+            int spellClickEntry = GetVehicleKit() != null ? GetVehicleKit().GetCreatureEntry() : GetEntry();
             TriggerCastFlags flags = GetVehicleKit() != null ? TriggerCastFlags.IgnoreCasterMountedOrOnVehicle : TriggerCastFlags.None;
 
             var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(spellClickEntry);
@@ -2662,7 +2663,7 @@ namespace Game.Entities
             return GetAuraApplication(predicate) != null;
         }
 
-        public bool HasAuraEffect(uint spellId, uint effIndex, ObjectGuid casterGUID = default)
+        public bool HasAuraEffect(int spellId, int effIndex, ObjectGuid casterGUID = default)
         {
             var range = m_appliedAuras.LookupByKey(spellId);
             if (!range.Empty())
@@ -2805,15 +2806,15 @@ namespace Game.Entities
             return count;
         }
 
-        public Aura GetAuraOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
+        public Aura GetAuraOfRankedSpell(int spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             var aurApp = GetAuraApplicationOfRankedSpell(spellId, casterGUID, itemCasterGUID, reqEffMask);
             return aurApp?.GetBase();
         }
 
-        public AuraApplication GetAuraApplicationOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
+        public AuraApplication GetAuraApplicationOfRankedSpell(int spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
         {
-            uint rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
+            int rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
             while (rankSpell != 0)
             {
                 AuraApplication aurApp = GetAuraApplication(rankSpell, casterGUID, itemCasterGUID, reqEffMask, except);
@@ -2992,7 +2993,7 @@ namespace Game.Entities
                     aura.Remove(removeMode);
             }
         }
-        public void RemoveAurasDueToSpellBySteal(uint spellId, ObjectGuid casterGUID, WorldObject stealer, int stolenCharges = 1)
+        public void RemoveAurasDueToSpellBySteal(int spellId, ObjectGuid casterGUID, WorldObject stealer, int stolenCharges = 1)
         {
             var range = m_ownedAuras.LookupByKey(spellId);
             foreach (var aura in range)
@@ -3074,7 +3075,7 @@ namespace Game.Entities
                 }
             }
         }
-        public void RemoveAurasDueToItemSpell(uint spellId, ObjectGuid castItemGuid)
+        public void RemoveAurasDueToItemSpell(int spellId, ObjectGuid castItemGuid)
         {
             var appliedAuras = m_appliedAuras.LookupByKey(spellId);
             for (var i = 0; i < appliedAuras.Count; ++i)
@@ -3181,7 +3182,7 @@ namespace Game.Entities
                 return;
             }
 
-            uint spellId = auraToRemove.GetId();
+            int spellId = auraToRemove.GetId();
             foreach (var pair in GetOwnedAuras())
             {
                 if (pair.Key != spellId)
@@ -3197,7 +3198,7 @@ namespace Game.Entities
             Cypher.Assert(false);
         }
 
-        public void RemoveAurasDueToSpell(uint spellId, ObjectGuid casterGUID = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        public void RemoveAurasDueToSpell(int spellId, ObjectGuid casterGUID = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             foreach (var pair in GetAppliedAuras())
             {
@@ -3237,7 +3238,7 @@ namespace Game.Entities
                 }
             }
         }
-        public void RemoveAuraFromStack(uint spellId, ObjectGuid casterGUID = default, AuraRemoveMode removeMode = AuraRemoveMode.Default, ushort num = 1)
+        public void RemoveAuraFromStack(int spellId, ObjectGuid casterGUID = default, AuraRemoveMode removeMode = AuraRemoveMode.Default, ushort num = 1)
         {
             var range = m_ownedAuras.LookupByKey(spellId);
             foreach (var aura in range)
@@ -3249,7 +3250,7 @@ namespace Game.Entities
                 }
             }
         }
-        public void RemoveAura(KeyValuePair<uint, AuraApplication> appMap, AuraRemoveMode mode = AuraRemoveMode.Default)
+        public void RemoveAura(KeyValuePair<int, AuraApplication> appMap, AuraRemoveMode mode = AuraRemoveMode.Default)
         {
             var aurApp = appMap.Value;
             // Do not remove aura which is already being removed
@@ -3261,7 +3262,7 @@ namespace Game.Entities
             if (aura.GetOwner() == this)
                 aura.Remove(mode);
         }
-        public void RemoveAura(uint spellId, ObjectGuid caster = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        public void RemoveAura(int spellId, ObjectGuid caster = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             var range = m_appliedAuras.LookupByKey(spellId);
             foreach (var iter in range)
@@ -3294,7 +3295,7 @@ namespace Game.Entities
             if (aurApp.GetBase().GetApplicationOfTarget(GetGUID()) != aurApp || aurApp.GetBase().IsRemoved())
                 return;
 
-            uint spellId = aurApp.GetBase().GetId();
+            int spellId = aurApp.GetBase().GetId();
 
             var range = m_appliedAuras.Where(p => p.Key == spellId);
             foreach (var pair in range)
@@ -3306,6 +3307,7 @@ namespace Game.Entities
                 }
             }
         }
+
         public void RemoveAura(Aura aura, AuraRemoveMode mode = AuraRemoveMode.Default)
         {
             if (aura.IsRemoved())
@@ -3314,6 +3316,7 @@ namespace Game.Entities
             if (aurApp != null)
                 RemoveAura(aurApp, mode);
         }
+
         public void RemoveAurasWithAttribute(SpellAttr0 flags)
         {
             foreach (var app in GetAppliedAuras())
@@ -3358,7 +3361,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveAppliedAuras(uint spellId, Func<AuraApplication, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        void RemoveAppliedAuras(int spellId, Func<AuraApplication, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             var list = m_appliedAuras.LookupByKey(spellId);
             foreach (var app in list)
@@ -3368,7 +3371,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveOwnedAuras(uint spellId, Func<Aura, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        void RemoveOwnedAuras(int spellId, Func<Aura, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             var list = m_ownedAuras.LookupByKey(spellId);
             foreach (var aura in list)
@@ -3654,7 +3657,7 @@ namespace Game.Entities
         }
 
         // removes aura application from lists and unapplies effects
-        public void _UnapplyAura(KeyValuePair<uint, AuraApplication> pair, AuraRemoveMode removeMode)
+        public void _UnapplyAura(KeyValuePair<int, AuraApplication> pair, AuraRemoveMode removeMode)
         {
             //Check if aura was already removed, if so just return.
             if (!m_appliedAuras.Remove(pair))
@@ -4286,7 +4289,7 @@ namespace Game.Entities
             return modifier;
         }
 
-        public int GetTotalAuraModifierByMiscMask(AuraType auraType, int miscMask)
+        public int GetTotalAuraModifierByMiscMask(AuraType auraType, uint miscMask)
         {
             return GetTotalAuraModifier(auraType, aurEff =>
             {

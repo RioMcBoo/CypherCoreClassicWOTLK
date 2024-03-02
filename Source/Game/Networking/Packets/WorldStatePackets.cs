@@ -74,7 +74,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(VariableID);
+            _worldPacket.WriteInt32(VariableID);
             _worldPacket.WriteInt32(Value);
             _worldPacket.WriteBit(Hidden);
             _worldPacket.FlushBits();
@@ -82,6 +82,6 @@ namespace Game.Networking.Packets
 
         public int Value;
         public bool Hidden; // @todo: research
-        public uint VariableID;
+        public int VariableID;
     }
 }

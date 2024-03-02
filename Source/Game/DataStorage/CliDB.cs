@@ -90,7 +90,6 @@ namespace Game.DataStorage
             BattlePetSpeciesStateStorage = ReadDB2<BattlePetSpeciesStateRecord>("BattlePetSpeciesState.db2", HotfixStatements.SEL_BATTLE_PET_SPECIES_STATE);
             BattlemasterListStorage = ReadDB2<BattlemasterListRecord>("BattlemasterList.db2", HotfixStatements.SEL_BATTLEMASTER_LIST, HotfixStatements.SEL_BATTLEMASTER_LIST_LOCALE);
             BroadcastTextStorage = ReadDB2<BroadcastTextRecord>("BroadcastText.db2", HotfixStatements.SEL_BROADCAST_TEXT, HotfixStatements.SEL_BROADCAST_TEXT_LOCALE);
-            BroadcastTextDurationStorage = ReadDB2<BroadcastTextDurationRecord>("BroadcastTextDuration.db2", HotfixStatements.SEL_BROADCAST_TEXT_DURATION);
             CfgCategoriesStorage = ReadDB2<Cfg_CategoriesRecord>("Cfg_Categories.db2", HotfixStatements.SEL_CFG_CATEGORIES, HotfixStatements.SEL_CFG_CATEGORIES_LOCALE);
             CfgRegionsStorage = ReadDB2<Cfg_RegionsRecord>("Cfg_Regions.db2", HotfixStatements.SEL_CFG_REGIONS);
             CharTitlesStorage = ReadDB2<CharTitlesRecord>("CharTitles.db2", HotfixStatements.SEL_CHAR_TITLES, HotfixStatements.SEL_CHAR_TITLES_LOCALE);
@@ -384,7 +383,7 @@ namespace Game.DataStorage
                 TaxiPathSetBySource[entry.FromTaxiNode][entry.ToTaxiNode] = new TaxiPathBySourceAndDestination(entry.Id, entry.Cost);
             }
 
-            uint pathCount = TaxiPathStorage.GetNumRows();
+            int pathCount = TaxiPathStorage.GetNumRows();
 
             // Calculate path nodes count
             uint[] pathLength = new uint[pathCount];                           // 0 and some other indexes not used
@@ -524,7 +523,6 @@ namespace Game.DataStorage
         public static DB6Storage<BattlePetSpeciesStateRecord> BattlePetSpeciesStateStorage;
         public static DB6Storage<BattlemasterListRecord> BattlemasterListStorage;
         public static DB6Storage<BroadcastTextRecord> BroadcastTextStorage;
-        public static DB6Storage<BroadcastTextDurationRecord> BroadcastTextDurationStorage;
         public static DB6Storage<Cfg_CategoriesRecord> CfgCategoriesStorage;
         public static DB6Storage<Cfg_RegionsRecord> CfgRegionsStorage;
         public static DB6Storage<CharTitlesRecord> CharTitlesStorage;
@@ -839,8 +837,8 @@ namespace Game.DataStorage
         #endregion
 
         #region Talent Collections
-        public static Dictionary<uint, TalentSpellPos> TalentSpellPosMap = new();
-        public static HashSet<uint> PetTalentSpells = new();
+        public static Dictionary<int, TalentSpellPos> TalentSpellPosMap = new();
+        public static HashSet<int> PetTalentSpells = new();
         /// <summary>store absolute bit position for first rank for talent inspect</summary>        
         public static uint[][] TalentTabPages = new uint[(uint)Class.Max][];
         #endregion
@@ -922,29 +920,6 @@ namespace Game.DataStorage
         public static float GetBattlePetXPPerLevel(GtBattlePetXPRecord row)
         {
             return row.Wins * row.Xp;
-        }
-
-        public static float GetIlvlStatMultiplier(GtGenericMultByILvlRecord row, InventoryType invType)
-        {
-            switch (invType)
-            {
-                case InventoryType.Neck:
-                case InventoryType.Finger:
-                    return row.JewelryMultiplier;
-                case InventoryType.Trinket:
-                    return row.TrinketMultiplier;
-                case InventoryType.Weapon:
-                case InventoryType.Shield:
-                case InventoryType.Ranged:
-                case InventoryType.Weapon2Hand:
-                case InventoryType.WeaponMainhand:
-                case InventoryType.WeaponOffhand:
-                case InventoryType.Holdable:
-                case InventoryType.RangedRight:
-                    return row.WeaponMultiplier;
-                default:
-                    return row.ArmorMultiplier;
-            }
         }
 
         public static float GetShieldBlockRegularColumnForQuality(GtShieldBlockRegularRecord row, ItemQuality quality)

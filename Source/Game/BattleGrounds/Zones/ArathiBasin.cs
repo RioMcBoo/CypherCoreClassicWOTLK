@@ -220,7 +220,7 @@ namespace Game.BattleGrounds.Zones
         {
         }
 
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
+        public override void HandleAreaTrigger(Player player, int trigger, bool entered)
         {
             switch (trigger)
             {
@@ -362,7 +362,7 @@ namespace Game.BattleGrounds.Zones
             //aura should only apply to players who have accupied the node, set correct faction for trigger
             if (trigger != null)
             {
-                trigger.SetFaction(team == Team.Alliance ? 84u : 83u);
+                trigger.SetFaction(team == Team.Alliance ? 84 : 83);
                 trigger.CastSpell(trigger, BattlegroundConst.SpellHonorableDefender25y, false);
             }
         }
@@ -408,7 +408,7 @@ namespace Game.BattleGrounds.Zones
                 return;
 
             source.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.PvPActive);
-            uint sound;
+            int sound;
             // If node is neutral, change to contested
             if (m_Nodes[node] == ABNodeStatus.Neutral)
             {
@@ -530,7 +530,7 @@ namespace Game.BattleGrounds.Zones
             bool result = true;
             for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
             {
-                result &= AddObject(ABObjectTypes.BannerNeutral + 8 * i, (uint)(NodeObjectId.Banner0 + i), NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.BannerNeutral + 8 * i, (NodeObjectId.Banner0 + i), NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
                 result &= AddObject(ABObjectTypes.BannerContA + 8 * i, ABObjectIds.BannerContA, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
                 result &= AddObject(ABObjectTypes.BannerContH + 8 * i, ABObjectIds.BannerContH, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
                 result &= AddObject(ABObjectTypes.BannerAlly + 8 * i, ABObjectIds.BannerA, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
@@ -657,7 +657,7 @@ namespace Game.BattleGrounds.Zones
             return Global.ObjectMgr.GetWorldSafeLoc(team == Team.Alliance ? ExploitTeleportLocationAlliance : ExploitTeleportLocationHorde);
         }
 
-        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
+        public override bool UpdatePlayerScore(Player player, ScoreType type, int value, bool doAddHonor = true)
         {
             if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
                 return false;
@@ -689,25 +689,25 @@ namespace Game.BattleGrounds.Zones
         BannerTimer[] m_BannerTimers = new BannerTimer[ABBattlegroundNodes.DynamicNodesCount];
         uint[] m_NodeTimers = new uint[ABBattlegroundNodes.DynamicNodesCount];
         uint[] m_lastTick = new uint[SharedConst.PvpTeamsCount];
-        uint[] m_HonorScoreTics = new uint[SharedConst.PvpTeamsCount];
-        uint[] m_ReputationScoreTics = new uint[SharedConst.PvpTeamsCount];
+        int[] m_HonorScoreTics = new int[SharedConst.PvpTeamsCount];
+        int[] m_ReputationScoreTics = new int[SharedConst.PvpTeamsCount];
         bool m_IsInformedNearVictory;
-        uint m_HonorTics;
-        uint m_ReputationTics;
+        int m_HonorTics;
+        int m_ReputationTics;
 
         //Const
-        public const uint NotABBGWeekendHonorTicks = 260;
-        public const uint ABBGWeekendHonorTicks = 160;
-        public const uint NotABBGWeekendReputationTicks = 160;
-        public const uint ABBGWeekendReputationTicks = 120;
+        public const int NotABBGWeekendHonorTicks = 260;
+        public const int ABBGWeekendHonorTicks = 160;
+        public const int NotABBGWeekendReputationTicks = 160;
+        public const int ABBGWeekendReputationTicks = 120;
 
         public const int EventStartBattle = 9158;// Achievement: Let's Get This Done
 
         public const int SoundClaimed = 8192;
         public const int SoundCapturedAlliance = 8173;
         public const int SoundCapturedHorde = 8213;
-        public const uint SoundAssaultedAlliance = 8212;
-        public const uint SoundAssaultedHorde = 8174;
+        public const int SoundAssaultedAlliance = 8212;
+        public const int SoundAssaultedHorde = 8174;
         public const int SoundNearVictoryAlliance = 8456;
         public const int SoundNearVictoryHorde = 8457;
 
@@ -716,8 +716,8 @@ namespace Game.BattleGrounds.Zones
         public const int WarningNearVictoryScore = 1400;
         public const int MaxTeamScore = 1500;
 
-        public const uint ExploitTeleportLocationAlliance = 3705;
-        public const uint ExploitTeleportLocationHorde = 3706;
+        public const int ExploitTeleportLocationAlliance = 3705;
+        public const int ExploitTeleportLocationHorde = 3706;
 
         public static Position[] NodePositions =
         {
@@ -737,10 +737,10 @@ namespace Game.BattleGrounds.Zones
 
         // Tick intervals and given points: case 0, 1, 2, 3, 4, 5 captured nodes
         public static uint[] TickIntervals = { 0, 12000, 9000, 6000, 3000, 1000 };
-        public static uint[] TickPoints = { 0, 10, 10, 10, 10, 30 };
+        public static int[] TickPoints = { 0, 10, 10, 10, 10, 30 };
 
         // WorldSafeLocs ids for 5 nodes, and for ally, and horde starting location
-        public static uint[] GraveyardIds = { 895, 894, 893, 897, 896, 898, 899 };
+        public static int[] GraveyardIds = { 895, 894, 893, 897, 896, 898, 899 };
 
         // x, y, z, o
         public static float[][] BuffPositions =
@@ -776,7 +776,7 @@ namespace Game.BattleGrounds.Zones
             BasesDefended = 0;
         }
 
-        public override void UpdateScore(ScoreType type, uint value)
+        public override void UpdateScore(ScoreType type, int value)
         {
             switch (type)
             {
@@ -800,11 +800,11 @@ namespace Game.BattleGrounds.Zones
             playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)ABObjectives.DefendBase, BasesDefended));
         }
 
-        public override uint GetAttr1() { return BasesAssaulted; }
-        public override uint GetAttr2() { return BasesDefended; }
+        public override int GetAttr1() { return BasesAssaulted; }
+        public override int GetAttr2() { return BasesDefended; }
 
-        uint BasesAssaulted;
-        uint BasesDefended;
+        int BasesAssaulted;
+        int BasesDefended;
     }
 
     struct BannerTimer
@@ -874,11 +874,11 @@ namespace Game.BattleGrounds.Zones
     // Note: code uses that these IDs follow each other
     struct NodeObjectId
     {
-        public const uint Banner0 = 180087;       // Stables Banner
-        public const uint Banner1 = 180088;       // Blacksmith Banner
-        public const uint Banner2 = 180089;       // Farm Banner
-        public const uint Banner3 = 180090;       // Lumber Mill Banner
-        public const uint Banner4 = 180091;        // Gold Mine Banner
+        public const int Banner0 = 180087;       // Stables Banner
+        public const int Banner1 = 180088;       // Blacksmith Banner
+        public const int Banner2 = 180089;       // Farm Banner
+        public const int Banner3 = 180090;       // Lumber Mill Banner
+        public const int Banner4 = 180091;        // Gold Mine Banner
     }
 
     struct ABObjectTypes
@@ -917,17 +917,17 @@ namespace Game.BattleGrounds.Zones
     // Object id templates from DB
     struct ABObjectIds
     {
-        public const uint BannerA = 180058;
-        public const uint BannerContA = 180059;
-        public const uint BannerH = 180060;
-        public const uint BannerContH = 180061;
+        public const int BannerA = 180058;
+        public const int BannerContA = 180059;
+        public const int BannerH = 180060;
+        public const int BannerContH = 180061;
 
-        public const uint AuraA = 180100;
-        public const uint AuraH = 180101;
-        public const uint AuraC = 180102;
+        public const int AuraA = 180100;
+        public const int AuraH = 180101;
+        public const int AuraC = 180102;
 
-        public const uint GateA = 180255;
-        public const uint GateH = 180256;
+        public const int GateA = 180255;
+        public const int GateH = 180256;
     }
 
     struct ABBattlegroundNodes
@@ -948,8 +948,8 @@ namespace Game.BattleGrounds.Zones
 
     struct ABBattlegroundBroadcastTexts
     {
-        public const uint AllianceNearVictory = 10598;
-        public const uint HordeNearVictory = 10599;
+        public const int AllianceNearVictory = 10598;
+        public const int HordeNearVictory = 10599;
 
         public static ABNodeInfo[] ABNodes =
         {
@@ -963,7 +963,7 @@ namespace Game.BattleGrounds.Zones
 
     struct ABNodeInfo
     {
-        public ABNodeInfo(uint nodeId, uint textAllianceAssaulted, uint textHordeAssaulted, uint textAllianceTaken, uint textHordeTaken, uint textAllianceDefended, uint textHordeDefended, uint textAllianceClaims, uint textHordeClaims)
+        public ABNodeInfo(int nodeId, int textAllianceAssaulted, int textHordeAssaulted, int textAllianceTaken, int textHordeTaken, int textAllianceDefended, int textHordeDefended, int textAllianceClaims, int textHordeClaims)
         {
             NodeId = nodeId;
             TextAllianceAssaulted = textAllianceAssaulted;
@@ -976,15 +976,15 @@ namespace Game.BattleGrounds.Zones
             TextHordeClaims = textHordeClaims;
         }
 
-        public uint NodeId;
-        public uint TextAllianceAssaulted;
-        public uint TextHordeAssaulted;
-        public uint TextAllianceTaken;
-        public uint TextHordeTaken;
-        public uint TextAllianceDefended;
-        public uint TextHordeDefended;
-        public uint TextAllianceClaims;
-        public uint TextHordeClaims;
+        public int NodeId;
+        public int TextAllianceAssaulted;
+        public int TextHordeAssaulted;
+        public int TextAllianceTaken;
+        public int TextHordeTaken;
+        public int TextAllianceDefended;
+        public int TextHordeDefended;
+        public int TextAllianceClaims;
+        public int TextHordeClaims;
     }
 
     enum ABNodeStatus

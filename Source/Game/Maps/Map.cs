@@ -23,7 +23,7 @@ namespace Game.Maps
 {
     public class Map : IDisposable
     {
-        public Map(uint id, long expiry, uint instanceId, Difficulty spawnmode)
+        public Map(int id, long expiry, int instanceId, Difficulty spawnmode)
         {
             i_mapRecord = CliDB.MapStorage.LookupByKey(id);
             i_spawnMode = spawnmode;
@@ -1557,12 +1557,12 @@ namespace Game.Maps
             return m_terrain.GetZoneId(phaseShift, GetId(), x, y, z, _dynamicTree);
         }
 
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, Position pos)
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out int zoneid, out int areaid, Position pos)
         {
             m_terrain.GetZoneAndAreaId(phaseShift, GetId(), out zoneid, out areaid, pos.posX, pos.posY, pos.posZ, _dynamicTree);
         }
 
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, float x, float y, float z)
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out int zoneid, out int areaid, float x, float y, float z)
         {
             m_terrain.GetZoneAndAreaId(phaseShift, GetId(), out zoneid, out areaid, x, y, z, _dynamicTree);
         }
@@ -1912,7 +1912,7 @@ namespace Game.Maps
             SaveRespawnInfoDB(info, dbTrans);
         }
 
-        public void RemoveRespawnTime(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null, bool alwaysDeleteFromDB = false)
+        public void RemoveRespawnTime(SpawnObjectType type, long spawnId, SQLTransaction dbTrans = null, bool alwaysDeleteFromDB = false)
         {
             RespawnInfo info = GetRespawnInfo(type, spawnId);
             if (info != null)
@@ -1922,7 +1922,7 @@ namespace Game.Maps
                 DeleteRespawnInfoFromDB(type, spawnId, dbTrans);
         }
 
-        int DespawnAll(SpawnObjectType type, ulong spawnId)
+        int DespawnAll(SpawnObjectType type, long spawnId)
         {
             List<WorldObject> toUnload = new();
             switch (type)
@@ -1979,7 +1979,7 @@ namespace Game.Maps
             return true;
         }
 
-        static void PushRespawnInfoFrom(List<RespawnInfo> data, Dictionary<ulong, RespawnInfo> map)
+        static void PushRespawnInfoFrom(List<RespawnInfo> data, Dictionary<long, RespawnInfo> map)
         {
             foreach (var pair in map)
                 data.Add(pair.Value);
@@ -1993,7 +1993,7 @@ namespace Game.Maps
                 PushRespawnInfoFrom(respawnData, _gameObjectRespawnTimesBySpawnId);
         }
 
-        public RespawnInfo GetRespawnInfo(SpawnObjectType type, ulong spawnId)
+        public RespawnInfo GetRespawnInfo(SpawnObjectType type, long spawnId)
         {
             var map = GetRespawnMapForType(type);
             if (map == null)
@@ -2006,7 +2006,7 @@ namespace Game.Maps
             return respawnInfo;
         }
 
-        Dictionary<ulong, RespawnInfo> GetRespawnMapForType(SpawnObjectType type)
+        Dictionary<long, RespawnInfo> GetRespawnMapForType(SpawnObjectType type)
         {
             switch (type)
             {
@@ -2209,7 +2209,7 @@ namespace Game.Maps
             return true;
         }
 
-        SpawnGroupTemplateData GetSpawnGroupData(uint groupId)
+        SpawnGroupTemplateData GetSpawnGroupData(int groupId)
         {
             SpawnGroupTemplateData data = Global.ObjectMgr.GetSpawnGroupData(groupId);
             if (data != null && (data.flags.HasAnyFlag(SpawnGroupFlags.System) || data.mapId == GetId()))
@@ -2218,7 +2218,7 @@ namespace Game.Maps
             return null;
         }
 
-        public bool SpawnGroupSpawn(uint groupId, bool ignoreRespawn = false, bool force = false, List<WorldObject> spawnedObjects = null)
+        public bool SpawnGroupSpawn(int groupId, bool ignoreRespawn = false, bool force = false, List<WorldObject> spawnedObjects = null)
         {
             var groupData = GetSpawnGroupData(groupId);
             if (groupData == null || groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
@@ -2315,7 +2315,7 @@ namespace Game.Maps
             return SpawnGroupDespawn(groupId, deleteRespawnTimes, out _);
         }
 
-        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes, out int count)
+        public bool SpawnGroupDespawn(int groupId, bool deleteRespawnTimes, out int count)
         {
             count = 0;
             SpawnGroupTemplateData groupData = GetSpawnGroupData(groupId);
@@ -2337,7 +2337,7 @@ namespace Game.Maps
             return true;
         }
 
-        public void SetSpawnGroupActive(uint groupId, bool state)
+        public void SetSpawnGroupActive(int groupId, bool state)
         {
             SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
             if (data == null || data.flags.HasAnyFlag(SpawnGroupFlags.System))
@@ -2353,9 +2353,9 @@ namespace Game.Maps
 
         // Disable the spawn group, which prevents any creatures in the group from respawning until re-enabled
         // This will not affect any already-present creatures in the group
-        public void SetSpawnGroupInactive(uint groupId) { SetSpawnGroupActive(groupId, false); }
+        public void SetSpawnGroupInactive(int groupId) { SetSpawnGroupActive(groupId, false); }
 
-        public bool IsSpawnGroupActive(uint groupId)
+        public bool IsSpawnGroupActive(int groupId)
         {
             SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
             if (data == null)
@@ -2374,7 +2374,7 @@ namespace Game.Maps
         public void UpdateSpawnGroupConditions()
         {
             var spawnGroups = Global.ObjectMgr.GetSpawnGroupsForMap(GetId());
-            foreach (uint spawnGroupId in spawnGroups)
+            foreach (var spawnGroupId in spawnGroups)
             {
                 SpawnGroupTemplateData spawnGroupTemplate = GetSpawnGroupData(spawnGroupId);
 
@@ -3218,7 +3218,7 @@ namespace Game.Maps
 
         public TerrainInfo GetTerrain() { return m_terrain; }
 
-        public uint GetInstanceId()
+        public int GetInstanceId()
         {
             return i_InstanceId;
         }
@@ -3567,7 +3567,7 @@ namespace Game.Maps
             }
         }
 
-        public TempSummon SummonCreature(int entry, Position pos, SummonPropertiesRecord properties = null, TimeSpan duration = default, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
+        public TempSummon SummonCreature(int entry, Position pos, SummonPropertiesRecord properties = null, TimeSpan duration = default, WorldObject summoner = null, int spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
         {
             var mask = UnitTypeMask.Summon;
             if (properties != null)
@@ -3656,7 +3656,7 @@ namespace Game.Maps
             }
 
             // Set the summon to the summoner's phase
-            if (summoner != null && !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
+            if (summoner != null && !(properties != null && properties.HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
                 PhasingHandler.InheritPhaseShift(summon, summoner);
 
             summon.SetCreatedBySpell(spellId);
@@ -3701,12 +3701,12 @@ namespace Game.Maps
             return summon;
         }
 
-        public ulong GenerateLowGuid(HighGuid high)
+        public long GenerateLowGuid(HighGuid high)
         {
             return GetGuidSequenceGenerator(high).Generate();
         }
 
-        public ulong GetMaxLowGuid(HighGuid high)
+        public long GetMaxLowGuid(HighGuid high)
         {
             return GetGuidSequenceGenerator(high).GetNextAfterMaxUsed();
         }
@@ -3736,12 +3736,12 @@ namespace Game.Maps
         #region Scripts
 
         // Put scripts in the execution queue
-        public void ScriptsStart(ScriptsType scriptsType, uint id, WorldObject source, WorldObject target)
+        public void ScriptsStart(ScriptsType scriptsType, int id, WorldObject source, WorldObject target)
         {
             var scripts = Global.ObjectMgr.GetScriptsMapByType(scriptsType);
 
             // Find the script map
-            MultiMap<uint, ScriptInfo> list = scripts.LookupByKey(id);
+            MultiMap<int, ScriptInfo> list = scripts.LookupByKey(id);
             if (list == null)
                 return;
 
@@ -4447,7 +4447,7 @@ namespace Game.Maps
                         Player pReceiver = _GetScriptPlayerSourceOrTarget(source, target, step.script);
                         if (pReceiver != null)
                         {
-                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
+                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
                             if (msg == InventoryResult.Ok)
                             {
                                 Item item = pReceiver.StoreNewItem(dest, step.script.CreateItem.ItemEntry, true, new ItemRandomEnchantmentId());
@@ -4650,11 +4650,11 @@ namespace Game.Maps
         DynamicMapTree _dynamicTree = new();
 
         SortedSet<RespawnInfo> _respawnTimes = new(new CompareRespawnInfo());
-        Dictionary<ulong, RespawnInfo> _creatureRespawnTimesBySpawnId = new();
-        Dictionary<ulong, RespawnInfo> _gameObjectRespawnTimesBySpawnId = new();
-        List<uint> _toggledSpawnGroupIds = new();
+        Dictionary<long, RespawnInfo> _creatureRespawnTimesBySpawnId = new();
+        Dictionary<long, RespawnInfo> _gameObjectRespawnTimesBySpawnId = new();
+        List<int> _toggledSpawnGroupIds = new();
         uint _respawnCheckTimer;
-        Dictionary<uint, uint> _zonePlayerCountMap = new();
+        Dictionary<int, int> _zonePlayerCountMap = new();
 
         List<Transport> _transports = new();
         Grid[][] i_grids = new Grid[MapConst.MaxGrids][];
@@ -4671,7 +4671,7 @@ namespace Game.Maps
 
         BitSet marked_cells = new(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
         public Dictionary<ulong, CreatureGroup> CreatureGroupHolder = new();
-        internal uint i_InstanceId;
+        internal int i_InstanceId;
         long i_gridExpiry;
         bool i_scriptLock;
 
@@ -4704,7 +4704,7 @@ namespace Game.Maps
 
     public class InstanceMap : Map
     {
-        public InstanceMap(uint id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
+        public InstanceMap(int id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
         {
             i_instanceLock = instanceLock;
 
@@ -5079,7 +5079,7 @@ namespace Game.Maps
             }
         }
 
-        public uint GetMaxPlayers()
+        public int GetMaxPlayers()
         {
             MapDifficultyRecord mapDiff = GetMapDifficulty();
             if (mapDiff != null && mapDiff.MaxPlayers != 0)
@@ -5099,7 +5099,7 @@ namespace Game.Maps
 
         public Team GetTeamInInstance() { return GetTeamIdInInstance() == TeamId.Alliance ? Team.Alliance : Team.Horde; }
 
-        public uint GetScriptId()
+        public int GetScriptId()
         {
             return i_script_id;
         }
@@ -5121,7 +5121,7 @@ namespace Game.Maps
         public InstanceLock GetInstanceLock() { return i_instanceLock; }
 
         InstanceScript i_data;
-        uint i_script_id;
+        int i_script_id;
         InstanceScenario i_scenario;
         InstanceLock i_instanceLock;
         GroupInstanceReference i_owningGroupRef = new();
@@ -5130,7 +5130,7 @@ namespace Game.Maps
 
     public class BattlegroundMap : Map
     {
-        public BattlegroundMap(uint id, uint expiry, uint InstanceId, Difficulty spawnMode)
+        public BattlegroundMap(int id, int expiry, int InstanceId, Difficulty spawnMode)
             : base(id, expiry, InstanceId, spawnMode)
         {
             InitVisibilityDistance();
@@ -5249,7 +5249,7 @@ namespace Game.Maps
             }
         }
 
-        public uint AreaId;
+        public int AreaId;
         public float FloorZ;
         public bool outdoors = true;
         public ZLiquidStatus LiquidStatus;

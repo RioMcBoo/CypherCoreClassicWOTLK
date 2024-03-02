@@ -46,7 +46,7 @@ namespace Game.Collision
 
     public class StaticMapTree
     {
-        public StaticMapTree(uint mapId)
+        public StaticMapTree(int mapId)
         {
             iMapID = mapId;
         }
@@ -228,7 +228,7 @@ namespace Game.Collision
         static uint PackTileID(int tileX, int tileY) { return (uint)(tileX << 16 | tileY); }
         static void UnpackTileID(int ID, ref int tileX, ref int tileY) { tileX = ID >> 16; tileY = ID & 0xFF; }
 
-        static TileFileOpenResult OpenMapTileFile(string vmapPath, uint mapID, int tileX, int tileY, VMapManager vm)
+        static TileFileOpenResult OpenMapTileFile(string vmapPath, int mapID, int tileX, int tileY, VMapManager vm)
         {
             TileFileOpenResult result = new();
             result.Name = vmapPath + GetTileFileName(mapID, tileX, tileY);
@@ -243,21 +243,21 @@ namespace Game.Collision
             int parentMapId = vm.GetParentMapId(mapID);
             while (parentMapId != -1)
             {
-                result.Name = vmapPath + GetTileFileName((uint)parentMapId, tileX, tileY);
+                result.Name = vmapPath + GetTileFileName(parentMapId, tileX, tileY);
                 if (File.Exists(result.Name))
                 {
                     result.File = new FileStream(result.Name, FileMode.Open, FileAccess.Read);
-                    result.UsedMapId = (uint)parentMapId;
+                    result.UsedMapId = parentMapId;
                     return result;
                 }
 
-                parentMapId = vm.GetParentMapId((uint)parentMapId);
+                parentMapId = vm.GetParentMapId(parentMapId);
             }
 
             return result;
         }
 
-        public static LoadResult CanLoadMap(string vmapPath, uint mapID, int tileX, int tileY, VMapManager vm)
+        public static LoadResult CanLoadMap(string vmapPath, int mapID, int tileX, int tileY, VMapManager vm)
         {
             string fullname = vmapPath + VMapManager.GetMapFileName(mapID);
             if (!File.Exists(fullname))
@@ -282,7 +282,7 @@ namespace Game.Collision
             return LoadResult.Success;
         }
 
-        public static string GetTileFileName(uint mapID, int tileX, int tileY)
+        public static string GetTileFileName(int mapID, int tileX, int tileY)
         {
             return $"{mapID:D4}_{tileY:D2}_{tileX:D2}.vmtile";
         }
@@ -402,7 +402,7 @@ namespace Game.Collision
 
         public int NumLoadedTiles() { return iLoadedTiles.Count; }
 
-        uint iMapID;
+        int iMapID;
         BIH iTree = new();
         ModelInstance[] iTreeValues;
         uint iNTreeValues;
@@ -416,6 +416,6 @@ namespace Game.Collision
     {
         public string Name;
         public FileStream File;
-        public uint UsedMapId;
+        public int UsedMapId;
     }
 }

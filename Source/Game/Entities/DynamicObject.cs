@@ -64,7 +64,7 @@ namespace Game.Entities
             }
         }
 
-        public bool CreateDynamicObject(ulong guidlow, Unit caster, SpellInfo spell, Position pos, float radius, DynamicObjectType type, SpellCastVisual spellVisual)
+        public bool CreateDynamicObject(long guidlow, Unit caster, SpellInfo spell, Position pos, float radius, DynamicObjectType type, SpellCastVisual spellVisual)
         {
             SetMap(caster.GetMap());
             Relocate(pos);
@@ -208,7 +208,7 @@ namespace Game.Entities
             }
         }
 
-        public override uint GetFaction()
+        public override int GetFaction()
         {
             Cypher.Assert(_caster != null);
             return _caster.GetFaction();
@@ -298,7 +298,7 @@ namespace Game.Entities
         }
 
         public Unit GetCaster() { return _caster; }
-        public uint GetSpellId() { return (uint)m_dynamicObjectData.SpellID.GetValue(); }
+        public int GetSpellId() { return m_dynamicObjectData.SpellID.GetValue(); }
         public ObjectGuid GetCasterGUID() { return m_dynamicObjectData.Caster; }
         public override ObjectGuid GetOwnerGUID() { return GetCasterGUID(); }
         public float GetRadius() { return m_dynamicObjectData.Radius; }

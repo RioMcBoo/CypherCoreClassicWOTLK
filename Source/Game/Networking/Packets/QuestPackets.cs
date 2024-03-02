@@ -807,11 +807,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
             _worldPacket.WriteUInt32((uint)Reason);
         }
 
-        public uint QuestID;
+        public int QuestID;
         public InventoryResult Reason;
     }
 
@@ -1089,8 +1089,8 @@ namespace Game.Networking.Packets
         public int ItemCount;
         public int Money;
         public int XP;
-        public uint ArtifactXP;
-        public uint ArtifactCategoryID;
+        public int ArtifactXP;
+        public int ArtifactCategoryID;
         public int Honor;
         public int Title;
         public int FactionFlags;
@@ -1123,8 +1123,8 @@ namespace Game.Networking.Packets
 
             data.WriteInt32(Money);
             data.WriteInt32(XP);
-            data.WriteUInt64(ArtifactXP);
-            data.WriteUInt32(ArtifactCategoryID);
+            data.WriteInt64(ArtifactXP);
+            data.WriteInt32(ArtifactCategoryID);
             data.WriteInt32(Honor);
             data.WriteInt32(Title);
             data.WriteInt32(FactionFlags);

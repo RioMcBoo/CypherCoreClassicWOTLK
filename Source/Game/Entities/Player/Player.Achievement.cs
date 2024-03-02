@@ -23,17 +23,17 @@ namespace Game.Entities
             m_achievementSys.SendAchievementInfo(player);
         }
 
-        public uint GetAchievementPoints()
+        public int GetAchievementPoints()
         {
             return m_achievementSys.GetAchievementPoints();
         }
 
-        public ICollection<uint> GetCompletedAchievementIds()
+        public ICollection<int> GetCompletedAchievementIds()
         {
             return m_achievementSys.GetCompletedAchievementIds();
         }
         
-        public bool HasAchieved(uint achievementId)
+        public bool HasAchieved(int achievementId)
         {
             return m_achievementSys.HasAchieved(achievementId);
         }
@@ -49,7 +49,7 @@ namespace Game.Entities
             m_questObjectiveCriteriaMgr.FailCriteria(failEvent, failAsset);
         }
 
-        public void UpdateCriteria(CriteriaType type, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, WorldObject refe = null)
+        public void UpdateCriteria(CriteriaType type, long miscValue1 = 0, long miscValue2 = 0, long miscValue3 = 0, WorldObject refe = null)
         {
             m_achievementSys.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);
             m_questObjectiveCriteriaMgr.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);

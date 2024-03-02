@@ -286,7 +286,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HonorNextLevel), 8800);
         }
 
-        public uint GetHonorLevel() { return (uint)m_playerData.HonorLevel.GetValue(); }
+        public int GetHonorLevel() { return m_playerData.HonorLevel; }
         public bool IsMaxHonorLevel() { return GetHonorLevel() == PlayerConst.MaxHonorLevel; }
 
         public void ActivatePvpItemLevels(bool activate) { _usePvpItemLevels = activate; }
@@ -343,7 +343,7 @@ namespace Game.Entities
             return IsAreaThatActivatesPvpTalents(GetAreaId());
         }
 
-        bool IsAreaThatActivatesPvpTalents(uint areaID)
+        bool IsAreaThatActivatesPvpTalents(int areaID)
         {
             if (InBattleground())
                 return true;
@@ -353,10 +353,10 @@ namespace Game.Entities
             {
                 do
                 {
-                    if (area.IsSanctuary())
+                    if (area.IsSanctuary)
                         return false;
 
-                    if (area.GetFlags().HasFlag(AreaFlags.FreeForAllPvP))
+                    if (area.HasFlag(AreaFlags.FreeForAllPvP))
                         return true;
 
                     if (Global.BattleFieldMgr.IsWorldPvpArea(area.Id))
@@ -370,7 +370,7 @@ namespace Game.Entities
             return false;
         }
 
-        public uint[] GetPvpTalentMap(byte spec) { return _specializationInfo.PvpTalents[spec]; }
+        public int[] GetPvpTalentMap(byte spec) { return _specializationInfo.PvpTalents[spec]; }
 
         //BGs
         public Battleground GetBattleground()

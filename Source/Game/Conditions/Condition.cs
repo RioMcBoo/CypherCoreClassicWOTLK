@@ -576,7 +576,7 @@ namespace Game.Conditions
             return ConditionType > ConditionTypes.None || ReferenceId != 0 || ScriptId != 0;
         }
 
-        public uint GetMaxAvailableConditionTargets()
+        public int GetMaxAvailableConditionTargets()
         {
             // returns number of targets which are available for given source Type
             switch (SourceType)
@@ -625,18 +625,18 @@ namespace Game.Conditions
         }
 
         public ConditionSourceType SourceType;        //SourceTypeOrReferenceId
-        public uint SourceGroup;
+        public int SourceGroup;
         public int SourceEntry;
-        public uint SourceId;          // So far, only used in CONDITION_SOURCE_TYPE_SMART_EVENT
-        public uint ElseGroup;
+        public int SourceId;          // So far, only used in CONDITION_SOURCE_TYPE_SMART_EVENT
+        public int ElseGroup;
         public ConditionTypes ConditionType;     //ConditionTypeOrReference
-        public uint ConditionValue1;
-        public uint ConditionValue2;
-        public uint ConditionValue3;
-        public uint ErrorType;
-        public uint ErrorTextId;
-        public uint ReferenceId;
-        public uint ScriptId;
+        public int ConditionValue1;
+        public int ConditionValue2;
+        public int ConditionValue3;
+        public int ErrorType;
+        public int ErrorTextId;
+        public int ReferenceId;
+        public int ScriptId;
         public byte ConditionTarget;
         public bool NegativeCondition;
     }

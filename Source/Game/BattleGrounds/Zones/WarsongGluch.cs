@@ -332,7 +332,7 @@ namespace Game.BattleGrounds.Zones
         void HandleFlagRoomCapturePoint(int team)
         {
             Player flagCarrier = Global.ObjAccessor.GetPlayer(GetBgMap(), GetFlagPickerGUID(team));
-            uint areaTrigger = team == TeamId.Alliance ? 3647 : 3646u;
+            int areaTrigger = team == TeamId.Alliance ? 3647 : 3646;
             if (flagCarrier != null && flagCarrier.IsInAreaTriggerRadius(CliDB.AreaTriggerStorage.LookupByKey(areaTrigger)))
                 EventPlayerCapturedFlag(flagCarrier);
         }
@@ -606,10 +606,10 @@ namespace Game.BattleGrounds.Zones
                 UpdateWorldState(WSGWorldStates.FlagCapturesHorde, (int)GetTeamScore(team));
         }
 
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
+        public override void HandleAreaTrigger(Player player, int trigger, bool entered)
         {
-            //uint SpellId = 0;
-            //uint64 buff_guid = 0;
+            //int SpellId = 0;
+            //int64 buff_guid = 0;
             switch (trigger)
             {
                 case 8965: // Horde Start
@@ -778,7 +778,7 @@ namespace Game.BattleGrounds.Zones
             base.HandleKillPlayer(victim, killer);
         }
 
-        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
+        public override bool UpdatePlayerScore(Player player, ScoreType type, int value, bool doAddHonor = true)
         {
             if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
                 return false;
@@ -849,7 +849,7 @@ namespace Game.BattleGrounds.Zones
         bool IsHordeFlagPickedup() { return !m_FlagKeepers[TeamId.Horde].IsEmpty(); }
         WSGFlagState GetFlagState(Team team) { return _flagState[GetTeamIndexByTeamId(team)]; }
 
-        void SetLastFlagCapture(Team team) { _lastFlagCaptureTeam = (uint)team; }
+        void SetLastFlagCapture(Team team) { _lastFlagCaptureTeam = (int)team; }
         public override void SetDroppedFlagGUID(ObjectGuid guid, int team = -1)
         {
             if (team == TeamId.Alliance || team == TeamId.Horde)
@@ -858,36 +858,36 @@ namespace Game.BattleGrounds.Zones
         }
         ObjectGuid GetDroppedFlagGUID(Team team) { return m_DroppedFlagGUID[GetTeamIndexByTeamId(team)]; }
 
-        void AddPoint(Team team, uint Points = 1) { m_TeamScores[GetTeamIndexByTeamId(team)] += Points; }
+        void AddPoint(Team team, int Points = 1) { m_TeamScores[GetTeamIndexByTeamId(team)] += Points; }
 
         ObjectGuid[] m_FlagKeepers = new ObjectGuid[2];                            // 0 - alliance, 1 - horde
         ObjectGuid[] m_DroppedFlagGUID = new ObjectGuid[2];
         WSGFlagState[] _flagState = new WSGFlagState[2];                               // for checking flag state
         int[] _flagsTimer = new int[2];
         int[] _flagsDropTimer = new int[2];
-        uint _lastFlagCaptureTeam;                       // Winner is based on this if score is equal
+        int _lastFlagCaptureTeam;                       // Winner is based on this if score is equal
 
-        uint m_ReputationCapture;
-        uint m_HonorWinKills;
-        uint m_HonorEndKills;
+        int m_ReputationCapture;
+        int m_HonorWinKills;
+        int m_HonorEndKills;
         int _flagSpellForceTimer;
         bool _bothFlagsKept;
         byte _flagDebuffState;                            // 0 - no debuffs, 1 - focused assault, 2 - brutal assault
 
-        uint[][] Honor =
+        int[][] Honor =
         {
-            new uint[] {20, 40, 40 }, // normal honor
-            new uint[] { 60, 40, 80}  // holiday
+            [20, 40, 40], // normal honor
+            [60, 40, 80]  // holiday
         };
-        const uint ExploitTeleportLocationAlliance = 3784;
-        const uint ExploitTeleportLocationHorde = 3785;
+        const int ExploitTeleportLocationAlliance = 3784;
+        const int ExploitTeleportLocationHorde = 3785;
     }
 
     class BattlegroundWGScore : BattlegroundScore
     {
         public BattlegroundWGScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team) { }
 
-        public override void UpdateScore(ScoreType type, uint value)
+        public override void UpdateScore(ScoreType type, int value)
         {
             switch (type)
             {
@@ -911,11 +911,11 @@ namespace Game.BattleGrounds.Zones
             playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat(WSObjectives.ReturnFlag, FlagReturns));
         }
 
-        public override uint GetAttr1() { return FlagCaptures; }
-        public override uint GetAttr2() { return FlagReturns; }
+        public override int GetAttr1() { return FlagCaptures; }
+        public override int GetAttr2() { return FlagReturns; }
 
-        uint FlagCaptures;
-        uint FlagReturns;
+        int FlagCaptures;
+        int FlagReturns;
     }
 
     #region Constants
@@ -960,20 +960,20 @@ namespace Game.BattleGrounds.Zones
 
     public sealed class WSGObjectEntry
     {
-        public const uint DoorA1 = 179918;
-        public const uint DoorA2 = 179919;
-        public const uint DoorA3 = 179920;
-        public const uint DoorA4 = 179921;
-        public const uint DoorA5 = 180322;
-        public const uint DoorA6 = 180322;
-        public const uint DoorH1 = 179916;
-        public const uint DoorH2 = 179917;
-        public const uint DoorH3 = 180322;
-        public const uint DoorH4 = 180322;
-        public const uint AFlag = 179830;
-        public const uint HFlag = 179831;
-        public const uint AFlagGround = 179785;
-        public const uint HFlagGround = 179786;
+        public const int DoorA1 = 179918;
+        public const int DoorA2 = 179919;
+        public const int DoorA3 = 179920;
+        public const int DoorA4 = 179921;
+        public const int DoorA5 = 180322;
+        public const int DoorA6 = 180322;
+        public const int DoorH1 = 179916;
+        public const int DoorH2 = 179917;
+        public const int DoorH3 = 180322;
+        public const int DoorH4 = 180322;
+        public const int AFlag = 179830;
+        public const int HFlag = 179831;
+        public const int AFlagGround = 179785;
+        public const int HFlagGround = 179786;
     }
 
     struct WSGCreatureTypes
@@ -986,76 +986,76 @@ namespace Game.BattleGrounds.Zones
 
     struct WSGWorldStates
     {
-        public const uint FlagStateAlliance = 1545;
-        public const uint FlagStateHorde = 1546;
-        public const uint FlagStateNeutral = 1547;     // Unused
-        public const uint HordeFlagCountPickedUp = 17712;    // Brawl
-        public const uint AllianceFlagCountPickedUp = 17713;    // Brawl
-        public const uint FlagCapturesAlliance = 1581;
-        public const uint FlagCapturesHorde = 1582;
-        public const uint FlagCapturesMax = 1601;
-        public const uint FlagCapturesMaxNew = 17303;
-        public const uint FlagControlHorde = 2338;
-        public const uint FlagControlAlliance = 2339;
-        public const uint StateTimer = 4248;
-        public const uint StateTimerActive = 4247;
+        public const int FlagStateAlliance = 1545;
+        public const int FlagStateHorde = 1546;
+        public const int FlagStateNeutral = 1547;     // Unused
+        public const int HordeFlagCountPickedUp = 17712;    // Brawl
+        public const int AllianceFlagCountPickedUp = 17713;    // Brawl
+        public const int FlagCapturesAlliance = 1581;
+        public const int FlagCapturesHorde = 1582;
+        public const int FlagCapturesMax = 1601;
+        public const int FlagCapturesMaxNew = 17303;
+        public const int FlagControlHorde = 2338;
+        public const int FlagControlAlliance = 2339;
+        public const int StateTimer = 4248;
+        public const int StateTimerActive = 4247;
     }
 
     struct WSGSpellId
     {
-        public const uint WarsongFlag = 23333;
-        public const uint WarsongFlagDropped = 23334;
-        public const uint WarsongFlagPicked = 61266;    // Fake Spell; Does Not Exist But Used As Timer Start Event
-        public const uint SilverwingFlag = 23335;
-        public const uint SilverwingFlagDropped = 23336;
-        public const uint SilverwingFlagPicked = 61265;    // Fake Spell; Does Not Exist But Used As Timer Start Event
-        public const uint FocusedAssault = 46392;
-        public const uint BrutalAssault = 46393;
+        public const int WarsongFlag = 23333;
+        public const int WarsongFlagDropped = 23334;
+        public const int WarsongFlagPicked = 61266;    // Fake Spell; Does Not Exist But Used As Timer Start Event
+        public const int SilverwingFlag = 23335;
+        public const int SilverwingFlagDropped = 23336;
+        public const int SilverwingFlagPicked = 61265;    // Fake Spell; Does Not Exist But Used As Timer Start Event
+        public const int FocusedAssault = 46392;
+        public const int BrutalAssault = 46393;
     }
 
     struct WSGTimerOrScore
     {
-        public const uint MaxTeamScore = 3;
+        public const int MaxTeamScore = 3;
         public const int FlagRespawnTime = 23000;
         public const int FlagDropTime = 10000;
-        public const uint SpellForceTime = 600000;
-        public const uint SpellBrutalTime = 900000;
+        public const int SpellForceTime = 600000;
+        public const int SpellBrutalTime = 900000;
     }
 
     struct WSGGraveyards
     {
-        public const uint FlagRoomAlliance = 769;
-        public const uint FlagRoomHorde = 770;
-        public const uint MainAlliance = 771;
-        public const uint MainHorde = 772;
+        public const int FlagRoomAlliance = 769;
+        public const int FlagRoomHorde = 770;
+        public const int MainAlliance = 771;
+        public const int MainHorde = 772;
     }
 
     struct WSGSound
     {
-        public const uint FlagCapturedAlliance = 8173;
-        public const uint FlagCapturedHorde = 8213;
-        public const uint FlagPlaced = 8232;
-        public const uint FlagReturned = 8192;
-        public const uint HordeFlagPickedUp = 8212;
-        public const uint AllianceFlagPickedUp = 8174;
-        public const uint FlagsRespawned = 8232;
+        public const int FlagCapturedAlliance = 8173;
+        public const int FlagCapturedHorde = 8213;
+        public const int FlagPlaced = 8232;
+        public const int FlagReturned = 8192;
+        public const int HordeFlagPickedUp = 8212;
+        public const int AllianceFlagPickedUp = 8174;
+        public const int FlagsRespawned = 8232;
     }
 
     struct WSGBroadcastTexts
     {
-        public const uint StartOneMinute = 10015;
-        public const uint StartHalfMinute = 10016;
-        public const uint BattleHasBegun = 10014;
+        public const int StartOneMinute = 10015;
+        public const int StartHalfMinute = 10016;
+        public const int BattleHasBegun = 10014;
 
-        public const uint CapturedHordeFlag = 9801;
-        public const uint CapturedAllianceFlag = 9802;
-        public const uint FlagsPlaced = 9803;
-        public const uint AllianceFlagPickedUp = 9804;
-        public const uint AllianceFlagDropped = 9805;
-        public const uint HordeFlagPickedUp = 9807;
-        public const uint HordeFlagDropped = 9806;
-        public const uint AllianceFlagReturned = 9808;
-        public const uint HordeFlagReturned = 9809;
+        public const int CapturedHordeFlag = 9801;
+        public const int CapturedAllianceFlag = 9802;
+        public const int FlagsPlaced = 9803;
+        public const int AllianceFlagPickedUp = 9804;
+        public const int AllianceFlagDropped = 9805;
+        public const int HordeFlagPickedUp = 9807;
+        public const int HordeFlagDropped = 9806;
+        public const int AllianceFlagReturned = 9808;
+        public const int HordeFlagReturned = 9809;
     }
     struct WSObjectives
     {

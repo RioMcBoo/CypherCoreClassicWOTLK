@@ -2161,13 +2161,13 @@ namespace Game.Chat
             }
 
             // Adding items
-            uint noSpaceForCount = 0;
+            int noSpaceForCount = 0;
 
             // check space and find places
-            List<ItemPosCount> dest;
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, (uint)count, out noSpaceForCount);
+            List<(ItemPos item, int count)> dest;
+            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
-                count -= (int)noSpaceForCount;
+                count -= noSpaceForCount;
 
             if (count == 0)   // can't add any
             {
@@ -2246,10 +2246,10 @@ namespace Game.Chat
 
                 found = true;
                 
-                InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, template.Value, 1, out _);
+                InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, template.Value, 1, out _);
                 if (msg == InventoryResult.Ok)
                 {
-                    List<uint> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
+                    List<int> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
                     if (itemContext < ItemContext.Max)
                     {
                         var contextBonuses = ItemBonusMgr.GetBonusListsForItem(template.Value.GetId(), new(itemContext));
@@ -2297,7 +2297,7 @@ namespace Game.Chat
             if (tailArgs.Empty())
                 return false;
 
-            uint itemId = 0;
+            int itemId = 0;
 
             if (tailArgs[0] == '[')                                        // [name] manual form
             {
@@ -2330,7 +2330,7 @@ namespace Game.Chat
                 string id = handler.ExtractKeyFromLink(tailArgs, "Hitem");
                 if (id.IsEmpty())
                     return false;
-                itemId = uint.Parse(id);
+                itemId = int.Parse(id);
             }
 
             string ccount = tailArgs.NextString();
@@ -2378,7 +2378,7 @@ namespace Game.Chat
             // Subtract
             if (count < 0)
             {
-                uint destroyedItemCount = playerTarget.DestroyItemCount(itemId, (uint)-count, true, false);
+                int destroyedItemCount = playerTarget.DestroyItemCount(itemId, -count, true, false);
 
                 if (destroyedItemCount > 0)
                 {
@@ -2386,7 +2386,7 @@ namespace Game.Chat
                     handler.SendSysMessage(CypherStrings.Removeitem, itemId, destroyedItemCount, handler.GetNameLink(playerTarget));
 
                     // check to see if we were unable to destroy all of the amount requested.
-                    uint unableToDestroyItemCount = (uint)(-count - destroyedItemCount);
+                    int unableToDestroyItemCount = -count - destroyedItemCount;
                     if (unableToDestroyItemCount > 0)
                     {
                         // output message for the amount of items we couldn't destroy
@@ -2403,11 +2403,11 @@ namespace Game.Chat
             }
 
             // Adding items
-            uint noSpaceForCount = 0;
+            int noSpaceForCount = 0;
 
             // check space and find places
-            List<ItemPosCount> dest;
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, (uint)count, out noSpaceForCount);
+            List<(ItemPos item, int count)> dest;
+            InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= (int)noSpaceForCount;
 
@@ -2417,8 +2417,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext, bonusListIDs.Empty() ? null : bonusListIDs);
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(itemId), null, itemContext, bonusListIDs);
+            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId), null, itemContext, bonusListIDs.Empty() ? null : bonusListIDs);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)

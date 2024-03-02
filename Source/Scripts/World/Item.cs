@@ -73,7 +73,7 @@ namespace Scripts.World.Items
 
         public override bool OnExpire(Player player, ItemTemplate pItemProto)
         {
-            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, 39883, 1); // Cracked Egg
+            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos, int)> dest, 39883, 1); // Cracked Egg
             if (msg == InventoryResult.Ok)
                 player.StoreNewItem(dest, 39883, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(39883));
 
@@ -88,7 +88,7 @@ namespace Scripts.World.Items
 
         public override bool OnExpire(Player player, ItemTemplate pItemProto)
         {
-            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, 44718, 1); // Ripe Disgusting Jar
+            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos, int)> dest, 44718, 1); // Ripe Disgusting Jar
             if (msg == InventoryResult.Ok)
                 player.StoreNewItem(dest, 44718, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(44718));
 
@@ -99,9 +99,9 @@ namespace Scripts.World.Items
     [Script]
     class item_petrov_cluster_bombs : ItemScript
     {
-        const uint SpellPetrovBomb = 42406;
-        const uint AreaIdShatteredStraits = 4064;
-        const uint ZoneIdHowling = 495;
+        const int SpellPetrovBomb = 42406;
+        const int AreaIdShatteredStraits = 4064;
+        const int ZoneIdHowling = 495;
 
         public item_petrov_cluster_bombs() : base("item_petrov_cluster_bombs") { }
 
@@ -126,8 +126,8 @@ namespace Scripts.World.Items
     [Script]
     class item_captured_frog : ItemScript
     {
-        const uint QuestThePerfectSpies = 25444;
-        const uint NpcVanirasSentryTotem = 40187;
+        const int QuestThePerfectSpies = 25444;
+        const int NpcVanirasSentryTotem = 40187;
 
         public item_captured_frog() : base("item_captured_frog") { }
 

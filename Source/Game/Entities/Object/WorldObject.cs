@@ -298,7 +298,7 @@ namespace Game.Entities
                 data.WriteBit(HasInertia);                                     // HasInertia
 
                 if (!unit.m_movementInfo.transport.guid.IsEmpty())
-                    MovementExtensions.WriteTransportInfo(data, unit.m_movementInfo.transport);
+                    unit.m_movementInfo.transport.Write(data);
 
                 if (HasStandingOnGameObjectGUID)
                     data.WritePackedGuid(unit.m_movementInfo.standingOnGameObjectGUID.Value);
@@ -374,11 +374,11 @@ namespace Game.Entities
 
                 if (movementForces != null)
                     foreach (MovementForce force in movementForces.GetForces())
-                        MovementExtensions.WriteMovementForceWithDirection(force, data, unit);
+                        force.Write(data,unit);
 
                 // HasMovementSpline - marks that spline data is present in packet
                 if (HasSpline)
-                    MovementExtensions.WriteCreateObjectSplineDataBlock(unit.MoveSpline, data);
+                    unit.MoveSpline.Write(data);
             }
 
             data.WriteInt32(PauseTimes != null ? PauseTimes.Count : 0);
@@ -422,7 +422,7 @@ namespace Game.Entities
             if (flags.MovementTransport)
             {
                 WorldObject self = this;
-                MovementExtensions.WriteTransportInfo(data, self.m_movementInfo.transport);
+                self.m_movementInfo.transport.Write(data);
             }
 
             if (flags.AreaTrigger)
@@ -485,23 +485,23 @@ namespace Game.Entities
                     data.WriteUInt32(areaTrigger.GetTimeToTarget());
                     data.WriteUInt32(areaTrigger.GetElapsedTimeForMovement());
 
-                    MovementExtensions.WriteCreateObjectAreaTriggerSpline(areaTrigger.GetSpline(), data);
+                    areaTrigger.GetSpline().Write(data);
                 }
 
                 if (hasTargetRollPitchYaw)
                     data.WriteVector3(areaTrigger.GetTargetRollPitchYaw());
 
                 if (hasScaleCurveID)
-                    data.WriteUInt32(createProperties.ScaleCurveId);
+                    data.WriteInt32((int)createProperties.ScaleCurveId);
 
                 if (hasMorphCurveID)
-                    data.WriteUInt32(createProperties.MorphCurveId);
+                    data.WriteInt32((int)createProperties.MorphCurveId);
 
                 if (hasFacingCurveID)
                     data.WriteUInt32(createProperties.FacingCurveId);
 
                 if (hasMoveCurveID)
-                    data.WriteUInt32(createProperties.MoveCurveId);
+                    data.WriteInt32((int)createProperties.MoveCurveId);
 
                 if (hasAreaTriggerSphere)
                 {
@@ -732,7 +732,7 @@ namespace Game.Entities
                 {
                     data.WriteInt32(player.GetSceneMgr().GetSceneTemplateByInstanceMap().Count);
                     foreach (var pair in player.GetSceneMgr().GetSceneTemplateByInstanceMap())
-                        data.WriteUInt32(pair.Key);
+                        data.WriteInt32(pair.Key);
                 }
 
                 if (HasRuneState)
@@ -752,7 +752,7 @@ namespace Game.Entities
                     for (byte i = 0; i < PlayerConst.MaxActionButtons; ++i)
                     {
                         if (player.GetActionButton(i) is ActionButton button)
-                            data.WriteUInt32(button.GetAction());
+                            data.WriteInt32(button.GetAction());
                         else
                             data.WriteUInt32(0);
                     }
@@ -1062,10 +1062,10 @@ namespace Game.Entities
             m_Events.KillAllEvents(false);                      // non-delatable (currently cast spells) will not deleted now but it will deleted at call in Map::RemoveAllObjectsInRemoveList
         }
 
-        public uint GetZoneId() { return m_zoneId; }
-        public uint GetAreaId() { return m_areaId; }
+        public int GetZoneId() { return m_zoneId; }
+        public int GetAreaId() { return m_areaId; }
 
-        public void GetZoneAndAreaId(out uint zoneid, out uint areaid) { zoneid = m_zoneId; areaid = m_areaId; }
+        public void GetZoneAndAreaId(out int zoneid, out int areaid) { zoneid = m_zoneId; areaid = m_areaId; }
 
         public bool IsOutdoors() { return m_outdoors; }
 
@@ -1194,7 +1194,7 @@ namespace Game.Entities
             if (smoothPhasing != null && smoothPhasing.IsBeingReplacedForSeer(GetGUID()))
                 return false;
 
-            if (!obj.IsPrivateObject() && !Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions((uint)obj.GetTypeId(), obj.GetEntry(), this))
+            if (!obj.IsPrivateObject() && !Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions(obj.GetTypeId(), obj.GetEntry(), this))
                 return false;
 
             bool corpseVisibility = false;
@@ -1397,7 +1397,7 @@ namespace Game.Entities
                 {
                     Unit owner = go.GetOwner();
                     if (owner != null)
-                        detectionValue -= (int)(owner.GetLevelForTarget(this) - 1) * 5;
+                        detectionValue -= (owner.GetLevelForTarget(this) - 1) * 5;
                 }
 
                 detectionValue -= obj.m_stealth.GetValue((StealthType)i);
@@ -1541,7 +1541,7 @@ namespace Game.Entities
             return null;
         }
 
-        public TempSummon SummonCreature(uint entry, float x, float y, float z, float o = 0, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, ObjectGuid privateObjectOwner = default)
+        public TempSummon SummonCreature(int entry, float x, float y, float z, float o = 0, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, ObjectGuid privateObjectOwner = default)
         {
             if (x == 0.0f && y == 0.0f && z == 0.0f)
                 GetClosePoint(out x, out y, out z, GetCombatReach());
@@ -1552,7 +1552,7 @@ namespace Game.Entities
             return SummonCreature(entry, new Position(x, y, z, o), despawnType, despawnTime, 0, 0, privateObjectOwner);
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, uint vehId = 0, uint spellId = 0, ObjectGuid privateObjectOwner = default)
+        public TempSummon SummonCreature(int entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, uint vehId = 0, int spellId = 0, ObjectGuid privateObjectOwner = default)
         {
             Map map = GetMap();
             if (map != null)
@@ -1568,7 +1568,7 @@ namespace Game.Entities
             return null;
         }
 
-        public TempSummon SummonPersonalClone(Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, uint vehId = 0, uint spellId = 0, Player privateObjectOwner = null)
+        public TempSummon SummonPersonalClone(Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, uint vehId = 0, int spellId = 0, Player privateObjectOwner = null)
         {
             Map map = GetMap();
             if (map != null)
@@ -1584,7 +1584,7 @@ namespace Game.Entities
             return null;
         }
 
-        public GameObject SummonGameObject(uint entry, float x, float y, float z, float ang, Quaternion rotation, TimeSpan respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
+        public GameObject SummonGameObject(int entry, float x, float y, float z, float ang, Quaternion rotation, TimeSpan respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
         {
             if (x == 0 && y == 0 && z == 0)
             {
@@ -1596,7 +1596,7 @@ namespace Game.Entities
             return SummonGameObject(entry, pos, rotation, respawnTime, summonType);
         }
 
-        public GameObject SummonGameObject(uint entry, Position pos, Quaternion rotation, TimeSpan respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
+        public GameObject SummonGameObject(int entry, Position pos, Quaternion rotation, TimeSpan respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
         {
             if (!IsInWorld)
                 return null;
@@ -1604,7 +1604,7 @@ namespace Game.Entities
             GameObjectTemplate goinfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
             if (goinfo == null)
             {
-                Log.outError(LogFilter.Sql, "Gameobject template {0} not found in database!", entry);
+                Log.outError(LogFilter.Sql, $"Gameobject template {entry} not found in database!");
                 return null;
             }
 
@@ -1860,7 +1860,7 @@ namespace Game.Entities
             return spellInfo.GetMinRange(!IsHostileTo(target));
         }
 
-        public double ApplyEffectModifiers(SpellInfo spellInfo, uint effIndex, double value)
+        public double ApplyEffectModifiers(SpellInfo spellInfo, int effIndex, double value)
         {
             Player modOwner = GetSpellModOwner();
             if (modOwner != null)
@@ -2067,10 +2067,10 @@ namespace Game.Entities
                 SpellSchoolMask schoolMask = spellInfo.GetSchoolMask();
                 // PvP - PvE spell misschances per leveldif > 2
                 int lchance = victim.IsPlayer() ? 7 : 11;
-                uint thisLevel = GetLevelForTarget(victim);
+                int thisLevel = GetLevelForTarget(victim);
                 if (IsCreature() && ToCreature().IsTrigger())
                     thisLevel = Math.Max(thisLevel, spellInfo.SpellLevel);
-                int leveldif = (int)(victim.GetLevelForTarget(this) - thisLevel);
+                int leveldif = (victim.GetLevelForTarget(this) - thisLevel);
                 int levelBasedHitDiff = leveldif;
 
                 // Base hit Chance from attacker and victim levels
@@ -2102,7 +2102,7 @@ namespace Game.Entities
                 if (!spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
                 {
                     // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
-                    modHitChance += victim.GetTotalAuraModifierByMiscMask(AuraType.ModAttackerSpellHitChance, (int)schoolMask);
+                    modHitChance += victim.GetTotalAuraModifierByMiscMask(AuraType.ModAttackerSpellHitChance, (uint)schoolMask);
                 }
 
                 float HitChance = modHitChance;
@@ -2175,7 +2175,7 @@ namespace Game.Entities
             if (canReflect)
             {
                 int reflectchance = victim.GetTotalAuraModifier(AuraType.ReflectSpells);
-                reflectchance += victim.GetTotalAuraModifierByMiscMask(AuraType.ReflectSpellsSchool, (int)spellInfo.GetSchoolMask());
+                reflectchance += victim.GetTotalAuraModifierByMiscMask(AuraType.ReflectSpellsSchool, (uint)spellInfo.GetSchoolMask());
 
                 if (reflectchance > 0 && RandomHelper.randChance(reflectchance))
                     return SpellMissInfo.Reflect;
@@ -2208,7 +2208,7 @@ namespace Game.Entities
 
         public FactionTemplateRecord GetFactionTemplateEntry()
         {
-            uint factionId = GetFaction();
+            int factionId = GetFaction();
             var entry = CliDB.FactionTemplateStorage.LookupByKey(factionId);
             if (entry == null)
             {
@@ -2954,7 +2954,7 @@ namespace Game.Entities
                 SendMessageToSet(sound, true);
         }
 
-        public void PlayDirectMusic(uint musicId, Player target = null)
+        public void PlayDirectMusic(int musicId, Player target = null)
         {
             if (target != null)
                 target.SendPacket(new PlayMusic(musicId));
@@ -3036,7 +3036,7 @@ namespace Game.Entities
             GetMap().RemoveUpdateObject(this);
         }
 
-        public uint GetInstanceId() { return instanceId; }
+        public int GetInstanceId() { return instanceId; }
 
         public virtual ushort GetAIAnimKitId() { return 0; }
         public virtual ushort GetMovementAnimKitId() { return 0; }
@@ -3061,8 +3061,8 @@ namespace Game.Entities
         public bool IsTypeId(TypeId typeId) { return GetTypeId() == typeId; }
         public bool IsTypeMask(TypeMask mask) { return Convert.ToBoolean(mask & ObjectTypeMask); }
 
-        public virtual bool HasQuest(uint questId) { return false; }
-        public virtual bool HasInvolvedQuest(uint questId) { return false; }
+        public virtual bool HasQuest(int questId) { return false; }
+        public virtual bool HasInvolvedQuest(int questId) { return false; }
         public void SetIsNewObject(bool enable) { _isNewObject = enable; }
         public bool IsDestroyedObject() { return _isDestroyedObject; }
         public void SetDestroyedObject(bool destroyed) { _isDestroyedObject = destroyed; }
@@ -3087,7 +3087,7 @@ namespace Game.Entities
         public Conversation ToConversation() { return IsConversation() ? (this as Conversation) : null; }
         public SceneObject ToSceneObject() { return IsSceneObject() ? (this as SceneObject) : null; }
 
-        public virtual uint GetLevelForTarget(WorldObject target) { return 1; }
+        public virtual int GetLevelForTarget(WorldObject target) { return 1; }
 
         public ZoneScript GetZoneScript() { return m_zoneScript; }
 
@@ -3138,8 +3138,8 @@ namespace Game.Entities
         public virtual ObjectGuid GetOwnerGUID() { return default; }
         public virtual ObjectGuid GetCharmerOrOwnerGUID() { return GetOwnerGUID(); }
 
-        public virtual uint GetFaction() { return 0; }
-        public virtual void SetFaction(uint faction) { }
+        public virtual int GetFaction() { return 0; }
+        public virtual void SetFaction(int faction) { }
         public virtual void SetFaction(FactionTemplates faction) { }
 
         //Position
@@ -3647,7 +3647,7 @@ namespace Game.Entities
             // Prevent invalid coordinates here, position is unchanged
             if (!GridDefines.IsValidMapCoord(destx, desty))
             {
-                Log.outError(LogFilter.Server, "WorldObject.MovePositionToFirstCollision invalid coordinates X: {0} and Y: {1} were passed!", destx, desty);
+                Log.outError(LogFilter.Server, $"WorldObject.MovePositionToFirstCollision invalid coordinates X: {destx} and Y: {desty} were passed!");
                 return;
             }
 
@@ -3754,7 +3754,7 @@ namespace Game.Entities
             return GetMap().GetHeight(GetPhaseShift(), x, y, z, vmap, distanceToSearch);
         }
 
-        public void SetLocationInstanceId(uint _instanceId) { instanceId = _instanceId; }
+        public void SetLocationInstanceId(int _instanceId) { instanceId = _instanceId; }
 
         #region Fields
         public TypeMask ObjectTypeMask { get; set; }
@@ -3767,12 +3767,12 @@ namespace Game.Entities
         public UpdateFieldHolder m_values;
         public ObjectFieldData m_objectData;
 
-        public uint LastUsedScriptID;
+        public int LastUsedScriptID;
 
         bool m_objectUpdated;
 
-        uint m_zoneId;
-        uint m_areaId;
+        int m_zoneId;
+        int m_areaId;
         float m_staticFloorZ;
         bool m_outdoors;
         ZLiquidStatus m_liquidStatus;
@@ -3790,7 +3790,7 @@ namespace Game.Entities
 
         ITransport m_transport;
         Map _currMap;
-        public uint instanceId;
+        public int instanceId;
         PhaseShift _phaseShift = new();
         PhaseShift _suppressedPhaseShift = new();                   // contains phases for current area but not applied due to conditions
         int _dbPhase;
@@ -3889,7 +3889,7 @@ namespace Game.Entities
             public sbyte seat;
             public uint time;
             public uint prevTime;
-            public uint vehicleId;
+            public int vehicleId;
         }
         public struct Inertia
         {
@@ -3924,7 +3924,7 @@ namespace Game.Entities
         public ObjectGuid ID;
         public Vector3 Origin;
         public Vector3 Direction;
-        public uint TransportID;
+        public int TransportID;
         public float Magnitude;
         public MovementForceType Type;
         public int Unused910;
@@ -4036,7 +4036,7 @@ namespace Game.Entities
 
     public struct FindCreatureOptions
     {
-        public FindCreatureOptions SetCreatureId(uint creatureId) { CreatureId = creatureId; return this; }
+        public FindCreatureOptions SetCreatureId(int creatureId) { CreatureId = creatureId; return this; }
         public FindCreatureOptions SetStringId(string stringId) { StringId = stringId; return this; }
 
         public FindCreatureOptions SetIsAlive(bool isAlive) { IsAlive = isAlive; return this; }
@@ -4047,14 +4047,14 @@ namespace Game.Entities
         public FindCreatureOptions SetIgnoreNotOwnedPrivateObjects(bool ignoreNotOwnedPrivateObjects) { IgnoreNotOwnedPrivateObjects = ignoreNotOwnedPrivateObjects; return this; }
         public FindCreatureOptions SetIgnorePrivateObjects(bool ignorePrivateObjects) { IgnorePrivateObjects = ignorePrivateObjects; return this; }
 
-        public FindCreatureOptions SetHasAura(uint spellId) { AuraSpellId = spellId; return this; }
+        public FindCreatureOptions SetHasAura(int spellId) { AuraSpellId = spellId; return this; }
         public FindCreatureOptions SetOwner(ObjectGuid ownerGuid) { OwnerGuid = ownerGuid; return this; }
         public FindCreatureOptions SetCharmer(ObjectGuid charmerGuid) { CharmerGuid = charmerGuid; return this; }
         public FindCreatureOptions SetCreator(ObjectGuid creatorGuid) { CreatorGuid = creatorGuid; return this; }
         public FindCreatureOptions SetDemonCreator(ObjectGuid demonCreatorGuid) { DemonCreatorGuid = demonCreatorGuid; return this; }
         public FindCreatureOptions SetPrivateObjectOwner(ObjectGuid privateObjectOwnerGuid) { PrivateObjectOwnerGuid = privateObjectOwnerGuid; return this; }
 
-        public uint? CreatureId;
+        public int? CreatureId;
         public string StringId;
 
         public bool? IsAlive;
@@ -4065,7 +4065,7 @@ namespace Game.Entities
         public bool IgnoreNotOwnedPrivateObjects;
         public bool IgnorePrivateObjects;
 
-        public uint? AuraSpellId;
+        public int? AuraSpellId;
         public ObjectGuid? OwnerGuid;
         public ObjectGuid? CharmerGuid;
         public ObjectGuid? CreatorGuid;
@@ -4075,7 +4075,7 @@ namespace Game.Entities
 
     public class FindGameObjectOptions
     {
-        public uint? GameObjectId;
+        public int? GameObjectId;
         public string StringId;
 
         public bool? IsSummon;

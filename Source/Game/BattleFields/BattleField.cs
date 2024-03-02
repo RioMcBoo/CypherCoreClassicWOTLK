@@ -74,7 +74,7 @@ namespace Game.BattleFields
         }
 
         // Called when a player leave the zone
-        public void HandlePlayerLeaveZone(Player player, uint zone)
+        public void HandlePlayerLeaveZone(Player player, int zone)
         {
             if (IsWarTime())
             {
@@ -708,7 +708,7 @@ namespace Game.BattleFields
         // Called when a player enter in battlefield zone
         public virtual void OnPlayerEnterZone(Player player) { }
 
-        public uint GetBattleId() { return m_BattleId; }
+        public int GetBattleId() { return m_BattleId; }
 
         public virtual void DoCompleteOrIncrementAchievement(uint achievement, Player player, byte incrementNumber = 1) { }
 
@@ -740,14 +740,14 @@ namespace Game.BattleFields
         protected Dictionary<ObjectGuid, long>[] m_PlayersWillBeKick = new Dictionary<ObjectGuid, long>[2];
 
         // Variables that must exist for each battlefield
-        protected uint m_TypeId;                                        // See enum BattlefieldTypes
-        protected uint m_BattleId;                                      // BattleID (for packet)
-        protected uint m_ZoneId;                                        // ZoneID of Wintergrasp = 4197
-        protected uint m_MapId;                                         // MapId where is Battlefield
+        protected int m_TypeId;                                        // See enum BattlefieldTypes
+        protected int m_BattleId;                                      // BattleID (for packet)
+        protected int m_ZoneId;                                        // ZoneID of Wintergrasp = 4197
+        protected int m_MapId;                                         // MapId where is Battlefield
         protected Map m_Map;
-        protected uint m_MaxPlayer;                                     // Maximum number of player that participated to Battlefield
-        protected uint m_MinPlayer;                                     // Minimum number of player for Battlefield start
-        protected uint m_MinLevel;                                      // Required level to participate at Battlefield
+        protected int m_MaxPlayer;                                     // Maximum number of player that participated to Battlefield
+        protected int m_MinPlayer;                                     // Minimum number of player for Battlefield start
+        protected int m_MinLevel;                                      // Required level to participate at Battlefield
         protected uint m_BattleTime;                                    // Length of a battle
         protected uint m_NoWarBattleTime;                               // Time between two battles
         protected uint m_RestartAfterCrash;                             // Delay to restart Wintergrasp if the server crashed during a running battle.
@@ -780,7 +780,7 @@ namespace Game.BattleFields
             m_SpiritGuide[1] = ObjectGuid.Empty;
         }
 
-        public void Initialize(uint startControl, uint graveyardId)
+        public void Initialize(int startControl, int graveyardId)
         {
             m_ControlTeam = startControl;
             m_GraveyardId = graveyardId;
@@ -805,7 +805,7 @@ namespace Game.BattleFields
         }
 
         // For changing graveyard control
-        public void GiveControlTo(uint team)
+        public void GiveControlTo(int team)
         {
             // Guide switching
             // Note: Visiblity changes are made by phasing
@@ -834,12 +834,12 @@ namespace Game.BattleFields
         }
 
         // Get the graveyard's ID.
-        public uint GetGraveyardId() { return m_GraveyardId; }
+        public int GetGraveyardId() { return m_GraveyardId; }
 
-        public uint GetControlTeamId() { return m_ControlTeam; }
+        public int GetControlTeamId() { return m_ControlTeam; }
 
-        uint m_ControlTeam;
-        uint m_GraveyardId;
+        int m_ControlTeam;
+        int m_GraveyardId;
         ObjectGuid[] m_SpiritGuide = new ObjectGuid[SharedConst.PvpTeamsCount];
         protected BattleField m_Bf;
     }
@@ -1038,7 +1038,7 @@ namespace Game.BattleFields
             }
 
             float oldValue = m_value;
-            uint oldTeam = m_team;
+            int oldTeam = m_team;
 
             m_OldState = m_State;
 
@@ -1133,10 +1133,10 @@ namespace Game.BattleFields
             return m_activePlayers[player.GetTeamId()].Contains(player.GetGUID());
         }
 
-        public virtual void ChangeTeam(uint oldTeam) { }
+        public virtual void ChangeTeam(int oldTeam) { }
 
-        public uint GetCapturePointEntry() { return m_capturePointEntry; }
-        uint GetTeamId() { return m_team; }
+        public int GetCapturePointEntry() { return m_capturePointEntry; }
+        int GetTeamId() { return m_team; }
 
         // active Players in the area of the objective, 0 - alliance, 1 - horde
         HashSet<ObjectGuid>[] m_activePlayers = new HashSet<ObjectGuid>[SharedConst.PvpTeamsCount];
@@ -1150,7 +1150,7 @@ namespace Game.BattleFields
 
         // The status of the objective
         float m_value;
-        protected uint m_team;
+        protected int m_team;
 
         // Objective states
         BattleFieldObjectiveStates m_OldState;
@@ -1163,7 +1163,7 @@ namespace Game.BattleFields
         protected BattleField m_Bf;
 
         // Capture point entry
-        uint m_capturePointEntry;
+        int m_capturePointEntry;
 
         // Gameobject related to that capture point
         ObjectGuid m_capturePointGUID;

@@ -5,7 +5,6 @@ using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Miscellaneous;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
@@ -53,10 +52,10 @@ namespace Game
         
         public FactionState GetState(FactionRecord factionEntry)
         {
-            return factionEntry.CanHaveReputation() ? GetState(factionEntry.ReputationIndex) : null;
+            return factionEntry.CanHaveReputation ? GetState(factionEntry.ReputationIndex) : null;
         }
 
-        public bool IsAtWar(uint factionId)
+        public bool IsAtWar(int factionId)
         {
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
             if (factionEntry == null)
@@ -76,7 +75,7 @@ namespace Game
             return false;
         }
 
-        public int GetReputation(uint faction_id)
+        public int GetReputation(int faction_id)
         {
             var factionEntry = CliDB.FactionStorage.LookupByKey(faction_id);
             if (factionEntry == null)
@@ -122,7 +121,7 @@ namespace Game
                 int reputation = GetReputation(factionEntry);
                 int cap = reputation + paragonReputation.LevelThreshold - reputation % paragonReputation.LevelThreshold - 1;
 
-                if (_player.GetQuestStatus((uint)paragonReputation.QuestID) == QuestStatus.None)
+                if (_player.GetQuestStatus(paragonReputation.QuestID) == QuestStatus.None)
                     cap += paragonReputation.LevelThreshold;
 
                 return cap;
@@ -251,7 +250,7 @@ namespace Game
             return 0;
         }
         
-        public void ApplyForceReaction(uint faction_id, ReputationRank rank, bool apply)
+        public void ApplyForceReaction(int faction_id, ReputationRank rank, bool apply)
         {
             if (apply)
                 _forcedReactions[faction_id] = rank;
@@ -478,7 +477,7 @@ namespace Game
 
         public bool SetOneFactionReputation(FactionRecord factionEntry, int standing, bool incremental)
         {
-            var factionState = _factions.LookupByKey((uint)factionEntry.ReputationIndex);
+            var factionState = _factions.LookupByKey(factionEntry.ReputationIndex);
             if (factionState != null)
             {
                 // Ignore renown reputation already raised to the maximum level
@@ -569,7 +568,7 @@ namespace Game
                     int newParagonLevel = standing / paragonReputation.LevelThreshold;
                     if (oldParagonLevel != newParagonLevel)
                     {
-                        Quest paragonRewardQuest = Global.ObjectMgr.GetQuestTemplate((uint)paragonReputation.QuestID);
+                        Quest paragonRewardQuest = Global.ObjectMgr.GetQuestTemplate(paragonReputation.QuestID);
                         if (paragonRewardQuest != null)
                             _player.AddQuestAndCheckCompletion(paragonRewardQuest, null);
                     }
@@ -594,16 +593,16 @@ namespace Game
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
             if (factionEntry.Id != 0)
                 // Never show factions of the opposing team
-                if (!(new RaceMask<long>(factionEntry.ReputationRaceMask[1]).HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom))
+                if (!((RaceMask)factionEntry.ReputationRaceMask[1]).HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom)
                     SetVisible(factionEntry);
         }
 
         public void SetVisible(FactionRecord factionEntry)
         {
-            if (!factionEntry.CanHaveReputation())
+            if (!factionEntry.CanHaveReputation)
                 return;
 
-            var factionState = _factions.LookupByKey((uint)factionEntry.ReputationIndex);
+            var factionState = _factions.LookupByKey(factionEntry.ReputationIndex);
             if (factionState == null)
                 return;
 
@@ -635,7 +634,7 @@ namespace Game
             SendVisible(faction);
         }
 
-        public void SetAtWar(uint repListID, bool on)
+        public void SetAtWar(int repListID, bool on)
         {
             var factionState = _factions.LookupByKey(repListID);
             if (factionState == null)
@@ -667,7 +666,7 @@ namespace Game
             faction.needSave = true;
         }
 
-        public void SetInactive(uint repListID, bool on)
+        public void SetInactive(int repListID, bool on)
         {
             var factionState = _factions.LookupByKey(repListID);
             if (factionState == null)
@@ -704,10 +703,10 @@ namespace Game
             {
                 do
                 {
-                    var factionEntry = CliDB.FactionStorage.LookupByKey(result.Read<uint>(0));
-                    if (factionEntry != null && factionEntry.CanHaveReputation())
+                    var factionEntry = CliDB.FactionStorage.LookupByKey(result.Read<int>(0));
+                    if (factionEntry != null && factionEntry.CanHaveReputation)
                     {
-                        var faction = _factions.LookupByKey((uint)factionEntry.ReputationIndex);
+                        var faction = _factions.LookupByKey(factionEntry.ReputationIndex);
                         if (faction == null)
                             continue;
                         // update standing to current
@@ -722,7 +721,7 @@ namespace Game
                             UpdateRankCounters(old_rank, new_rank);
                         }
 
-                        ReputationFlags dbFactionFlags = (ReputationFlags)result.Read<uint>(2);
+                        ReputationFlags dbFactionFlags = (ReputationFlags)result.Read<int>(2);
 
                         if (dbFactionFlags.HasFlag(ReputationFlags.Visible))
                             SetVisible(faction);                    // have internal checks for forced invisibility
@@ -799,12 +798,12 @@ namespace Game
             if (factionEntry == null)
                 return -1;
 
-            short classMask = (short)_player.GetClassMask();
+            Class class_ = _player.GetClass();
 
             for (int i = 0; i < 4; i++)
             {
-                var raceMask = new RaceMask<long>(factionEntry.ReputationRaceMask[i]);
-                if ((raceMask.HasRace(_player.GetRace()) || (raceMask.IsEmpty() && factionEntry.ReputationClassMask[i] != 0)) && (factionEntry.ReputationClassMask[i].HasAnyFlag(classMask) || factionEntry.ReputationClassMask[i] == 0))
+                var raceMask = (RaceMask)factionEntry.ReputationRaceMask[i];
+                if ((raceMask.HasRace(_player.GetRace()) || (raceMask == RaceMask.None && factionEntry.ReputationClassMask(i) != ClassMask.None)) && (factionEntry.ReputationClassMask(i).HasClass(class_) || factionEntry.ReputationClassMask(i) == ClassMask.None))
                     return i;
             }
 
@@ -838,16 +837,16 @@ namespace Game
 
         public byte GetExaltedFactionCount() { return _exaltedFactionCount; }
 
-        public SortedDictionary<uint, FactionState> GetStateList() { return _factions; }
+        public SortedDictionary<int, FactionState> GetStateList() { return _factions; }
 
         public FactionState GetState(int id)
         {
-            return _factions.LookupByKey((uint)id);
+            return _factions.LookupByKey(id);
         }
 
-        public uint GetReputationRankStrIndex(FactionRecord factionEntry)
+        public CypherStrings GetReputationRankStrIndex(FactionRecord factionEntry)
         {
-            return (uint)ReputationRankStrIndex[(int)GetRank(factionEntry)];
+            return ReputationRankStrIndex[(int)GetRank(factionEntry)];
         }
 
         public ReputationRank GetForcedRankIfAny(int factionId)
@@ -907,14 +906,14 @@ namespace Game
             CypherStrings.RepFriendly, CypherStrings.RepHonored, CypherStrings.RepRevered, CypherStrings.RepExalted
         };
 
-        SortedDictionary<uint, FactionState> _factions = new();
+        SortedDictionary<int, FactionState> _factions = new();
         Dictionary<int, ReputationRank> _forcedReactions = new();
     }
 
     public class FactionState
     {
-        public uint Id;
-        public uint ReputationListID;
+        public int Id;
+        public int ReputationListID;
         public int Standing;
         public int VisualStandingIncrease;
         public ReputationFlags Flags;

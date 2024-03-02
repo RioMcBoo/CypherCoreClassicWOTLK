@@ -47,13 +47,13 @@ namespace Game.Entities
             base.RemoveFromWorld();
         }
 
-        public bool Create(ulong guidlow, Map map)
+        public bool Create(long guidlow, Map map)
         {
             _Create(ObjectGuid.Create(HighGuid.Corpse, map.GetId(), 0, guidlow));
             return true;
         }
 
-        public bool Create(ulong guidlow, Player owner)
+        public bool Create(long guidlow, Player owner)
         {
             Cypher.Assert(owner != null);
 
@@ -157,7 +157,7 @@ namespace Game.Entities
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 
-        public bool LoadCorpseFromDB(ulong guid, SQLFields field)
+        public bool LoadCorpseFromDB(long guid, SQLFields field)
         {
             //        0     1     2     3            4      5          6          7     8      9       10     11        12    13          14          15
             // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, race, class, gender, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
@@ -182,12 +182,12 @@ namespace Game.Entities
             SetSex(field.Read<byte>(9));
             ReplaceAllFlags((CorpseFlags)field.Read<byte>(10));
             ReplaceAllCorpseDynamicFlags((CorpseDynFlags)field.Read<byte>(11));
-            SetOwnerGUID(ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(15)));
+            SetOwnerGUID(ObjectGuid.Create(HighGuid.Player, field.Read<long>(15)));
             SetFactionTemplate(CliDB.ChrRacesStorage.LookupByKey(m_corpseData.RaceID).FactionID);
 
             m_time = field.Read<uint>(12);
 
-            uint instanceId = field.Read<uint>(14);
+            int instanceId = field.Read<int>(14);
 
             // place
             SetLocationInstanceId(instanceId);
@@ -294,8 +294,8 @@ namespace Game.Entities
         public void SetSex(byte sex) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Sex), sex); }
         public void ReplaceAllFlags(CorpseFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Flags), (uint)flags); }
         public void SetFactionTemplate(int factionTemplate) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.FactionTemplate), factionTemplate); }
-        public override uint GetFaction() { return (uint)(int)m_corpseData.FactionTemplate; }
-        public override void SetFaction(uint faction) { SetFactionTemplate((int)faction); }
+        public override int GetFaction() { return m_corpseData.FactionTemplate; }
+        public override void SetFaction(int faction) { SetFactionTemplate(faction); }
         public void SetItem(uint slot, uint item) { SetUpdateFieldValue(ref m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Items, (int)slot), item); }
 
         public void SetCustomizations(List<ChrCustomizationChoice> customizations)

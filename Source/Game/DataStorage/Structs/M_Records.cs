@@ -150,12 +150,12 @@ namespace Game.DataStorage
 
     public sealed class MapDifficultyRecord
     {
-        public uint Id;
+        public int Id;
         /// <summary>
         /// m_message_lang (text showed when transfer to map failed)
         /// </summary>
         public LocalizedString Message;
-        public uint ItemContextPickerID;
+        public int ItemContextPickerID;
         public int ContentTuningID;
         private byte _difficultyID;
         public byte LockID;
@@ -163,7 +163,7 @@ namespace Game.DataStorage
         public byte MaxPlayers;
         public byte ItemContext;
         private byte _flags;
-        public uint MapID;
+        public int MapID;
 
         #region Properties
         public Difficulty DifficultyID => (Difficulty)_difficultyID;
@@ -203,11 +203,15 @@ namespace Game.DataStorage
 
     public sealed class MapDifficultyXConditionRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString FailureDescription;
-        public uint PlayerConditionID;
+        public int PlayerConditionID;
         public int OrderIndex;
-        public uint MapDifficultyID;
+        private uint _mapDifficultyID;
+
+        #region Properties
+        public Difficulty MapDifficultyID => (Difficulty)_mapDifficultyID;
+        #endregion
     }
 
     public sealed class ModifierTreeRecord
@@ -227,18 +231,17 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public LocalizedString SourceText;
         public LocalizedString Description;
-        public uint Id;
+        public int Id;
         public ushort MountTypeID;
         private ushort _flags;
         public sbyte SourceTypeEnum;
-        private int _sourceSpellID;
-        public uint PlayerConditionID;
+        public int SourceSpellID;
+        public int PlayerConditionID;
         public float MountFlyRideHeight;
         public int UiModelSceneID;
 
         #region Properties
         public MountFlags Flags => (MountFlags)_flags;
-        public uint SourceSpellID => (uint)_sourceSpellID;
         #endregion
 
         #region Helpers
@@ -286,36 +289,36 @@ namespace Game.DataStorage
 
     public sealed class MountTypeXCapabilityRecord
     {
-        public uint Id;
+        public int Id;
         private ushort _mountTypeID;
         public ushort MountCapabilityID;
         public byte OrderIndex;
 
         #region Properties
-        public uint MountTypeID => _mountTypeID;
+        public int MountTypeID => _mountTypeID;
         #endregion
     }
 
     public sealed class MountXDisplayRecord
     {
-        public uint Id;
+        public int Id;
         public int CreatureDisplayInfoID;
-        public uint PlayerConditionID;
-        public uint MountID;
+        public int PlayerConditionID;
+        public int MountID;
     }
 
     public sealed class MovieRecord
     {
-        public uint Id;
+        public int Id;
         public byte Volume;
         public byte KeyID;
-        public uint AudioFileDataID;
-        public uint SubtitleFileDataID;
+        public int AudioFileDataID;
+        public int SubtitleFileDataID;
     }
 
     public sealed class MythicPlusSeasonRecord
     {
-        public uint Id;
+        public int Id;
         public int MilestoneSeason;
         public int ExpansionLevel;
         public int HeroicLFGDungeonMinGear;

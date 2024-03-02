@@ -9,8 +9,8 @@ namespace Game.DataStorage
     public sealed class HeirloomRecord
     {
         public LocalizedString SourceText;
-        public uint Id;
-        private int _itemID;
+        public int Id;
+        public int ItemID;
         public int LegacyUpgradedItemID;
         public int StaticUpgradedItemID;
         public sbyte SourceTypeEnum;
@@ -18,10 +18,6 @@ namespace Game.DataStorage
         public int LegacyItemID;
         public int[] UpgradeItemID = new int[6];
         public ushort[] UpgradeItemBonusListID = new ushort[6];
-
-        #region Properties
-        public uint ItemID => (uint)_itemID;
-        #endregion
     }
 
     public sealed class HolidaysRecord

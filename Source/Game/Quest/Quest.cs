@@ -6,13 +6,11 @@ using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Miscellaneous;
 using Game.Networking.Packets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using static Game.AI.SmartAction;
 
 namespace Game
 {
@@ -792,9 +790,9 @@ namespace Game
         public bool IsDFQuest() { return HasAnyFlag(QuestSpecialFlags.DfQuest); }
         public bool IsPushedToPartyOnAccept() { return HasAnyFlag(QuestSpecialFlags.AutoPushToParty); }
         
-        public uint GetRewChoiceItemsCount() { return _rewChoiceItemsCount; }
-        public uint GetRewItemsCount() { return _rewItemsCount; }
-        public uint GetRewCurrencyCount() { return _rewCurrencyCount; }
+        public int GetRewChoiceItemsCount() { return _rewChoiceItemsCount; }
+        public int GetRewItemsCount() { return _rewItemsCount; }
+        public int GetRewCurrencyCount() { return _rewCurrencyCount; }
 
         public void SetEventIdForQuest(ushort eventId) { _eventIdForQuest = eventId; }
         public ushort GetEventIdForQuest() { return _eventIdForQuest; }
@@ -830,7 +828,7 @@ namespace Game
         public LootItemType[] RewardChoiceItemType = new LootItemType[SharedConst.QuestRewardChoicesCount];
         public int[] RewardChoiceItemId = new int[SharedConst.QuestRewardChoicesCount];
         public int[] RewardChoiceItemCount = new int[SharedConst.QuestRewardChoicesCount];
-        public uint[] RewardChoiceItemDisplayId = new uint[SharedConst.QuestRewardChoicesCount];
+        public int[] RewardChoiceItemDisplayId = new int[SharedConst.QuestRewardChoicesCount];
         public int POIContinent;
         public float POIx;
         public float POIy;
@@ -877,7 +875,7 @@ namespace Game
         public List<QuestConditionalText> ConditionalQuestCompletionLog = new();
 
         // quest_detais table
-        public uint[] DetailsEmote = new uint[SharedConst.QuestEmoteCount];
+        public int[] DetailsEmote = new int[SharedConst.QuestEmoteCount];
         public uint[] DetailsEmoteDelay = new uint[SharedConst.QuestEmoteCount];
 
         // quest_request_items table
@@ -892,14 +890,14 @@ namespace Game
 
         // quest_offer_reward table
         public int[] OfferRewardEmote = new int[SharedConst.QuestEmoteCount];
-        public uint[] OfferRewardEmoteDelay = new uint[SharedConst.QuestEmoteCount];
+        public int[] OfferRewardEmoteDelay = new int[SharedConst.QuestEmoteCount];
         public string OfferRewardText = string.Empty;
 
         // quest_offer_reward_conditional
         public List<QuestConditionalText> ConditionalOfferRewardText = new();
 
         // quest_template_addon table (custom data)
-        public uint MaxLevel { get; set; }
+        public int MaxLevel { get; set; }
         public int MinLevel { get; set; }
         public int Level { get; set; }
         public int ScalingFactionGroup { get; set; }
@@ -913,24 +911,24 @@ namespace Game
         public int RewardMailTemplateId { get; set; }
         public uint RewardMailDelay { get; set; }
         public SkillType RequiredSkillId { get; set; }
-        public uint RequiredSkillPoints { get; set; }
+        public int RequiredSkillPoints { get; set; }
         public int RequiredMinRepFaction { get; set; }
         public int RequiredMinRepValue { get; set; }
         public int RequiredMaxRepFaction { get; set; }
         public int RequiredMaxRepValue { get; set; }
-        public uint SourceItemIdCount { get; set; }
-        public uint RewardMailSenderEntry { get; set; }
+        public int SourceItemIdCount { get; set; }
+        public int RewardMailSenderEntry { get; set; }
         public QuestSpecialFlags SpecialFlags { get; set; } // custom flags, not sniffed/WDB
         public BitArray _usedQuestObjectiveTypes = new((int)QuestObjectiveType.Max);
-        public uint ScriptId { get; set; }
+        public int ScriptId { get; set; }
 
         public List<int> DependentPreviousQuests = new();
         public List<int> DependentBreadcrumbQuests = new();
         public QueryQuestInfoResponse[] response = new QueryQuestInfoResponse[(int)Locale.Total];
 
-        uint _rewChoiceItemsCount;
-        uint _rewItemsCount;
-        uint _rewCurrencyCount;
+        int _rewChoiceItemsCount;
+        int _rewItemsCount;
+        int _rewCurrencyCount;
         ushort _eventIdForQuest;
         #endregion
     }

@@ -12,7 +12,7 @@ namespace Game.DataStorage
         public long[] ReputationRaceMask = new long[4];
         public LocalizedString Name;
         public LocalizedString Description;
-        public uint Id;
+        public int Id;
         public short ReputationIndex;
         public ushort ParentFactionID;
         public byte Expansion;

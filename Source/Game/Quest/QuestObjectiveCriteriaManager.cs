@@ -76,8 +76,8 @@ namespace Game
                 long now = GameTime.GetGameTime();
                 do
                 {
-                    uint criteriaId = criteriaResult.Read<uint>(0);
-                    ulong counter = criteriaResult.Read<ulong>(1);
+                    int criteriaId = criteriaResult.Read<int>(0);
+                    long counter = criteriaResult.Read<long>(1);
                     long date = criteriaResult.Read<long>(2);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(criteriaId);
@@ -215,7 +215,7 @@ namespace Game
             SendPacket(criteriaUpdate);
         }
 
-        public override void SendCriteriaProgressRemoved(uint criteriaId)
+        public override void SendCriteriaProgressRemoved(int criteriaId)
         {
             CriteriaDeleted criteriaDeleted = new();
             criteriaDeleted.CriteriaID = criteriaId;
@@ -285,13 +285,13 @@ namespace Game
             return $"{_owner.GetGUID()} {_owner.GetName()}";
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
+        public override List<Criteria> GetCriteriaByType(CriteriaType type, int asset)
         {
             return Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(type);
         }
 
 
         Player _owner;
-        List<uint> _completedObjectives = new();
+        List<int> _completedObjectives = new();
     }
 }

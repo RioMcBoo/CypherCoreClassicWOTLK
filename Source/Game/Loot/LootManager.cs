@@ -13,7 +13,7 @@ using System.Collections.Generic;
 namespace Game.Loots
 {
     using LootStoreItemList = List<LootStoreItem>;
-    using LootTemplateMap = Dictionary<uint, LootTemplate>;
+    using LootTemplateMap = Dictionary<int, LootTemplate>;
 
     public class LootManager : LootStorage
     {
@@ -415,7 +415,7 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet;
+            List<int> lootIdSet;
             uint count = Spell.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
@@ -482,8 +482,8 @@ namespace Game.Loots
 
     public class LootStoreItem
     {
-        public uint itemid;                 // id of the item
-        public uint reference;              // referenced TemplateleId
+        public int itemid;                 // id of the item
+        public int reference;              // referenced TemplateleId
         public float chance;                // Chance to drop for both quest and non-quest items, Chance to be used for refs
         public ushort lootmode;
         public bool needs_quest;            // quest drop (negative ChanceOrQuestChance in DB)
@@ -492,7 +492,7 @@ namespace Game.Loots
         public byte maxcount;               // max drop count for the item mincount or Ref multiplicator
         public List<Condition> conditions;  // additional loot condition
 
-        public LootStoreItem(uint _itemid, uint _reference, float _chance, bool _needs_quest, ushort _lootmode, byte _groupid, byte _mincount, byte _maxcount)
+        public LootStoreItem(int _itemid, int _reference, float _chance, bool _needs_quest, ushort _lootmode, byte _groupid, byte _mincount, byte _maxcount)
         {
             itemid = _itemid;
             reference = _reference;
@@ -519,7 +519,7 @@ namespace Game.Loots
 
             return RandomHelper.randChance(chance * qualityModifier);
         }
-        public bool IsValid(LootStore store, uint entry)
+        public bool IsValid(LootStore store, int entry)
         {
             if (mincount == 0)
             {
@@ -595,10 +595,10 @@ namespace Game.Loots
                 i.Value.Verify(this, i.Key);
         }
 
-        public uint LoadAndCollectLootIds(out List<uint> lootIdSet)
+        public int LoadAndCollectLootIds(out List<int> lootIdSet)
         {
-            uint count = LoadLootTable();
-            lootIdSet = new List<uint>();
+            int count = LoadLootTable();
+            lootIdSet = new List<int>();
 
             foreach (var tab in m_LootTemplates)
                 lootIdSet.Add(tab.Key);
@@ -617,14 +617,14 @@ namespace Game.Loots
                 Log.outError( LogFilter.Sql, "Table '{0}' entry {1} isn't {2} and not referenced from loot, and then useless.", GetName(), id, GetEntryName());
         }
 
-        public void ReportNonExistingId(uint lootId, uint ownerId)
+        public void ReportNonExistingId(int lootId, int ownerId)
         {
             Log.outError( LogFilter.Sql, "Table '{0}' Entry {1} does not exist but it is used by {2} {3}", GetName(), lootId, GetEntryName(), ownerId);
         }
 
-        public bool HaveLootFor(uint loot_id) { return m_LootTemplates.LookupByKey(loot_id) != null; }
+        public bool HaveLootFor(int loot_id) { return m_LootTemplates.LookupByKey(loot_id) != null; }
 
-        public bool HaveQuestLootFor(uint loot_id)
+        public bool HaveQuestLootFor(int loot_id)
         {
             var lootTemplate = m_LootTemplates.LookupByKey(loot_id);
             if (lootTemplate == null)
@@ -634,7 +634,7 @@ namespace Game.Loots
             return lootTemplate.HasQuestDrop(m_LootTemplates);
         }
 
-        public bool HaveQuestLootForPlayer(uint loot_id, Player player)
+        public bool HaveQuestLootForPlayer(int loot_id, Player player)
         {
             var tab = m_LootTemplates.LookupByKey(loot_id);
             if (tab != null)
@@ -644,7 +644,7 @@ namespace Game.Loots
             return false;
         }
 
-        public LootTemplate GetLootFor(uint loot_id)
+        public LootTemplate GetLootFor(int loot_id)
         {
             var tab = m_LootTemplates.LookupByKey(loot_id);
 
@@ -663,7 +663,7 @@ namespace Game.Loots
             }
         }
 
-        public LootTemplate GetLootForConditionFill(uint loot_id)
+        public LootTemplate GetLootForConditionFill(int loot_id)
         {
             var tab = m_LootTemplates.LookupByKey(loot_id);
 
@@ -677,7 +677,7 @@ namespace Game.Loots
         string GetEntryName() { return m_entryName; }
         public bool IsRatesAllowed() { return m_ratesAllowed; }
 
-        uint LoadLootTable()
+        int LoadLootTable()
         {
             // Clearing store (for reloading case)
             Clear();
@@ -690,9 +690,9 @@ namespace Game.Loots
             uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
-                uint item = result.Read<uint>(1);
-                uint reference = result.Read<uint>(2);
+                int entry = result.Read<int>(0);
+                int item = result.Read<int>(1);
+                int reference = result.Read<int>(2);
                 float chance = result.Read<float>(3);
                 bool needsquest = result.Read<bool>(4);
                 ushort lootmode = result.Read<ushort>(5);
@@ -1026,7 +1026,7 @@ namespace Game.Loots
             return false;
         }
 
-        public void Verify(LootStore lootstore, uint id)
+        public void Verify(LootStore lootstore, int id)
         {
             // Checking group chances
             foreach (var group in Groups)
@@ -1106,7 +1106,7 @@ namespace Game.Loots
             }
             return false;
         }
-        public bool IsReference(uint id)
+        public bool IsReference(int id)
         {
             foreach (var storeItem in Entries)
                 if (storeItem.itemid == id && storeItem.reference > 0)
@@ -1180,7 +1180,7 @@ namespace Game.Loots
                 return result;
             }
 
-            public void Verify(LootStore lootstore, uint id, byte group_id = 0)
+            public void Verify(LootStore lootstore, int id, byte group_id = 0)
             {
                 float chance = RawTotalChance();
                 if (chance > 101.0f)                                    // @todo replace with 100% when DBs will be ready
@@ -1190,7 +1190,7 @@ namespace Game.Loots
                     Log.outError(LogFilter.Sql, "Table '{0}' entry {1} group {2} has items with Chance=0% but group total Chance >= 100% ({3})", lootstore.GetName(), id, group_id, chance);
 
             }
-            public void CheckLootRefs(LootTemplateMap store, List<uint> ref_set)
+            public void CheckLootRefs(LootTemplateMap store, List<int> ref_set)
             {
                 foreach (var item in ExplicitlyChanced)
                 {

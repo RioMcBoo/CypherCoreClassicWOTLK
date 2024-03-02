@@ -159,7 +159,7 @@ namespace Game.DataStorage
         public byte Flags;
         public uint ChatBubbleDurationMs;
         public int VoiceOverPriorityID;
-        public uint[] SoundKitID = new uint[2];
+        public int[] SoundKitID = new int[2];
         public ushort[] EmoteID = new ushort[MAX_BROADCAST_TEXT_EMOTES];
         public ushort[] EmoteDelay = new ushort[MAX_BROADCAST_TEXT_EMOTES];
     }

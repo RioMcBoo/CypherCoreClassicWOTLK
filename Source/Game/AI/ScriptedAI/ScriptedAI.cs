@@ -507,9 +507,9 @@ namespace Game.AI
     {
         public InstanceScript instance;
         public SummonList summons;
-        uint _bossId;
+        int _bossId;
 
-        public BossAI(Creature creature, uint bossId) : base(creature)
+        public BossAI(Creature creature, int bossId) : base(creature)
         {
             instance = creature.GetInstanceScript();
             summons = new SummonList(creature);
@@ -662,7 +662,7 @@ namespace Game.AI
                 instance.SetBossState(_bossId, EncounterState.Fail);
         }
 
-        public virtual void ExecuteEvent(uint eventId) { }
+        public virtual void ExecuteEvent(int eventId) { }
 
         public virtual void ScheduleTasks() { }
 
@@ -675,7 +675,7 @@ namespace Game.AI
 
         public void _JustReachedHome() { me.SetActive(false); }
 
-        public uint GetBossId() { return _bossId; }
+        public int GetBossId() { return _bossId; }
     }
 
     public class WorldBossAI : ScriptedAI

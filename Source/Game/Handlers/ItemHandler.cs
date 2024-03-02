@@ -200,7 +200,7 @@ namespace Game
                 if (!dstItem.HasItemFlag(ItemFieldFlags.Child))
                 {
                     // check dest->src move possibility
-                    List<ItemPosCount> sSrc = new();                    
+                    List<(ItemPos item, int count)> sSrc = new();                    
                     if (src.IsInventoryPos)
                     {
                         msg = player.CanStoreItem(src, out sSrc, dstItem, forSwap: true);
@@ -492,7 +492,7 @@ namespace Game
                     return;
                 }
 
-                InventoryResult msg = _player.CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, pItem);
+                InventoryResult msg = _player.CanStoreItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, pItem);
                 if (msg == InventoryResult.Ok)
                 {
                     _player.ModifyMoney(-price);
@@ -573,7 +573,7 @@ namespace Game
                 }
             }
 
-            msg = GetPlayer().CanStoreItem(destBagSlot, out List<ItemPosCount> dest, item);
+            msg = GetPlayer().CanStoreItem(destBagSlot, out List<(ItemPos item, int count)> dest, item);
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, item);
@@ -869,7 +869,7 @@ namespace Game
                             else if (oldGemData[j] != null)
                             {
                                 // existing gem
-                                ItemTemplate jProto = Global.ObjectMgr.GetItemTemplate((uint)oldGemData[j].ItemId.GetValue());
+                                ItemTemplate jProto = Global.ObjectMgr.GetItemTemplate(oldGemData[j].ItemId.GetValue());
                                 if (jProto != null)
                                     if (iGemProto.GetItemLimitCategory() == jProto.GetItemLimitCategory())
                                         ++limit_newcount;
@@ -909,8 +909,8 @@ namespace Game
             {
                 if (gems[i] != null)
                 {
-                    uint gemScalingLevel = _player.GetLevel();
-                    uint fixedLevel = gems[i].GetModifier(ItemModifier.TimewalkerLevel);
+                    int gemScalingLevel = _player.GetLevel();
+                    int fixedLevel = gems[i].GetModifier(ItemModifier.TimewalkerLevel);
                     if (fixedLevel != 0)
                         gemScalingLevel = fixedLevel;
 
@@ -1038,7 +1038,7 @@ namespace Game
                     GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
             }
 
-            GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+            GetPlayer().DestroyItem(item.InventoryPosition, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.SortBags, Processing = PacketProcessing.Inplace)]

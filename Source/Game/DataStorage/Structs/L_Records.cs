@@ -27,7 +27,7 @@ namespace Game.DataStorage
 
     public sealed class LFGDungeonsRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public LocalizedString Description;
         public byte MinLevel;
@@ -86,7 +86,7 @@ namespace Game.DataStorage
 
     public sealed class LightRecord
     {
-        public uint Id;
+        public int Id;
         public Vector3 GameCoords;
         public float GameFalloffStart;
         public float GameFalloffEnd;
@@ -96,7 +96,7 @@ namespace Game.DataStorage
 
     public sealed class LiquidTypeRecord
     {
-        public uint Id;
+        public int Id;
         public string Name;
         public string[] Texture = new string[6];
         public ushort Flags;
@@ -104,8 +104,8 @@ namespace Game.DataStorage
         /// used to be "Type", maybe needs fixing (works well for now)
         /// </summary>
         public byte SoundBank;
-        public uint SoundID;
-        public uint SpellID;
+        public int SoundID;
+        public int SpellID;
         public float MaxDarkenDepth;
         public float FogDarkenIntensity;
         public float AmbDarkenIntensity;
@@ -125,7 +125,7 @@ namespace Game.DataStorage
 
     public sealed class LockRecord
     {
-        public uint Id;
+        public int Id;
         public int[] Index = new int[SharedConst.MaxLockCase];
         public ushort[] Skill = new ushort[SharedConst.MaxLockCase];
         public byte[] Type = new byte[SharedConst.MaxLockCase];

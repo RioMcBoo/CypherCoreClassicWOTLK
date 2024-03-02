@@ -26,7 +26,7 @@ namespace Game
             if (item == null)
                 return;
 
-            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<ItemPosCount> dest, item, false);
+            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item, false);
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, item);
@@ -76,7 +76,7 @@ namespace Game
 
             if (itemPos.IsBankPos)                 // moving from bank to inventory
             {
-                InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, item);
+                InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);
@@ -90,7 +90,7 @@ namespace Game
             }
             else                                                    // moving from inventory to bank
             {
-                InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<ItemPosCount> dest, item, false);
+                InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item, false);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);

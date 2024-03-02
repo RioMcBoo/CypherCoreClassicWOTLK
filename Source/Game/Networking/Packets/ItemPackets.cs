@@ -635,6 +635,13 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
+    class SortReagentBankBags : ClientPacket
+    {
+        public SortReagentBankBags(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
     class BagCleanupFinished : ServerPacket
     {
         public BagCleanupFinished() : base(ServerOpcodes.BagCleanupFinished, ConnectionType.Instance) { }
@@ -849,7 +856,7 @@ namespace Game.Networking.Packets
             RandomPropertiesID = item.GetItemRandomPropertyId();
 
             foreach (var mod in item.m_itemData.Modifiers.GetValue().Values)
-                Modifications.Values.Add(new ItemMod((uint)mod.Value, (ItemModifier)mod.Type));
+                Modifications.Values.Add(new ItemMod(mod.Value, (ItemModifier)mod.Type));
         }
 
         public ItemInstance(SocketedGem gem)
@@ -953,16 +960,16 @@ namespace Game.Networking.Packets
 
     public class ItemBonusKey : IEquatable<ItemBonusKey>
     {
-        public uint ItemID;
-        public List<uint> BonusListIDs = new();
+        public int ItemID;
+        public List<int> BonusListIDs = new();
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(ItemID);
+            data.WriteInt32(ItemID);
             data.WriteInt32(BonusListIDs.Count);
 
             foreach (var id in BonusListIDs)
-                    data.WriteUInt32(id);
+                    data.WriteInt32(id);
         }
 
         public bool Equals(ItemBonusKey right)

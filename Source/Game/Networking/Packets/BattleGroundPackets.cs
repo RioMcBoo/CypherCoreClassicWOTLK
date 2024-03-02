@@ -503,8 +503,23 @@ namespace Game.Networking.Packets
         public uint BattlemasterListID;
         public bool Registered;
         public bool AffectsRating;
-    }       
-    
+    }
+
+    class PVPMatchSetState : ServerPacket
+    {
+        public PVPMatchSetState(PVPMatchState state) : base(ServerOpcodes.PvpMatchSetState)
+        {
+            State = state;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)State);
+        }
+
+        PVPMatchState State;
+    }
+
     class PVPMatchComplete : ServerPacket
     {
         public PVPMatchComplete() : base(ServerOpcodes.PvpMatchComplete, ConnectionType.Instance) { }
@@ -648,14 +663,14 @@ namespace Game.Networking.Packets
         {
             public void Write(WorldPacket data)
             {
-                data.WriteUInt32(HonorKills);
-                data.WriteUInt32(Deaths);
-                data.WriteUInt32(ContributionPoints);
+                data.WriteInt32(HonorKills);
+                data.WriteInt32(Deaths);
+                data.WriteInt32(ContributionPoints);
             }
 
-            public uint HonorKills;
-            public uint Deaths;
-            public uint ContributionPoints;
+            public int HonorKills;
+            public int Deaths;
+            public int ContributionPoints;
         }
 
         public struct PVPMatchPlayerPVPStat
@@ -681,12 +696,12 @@ namespace Game.Networking.Packets
             public void Write(WorldPacket data)
             {
                 data.WritePackedGuid(PlayerGUID);
-                data.WriteUInt32(Kills);
-                data.WriteUInt32(DamageDone);
-                data.WriteUInt32(HealingDone);
+                data.WriteInt32(Kills);
+                data.WriteInt32(DamageDone);
+                data.WriteInt32(HealingDone);
                 data.WriteInt32(Stats.Count);
-                data.WriteInt32(PrimaryTalentTree);
-                data.WriteInt8(Sex);
+                data.WriteInt32((int)PrimaryTalentTree);
+                data.WriteInt8((sbyte)Sex);
                 data.WriteUInt32((uint)PlayerRace);
                 data.WriteInt32((int)PlayerClass);
                 data.WriteInt32(CreatureID);
@@ -726,20 +741,20 @@ namespace Game.Networking.Packets
             }
 
             public ObjectGuid PlayerGUID;
-            public uint Kills;
+            public int Kills;
             public byte Faction;
             public bool IsInWorld;
             public HonorData? Honor;
-            public uint DamageDone;
-            public uint HealingDone;
+            public int DamageDone;
+            public int HealingDone;
             public uint? PreMatchRating;
             public int? RatingChange;
             public uint? PreMatchMMR;
             public int? MmrChange;
             public uint? PostMatchMMR;
             public List<PVPMatchPlayerPVPStat> Stats = new();
-            public int PrimaryTalentTree;
-            public sbyte Sex;
+            public ChrSpecialization PrimaryTalentTree;
+            public Gender Sex;
             public Race PlayerRace;
             public Class PlayerClass;
             public int CreatureID;

@@ -364,7 +364,7 @@ namespace Game.Entities
             _ => 0,
         };
 
-        public uint GetLockId() => type switch
+        public int GetLockId() => type switch
         {
             GameObjectTypes.Door => Door.open,
             GameObjectTypes.Button => Button.open,
@@ -412,7 +412,7 @@ namespace Game.Entities
         /// Cannot be used/activated/looted by players under immunity effects (example: Divine Shield)
         /// </summary>
         /// <returns></returns>
-        public uint GetNoDamageImmune()
+        public int GetNoDamageImmune()
         {
             switch (type)
             {
@@ -459,7 +459,7 @@ namespace Game.Entities
             }
         }
 
-        public uint GetLinkedGameObjectEntry()
+        public int GetLinkedGameObjectEntry()
         {
             switch (type)
             {
@@ -746,7 +746,7 @@ namespace Game.Entities
             _ => 0,
         };
         
-        public uint GetSpellFocusType()
+        public int GetSpellFocusType()
         {
             switch (type)
             {
@@ -840,7 +840,7 @@ namespace Game.Entities
             public uint startOpen;                               // 0 startOpen, enum { false, true, }; Default: false
             public int open;                                    // 1 open, References: Lock_, NoValue = 0
             public uint autoClose;                               // 2 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
-            public uint linkedTrap;                              // 3 linkedTrap, References: GameObjects, NoValue = 0
+            public int linkedTrap;                              // 3 linkedTrap, References: GameObjects, NoValue = 0
             public int noDamageImmune;                          // 4 noDamageImmune, enum { false, true, }; Default: false
             public uint GiganticAOI;                             // 5 Gigantic AOI, enum { false, true, }; Default: false
             public uint openTextID;                              // 6 openTextID, References: BroadcastText, NoValue = 0
@@ -870,14 +870,14 @@ namespace Game.Entities
         public struct chest
         {
             public int open;                                    // 0 open, References: Lock_, NoValue = 0
-            public uint chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
+            public int chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
             public uint chestRestockTime;                        // 2 chestRestockTime, int, Min value: 0, Max value: 1800000, Default value: 0
             public int consumable;                              // 3 consumable, enum { false, true, }; Default: false
             public uint minRestock;                              // 4 minRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public uint maxRestock;                              // 5 maxRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public int triggeredEvent;                          // 6 triggeredEvent, References: GameEvents, NoValue = 0
             public int linkedTrap;                              // 7 linkedTrap, References: GameObjects, NoValue = 0
-            public uint questID;                                 // 8 questID, References: QuestV2, NoValue = 0
+            public int questID;                                 // 8 questID, References: QuestV2, NoValue = 0
             public uint InteractRadiusOverride;                  // 9 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint requireLOS;                              // 10 require LOS, enum { false, true, }; Default: false
             public uint leaveLoot;                               // 11 leaveLoot, enum { false, true, }; Default: false
@@ -895,14 +895,14 @@ namespace Game.Entities
             public uint trivialSkillLow;                         // 23 trivialSkillLow, int, Min value: 0, Max value: 65535, Default value: 0
             public uint trivialSkillHigh;                        // 24 trivialSkillHigh, int, Min value: 0, Max value: 65535, Default value: 0
             public uint DungeonEncounter;                        // 25 Dungeon Encounter, References: DungeonEncounter, NoValue = 0
-            public uint spell;                                   // 26 spell, References: Spell, NoValue = 0
+            public int spell;                                   // 26 spell, References: Spell, NoValue = 0
             public uint GiganticAOI;                             // 27 Gigantic AOI, enum { false, true, }; Default: false
             public uint LargeAOI;                                // 28 Large AOI, enum { false, true, }; Default: false
             public uint SpawnVignette;                           // 29 Spawn Vignette, References: vignette, NoValue = 0
-            public uint chestPersonalLoot;                       // 30 chest Personal Loot, References: Treasure, NoValue = 0
+            public int chestPersonalLoot;                       // 30 chest Personal Loot, References: Treasure, NoValue = 0
             public uint turnpersonallootsecurityoff;             // 31 turn personal loot security off, enum { false, true, }; Default: false
             public uint ChestProperties;                         // 32 Chest Properties, References: ChestProperties, NoValue = 0
-            public uint chestPushLoot;                           // 33 chest Push Loot, References: Treasure, NoValue = 0
+            public int chestPushLoot;                           // 33 chest Push Loot, References: Treasure, NoValue = 0
             public uint ForceSingleLooter;                       // 34 Force Single Looter, enum { false, true, }; Default: false
         }
 
@@ -918,7 +918,7 @@ namespace Game.Entities
             public uint serverOnly;                              // 2 serverOnly, enum { false, true, }; Default: false
             public uint GiganticAOI;                             // 3 Gigantic AOI, enum { false, true, }; Default: false
             public uint floatOnWater;                            // 4 floatOnWater, enum { false, true, }; Default: false
-            public uint questID;                                 // 5 questID, References: QuestV2, NoValue = 0
+            public int questID;                                 // 5 questID, References: QuestV2, NoValue = 0
             public uint conditionID1;                            // 6 conditionID1, References: PlayerCondition, NoValue = 0
             public uint LargeAOI;                                // 7 Large AOI, enum { false, true, }; Default: false
             public uint UseGarrisonOwnerGuildColors;             // 8 Use Garrison Owner Guild Colors, enum { false, true, }; Default: false
@@ -931,7 +931,7 @@ namespace Game.Entities
             public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint Unused;                                  // 1 Unused, int, Min value: 0, Max value: 65535, Default value: 0
             public uint radius;                                  // 2 radius, int, Min value: 0, Max value: 100, Default value: 0
-            public uint spell;                                   // 3 spell, References: Spell, NoValue = 0
+            public int spell;                                   // 3 spell, References: Spell, NoValue = 0
             public uint charges;                                 // 4 charges, int, Min value: 0, Max value: 65535, Default value: 1
             public uint cooldown;                                // 5 cooldown, int, Min value: 0, Max value: 65535, Default value: 0
             public uint autoClose;                               // 6 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
@@ -940,8 +940,8 @@ namespace Game.Entities
             public uint stealthed;                               // 9 stealthed, enum { false, true, }; Default: false
             public uint GiganticAOI;                             // 10 Gigantic AOI, enum { false, true, }; Default: false
             public uint stealthAffected;                         // 11 stealthAffected, enum { false, true, }; Default: false
-            public uint openTextID;                              // 12 openTextID, References: BroadcastText, NoValue = 0
-            public uint closeTextID;                             // 13 closeTextID, References: BroadcastText, NoValue = 0
+            public int openTextID;                              // 12 openTextID, References: BroadcastText, NoValue = 0
+            public int closeTextID;                             // 13 closeTextID, References: BroadcastText, NoValue = 0
             public uint IgnoreTotems;                            // 14 Ignore Totems, enum { false, true, }; Default: false
             public uint conditionID1;                            // 15 conditionID1, References: PlayerCondition, NoValue = 0
             public uint playerCast;                              // 16 playerCast, enum { false, true, }; Default: false
@@ -1296,7 +1296,7 @@ namespace Game.Entities
             public int Unused7;                                  // 15 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint RebuildingTime;                          // 16 Rebuilding: Time (secs), int, Min value: 0, Max value: 65535, Default value: 0
             public int Unused8;                                  // 17 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
-            public uint DestructibleModelRec;                    // 18 Destructible Model Rec, References: DestructibleModelData, NoValue = 0
+            public int DestructibleModelRec;                    // 18 Destructible Model Rec, References: DestructibleModelData, NoValue = 0
             public int RebuildingEvent;                         // 19 Rebuilding: Event, References: GameEvents, NoValue = 0
             public int Unused9;                                  // 20 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public int Unused10;                                 // 21 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
@@ -1329,8 +1329,8 @@ namespace Game.Entities
 
         public struct newflag
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
-            public uint pickupSpell;                             // 1 pickupSpell, References: Spell, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int pickupSpell;                             // 1 pickupSpell, References: Spell, NoValue = 0
             public uint openTextID;                              // 2 openTextID, References: BroadcastText, NoValue = 0
             public uint requireLOS;                              // 3 require LOS, enum { false, true, }; Default: true
             public uint conditionID1;                            // 4 conditionID1, References: PlayerCondition, NoValue = 0
@@ -1348,7 +1348,7 @@ namespace Game.Entities
 
         public struct newflagdrop
         {
-            public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint SpawnVignette;                           // 1 Spawn Vignette, References: vignette, NoValue = 0
             public uint InteractRadiusOverride;                  // 2 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
@@ -1383,7 +1383,7 @@ namespace Game.Entities
             public uint CaptureTime;                             // 0 Capture Time (ms), int, Min value: 0, Max value: 2147483647, Default value: 60000
             public uint GiganticAOI;                             // 1 Gigantic AOI, enum { false, true, }; Default: false
             public uint highlight;                               // 2 highlight, enum { false, true, }; Default: true
-            public uint open;                                    // 3 open, References: Lock_, NoValue = 0
+            public int open;                                    // 3 open, References: Lock_, NoValue = 0
             public uint AssaultBroadcastHorde;                   // 4 Assault Broadcast (Horde), References: BroadcastText, NoValue = 0
             public uint CaptureBroadcastHorde;                   // 5 Capture Broadcast (Horde), References: BroadcastText, NoValue = 0
             public uint DefendedBroadcastHorde;                  // 6 Defended Broadcast (Horde), References: BroadcastText, NoValue = 0
@@ -1453,7 +1453,7 @@ namespace Game.Entities
             public uint UILinkType;                              // 0 UI Link Type, enum { Adventure Journal, Obliterum Forge, Scrapping Machine, Item Interaction }; Default: Adventure Journal
             public uint allowMounted;                            // 1 allowMounted, enum { false, true, }; Default: false
             public uint GiganticAOI;                             // 2 Gigantic AOI, enum { false, true, }; Default: false
-            public uint spellFocusType;                          // 3 spellFocusType, References: SpellFocusObject, NoValue = 0
+            public int spellFocusType;                          // 3 spellFocusType, References: SpellFocusObject, NoValue = 0
             public uint radius;                                  // 4 radius, int, Min value: 0, Max value: 50, Default value: 10
             public uint InteractRadiusOverride;                  // 5 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint ItemInteractionID;                       // 6 Item Interaction ID, References: UiItemInteraction, NoValue = 0
@@ -1467,7 +1467,7 @@ namespace Game.Entities
         public struct gatheringnode
         {
             public int open;                                    // 0 open, References: Lock_, NoValue = 0
-            public uint chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
+            public int chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
             public uint Unused;                                  // 2 Unused, int, Min value: 0, Max value: 65535, Default value: 0
             public uint notInCombat;                             // 3 notInCombat, enum { false, true, }; Default: false
             public uint trivialSkillLow;                         // 4 trivialSkillLow, int, Min value: 0, Max value: 65535, Default value: 0
@@ -1498,7 +1498,7 @@ namespace Game.Entities
         {
             public int Unused;                                   // 0 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint WhenAvailable;                           // 1 When Available, References: GameObjectDisplayInfo, NoValue = 0
-            public uint open;                                    // 2 open, References: Lock_, NoValue = 0
+            public int open;                                    // 2 open, References: Lock_, NoValue = 0
             public uint openTextID;                              // 3 openTextID, References: BroadcastText, NoValue = 0
             public uint InteractRadiusOverride;                  // 4 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
@@ -1529,7 +1529,7 @@ namespace Game.Entities
         {
             public int Unused;                                   // 0 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint WhenAvailable;                           // 1 When Available, References: GameObjectDisplayInfo, NoValue = 0
-            public uint open;                                    // 2 open, References: Lock_, NoValue = 0
+            public int open;                                    // 2 open, References: Lock_, NoValue = 0
             public uint openTextID;                              // 3 openTextID, References: BroadcastText, NoValue = 0
             public uint InteractRadiusOverride;                  // 4 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
         }

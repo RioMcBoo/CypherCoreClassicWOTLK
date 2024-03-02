@@ -391,7 +391,7 @@ namespace Game.BattleGrounds
                 }
                 else
                 {
-                    PlaySoundToAll((uint)BattlegroundSounds.BgStart);
+                    PlaySoundToAll((int)BattlegroundSounds.BgStart);
 
                     foreach (var guid in GetPlayers().Keys)
                     {
@@ -506,7 +506,7 @@ namespace Game.BattleGrounds
             Global.CreatureTextMgr.SendChat(source, textId, target);
         }
 
-        public void SendBroadcastText(uint id, ChatMsg msgType, WorldObject target = null)
+        public void SendBroadcastText(int id, ChatMsg msgType, WorldObject target = null)
         {
             if (!CliDB.BroadcastTextStorage.ContainsKey(id))
             {
@@ -519,17 +519,17 @@ namespace Game.BattleGrounds
             BroadcastWorker(localizer);
         }
 
-        public void PlaySoundToAll(uint soundID)
+        public void PlaySoundToAll(int soundID)
         {
             SendPacketToAll(new PlaySound(ObjectGuid.Empty, soundID, 0));
         }
 
-        void PlaySoundToTeam(uint soundID, Team team)
+        void PlaySoundToTeam(int soundID, Team team)
         {
             SendPacketToTeam(team, new PlaySound(ObjectGuid.Empty, soundID, 0));
         }
 
-        public void CastSpellOnTeam(uint SpellID, Team team)
+        public void CastSpellOnTeam(int SpellID, Team team)
         {
             foreach (var pair in m_Players)
             {
@@ -539,7 +539,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        void RemoveAuraOnTeam(uint SpellID, Team team)
+        void RemoveAuraOnTeam(int SpellID, Team team)
         {
             foreach (var pair in m_Players)
             {
@@ -549,7 +549,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        public void RewardHonorToTeam(uint Honor, Team team)
+        public void RewardHonorToTeam(int Honor, Team team)
         {
             foreach (var pair in m_Players)
             {
@@ -559,7 +559,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        public void RewardReputationToTeam(uint faction_id, uint Reputation, Team team)
+        public void RewardReputationToTeam(int faction_id, int Reputation, Team team)
         {
             FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(faction_id);
             if (factionEntry == null)
@@ -574,21 +574,16 @@ namespace Game.BattleGrounds
                 if (player.HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode))
                     continue;
 
-                uint repGain = Reputation;
+                int repGain = Reputation;
                 MathFunctions.AddPct(ref repGain, player.GetTotalAuraModifier(AuraType.ModReputationGain));
-                MathFunctions.AddPct(ref repGain, player.GetTotalAuraModifierByMiscValue(AuraType.ModFactionReputationGain, (int)faction_id));
-                player.GetReputationMgr().ModifyReputation(factionEntry, (int)repGain);
+                MathFunctions.AddPct(ref repGain, player.GetTotalAuraModifierByMiscValue(AuraType.ModFactionReputationGain, faction_id));
+                player.GetReputationMgr().ModifyReputation(factionEntry, repGain);
             }
         }
 
         public void UpdateWorldState(int worldStateId, int value, bool hidden = false)
         {
             Global.WorldStateMgr.SetValue(worldStateId, value, hidden, GetBgMap());
-        }
-
-        public void UpdateWorldState(uint worldStateId, int value, bool hidden = false)
-        {
-            Global.WorldStateMgr.SetValue((int)worldStateId, value, hidden, GetBgMap());
         }
 
         public virtual void EndBattleground(Team winner)
@@ -602,7 +597,7 @@ namespace Game.BattleGrounds
                 if (IsBattleground())
                     SendBroadcastText(BattlegroundBroadcastTexts.AllianceWins, ChatMsg.BgSystemNeutral);
 
-                PlaySoundToAll((uint)BattlegroundSounds.AllianceWins);
+                PlaySoundToAll((int)BattlegroundSounds.AllianceWins);
                 SetWinner(PvPTeamId.Alliance);
             }
             else if (winner == Team.Horde)
@@ -610,7 +605,7 @@ namespace Game.BattleGrounds
                 if (IsBattleground())
                     SendBroadcastText(BattlegroundBroadcastTexts.HordeWins, ChatMsg.BgSystemNeutral);
 
-                PlaySoundToAll((uint)BattlegroundSounds.HordeWins);
+                PlaySoundToAll((int)BattlegroundSounds.HordeWins);
                 SetWinner(PvPTeamId.Horde);
             }
             else
@@ -673,8 +668,8 @@ namespace Game.BattleGrounds
                 player.RemoveAura(BattlegroundConst.SpellHonorableDefender25y);
                 player.RemoveAura(BattlegroundConst.SpellHonorableDefender60y);
 
-                uint winnerKills = player.GetRandomWinner() ? WorldConfig.GetUIntValue(WorldCfg.BgRewardWinnerHonorLast) : WorldConfig.GetUIntValue(WorldCfg.BgRewardWinnerHonorFirst);
-                uint loserKills = player.GetRandomWinner() ? WorldConfig.GetUIntValue(WorldCfg.BgRewardLoserHonorLast) : WorldConfig.GetUIntValue(WorldCfg.BgRewardLoserHonorFirst);
+                int winnerKills = player.GetRandomWinner() ? WorldConfig.GetIntValue(WorldCfg.BgRewardWinnerHonorLast) : WorldConfig.GetIntValue(WorldCfg.BgRewardWinnerHonorFirst);
+                int loserKills = player.GetRandomWinner() ? WorldConfig.GetIntValue(WorldCfg.BgRewardLoserHonorLast) : WorldConfig.GetIntValue(WorldCfg.BgRewardLoserHonorFirst);
 
                 if (IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
                 {
@@ -721,7 +716,7 @@ namespace Game.BattleGrounds
                         }
                     }
 
-                    player.UpdateCriteria(CriteriaType.WinBattleground, player.GetMapId());
+                    player.UpdateCriteria(CriteriaType.WinBattleground, (ulong)player.GetMapId());
                     if (!guildAwarded)
                     {
                         guildAwarded = true;
@@ -730,7 +725,7 @@ namespace Game.BattleGrounds
                         {
                             Guild guild = Global.GuildMgr.GetGuildById(guildId);
                             if (guild != null)
-                                guild.UpdateCriteria(CriteriaType.WinBattleground, player.GetMapId(), 0, 0, null, player);
+                                guild.UpdateCriteria(CriteriaType.WinBattleground, (ulong)player.GetMapId(), 0, 0, null, player);
                         }
                     }
                 }
@@ -752,7 +747,7 @@ namespace Game.BattleGrounds
 
                 player.SendPacket(pvpMatchComplete);
 
-                player.UpdateCriteria(CriteriaType.ParticipateInBattleground, player.GetMapId());
+                player.UpdateCriteria(CriteriaType.ParticipateInBattleground, (ulong)player.GetMapId());
             }
         }
 
@@ -761,10 +756,10 @@ namespace Game.BattleGrounds
             return _battlegroundTemplate.ScriptId;
         }
         
-        public uint GetBonusHonorFromKill(uint kills)
+        public int GetBonusHonorFromKill(int kills)
         {
             //variable kills means how many honorable kills you scored (so we need kills * honor_for_one_kill)
-            uint maxLevel = Math.Min(GetMaxLevel(), 80U);
+            int maxLevel = Math.Min(GetMaxLevel(), 80);
             return Formulas.HKHonorAtLevel(maxLevel, kills);
         }
 
@@ -1239,11 +1234,11 @@ namespace Game.BattleGrounds
                 if (player != null)
                 {
                     playerData.IsInWorld = true;
-                    playerData.PrimaryTalentTree = (int)player.GetPrimarySpecialization();
-                    playerData.Sex = (sbyte)player.GetGender();
+                    playerData.PrimaryTalentTree = player.GetPrimarySpecialization();
+                    playerData.Sex = player.GetGender();
                     playerData.PlayerRace = player.GetRace();
-                    playerData.PlayerClass = (int)player.GetClass();
-                    playerData.HonorLevel = (int)player.GetHonorLevel();
+                    playerData.PlayerClass = player.GetClass();
+                    playerData.HonorLevel = player.GetHonorLevel();
                 }
 
                 pvpLogData.Statistics.Add(playerData);
@@ -1253,21 +1248,21 @@ namespace Game.BattleGrounds
             pvpLogData.PlayerCount[(int)PvPTeamId.Alliance] = (sbyte)GetPlayersCountByTeam(Team.Alliance);
         }
 
-        public virtual bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
+        public virtual bool UpdatePlayerScore(Player player, ScoreType type, int value, bool doAddHonor = true)
         {
             var bgScore = PlayerScores.LookupByKey(player.GetGUID());
             if (bgScore == null)  // player not found...
                 return false;
 
             if (type == ScoreType.BonusHonor && doAddHonor && IsBattleground())
-                player.RewardHonor(null, 1, (int)value);
+                player.RewardHonor(null, 1, value);
             else
                 bgScore.UpdateScore(type, value);
 
             return true;
         }
 
-        public bool AddObject(int type, uint entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint respawnTime = 0, GameObjectState goState = GameObjectState.Ready)
+        public bool AddObject(int type, int entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint respawnTime = 0, GameObjectState goState = GameObjectState.Ready)
         {
             Map map = FindBgMap();
             if (map == null)
@@ -1301,7 +1296,7 @@ namespace Game.BattleGrounds
             return true;
         }
 
-        public bool AddObject(int type, uint entry, Position pos, float rotation0, float rotation1, float rotation2, float rotation3, uint respawnTime = 0, GameObjectState goState = GameObjectState.Ready)
+        public bool AddObject(int type, int entry, Position pos, float rotation0, float rotation1, float rotation2, float rotation3, uint respawnTime = 0, GameObjectState goState = GameObjectState.Ready)
         {
             return AddObject(type, entry, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), rotation0, rotation1, rotation2, rotation3, respawnTime, goState);
         }
@@ -1398,7 +1393,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        public virtual Creature AddCreature(uint entry, int type, float x, float y, float z, float o, int teamIndex = TeamId.Neutral, uint respawntime = 0, Transport transport = null)
+        public virtual Creature AddCreature(int entry, int type, float x, float y, float z, float o, int teamIndex = TeamId.Neutral, uint respawntime = 0, Transport transport = null)
         {
             Map map = FindBgMap();
             if (map == null)
@@ -1445,7 +1440,7 @@ namespace Game.BattleGrounds
             return creature;
         }
 
-        public Creature AddCreature(uint entry, int type, Position pos, int teamIndex = TeamId.Neutral, uint respawntime = 0, Transport transport = null)
+        public Creature AddCreature(int entry, int type, Position pos, int teamIndex = TeamId.Neutral, uint respawntime = 0, Transport transport = null)
         {
             return AddCreature(entry, type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamIndex, respawntime, transport);
         }
@@ -1504,7 +1499,7 @@ namespace Game.BattleGrounds
 
         public bool AddSpiritGuide(int type, float x, float y, float z, float o, int teamIndex)
         {
-            uint entry = (uint)(teamIndex == TeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
+            int entry = (int)(teamIndex == TeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
 
             if (AddCreature(entry, type, x, y, z, o) != null)
                 return true;
@@ -1682,7 +1677,7 @@ namespace Game.BattleGrounds
             return Global.ObjectMgr.GetClosestGraveyard(player, GetPlayerTeam(player.GetGUID()), player);
         }
 
-        public override void TriggerGameEvent(uint gameEventId, WorldObject source = null, WorldObject target = null)
+        public override void TriggerGameEvent(int gameEventId, WorldObject source = null, WorldObject target = null)
         {
             ProcessEvent(target, gameEventId, source);
             GameEvents.TriggerForMap(gameEventId, GetBgMap(), source, target);
@@ -1705,7 +1700,7 @@ namespace Game.BattleGrounds
                 new KillRewarder(new[] { killer }, victim, true).Reward();
         }
 
-        public uint GetTeamScore(int teamIndex)
+        public int GetTeamScore(int teamIndex)
         {
             if (teamIndex == TeamId.Alliance || teamIndex == TeamId.Horde)
                 return m_TeamScores[teamIndex];
@@ -1714,7 +1709,7 @@ namespace Game.BattleGrounds
             return 0;
         }
 
-        public virtual void HandleAreaTrigger(Player player, uint trigger, bool entered)
+        public virtual void HandleAreaTrigger(Player player, int trigger, bool entered)
         {
             Log.outDebug(LogFilter.Battleground, "Unhandled AreaTrigger {0} in Battleground {1}. Player coords (x: {2}, y: {3}, z: {4})",
                            trigger, player.GetMapId(), player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
@@ -1737,7 +1732,7 @@ namespace Game.BattleGrounds
 
         public BattlegroundBracketId GetBracketId()
         {
-            return _pvpDifficultyEntry.BracketId();
+            return _pvpDifficultyEntry.BracketId;
         }
 
         byte GetUniqueBracketId()
@@ -1763,7 +1758,7 @@ namespace Game.BattleGrounds
             return _battlegroundTemplate.GetMinLevel();
         }
 
-        public uint GetMaxLevel()
+        public int GetMaxLevel()
         {
             if (_pvpDifficultyEntry != null)
                 return _pvpDifficultyEntry.MaxLevel;
@@ -1879,7 +1874,7 @@ namespace Game.BattleGrounds
         public virtual void EventPlayerDroppedFlag(Player player) { }
         public virtual void EventPlayerClickedOnFlag(Player player, GameObject target_obj) { }
 
-        public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker = null) { }
+        public override void ProcessEvent(WorldObject obj, int eventId, WorldObject invoker = null) { }
 
         // this function can be used by spell to interact with the BG map
         public virtual void DoAction(uint action, ulong arg) { }
@@ -1897,9 +1892,9 @@ namespace Game.BattleGrounds
 
         public virtual ObjectGuid GetFlagPickerGUID(int teamIndex = -1) { return ObjectGuid.Empty; }
         public virtual void SetDroppedFlagGUID(ObjectGuid guid, int teamIndex = -1) { }
-        public virtual void HandleQuestComplete(uint questid, Player player) { }
+        public virtual void HandleQuestComplete(int questid, Player player) { }
         public virtual bool CanActivateGO(int entry, uint team) { return true; }
-        public virtual bool IsSpellAllowed(uint spellId, Player player) { return true; }
+        public virtual bool IsSpellAllowed(int spellId, Player player) { return true; }
 
         public virtual void RemovePlayer(Player player, ObjectGuid guid, Team team) { }
 
@@ -1926,14 +1921,14 @@ namespace Game.BattleGrounds
         BattlegroundEventFlags m_Events;
         public BattlegroundStartTimeIntervals[] StartDelayTimes = new BattlegroundStartTimeIntervals[4];
         // this must be filled inructors!
-        public uint[] StartMessageIds = new uint[4];
+        public int[] StartMessageIds = new int[4];
 
-        public uint[] m_TeamScores = new uint[SharedConst.PvpTeamsCount];
+        public int[] m_TeamScores = new int[SharedConst.PvpTeamsCount];
 
         protected ObjectGuid[] BgObjects;// = new Dictionary<int, ObjectGuid>();
         protected ObjectGuid[] BgCreatures;// = new Dictionary<int, ObjectGuid>();
 
-        public uint[] Buff_Entries = { BattlegroundConst.SpeedBuff, BattlegroundConst.RegenBuff, BattlegroundConst.BerserkerBuff };
+        public int[] Buff_Entries = { BattlegroundConst.SpeedBuff, BattlegroundConst.RegenBuff, BattlegroundConst.BerserkerBuff };
 
         // Battleground
         uint m_InstanceID;                                // Battleground Instance's GUID!

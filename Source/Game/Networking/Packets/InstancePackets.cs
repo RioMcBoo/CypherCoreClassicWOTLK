@@ -59,12 +59,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteBits((int)ResetFailedReason, 2);
             _worldPacket.FlushBits();
         }
 
-        public uint MapID;
+        public int MapID;
         public ResetFailedReason ResetFailedReason;
     }
 

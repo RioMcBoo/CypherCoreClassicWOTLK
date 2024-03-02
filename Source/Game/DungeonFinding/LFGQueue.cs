@@ -177,7 +177,7 @@ namespace Game.DungeonFinding
             currentQueueStore.Remove(guid);
         }
 
-        public void AddQueueData(ObjectGuid guid, long joinTime, List<uint> dungeons, Dictionary<ObjectGuid, LfgRoles> rolesMap)
+        public void AddQueueData(ObjectGuid guid, long joinTime, List<int> dungeons, Dictionary<ObjectGuid, LfgRoles> rolesMap)
         {
             QueueDataStore[guid] = new LfgQueueData(joinTime, dungeons, rolesMap);
             AddToQueue(guid);
@@ -188,28 +188,28 @@ namespace Game.DungeonFinding
             QueueDataStore.Remove(guid);
         }
 
-        public void UpdateWaitTimeAvg(int waitTime, uint dungeonId)
+        public void UpdateWaitTimeAvg(int waitTime, int dungeonId)
         {
             LfgWaitTime wt = waitTimesAvgStore[dungeonId];
             uint old_number = wt.number++;
             wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
         }
 
-        public void UpdateWaitTimeTank(int waitTime, uint dungeonId)
+        public void UpdateWaitTimeTank(int waitTime, int dungeonId)
         {
             LfgWaitTime wt = waitTimesTankStore[dungeonId];
             uint old_number = wt.number++;
             wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
         }
 
-        public void UpdateWaitTimeHealer(int waitTime, uint dungeonId)
+        public void UpdateWaitTimeHealer(int waitTime, int dungeonId)
         {
             LfgWaitTime wt = waitTimesHealerStore[dungeonId];
             uint old_number = wt.number++;
             wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
         }
 
-        public void UpdateWaitTimeDps(int waitTime, uint dungeonId)
+        public void UpdateWaitTimeDps(int waitTime, int dungeonId)
         {
             LfgWaitTime wt = waitTimesDpsStore[dungeonId];
             uint old_number = wt.number++;
@@ -318,7 +318,7 @@ namespace Game.DungeonFinding
         {
             string strGuids = ConcatenateGuids(check);
             LfgProposal proposal = new();
-            List<uint> proposalDungeons;
+            List<int> proposalDungeons;
             Dictionary<ObjectGuid, ObjectGuid> proposalGroups = new();
             Dictionary<ObjectGuid, LfgRoles> proposalRoles = new();
 
@@ -457,9 +457,9 @@ namespace Game.DungeonFinding
                     if (guid == itguid)
                         continue;
 
-                    List<uint> dungeons = QueueDataStore[itguid].dungeons;
+                    List<int> dungeons = QueueDataStore[itguid].dungeons;
                     o.AppendFormat(", {0}: ({1})", guid, Global.LFGMgr.ConcatenateDungeons(dungeons));
-                    List<uint> temporal = proposalDungeons.Intersect(dungeons).ToList();
+                    List<int> temporal = proposalDungeons.Intersect(dungeons).ToList();
                     proposalDungeons = temporal;
                 }
 
@@ -556,7 +556,7 @@ namespace Game.DungeonFinding
             foreach (var itQueue in QueueDataStore)
             {
                 LfgQueueData queueinfo = itQueue.Value;
-                uint dungeonId = queueinfo.dungeons.FirstOrDefault();
+                int dungeonId = queueinfo.dungeons.FirstOrDefault();
                 uint queuedTime = (uint)(currTime - queueinfo.joinTime);
                 LfgRoles role = LfgRoles.None;
                 int waitTime = -1;
@@ -697,10 +697,10 @@ namespace Game.DungeonFinding
         Dictionary<ObjectGuid, LfgQueueData> QueueDataStore = new();
         Dictionary<string, LfgCompatibilityData> CompatibleMapStore = new();
 
-        Dictionary<uint, LfgWaitTime> waitTimesAvgStore = new();
-        Dictionary<uint, LfgWaitTime> waitTimesTankStore = new();
-        Dictionary<uint, LfgWaitTime> waitTimesHealerStore = new();
-        Dictionary<uint, LfgWaitTime> waitTimesDpsStore = new();
+        Dictionary<int, LfgWaitTime> waitTimesAvgStore = new();
+        Dictionary<int, LfgWaitTime> waitTimesTankStore = new();
+        Dictionary<int, LfgWaitTime> waitTimesHealerStore = new();
+        Dictionary<int, LfgWaitTime> waitTimesDpsStore = new();
         List<ObjectGuid> currentQueueStore = new();
         List<ObjectGuid> newToQueueStore = new();
     }
@@ -738,7 +738,7 @@ namespace Game.DungeonFinding
             dps = SharedConst.LFGDPSNeeded;
         }
 
-        public LfgQueueData(long _joinTime, List<uint> _dungeons, Dictionary<ObjectGuid, LfgRoles> _roles)
+        public LfgQueueData(long _joinTime, List<int> _dungeons, Dictionary<ObjectGuid, LfgRoles> _roles)
         {
             joinTime = _joinTime;
             tanks = SharedConst.LFGTanksNeeded;
@@ -752,7 +752,7 @@ namespace Game.DungeonFinding
         public byte tanks;
         public byte healers;
         public byte dps;
-        public List<uint> dungeons;
+        public List<int> dungeons;
         public Dictionary<ObjectGuid, LfgRoles> roles;
         public string bestCompatible = "";
     }

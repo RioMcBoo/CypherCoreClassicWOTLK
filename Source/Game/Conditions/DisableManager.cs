@@ -379,12 +379,12 @@ namespace Game
             return false;
         }
 
-        public bool IsVMAPDisabledFor(uint entry, DisableFlags flags)
+        public bool IsVMAPDisabledFor(int entry, DisableFlags flags)
         {
             return IsDisabledFor(DisableType.VMAP, entry, null, flags);
         }
 
-        public bool IsPathfindingEnabled(uint mapId)
+        public bool IsPathfindingEnabled(int mapId)
         {
             return WorldConfig.GetBoolValue(WorldCfg.EnableMmaps) && !Global.DisableMgr.IsDisabledFor(DisableType.MMAP, mapId, null);
         }

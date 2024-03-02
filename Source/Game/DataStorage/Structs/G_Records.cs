@@ -295,13 +295,9 @@ namespace Game.DataStorage
 
     public sealed class GlyphBindableSpellRecord
     {
-        public uint Id;
-        private int _spellID;
-        public uint GlyphPropertiesID;
-
-        #region Properties
-        public uint SpellID => (uint)_spellID;
-        #endregion
+        public int Id;
+        public int SpellID;
+        public int GlyphPropertiesID;
     }
 
     public sealed class GlyphSlotRecord
@@ -313,8 +309,8 @@ namespace Game.DataStorage
 
     public sealed class GlyphPropertiesRecord
     {
-        public uint Id;
-        public uint SpellID;
+        public int Id;
+        public int SpellID;
         public byte GlyphType;
         public byte GlyphExclusiveCategoryID;
         public int SpellIconFileDataID;
@@ -323,9 +319,9 @@ namespace Game.DataStorage
 
     public sealed class GlyphRequiredSpecRecord
     {
-        public uint Id;
+        public int Id;
         public ushort ChrSpecializationID;
-        public uint GlyphPropertiesID;
+        public int GlyphPropertiesID;
     }
 
     public sealed class GossipNPCOptionRecord

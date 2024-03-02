@@ -466,12 +466,12 @@ namespace Game.Entities
                 _instanceResetTimes.Add(instanceId, enterTime + Time.Hour);
         }
 
-        public WorldSafeLocsEntry GetInstanceEntrance(uint targetMapId)
+        public WorldSafeLocsEntry GetInstanceEntrance(int targetMapId)
         {
             WorldSafeLocsEntry entranceLocation = null;
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(targetMapId);
 
-            if (mapEntry.Instanceable())
+            if (mapEntry.Instanceable)
             {
                 // Check if we can contact the instancescript of the instance for an updated entrance location
                 uint targetInstanceId = Global.MapMgr.FindInstanceIdForPlayer(targetMapId, this);
@@ -562,14 +562,14 @@ namespace Game.Entities
             }
         }
 
-        public void SendResetInstanceSuccess(uint MapId)
+        public void SendResetInstanceSuccess(int MapId)
         {
             InstanceReset data = new();
             data.MapID = MapId;
             SendPacket(data);
         }
 
-        public void SendResetInstanceFailed(ResetFailedReason reason, uint MapId)
+        public void SendResetInstanceFailed(ResetFailedReason reason, int MapId)
         {
             InstanceResetFailed data = new();
             data.MapID = MapId;
@@ -577,7 +577,7 @@ namespace Game.Entities
             SendPacket(data);
         }
 
-        public void SendTransferAborted(uint mapid, TransferAbortReason reason, byte arg = 0, uint mapDifficultyXConditionID = 0)
+        public void SendTransferAborted(int mapid, TransferAbortReason reason, byte arg = 0, int mapDifficultyXConditionID = 0)
         {
             TransferAborted transferAborted = new();
             transferAborted.MapID = mapid;
@@ -587,7 +587,7 @@ namespace Game.Entities
             SendPacket(transferAborted);
         }
 
-        public bool IsLockedToDungeonEncounter(uint dungeonEncounterId)
+        public bool IsLockedToDungeonEncounter(int dungeonEncounterId)
         {
             DungeonEncounterRecord dungeonEncounter = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterId);
             if (dungeonEncounter == null)
@@ -600,13 +600,13 @@ namespace Game.Entities
             return (instanceLock.GetData().CompletedEncountersMask & (1u << dungeonEncounter.Bit)) != 0;
         }
 
-        public bool IsLockedToDungeonEncounter(uint dungeonEncounterId, Difficulty difficulty)
+        public bool IsLockedToDungeonEncounter(int dungeonEncounterId, Difficulty difficulty)
         {
             var dungeonEncounter = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterId);
             if (dungeonEncounter == null)
                 return false;
 
-            InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(GetGUID(), new MapDb2Entries((uint)dungeonEncounter.MapID, difficulty));
+            InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(GetGUID(), new MapDb2Entries(dungeonEncounter.MapID, difficulty));
             if (instanceLock == null)
                 return false;
 

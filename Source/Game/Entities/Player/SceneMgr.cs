@@ -12,8 +12,8 @@ namespace Game.Entities
     public class SceneMgr
     {
         Player _player;
-        Dictionary<uint, SceneTemplate> _scenesByInstance = new();
-        uint _standaloneSceneInstanceID;
+        Dictionary<int, SceneTemplate> _scenesByInstance = new();
+        int _standaloneSceneInstanceID;
         List<ServerPacket> _delayedScenes = new();
         bool _isDebuggingScenes;
 
@@ -24,13 +24,13 @@ namespace Game.Entities
             _isDebuggingScenes = false;
         }
 
-        public uint PlayScene(uint sceneId, Position position = null)
+        public uint PlayScene(int sceneId, Position position = null)
         {
             SceneTemplate sceneTemplate = Global.ObjectMgr.GetSceneTemplate(sceneId);
             return PlaySceneByTemplate(sceneTemplate, position);
         }
 
-        public uint PlaySceneByTemplate(SceneTemplate sceneTemplate, Position position = null)
+        public int PlaySceneByTemplate(SceneTemplate sceneTemplate, Position position = null)
         {
             if (sceneTemplate == null)
                 return 0;
@@ -43,7 +43,7 @@ namespace Game.Entities
             if (position == null)
                 position = GetPlayer();
 
-            uint sceneInstanceID = GetNewStandaloneSceneInstanceID();
+            int sceneInstanceID = GetNewStandaloneSceneInstanceID();
 
             if (_isDebuggingScenes)
                 GetPlayer().SendSysMessage(CypherStrings.CommandSceneDebugPlay, sceneInstanceID, sceneTemplate.ScenePackageId, sceneTemplate.PlaybackFlags);
@@ -70,7 +70,7 @@ namespace Game.Entities
             return sceneInstanceID;
         }
 
-        public uint PlaySceneByPackageId(uint sceneScriptPackageId, SceneFlags playbackflags, Position position = null)
+        public int PlaySceneByPackageId(int sceneScriptPackageId, SceneFlags playbackflags, Position position = null)
         {
             SceneTemplate sceneTemplate = new();
             sceneTemplate.SceneId = 0;
@@ -128,7 +128,7 @@ namespace Game.Entities
                 CancelScene(sceneInstanceID, false);
         }
 
-        public void OnSceneComplete(uint sceneInstanceID)
+        public void OnSceneComplete(int sceneInstanceID)
         {
             if (!HasScene(sceneInstanceID))
                 return;
@@ -150,7 +150,7 @@ namespace Game.Entities
                 CancelScene(sceneInstanceID, false);
         }
 
-        bool HasScene(uint sceneInstanceID, uint sceneScriptPackageId = 0)
+        bool HasScene(int sceneInstanceID, int sceneScriptPackageId = 0)
         {
             var sceneTempalte = _scenesByInstance.LookupByKey(sceneInstanceID);
 
@@ -160,14 +160,14 @@ namespace Game.Entities
             return false;
         }
 
-        void AddInstanceIdToSceneMap(uint sceneInstanceID, SceneTemplate sceneTemplate)
+        void AddInstanceIdToSceneMap(int sceneInstanceID, SceneTemplate sceneTemplate)
         {
             _scenesByInstance[sceneInstanceID] = sceneTemplate;
         }
 
-        public void CancelSceneBySceneId(uint sceneId)
+        public void CancelSceneBySceneId(int sceneId)
         {
-            List<uint> instancesIds = new();
+            List<int> instancesIds = new();
 
             foreach (var pair in _scenesByInstance)
                 if (pair.Value.SceneId == sceneId)
@@ -177,9 +177,9 @@ namespace Game.Entities
                 CancelScene(sceneInstanceID);
         }
 
-        public void CancelSceneByPackageId(uint sceneScriptPackageId)
+        public void CancelSceneByPackageId(int sceneScriptPackageId)
         {
-            List<uint> instancesIds = new();
+            List<int> instancesIds = new();
 
             foreach (var sceneTemplate in _scenesByInstance)
                 if (sceneTemplate.Value.ScenePackageId == sceneScriptPackageId)
@@ -189,12 +189,12 @@ namespace Game.Entities
                 CancelScene(sceneInstanceID);
         }
 
-        void RemoveSceneInstanceId(uint sceneInstanceID)
+        void RemoveSceneInstanceId(int sceneInstanceID)
         {
             _scenesByInstance.Remove(sceneInstanceID);
         }
 
-        void RemoveAurasDueToSceneId(uint sceneId)
+        void RemoveAurasDueToSceneId(int sceneId)
         {
             var scenePlayAuras = GetPlayer().GetAuraEffectsByType(AuraType.PlayScene);
             foreach (var scenePlayAura in scenePlayAuras)
@@ -207,14 +207,14 @@ namespace Game.Entities
             }
         }
 
-        SceneTemplate GetSceneTemplateFromInstanceId(uint sceneInstanceID)
+        SceneTemplate GetSceneTemplateFromInstanceId(int sceneInstanceID)
         {
             return _scenesByInstance.LookupByKey(sceneInstanceID);
         }
 
-        public uint GetActiveSceneCount(uint sceneScriptPackageId = 0)
+        public int GetActiveSceneCount(int sceneScriptPackageId = 0)
         {
-            uint activeSceneCount = 0;
+            int activeSceneCount = 0;
 
             foreach (var sceneTemplate in _scenesByInstance.Values)
                 if (sceneScriptPackageId == 0 || sceneTemplate.ScenePackageId == sceneScriptPackageId)
@@ -233,15 +233,15 @@ namespace Game.Entities
 
         Player GetPlayer() { return _player; }
 
-        void RecreateScene(uint sceneScriptPackageId, SceneFlags playbackflags, Position position = null)
+        void RecreateScene(int sceneScriptPackageId, SceneFlags playbackflags, Position position = null)
         {
             CancelSceneByPackageId(sceneScriptPackageId);
             PlaySceneByPackageId(sceneScriptPackageId, playbackflags, position);
         }
 
-        public Dictionary<uint, SceneTemplate> GetSceneTemplateByInstanceMap() { return _scenesByInstance; }
+        public Dictionary<int, SceneTemplate> GetSceneTemplateByInstanceMap() { return _scenesByInstance; }
 
-        uint GetNewStandaloneSceneInstanceID() { return ++_standaloneSceneInstanceID; }
+        int GetNewStandaloneSceneInstanceID() { return ++_standaloneSceneInstanceID; }
 
         public void ToggleDebugSceneMode() { _isDebuggingScenes = !_isDebuggingScenes; }
         public bool IsInDebugSceneMode() { return _isDebuggingScenes; }

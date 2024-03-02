@@ -49,7 +49,7 @@ namespace Game.Entities
         bool m_cannotReachTarget;
         uint m_cannotReachTimer;
 
-        SpellSchoolMask m_meleeDamageSchoolMask;
+        SpellSchools m_meleeDamageSchool;
         public uint m_originalEntry;
 
         Position m_homePosition;
@@ -69,7 +69,7 @@ namespace Game.Entities
         bool triggerJustAppeared;
         bool m_respawnCompatibilityMode;
 
-        public uint[] m_spells = new uint[SharedConst.MaxCreatureSpells];
+        public int[] m_spells = new int[SharedConst.MaxCreatureSpells];
 
         // Timers
         long _pickpocketLootRestore;

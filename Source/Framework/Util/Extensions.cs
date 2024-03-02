@@ -11,11 +11,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using Framework.Constants;
-using Bgs.Protocol;
-using System.Security.Cryptography;
-using static System.Net.Mime.MediaTypeNames;
-using System.Diagnostics.Metrics;
-using System.Threading;
 
 namespace System
 {
@@ -125,10 +120,10 @@ namespace System
             return (mask & (SpellSchoolMask)(1 << (int)_school)) != 0;            
         }
 
-        //public static SpellSchoolMask GetSpellSchoolMask(this SpellSchools school)
-        //{
-        //    return (SpellSchoolMask)(1 << (int)school);
-        //}
+        public static SpellSchoolMask GetSpellSchoolMask(this SpellSchools school)
+        {
+            return (SpellSchoolMask)(1 << (int)school);
+        }
 
         public static SpellSchools GetFirstSchool(this SpellSchoolMask mask)
         {

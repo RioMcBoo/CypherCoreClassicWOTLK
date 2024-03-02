@@ -432,7 +432,7 @@ namespace Game.Entities
             m_lifetime += mod;
         }
 
-        public uint? GetCreatureIdVisibleToSummoner() { return m_creatureIdVisibleToSummoner; }
+        public int? GetCreatureIdVisibleToSummoner() { return m_creatureIdVisibleToSummoner; }
 
         public uint? GetDisplayIdVisibleToSummoner() { return m_displayIdVisibleToSummoner; }
         

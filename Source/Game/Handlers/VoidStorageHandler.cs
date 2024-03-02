@@ -171,7 +171,7 @@ namespace Game
                     continue;
                 }
 
-                InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, itemVS.ItemEntry, 1);
+                InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemVS.ItemEntry, 1);
                 if (msg != InventoryResult.Ok)
                 {
                     SendVoidStorageTransferResult(VoidTransferError.InventoryFull);

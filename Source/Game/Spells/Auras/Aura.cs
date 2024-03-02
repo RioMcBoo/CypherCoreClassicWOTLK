@@ -307,10 +307,10 @@ namespace Game.Spells
         public byte GetSlot() { return _slot; }
         public AuraFlags GetFlags() { return _flags; }
         public uint GetEffectMask() { return _effectMask; }
-        public bool HasEffect(uint effect)
+        public bool HasEffect(int effect)
         {
             Cypher.Assert(effect < SpellConst.MaxEffects);
-            return Convert.ToBoolean(_effectMask & (1 << (int)effect));
+            return Convert.ToBoolean(_effectMask & (1 << effect));
         }
         public bool IsPositive() { return _flags.HasAnyFlag(AuraFlags.Positive); }
         bool IsSelfcasted() { return _flags.HasAnyFlag(AuraFlags.NoCaster); }
@@ -2362,12 +2362,12 @@ namespace Game.Spells
         #endregion
 
         public SpellInfo GetSpellInfo() { return m_spellInfo; }
-        public uint GetId() { return m_spellInfo.Id; }
+        public int GetId() { return m_spellInfo.Id; }
         public Difficulty GetCastDifficulty() { return m_castDifficulty; }
         public ObjectGuid GetCastId() { return m_castId; }
         public ObjectGuid GetCasterGUID() { return m_casterGuid; }
         public ObjectGuid GetCastItemGUID() { return m_castItemGuid; }
-        public uint GetCastItemId() { return m_castItemId; }
+        public int GetCastItemId() { return m_castItemId; }
         public int GetCastItemLevel() { return m_castItemLevel; }
         public SpellCastVisual GetSpellVisual() { return m_spellVisual; }
         public WorldObject GetOwner() { return m_owner; }
@@ -2387,7 +2387,7 @@ namespace Game.Spells
             m_castItemGuid = guid;
         }
 
-        public void SetCastItemId(uint id)
+        public void SetCastItemId(int id)
         {
             m_castItemId = id;
         }
@@ -2418,6 +2418,7 @@ namespace Game.Spells
 
         public byte GetCharges() { return m_procCharges; }
         public byte CalcMaxCharges() { return CalcMaxCharges(GetCaster()); }
+
         byte CalcMaxCharges(Unit caster)
         {
             uint maxProcCharges = m_spellInfo.ProcCharges;
@@ -2433,6 +2434,7 @@ namespace Game.Spells
             }
             return (byte)maxProcCharges;
         }
+
         public bool DropCharge(AuraRemoveMode removeMode = AuraRemoveMode.Default) { return ModCharges(-1, removeMode); }
 
         public byte GetStackAmount() { return m_stackAmount; }
@@ -2443,17 +2445,19 @@ namespace Game.Spells
         public bool IsSingleTarget() { return m_isSingleTarget; }
         public void SetIsSingleTarget(bool val) { m_isSingleTarget = val; }
 
-        public bool HasEffect(uint index)
+        public bool HasEffect(int index)
         {
             return GetEffect(index) != null;
         }
-        public AuraEffect GetEffect(uint index)
+
+        public AuraEffect GetEffect(int index)
         {
             if (index >= _effects.Length)
                 return null;
 
             return _effects[index];
         }
+
         public uint GetEffectMask()
         {
             uint effMask = 0;
@@ -2636,7 +2640,7 @@ namespace Game.Spells
         ObjectGuid m_castId;
         ObjectGuid m_casterGuid;
         ObjectGuid m_castItemGuid;
-        uint m_castItemId;
+        int m_castItemId;
         int m_castItemLevel;
         SpellCastVisual m_spellVisual;
         long m_applyTime;
@@ -2648,7 +2652,7 @@ namespace Game.Spells
         List<SpellPowerRecord> m_periodicCosts = new();// Periodic costs
         int m_updateTargetMapInterval;                    // Timer for UpdateTargetMapOfEffect
 
-        uint m_casterLevel;                          // Aura level (store caster level for correct show level dep amount)
+        int m_casterLevel;                          // Aura level (store caster level for correct show level dep amount)
         byte m_procCharges;                                // Aura charges (0 for infinite)
         byte m_stackAmount;                                // Aura stack amount
 
@@ -2971,7 +2975,7 @@ namespace Game.Spells
         public Unit Caster;
         public int[] BaseAmount;
         public ObjectGuid CastItemGUID;
-        public uint CastItemId = 0;
+        public int CastItemId = 0;
         public int CastItemLevel = -1;
         public bool IsRefresh;
         public bool ResetPeriodicTimer = true;
@@ -3002,7 +3006,7 @@ namespace Game.Spells
         public void SetCasterGUID(ObjectGuid guid) { CasterGUID = guid; }
         public void SetCaster(Unit caster) { Caster = caster; }
         public void SetBaseAmount(int[] bp) { BaseAmount = bp; }
-        public void SetCastItem(ObjectGuid guid, uint itemId, int itemLevel) { CastItemGUID = guid; CastItemId = itemId; CastItemLevel = itemLevel; }
+        public void SetCastItem(ObjectGuid guid, int itemId, int itemLevel) { CastItemGUID = guid; CastItemId = itemId; CastItemLevel = itemLevel; }
         public void SetPeriodicReset(bool reset) { ResetPeriodicTimer = reset; }
         public void SetOwnerEffectMask(uint effMask) { _targetEffectMask = effMask; }
         public void SetAuraEffectMask(uint effMask) { _auraEffectMask = effMask; }

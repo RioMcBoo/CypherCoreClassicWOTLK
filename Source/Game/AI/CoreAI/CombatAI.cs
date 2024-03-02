@@ -75,7 +75,7 @@ namespace Game.AI
                 DoMeleeAttackIfReady();
         }
 
-        public override void SpellInterrupted(uint spellId, uint unTimeMs)
+        public override void SpellInterrupted(int spellId, uint unTimeMs)
         {
             _events.RescheduleEvent(spellId, TimeSpan.FromMilliseconds(unTimeMs));
         }

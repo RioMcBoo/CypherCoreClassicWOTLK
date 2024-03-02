@@ -406,13 +406,13 @@ public static class PacketHandlerExtensions
 
     public static void Write(this ChrCustomizationChoice chrCustomizationChoice, WorldPacket data)
     {
-        data.WriteUInt32(chrCustomizationChoice.ChrCustomizationOptionID);
-        data.WriteUInt32(chrCustomizationChoice.ChrCustomizationChoiceID);
+        data.WriteInt32(chrCustomizationChoice.ChrCustomizationOptionID);
+        data.WriteInt32(chrCustomizationChoice.ChrCustomizationChoiceID);
     }
 
     public static void Read(this ChrCustomizationChoice chrCustomizationChoice, WorldPacket data)
     {
-        chrCustomizationChoice.ChrCustomizationOptionID = data.ReadUInt32();
-        chrCustomizationChoice.ChrCustomizationChoiceID = data.ReadUInt32();
+        chrCustomizationChoice.ChrCustomizationOptionID = data.ReadInt32();
+        chrCustomizationChoice.ChrCustomizationChoiceID = data.ReadInt32();
     }
 }

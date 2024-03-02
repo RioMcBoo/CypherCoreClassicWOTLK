@@ -104,7 +104,7 @@ namespace Game.AI
                 me.SetControlled(true, UnitState.Fleeing);
         }
 
-        public override void MovementInform(MovementGeneratorType type, uint id)
+        public override void MovementInform(MovementGeneratorType type, int id)
         {
             if (type == MovementGeneratorType.TimedFleeing)
                 EnterEvadeMode(EvadeReason.Other);

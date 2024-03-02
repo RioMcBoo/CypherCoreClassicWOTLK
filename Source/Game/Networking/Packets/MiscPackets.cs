@@ -17,18 +17,18 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteVector3(BindPosition);
-            _worldPacket.WriteUInt32(BindMapID);
-            _worldPacket.WriteUInt32(BindAreaID);
+            _worldPacket.WriteInt32(BindMapID);
+            _worldPacket.WriteInt32(BindAreaID);
         }
 
-        public uint BindMapID = 0xFFFFFFFF;
+        public int BindMapID = -1;
         public Vector3 BindPosition;
-        public uint BindAreaID;
+        public int BindAreaID;
     }
 
     public class PlayerBound : ServerPacket
     {
-        public PlayerBound(ObjectGuid binderId, uint areaId) : base(ServerOpcodes.PlayerBound)
+        public PlayerBound(ObjectGuid binderId, int areaId) : base(ServerOpcodes.PlayerBound)
         {
             BinderID = binderId;
             AreaID = areaId;
@@ -37,11 +37,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(BinderID);
-            _worldPacket.WriteUInt32(AreaID);
+            _worldPacket.WriteInt32(AreaID);
         }
 
         ObjectGuid BinderID;
-        uint AreaID;
+        int AreaID;
     }
 
     public class InvalidatePlayer : ServerPacket
@@ -735,7 +735,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SoundKitID);
+            _worldPacket.WriteInt32(SoundKitID);
         }
 
         int SoundKitID;

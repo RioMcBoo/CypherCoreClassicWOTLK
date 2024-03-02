@@ -8,6 +8,7 @@ using Game.Movement;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,7 +77,7 @@ namespace Game.Entities
             }
         }
 
-        bool Create(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisualField spellVisual, Spell spell, AuraEffect aurEff)
+        bool Create(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisual spellVisual, Spell spell, AuraEffect aurEff)
         {
             _targetGuid = target != null ? target.GetGUID() : ObjectGuid.Empty;
             _aurEff = aurEff;
@@ -193,7 +194,7 @@ namespace Game.Entities
             return true;
         }
 
-        public static AreaTrigger CreateAreaTrigger(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisualField spellVisual, Spell spell = null, AuraEffect aurEff = null)
+        public static AreaTrigger CreateAreaTrigger(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisual spellVisual, Spell spell = null, AuraEffect aurEff = null)
         {
             AreaTrigger at = new();
             if (!at.Create(areaTriggerCreatePropertiesId, caster, target, spellInfo, pos, duration, spellVisual, spell, aurEff))
@@ -262,7 +263,7 @@ namespace Game.Entities
             _maxSearchRadius = _shape.GetMaxSearchRadius();
 
             if (position.PhaseUseFlags != 0 || position.PhaseId != 0 || position.PhaseGroup != 0)
-                PhasingHandler.InitDbPhaseShift(GetPhaseShift(), (PhaseUseFlagsValues)position.PhaseUseFlags, position.PhaseId, position.PhaseGroup);
+                PhasingHandler.InitDbPhaseShift(GetPhaseShift(), position.PhaseUseFlags, position.PhaseId, position.PhaseGroup);
 
             UpdateShape();
 
@@ -637,7 +638,7 @@ namespace Game.Entities
             return _areaTriggerTemplate;
         }
 
-        public uint GetScriptId()
+        public int GetScriptId()
         {
             if (_spawnId != 0)
                 return Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(_spawnId).ScriptId;
@@ -658,7 +659,7 @@ namespace Game.Entities
             return Global.ObjAccessor.GetUnit(this, _targetGuid);
         }
 
-        public override uint GetFaction()
+        public override int GetFaction()
         {
             Unit caster = GetCaster();
             if (caster != null)

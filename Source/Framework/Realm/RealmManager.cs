@@ -92,7 +92,7 @@ public class RealmManager : Singleton<RealmManager>
             do
             {
                 var realm = new Realm();
-                uint realmId = result.Read<uint>(0);
+                int realmId = result.Read<int>(0);
                 realm.Name = result.Read<string>(1);
                 realm.Addresses.Add(IPAddress.Parse(result.Read<string>(2)));
                 realm.Addresses.Add(IPAddress.Parse(result.Read<string>(3)));

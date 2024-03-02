@@ -10,7 +10,7 @@ namespace Game
 {
     class GameEvents
     {
-        public static void Trigger(uint gameEventId, WorldObject source, WorldObject target)
+        public static void Trigger(int gameEventId, WorldObject source, WorldObject target)
         {
             Cypher.Assert(source != null || target != null, "At least one of [source] or [target] must be provided");
 
@@ -50,13 +50,13 @@ namespace Game
                 source.StartCriteria(CriteriaStartEvent.SendEvent, gameEventId);
             }
 
-            source.UpdateCriteria(CriteriaType.PlayerTriggerGameEvent, gameEventId, 0, 0, source);
+            source.UpdateCriteria(CriteriaType.PlayerTriggerGameEvent, (ulong)gameEventId, 0, 0, source);
 
             if (map.IsScenario())
-                source.UpdateCriteria(CriteriaType.AnyoneTriggerGameEventScenario, gameEventId, 0, 0, source);
+                source.UpdateCriteria(CriteriaType.AnyoneTriggerGameEventScenario, (ulong)gameEventId, 0, 0, source);
         }
 
-        public static void TriggerForMap(uint gameEventId, Map map, WorldObject source = null, WorldObject target = null)
+        public static void TriggerForMap(int gameEventId, Map map, WorldObject source = null, WorldObject target = null)
         {
             map.ScriptsStart(ScriptsType.Event, gameEventId, source, target);
         }

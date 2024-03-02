@@ -103,16 +103,16 @@ namespace Game.Entities
         //Spell
         Dictionary<int, PlayerSpell> m_spells = new();
         Dictionary<SkillType, SkillStatusData> mSkillStatus = new();
-        Dictionary<uint, PlayerCurrency> _currencyStorage = new();
+        Dictionary<int, PlayerCurrency> _currencyStorage = new();
         List<SpellModifier>[][] m_spellMods = new List<SpellModifier>[(int)SpellModOp.Max][];
-        MultiMap<uint, uint> m_overrideSpells = new();
+        MultiMap<int, int> m_overrideSpells = new();
         public Spell m_spellModTakingSpell;
-        uint m_oldpetspell;
+        int m_oldpetspell;
         Dictionary<uint, StoredAuraTeleportLocation> m_storedAuraTeleportLocations = new();
 
         //Mail
         List<Mail> m_mail = new();
-        Dictionary<ulong, Item> mMitems = new();
+        Dictionary<long, Item> mMitems = new();
         public byte unReadMails;
         long m_nextMailDelivereTime;
         public bool m_mailsUpdated;
@@ -247,7 +247,7 @@ namespace Game.Entities
 
         Dictionary<byte, ActionButton> m_actionButtons = new();
         ObjectGuid m_playerSharingQuest;
-        uint m_sharedQuestId;
+        int m_sharedQuestId;
         uint m_ingametime;
 
         PlayerCommandStates _activeCheats;
@@ -313,14 +313,14 @@ namespace Game.Entities
 
     public class PlayerCreateInfoItem
     {
-        public PlayerCreateInfoItem(int id, uint amount)
+        public PlayerCreateInfoItem(int id, int amount)
         {
             item_id = id;
             item_amount = amount;
         }
 
         public int item_id;
-        public uint item_amount;
+        public int item_amount;
     }
 
     public class PlayerCreateInfoAction
@@ -346,11 +346,11 @@ namespace Game.Entities
     public class PlayerCurrency
     {
         public PlayerCurrencyState state;
-        public uint Quantity;
-        public uint WeeklyQuantity;
-        public uint TrackedQuantity;
-        public uint IncreasedCapQuantity;
-        public uint EarnedQuantity;
+        public int Quantity;
+        public int WeeklyQuantity;
+        public int TrackedQuantity;
+        public int IncreasedCapQuantity;
+        public int EarnedQuantity;
         public CurrencyDbFlags Flags;
     }
 
@@ -360,15 +360,15 @@ namespace Game.Entities
         {
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
-                Talents[i] = new Dictionary<uint, PlayerTalent>();
-                PvpTalents[i] = new uint[PlayerConst.MaxPvpTalentSlots];
-                Glyphs[i] = new uint[PlayerConst.MaxGlyphSlotIndex];
+                Talents[i] = new Dictionary<int, PlayerTalent>();
+                PvpTalents[i] = new int[PlayerConst.MaxPvpTalentSlots];
+                Glyphs[i] = new int[PlayerConst.MaxGlyphSlotIndex];
             }
         }
 
-        public Dictionary<uint, PlayerTalent>[] Talents = new Dictionary<uint, PlayerTalent>[PlayerConst.MaxSpecializations];
-        public uint[][] PvpTalents = new uint[PlayerConst.MaxSpecializations][];
-        public uint[][] Glyphs = new uint[PlayerConst.MaxSpecializations][];
+        public Dictionary<int, PlayerTalent>[] Talents = new Dictionary<int, PlayerTalent>[PlayerConst.MaxSpecializations];
+        public int[][] PvpTalents = new int[PlayerConst.MaxSpecializations][];
+        public int[][] Glyphs = new int[PlayerConst.MaxSpecializations][];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;
         public uint UsedTalentCount;
@@ -492,7 +492,7 @@ namespace Game.Entities
 
     public class VoidStorageItem
     {
-        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, ItemRandomEnchantmentId randomPropertyId, uint itemSuffixFactor, uint fixedScalingLevel, uint artifactKnowledgeLevel, ItemContext context, List<int> bonuses)
+        public VoidStorageItem(long id, int entry, ObjectGuid creator, ItemRandomEnchantmentId randomPropertyId, int itemSuffixFactor, int fixedScalingLevel, int artifactKnowledgeLevel, ItemContext context, List<int> bonuses)
         {
             ItemId = id;
             ItemEntry = entry;
@@ -507,13 +507,13 @@ namespace Game.Entities
                 BonusListIDs.Add(value);
         }
 
-        public ulong ItemId;
-        public uint ItemEntry;
+        public long ItemId;
+        public int ItemEntry;
         public ObjectGuid CreatorGuid;
         public ItemRandomEnchantmentId ItemRandomPropertyId;
-        public uint ItemSuffixFactor;
-        public uint FixedScalingLevel;
-        public uint ArtifactKnowledgeLevel;
+        public int ItemSuffixFactor;
+        public int FixedScalingLevel;
+        public int ArtifactKnowledgeLevel;
         public ItemContext Context;
         public List<int> BonusListIDs = new();
     }
@@ -675,7 +675,7 @@ namespace Game.Entities
 
     struct QuestObjectiveStatusData
     {
-        public (uint QuestID, QuestStatusData Status) QuestStatusPair;
+        public (int QuestID, QuestStatusData Status) QuestStatusPair;
         public QuestObjective Objective;
     }
 

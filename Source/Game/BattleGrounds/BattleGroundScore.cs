@@ -15,7 +15,7 @@ namespace Game.BattleGrounds
             TeamId = (int)(team == Team.Alliance ? PvPTeamId.Alliance : PvPTeamId.Horde);
         }
 
-        public virtual void UpdateScore(ScoreType type, uint value)
+        public virtual void UpdateScore(ScoreType type, int value)
         {
             switch (type)
             {
@@ -62,21 +62,21 @@ namespace Game.BattleGrounds
             playerData.HealingDone = HealingDone;
         }
 
-        public virtual uint GetAttr1() { return 0; }
-        public virtual uint GetAttr2() { return 0; }
-        public virtual uint GetAttr3() { return 0; }
-        public virtual uint GetAttr4() { return 0; }
-        public virtual uint GetAttr5() { return 0; }
+        public virtual int GetAttr1() { return 0; }
+        public virtual int GetAttr2() { return 0; }
+        public virtual int GetAttr3() { return 0; }
+        public virtual int GetAttr4() { return 0; }
+        public virtual int GetAttr5() { return 0; }
 
         public ObjectGuid PlayerGuid;
         public int TeamId;
 
         // Default score, present in every Type
-        public uint KillingBlows;
-        public uint Deaths;
-        public uint HonorableKills;
-        public uint BonusHonor;
-        public uint DamageDone;
-        public uint HealingDone;
+        public int KillingBlows;
+        public int Deaths;
+        public int HonorableKills;
+        public int BonusHonor;
+        public int DamageDone;
+        public int HealingDone;
     }
 }

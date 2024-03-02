@@ -396,7 +396,7 @@ namespace Game.Entities
         public UpdateField<ObjectGuid> ContainedIn = new(0, 4);
         public UpdateField<ObjectGuid> Creator = new(0, 5);
         public UpdateField<ObjectGuid> GiftCreator = new(0, 6);
-        public UpdateField<uint> StackCount = new(0, 7);
+        public UpdateField<int> StackCount = new(0, 7);
         public UpdateField<uint> Expiration = new(0, 8);
         public UpdateField<uint> DynamicFlags = new(0, 9);
         public UpdateField<int> PropertySeed = new(0, 10);
@@ -426,7 +426,7 @@ namespace Game.Entities
             data.WritePackedGuid(GiftCreator);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
-                data.WriteUInt32(StackCount);
+                data.WriteInt32(StackCount);
                 data.WriteUInt32(Expiration);
                 for (int i = 0; i < 5; ++i)
                 {
@@ -560,7 +560,7 @@ namespace Game.Entities
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt32(StackCount);
+                    data.WriteInt32(StackCount);
                 }
                 if (changesMask[8])
                 {
@@ -1042,8 +1042,8 @@ namespace Game.Entities
             data.WriteUInt8(AnimTier);
             data.WriteUInt32(PetNumber);
             data.WriteUInt32(PetNameTimestamp);
-            data.WriteUInt32(PetExperience);
-            data.WriteUInt32(PetNextLevelExperience);
+            data.WriteInt32(PetExperience);
+            data.WriteInt32(PetNextLevelExperience);
             data.WriteFloat(ModCastingSpeed);
             data.WriteFloat(ModSpellHaste);
             data.WriteFloat(ModHaste);
@@ -1470,11 +1470,11 @@ namespace Game.Entities
                 }
                 if (changesMask[62])
                 {
-                    data.WriteUInt32(PetExperience);
+                    data.WriteInt32(PetExperience);
                 }
                 if (changesMask[63])
                 {
-                    data.WriteUInt32(PetNextLevelExperience);
+                    data.WriteInt32(PetNextLevelExperience);
                 }
             }
             if (changesMask[64])
@@ -1953,7 +1953,7 @@ namespace Game.Entities
                     {
                         if (spellEffectInfo.IsAura(AuraType.Transform))
                         {
-                            CreatureTemplate transformInfo = Global.ObjectMgr.GetCreatureTemplate((uint)spellEffectInfo.MiscValue);
+                            CreatureTemplate transformInfo = Global.ObjectMgr.GetCreatureTemplate(spellEffectInfo.MiscValue);
                             if (transformInfo != null)
                             {
                                 cinfo = transformInfo;
@@ -2246,7 +2246,7 @@ namespace Game.Entities
         public UpdateField<int> PlayerTitle = new(0, 21);
         public UpdateField<int> FakeInebriation = new(0, 22);
         public UpdateField<uint> VirtualPlayerRealm = new(0, 23);
-        public UpdateField<uint> CurrentSpecID = new(0, 24);
+        public UpdateField<int> CurrentSpecID = new(0, 24);
         public UpdateField<int> TaxiMountAnimKitID = new(0, 25);
         public UpdateField<byte> CurrentBattlePetBreedQuality = new(0, 26);
         public UpdateField<int> HonorLevel = new(0, 27);
@@ -2299,7 +2299,7 @@ namespace Game.Entities
             data.WriteInt32(PlayerTitle);
             data.WriteInt32(FakeInebriation);
             data.WriteUInt32(VirtualPlayerRealm);
-            data.WriteUInt32(CurrentSpecID);
+            data.WriteInt32(CurrentSpecID);
             data.WriteInt32(TaxiMountAnimKitID);
             for (int i = 0; i < 6; ++i)
             {
@@ -2498,7 +2498,7 @@ namespace Game.Entities
                 }
                 if (changesMask[24])
                 {
-                    data.WriteUInt32(CurrentSpecID);
+                    data.WriteInt32(CurrentSpecID);
                 }
                 if (changesMask[25])
                 {
@@ -3512,7 +3512,7 @@ namespace Game.Entities
         public DynamicUpdateField<TraitConfig> TraitConfigs = new(0, 17);
         public UpdateField<ObjectGuid> FarsightObject = new(0, 26);
         public UpdateField<ObjectGuid> SummonedBattlePetGUID = new(0, 27);
-        public UpdateField<ulong> Coinage = new(0, 28);
+        public UpdateField<long> Coinage = new(0, 28);
         public UpdateField<int> XP = new(0, 29);
         public UpdateField<int> NextLevelXP = new(0, 30);
         public UpdateField<int> TrialXP = new(0, 31);
@@ -3651,7 +3651,7 @@ namespace Game.Entities
             data.WritePackedGuid(FarsightObject);
             data.WritePackedGuid(SummonedBattlePetGUID);
             data.WriteUInt32((uint)KnownTitles.Size());
-            data.WriteUInt64(Coinage);
+            data.WriteInt64(Coinage);
             data.WriteInt32(XP);
             data.WriteInt32(NextLevelXP);
             data.WriteInt32(TrialXP);
@@ -4337,7 +4337,7 @@ namespace Game.Entities
                 }
                 if (changesMask[28])
                 {
-                    data.WriteUInt64(Coinage);
+                    data.WriteInt64(Coinage);
                 }
                 if (changesMask[29])
                 {
@@ -5583,7 +5583,7 @@ namespace Game.Entities
     public class VisualAnim : HasChangesMask
     {
         public UpdateField<bool> Field_C = new(0, 1);
-        public UpdateField<uint> AnimationDataID = new(0, 2);
+        public UpdateField<int> AnimationDataID = new(0, 2);
         public UpdateField<uint> AnimKitID = new(0, 3);
         public UpdateField<uint> AnimProgress = new(0, 4);
         static int changeMaskLength = 5;
@@ -5592,7 +5592,7 @@ namespace Game.Entities
 
         public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
         {
-            data.WriteUInt32(AnimationDataID);
+            data.WriteInt32(AnimationDataID);
             data.WriteUInt32(AnimKitID);
             data.WriteUInt32(AnimProgress);
             data.WriteBit(Field_C);
@@ -5619,7 +5619,7 @@ namespace Game.Entities
             {
                 if (changesMask[2])
                 {
-                    data.WriteUInt32(AnimationDataID);
+                    data.WriteInt32(AnimationDataID);
                 }
                 if (changesMask[3])
                 {

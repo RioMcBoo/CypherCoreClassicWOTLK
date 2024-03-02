@@ -1373,7 +1373,7 @@ namespace Game.Groups
 
         void _homebindIfInstance(Player player)
         {
-            if (player != null && !player.IsGameMaster() && CliDB.MapStorage.LookupByKey(player.GetMapId()).IsDungeon())
+            if (player != null && !player.IsGameMaster() && CliDB.MapStorage.LookupByKey(player.GetMapId()).IsDungeon)
                 player.m_InstanceValid = false;
         }
 
@@ -1535,7 +1535,7 @@ namespace Game.Groups
                 member.readyChecked = false;
         }
 
-        public void AddRaidMarker(byte markerId, uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
+        public void AddRaidMarker(byte markerId, int mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
         {
             if (markerId >= MapConst.RaidMarkersCount || m_markers[markerId] != null)
                 return;
@@ -1906,7 +1906,7 @@ namespace Game.Groups
                 worker(refe.GetSource());
         }
 
-        public ObjectGuid GetRecentInstanceOwner(uint mapId)
+        public ObjectGuid GetRecentInstanceOwner(int mapId)
         {
 
             if (m_recentInstances.TryGetValue(mapId, out Tuple<ObjectGuid, uint> value))
@@ -1915,7 +1915,7 @@ namespace Game.Groups
             return m_leaderGuid;
         }
 
-        public uint GetRecentInstanceId(uint mapId)
+        public uint GetRecentInstanceId(int mapId)
         {
             if (m_recentInstances.TryGetValue(mapId, out Tuple<ObjectGuid, uint> value))
                 return value.Item2;
@@ -1923,7 +1923,7 @@ namespace Game.Groups
             return 0;
         }
 
-        public void SetRecentInstance(uint mapId, ObjectGuid instanceOwner, uint instanceId)
+        public void SetRecentInstance(int mapId, ObjectGuid instanceOwner, uint instanceId)
         {
             m_recentInstances[mapId] = Tuple.Create(instanceOwner, instanceId);
         }
@@ -1946,7 +1946,7 @@ namespace Game.Groups
         ItemQuality m_lootThreshold;
         ObjectGuid m_looterGuid;
         ObjectGuid m_masterLooterGuid;
-        Dictionary<uint, Tuple<ObjectGuid, uint>> m_recentInstances = new();
+        Dictionary<int, Tuple<ObjectGuid, uint>> m_recentInstances = new();
         GroupInstanceRefManager m_ownedInstancesMgr = new();
         byte[] m_subGroupsCounts;
         ObjectGuid m_guid;
@@ -1977,7 +1977,7 @@ namespace Game.Groups
 
     public class RaidMarker
     {
-        public RaidMarker(uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
+        public RaidMarker(int mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
         {
             Location = new WorldLocation(mapId, positionX, positionY, positionZ);
             TransportGUID = transportGuid;

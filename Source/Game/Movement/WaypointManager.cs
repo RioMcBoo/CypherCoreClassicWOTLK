@@ -28,7 +28,7 @@ namespace Game
 
             do
             {
-                uint pathId = result.Read<uint>(0);
+                int pathId = result.Read<int>(0);
 
                 float x = result.Read<float>(2);
                 float y = result.Read<float>(3);
@@ -55,7 +55,7 @@ namespace Game
                 }
 
                 waypoint.delay = result.Read<uint>(7);
-                waypoint.eventId = result.Read<uint>(8);
+                waypoint.eventId = result.Read<int>(8);
                 waypoint.eventChance = result.Read<byte>(9);
 
                 if (!_waypointStore.ContainsKey(pathId))
@@ -71,7 +71,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} waypoints in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        public void ReloadPath(uint id)
+        public void ReloadPath(int id)
         {
             _waypointStore.Remove(id);
 
@@ -110,7 +110,7 @@ namespace Game
                 }
 
                 waypoint.delay = result.Read<uint>(6);
-                waypoint.eventId = result.Read<uint>(7);
+                waypoint.eventId = result.Read<int>(7);
                 waypoint.eventChance = result.Read<byte>(8);
 
                 values.Add(waypoint);
@@ -120,12 +120,12 @@ namespace Game
             _waypointStore[id] = new WaypointPath(id, values);
         }
 
-        public WaypointPath GetPath(uint id)
+        public WaypointPath GetPath(int id)
         {
             return _waypointStore.LookupByKey(id);
         }
 
-        Dictionary<uint, WaypointPath> _waypointStore = new();
+        Dictionary<int, WaypointPath> _waypointStore = new();
     }
 
     public class WaypointNode
@@ -148,7 +148,7 @@ namespace Game
         public float x, y, z;
         public float? orientation;
         public uint delay;
-        public uint eventId;
+        public int eventId;
         public WaypointMoveType moveType;
         public byte eventChance;
     }
@@ -156,14 +156,14 @@ namespace Game
     public class WaypointPath
     {
         public WaypointPath() { }
-        public WaypointPath(uint _id, List<WaypointNode> _nodes)
+        public WaypointPath(int _id, List<WaypointNode> _nodes)
         {
             id = _id;
             nodes = _nodes;
         }
 
         public List<WaypointNode> nodes = new();
-        public uint id;
+        public int id;
     }
 
     public enum WaypointMoveType

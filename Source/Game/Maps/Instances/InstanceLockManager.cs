@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace Game.Maps
 {
-    using InstanceLockKey = Tuple<uint, uint>;
+    using InstanceLockKey = (int, int);
 
     public class InstanceLockManager : Singleton<InstanceLockManager>
     {
@@ -51,10 +51,10 @@ namespace Game.Maps
             {
                 do
                 {
-                    ObjectGuid playerGuid = ObjectGuid.Create(HighGuid.Player, lockResult.Read<ulong>(0));
-                    uint mapId = lockResult.Read<uint>(1);
-                    uint lockId = lockResult.Read<uint>(2);
-                    uint instanceId = lockResult.Read<uint>(3);
+                    ObjectGuid playerGuid = ObjectGuid.Create(HighGuid.Player, lockResult.Read<long>(0));
+                    int mapId = lockResult.Read<int>(1);
+                    int lockId = lockResult.Read<int>(2);
+                    int instanceId = lockResult.Read<int>(3);
                     Difficulty difficulty = (Difficulty)lockResult.Read<byte>(4);
                     DateTime expiryTime = Time.UnixTimeToDateTime(lockResult.Read<long>(7));
 
@@ -82,7 +82,7 @@ namespace Game.Maps
                     instanceLock.GetData().CompletedEncountersMask = lockResult.Read<uint>(6);
                     instanceLock.SetExtended(lockResult.Read<bool>(8));
 
-                    _instanceLocksByPlayer[playerGuid][Tuple.Create(mapId, lockId)] = instanceLock;
+                    _instanceLocksByPlayer[playerGuid][(mapId, lockId)] = instanceLock;
 
                 } while (result.NextRow());
             }
@@ -575,7 +575,7 @@ namespace Game.Maps
         public MapRecord Map;
         public MapDifficultyRecord MapDifficulty;
 
-        public MapDb2Entries(uint mapId, Difficulty difficulty)
+        public MapDb2Entries(int mapId, Difficulty difficulty)
         {
             Map = CliDB.MapStorage.LookupByKey(mapId);
             MapDifficulty = Global.DB2Mgr.GetMapDifficultyData(mapId, difficulty);
@@ -589,7 +589,7 @@ namespace Game.Maps
 
         public InstanceLockKey GetKey()
         {
-            return Tuple.Create((uint)MapDifficulty.MapID, (uint)MapDifficulty.LockID);
+            return (MapDifficulty.MapID, MapDifficulty.LockID);
         }
 
         public bool IsInstanceIdBound()
@@ -606,7 +606,7 @@ namespace Game.Maps
         public DungeonEncounterRecord CompletedEncounter;
         public uint? EntranceWorldSafeLocId;
 
-        public InstanceLockUpdateEvent(uint instanceId, string newData, uint instanceCompletedEncountersMask, DungeonEncounterRecord completedEncounter, uint? entranceWorldSafeLocId)
+        public InstanceLockUpdateEvent(int instanceId, string newData, uint instanceCompletedEncountersMask, DungeonEncounterRecord completedEncounter, uint? entranceWorldSafeLocId)
         {
             InstanceId = instanceId;
             NewData = newData;

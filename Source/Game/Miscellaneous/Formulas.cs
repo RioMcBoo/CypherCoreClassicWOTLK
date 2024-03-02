@@ -11,16 +11,16 @@ namespace Game
 {
     public class Formulas
     {
-        public static float HKHonorAtLevelF(uint level, float multiplier = 1.0f)
+        public static float HKHonorAtLevelF(int level, float multiplier = 1.0f)
         {
             float honor = multiplier * level * 1.55f;
             Global.ScriptMgr.OnHonorCalculation(honor, level, multiplier);
             return honor;
         }
 
-        public static uint HKHonorAtLevel(uint level, float multiplier = 1.0f)
+        public static int HKHonorAtLevel(int level, float multiplier = 1.0f)
         {
-            return (uint)Math.Ceiling(HKHonorAtLevelF(level, multiplier));
+            return Math.Ceiling(HKHonorAtLevelF(level, multiplier));
         }
 
         public static uint GetGrayLevel(uint pl_level)

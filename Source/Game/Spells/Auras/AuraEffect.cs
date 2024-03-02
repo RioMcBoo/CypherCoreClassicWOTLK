@@ -734,10 +734,10 @@ namespace Game.Spells
 
         public void HandleShapeshiftBoosts(Unit target, bool apply)
         {
-            uint spellId = 0;
-            uint spellId2 = 0;
-            uint spellId3 = 0;
-            uint spellId4 = 0;
+            int spellId = 0;
+            int spellId2 = 0;
+            int spellId3 = 0;
+            int spellId4 = 0;
 
             switch ((ShapeShiftForm)GetMiscValue())
             {
@@ -871,8 +871,8 @@ namespace Game.Spells
         public Aura GetBase() { return auraBase; }
 
         public SpellInfo GetSpellInfo() { return m_spellInfo; }
-        public uint GetId() { return m_spellInfo.Id; }
-        public uint GetEffIndex() { return _effectInfo.EffectIndex; }
+        public int GetId() { return m_spellInfo.Id; }
+        public int GetEffIndex() { return _effectInfo.EffectIndex; }
         public int GetBaseAmount() { return m_baseAmount; }
         public int GetPeriod() { return _period; }
 
@@ -4528,10 +4528,10 @@ namespace Game.Spells
             }
 
             //Adding items
-            uint noSpaceForCount;
-            uint count = (uint)GetAmount();
+            int noSpaceForCount;
+            int count = GetAmount();
 
-            InventoryResult msg = plCaster.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, itemTemplate, count, out noSpaceForCount);
+            InventoryResult msg = plCaster.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos, int)> dest, itemTemplate, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)
             {
                 count -= noSpaceForCount;

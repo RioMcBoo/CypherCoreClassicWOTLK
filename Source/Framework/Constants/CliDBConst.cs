@@ -1158,7 +1158,7 @@ namespace Framework.Constants
         Dps = 2
     }
 
-    public enum ChrSpecialization
+    public enum ChrSpecialization : ushort
     {
         None = 0,
         MageArcane = 62,

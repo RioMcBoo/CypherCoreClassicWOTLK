@@ -561,7 +561,7 @@ namespace Game.BattlePets
             if (pet.PacketInfo.Health < pet.PacketInfo.MaxHealth)
                 return;
 
-            if (_owner.GetPlayer().CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, SharedConst.BattlePetCageItemId, 1) != InventoryResult.Ok)
+            if (_owner.GetPlayer().CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, SharedConst.BattlePetCageItemId, 1) != InventoryResult.Ok)
                 return;
 
             Item item = _owner.GetPlayer().StoreNewItem(dest, SharedConst.BattlePetCageItemId, true, new ItemRandomEnchantmentId());
@@ -569,7 +569,7 @@ namespace Game.BattlePets
                 return;
 
             item.SetModifier(ItemModifier.BattlePetSpeciesId, pet.PacketInfo.Species);
-            item.SetModifier(ItemModifier.BattlePetBreedData, (uint)(pet.PacketInfo.Breed | (pet.PacketInfo.Quality << 24)));
+            item.SetModifier(ItemModifier.BattlePetBreedData, pet.PacketInfo.Breed | (pet.PacketInfo.Quality << 24));
             item.SetModifier(ItemModifier.BattlePetLevel, pet.PacketInfo.Level);
             item.SetModifier(ItemModifier.BattlePetDisplayId, pet.PacketInfo.DisplayID);
 
@@ -596,7 +596,7 @@ namespace Game.BattlePets
 
             var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
             if (battlePetSpecies != null)
-                if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.CantBattle))
+                if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.CantBattle))
                     return;
 
             byte qualityValue = (byte)quality;

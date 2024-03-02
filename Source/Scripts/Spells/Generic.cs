@@ -2277,12 +2277,12 @@ namespace Scripts.Spells.Generic
     [Script] // 27539 - Obsidian Armor
     class spell_gen_obsidian_armor : AuraScript
     {
-        const uint SpellGenObsidianArmorHoly = 27536;
-        const uint SpellGenObsidianArmorFire = 27533;
-        const uint SpellGenObsidianArmorNature = 27538;
-        const uint SpellGenObsidianArmorFrost = 27534;
-        const uint SpellGenObsidianArmorShadow = 27535;
-        const uint SpellGenObsidianArmorArcane = 27540;
+        const int SpellGenObsidianArmorHoly = 27536;
+        const int SpellGenObsidianArmorFire = 27533;
+        const int SpellGenObsidianArmorNature = 27538;
+        const int SpellGenObsidianArmorFrost = 27534;
+        const int SpellGenObsidianArmorShadow = 27535;
+        const int SpellGenObsidianArmorArcane = 27540;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -2304,7 +2304,7 @@ namespace Scripts.Spells.Generic
         {
             PreventDefaultAction();
 
-            uint spellId;
+            int spellId;
             switch (eventInfo.GetSchoolMask().GetFirstSchool())
             {
                 case SpellSchools.Holy:

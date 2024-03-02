@@ -12,7 +12,7 @@ namespace Game.DataStorage
         public LocalizedString Description;
         public LocalizedString Title;
         public LocalizedString Reward;
-        public uint Id;
+        public int Id;
         /// <summary> -1 = none </summary>
         public short InstanceID;
         private sbyte _faction;
@@ -28,7 +28,7 @@ namespace Game.DataStorage
         private int _flags;
         public short UiOrder;
         public int IconFileID;
-        public uint CriteriaTree;
+        public int CriteriaTree;
         /// <summary>
         /// referenced achievement (counting of all completed criterias)
         /// </summary>
@@ -106,7 +106,7 @@ namespace Game.DataStorage
 
     public sealed class AnimationDataRecord
     {
-        public uint Id;
+        public int Id;
         public ushort Fallback;
         public byte BehaviorTier;
         public int BehaviorID;
@@ -115,7 +115,7 @@ namespace Game.DataStorage
 
     public sealed class AnimKitRecord
     {
-        public uint Id;
+        public int Id;
         public uint OneShotDuration;
         public ushort OneShotStopAnimKitID;
         public ushort LowDefAnimKitID;
@@ -123,9 +123,9 @@ namespace Game.DataStorage
 
     public sealed class AreaGroupMemberRecord
     {
-        public uint Id;
+        public int Id;
         public ushort AreaID;
-        public uint AreaGroupID;
+        public int AreaGroupID;
     }
 
     public sealed class AreaTableRecord
@@ -200,7 +200,7 @@ namespace Game.DataStorage
     {
         public LocalizedString Message;
         public Vector3 Pos;
-        public uint Id;
+        public int Id;
         public short ContinentID;
         public sbyte PhaseUseFlags;
         public short PhaseID;
@@ -244,7 +244,7 @@ namespace Game.DataStorage
     public sealed class ArtifactAppearanceRecord
     {
         public LocalizedString Name;
-        public uint Id;
+        public int Id;
         public ushort ArtifactAppearanceSetID;
         public byte DisplayIndex;
         public uint UnlockPlayerConditionID;

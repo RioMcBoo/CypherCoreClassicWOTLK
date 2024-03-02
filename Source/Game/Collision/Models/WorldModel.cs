@@ -29,13 +29,13 @@ namespace Game.Collision
         uint iTilesX;
         uint iTilesY;
         Vector3 iCorner;
-        uint iType;
+        int iType;
         float[] iHeight;
         byte[] iFlags;
 
         public WmoLiquid() { }
 
-        public WmoLiquid(uint width, uint height, Vector3 corner, uint type)
+        public WmoLiquid(uint width, uint height, Vector3 corner, int type)
         {
             iTilesX = width;
             iTilesY = height;
@@ -131,7 +131,7 @@ namespace Game.Collision
             liquid.iTilesX = reader.ReadUInt32();
             liquid.iTilesY = reader.ReadUInt32();
             liquid.iCorner = reader.Read<Vector3>();
-            liquid.iType = reader.ReadUInt32();
+            liquid.iType = reader.ReadInt32();
 
             if (liquid.iTilesX != 0 && liquid.iTilesY != 0)
             {
@@ -150,7 +150,7 @@ namespace Game.Collision
             return liquid;
         }
 
-        public uint GetLiquidType() { return iType; }
+        public int GetLiquidType() { return iType; }
     }
 
     public class GroupModel : IModel
@@ -274,7 +274,7 @@ namespace Game.Collision
             return false;
         }
 
-        public uint GetLiquidType()
+        public int GetLiquidType()
         {
             if (iLiquid != null)
                 return iLiquid.GetLiquidType();

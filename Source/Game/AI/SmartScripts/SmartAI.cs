@@ -17,7 +17,7 @@ namespace Game.AI
         const int SMART_ESCORT_MAX_PLAYER_DIST = 60;
         const int SMART_MAX_AID_DIST = SMART_ESCORT_MAX_PLAYER_DIST / 2;
 
-        public uint EscortQuestID;
+        public int EscortQuestID;
 
         SmartScript _script = new();
 
@@ -33,7 +33,7 @@ namespace Game.AI
         SmartEscortState _escortState;
         uint _escortNPCFlags;
         uint _escortInvokerCheckTimer;
-        uint _currentWaypointNode;
+        int _currentWaypointNode;
         bool _waypointReached;
         uint _waypointPauseTimer;
         bool _waypointPauseForced;
@@ -161,7 +161,7 @@ namespace Game.AI
             return HasEscortState(SmartEscortState.Paused);
         }
 
-        public void StopPath(uint despawnTime = 0, uint quest = 0, bool fail = false)
+        public void StopPath(uint despawnTime = 0, int quest = 0, bool fail = false)
         {
             if (!HasEscortState(SmartEscortState.Escorting))
             {
@@ -370,7 +370,7 @@ namespace Game.AI
             return true;
         }
 
-        public override void WaypointReached(uint nodeId, uint pathId)
+        public override void WaypointReached(int nodeId, int pathId)
         {
             if (!HasEscortState(SmartEscortState.Escorting))
             {
@@ -398,7 +398,7 @@ namespace Game.AI
             }
         }
 
-        public override void WaypointPathEnded(uint nodeId, uint pathId)
+        public override void WaypointPathEnded(int nodeId, int pathId)
         {
             if (!HasEscortState(SmartEscortState.Escorting))
             {
@@ -407,12 +407,12 @@ namespace Game.AI
             }
         }
 
-        public override void MovementInform(MovementGeneratorType movementType, uint id)
+        public override void MovementInform(MovementGeneratorType movementType, int id)
         {
             if (movementType == MovementGeneratorType.Point && id == EventId.SmartEscortLastOCCPoint)
                 me.ClearUnitState(UnitState.Evade);
 
-            GetScript().ProcessEventsFor(SmartEvents.Movementinform, null, (uint)movementType, id);
+            GetScript().ProcessEventsFor(SmartEvents.Movementinform, null, (int)movementType, id);
 
             if (!HasEscortState(SmartEscortState.Escorting))
                 return;
@@ -656,7 +656,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.OnSpellStart, null, 0, 0, false, spellInfo);
         }
         
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             GetScript().ProcessEventsFor(SmartEvents.Damaged, attacker, damage);
 
@@ -664,17 +664,17 @@ namespace Game.AI
                 return;
 
             if (_invincibilityHpLevel != 0 && (damage >= me.GetHealth() - _invincibilityHpLevel))
-                damage = (uint)(me.GetHealth() - _invincibilityHpLevel);  // damage should not be nullified, because of player damage req.
+                damage = (int)(me.GetHealth() - _invincibilityHpLevel);  // damage should not be nullified, because of player damage req.
         }
 
-        public override void HealReceived(Unit by, uint addhealth)
+        public override void HealReceived(Unit by, int addhealth)
         {
             GetScript().ProcessEventsFor(SmartEvents.ReceiveHeal, by, addhealth);
         }
 
         public override void ReceiveEmote(Player player, TextEmotes emoteId)
         {
-            GetScript().ProcessEventsFor(SmartEvents.ReceiveEmote, player, (uint)emoteId);
+            GetScript().ProcessEventsFor(SmartEvents.ReceiveEmote, player, (int)emoteId);
         }
 
         public override void IsSummonedBy(WorldObject summoner)
@@ -682,7 +682,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.JustSummoned, summoner.ToUnit(), 0, 0, false, null, summoner.ToGameObject());
         }
 
-        public override void DamageDealt(Unit victim, ref uint damage, DamageEffectType damageType)
+        public override void DamageDealt(Unit victim, ref int damage, DamageEffectType damageType)
         {
             GetScript().ProcessEventsFor(SmartEvents.DamagedTarget, victim, damage);
         }
@@ -694,7 +694,7 @@ namespace Game.AI
 
         public override void CorpseRemoved(long respawnDelay)
         {
-            GetScript().ProcessEventsFor(SmartEvents.CorpseRemoved, null, (uint)respawnDelay);
+            GetScript().ProcessEventsFor(SmartEvents.CorpseRemoved, null, (int)respawnDelay);
         }
 
         public override void OnDespawn()
@@ -704,7 +704,7 @@ namespace Game.AI
 
         public override void PassengerBoarded(Unit passenger, sbyte seatId, bool apply)
         {
-            GetScript().ProcessEventsFor(apply ? SmartEvents.PassengerBoarded : SmartEvents.PassengerRemoved, passenger, (uint)seatId, 0, apply);
+            GetScript().ProcessEventsFor(apply ? SmartEvents.PassengerBoarded : SmartEvents.PassengerRemoved, passenger, seatId, 0, apply);
         }
 
         public override void OnCharmed(bool isNew)
@@ -751,17 +751,17 @@ namespace Game.AI
 
         public override void DoAction(int param)
         {
-            GetScript().ProcessEventsFor(SmartEvents.ActionDone, null, (uint)param);
+            GetScript().ProcessEventsFor(SmartEvents.ActionDone, null, param);
         }
 
-        public override uint GetData(uint id)
+        public override int GetData(int id)
         {
             return 0;
         }
 
-        public override void SetData(uint id, uint value) { SetData(id, value, null); }
+        public override void SetData(int id, int value) { SetData(id, value, null); }
 
-        public void SetData(uint id, uint value, Unit invoker)
+        public void SetData(int id, int value, Unit invoker)
         {
             GetScript().ProcessEventsFor(SmartEvents.DataSet, invoker, id, value);
         }
@@ -796,14 +796,14 @@ namespace Game.AI
             return _gossipReturn;
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
             _gossipReturn = false;
             GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, menuId, gossipListId);
             return _gossipReturn;
         }
 
-        public override bool OnGossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
+        public override bool OnGossipSelectCode(Player player, int menuId, int gossipListId, string code)
         {
             return false;
         }
@@ -813,7 +813,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.AcceptedQuest, player, quest.Id);
         }
 
-        public override void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt)
+        public override void OnQuestReward(Player player, Quest quest, LootItemType type, int opt)
         {
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt);
         }
@@ -1111,14 +1111,14 @@ namespace Game.AI
             return _gossipReturn;
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
             _gossipReturn = false;
             GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, menuId, gossipListId, false, null, me);
             return _gossipReturn;
         }
 
-        public override bool OnGossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
+        public override bool OnGossipSelectCode(Player player, int menuId, int gossipListId, string code)
         {
             return false;
         }
@@ -1128,7 +1128,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.AcceptedQuest, player, quest.Id, 0, false, null, me);
         }
 
-        public override void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt)
+        public override void OnQuestReward(Player player, Quest quest, LootItemType type, int opt)
         {
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt, false, null, me);
         }
@@ -1140,14 +1140,14 @@ namespace Game.AI
             return _gossipReturn;
         }
 
-        public override void Destroyed(WorldObject attacker, uint eventId)
+        public override void Destroyed(WorldObject attacker, int eventId)
         {
             GetScript().ProcessEventsFor(SmartEvents.Death, attacker != null ? attacker.ToUnit() : null, eventId, 0, false, null, me);
         }
 
-        public override void SetData(uint id, uint value) { SetData(id, value, null); }
+        public override void SetData(int id, int value) { SetData(id, value, null); }
         
-        public void SetData(uint id, uint value, Unit invoker)
+        public void SetData(int id, int value, Unit invoker)
         {
             GetScript().ProcessEventsFor(SmartEvents.DataSet, invoker, id, value);
         }
@@ -1162,12 +1162,12 @@ namespace Game.AI
             GetScript().ProcessEventsFor(start ? SmartEvents.GameEventStart : SmartEvents.GameEventEnd, null, eventId);
         }
 
-        public override void OnLootStateChanged(uint state, Unit unit)
+        public override void OnLootStateChanged(LootState state, Unit unit)
         {
-            GetScript().ProcessEventsFor(SmartEvents.GoLootStateChanged, unit, state);
+            GetScript().ProcessEventsFor(SmartEvents.GoLootStateChanged, unit, (int)state);
         }
 
-        public override void EventInform(uint eventId)
+        public override void EventInform(int eventId)
         {
             GetScript().ProcessEventsFor(SmartEvents.GoEventInform, null, eventId);
         }

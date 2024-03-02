@@ -38,7 +38,7 @@ namespace Game.Entities
                 pair.Value.InitVisibilityDistance();
         }
 
-        Map FindMap_i(uint mapId, uint instanceId)
+        Map FindMap_i(int mapId, int instanceId)
         {
             return i_maps.LookupByKey((mapId, instanceId));
         }
@@ -55,7 +55,7 @@ namespace Game.Entities
             return map;
         }
 
-        InstanceMap CreateInstance(uint mapId, uint instanceId, InstanceLock instanceLock, Difficulty difficulty, int team, Group group)
+        InstanceMap CreateInstance(int mapId, uint instanceId, InstanceLock instanceLock, Difficulty difficulty, int team, Group group)
         {
             // make sure we have a valid map id
             var entry = CliDB.MapStorage.LookupByKey(mapId);
@@ -88,7 +88,7 @@ namespace Game.Entities
             return map;
         }
 
-        BattlegroundMap CreateBattleground(uint mapId, uint instanceId, Battleground bg)
+        BattlegroundMap CreateBattleground(int mapId, int instanceId, Battleground bg)
         {
             Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateBattleground: map bg {instanceId} for {mapId} created.");
 
@@ -207,13 +207,13 @@ namespace Game.Entities
             }
         }
 
-        public Map FindMap(uint mapId, uint instanceId)
+        public Map FindMap(int mapId, int instanceId)
         {
             lock (_mapsLock)
                 return FindMap_i(mapId, instanceId);
         }
 
-        public uint FindInstanceIdForPlayer(uint mapId, Player player)
+        public int FindInstanceIdForPlayer(int mapId, Player player)
         {
             MapRecord entry = CliDB.MapStorage.LookupByKey(mapId);
             if (entry == null)
@@ -246,11 +246,11 @@ namespace Game.Entities
 
                 return newInstanceId;
             }
-            else if (entry.IsGarrison())
+            else if (entry.IsGarrison)
                 return (uint)player.GetGUID().GetCounter();
             else
             {
-                if (entry.IsSplitByFaction())
+                if (entry.IsSplitByFaction)
                     return (uint)player.GetTeamId();
 
                 return 0;
@@ -298,7 +298,7 @@ namespace Game.Entities
             map.UnloadAll();
 
             // Free up the instance id and allow it to be reused for normal dungeons, bgs and arenas
-            if (map.IsBattlegroundOrArena() || (map.IsDungeon() && !map.GetMapDifficulty().HasResetSchedule()))
+            if (map.IsBattlegroundOrArena() || (map.IsDungeon() && !map.GetMapDifficulty().HasResetSchedule))
                 FreeInstanceId(map.GetInstanceId());
 
             // erase map
@@ -361,9 +361,9 @@ namespace Game.Entities
             _freeInstanceIds[0] = false;
         }
 
-        public void RegisterInstanceId(uint instanceId)
+        public void RegisterInstanceId(int instanceId)
         {
-            _freeInstanceIds[(int)instanceId] = false;
+            _freeInstanceIds[instanceId] = false;
 
             // Instances are pulled in ascending order from db and nextInstanceId is initialized with 1,
             // so if the instance id is used, increment until we find the first unused one for a potential new instance
@@ -371,7 +371,7 @@ namespace Game.Entities
                 ++_nextInstanceId;
         }
 
-        public uint GenerateInstanceId()
+        public int GenerateInstanceId()
         {
             if (_nextInstanceId == 0xFFFFFFFF)
             {
@@ -380,13 +380,13 @@ namespace Game.Entities
                 return _nextInstanceId;
             }
 
-            uint newInstanceId = _nextInstanceId;
+            int newInstanceId = _nextInstanceId;
             Cypher.Assert(newInstanceId < _freeInstanceIds.Length);
-            _freeInstanceIds[(int)newInstanceId] = false;
+            _freeInstanceIds[newInstanceId] = false;
 
             // Find the lowest available id starting from the current NextInstanceId (which should be the lowest according to the logic in FreeInstanceId()
             int nextFreeId = -1;
-            for (var i = (int)_nextInstanceId++; i < _freeInstanceIds.Length; i++)
+            for (var i = _nextInstanceId++; i < _freeInstanceIds.Length; i++)
             {
                 if (_freeInstanceIds[i])
                 {
@@ -397,21 +397,21 @@ namespace Game.Entities
 
             if (nextFreeId == -1)
             {
-                _nextInstanceId = (uint)_freeInstanceIds.Length;
+                _nextInstanceId = _freeInstanceIds.Length;
                 _freeInstanceIds.Length += 1;
-                _freeInstanceIds[(int)_nextInstanceId] = true;
+                _freeInstanceIds[_nextInstanceId] = true;
             }
             else
-                _nextInstanceId = (uint)nextFreeId;
+                _nextInstanceId = nextFreeId;
 
             return newInstanceId;
         }
 
-        public void FreeInstanceId(uint instanceId)
+        public void FreeInstanceId(int instanceId)
         {
             // If freed instance id is lower than the next id available for new instances, use the freed one instead
             _nextInstanceId = Math.Min(instanceId, _nextInstanceId);
-            _freeInstanceIds[(int)instanceId] = true;
+            _freeInstanceIds[instanceId] = true;
         }
 
         public void SetGridCleanUpDelay(uint t)
@@ -431,9 +431,9 @@ namespace Game.Entities
             i_timer.Reset();
         }
 
-        public uint GetNextInstanceId() { return _nextInstanceId; }
+        public int GetNextInstanceId() { return _nextInstanceId; }
 
-        public void SetNextInstanceId(uint nextInstanceId) { _nextInstanceId = nextInstanceId; }
+        public void SetNextInstanceId(int nextInstanceId) { _nextInstanceId = nextInstanceId; }
 
         public void DoForAllMaps(Action<Map> worker)
         {
@@ -457,7 +457,7 @@ namespace Game.Entities
         public void AddSC_BuiltInScripts()
         {
             foreach (var (_, mapEntry) in CliDB.MapStorage)
-                if (mapEntry.IsWorldMap() && mapEntry.IsSplitByFaction())
+                if (mapEntry.IsWorldMap && mapEntry.IsSplitByFaction)
                     new SplitByFactionMapScript($"world_map_set_faction_worldstates_{mapEntry.Id}", mapEntry.Id);
         }
 
@@ -466,12 +466,12 @@ namespace Game.Entities
         public void DecreaseScheduledScriptCount(uint count) { _scheduledScripts -= count; }
         public bool IsScriptScheduled() { return _scheduledScripts > 0; }
 
-        Dictionary<(uint mapId, uint instanceId), Map> i_maps = new();
+        Dictionary<(int mapId, int instanceId), Map> i_maps = new();
         IntervalTimer i_timer = new();
         object _mapsLock = new();
         uint i_gridCleanUpDelay;
         BitSet _freeInstanceIds = new(1);
-        uint _nextInstanceId;
+        int _nextInstanceId;
         MapUpdater m_updater;
         uint _scheduledScripts;
     }
@@ -479,7 +479,7 @@ namespace Game.Entities
     // hack to allow conditions to access what faction owns the map (these worldstates should not be set on these maps)
     class SplitByFactionMapScript : WorldMapScript
     {
-        public SplitByFactionMapScript(string name, uint mapId) : base(name, mapId) { }
+        public SplitByFactionMapScript(string name, int mapId) : base(name, mapId) { }
 
         public override void OnCreate(Map map)
         {

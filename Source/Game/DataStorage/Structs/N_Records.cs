@@ -8,10 +8,15 @@ namespace Game.DataStorage
 {
     public sealed class NameGenRecord
     {
-        public uint Id;
+        public int Id;
         public string Name;
-        public byte RaceID;
-        public byte Sex;
+        private byte _raceID;
+        private byte _sex;
+
+        #region Properties
+        public Race RaceID => (Race)_raceID;
+        public Gender Sex => (Gender)_sex;
+        #endregion
     }
 
     public sealed class NamesProfanityRecord

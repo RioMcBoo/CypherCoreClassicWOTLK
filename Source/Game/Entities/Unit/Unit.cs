@@ -544,7 +544,7 @@ namespace Game.Entities
         }
 
         public void SetTransformSpell(uint spellid) { m_transformSpell = spellid; }
-        public uint GetTransformSpell() { return m_transformSpell; }
+        public int GetTransformSpell() { return m_transformSpell; }
 
         public Vehicle GetVehicleKit() { return VehicleKit; }
         public Vehicle GetVehicle() { return m_vehicle; }
@@ -1908,7 +1908,6 @@ namespace Game.Entities
 
         public Race GetRace() { return (Race)(byte)m_unitData.Race; }
         public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Race), (byte)race); }
-        public ulong GetRaceMask() { return 1UL << ((int)GetRace() - 1); }
         public Class GetClass() { return (Class)(byte)m_unitData.ClassId; }
         public void SetClass(Class classId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ClassId), (byte)classId); }        
         public Gender GetGender() { return (Gender)(byte)m_unitData.Sex; }
@@ -2020,22 +2019,22 @@ namespace Game.Entities
             // no auras found - set modelid to default
             SetDisplayId(GetNativeDisplayId());
         }
-        public uint GetNativeDisplayId() { return m_unitData.NativeDisplayID; }
+        public int GetNativeDisplayId() { return m_unitData.NativeDisplayID; }
         public float GetNativeDisplayScale() { return m_unitData.NativeXDisplayScale; }
 
         public bool IsMounted()
         {
             return HasUnitFlag(UnitFlags.Mount);
         }
-        public uint GetMountDisplayId() { return (uint)m_unitData.MountDisplayID.GetValue(); }
-        public void SetMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), (int)mountDisplayId); }
+        public int GetMountDisplayId() { return m_unitData.MountDisplayID; }
+        public void SetMountDisplayId(int mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), mountDisplayId); }
 
         void CalculateHoverHeight()
         {
             float hoverHeight = SharedConst.DefaultPlayerHoverHeight;
             float displayScale = SharedConst.DefaultPlayerDisplayScale;
 
-            uint displayId = IsMounted() ? GetMountDisplayId() : GetDisplayId();
+            int displayId = IsMounted() ? GetMountDisplayId() : GetDisplayId();
 
             // Get DisplayScale for creatures
             if (IsCreature())
@@ -2149,7 +2148,7 @@ namespace Game.Entities
         public void RemoveDynamicFlag(UnitDynFlags flag) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
         public void ReplaceAllDynamicFlags(UnitDynFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
 
-        public void SetCreatedBySpell(uint spellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBySpell), (int)spellId); }
+        public void SetCreatedBySpell(int spellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBySpell), spellId); }
 
         public Emote GetEmoteState() { return (Emote)(int)m_unitData.EmoteState; }
         public void SetEmoteState(Emote emote) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.EmoteState), (int)emote); }
@@ -2183,12 +2182,12 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Player))
             {
                 ShapeShiftForm form = GetShapeshiftForm();
-                var ssEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey((uint)form);
+                var ssEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey((int)form);
                 if (ssEntry != null && ssEntry.CreatureType > 0)
                     return (CreatureType)ssEntry.CreatureType;
                 else
                 {
-                    var raceEntry = CliDB.ChrRacesStorage.LookupByKey(GetRace());
+                    var raceEntry = CliDB.ChrRacesStorage.LookupByKey((int)GetRace());
                     return (CreatureType)raceEntry.CreatureType;
                 }
             }
@@ -2214,7 +2213,7 @@ namespace Game.Entities
         public bool IsTotem() { return UnitTypeMask.HasAnyFlag(UnitTypeMask.Totem); }
         public bool IsVehicle() { return UnitTypeMask.HasAnyFlag(UnitTypeMask.Vehicle); }
 
-        public uint GetContentTuning() { return m_unitData.ContentTuningID; }
+        public int GetContentTuning() { return m_unitData.ContentTuningID; }
 
         public void AddUnitState(UnitState f)
         {
@@ -2256,15 +2255,15 @@ namespace Game.Entities
             return false;
         }
 
-        public override uint GetFaction() { return m_unitData.FactionTemplate; }
-        public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), faction); }
-        public override void SetFaction(FactionTemplates faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), (uint)faction); }
+        public override int GetFaction() { return m_unitData.FactionTemplate; }
+        public override void SetFaction(int faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), faction); }
+        public override void SetFaction(FactionTemplates faction) { SetFaction((int)faction); }
 
         public void RestoreFaction()
         {
             if (HasAuraType(AuraType.ModFaction))
             {
-                SetFaction((uint)GetAuraEffectsByType(AuraType.ModFaction).LastOrDefault().GetMiscValue());
+                SetFaction((int)GetAuraEffectsByType(AuraType.ModFaction).LastOrDefault().GetMiscValue());
                 return;
             }
 
@@ -2701,7 +2700,7 @@ namespace Game.Entities
 
                 // If we had damage (aka health was not 1 already) trigger OnHealthDepleted
                 if (damageTaken > 0)
-                    victim.ToCreature().GetAI()?.OnHealthDepleted(attacker, false);
+                    victim.ToCreature().GetAI()?.OnHealthDeleted(attacker, false);
             }
             else if (victim.IsVehicle() && damageTaken >= (health - 1) && victim.GetCharmer() != null && victim.GetCharmer().IsTypeId(TypeId.Player))
             {
@@ -3883,7 +3882,7 @@ namespace Game.Entities
             int DoneFlatBenefit = 0;
 
             // ..done
-            DoneFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, (int)creatureTypeMask);
+            DoneFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, (uint)creatureTypeMask);
 
             // ..done
             // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
@@ -3896,14 +3895,14 @@ namespace Game.Entities
                 APbonus += victim.GetTotalAuraModifier(AuraType.RangedAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature Type)
-                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (int)creatureTypeMask);
+                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (uint)creatureTypeMask);
             }
             else
             {
                 APbonus += victim.GetTotalAuraModifier(AuraType.MeleeAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature Type)
-                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (int)creatureTypeMask);
+                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (uint)creatureTypeMask);
             }
 
             if (APbonus != 0)                                       // Can be negative
@@ -3998,7 +3997,7 @@ namespace Game.Entities
             int TakenFlatBenefit = 0;
 
             // ..taken
-            TakenFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)attacker.GetMeleeDamageSchoolMask());
+            TakenFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (uint)attacker.GetMeleeDamageSchool().GetSpellSchoolMask());
 
             if (attType != WeaponAttackType.RangedAttack)
                 TakenFlatBenefit += GetTotalAuraModifier(AuraType.ModMeleeDamageTaken);
@@ -4012,7 +4011,7 @@ namespace Game.Entities
             float TakenTotalMod = 1.0f;
 
             // ..taken
-            TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentTaken, (uint)attacker.GetMeleeDamageSchoolMask());
+            TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentTaken, (uint)attacker.GetMeleeDamageSchool().GetSpellSchoolMask());
 
             // .. taken pct (special attacks)
             if (spellProto != null)
@@ -4094,7 +4093,7 @@ namespace Game.Entities
             return false;
         }
 
-        public virtual SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return SpellSchoolMask.None; }
+        public virtual SpellSchools GetMeleeDamageSchool(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return SpellSchools.Normal; }
 
         public virtual void UpdateDamageDoneMods(WeaponAttackType attackType, int skipEnchantSlot = -1)
         {

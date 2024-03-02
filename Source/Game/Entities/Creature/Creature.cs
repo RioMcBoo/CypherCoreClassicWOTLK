@@ -30,7 +30,7 @@ namespace Game.Entities
             reactState = ReactStates.Aggressive;
             DefaultMovementType = MovementGeneratorType.Idle;
             _regenerateHealth = true;
-            m_meleeDamageSchoolMask = SpellSchoolMask.Normal;
+            m_meleeDamageSchool = SpellSchoolMask.Normal;
             triggerJustAppeared = true;
 
             RegenTimer = SharedConst.CreatureRegenInterval;
@@ -755,13 +755,13 @@ namespace Game.Entities
             GetMotionMaster().Initialize();
         }
 
-        public static Creature CreateCreature(uint entry, Map map, Position pos, uint vehId = 0)
+        public static Creature CreateCreature(int entry, Map map, Position pos, uint vehId = 0)
         {
             CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (cInfo == null)
                 return null;
 
-            ulong lowGuid;
+            long lowGuid;
             if (vehId != 0 || cInfo.VehicleId != 0)
                 lowGuid = map.GenerateLowGuid(HighGuid.Vehicle);
             else
@@ -783,7 +783,7 @@ namespace Game.Entities
             return creature;
         }
 
-        public bool Create(ulong guidlow, Map map, int entry, Position pos, CreatureData data = null, uint vehId = 0, bool dynamic = false)
+        public bool Create(long guidlow, Map map, int entry, Position pos, CreatureData data = null, uint vehId = 0, bool dynamic = false)
         {
             SetMap(map);
 
@@ -1758,17 +1758,17 @@ namespace Game.Entities
             SetControlled(rooted, UnitState.Root);
         }
 
-        public override bool HasQuest(uint questId)
+        public override bool HasQuest(int questId)
         {
             return Global.ObjectMgr.GetCreatureQuestRelations(GetEntry()).HasQuest(questId);
         }
 
-        public override bool HasInvolvedQuest(uint questId)
+        public override bool HasInvolvedQuest(int questId)
         {
             return Global.ObjectMgr.GetCreatureQuestInvolvedRelations(GetEntry()).HasQuest(questId);
         }
 
-        public static bool DeleteFromDB(ulong spawnId)
+        public static bool DeleteFromDB(long spawnId)
         {
             CreatureData data = Global.ObjectMgr.GetCreatureData(spawnId);
             if (data == null)
@@ -2521,7 +2521,7 @@ namespace Game.Entities
                     SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(id, GetMap().GetDifficultyID());
                     if (AdditionalSpellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, "Creature ({0}) has wrong spell {1} defined in `auras` field.", GetGUID().ToString(), id);
+                        Log.outError(LogFilter.Sql, $"Creature ({GetGUID()}) has wrong spell {id} defined in `auras` field.");
                         continue;
                     }
 
@@ -2530,7 +2530,7 @@ namespace Game.Entities
                         continue;
 
                     AddAura(id, this);
-                    Log.outDebug(LogFilter.Unit, "Spell: {0} added to creature ({1})", id, GetGUID().ToString());
+                    Log.outDebug(LogFilter.Unit, $"Spell: {id} added to creature ({GetGUID()}).");
                 }
             }
             return true;
@@ -2549,11 +2549,11 @@ namespace Game.Entities
             Team enemy_team = attacker.GetTeam();
 
             ZoneUnderAttack packet = new();
-            packet.AreaID = (int)GetAreaId();
+            packet.AreaID = GetAreaId();
             Global.WorldMgr.SendGlobalMessage(packet, null, (enemy_team == Team.Alliance ? Team.Horde : Team.Alliance));
         }
 
-        public override bool HasSpell(uint spellId)
+        public override bool HasSpell(int spellId)
         {
             return m_spells.Contains(spellId);
         }
@@ -2571,10 +2571,12 @@ namespace Game.Entities
         {
             GetRespawnPosition(out x, out y, out z, out _, out _);
         }
+
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori)
         {
             GetRespawnPosition(out x, out y, out z, out ori, out _);
         }
+
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori, out float dist)
         {
             if (m_creatureData != null)
@@ -2740,12 +2742,12 @@ namespace Game.Entities
             return Global.ObjectMgr.GetScriptName(GetScriptId());
         }
 
-        public uint GetScriptId()
+        public int GetScriptId()
         {
             CreatureData creatureData = GetCreatureData();
             if (creatureData != null)
             {
-                uint scriptId = creatureData.ScriptId;
+                int scriptId = creatureData.ScriptId;
                 if (scriptId != 0)
                     return scriptId;
             }
@@ -2870,7 +2872,7 @@ namespace Game.Entities
 
         public virtual byte GetPetAutoSpellSize() { return 4; }
 
-        public virtual uint GetPetAutoSpellOnPos(byte pos)
+        public virtual int GetPetAutoSpellOnPos(byte pos)
         {
             if (pos >= SharedConst.MaxSpellCharm || GetCharmInfo() == null || GetCharmInfo().GetCharmSpell(pos).GetActiveState() != ActiveStates.Enabled)
                 return 0;
@@ -2884,7 +2886,7 @@ namespace Game.Entities
 
             for (byte i = 0; i < GetPetAutoSpellSize(); ++i)
             {
-                uint spellID = GetPetAutoSpellOnPos(i);
+                int spellID = GetPetAutoSpellOnPos(i);
                 if (spellID == 0)
                     continue;
 
@@ -2920,14 +2922,14 @@ namespace Game.Entities
 
             if (target != null && IsPet())
             {
-                uint targetLevel = 0;
+                int targetLevel = 0;
 
                 if (target.IsTypeId(TypeId.Player))
                     targetLevel = target.GetLevelForTarget(this);
                 else if (target.IsTypeId(TypeId.Unit))
                     targetLevel = target.ToCreature().GetLevelForTarget(this);
 
-                uint myLevel = GetLevelForTarget(target);
+                int myLevel = GetLevelForTarget(target);
                 int levelDiff = (int)(targetLevel - myLevel);
 
                 // The maximum Aggro Radius is capped at 45 yards (25 level difference)
@@ -3202,8 +3204,8 @@ namespace Game.Entities
             return (T)i_AI;
         }
 
-        public override SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return m_meleeDamageSchoolMask; }
-        public void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = (SpellSchoolMask)(1 << (int)school); }
+        public override SpellSchools GetMeleeDamageSchool(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return m_meleeDamageSchool; }
+        public void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchool = school; }
         /// <summary>don't know the value of the mob block</summary>
         public override uint GetShieldBlockValue()
         {

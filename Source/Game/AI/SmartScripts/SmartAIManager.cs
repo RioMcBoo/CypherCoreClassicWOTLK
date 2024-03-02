@@ -2131,7 +2131,7 @@ namespace Game.AI
             if (e.GetScriptType() != SmartScriptType.Creature)
                 return true;
 
-            uint entry;
+            int entry;
             if (e.GetEventType() == SmartEvents.TextOver)
             {
                 entry = e.Event.textOver.creatureEntry;
@@ -2147,7 +2147,7 @@ namespace Game.AI
                     default:
                         if (e.EntryOrGuid < 0)
                         {
-                            ulong guid = (ulong)-e.EntryOrGuid;
+                            long guid = -e.EntryOrGuid;
                             CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                             if (data == null)
                             {
@@ -2158,7 +2158,7 @@ namespace Game.AI
                                 entry = data.Id;
                         }
                         else
-                            entry = (uint)e.EntryOrGuid;
+                            entry = e.EntryOrGuid;
                         break;
                 }
             }
@@ -2171,7 +2171,7 @@ namespace Game.AI
 
             return true;
         }
-        static bool IsCreatureValid(SmartScriptHolder e, uint entry)
+        static bool IsCreatureValid(SmartScriptHolder e, int entry)
         {
             if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
             {
@@ -2180,7 +2180,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsGameObjectValid(SmartScriptHolder e, uint entry)
+        static bool IsGameObjectValid(SmartScriptHolder e, int entry)
         {
             if (Global.ObjectMgr.GetGameObjectTemplate(entry) == null)
             {
@@ -2189,7 +2189,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsQuestValid(SmartScriptHolder e, uint entry)
+        static bool IsQuestValid(SmartScriptHolder e, int entry)
         {
             if (Global.ObjectMgr.GetQuestTemplate(entry) == null)
             {
@@ -2198,7 +2198,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsSpellValid(SmartScriptHolder e, uint entry)
+        static bool IsSpellValid(SmartScriptHolder e, int entry)
         {
             if (!Global.SpellMgr.HasSpellInfo(entry, Difficulty.None))
             {
@@ -2207,7 +2207,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsMinMaxValid(SmartScriptHolder e, uint min, uint max)
+        static bool IsMinMaxValid(SmartScriptHolder e, int min, int max)
         {
             if (max < min)
             {
@@ -2216,7 +2216,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool NotNULL(SmartScriptHolder e, uint data)
+        static bool NotNULL(SmartScriptHolder e, int data)
         {
             if (data == 0)
             {
@@ -2225,7 +2225,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsEmoteValid(SmartScriptHolder e, uint entry)
+        static bool IsEmoteValid(SmartScriptHolder e, int entry)
         {
             if (!CliDB.EmotesStorage.ContainsKey(entry))
             {
@@ -2234,7 +2234,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsItemValid(SmartScriptHolder e, uint entry)
+        static bool IsItemValid(SmartScriptHolder e, int entry)
         {
             if (!CliDB.ItemSparseStorage.ContainsKey(entry))
             {
@@ -2243,7 +2243,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsTextEmoteValid(SmartScriptHolder e, uint entry)
+        static bool IsTextEmoteValid(SmartScriptHolder e, int entry)
         {
             if (!CliDB.EmotesTextStorage.ContainsKey(entry))
             {
@@ -2252,7 +2252,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsAreaTriggerValid(SmartScriptHolder e, uint entry)
+        static bool IsAreaTriggerValid(SmartScriptHolder e, int entry)
         {
             if (!CliDB.AreaTriggerStorage.ContainsKey(entry))
             {
@@ -2261,7 +2261,7 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsSoundValid(SmartScriptHolder e, uint entry)
+        static bool IsSoundValid(SmartScriptHolder e, int entry)
         {
             if (!CliDB.SoundKitStorage.ContainsKey(entry))
             {
@@ -2614,8 +2614,8 @@ namespace Game.AI
         #region Structs
         public struct MinMaxRepeat
         {
-            public uint min;
-            public uint max;
+            public int min;
+            public int max;
             public uint repeatMin;
             public uint repeatMax;
         }
@@ -2624,12 +2624,12 @@ namespace Game.AI
             public uint cooldownMin;
             public uint cooldownMax;
             public uint playerOnly;
-            public uint creature;
+            public int creature;
         }
         public struct SpellHit
         {
-            public uint spell;
-            public uint school;
+            public int spell;
+            public int school;
             public uint cooldownMin;
             public uint cooldownMax;
         }
@@ -2643,9 +2643,9 @@ namespace Game.AI
         }
         public struct Respawn
         {
-            public uint type;
-            public uint map;
-            public uint area;
+            public int type;
+            public int map;
+            public int area;
         }
         public struct MinMax
         {
@@ -2656,7 +2656,7 @@ namespace Game.AI
         {
             public uint repeatMin;
             public uint repeatMax;
-            public uint spellId;
+            public int spellId;
         }
         public struct FriendlyCC
         {
@@ -2706,47 +2706,47 @@ namespace Game.AI
         }
         public struct MovementInform
         {
-            public uint type;
-            public uint id;
+            public int type;
+            public int id;
         }
         public struct DataSet
         {
-            public uint id;
-            public uint value;
+            public int id;
+            public int value;
             public uint cooldownMin;
             public uint cooldownMax;
         }
         public struct Waypoint
         {
-            public uint pointID;
-            public uint pathID;
+            public int pointID;
+            public int pathID;
         }
         public struct TransportAddCreature
         {
-            public uint creature;
+            public int creature;
         }
         public struct TransportRelocate
         {
-            public uint pointID;
+            public int pointID;
         }
         public struct InstancePlayerEnter
         {
-            public uint team;
+            public int team;
             public uint cooldownMin;
             public uint cooldownMax;
         }
         public struct Areatrigger
         {
-            public uint id;
+            public int id;
         }
         public struct TextOver
         {
-            public uint textGroupID;
-            public uint creatureEntry;
+            public int textGroupID;
+            public int creatureEntry;
         }
         public struct TimedEvent
         {
-            public uint id;
+            public int id;
         }
         public struct GossipHello
         {
@@ -2754,8 +2754,8 @@ namespace Game.AI
         }
         public struct Gossip
         {
-            public uint sender;
-            public uint action;
+            public int sender;
+            public int action;
         }
         public struct GameEvent
         {
@@ -2771,27 +2771,27 @@ namespace Game.AI
         }
         public struct DoAction
         {
-            public uint eventId;
+            public int eventId;
         }
         public struct FriendlyHealthPct
         {
-            public uint minHpPct;
-            public uint maxHpPct;
-            public uint repeatMin;
-            public uint repeatMax;
-            public uint radius;
+            public int minHpPct;
+            public int maxHpPct;
+            public int repeatMin;
+            public int repeatMax;
+            public int radius;
         }
         public struct Distance
         {
-            public uint guid;
-            public uint entry;
-            public uint dist;
+            public int guid;
+            public int entry;
+            public int dist;
             public uint repeat;
         }
         public struct Counter
         {
-            public uint id;
-            public uint value;
+            public int id;
+            public int value;
             public uint cooldownMin;
             public uint cooldownMax;
         }

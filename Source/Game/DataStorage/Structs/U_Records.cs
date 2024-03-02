@@ -10,22 +10,21 @@ namespace Game.DataStorage
     public sealed class UiMapRecord
     {
         public LocalizedString Name;
-        public uint Id;
-        private int _parentUiMapID;
+        public int Id;
+        public int ParentUiMapID;
         private int _flags;
         private sbyte _system;
         private byte _type;
         public int BountySetID;
-        public uint BountyDisplayLocation;
+        public int BountyDisplayLocation;
         public int VisibilityPlayerConditionID2; // if not met then map is skipped when evaluating UiMapAssignment
         public int VisibilityPlayerConditionID;  // if not met then client checks other maps with the same AlternateUiMapGroup, not re-evaluating UiMapAssignment for them
         public sbyte HelpTextPosition;
         public int BkgAtlasID;
-        public uint AlternateUiMapGroup;
-        public uint ContentTuningID;
+        public int AlternateUiMapGroup;
+        public int ContentTuningID;
 
         #region Properties
-        public uint ParentUiMapID => (uint)_parentUiMapID;
         public UiMapFlag Flags => (UiMapFlag)_flags;
         public UiMapSystem System => (UiMapSystem)_system;
         public UiMapType Type => (UiMapType)_type;
@@ -51,16 +50,12 @@ namespace Game.DataStorage
         public Vector2 UiMax;
         public Vector3[] Region = new Vector3[2];
         public uint Id;
-        private int _uiMapID;
+        public int UiMapID;
         public int OrderIndex;
         public int MapID;
         public int AreaID;
         public int WmoDoodadPlacementID;
         public int WmoGroupID;
-
-        #region Prioperties
-        public uint UiMapID => (uint)_uiMapID;
-        #endregion
     }
 
     public sealed class UiMapLinkRecord

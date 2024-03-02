@@ -385,7 +385,7 @@ namespace Game.Entities
 
         public void SetStat(Stats stat, int val) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Stats, (int)stat), val); }
 
-        public uint GetCreateMana() { return m_unitData.BaseMana; }
+        public int GetCreateMana() { return m_unitData.BaseMana; }
 
         public void SetCreateMana(int val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseMana), val); }
 
@@ -709,7 +709,7 @@ namespace Game.Entities
 
             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
             if (powerTypeEntry != null)
-                return (int)powerTypeEntry.MaxBasePower;
+                return powerTypeEntry.MaxBasePower;
 
             return 0;
         }
@@ -726,8 +726,8 @@ namespace Game.Entities
                 {
                     if (effect.GetMiscValue() == (int)power)
                     {
-                        uint effectAmount = (uint)effect.GetAmount();
-                        uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
+                        int effectAmount = effect.GetAmount();
+                        int triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
 
                         float oldValueCheck = oldVal;
                         float newValueCheck = newVal;
@@ -1365,8 +1365,8 @@ namespace Game.Entities
 
         float OCTRegenHPPerSpirit()
         {
-            uint level = GetLevel();
-            Class pclass = GetClass();
+            var level = GetLevel();
+            var pclass = GetClass();
 
             float baseRatio = Global.ObjectMgr.GetOCTRegenHP(pclass, level);
             float moreRatio = Global.ObjectMgr.GetRegenHPPerSpt(pclass, level);
@@ -1374,19 +1374,19 @@ namespace Game.Entities
                 return 0.0f;
 
             // Formula from PaperDollFrame script 3.3.5
-            float spirit = GetStat(Stats.Spirit);
-            float baseSpirit = spirit;
+            var spirit = GetStat(Stats.Spirit);
+            var baseSpirit = spirit;
             if (baseSpirit > 50)
                 baseSpirit = 50;
-            float moreSpirit = spirit - baseSpirit;
-            float regen = baseSpirit * baseRatio + moreSpirit * moreRatio;
+            var moreSpirit = spirit - baseSpirit;
+            var regen = baseSpirit * baseRatio + moreSpirit * moreRatio;
             return regen;
         }
 
         float OCTRegenMPPerSpirit()
         {
-            uint level = GetLevel();
-            Class pclass = GetClass();
+            var level = GetLevel();
+            var pclass = GetClass();
 
             //    GtOCTRegenMPEntry     const* baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
             float moreRatio = Global.ObjectMgr.GetRegenMPPerSpt(pclass, level);

@@ -27,15 +27,15 @@ namespace Game
             InitDbPhaseShift(AlwaysVisible, PhaseUseFlagsValues.AlwaysVisible, 0, 0);
         }
 
-        public static PhaseFlags GetPhaseFlags(uint phaseId)
+        public static PhaseFlags GetPhaseFlags(int phaseId)
         {
             PhaseRecord phase = CliDB.PhaseStorage.LookupByKey(phaseId);
             if (phase != null)
             {
-                if (phase.Flags.HasAnyFlag(PhaseEntryFlags.Cosmetic))
+                if (phase.HasAnyFlag(PhaseEntryFlags.Cosmetic))
                     return PhaseFlags.Cosmetic;
 
-                if (phase.Flags.HasAnyFlag(PhaseEntryFlags.Personal))
+                if (phase.HasAnyFlag(PhaseEntryFlags.Personal))
                     return PhaseFlags.Personal;
             }
 
@@ -74,13 +74,13 @@ namespace Game
             }
         }
 
-        public static void AddPhase(WorldObject obj, uint phaseId, bool updateVisibility)
+        public static void AddPhase(WorldObject obj, int phaseId, bool updateVisibility)
         {
             ControlledUnitVisitor visitor = new(obj);
             AddPhase(obj, phaseId, obj.GetGUID(), updateVisibility, visitor);
         }
 
-        static void AddPhase(WorldObject obj, uint phaseId, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
+        static void AddPhase(WorldObject obj, int phaseId, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
         {
             bool changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null);
 
@@ -471,7 +471,7 @@ namespace Game
             return AlwaysVisible;
         }
 
-        public static void InitDbPhaseShift(PhaseShift phaseShift, PhaseUseFlagsValues phaseUseFlags, uint phaseId, uint phaseGroupId)
+        public static void InitDbPhaseShift(PhaseShift phaseShift, PhaseUseFlagsValues phaseUseFlags, int phaseId, int phaseGroupId)
         {
             phaseShift.ClearPhases();
             phaseShift.IsDbPhaseShift = true;
@@ -513,10 +513,10 @@ namespace Game
         {
             phaseShift.VisibleMapIds.Clear();
             if (visibleMapId != -1)
-                phaseShift.AddVisibleMapId((uint)visibleMapId, Global.ObjectMgr.GetTerrainSwapInfo((uint)visibleMapId));
+                phaseShift.AddVisibleMapId(visibleMapId, Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId));
         }
 
-        public static bool InDbPhaseShift(WorldObject obj, PhaseUseFlagsValues phaseUseFlags, ushort phaseId, uint phaseGroupId)
+        public static bool InDbPhaseShift(WorldObject obj, PhaseUseFlagsValues phaseUseFlags, ushort phaseId, int phaseGroupId)
         {
             PhaseShift phaseShift = new();
             InitDbPhaseShift(phaseShift, phaseUseFlags, phaseId, phaseGroupId);

@@ -1445,9 +1445,9 @@ namespace Game
                 }
 
                 if (!scripts.ContainsKey(tmp.id))
-                    scripts[tmp.id] = new MultiMap<uint, ScriptInfo>();
+                    scripts[tmp.id] = new MultiMap<int, ScriptInfo>();
 
-                scripts[tmp.id].Add(tmp.delay, tmp);
+                scripts[tmp.id].Add((int)tmp.delay, tmp);
 
                 ++count;
             }
@@ -1677,7 +1677,7 @@ namespace Game
             {
                 SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(script.Key, Difficulty.None);
 
-                Dictionary<SpellScriptLoader, uint> SpellScriptLoaders = Global.ScriptMgr.CreateSpellScriptLoaders((uint)script.Key);
+                var SpellScriptLoaders = Global.ScriptMgr.CreateSpellScriptLoaders(script.Key);
                 foreach (var pair in SpellScriptLoaders)
                 {
                     SpellScript spellScript = pair.Key.GetSpellScript();
@@ -1691,7 +1691,7 @@ namespace Game
 
                     if (spellScript != null)
                     {
-                        spellScript._Init(pair.Key.GetName(), (uint)spellEntry.Id);
+                        spellScript._Init(pair.Key.GetName(), spellEntry.Id);
                         spellScript._Register();
                         if (!spellScript._Validate(spellEntry))
                             valid = false;
@@ -1701,7 +1701,7 @@ namespace Game
                         spellScriptsStorage.Remove(script);
                 }
 
-                Dictionary<AuraScriptLoader, uint> AuraScriptLoaders = Global.ScriptMgr.CreateAuraScriptLoaders((uint)script.Key);
+                var AuraScriptLoaders = Global.ScriptMgr.CreateAuraScriptLoaders(script.Key);
                 foreach (var pair in AuraScriptLoaders)
                 {
                     AuraScript auraScript = pair.Key.GetAuraScript();
@@ -1715,7 +1715,7 @@ namespace Game
 
                     if (auraScript != null)
                     {
-                        auraScript._Init(pair.Key.GetName(), (uint)spellEntry.Id);
+                        auraScript._Init(pair.Key.GetName(), spellEntry.Id);
                         auraScript._Register();
                         if (!auraScript._Validate(spellEntry))
                             valid = false;
@@ -1750,7 +1750,7 @@ namespace Game
             return _scriptNamesStorage.GetAllDBScriptNames();
         }
 
-        public string GetScriptName(uint id)
+        public string GetScriptName(int id)
         {
             var entry = _scriptNamesStorage.Find(id);
             if (entry != null)
@@ -1759,7 +1759,7 @@ namespace Game
             return string.Empty;
         }
 
-        bool IsScriptDatabaseBound(uint id)
+        bool IsScriptDatabaseBound(int id)
         {
             var entry = _scriptNamesStorage.Find(id);
             if (entry != null)
@@ -1778,7 +1778,7 @@ namespace Game
             return areaTriggerScriptStorage.LookupByKey(triggerid);
         }
 
-        public Dictionary<int, MultiMap<uint, ScriptInfo>> GetScriptsMapByType(ScriptsType type)
+        public Dictionary<int, MultiMap<int, ScriptInfo>> GetScriptsMapByType(ScriptsType type)
         {
             switch (type)
             {
@@ -6381,7 +6381,7 @@ namespace Game
                             foreach (ItemTemplate itemTemplate in items)
                             {
                                 // BuyCount by default
-                                uint count = itemTemplate.GetBuyCount();
+                                int count = itemTemplate.GetBuyCount();
 
                                 // special amount for food/drink
                                 if (itemTemplate.GetClass() == ItemClass.Consumable && itemTemplate.GetSubClass().Consumable == ItemSubClassConsumable.FoodDrink)
@@ -6391,7 +6391,7 @@ namespace Game
                                         switch (itemTemplate.Effects[0].SpellCategoryID)
                                         {
                                             case SpellCategories.Food:                                // food
-                                                count = characterLoadout.ChrClassID == Class.Deathknight ? 10 : 4u;
+                                                count = characterLoadout.ChrClassID == Class.Deathknight ? 10 : 4;
                                                 break;
                                             case SpellCategories.Drink:                                // drink
                                                 count = 2;
@@ -6887,13 +6887,13 @@ namespace Game
             return CliDB.GetGameTableColumnForClass(regenHPPerSpt, class_);
         }
 
-        public float GetRegenMPPerSpt(Class class_, uint level)
+        public float GetRegenMPPerSpt(Class class_, int level)
         {
             if (level < 1 || class_ >= Class.Max)
                 return 0.0f;
 
-            if (level > WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel))
-                level = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
+            if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                level = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
 
             GtRegenMPPerSptRecord regenMPPerSpt = CliDB.RegenMPPerSptGameTable.GetRow(level);
             if (regenMPPerSpt is null)
@@ -6912,7 +6912,7 @@ namespace Game
                 return;
 
             if (count > 0)
-                playerInfo.item.Add(new PlayerCreateInfoItem(itemId, (uint)count));
+                playerInfo.item.Add(new PlayerCreateInfoItem(itemId, count));
             else
             {
                 if (count < -1)
@@ -7164,7 +7164,7 @@ namespace Game
 
             using var result = DB.Characters.Query("SELECT MAX(id) FROM character_pet");
             if (!result.IsEmpty())
-                _hiPetNumber = result.Read<uint>(0) + 1;
+                _hiPetNumber = result.Read<int>(0) + 1;
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded the max pet number: {_hiPetNumber - 1} in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
@@ -7201,16 +7201,6 @@ namespace Game
             }
 
             return list0[RandomHelper.IRand(0, list0.Count - 1)] + list1[RandomHelper.IRand(0, list1.Count - 1)];
-        }
-
-        public uint GeneratePetNumber()
-        {
-            if (_hiPetNumber >= (uint.MaxValue - 1))
-            {
-                Log.outError(LogFilter.Misc, "_hiPetNumber Id overflow!! Can't continue, shutting down server.");
-                Global.WorldMgr.StopNow(ShutdownExitCode.Error);
-            }
-            return _hiPetNumber++;
         }
 
         //Faction Change
@@ -10873,13 +10863,13 @@ namespace Game
             using (var result = DB.Characters.Query("SELECT MAX(guid) FROM characters"))
             {
                 if (!result.IsEmpty())
-                    GetGuidSequenceGenerator(HighGuid.Player).Set(result.Read<ulong>(0) + 1);
+                    GetGuidSequenceGenerator(HighGuid.Player).Set(result.Read<long>(0) + 1);
             }
 
             using (var result = DB.Characters.Query("SELECT MAX(guid) FROM item_instance"))
             {
                 if (!result.IsEmpty())
-                    GetGuidSequenceGenerator(HighGuid.Item).Set(result.Read<ulong>(0) + 1);
+                    GetGuidSequenceGenerator(HighGuid.Item).Set(result.Read<long>(0) + 1);
             }
 
             // Cleanup other tables from not existed guids ( >= hiItemGuid)
@@ -10892,19 +10882,19 @@ namespace Game
             using (var result = DB.World.Query("SELECT MAX(guid) FROM transports"))
             {
                 if (!result.IsEmpty())
-                    GetGuidSequenceGenerator(HighGuid.Transport).Set(result.Read<ulong>(0) + 1);
+                    GetGuidSequenceGenerator(HighGuid.Transport).Set(result.Read<long>(0) + 1);
             }
 
             using (var result = DB.Characters.Query("SELECT MAX(id) FROM auctionhouse"))
             {
                 if (!result.IsEmpty())
-                    _auctionId = result.Read<uint>(0) + 1;
+                    _auctionId = result.Read<int>(0) + 1;
             }
 
             using (var result = DB.Characters.Query("SELECT MAX(id) FROM mail"))
             {
                 if (!result.IsEmpty())
-                    _mailId = result.Read<ulong>(0) + 1;
+                    _mailId = result.Read<long>(0) + 1;
             }
 
             using (var result = DB.Characters.Query("SELECT MAX(arenateamid) FROM arena_team"))
@@ -10916,13 +10906,13 @@ namespace Game
             using (var result = DB.Characters.Query("SELECT MAX(maxguid) FROM ((SELECT MAX(setguid) AS maxguid FROM character_equipmentsets) UNION (SELECT MAX(setguid) AS maxguid FROM character_transmog_outfits)) allsets"))
             {
                 if (!result.IsEmpty())
-                    _equipmentSetGuid = result.Read<ulong>(0) + 1;
+                    _equipmentSetGuid = result.Read<long>(0) + 1;
             }
 
             using (var result = DB.Characters.Query("SELECT MAX(guildId) FROM guild"))
             {
                 if (!result.IsEmpty())
-                    Global.GuildMgr.SetNextGuildId(result.Read<ulong>(0) + 1);
+                    Global.GuildMgr.SetNextGuildId(result.Read<long>(0) + 1);
             }
 
             using (var result = DB.Characters.Query("SELECT MAX(guid) FROM `groups`"))
@@ -10934,25 +10924,25 @@ namespace Game
             using (var result = DB.Characters.Query("SELECT MAX(itemId) from character_void_storage"))
             {
                 if (!result.IsEmpty())
-                    _voidItemId = result.Read<ulong>(0) + 1;
+                    _voidItemId = result.Read<long>(0) + 1;
             }
 
             using (var result = DB.World.Query("SELECT MAX(guid) FROM creature"))
             {
                 if (!result.IsEmpty())
-                    _creatureSpawnId = result.Read<ulong>(0) + 1;
+                    _creatureSpawnId = result.Read<long>(0) + 1;
             }
 
             using (var result = DB.World.Query("SELECT MAX(guid) FROM gameobject"))
             {
                 if (!result.IsEmpty())
-                    _gameObjectSpawnId = result.Read<ulong>(0) + 1;
+                    _gameObjectSpawnId = result.Read<long>(0) + 1;
             }
         }
 
-        public uint GenerateAuctionID()
+        public int GenerateAuctionID()
         {
-            if (_auctionId >= (uint.MaxValue - 1))
+            if (_auctionId >= -2)
             {
                 Log.outError(LogFilter.Server, "Auctions ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
@@ -10960,18 +10950,19 @@ namespace Game
             return _auctionId++;
         }
 
-        public ulong GenerateEquipmentSetGuid()
+        public long GenerateEquipmentSetGuid()
         {
-            if (_equipmentSetGuid >= (ulong.MaxValue - 1))
+            if (_equipmentSetGuid >= -2)
             {
                 Log.outError(LogFilter.Server, "EquipmentSet guid overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
             return _equipmentSetGuid++;
         }
-        public ulong GenerateMailID()
+
+        public long GenerateMailID()
         {
-            if (_mailId >= (ulong.MaxValue - 1))
+            if (_mailId >= -2)
             {
                 Log.outError(LogFilter.Server, "Mail ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
@@ -10979,9 +10970,19 @@ namespace Game
             return _mailId++;
         }
 
-        public ulong GenerateVoidStorageItemId()
+        public int GeneratePetNumber()
         {
-            if (_voidItemId >= (ulong.MaxValue - 1))
+            if (_hiPetNumber >= -2)
+            {
+                Log.outError(LogFilter.Misc, "_hiPetNumber Id overflow!! Can't continue, shutting down server.");
+                Global.WorldMgr.StopNow(ShutdownExitCode.Error);
+            }
+            return _hiPetNumber++;
+        }
+
+        public long GenerateVoidStorageItemId()
+        {
+            if (_voidItemId >= -2)
             {
                 Log.outError(LogFilter.Misc, "_voidItemId overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow(ShutdownExitCode.Error);
@@ -10989,9 +10990,9 @@ namespace Game
             return _voidItemId++;
         }
 
-        public ulong GenerateCreatureSpawnId()
+        public long GenerateCreatureSpawnId()
         {
-            if (_creatureSpawnId >= (ulong.MaxValue - 1))
+            if (_creatureSpawnId >= -2)
             {
                 Log.outFatal(LogFilter.Server, "Creature spawn id overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
@@ -10999,9 +11000,9 @@ namespace Game
             return _creatureSpawnId++;
         }
 
-        public ulong GenerateGameObjectSpawnId()
+        public long GenerateGameObjectSpawnId()
         {
-            if (_gameObjectSpawnId >= (ulong.MaxValue - 1))
+            if (_gameObjectSpawnId >= -2)
             {
                 Log.outFatal(LogFilter.Server, "GameObject spawn id overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
@@ -11567,9 +11568,9 @@ namespace Game
         //Scripts
         ScriptNameContainer _scriptNamesStorage = new();
         MultiMap<int, int> spellScriptsStorage = new();
-        public Dictionary<int, MultiMap<uint, ScriptInfo>> sSpellScripts = new();
-        public Dictionary<int, MultiMap<uint, ScriptInfo>> sEventScripts = new();
-        public Dictionary<int, MultiMap<uint, ScriptInfo>> sWaypointScripts = new();
+        public Dictionary<int, MultiMap<int, ScriptInfo>> sSpellScripts = new();
+        public Dictionary<int, MultiMap<int, ScriptInfo>> sEventScripts = new();
+        public Dictionary<int, MultiMap<int, ScriptInfo>> sWaypointScripts = new();
         Dictionary<int, int> areaTriggerScriptStorage = new();
         List<int> _eventStorage = new();
         Dictionary<int, int> _eventScriptStorage = new();
@@ -11674,13 +11675,13 @@ namespace Game
 
         Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new();
         // first free id for selected id Type
-        uint _auctionId;
-        ulong _equipmentSetGuid;
-        ulong _mailId;
-        uint _hiPetNumber;
-        ulong _creatureSpawnId;
-        ulong _gameObjectSpawnId;
-        ulong _voidItemId;
+        int _auctionId;
+        long _equipmentSetGuid;
+        long _mailId;
+        int _hiPetNumber;
+        long _creatureSpawnId;
+        long _gameObjectSpawnId;
+        long _voidItemId;
         int[] _playerXPperLevel;
         Dictionary<int, int> _baseXPTable = new();
         #endregion
@@ -12743,9 +12744,9 @@ namespace Game
             return IndexToName.Count;
         }
 
-        public Entry Find(uint index)
+        public Entry Find(int index)
         {
-            return index < IndexToName.Count ? IndexToName[(int)index] : null;
+            return index < IndexToName.Count ? IndexToName[index] : null;
         }
 
         public Entry Find(string name)

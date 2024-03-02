@@ -3,22 +3,16 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Game.Entities;
-using Game.Miscellaneous;
 using Game.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading;
 
 namespace Game.DataStorage
 {
     using static CliDB;
-    using static Game.AI.SmartAction;
-    using static Game.ScriptNameContainer;
-    using static System.Runtime.InteropServices.JavaScript.JSType;
 
     public class DB2Manager : Singleton<DB2Manager>
     {
@@ -86,8 +80,8 @@ namespace Game.DataStorage
             foreach (var customizationChoice in ChrCustomizationChoiceStorage.Values)
                 _chrCustomizationChoicesByOption.Add(customizationChoice.ChrCustomizationOptionID, customizationChoice);
 
-            MultiMap<uint, Tuple<uint, byte>> shapeshiftFormByModel = new();
-            Dictionary<uint, ChrCustomizationDisplayInfoRecord> displayInfoByCustomizationChoice = new();
+            MultiMap<int, (int, byte)> shapeshiftFormByModel = new();
+            Dictionary<int, ChrCustomizationDisplayInfoRecord> displayInfoByCustomizationChoice = new();
 
             // build shapeshift form model lookup
             foreach (ChrCustomizationElementRecord customizationElement in ChrCustomizationElementStorage.Values)
@@ -101,12 +95,12 @@ namespace Game.DataStorage
                         displayInfoByCustomizationChoice[customizationElement.ChrCustomizationChoiceID] = customizationDisplayInfo;
                         ChrCustomizationOptionRecord customizationOption = ChrCustomizationOptionStorage.LookupByKey(customizationChoice.ChrCustomizationOptionID);
                         if (customizationOption != null)
-                            shapeshiftFormByModel.Add(customizationOption.ChrModelID, Tuple.Create(customizationOption.Id, customizationDisplayInfo.ShapeshiftFormID));
+                            shapeshiftFormByModel.Add(customizationOption.ChrModelID, (customizationOption.Id, customizationDisplayInfo.ShapeshiftFormID));
                     }
                 }
             }
 
-            MultiMap<uint, ChrCustomizationOptionRecord> customizationOptionsByModel = new();
+            MultiMap<int, ChrCustomizationOptionRecord> customizationOptionsByModel = new();
             foreach (ChrCustomizationOptionRecord customizationOption in ChrCustomizationOptionStorage.Values)
                 customizationOptionsByModel.Add(customizationOption.ChrModelID, customizationOption);
 
@@ -116,32 +110,32 @@ namespace Game.DataStorage
                 if (customizationChoice != null)
                 {
                     if (!_chrCustomizationRequiredChoices.ContainsKey(reqChoice.ChrCustomizationReqID))
-                        _chrCustomizationRequiredChoices[reqChoice.ChrCustomizationReqID] = new MultiMap<uint, uint>();
+                        _chrCustomizationRequiredChoices[reqChoice.ChrCustomizationReqID] = new MultiMap<int, int>();
 
                     _chrCustomizationRequiredChoices[reqChoice.ChrCustomizationReqID].Add(customizationChoice.ChrCustomizationOptionID, reqChoice.ChrCustomizationChoiceID);
                 }
             }
 
-            Dictionary<uint, uint> parentRaces = new();
+            Dictionary<Race, Race> parentRaces = new();
             foreach (ChrRacesRecord chrRace in ChrRacesStorage.Values)
                 if (chrRace.UnalteredVisualRaceID != 0)
-                    parentRaces[(uint)chrRace.UnalteredVisualRaceID] = chrRace.Id;
+                    parentRaces[chrRace.UnalteredVisualRaceID] = chrRace.Id;
 
             foreach (ChrRaceXChrModelRecord raceModel in ChrRaceXChrModelStorage.Values)
             {
                 ChrModelRecord model = ChrModelStorage.LookupByKey(raceModel.ChrModelID);
                 if (model != null)
                 {
-                    _chrModelsByRaceAndGender[Tuple.Create((byte)raceModel.ChrRacesID, (byte)raceModel.Sex)] = model;
+                    _chrModelsByRaceAndGender[(raceModel.ChrRacesID, raceModel.Sex)] = model;
 
                     var customizationOptionsForModel = customizationOptionsByModel.LookupByKey(model.Id);
                     if (customizationOptionsForModel != null)
                     {
-                        _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)raceModel.ChrRacesID, (byte)raceModel.Sex), customizationOptionsForModel);
+                        _chrCustomizationOptionsByRaceAndGender.AddRange((raceModel.ChrRacesID, raceModel.Sex), customizationOptionsForModel);
 
-                        uint parentRace = parentRaces.LookupByKey(raceModel.ChrRacesID);
+                        var parentRace = parentRaces.LookupByKey(raceModel.ChrRacesID);
                         if (parentRace != 0)
-                            _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)parentRace, (byte)raceModel.Sex), customizationOptionsForModel);
+                            _chrCustomizationOptionsByRaceAndGender.AddRange((parentRace, raceModel.Sex), customizationOptionsForModel);
                     }
 
                     // link shapeshift displays to race/gender/form
@@ -184,7 +178,7 @@ namespace Game.DataStorage
             foreach (CurrencyContainerRecord currencyContainer in CurrencyContainerStorage.Values)
                 _currencyContainers.Add(currencyContainer.CurrencyTypesID, currencyContainer);            
 
-            MultiMap<uint, CurvePointRecord> unsortedPoints = new();
+            MultiMap<int, CurvePointRecord> unsortedPoints = new();
             foreach (var curvePoint in CurvePointStorage.Values)
                 if (CurveStorage.ContainsKey(curvePoint.CurveID))
                     unsortedPoints.Add(curvePoint.CurveID, curvePoint);
@@ -197,10 +191,10 @@ namespace Game.DataStorage
             }
 
             foreach (EmotesTextSoundRecord emoteTextSound in EmotesTextSoundStorage.Values)
-                _emoteTextSounds[Tuple.Create(emoteTextSound.EmotesTextId, emoteTextSound.RaceId, emoteTextSound.SexId, emoteTextSound.ClassId)] = emoteTextSound;
+                _emoteTextSounds[(emoteTextSound.EmotesTextId, emoteTextSound.RaceId, emoteTextSound.SexId, emoteTextSound.ClassId)] = emoteTextSound;
 
             foreach (ExpectedStatRecord expectedStat in ExpectedStatStorage.Values)
-                _expectedStatsByLevel[Tuple.Create(expectedStat.Lvl, expectedStat.ExpansionID)] = expectedStat;
+                _expectedStatsByLevel[(expectedStat.Lvl, expectedStat.ExpansionID)] = expectedStat;
 
             foreach (FactionRecord faction in FactionStorage.Values)
                 if (faction.ParentFactionID != 0)
@@ -252,8 +246,8 @@ namespace Game.DataStorage
 
             foreach (var appearanceMod in ItemModifiedAppearanceStorage.Values)
             {
-                //ASSERT(appearanceMod.ItemID <= 0xFFFFFF);
-                _itemModifiedAppearancesByItem[(uint)(appearanceMod.ItemID | (appearanceMod.ItemAppearanceModifierID << 24))] = appearanceMod;
+                //ASSERT(appearanceMod.ItemID <= -1);
+                _itemModifiedAppearancesByItem[appearanceMod.ItemID | (appearanceMod.ItemAppearanceModifierID << 24)] = appearanceMod;
             }
 
             foreach (ItemSetSpellRecord itemSetSpell in ItemSetSpellStorage.Values)
@@ -283,7 +277,7 @@ namespace Game.DataStorage
             {
                 PlayerConditionRecord playerCondition = PlayerConditionStorage.LookupByKey(mapDifficultyCondition.PlayerConditionID);
                 if (playerCondition != null)
-                    _mapDifficultyConditions.Add(mapDifficultyCondition.MapDifficultyID, Tuple.Create(mapDifficultyCondition.Id, playerCondition));
+                    _mapDifficultyConditions.Add(mapDifficultyCondition.MapDifficultyID, (mapDifficultyCondition.Id, playerCondition));
             }
 
             foreach (var mount in MountStorage.Values)
@@ -399,7 +393,7 @@ namespace Game.DataStorage
 
             foreach (SkillRaceClassInfoRecord entry in SkillRaceClassInfoStorage.Values)
             {
-                if (SkillLineStorage.ContainsKey(entry.SkillID))
+                if (SkillLineStorage.ContainsKey((int)entry.SkillID))
                     _skillRaceClassInfoBySkill.Add(entry.SkillID, entry);
             }
 
@@ -407,7 +401,7 @@ namespace Game.DataStorage
                 _specializationSpellsBySpec.Add(specSpells.SpecID, specSpells);
 
             foreach (SpecSetMemberRecord specSetMember in SpecSetMemberStorage.Values)
-                _specsBySpecSet.Add(Tuple.Create((int)specSetMember.SpecSetID, (uint)specSetMember.ChrSpecializationID));
+                _specsBySpecSet.Add((specSetMember.SpecSetID, specSetMember.ChrSpecializationID));
 
             foreach (SpellClassOptionsRecord classOption in SpellClassOptionsStorage.Values)
                 _spellFamilyNames.Add(classOption.SpellClassSet);
@@ -501,7 +495,7 @@ namespace Game.DataStorage
                 _uiMapAssignmentByWmoGroup[i] = new MultiMap<int, UiMapAssignmentRecord>();
             }
 
-            MultiMap<uint, UiMapAssignmentRecord> uiMapAssignmentByUiMap = new();
+            MultiMap<int, UiMapAssignmentRecord> uiMapAssignmentByUiMap = new();
             foreach (UiMapAssignmentRecord uiMapAssignment in UiMapAssignmentStorage.Values)
             {
                 uiMapAssignmentByUiMap.Add(uiMapAssignment.UiMapID, uiMapAssignment);
@@ -520,9 +514,9 @@ namespace Game.DataStorage
                 }
             }
 
-            Dictionary<Tuple<int, uint>, UiMapLinkRecord> uiMapLinks = new();
+            Dictionary<(int, int), UiMapLinkRecord> uiMapLinks = new();
             foreach (UiMapLinkRecord uiMapLink in UiMapLinkStorage.Values)
-                uiMapLinks[Tuple.Create(uiMapLink.ParentUiMapID, (uint)uiMapLink.ChildUiMapID)] = uiMapLink;
+                uiMapLinks[(uiMapLink.ParentUiMapID, uiMapLink.ChildUiMapID)] = uiMapLink;
 
             foreach (UiMapRecord uiMap in UiMapStorage.Values)
             {
@@ -580,7 +574,7 @@ namespace Game.DataStorage
                     }
                 }
 
-                UiMapLinkRecord uiMapLink = uiMapLinks.LookupByKey(Tuple.Create(uiMap.ParentUiMapID, uiMap.Id));
+                UiMapLinkRecord uiMapLink = uiMapLinks.LookupByKey((uiMap.ParentUiMapID, uiMap.Id));
                 if (uiMapLink != null)
                 {
                     bounds.IsUiAssignment = false;
@@ -655,7 +649,7 @@ namespace Game.DataStorage
                 {
                     var store = _storage.LookupByKey(itr.Key.tableHash);
                     if (store != null)
-                        store.EraseRecord((uint)itr.Key.recordId);
+                        store.EraseRecord(itr.Key.recordId);
                 }
             }
 
@@ -798,12 +792,12 @@ namespace Game.DataStorage
             return _hotfixOptionalData[(int)locale].LookupByKey((tableHash, (int)recordId));
         }
 
-        public uint GetEmptyAnimStateID()
+        public int GetEmptyAnimStateID()
         {
             return AnimationDataStorage.GetNumRows();
         }
 
-        public List<uint> GetAreasForGroup(uint areaGroupId)
+        public List<int> GetAreasForGroup(int areaGroupId)
         {
             return _areaGroupMembers.LookupByKey(areaGroupId);
         }
@@ -853,22 +847,22 @@ namespace Game.DataStorage
             return _artifactPowerLinks.LookupByKey(artifactPowerId);
         }
 
-        public ArtifactPowerRankRecord GetArtifactPowerRank(uint artifactPowerId, byte rank)
+        public ArtifactPowerRankRecord GetArtifactPowerRank(int artifactPowerId, byte rank)
         {
             return _artifactPowerRanks.LookupByKey(Tuple.Create(artifactPowerId, rank));
         }
 
-        public AzeriteEmpoweredItemRecord GetAzeriteEmpoweredItem(uint itemId)
+        public AzeriteEmpoweredItemRecord GetAzeriteEmpoweredItem(int itemId)
         {
             return _azeriteEmpoweredItems.LookupByKey(itemId);
         }
 
-        public bool IsAzeriteItem(uint itemId)
+        public bool IsAzeriteItem(int itemId)
         {
             return AzeriteItemStorage.Any(pair => pair.Value.ItemID == itemId);
         }
 
-        public AzeriteEssencePowerRecord GetAzeriteEssencePower(uint azeriteEssenceId, uint rank)
+        public AzeriteEssencePowerRecord GetAzeriteEssencePower(int azeriteEssenceId, uint rank)
         {
             return _azeriteEssencePowersByIdAndRank.LookupByKey((azeriteEssenceId, rank));
         }
@@ -884,7 +878,7 @@ namespace Game.DataStorage
             return _azeriteItemMilestonePowerByEssenceSlot[slot];
         }
 
-        public List<AzeritePowerSetMemberRecord> GetAzeritePowers(uint itemId)
+        public List<AzeritePowerSetMemberRecord> GetAzeritePowers(int itemId)
         {
             AzeriteEmpoweredItemRecord azeriteEmpoweredItem = GetAzeriteEmpoweredItem(itemId);
             if (azeriteEmpoweredItem != null)
@@ -893,7 +887,7 @@ namespace Game.DataStorage
             return null;
         }
 
-        public uint GetRequiredAzeriteLevelForAzeritePowerTier(uint azeriteUnlockSetId, ItemContext context, uint tier)
+        public int GetRequiredAzeriteLevelForAzeritePowerTier(int azeriteUnlockSetId, ItemContext context, uint tier)
         {
             //ASSERT(tier < MAX_AZERITE_EMPOWERED_TIER);
             var levels = _azeriteTierUnlockLevels.LookupByKey((azeriteUnlockSetId, context));
@@ -940,7 +934,7 @@ namespace Game.DataStorage
 
         public string GetClassName(Class class_, Locale locale = Locale.enUS)
         {
-            ChrClassesRecord classEntry = ChrClassesStorage.LookupByKey(class_);
+            ChrClassesRecord classEntry = ChrClassesStorage.LookupByKey((int)class_);
             if (classEntry == null)
                 return "";
 
@@ -955,29 +949,29 @@ namespace Game.DataStorage
             return _powersByClass[(int)classId][(int)powerType];
         }
 
-        public List<ChrCustomizationChoiceRecord> GetCustomiztionChoices(uint chrCustomizationOptionId)
+        public List<ChrCustomizationChoiceRecord> GetCustomiztionChoices(int chrCustomizationOptionId)
         {
             return _chrCustomizationChoicesByOption.LookupByKey(chrCustomizationOptionId);
         }
 
         public List<ChrCustomizationOptionRecord> GetCustomiztionOptions(Race race, Gender gender)
         {
-            return _chrCustomizationOptionsByRaceAndGender.LookupByKey(Tuple.Create((byte)race, (byte)gender));
+            return _chrCustomizationOptionsByRaceAndGender.LookupByKey((race, gender));
         }
 
-        public MultiMap<uint, uint> GetRequiredCustomizationChoices(uint chrCustomizationReqId)
+        public MultiMap<int, int> GetRequiredCustomizationChoices(int chrCustomizationReqId)
         {
             return _chrCustomizationRequiredChoices.LookupByKey(chrCustomizationReqId);
         }
 
         public ChrModelRecord GetChrModel(Race race, Gender gender)
         {
-            return _chrModelsByRaceAndGender.LookupByKey(Tuple.Create((byte)race, (byte)gender));
+            return _chrModelsByRaceAndGender.LookupByKey((race, gender));
         }
 
         public string GetChrRaceName(Race race, Locale locale = Locale.enUS)
         {
-            ChrRacesRecord raceEntry = ChrRacesStorage.LookupByKey(race);
+            ChrRacesRecord raceEntry = ChrRacesStorage.LookupByKey((int)race);
             if (raceEntry == null)
                 return "";
 
@@ -1005,16 +999,16 @@ namespace Game.DataStorage
             return GetChrSpecializationByIndex(class_, PlayerConst.InitialSpecializationIndex);
         }
 
-        public uint GetRedirectedContentTuningId(uint contentTuningId, uint redirectFlag)
+        public int GetRedirectedContentTuningId(int contentTuningId, uint redirectFlag)
         {
             foreach (var conditionalContentTuning in _conditionalContentTuning.LookupByKey(contentTuningId))
                 if ((conditionalContentTuning.RedirectFlag & redirectFlag) != 0)
-                    return (uint)conditionalContentTuning.RedirectContentTuningID;
+                    return conditionalContentTuning.RedirectContentTuningID;
 
             return contentTuningId;
         }
 
-        public ContentTuningLevels? GetContentTuningData(uint contentTuningId, uint redirectFlag, bool forItem = false)
+        public ContentTuningLevels? GetContentTuningData(int contentTuningId, uint redirectFlag, bool forItem = false)
         {
             ContentTuningRecord contentTuning = ContentTuningStorage.LookupByKey(GetRedirectedContentTuningId(contentTuningId, redirectFlag));
             if (contentTuning == null)
@@ -1043,7 +1037,7 @@ namespace Game.DataStorage
             return levels;
         }
 
-        public bool HasContentTuningLabel(uint contentTuningId, int label)
+        public bool HasContentTuningLabel(int contentTuningId, int label)
         {
             return _contentTuningLabels.Contains((contentTuningId, label));
         }
@@ -1053,14 +1047,14 @@ namespace Game.DataStorage
             if (petfamily == CreatureFamily.None)
                 return null;
 
-            CreatureFamilyRecord petFamily = CreatureFamilyStorage.LookupByKey(petfamily);
+            CreatureFamilyRecord petFamily = CreatureFamilyStorage.LookupByKey((int)petfamily);
             if (petFamily == null)
                 return "";
 
             return petFamily.Name[locale][0] != '\0' ? petFamily.Name[locale] : "";
         }
 
-        public CurrencyContainerRecord GetCurrencyContainerForCurrencyQuantity(uint currencyId, int quantity)
+        public CurrencyContainerRecord GetCurrencyContainerForCurrencyQuantity(int currencyId, int quantity)
         {
             foreach (var record in _currencyContainers.LookupByKey(currencyId))
                 if (quantity >= record.MinAmount && (record.MaxAmount == 0 || quantity <= record.MaxAmount))
@@ -1069,13 +1063,13 @@ namespace Game.DataStorage
             return null;
         }
 
-        public Tuple<float, float> GetCurveXAxisRange(uint curveId)
+        public (float first, float last) GetCurveXAxisRange(int curveId)
         {
             var points = _curvePoints.LookupByKey(curveId);
             if (!points.Empty())
-                return Tuple.Create(points.First().X, points.Last().X);
+                return ((points.First().X, points.Last().X));
 
-            return Tuple.Create(0.0f, 0.0f);
+            return (0.0f, 0.0f);
         }
 
         static CurveInterpolationMode DetermineCurveType(CurveRecord curve, List<Vector2> points)
@@ -1110,7 +1104,7 @@ namespace Game.DataStorage
             return points.Count != 1 ? CurveInterpolationMode.Linear : CurveInterpolationMode.Constant;
         }
 
-        public float GetCurveValueAt(uint curveId, float x)
+        public float GetCurveValueAt(int curveId, float x)
         {
             var curve = CurveStorage.LookupByKey(curveId);
             var points = _curvePoints.LookupByKey(curveId);
@@ -1224,66 +1218,24 @@ namespace Game.DataStorage
             return 0.0f;
         }
 
-        public EmotesTextSoundRecord GetTextSoundEmoteFor(uint emote, Race race, Gender gender, Class class_)
+        public EmotesTextSoundRecord GetTextSoundEmoteFor(int emote, Race race, Gender gender, Class class_)
         {
-            var emoteTextSound = _emoteTextSounds.LookupByKey(Tuple.Create(emote, (byte)race, (byte)gender, (byte)class_));
+            var emoteTextSound = _emoteTextSounds.LookupByKey((emote, race, gender, class_));
             if (emoteTextSound != null)
                 return emoteTextSound;
 
-            emoteTextSound = _emoteTextSounds.LookupByKey(Tuple.Create(emote, (byte)race, (byte)gender, 0));
-        }
-        float ExpectedStatModReducer(float mod, ContentTuningXExpectedRecord contentTuningXExpected, ExpectedStatType stat, int ActiveMilestoneSeason)
-        {
-            if (contentTuningXExpected == null)
-                return mod;
+            emoteTextSound = _emoteTextSounds.LookupByKey((emote, race, gender, Class.None));
+            if (emoteTextSound != null)
+                return emoteTextSound;
 
-            if (contentTuningXExpected.MinMythicPlusSeasonID != 0)
-            {
-                var mythicPlusSeason = MythicPlusSeasonStorage.LookupByKey(contentTuningXExpected.MinMythicPlusSeasonID);
-                if (mythicPlusSeason != null)
-                    if (ActiveMilestoneSeason < mythicPlusSeason.MilestoneSeason)
-                        return mod;
-            }
-
-            if (contentTuningXExpected.MaxMythicPlusSeasonID != 0)
-            {
-                var mythicPlusSeason = MythicPlusSeasonStorage.LookupByKey(contentTuningXExpected.MaxMythicPlusSeasonID);
-                if (mythicPlusSeason != null)
-                    if (ActiveMilestoneSeason >= mythicPlusSeason.MilestoneSeason)
-                        return mod;
-            }
-
-            var expectedStatMod = ExpectedStatModStorage.LookupByKey(contentTuningXExpected.ExpectedStatModID);
-            switch (stat)
-            {
-                case ExpectedStatType.CreatureHealth:
-                    return mod * expectedStatMod.CreatureHealthMod;
-                case ExpectedStatType.PlayerHealth:
-                    return mod * expectedStatMod.PlayerHealthMod;
-                case ExpectedStatType.CreatureAutoAttackDps:
-                    return mod * expectedStatMod.CreatureAutoAttackDPSMod;
-                case ExpectedStatType.CreatureArmor:
-                    return mod * expectedStatMod.CreatureArmorMod;
-                case ExpectedStatType.PlayerMana:
-                    return mod * expectedStatMod.PlayerManaMod;
-                case ExpectedStatType.PlayerPrimaryStat:
-                    return mod * expectedStatMod.PlayerPrimaryStatMod;
-                case ExpectedStatType.PlayerSecondaryStat:
-                    return mod * expectedStatMod.PlayerSecondaryStatMod;
-                case ExpectedStatType.ArmorConstant:
-                    return mod * expectedStatMod.ArmorConstantMod;
-                case ExpectedStatType.CreatureSpellDamage:
-                    return mod * expectedStatMod.CreatureSpellDamageMod;
-            }
-
-            return mod;
+            return null;
         }
 
-        float EvaluateExpectedStat(ExpectedStatType stat, uint level, int expansion, uint contentTuningId, Class unitClass)
+        float EvaluateExpectedStat(ExpectedStatType stat, int level, Expansion expansion, int contentTuningId, Class unitClass)
         {
-            var expectedStatRecord = _expectedStatsByLevel.LookupByKey(Tuple.Create(level, expansion));
+            var expectedStatRecord = _expectedStatsByLevel.LookupByKey((level, expansion));
             if (expectedStatRecord == null)
-                expectedStatRecord = _expectedStatsByLevel.LookupByKey(Tuple.Create(level, -2));
+                expectedStatRecord = _expectedStatsByLevel.LookupByKey((level, Expansion.Unk));
             if (expectedStatRecord == null)
                 return 1.0f;
 
@@ -1363,34 +1315,32 @@ namespace Game.DataStorage
 
         }
 
-
-        List<uint> GetFactionTeamList(uint faction)
+        public List<int> GetFactionTeamList(int faction)
         {
             return _factionTeams.LookupByKey(faction);
         }
 
-
-        public List<FriendshipRepReactionRecord> GetFriendshipRepReactions(uint friendshipRepID)
+        public List<FriendshipRepReactionRecord> GetFriendshipRepReactions(int friendshipRepID)
         {
             return _friendshipRepReactions.LookupByKey(friendshipRepID);
         }
 
-        public List<uint> GetGlyphBindableSpells(uint glyphPropertiesId)
+        public List<int> GetGlyphBindableSpells(int glyphPropertiesId)
         {
             return _glyphBindableSpells.LookupByKey(glyphPropertiesId);
         }
 
-        public List<ChrSpecialization> GetGlyphRequiredSpecs(uint glyphPropertiesId)
+        public List<ChrSpecialization> GetGlyphRequiredSpecs(int glyphPropertiesId)
         {
             return _glyphRequiredSpecs.LookupByKey(glyphPropertiesId);
         }
 
-        public HeirloomRecord GetHeirloomByItemId(uint itemId)
+        public HeirloomRecord GetHeirloomByItemId(int itemId)
         {
             return _heirlooms.LookupByKey(itemId);
         }
 
-        public ItemChildEquipmentRecord GetItemChildEquipment(uint itemId)
+        public ItemChildEquipmentRecord GetItemChildEquipment(int itemId)
         {
             return _itemChildEquipment.LookupByKey(itemId);
         }
@@ -1400,12 +1350,12 @@ namespace Game.DataStorage
             return _itemClassByOldEnum[(int)itemClass];
         }
 
-        public List<ItemLimitCategoryConditionRecord> GetItemLimitCategoryConditions(uint categoryId)
+        public List<ItemLimitCategoryConditionRecord> GetItemLimitCategoryConditions(int categoryId)
         {
             return _itemCategoryConditions.LookupByKey(categoryId);
         }
 
-        public uint GetItemDisplayId(uint itemId, uint appearanceModId)
+        public int GetItemDisplayId(int itemId, int appearanceModId)
         {
             ItemModifiedAppearanceRecord modifiedAppearance = GetItemModifiedAppearance(itemId, appearanceModId);
             if (modifiedAppearance != null)
@@ -1418,7 +1368,7 @@ namespace Game.DataStorage
             return 0;
         }
 
-        public ItemModifiedAppearanceRecord GetItemModifiedAppearance(int itemId, uint appearanceModId)
+        public ItemModifiedAppearanceRecord GetItemModifiedAppearance(int itemId, int appearanceModId)
         {
             var itemModifiedAppearance = _itemModifiedAppearancesByItem.LookupByKey(itemId | (appearanceModId << 24));
             if (itemModifiedAppearance != null)
@@ -1440,7 +1390,7 @@ namespace Game.DataStorage
             return _itemModifiedAppearancesByItem.LookupByKey(itemId);
         }
 
-        public List<ItemSetSpellRecord> GetItemSetSpells(uint itemSetId)
+        public List<ItemSetSpellRecord> GetItemSetSpells(int itemSetId)
         {
             return _itemSetSpells.LookupByKey(itemSetId);
         }
@@ -1466,7 +1416,7 @@ namespace Game.DataStorage
             return null;
         }
 
-        public uint GetDefaultMapLight(uint mapId)
+        public int GetDefaultMapLight(uint mapId)
         {
             foreach (var light in LightStorage.Values.Reverse())
             {
@@ -1482,7 +1432,7 @@ namespace Game.DataStorage
             return TalentTabPages[cls];
         }
 
-        public uint GetLiquidFlags(uint liquidType)
+        public uint GetLiquidFlags(int liquidType)
         {
             LiquidTypeRecord liq = LiquidTypeStorage.LookupByKey(liquidType);
             if (liq != null)
@@ -1496,7 +1446,7 @@ namespace Game.DataStorage
             Difficulty NotUsed = Difficulty.None;
             return GetDefaultMapDifficulty(mapId, ref NotUsed);
         }
-        public MapDifficultyRecord GetDefaultMapDifficulty(uint mapId, ref Difficulty difficulty)
+        public MapDifficultyRecord GetDefaultMapDifficulty(int mapId, ref Difficulty difficulty)
         {
             var dicMapDiff = _mapDifficulties.LookupByKey(mapId);
             if (dicMapDiff == null)
@@ -1507,13 +1457,13 @@ namespace Game.DataStorage
 
             foreach (var pair in dicMapDiff)
             {
-                DifficultyRecord difficultyEntry = DifficultyStorage.LookupByKey(pair.Key);
+                DifficultyRecord difficultyEntry = DifficultyStorage.LookupByKey((int)pair.Key);
                 if (difficultyEntry == null)
                     continue;
 
-                if (difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.Default))
+                if (difficultyEntry.HasAnyFlag(DifficultyFlags.Default))
                 {
-                    difficulty = (Difficulty)pair.Key;
+                    difficulty = pair.Key;
                     return pair.Value;
                 }
             }
@@ -1546,8 +1496,8 @@ namespace Game.DataStorage
             MapDifficultyRecord mapDiff = GetMapDifficultyData(mapId, tmpDiff);
             while (mapDiff == null)
             {
-                tmpDiff = (Difficulty)diffEntry.FallbackDifficultyID;
-                diffEntry = DifficultyStorage.LookupByKey(tmpDiff);
+                tmpDiff = diffEntry.FallbackDifficultyID;
+                diffEntry = DifficultyStorage.LookupByKey((int)tmpDiff);
                 if (diffEntry == null)
                     return GetDefaultMapDifficulty(mapId, ref difficulty);
 
@@ -1559,27 +1509,27 @@ namespace Game.DataStorage
             return mapDiff;
         }
 
-        public List<Tuple<uint, PlayerConditionRecord>> GetMapDifficultyConditions(uint mapDifficultyId)
+        public List<(int, PlayerConditionRecord)> GetMapDifficultyConditions(Difficulty mapDifficultyId)
         {
             return _mapDifficultyConditions.LookupByKey(mapDifficultyId);
         }
 
-        public MountRecord GetMount(uint spellId)
+        public MountRecord GetMount(int spellId)
         {
             return _mountsBySpellId.LookupByKey(spellId);
         }
 
-        public MountRecord GetMountById(uint id)
+        public MountRecord GetMountById(int id)
         {
             return MountStorage.LookupByKey(id);
         }
 
-        public List<MountTypeXCapabilityRecord> GetMountCapabilities(uint mountType)
+        public List<MountTypeXCapabilityRecord> GetMountCapabilities(int mountType)
         {
             return _mountCapabilitiesByType.LookupByKey(mountType);
         }
 
-        public List<MountXDisplayRecord> GetMountDisplays(uint mountId)
+        public List<MountXDisplayRecord> GetMountDisplays(int mountId)
         {
             return _mountDisplays.LookupByKey(mountId);
         }
@@ -1591,10 +1541,10 @@ namespace Game.DataStorage
             if (listNameGen == null)
                 return "";
 
-            if (listNameGen[gender].Empty())
+            if (listNameGen[(int)gender].Empty())
                 return "";
 
-            return listNameGen[gender].SelectRandom().Name;
+            return listNameGen[(int)gender].SelectRandom().Name;
         }
 
         public ResponseCodes ValidateName(string name, Locale locale)
@@ -1657,7 +1607,7 @@ namespace Game.DataStorage
         public PvpDifficultyRecord GetBattlegroundBracketById(int mapid, BattlegroundBracketId id)
         {
             foreach (var entry in PvpDifficultyStorage.Values)
-                if (entry.MapID == mapid && entry.BracketId() == id)
+                if (entry.MapID == mapid && entry.BracketId == id)
                     return entry;
 
             return null;
@@ -1800,22 +1750,22 @@ namespace Game.DataStorage
             return _skillRaceClassInfoBySkill.LookupByKey(skill);
         }
 
-        public List<SpecializationSpellsRecord> GetSpecializationSpells(uint specId)
+        public List<SpecializationSpellsRecord> GetSpecializationSpells(ChrSpecialization specId)
         {
             return _specializationSpellsBySpec.LookupByKey(specId);
         }
 
-        public bool IsSpecSetMember(int specSetId, uint specId)
+        public bool IsSpecSetMember(int specSetId, ChrSpecialization specId)
         {
-            return _specsBySpecSet.Contains(Tuple.Create(specSetId, specId));
+            return _specsBySpecSet.Contains((specSetId, specId));
         }
 
         public bool IsValidSpellFamiliyName(SpellFamilyNames family)
         {
-            return _spellFamilyNames.Contains((byte)family);
+            return _spellFamilyNames.Contains(family);
         }
 
-        public List<SpellProcsPerMinuteModRecord> GetSpellProcsPerMinuteMods(uint spellprocsPerMinuteId)
+        public List<SpellProcsPerMinuteModRecord> GetSpellProcsPerMinuteMods(int spellprocsPerMinuteId)
         {
             return _spellProcsPerMinuteMods.LookupByKey(spellprocsPerMinuteId);
         }
@@ -1830,7 +1780,7 @@ namespace Game.DataStorage
             return _talentsByPosition[(int)class_][tier][column];
         }
 
-        public bool IsTotemCategoryCompatibleWith(uint itemTotemCategoryId, uint requiredTotemCategoryId, bool requireAllTotems = true)
+        public bool IsTotemCategoryCompatibleWith(int itemTotemCategoryId, int requiredTotemCategoryId, bool requireAllTotems = true)
         {
             if (requiredTotemCategoryId == 0)
                 return true;
@@ -1856,17 +1806,17 @@ namespace Game.DataStorage
             return _toys.Contains(toy);
         }
 
-        public List<TransmogSetRecord> GetTransmogSetsForItemModifiedAppearance(uint itemModifiedAppearanceId)
+        public List<TransmogSetRecord> GetTransmogSetsForItemModifiedAppearance(int itemModifiedAppearanceId)
         {
             return _transmogSetsByItemModifiedAppearance.LookupByKey(itemModifiedAppearanceId);
         }
 
-        public List<TransmogSetItemRecord> GetTransmogSetItems(uint transmogSetId)
+        public List<TransmogSetItemRecord> GetTransmogSetItems(int transmogSetId)
         {
             return _transmogSetItemsByTransmogSet.LookupByKey(transmogSetId);
         }
 
-        static bool CheckUiMapAssignmentStatus(float x, float y, float z, uint? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapAssignmentRecord uiMapAssignment, out UiMapAssignmentStatus status)
+        static bool CheckUiMapAssignmentStatus(float x, float y, float z, int? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapAssignmentRecord uiMapAssignment, out UiMapAssignmentStatus status)
         {
             status = new UiMapAssignmentStatus();
             status.UiMapAssignment = uiMapAssignment;
@@ -1947,7 +1897,7 @@ namespace Game.DataStorage
             {
                 if (mapId != uiMapAssignment.MapID)
                 {
-                    MapRecord mapEntry = MapStorage.LookupByKey(mapId);
+                    MapRecord mapEntry = MapStorage.LookupByKey(mapId.Value);
                     if (mapEntry != null)
                     {
                         if (mapEntry.ParentMapID == uiMapAssignment.MapID)
@@ -1995,7 +1945,7 @@ namespace Game.DataStorage
             return true;
         }
 
-        UiMapAssignmentRecord FindNearestMapAssignment(float x, float y, float z, uint? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system)
+        UiMapAssignmentRecord FindNearestMapAssignment(float x, float y, float z, int? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system)
         {
             UiMapAssignmentStatus nearestMapAssignment = new();
             var iterateUiMapAssignments = new Action<MultiMap<int, UiMapAssignmentRecord>, int>((assignments, id) =>
@@ -2021,7 +1971,7 @@ namespace Game.DataStorage
 
             if (mapId.HasValue && mapId > 0)
             {
-                MapRecord mapEntry = MapStorage.LookupByKey(mapId);
+                MapRecord mapEntry = MapStorage.LookupByKey(mapId.Value);
                 if (mapEntry != null)
                 {
                     iterateUiMapAssignments(_uiMapAssignmentByMap[(int)system], (int)mapEntry.Id);
@@ -2056,17 +2006,17 @@ namespace Game.DataStorage
             return uiPosition;
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, uint? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out Vector2 newPos)
+        public bool GetUiMapPosition(float x, float y, float z, int? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out Vector2 newPos)
         {
             return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out _, out newPos);
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, uint? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId)
+        public bool GetUiMapPosition(float x, float y, float z, int? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId)
         {
             return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out uiMapId, out _);
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, uint? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId, out Vector2 newPos)
+        public bool GetUiMapPosition(float x, float y, float z, int? mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId, out Vector2 newPos)
         {
             uiMapId = -1;
             newPos = new Vector2();
@@ -2095,13 +2045,13 @@ namespace Game.DataStorage
         }
 
 
-        public TalentSpellPos GetTalentSpellPos(uint spellId)
+        public TalentSpellPos GetTalentSpellPos(int spellId)
         {
             TalentSpellPosMap.TryGetValue(spellId, out TalentSpellPos tsp);
             return tsp;
         }
 
-        public uint GetTalentSpellCost(uint spellId)
+        public uint GetTalentSpellCost(int spellId)
         {
             if (GetTalentSpellPos(spellId) is TalentSpellPos pos)
                 return (uint)pos.Rank + 1;
@@ -2109,7 +2059,7 @@ namespace Game.DataStorage
             return 0;
         }
 
-        public ContentLevels GetContentLevelsForMapAndZone(uint mapid, uint zoneId)
+        public ContentLevels GetContentLevelsForMapAndZone(int mapid, int zoneId)
         {
             if (mapid == 530 || mapid == 571)
             {
@@ -2139,7 +2089,7 @@ namespace Game.DataStorage
             if (mapEntry == null)
                 return ContentLevels.Content_1_60;
 
-            switch (mapEntry.Expansion())
+            switch (mapEntry.Expansion)
             {
                 default: return ContentLevels.Content_1_60;
                 case Expansion.BurningCrusade: return ContentLevels.Content_61_70;
@@ -2147,7 +2097,7 @@ namespace Game.DataStorage
             }
         }
 
-        public bool Zone2MapCoordinates(uint areaId, ref float x, ref float y)
+        public bool Zone2MapCoordinates(int areaId, ref float x, ref float y)
         {
             AreaTableRecord areaEntry = AreaTableStorage.LookupByKey(areaId);
             if (areaEntry == null)
@@ -2193,7 +2143,7 @@ namespace Game.DataStorage
             return null;
         }
 
-        public bool HasItemCurrencyCost(uint itemId) { return _itemsWithCurrencyCost.Contains(itemId); }
+        public bool HasItemCurrencyCost(int itemId) { return _itemsWithCurrencyCost.Contains(itemId); }
 
         public Dictionary<int, Dictionary<Difficulty, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
 
@@ -2210,53 +2160,53 @@ namespace Game.DataStorage
         MultiMap<uint, Tuple<uint, AllowedHotfixOptionalData>> _allowedHotfixOptionalData = new();
         MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[] _hotfixOptionalData = new MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[(int)Locale.Total];
 
-        MultiMap<uint, uint> _areaGroupMembers = new();
+        MultiMap<int, int> _areaGroupMembers = new();
         MultiMap<uint, ArtifactPowerRecord> _artifactPowers = new();
         MultiMap<uint, uint> _artifactPowerLinks = new();
-        Dictionary<Tuple<uint, byte>, ArtifactPowerRankRecord> _artifactPowerRanks = new();
-        Dictionary<uint, AzeriteEmpoweredItemRecord> _azeriteEmpoweredItems = new();
-        Dictionary<(uint azeriteEssenceId, uint rank), AzeriteEssencePowerRecord> _azeriteEssencePowersByIdAndRank = new();
+        Dictionary<Tuple<int, byte>, ArtifactPowerRankRecord> _artifactPowerRanks = new();
+        Dictionary<int, AzeriteEmpoweredItemRecord> _azeriteEmpoweredItems = new();
+        Dictionary<(int azeriteEssenceId, uint rank), AzeriteEssencePowerRecord> _azeriteEssencePowersByIdAndRank = new();
         List<AzeriteItemMilestonePowerRecord> _azeriteItemMilestonePowers = new();
         AzeriteItemMilestonePowerRecord[] _azeriteItemMilestonePowerByEssenceSlot = new AzeriteItemMilestonePowerRecord[SharedConst.MaxAzeriteEssenceSlot];
         MultiMap<uint, AzeritePowerSetMemberRecord> _azeritePowers = new();
-        Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new();
+        Dictionary<(int azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new();
         Dictionary<(int broadcastTextId, CascLocaleBit cascLocaleBit), int> _broadcastTextDurations = new();
         ChrClassUIDisplayRecord[] _uiDisplayByClass = new ChrClassUIDisplayRecord[(int)Class.Max];
         uint[][] _powersByClass = new uint[(int)Class.Max][];
-        MultiMap<uint, ChrCustomizationChoiceRecord> _chrCustomizationChoicesByOption = new();
-        Dictionary<Tuple<byte, byte>, ChrModelRecord> _chrModelsByRaceAndGender = new();
+        MultiMap<int, ChrCustomizationChoiceRecord> _chrCustomizationChoicesByOption = new();
+        Dictionary<(Race, Gender), ChrModelRecord> _chrModelsByRaceAndGender = new();
         Dictionary<Tuple<byte, byte, byte>, ShapeshiftFormModelData> _chrCustomizationChoicesForShapeshifts = new();
-        MultiMap<Tuple<byte, byte>, ChrCustomizationOptionRecord> _chrCustomizationOptionsByRaceAndGender = new();
-        Dictionary<uint, MultiMap<uint, uint>> _chrCustomizationRequiredChoices = new();
+        MultiMap<(Race, Gender), ChrCustomizationOptionRecord> _chrCustomizationOptionsByRaceAndGender = new();
+        Dictionary<int, MultiMap<int, int>> _chrCustomizationRequiredChoices = new();
         ChrSpecializationRecord[][] _chrSpecializationsByIndex = new ChrSpecializationRecord[(int)Class.Max + 1][];
-        MultiMap<uint, ConditionalContentTuningRecord> _conditionalContentTuning = new();
-        MultiMap<uint, CurrencyContainerRecord> _currencyContainers = new();
-        List<(uint, int)> _contentTuningLabels = new();
-        MultiMap<uint, Vector2> _curvePoints = new();
-        Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord> _emoteTextSounds = new();
-        Dictionary<Tuple<uint, int>, ExpectedStatRecord> _expectedStatsByLevel = new();
-        MultiMap<uint, uint> _factionTeams = new();
-        MultiMap<uint, FriendshipRepReactionRecord> _friendshipRepReactions = new();
-        Dictionary<uint, HeirloomRecord> _heirlooms = new();
-        MultiMap<uint, uint> _glyphBindableSpells = new();
-        MultiMap<uint, ChrSpecialization> _glyphRequiredSpecs = new();
-        Dictionary<uint, ItemChildEquipmentRecord> _itemChildEquipment = new();
+        MultiMap<int, ConditionalContentTuningRecord> _conditionalContentTuning = new();
+        MultiMap<int, CurrencyContainerRecord> _currencyContainers = new();
+        List<(int, int)> _contentTuningLabels = new();
+        MultiMap<int, Vector2> _curvePoints = new();
+        Dictionary<(int, Race, Gender, Class), EmotesTextSoundRecord> _emoteTextSounds = new();
+        Dictionary<(int, Expansion), ExpectedStatRecord> _expectedStatsByLevel = new();
+        MultiMap<int, int> _factionTeams = new();
+        MultiMap<int, FriendshipRepReactionRecord> _friendshipRepReactions = new();
+        Dictionary<int, HeirloomRecord> _heirlooms = new();
+        MultiMap<int, int> _glyphBindableSpells = new();
+        MultiMap<int, ChrSpecialization> _glyphRequiredSpecs = new();
+        Dictionary<int, ItemChildEquipmentRecord> _itemChildEquipment = new();
         ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[20];
-        List<uint> _itemsWithCurrencyCost = new();
-        MultiMap<uint, ItemLimitCategoryConditionRecord> _itemCategoryConditions = new();
+        List<int> _itemsWithCurrencyCost = new();
+        MultiMap<int, ItemLimitCategoryConditionRecord> _itemCategoryConditions = new();
         Dictionary<int, ItemModifiedAppearanceRecord> _itemModifiedAppearancesByItem = new();
-        MultiMap<uint, ItemSetSpellRecord> _itemSetSpells = new();
+        MultiMap<int, ItemSetSpellRecord> _itemSetSpells = new();
         MultiMap<int, ItemSpecOverrideRecord> _itemSpecOverrides = new();
-        Dictionary<uint, ItemEffectRecord> _itemEffectsByItemId = new();
+        Dictionary<int, ItemEffectRecord> _itemEffectsByItemId = new();
         List<JournalTierRecord> _journalTiersByIndex = new();
         Dictionary<int, Dictionary<Difficulty, MapDifficultyRecord>> _mapDifficulties = new();
-        MultiMap<int, Tuple<uint, PlayerConditionRecord>> _mapDifficultyConditions = new();
+        MultiMap<Difficulty, (int, PlayerConditionRecord)> _mapDifficultyConditions = new();
         Dictionary<int, MountRecord> _mountsBySpellId = new();
         MultiMap<int, MountTypeXCapabilityRecord> _mountCapabilitiesByType = new();
         MultiMap<int, MountXDisplayRecord> _mountDisplays = new();
-        Dictionary<int, List<NameGenRecord>[]> _nameGenData = new();
+        Dictionary<Race, List<NameGenRecord>[]> _nameGenData = new();
         List<string>[] _nameValidators = new List<string>[(int)Locale.Total + 1];
-        Dictionary<uint, ParagonReputationRecord> _paragonReputations = new();
+        Dictionary<int, ParagonReputationRecord> _paragonReputations = new();
         MultiMap<int, int> _phasesByGroup = new();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new();
         Dictionary<uint, byte> _pvpItemBonus = new();
@@ -2268,16 +2218,16 @@ namespace Game.DataStorage
         MultiMap<SkillType, SkillLineRecord> _skillLinesByParentSkillLine = new();
         MultiMap<SkillType, SkillLineAbilityRecord> _skillLineAbilitiesBySkillupSkill = new();
         MultiMap<SkillType, SkillRaceClassInfoRecord> _skillRaceClassInfoBySkill = new();
-        MultiMap<uint, SpecializationSpellsRecord> _specializationSpellsBySpec = new();
-        List<Tuple<int, uint>> _specsBySpecSet = new();
-        List<byte> _spellFamilyNames = new();
-        MultiMap<uint, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new();
-        MultiMap<uint, SpellVisualMissileRecord> _spellVisualMissilesBySet = new();
+        MultiMap<ChrSpecialization, SpecializationSpellsRecord> _specializationSpellsBySpec = new();
+        List<(int, ChrSpecialization)> _specsBySpecSet = new();
+        List<SpellFamilyNames> _spellFamilyNames = new();
+        MultiMap<int, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new();
+        MultiMap<int, SpellVisualMissileRecord> _spellVisualMissilesBySet = new();
         MultiMap<uint, ScalingStatValuesRecord> _scalingStatValuesByLevel = new();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
         List<uint> _toys = new();
-        MultiMap<uint, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new();
-        MultiMap<uint, TransmogSetItemRecord> _transmogSetItemsByTransmogSet = new();
+        MultiMap<int, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new();
+        MultiMap<int, TransmogSetItemRecord> _transmogSetItemsByTransmogSet = new();
         Dictionary<int, UiMapBounds> _uiMapBounds = new();
         MultiMap<int, UiMapAssignmentRecord>[] _uiMapAssignmentByMap = new MultiMap<int, UiMapAssignmentRecord>[(int)UiMapSystem.Max];
         MultiMap<int, UiMapAssignmentRecord>[] _uiMapAssignmentByArea = new MultiMap<int, UiMapAssignmentRecord>[(int)UiMapSystem.Max];
@@ -2542,20 +2492,9 @@ namespace Game.DataStorage
 
     public class ShapeshiftFormModelData
     {
-        public uint OptionID;
+        public int OptionID;
         public List<ChrCustomizationChoiceRecord> Choices = new();
         public List<ChrCustomizationDisplayInfoRecord> Displays = new();
-    }
-
-    public enum CurveInterpolationMode
-    {
-        Linear = 0,
-        Cosine = 1,
-        CatmullRom = 2,
-        Bezier3 = 3,
-        Bezier4 = 4,
-        Bezier = 5,
-        Constant = 6,
     }
 
     public class TalentSpellPos

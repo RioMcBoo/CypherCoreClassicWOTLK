@@ -57,12 +57,12 @@ namespace Game.Maps
             AddDoor(go, false);
         }
 
-        public ObjectGuid GetObjectGuid(uint type)
+        public ObjectGuid GetObjectGuid(int type)
         {
             return _objectGuids.LookupByKey(type);
         }
 
-        public override ObjectGuid GetGuidData(uint type)
+        public override ObjectGuid GetGuidData(int type)
         {
             return GetObjectGuid(type);
         }
@@ -120,7 +120,7 @@ namespace Game.Maps
             Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadObjectData: {0} objects loaded.", _creatureInfo.Count + _gameObjectInfo.Count);
         }
 
-        void LoadObjectData(ObjectData[] objectData, Dictionary<uint, uint> objectInfo)
+        void LoadObjectData(ObjectData[] objectData, Dictionary<int, int> objectInfo)
         {
             foreach (var data in objectData)
             {
@@ -135,7 +135,7 @@ namespace Game.Maps
                 LoadDungeonEncounterData(encounter.BossId, encounter.DungeonEncounterId);
         }
 
-        void LoadDungeonEncounterData(uint bossId, uint[] dungeonEncounterIds)
+        void LoadDungeonEncounterData(int bossId, int[] dungeonEncounterIds)
         {
             if (bossId < bosses.Count)
                 for (int i = 0; i < dungeonEncounterIds.Length && i < MapConst.MaxDungeonEncountersPerBoss; ++i)
@@ -201,7 +201,7 @@ namespace Game.Maps
             if (_instanceSpawnGroups.Empty())
                 return;
 
-            Dictionary<uint, states> newStates = new();
+            Dictionary<int, states> newStates = new();
             foreach (var info in _instanceSpawnGroups)
             {
                 if (!newStates.ContainsKey(info.SpawnGroupId))
@@ -210,7 +210,7 @@ namespace Game.Maps
                 if (newStates[info.SpawnGroupId] == states.ForceBlock) // nothing will change this
                     continue;
 
-                if (((1 << (int)GetBossState(info.BossStateId)) & info.BossStates) == 0)
+                if (((1 << (int)GetBossState(info.BossStateId)) & (int)info.BossStates) == 0)
                     continue;
 
                 if (((instance.GetTeamIdInInstance() == TeamId.Alliance) && info.Flags.HasFlag(InstanceSpawnGroupFlags.HordeOnly))
@@ -226,7 +226,7 @@ namespace Game.Maps
 
             foreach (var pair in newStates)
             {
-                uint groupId = pair.Key;
+                int groupId = pair.Key;
                 bool doSpawn = pair.Value == states.Spawn;
                 if (instance.IsSpawnGroupActive(groupId) == doSpawn)
                     continue; // nothing to do here
@@ -238,7 +238,7 @@ namespace Game.Maps
             }
         }
 
-        public BossInfo GetBossInfo(uint id)
+        public BossInfo GetBossInfo(int id)
         {
             Cypher.Assert(id < bosses.Count);
             return bosses[id];
@@ -256,7 +256,7 @@ namespace Game.Maps
                 AddObject(obj, _gameObjectInfo[obj.GetEntry()], add);
         }
 
-        void AddObject(WorldObject obj, uint type, bool add)
+        void AddObject(WorldObject obj, int type, bool add)
         {
             if (add)
                 _objectGuids[type] = obj.GetGUID();
@@ -300,7 +300,7 @@ namespace Game.Maps
 
         // Triggers a GameEvent
         // * If source is null then event is triggered for each player in the instance as "source"
-        public override void TriggerGameEvent(uint gameEventId, WorldObject source = null, WorldObject target = null)
+        public override void TriggerGameEvent(int gameEventId, WorldObject source = null, WorldObject target = null)
         {
             if (source != null)
             {
@@ -314,17 +314,17 @@ namespace Game.Maps
             GameEvents.TriggerForMap(gameEventId, instance);
         }
 
-        public Creature GetCreature(uint type)
+        public Creature GetCreature(int type)
         {
             return instance.GetCreature(GetObjectGuid(type));
         }
 
-        public GameObject GetGameObject(uint type)
+        public GameObject GetGameObject(int type)
         {
             return instance.GetGameObject(GetObjectGuid(type));
         }
 
-        public virtual bool SetBossState(uint id, EncounterState state)
+        public virtual bool SetBossState(int id, EncounterState state)
         {
             if (id < bosses.Count)
             {
@@ -426,7 +426,7 @@ namespace Game.Maps
 
         public virtual void Create()
         {
-            for (uint i = 0; i < bosses.Count; ++i)
+            for (int i = 0; i < bosses.Count; ++i)
                 SetBossState(i, EncounterState.NotStarted);
 
             UpdateSpawnGroups();
@@ -447,7 +447,7 @@ namespace Game.Maps
             {
                 // in loot-based lockouts instance can be loaded with later boss marked as killed without preceding bosses
                 // but we still need to have them alive
-                for (uint i = 0; i < bosses.Count; ++i)
+                for (int i = 0; i < bosses.Count; ++i)
                     if (bosses[i].state == EncounterState.Done && !CheckRequiredBosses(i))
                         bosses[i].state = EncounterState.NotStarted;
 
@@ -475,7 +475,7 @@ namespace Game.Maps
 
         public string UpdateBossStateSaveData(string oldData, UpdateBossStateSaveDataEvent saveEvent)
         {
-            if (!instance.GetMapDifficulty().IsUsingEncounterLocks())
+            if (!instance.GetMapDifficulty().IsUsingEncounterLocks)
                 return GetSaveData();
 
             InstanceScriptDataWriter writer = new(this);
@@ -486,7 +486,7 @@ namespace Game.Maps
 
         public string UpdateAdditionalSaveData(string oldData, UpdateAdditionalSaveDataEvent saveEvent)
         {
-            if (!instance.GetMapDifficulty().IsUsingEncounterLocks())
+            if (!instance.GetMapDifficulty().IsUsingEncounterLocks)
                 return GetSaveData();
 
             InstanceScriptDataWriter writer = new(this);
@@ -495,15 +495,15 @@ namespace Game.Maps
             return writer.GetString();
         }
 
-        public uint? GetEntranceLocationForCompletedEncounters(uint completedEncountersMask)
+        public int? GetEntranceLocationForCompletedEncounters(uint completedEncountersMask)
         {
-            if (!instance.GetMapDifficulty().IsUsingEncounterLocks())
+            if (!instance.GetMapDifficulty().IsUsingEncounterLocks)
                 return _entranceId;
 
             return ComputeEntranceLocationForCompletedEncounters(completedEncountersMask);
         }
 
-        public virtual uint? ComputeEntranceLocationForCompletedEncounters(uint completedEncountersMask)
+        public virtual int? ComputeEntranceLocationForCompletedEncounters(uint completedEncountersMask)
         {
             return null;
         }
@@ -605,12 +605,12 @@ namespace Game.Maps
         }
 
         // Remove Auras due to Spell on all players in instance
-        public void DoRemoveAurasDueToSpellOnPlayers(uint spell, bool includePets = false, bool includeControlled = false)
+        public void DoRemoveAurasDueToSpellOnPlayers(int spell, bool includePets = false, bool includeControlled = false)
         {
             instance.DoOnPlayers(player => DoRemoveAurasDueToSpellOnPlayer(player, spell, includePets, includeControlled));
         }
 
-        public void DoRemoveAurasDueToSpellOnPlayer(Player player, uint spell, bool includePets = false, bool includeControlled = false)
+        public void DoRemoveAurasDueToSpellOnPlayer(Player player, int spell, bool includePets = false, bool includeControlled = false)
         {
             if (player == null)
                 return;
@@ -644,12 +644,12 @@ namespace Game.Maps
         }
 
         // Cast spell on all players in instance
-        public void DoCastSpellOnPlayers(uint spell, bool includePets = false, bool includeControlled = false)
+        public void DoCastSpellOnPlayers(int spell, bool includePets = false, bool includeControlled = false)
         {
             instance.DoOnPlayers(player => DoCastSpellOnPlayer(player, spell, includePets, includeControlled));
         }
 
-        public void DoCastSpellOnPlayer(Player player, uint spell, bool includePets = false, bool includeControlled = false)
+        public void DoCastSpellOnPlayer(Player player, int spell, bool includePets = false, bool includeControlled = false)
         {
             if (player == null)
                 return;
@@ -682,7 +682,7 @@ namespace Game.Maps
             }
         }
 
-        public DungeonEncounterRecord GetBossDungeonEncounter(uint id)
+        public DungeonEncounterRecord GetBossDungeonEncounter(int id)
         {
             return id < bosses.Count ? bosses[id].GetDungeonEncounterForDifficulty(instance.GetDifficultyID()) : null;
         }
@@ -696,16 +696,16 @@ namespace Game.Maps
             return null;
         }
         
-        public virtual bool CheckAchievementCriteriaMeet(uint criteria_id, Player source, Unit target = null, uint miscvalue1 = 0)
+        public virtual bool CheckAchievementCriteriaMeet(int criteria_id, Player source, Unit target = null, uint miscvalue1 = 0)
         {
             Log.outError(LogFilter.Server, "Achievement system call CheckAchievementCriteriaMeet but instance script for map {0} not have implementation for achievement criteria {1}",
                 instance.GetId(), criteria_id);
             return false;
         }
 
-        public bool IsEncounterCompleted(uint dungeonEncounterId)
+        public bool IsEncounterCompleted(int dungeonEncounterId)
         {
-            for (uint i = 0; i < bosses.Count; ++i)
+            for (int i = 0; i < bosses.Count; ++i)
                 for (var j = 0; j < bosses[i].DungeonEncounters.Length; ++j)
                     if (bosses[i].DungeonEncounters[j] != null && bosses[i].DungeonEncounters[j].Id == dungeonEncounterId)
                         return bosses[i].state == EncounterState.Done;
@@ -713,7 +713,7 @@ namespace Game.Maps
             return false;
         }
 
-        public bool IsEncounterCompletedInMaskByBossId(uint completedEncountersMask, uint bossId)
+        public bool IsEncounterCompletedInMaskByBossId(uint completedEncountersMask, int bossId)
         {
             DungeonEncounterRecord dungeonEncounter = GetBossDungeonEncounter(bossId);
             if (dungeonEncounter != null)
@@ -723,7 +723,7 @@ namespace Game.Maps
             return false;
         }
         
-        public void SetEntranceLocation(uint worldSafeLocationId)
+        public void SetEntranceLocation(int worldSafeLocationId)
         {
             _entranceId = worldSafeLocationId;
             _temporaryEntranceId = 0;
@@ -788,23 +788,23 @@ namespace Game.Maps
             instance.SendToPlayers(bossKillCreditMessage);
         }
 
-        public void UpdateEncounterStateForKilledCreature(uint creatureId, Unit source)
+        public void UpdateEncounterStateForKilledCreature(int creatureId, Unit source)
         {
             UpdateEncounterState(EncounterCreditType.KillCreature, creatureId, source);
         }
 
-        public void UpdateEncounterStateForSpellCast(uint spellId, Unit source)
+        public void UpdateEncounterStateForSpellCast(int spellId, Unit source)
         {
             UpdateEncounterState(EncounterCreditType.CastSpell, spellId, source);
         }
 
-        void UpdateEncounterState(EncounterCreditType type, uint creditEntry, Unit source)
+        void UpdateEncounterState(EncounterCreditType type, int creditEntry, Unit source)
         {
             var encounters = Global.ObjectMgr.GetDungeonEncounterList(instance.GetId(), instance.GetDifficultyID());
             if (encounters.Empty())
                 return;
 
-            uint dungeonId = 0;
+            int dungeonId = 0;
 
             foreach (var encounter in encounters)
             {
@@ -925,23 +925,23 @@ namespace Game.Maps
         // Return wether server allow two side groups or not
         public bool ServerAllowsTwoSideGroups() { return WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup); }
 
-        public EncounterState GetBossState(uint id) { return id < bosses.Count ? bosses[id].state : EncounterState.ToBeDecided; }
-        public List<AreaBoundary> GetBossBoundary(uint id) { return id < bosses.Count ? bosses[id].boundary : null; }
+        public EncounterState GetBossState(int id) { return id < bosses.Count ? bosses[id].state : EncounterState.ToBeDecided; }
+        public List<AreaBoundary> GetBossBoundary(int id) { return id < bosses.Count ? bosses[id].boundary : null; }
 
-        public virtual bool CheckRequiredBosses(uint bossId, Player player = null) { return true; }
+        public virtual bool CheckRequiredBosses(int bossId, Player player = null) { return true; }
 
         public uint GetCompletedEncounterMask() { return completedEncounters; }
 
         // Sets a temporary entrance that does not get saved to db
-        public void SetTemporaryEntranceLocation(uint worldSafeLocationId) { _temporaryEntranceId = worldSafeLocationId; }
+        public void SetTemporaryEntranceLocation(int worldSafeLocationId) { _temporaryEntranceId = worldSafeLocationId; }
 
         // Get's the current entrance id
-        public uint GetEntranceLocation() { return _temporaryEntranceId != 0 ? _temporaryEntranceId : _entranceId; }
+        public int GetEntranceLocation() { return _temporaryEntranceId != 0 ? _temporaryEntranceId : _entranceId; }
 
         // Only used by areatriggers that inherit from OnlyOnceAreaTriggerScript
-        public void MarkAreaTriggerDone(uint id) { _activatedAreaTriggers.Add(id); }
-        public void ResetAreaTriggerDone(uint id) { _activatedAreaTriggers.Remove(id); }
-        public bool IsAreaTriggerDone(uint id) { return _activatedAreaTriggers.Contains(id); }
+        public void MarkAreaTriggerDone(int id) { _activatedAreaTriggers.Add(id); }
+        public void ResetAreaTriggerDone(int id) { _activatedAreaTriggers.Remove(id); }
+        public bool IsAreaTriggerDone(int id) { return _activatedAreaTriggers.Contains(id); }
 
         public int GetEncounterCount() { return bosses.Count; }
 
@@ -953,9 +953,9 @@ namespace Game.Maps
 
         public List<PersistentInstanceScriptValueBase> GetPersistentScriptValues() { return _persistentScriptValues; }
 
-        public void SetBossNumber(uint number)
+        public void SetBossNumber(int number)
         {
-            for (uint i = 0; i < number; ++i)
+            for (int i = 0; i < number; ++i)
                 bosses.Add(i, new BossInfo());
         }
 
@@ -972,18 +972,18 @@ namespace Game.Maps
 
         public InstanceMap instance;
         string headers;
-        Dictionary<uint, BossInfo> bosses = new();
+        Dictionary<int, BossInfo> bosses = new();
         List<PersistentInstanceScriptValueBase> _persistentScriptValues = new();
-        MultiMap<uint, DoorInfo> doors = new();
-        Dictionary<uint, MinionInfo> minions = new();
-        Dictionary<uint, uint> _creatureInfo = new();
-        Dictionary<uint, uint> _gameObjectInfo = new();
-        Dictionary<uint, ObjectGuid> _objectGuids = new();
+        MultiMap<int, DoorInfo> doors = new();
+        Dictionary<int, MinionInfo> minions = new();
+        Dictionary<int, int> _creatureInfo = new();
+        Dictionary<int, int> _gameObjectInfo = new();
+        Dictionary<int, ObjectGuid> _objectGuids = new();
         uint completedEncounters; // DEPRECATED, REMOVE
         List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new();
-        List<uint> _activatedAreaTriggers = new();
-        uint _entranceId;
-        uint _temporaryEntranceId;
+        List<int> _activatedAreaTriggers = new();
+        int _entranceId;
+        int _temporaryEntranceId;
         uint _combatResurrectionTimer;
         byte _combatResurrectionCharges; // the counter for available battle resurrections
         bool _combatResurrectionTimerStarted;
@@ -991,10 +991,10 @@ namespace Game.Maps
 
     public class DungeonEncounterData
     {
-        public uint BossId;
-        public uint[] DungeonEncounterId = new uint[4];
+        public int BossId;
+        public int[] DungeonEncounterId = new int[4];
 
-        public DungeonEncounterData(uint bossId, params uint[] dungeonEncounterIds)
+        public DungeonEncounterData(int bossId, params int[] dungeonEncounterIds)
         {
             BossId = bossId;
             DungeonEncounterId = dungeonEncounterIds;
@@ -1003,52 +1003,52 @@ namespace Game.Maps
 
     public class DoorData
     {
-        public DoorData(uint _entry, uint _bossid, DoorType _type)
+        public DoorData(int _entry, int _bossid, DoorType _type)
         {
             entry = _entry;
             bossId = _bossid;
             type = _type;
         }
 
-        public uint entry;
-        public uint bossId;
+        public int entry;
+        public int bossId;
         public DoorType type;
     }
 
     public class BossBoundaryEntry
     {
-        public BossBoundaryEntry(uint bossId, AreaBoundary boundary)
+        public BossBoundaryEntry(int bossId, AreaBoundary boundary)
         {
             BossId = bossId;
             Boundary = boundary;
         }
 
-        public uint BossId;
+        public int BossId;
         public AreaBoundary Boundary;
     }
 
     public class MinionData
     {
-        public MinionData(uint _entry, uint _bossid)
+        public MinionData(int _entry, int _bossid)
         {
             entry = _entry;
             bossId = _bossid;
         }
 
-        public uint entry;
-        public uint bossId;
+        public int entry;
+        public int bossId;
     }
 
     public struct ObjectData
     {
-        public ObjectData(uint _entry, uint _type)
+        public ObjectData(int _entry, int _type)
         {
             entry = _entry;
             type = _type;
         }
 
-        public uint entry;
-        public uint type;
+        public int entry;
+        public int type;
     }
 
     public class BossInfo
@@ -1095,10 +1095,10 @@ namespace Game.Maps
     public struct UpdateBossStateSaveDataEvent
     {
         public DungeonEncounterRecord DungeonEncounter;
-        public uint BossId;
+        public int BossId;
         public EncounterState NewState;
 
-        public UpdateBossStateSaveDataEvent(DungeonEncounterRecord dungeonEncounter, uint bossId, EncounterState state)
+        public UpdateBossStateSaveDataEvent(DungeonEncounterRecord dungeonEncounter, int bossId, EncounterState state)
         {
             DungeonEncounter = dungeonEncounter;
             BossId = bossId;

@@ -62,8 +62,8 @@ namespace Game.BattleGrounds.Zones
                     SendTransportsRemove(player);
             }
 
-            uint atF = SAMiscConst.Factions[Attackers];
-            uint defF = SAMiscConst.Factions[Attackers != 0 ? TeamId.Alliance : TeamId.Horde];
+            int atF = SAMiscConst.Factions[Attackers];
+            int defF = SAMiscConst.Factions[Attackers != 0 ? TeamId.Alliance : TeamId.Horde];
 
             for (byte i = 0; i < SAObjectTypes.MaxObj; i++)
                 DelObject(i);
@@ -94,7 +94,7 @@ namespace Game.BattleGrounds.Zones
 
             for (int i = SAObjectTypes.BoatOne; i <= SAObjectTypes.BoatTwo; i++)
             {
-                uint boatid = 0;
+                int boatid = 0;
                 switch (i)
                 {
                     case SAObjectTypes.BoatOne:
@@ -183,7 +183,7 @@ namespace Game.BattleGrounds.Zones
             //GY capture points
             for (byte i = SAObjectTypes.CentralFlag; i <= SAObjectTypes.LeftFlag; i++)
             {
-                if (!AddObject(i, (SAMiscConst.ObjEntries[i] - (Attackers == TeamId.Alliance ? 1u : 0)), SAMiscConst.ObjSpawnlocs[i], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay))
+                if (!AddObject(i, (SAMiscConst.ObjEntries[i] - (Attackers == TeamId.Alliance ? 1 : 0)), SAMiscConst.ObjSpawnlocs[i], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay))
                 {
                     Log.outError(LogFilter.Battleground, $"SOTA: couldn't spawn Central Flag Entry: {SAMiscConst.ObjEntries[i] - (Attackers == TeamId.Alliance ? 1 : 0)}");
                     continue;
@@ -326,7 +326,7 @@ namespace Game.BattleGrounds.Zones
                     ToggleTimer();
                     DemolisherStartState(false);
                     Status = SAStatus.RoundOne;
-                    TriggerGameEvent(Attackers == TeamId.Alliance ? 23748 : 21702u);
+                    TriggerGameEvent(Attackers == TeamId.Alliance ? 23748 : 21702);
                 }
                 if (TotalTime >= SATimers.BoatStart)
                     StartShips();
@@ -350,7 +350,7 @@ namespace Game.BattleGrounds.Zones
                     ToggleTimer();
                     DemolisherStartState(false);
                     Status = SAStatus.RoundTwo;
-                    TriggerGameEvent(Attackers == TeamId.Alliance ? 23748 : 21702u);
+                    TriggerGameEvent(Attackers == TeamId.Alliance ? 23748 : 21702);
                     // status was set to STATUS_WAIT_JOIN manually for Preparation, set it back now
                     SetStatus(BattlegroundStatus.InProgress);
                     foreach (var pair in GetPlayers())
@@ -431,7 +431,7 @@ namespace Game.BattleGrounds.Zones
 
         public override void RemovePlayer(Player player, ObjectGuid guid, Team team) { }
 
-        public override void HandleAreaTrigger(Player source, uint trigger, bool entered)
+        public override void HandleAreaTrigger(Player source, int trigger, bool entered)
         {
             // this is wrong way to implement these things. On official it done by gameobject spell cast.
             if (GetStatus() != BattlegroundStatus.InProgress)
@@ -485,7 +485,7 @@ namespace Game.BattleGrounds.Zones
                 player.TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f, 0);
         }
 
-        public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker = null)
+        public override void ProcessEvent(WorldObject obj, int eventId, WorldObject invoker = null)
         {
             GameObject go = obj.ToGameObject();
             if (go != null)
@@ -494,7 +494,7 @@ namespace Game.BattleGrounds.Zones
                 {
                     case GameObjectTypes.Goober:
                         if (invoker != null)
-                            if (eventId == (uint)SAEventIds.BG_SA_EVENT_TITAN_RELIC_ACTIVATED)
+                            if (eventId == (int)SAEventIds.BG_SA_EVENT_TITAN_RELIC_ACTIVATED)
                                 TitanRelicActivated(invoker.ToPlayer());
                         break;
                     case GameObjectTypes.DestructibleBuilding:
@@ -502,7 +502,7 @@ namespace Game.BattleGrounds.Zones
                         SAGateInfo gate = GetGate(obj.GetEntry());
                         if (gate != null)
                         {
-                            uint gateId = gate.GateId;
+                            int gateId = gate.GateId;
 
                             // damaged
                             if (eventId == go.GetGoInfo().DestructibleBuilding.DamagedEvent)
@@ -587,8 +587,8 @@ namespace Game.BattleGrounds.Zones
             if (creature.GetEntry() == SACreatureIds.Demolisher)
             {
                 UpdatePlayerScore(killer, ScoreType.DestroyedDemolisher, 1);
-                uint worldStateId = Attackers == TeamId.Horde ? SAWorldStateIds.DestroyedHordeVehicles : SAWorldStateIds.DestroyedAllianceVehicles;
-                int currentDestroyedVehicles = Global.WorldStateMgr.GetValue((int)worldStateId, GetBgMap());
+                int worldStateId = Attackers == TeamId.Horde ? SAWorldStateIds.DestroyedHordeVehicles : SAWorldStateIds.DestroyedAllianceVehicles;
+                int currentDestroyedVehicles = Global.WorldStateMgr.GetValue(worldStateId, GetBgMap());
                 UpdateWorldState(worldStateId, currentDestroyedVehicles + 1);
             }
         }
@@ -648,7 +648,7 @@ namespace Game.BattleGrounds.Zones
 
         public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
-            uint safeloc;
+            int safeloc;
 
             int teamId = GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID()));
             if (teamId == Attackers)
@@ -769,7 +769,7 @@ namespace Game.BattleGrounds.Zones
                 {
                     flag = SAObjectTypes.LeftFlag;
                     DelObject(flag);
-                    AddObject(flag, (SAMiscConst.ObjEntries[flag] - (teamId == TeamId.Alliance ? 0 : 1u)),
+                    AddObject(flag, (SAMiscConst.ObjEntries[flag] - (teamId == TeamId.Alliance ? 0 : 1)),
                         SAMiscConst.ObjSpawnlocs[flag], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay);
 
                     npc = SACreatureTypes.Rigspark;
@@ -797,7 +797,7 @@ namespace Game.BattleGrounds.Zones
                 {
                     flag = SAObjectTypes.RightFlag;
                     DelObject(flag);
-                    AddObject(flag, (SAMiscConst.ObjEntries[flag] - (teamId == TeamId.Alliance ? 0 : 1u)),
+                    AddObject(flag, (SAMiscConst.ObjEntries[flag] - (teamId == TeamId.Alliance ? 0 : 1)),
                         SAMiscConst.ObjSpawnlocs[flag], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay);
 
                     npc = SACreatureTypes.Sparklight;
@@ -826,7 +826,7 @@ namespace Game.BattleGrounds.Zones
                 {
                     flag = SAObjectTypes.CentralFlag;
                     DelObject(flag);
-                    AddObject(flag, (SAMiscConst.ObjEntries[flag] - (teamId == TeamId.Alliance ? 0 : 1u)),
+                    AddObject(flag, (SAMiscConst.ObjEntries[flag] - (teamId == TeamId.Alliance ? 0 : 1)),
                       SAMiscConst.ObjSpawnlocs[flag], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay);
 
                     UpdateWorldState(SAWorldStateIds.CenterGyAlliance, GraveyardStatus[i] == TeamId.Alliance ? 1 : 0);
@@ -1005,7 +1005,7 @@ namespace Game.BattleGrounds.Zones
             return GateStatus[gateId] == SAGateState.AllianceGateDestroyed || GateStatus[gateId] == SAGateState.HordeGateDestroyed;
         }
 
-        public override bool IsSpellAllowed(uint spellId, Player player)
+        public override bool IsSpellAllowed(int spellId, Player player)
         {
             switch (spellId)
             {
@@ -1022,7 +1022,7 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
-        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
+        public override bool UpdatePlayerScore(Player player, ScoreType type, int value, bool doAddHonor = true)
         {
             if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
                 return false;
@@ -1041,7 +1041,7 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
-        SAGateInfo GetGate(uint entry)
+        SAGateInfo GetGate(int entry)
         {
             foreach (var gate in SAMiscConst.Gates)
                 if (gate.GameObjectId == entry)
@@ -1084,7 +1084,7 @@ namespace Game.BattleGrounds.Zones
     {
         public BattlegroundSAScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team) { }
 
-        public override void UpdateScore(ScoreType type, uint value)
+        public override void UpdateScore(ScoreType type, int value)
         {
             switch (type)
             {
@@ -1108,11 +1108,11 @@ namespace Game.BattleGrounds.Zones
             playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)SAObjectives.GatesDestroyed, GatesDestroyed));
         }
 
-        public override uint GetAttr1() { return DemolishersDestroyed; }
-        public override uint GetAttr2() { return GatesDestroyed; }
+        public override int GetAttr1() { return DemolishersDestroyed; }
+        public override int GetAttr2() { return GatesDestroyed; }
 
-        uint DemolishersDestroyed;
-        uint GatesDestroyed;
+        int DemolishersDestroyed;
+        int GatesDestroyed;
     }
 
     struct SARoundScore
@@ -1123,7 +1123,7 @@ namespace Game.BattleGrounds.Zones
 
     class SAGateInfo
     {
-        public SAGateInfo(uint gateId, uint gameObjectId, uint worldState, uint damagedText, uint destroyedText)
+        public SAGateInfo(int gateId, int gameObjectId, int worldState, int damagedText, int destroyedText)
         {
             GateId = gateId;
             GameObjectId = gameObjectId;
@@ -1132,17 +1132,17 @@ namespace Game.BattleGrounds.Zones
             DestroyedText = destroyedText;
         }
 
-        public uint GateId;
-        public uint GameObjectId;
-        public uint WorldState;
-        public uint DamagedText;
-        public uint DestroyedText;
+        public int GateId;
+        public int GameObjectId;
+        public int WorldState;
+        public int DamagedText;
+        public int DestroyedText;
     }
 
     #region Consts
     struct SAMiscConst
     {
-        public static uint[] NpcEntries =
+        public static int[] NpcEntries =
         {
             SACreatureIds.AntiPersonnalCannon,
             SACreatureIds.AntiPersonnalCannon,
@@ -1303,7 +1303,7 @@ namespace Game.BattleGrounds.Zones
             new Position(984.556f, 3.54097f, 86.8137f, 1.5779f),
         };
 
-        public static uint[] ObjEntries =
+        public static int[] ObjEntries =
         {
             190722,
             190727,
@@ -1333,9 +1333,9 @@ namespace Game.BattleGrounds.Zones
             190753
         };
 
-        public static uint[] Factions = { 1732, 1735, };
+        public static int[] Factions = { 1732, 1735, };
 
-        public static uint[] GYEntries = { 1350, 1349, 1347, 1346, 1348, };
+        public static int[] GYEntries = { 1350, 1349, 1347, 1346, 1348, };
 
         public static float[] GYOrientation =
         {
@@ -1359,11 +1359,11 @@ namespace Game.BattleGrounds.Zones
 
     struct SABroadcastTexts
     {
-        public const uint AllianceCapturedTitanPortal = 28944;
-        public const uint HordeCapturedTitanPortal = 28945;
+        public const int AllianceCapturedTitanPortal = 28944;
+        public const int HordeCapturedTitanPortal = 28945;
 
-        public const uint RoundTwoStartOneMinute = 29448;
-        public const uint RoundTwoStartHalfMinute = 29449;
+        public const int RoundTwoStartOneMinute = 29448;
+        public const int RoundTwoStartHalfMinute = 29449;
     }
 
     enum SAStatus
@@ -1413,40 +1413,40 @@ namespace Game.BattleGrounds.Zones
 
     struct SASpellIds
     {
-        public const uint TeleportDefender = 52364;
-        public const uint TeleportAttackers = 60178;
-        public const uint EndOfRound = 52459;
-        public const uint RemoveSeaforium = 59077;
-        public const uint AllianceControlPhaseShift = 60027;
-        public const uint HordeControlPhaseShift = 60028;
+        public const int TeleportDefender = 52364;
+        public const int TeleportAttackers = 60178;
+        public const int EndOfRound = 52459;
+        public const int RemoveSeaforium = 59077;
+        public const int AllianceControlPhaseShift = 60027;
+        public const int HordeControlPhaseShift = 60028;
     }
 
     struct SACreatureIds
     {
-        public const uint Kanrethad = 29;
-        public const uint InvisibleStalker = 15214;
-        public const uint WorldTrigger = 22515;
-        public const uint WorldTriggerLargeAoiNotImmunePcNpc = 23472;
+        public const int Kanrethad = 29;
+        public const int InvisibleStalker = 15214;
+        public const int WorldTrigger = 22515;
+        public const int WorldTriggerLargeAoiNotImmunePcNpc = 23472;
 
-        public const uint AntiPersonnalCannon = 27894;
-        public const uint Demolisher = 28781;
-        public const uint RiggerSparklight = 29260;
-        public const uint GorgrilRigspark = 29262;
+        public const int AntiPersonnalCannon = 27894;
+        public const int Demolisher = 28781;
+        public const int RiggerSparklight = 29260;
+        public const int GorgrilRigspark = 29262;
     }
 
     struct SAGameObjectIds
     {
-        public const uint GateOfTheGreenEmerald = 190722;
-        public const uint GateOfThePurpleAmethyst = 190723;
-        public const uint GateOfTheBlueSapphire = 190724;
-        public const uint GateOfTheRedSun = 190726;
-        public const uint GateOfTheYellowMoon = 190727;
-        public const uint ChamberOfAncientRelics = 192549;
+        public const int GateOfTheGreenEmerald = 190722;
+        public const int GateOfThePurpleAmethyst = 190723;
+        public const int GateOfTheBlueSapphire = 190724;
+        public const int GateOfTheRedSun = 190726;
+        public const int GateOfTheYellowMoon = 190727;
+        public const int ChamberOfAncientRelics = 192549;
 
-        public const uint BoatOneA = 208000;
-        public const uint BoatTwoA = 193185;
-        public const uint BoatOneH = 193184;
-        public const uint BoatTwoH = 208001;
+        public const int BoatOneA = 208000;
+        public const int BoatTwoA = 193185;
+        public const int BoatOneH = 193184;
+        public const int BoatTwoH = 208001;
     }
 
     struct SATimers
@@ -1458,16 +1458,16 @@ namespace Game.BattleGrounds.Zones
 
     struct SASoundIds
     {
-        public const uint GraveyardTakenHorde = 8174;
-        public const uint GraveyardTakenAlliance = 8212;
-        public const uint DefeatHorde = 15905;
-        public const uint VictoryHorde = 15906;
-        public const uint VictoryAlliance = 15907;
-        public const uint DefeatAlliance = 15908;
-        public const uint WallDestroyedAlliance = 15909;
-        public const uint WallDestroyedHorde = 15910;
-        public const uint WallAttackedHorde = 15911;
-        public const uint WallAttackedAlliance = 15912;
+        public const int GraveyardTakenHorde = 8174;
+        public const int GraveyardTakenAlliance = 8212;
+        public const int DefeatHorde = 15905;
+        public const int VictoryHorde = 15906;
+        public const int VictoryAlliance = 15907;
+        public const int DefeatAlliance = 15908;
+        public const int WallDestroyedAlliance = 15909;
+        public const int WallDestroyedHorde = 15910;
+        public const int WallAttackedHorde = 15911;
+        public const int WallAttackedAlliance = 15912;
     }
 
     struct SATextIds
@@ -1502,32 +1502,32 @@ namespace Game.BattleGrounds.Zones
 
     struct SAWorldStateIds
     {
-        public const uint Timer = 3557;
-        public const uint AllyAttacks = 4352;
-        public const uint HordeAttacks = 4353;
-        public const uint PurpleGate = 3614;
-        public const uint RedGate = 3617;
-        public const uint BlueGate = 3620;
-        public const uint GreenGate = 3623;
-        public const uint YellowGate = 3638;
-        public const uint AncientGate = 3849;
-        public const uint LeftGyAlliance = 3635;
-        public const uint RightGyAlliance = 3636;
-        public const uint CenterGyAlliance = 3637;
-        public const uint RightAttTokenAll = 3627;
-        public const uint LeftAttTokenAll = 3626;
-        public const uint LeftAttTokenHrd = 3629;
-        public const uint RightAttTokenHrd = 3628;
-        public const uint HordeDefenceToken = 3631;
-        public const uint AllianceDefenceToken = 3630;
-        public const uint RightGyHorde = 3632;
-        public const uint LeftGyHorde = 3633;
-        public const uint CenterGyHorde = 3634;
-        public const uint BonusTimer = 3571;
-        public const uint EnableTimer = 3564;
-        public const uint AttackerTeam = 3690;
-        public const uint DestroyedAllianceVehicles = 3955;
-        public const uint DestroyedHordeVehicles = 3956;
+        public const int Timer = 3557;
+        public const int AllyAttacks = 4352;
+        public const int HordeAttacks = 4353;
+        public const int PurpleGate = 3614;
+        public const int RedGate = 3617;
+        public const int BlueGate = 3620;
+        public const int GreenGate = 3623;
+        public const int YellowGate = 3638;
+        public const int AncientGate = 3849;
+        public const int LeftGyAlliance = 3635;
+        public const int RightGyAlliance = 3636;
+        public const int CenterGyAlliance = 3637;
+        public const int RightAttTokenAll = 3627;
+        public const int LeftAttTokenAll = 3626;
+        public const int LeftAttTokenHrd = 3629;
+        public const int RightAttTokenHrd = 3628;
+        public const int HordeDefenceToken = 3631;
+        public const int AllianceDefenceToken = 3630;
+        public const int RightGyHorde = 3632;
+        public const int LeftGyHorde = 3633;
+        public const int CenterGyHorde = 3634;
+        public const int BonusTimer = 3571;
+        public const int EnableTimer = 3564;
+        public const int AttackerTeam = 3690;
+        public const int DestroyedAllianceVehicles = 3955;
+        public const int DestroyedHordeVehicles = 3956;
     }
 
     struct SACreatureTypes

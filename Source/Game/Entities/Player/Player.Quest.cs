@@ -15,26 +15,24 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Game.AI.SmartAction;
-using static Game.AI.SmartEvent;
 
 namespace Game.Entities
 {
     public partial class Player
     {
-        public uint GetSharedQuestID() { return m_sharedQuestId; }
+        public int GetSharedQuestID() { return m_sharedQuestId; }
         public ObjectGuid GetPlayerSharingQuest() { return m_playerSharingQuest; }
-        public void SetQuestSharingInfo(ObjectGuid guid, uint id) { m_playerSharingQuest = guid; m_sharedQuestId = id; }
+        public void SetQuestSharingInfo(ObjectGuid guid, int id) { m_playerSharingQuest = guid; m_sharedQuestId = id; }
         public void ClearQuestSharingInfo() { m_playerSharingQuest = ObjectGuid.Empty; m_sharedQuestId = 0; }
 
         uint GetInGameTime() { return m_ingametime; }
         public void SetInGameTime(uint time) { m_ingametime = time; }
 
-        void AddTimedQuest(uint questId) { m_timedquests.Add(questId); }
-        public void RemoveTimedQuest(uint questId) { m_timedquests.Remove(questId); }
+        void AddTimedQuest(int questId) { m_timedquests.Add(questId); }
+        public void RemoveTimedQuest(int questId) { m_timedquests.Remove(questId); }
 
-        public List<uint> GetRewardedQuests() { return m_RewardedQuests; }
-        Dictionary<uint, QuestStatusData> GetQuestStatusMap() { return m_QuestStatus; }
+        public List<int> GetRewardedQuests() { return m_RewardedQuests; }
+        Dictionary<int, QuestStatusData> GetQuestStatusMap() { return m_QuestStatus; }
 
         public int GetQuestLevel(Quest quest)
         {
@@ -49,7 +47,7 @@ namespace Game.Entities
         {
             //wtf why is rewardspell a uint if it can me -1
             int spell_id = Convert.ToInt32(quest.RewardSpell);
-            uint src_spell_id = quest.SourceSpellID;
+            int src_spell_id = quest.SourceSpellID;
 
             // skip quests without rewarded spell
             if (spell_id == 0)
@@ -62,7 +60,7 @@ namespace Game.Entities
                 return;
             }
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spell_id, Difficulty.None);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, Difficulty.None);
             if (spellInfo == null)
                 return;
 
@@ -82,7 +80,7 @@ namespace Game.Entities
                 return;
 
             SpellEffectInfo effect = spellInfo.GetEffect(0);
-            uint learned_0 = effect.TriggerSpell;
+            int learned_0 = effect.TriggerSpell;
             if (!HasSpell(learned_0))
             {
                 found = false;
@@ -101,7 +99,7 @@ namespace Game.Entities
                     return;
             }
 
-            CastSpell(this, (uint)spell_id, true);
+            CastSpell(this, spell_id, true);
         }
 
         public void LearnQuestRewardedSpells()
@@ -564,7 +562,7 @@ namespace Game.Entities
 
         public bool CanRewardQuest(Quest quest, LootItemType rewardType, uint rewardId, bool msg)
         {
-            List<ItemPosCount> dest = new();
+            List<(ItemPos, int)> dest = new();
             if (quest.GetRewChoiceItemsCount() > 0)
             {
                 switch (rewardType)
@@ -807,7 +805,7 @@ namespace Game.Entities
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
         }
 
-        public void CompleteQuest(uint quest_id)
+        public void CompleteQuest(int quest_id)
         {
             if (quest_id != 0)
             {
@@ -824,7 +822,7 @@ namespace Game.Entities
             }
         }
 
-        public void IncompleteQuest(uint quest_id)
+        public void IncompleteQuest(int quest_id)
         {
             if (quest_id != 0)
             {
@@ -898,7 +896,7 @@ namespace Game.Entities
                     if (CanSelectQuestPackageItem(questPackageItem))
                     {
                         hasFilteredQuestPackageReward = true;
-                        if (CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
@@ -917,7 +915,7 @@ namespace Game.Entities
                         if (onlyItemId != 0 && questPackageItem.ItemID != onlyItemId)
                             continue;
 
-                        if (CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
@@ -977,7 +975,7 @@ namespace Game.Entities
                     uint itemId = quest.RewardItemId[i];
                     if (itemId != 0)
                     {
-                        if (CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(itemId));
                             SendNewItem(item, quest.RewardItemCount[i], true, false);
@@ -1013,7 +1011,7 @@ namespace Game.Entities
                         {
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == rewardId)
                             {
-                                if (CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
+                                if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
                                 {
                                     Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(rewardId));
                                     SendNewItem(item, quest.RewardChoiceItemCount[i], true, false);
@@ -1755,7 +1753,7 @@ namespace Game.Entities
                 if (count <= 0)
                     count = 1;
 
-                InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, itemTemplate, count, out _);
+                InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemTemplate, count, out _);
                 if (msg == InventoryResult.Ok)
                 {
                     Item item = StoreNewItem(dest, srcitem, true, new ItemRandomEnchantmentId());
@@ -1806,7 +1804,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool GetQuestRewardStatus(uint quest_id)
+        public bool GetQuestRewardStatus(int quest_id)
         {
             Quest qInfo = Global.ObjectMgr.GetQuestTemplate(quest_id);
             if (qInfo != null)
@@ -1848,7 +1846,7 @@ namespace Game.Entities
             return false;
         }
 
-        public void SetQuestStatus(uint questId, QuestStatus status, bool update = true)
+        public void SetQuestStatus(int questId, QuestStatus status, bool update = true)
         {
             Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
             if (quest != null)
@@ -2089,7 +2087,7 @@ namespace Game.Entities
             return result;
         }
 
-        public ushort GetReqKillOrCastCurrentCount(uint quest_id, int entry)
+        public ushort GetReqKillOrCastCurrentCount(int quest_id, int entry)
         {
             Quest qInfo = Global.ObjectMgr.GetQuestTemplate(quest_id);
             if (qInfo == null)
@@ -2115,15 +2113,15 @@ namespace Game.Entities
                 {
                     if (obj.Type == QuestObjectiveType.Item)
                     {
-                        uint reqItemCount = (uint)obj.Amount;
-                        uint curItemCount = GetItemCount((uint)obj.ObjectID, true);
+                        int reqItemCount = obj.Amount;
+                        int curItemCount = GetItemCount(obj.ObjectID, true);
                         SetQuestObjectiveData(obj, (int)Math.Min(curItemCount, reqItemCount));
                     }
                     else if (obj.Type == QuestObjectiveType.HaveCurrency)
                     {
-                        uint reqCurrencyCount = (uint)obj.Amount;
-                        uint curCurrencyCount = GetCurrencyQuantity((uint)obj.ObjectID);
-                        SetQuestObjectiveData(obj, (int)Math.Min(reqCurrencyCount, curCurrencyCount));
+                        int reqCurrencyCount = obj.Amount;
+                        int curCurrencyCount = GetCurrencyQuantity(obj.ObjectID);
+                        SetQuestObjectiveData(obj, Math.Min(reqCurrencyCount, curCurrencyCount));
                     }
                 }
             }
@@ -2138,12 +2136,12 @@ namespace Game.Entities
             return SharedConst.MaxQuestLogSize;
         }
 
-        public uint GetQuestSlotQuestId(ushort slot)
+        public int GetQuestSlotQuestId(ushort slot)
         {
-            return (uint)m_playerData.QuestLog[slot].QuestID.GetValue();
+            return m_playerData.QuestLog[slot].QuestID;
         }
 
-        public uint GetQuestSlotState(ushort slot, byte counter)
+        public uint GetQuestSlotState(ushort slot)
         {
             return m_playerData.QuestLog[slot].StateFlags;
         }
@@ -2178,9 +2176,8 @@ namespace Game.Entities
             if (!objective.IsStoringFlag())
                 return GetQuestSlotCounter(slot, (byte)objective.StorageIndex);
 
-            return (GetQuestSlotState(slot) & objective.StorageIndex) != 0) ? 1, 0);
-        }
-    
+            return (((GetQuestSlotState(slot) & objective.StorageIndex) != 0) ? 1 : 0);
+        }    
 
         public void SetQuestSlot(ushort slot, uint quest_id)
         {
@@ -2237,7 +2234,7 @@ namespace Game.Entities
                 RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted, (int)fieldOffset), flag);
         }
 
-        public void AreaExploredOrEventHappens(uint questId)
+        public void AreaExploredOrEventHappens(int questId)
         {
             if (questId != 0)
             {
@@ -2258,7 +2255,7 @@ namespace Game.Entities
             }
         }
 
-        public void GroupEventHappens(uint questId, WorldObject pEventObject)
+        public void GroupEventHappens(int questId, WorldObject pEventObject)
         {
             var group = GetGroup();
             if (group != null)
@@ -2276,16 +2273,16 @@ namespace Game.Entities
                 AreaExploredOrEventHappens(questId);
         }
 
-        public void ItemAddedQuestCheck(uint entry, uint count)
+        public void ItemAddedQuestCheck(int entry, int count)
         {
-            UpdateQuestObjectiveProgress(QuestObjectiveType.Item, (int)entry, count);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.Item, entry, count);
         }
 
-        public void ItemRemovedQuestCheck(uint entry, uint count)
+        public void ItemRemovedQuestCheck(int entry, int count)
         {
-            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, (int)entry)))
+            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, entry)))
             {
-                uint questId = objectiveStatusData.QuestStatusPair.QuestID;
+                int questId = objectiveStatusData.QuestStatusPair.QuestID;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                 ushort logSlot = objectiveStatusData.QuestStatusPair.Status.Slot;
                 QuestObjective objective = objectiveStatusData.Objective;
@@ -2293,7 +2290,7 @@ namespace Game.Entities
                 if (!IsQuestObjectiveCompletable(logSlot, quest, objective))
                     continue;
 
-                int newItemCount = (int)GetItemCount(entry, false);  // we may have more than what the status shows, so we have to iterate inventory
+                int newItemCount = GetItemCount(entry, false);  // we may have more than what the status shows, so we have to iterate inventory
                 if (newItemCount < objective.Amount)
                 {
                     SetQuestObjectiveData(objective, newItemCount);
@@ -2316,10 +2313,10 @@ namespace Game.Entities
                     KilledMonsterCredit(cInfo.KillCredit[i]);
         }
 
-        public void KilledMonsterCredit(uint entry, ObjectGuid guid = default)
+        public void KilledMonsterCredit(int entry, ObjectGuid guid = default)
         {
             ushort addKillCount = 1;
-            uint real_entry = entry;
+            int real_entry = entry;
             Creature killed = null;
             if (!guid.IsEmpty())
             {
@@ -2355,23 +2352,23 @@ namespace Game.Entities
             UpdateQuestObjectiveProgress(QuestObjectiveType.TalkTo, (int)entry, 1, guid);
         }
 
-        public void MoneyChanged(ulong value)
+        public void MoneyChanged(long value)
         {
-            UpdateQuestObjectiveProgress(QuestObjectiveType.Money, 0, (long)value - (long)GetMoney());
+            UpdateQuestObjectiveProgress(QuestObjectiveType.Money, 0, value - GetMoney());
         }
 
         public void ReputationChanged(FactionRecord FactionRecord, int change)
         {
-            UpdateQuestObjectiveProgress(QuestObjectiveType.MinReputation, (int)FactionRecord.Id, change);
-            UpdateQuestObjectiveProgress(QuestObjectiveType.MaxReputation, (int)FactionRecord.Id, change);
-            UpdateQuestObjectiveProgress(QuestObjectiveType.IncreaseReputation, (int)FactionRecord.Id, change);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.MinReputation, FactionRecord.Id, change);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.MaxReputation, FactionRecord.Id, change);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.IncreaseReputation, FactionRecord.Id, change);
         }
 
-        void CurrencyChanged(uint currencyId, int change)
+        void CurrencyChanged(int currencyId, int change)
         {
-            UpdateQuestObjectiveProgress(QuestObjectiveType.Currency, (int)currencyId, change);
-            UpdateQuestObjectiveProgress(QuestObjectiveType.HaveCurrency, (int)currencyId, change);
-            UpdateQuestObjectiveProgress(QuestObjectiveType.ObtainCurrency, (int)currencyId, change);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.Currency, currencyId, change);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.HaveCurrency, currencyId, change);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.ObtainCurrency, currencyId, change);
         }
 
         public void UpdateQuestObjectiveProgress(QuestObjectiveType objectiveType, int objectId, long addCount, ObjectGuid victimGuid = default)
@@ -2382,7 +2379,7 @@ namespace Game.Entities
 
             foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((objectiveType, objectId)))
             {
-                uint questId = objectiveStatusData.QuestStatusPair.QuestID;
+                int questId = objectiveStatusData.QuestStatusPair.QuestID;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
 
                 if (!QuestObjective.CanAlwaysBeProgressedInRaid(objectiveType))
@@ -2520,10 +2517,10 @@ namespace Game.Entities
             }
         }
 
-        public bool HasQuestForItem(uint itemid)
+        public bool HasQuestForItem(int itemid)
         {
             // Search incomplete objective first
-            foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, (int)itemid)))
+            foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, itemid)))
             {
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveItr.QuestStatusPair.QuestID);
                 QuestObjective objective = objectiveItr.Objective;
@@ -2560,7 +2557,7 @@ namespace Game.Entities
                     ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(itemid);
 
                     // allows custom amount drop when not 0
-                    uint maxAllowedCount = qInfo.ItemDropQuantity[j] != 0 ? qInfo.ItemDropQuantity[j] : pProto.GetMaxStackSize();
+                    int maxAllowedCount = qInfo.ItemDropQuantity[j] != 0 ? qInfo.ItemDropQuantity[j] : pProto.GetMaxStackSize();
 
                     // 'unique' item
                     if (pProto.GetMaxCount() != 0 && pProto.GetMaxCount() < maxAllowedCount)
@@ -2756,7 +2753,7 @@ namespace Game.Entities
             return false;
         }
 
-        public void SendQuestComplete(uint questId)
+        public void SendQuestComplete(int questId)
         {
             if (questId != 0)
             {
@@ -2766,12 +2763,12 @@ namespace Game.Entities
             }
         }
 
-        public void SendQuestReward(Quest quest, Creature questGiver, uint xp, bool hideChatMessage)
+        public void SendQuestReward(Quest quest, Creature questGiver, int xp, bool hideChatMessage)
         {
-            uint questId = quest.Id;
+            int questId = quest.Id;
             Global.GameEventMgr.HandleQuestComplete(questId);
 
-            uint moneyReward;
+            int moneyReward;
 
             if (!IsMaxLevel())
             {
@@ -2812,7 +2809,7 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public void SendQuestFailed(uint questId, InventoryResult reason = InventoryResult.Ok)
+        public void SendQuestFailed(int questId, InventoryResult reason = InventoryResult.Ok)
         {
             if (questId != 0)
             {
@@ -2890,7 +2887,7 @@ namespace Game.Entities
             }
         }
 
-        void SendQuestUpdateAddCredit(Quest quest, ObjectGuid guid, QuestObjective obj, uint count)
+        void SendQuestUpdateAddCredit(Quest quest, ObjectGuid guid, QuestObjective obj, int count)
         {
             QuestUpdateAddCredit packet = new();
             packet.VictimGUID = guid;
@@ -2911,7 +2908,7 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public void SendQuestUpdateAddPlayer(Quest quest, uint newCount)
+        public void SendQuestUpdateAddPlayer(Quest quest, int newCount)
         {
             QuestUpdateAddPvPCredit packet = new();
             packet.QuestID = quest.Id;

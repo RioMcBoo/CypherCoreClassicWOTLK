@@ -88,15 +88,15 @@ namespace Game.Mails
         }
 
         public Player GetPlayer() { return m_receiver; }
-        public ulong GetPlayerGUIDLow() { return m_receiver_lowguid; }
+        public long GetPlayerGUIDLow() { return m_receiver_lowguid; }
 
         Player m_receiver;
-        ulong m_receiver_lowguid;
+        long m_receiver_lowguid;
     }
 
     public class MailSender
     {
-        public MailSender(MailMessageType messageType, ulong sender_guidlow_or_entry, MailStationery stationery = MailStationery.Default)
+        public MailSender(MailMessageType messageType, long sender_guidlow_or_entry, MailStationery stationery = MailStationery.Default)
         {
             m_messageType = messageType;
             m_senderId = sender_guidlow_or_entry;
@@ -164,11 +164,11 @@ namespace Game.Mails
         }
 
         public MailMessageType GetMailMessageType() { return m_messageType; }
-        public ulong GetSenderId() { return m_senderId; }
+        public long GetSenderId() { return m_senderId; }
         public MailStationery GetStationery() { return m_stationery; }
 
         MailMessageType m_messageType;
-        ulong m_senderId;                                  // player low guid or other object entry
+        long m_senderId;                                  // player low guid or other object entry
         MailStationery m_stationery;
     }
 }

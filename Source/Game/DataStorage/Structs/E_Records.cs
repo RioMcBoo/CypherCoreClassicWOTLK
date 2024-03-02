@@ -26,25 +26,31 @@ namespace Game.DataStorage
 
     public sealed class EmotesTextRecord
     {
-        public uint Id;
+        public int Id;
         public string Name;
         public ushort EmoteId;
     }
 
     public sealed class EmotesTextSoundRecord
     {
-        public uint Id;
-        public byte RaceId;
-        public byte ClassId;
-        public byte SexId;
-        public uint SoundId;
-        public uint EmotesTextId;
+        public int Id;
+        private byte _raceId;
+        private byte _classId;
+        private byte _sexId;
+        public int SoundId;
+        public int EmotesTextId;
+
+        #region Properties
+        public Race RaceId => (Race)_raceId;
+        public Class ClassId => (Class)_classId;
+        public Gender SexId => (Gender)_sexId;
+        #endregion
     }
 
     public sealed class ExpectedStatRecord
     {
-        public uint Id;
-        public int ExpansionID;
+        public int Id;
+        private int _expansionID;
         public float CreatureHealth;
         public float PlayerHealth;
         public float CreatureAutoAttackDps;
@@ -54,7 +60,11 @@ namespace Game.DataStorage
         public float PlayerSecondaryStat;
         public float ArmorConstant;
         public float CreatureSpellDamage;
-        public uint Lvl;
+        public int Lvl;
+
+        #region Properties
+        public Expansion ExpansionID => (Expansion)_expansionID;
+        #endregion
     }
 
     public sealed class ExpectedStatModRecord

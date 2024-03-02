@@ -911,7 +911,7 @@ namespace Game.Combat
             if (IsTaunting()) // a taunting victim can never be suppressed
                 return false;
 
-            if (_victim.IsImmunedToDamage(_owner.GetMeleeDamageSchoolMask()))
+            if (_victim.IsImmunedToDamage(_owner.GetMeleeDamageSchool().GetSpellSchoolMask()))
                 return true;
 
             if (_victim.HasAuraType(AuraType.ModConfuse))

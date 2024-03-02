@@ -2,22 +2,21 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Numerics;
 
 namespace Framework.Dynamic
 {
-    public class FlagsArray<T> where T : IBinaryInteger<T>
+    public class FlagsArray<T> where T : struct
     {
-        protected T[] _storage;
+        protected dynamic[] _storage;
 
         public FlagsArray(uint length)
         {
-            _storage = new T[length];
+            _storage = new dynamic[length];
         }
 
         public FlagsArray(T[] parts)
         {
-            _storage = new T[parts.Length];
+            _storage = new dynamic[parts.Length];
             for (var i = 0; i < parts.Length; ++i)
                 _storage[i] = parts[i];
         }
@@ -32,9 +31,9 @@ namespace Framework.Dynamic
         {
             for (int i = (int)left.GetSize(); i > 0; --i)
             {
-                if (left[i - 1] < right[i - 1])
+                if ((dynamic)left[i - 1] < right[i - 1])
                     return true;
-                else if (left[i - 1] > right[i - 1])
+                else if ((dynamic)left[i - 1] > right[i - 1])
                     return false;
             }
             return false;
@@ -43,9 +42,9 @@ namespace Framework.Dynamic
         {
             for (int i = (int)left.GetSize(); i > 0; --i)
             {
-                if (left[i - 1] > right[i - 1])
+                if ((dynamic)left[i - 1] > right[i - 1])
                     return true;
-                else if (left[i - 1] < right[i - 1])
+                else if ((dynamic)left[i - 1] < right[i - 1])
                     return false;
             }
             return false;
@@ -55,7 +54,7 @@ namespace Framework.Dynamic
         {
             FlagsArray<T> fl = new(left.GetSize());
             for (var i = 0; i < left.GetSize(); ++i)
-                fl[i] = left[i] & right[i];
+                fl[i] = (dynamic)left[i] & right[i];
 
             return fl;
         }
@@ -63,7 +62,7 @@ namespace Framework.Dynamic
         {
             FlagsArray<T> fl = new(left.GetSize());
             for (var i = 0; i < left.GetSize(); ++i)
-                fl[i] = left[i] | right[i];
+                fl[i] = (dynamic)left[i] | right[i];
 
             return fl;
         }
@@ -71,14 +70,14 @@ namespace Framework.Dynamic
         {
             FlagsArray<T> fl = new(left.GetSize());
             for (var i = 0; i < left.GetSize(); ++i)
-                fl[i] = left[i] ^ right[i];
+                fl[i] = (dynamic)left[i] ^ right[i];
             return fl;
         }
 
         public static implicit operator bool(FlagsArray<T> left)
         {
             for (var i = 0; i < left.GetSize(); ++i)
-                if (left[i] != T.Zero)
+                if ((dynamic)left[i] != 0)
                     return true;
 
             return false;
@@ -120,7 +119,7 @@ namespace Framework.Dynamic
         public bool IsEqual(params uint[] parts)
         {
             for (var i = 0; i < _storage.Length; ++i)
-                if (_storage[i] != parts[i])
+                if (_storage[i] == parts[i])
                     return false;
 
             return true;
@@ -128,8 +127,7 @@ namespace Framework.Dynamic
 
         public bool HasFlag(params uint[] parts)
         {
-            return (_storage[0] & parts[0]) != 0 || (_storage[1] & parts[1]) != 0
-                || (_storage[2] & parts[2]) != 0 || (_storage[3] & parts[3]) != 0;
+            return (_storage[0] & parts[0] || _storage[1] & parts[1] || _storage[2] & parts[2] || _storage[3] & parts[3]);
         }
 
         public void Set(params uint[] parts)
@@ -161,43 +159,43 @@ namespace Framework.Dynamic
         }
     }
 
-    public class FlaggedArray32<T1,T2> where T1 : Enum where T2 : Enum
+    public class FlaggedArray32<T> where T : struct
     {
         int[] m_values;
-        int m_flags;
+        uint m_flags;
 
         public FlaggedArray32(byte arraysize)
         {
             m_values = new int[4 * arraysize];
         }
 
-        public int GetFlags() { return m_flags; }
-        public bool HasFlag(T1 flag) { return (m_flags & 1 << Convert.ToInt32(flag)) != 0; }
-        public void AddFlag(T1 flag) { m_flags |= (1 << Convert.ToInt32(flag)); }
-        public void DelFlag(T1 flag) { m_flags &= ~(1 << Convert.ToInt32(flag)); }
+        public uint GetFlags() { return m_flags; }
+        public bool HasFlag(T flag) { return (m_flags & 1 << Convert.ToInt32(flag)) != 0; }
+        public void AddFlag(T flag) { m_flags |= (dynamic)(1 << Convert.ToInt32(flag)); }
+        public void DelFlag(T flag) { m_flags &= ~(dynamic)(1 << Convert.ToInt32(flag)); }
 
-        public int GetValue(T1 flag) { return m_values[Convert.ToInt32(flag)]; }
-        public void SetValue(T1 flag, T2 value) { m_values[Convert.ToInt32(flag)] = Convert.ToInt32(value); }
-        public void AddValue(T1 flag, T2 value) { m_values[Convert.ToInt32(flag)] += Convert.ToInt32(value); }
+        public int GetValue(T flag) { return m_values[Convert.ToInt32(flag)]; }
+        public void SetValue(T flag, object value) { m_values[Convert.ToInt32(flag)] = Convert.ToInt32(value); }
+        public void AddValue(T flag, object value) { m_values[Convert.ToInt32(flag)] += Convert.ToInt32(value); }
     }
 
-    public class FlaggedArray64<T1, T2> where T1 : Enum where T2 : Enum
+    public class FlaggedArray64<T> where T : struct
     {
         int[] m_values;
-        long m_flags;
+        ulong m_flags;
 
         public FlaggedArray64(byte arraysize)
         {
             m_values = new int[4 * arraysize];
         }
 
-        public long GetFlags() { return m_flags; }
-        public bool HasFlag(T1 flag) { return (m_flags & 1L << Convert.ToInt32(flag)) != 0; }
-        public void AddFlag(T1 flag) { m_flags |= (1L << Convert.ToInt32(flag)); }
-        public void DelFlag(T1 flag) { m_flags &= ~(1L << Convert.ToInt32(flag)); }
+        public ulong GetFlags() { return m_flags; }
+        public bool HasFlag(T flag) { return (m_flags & 1ul << Convert.ToInt32(flag)) != 0; }
+        public void AddFlag(T flag) { m_flags |= (dynamic)(1ul << Convert.ToInt32(flag)); }
+        public void DelFlag(T flag) { m_flags &= ~(dynamic)(1ul << Convert.ToInt32(flag)); }
 
-        public int GetValue(T1 flag) { return m_values[Convert.ToInt32(flag)]; }
-        public void SetValue(T1 flag, T2 value) { m_values[Convert.ToInt32(flag)] = Convert.ToInt32(value); }
-        public void AddValue(T1 flag, T2 value) { m_values[Convert.ToInt32(flag)] += Convert.ToInt32(value); }
+        public int GetValue(T flag) { return m_values[Convert.ToInt32(flag)]; }
+        public void SetValue(T flag, object value) { m_values[Convert.ToInt32(flag)] = Convert.ToInt32(value); }
+        public void AddValue(T flag, object value) { m_values[Convert.ToInt32(flag)] += Convert.ToInt32(value); }
     }
 }

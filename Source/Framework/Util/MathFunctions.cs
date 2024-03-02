@@ -231,6 +231,10 @@ public static class MathFunctions
     {
         return (ulong)l | ((ulong)h << 32);
     }
+    public static long MakePair64(int l, int h)
+    {
+        return (long)l | ((long)h << 32);
+    }
     public static uint Pair64_HiPart(ulong x)
     {
         return (uint)((x >> 32) & 0x00000000FFFFFFFF);

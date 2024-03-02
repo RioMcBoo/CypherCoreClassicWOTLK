@@ -37,7 +37,7 @@ namespace System.Collections.Generic
             }
         }
 
-        public void Add(int entry, KeyValuePair<TKey, TValue> item)
+        public void Add(KeyValuePair<TKey, TValue> item)
         {
             if (!_interalStorage.ContainsKey(item.Key))
             {
@@ -108,15 +108,6 @@ namespace System.Collections.Generic
 
             return new List<TValue>();
         }
-
-        //public List<TValue> LookupByKey(object key)
-        //{
-        //    TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
-        //    if (_interalStorage.ContainsKey(newkey))
-        //        return _interalStorage[newkey];
-
-        //    return new List<TValue>();
-        //}
 
         bool IDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
         {

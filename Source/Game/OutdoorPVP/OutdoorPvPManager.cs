@@ -118,7 +118,7 @@ namespace Game.PvP
             Log.outDebug(LogFilter.Outdoorpvp, "Player {0} left outdoorpvp id {1}", player.GetGUID().ToString(), outdoor.GetTypeId());
         }
 
-        public OutdoorPvP GetOutdoorPvPToZoneId(Map map, uint zoneid)
+        public OutdoorPvP GetOutdoorPvPToZoneId(Map map, int zoneid)
         {
             return m_OutdoorPvPMap.LookupByKey((map, zoneid));
         }
@@ -182,7 +182,7 @@ namespace Game.PvP
 
         // maps the zone ids to an outdoor pvp event
         // used in player event handling
-        Dictionary<(Map map, uint zoneId), OutdoorPvP> m_OutdoorPvPMap = new();
+        Dictionary<(Map map, int zoneId), OutdoorPvP> m_OutdoorPvPMap = new();
 
         // Holds the outdoor PvP templates
         uint[] m_OutdoorMapIds = { 0, 530, 530, 530, 530, 1 };

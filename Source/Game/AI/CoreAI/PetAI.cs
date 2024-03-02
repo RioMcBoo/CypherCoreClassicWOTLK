@@ -87,7 +87,7 @@ namespace Game.AI
 
                 for (byte i = 0; i < me.GetPetAutoSpellSize(); ++i)
                 {
-                    uint spellID = me.GetPetAutoSpellOnPos(i);
+                    int spellID = me.GetPetAutoSpellOnPos(i);
                     if (spellID == 0)
                         continue;
 
@@ -422,7 +422,7 @@ namespace Game.AI
             }
         }
 
-        public override void MovementInform(MovementGeneratorType type, uint id)
+        public override void MovementInform(MovementGeneratorType type, int id)
         {
             // Receives notification when pet reaches stay or follow owner
             switch (type)
@@ -641,7 +641,7 @@ namespace Game.AI
             }
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             AttackStart(attacker);
         }

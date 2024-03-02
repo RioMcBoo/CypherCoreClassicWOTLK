@@ -4,8 +4,6 @@
 using Framework.Constants;
 using System;
 using System.Numerics;
-using System.Xml.Linq;
-using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
@@ -19,7 +17,7 @@ namespace Game.DataStorage
 
     public sealed class TalentRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Description;
         public byte TierID;
         public byte Flags;
@@ -441,9 +439,9 @@ namespace Game.DataStorage
 
     public sealed class TransmogSetItemRecord
     {
-        public uint Id;
-        public uint TransmogSetID;
-        public uint ItemModifiedAppearanceID;
+        public int Id;
+        public int TransmogSetID;
+        public int ItemModifiedAppearanceID;
         public int Flags;
     }
 

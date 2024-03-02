@@ -155,7 +155,7 @@ namespace Game.Networking.Packets
     {
         public ChatPkt() : base(ServerOpcodes.Chat) { }
 
-        public void Initialize(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, uint achievementId = 0, string channelName = "", Locale locale = Locale.enUS, string addonPrefix = "")
+        public void Initialize(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, int achievementId = 0, string channelName = "", Locale locale = Locale.enUS, string addonPrefix = "")
         {
             // Clear everything because same packet can be used multiple times
             Clear();

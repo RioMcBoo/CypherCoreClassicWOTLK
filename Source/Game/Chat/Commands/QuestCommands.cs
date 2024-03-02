@@ -179,7 +179,7 @@ namespace Game.Chat
 
                     uint curItemCount = player.GetItemCount(itemTemplate.GetId(), true);   
 
-                    var msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, itemTemplate, (uint)(obj.Amount - curItemCount), out _);
+                    var msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemTemplate, (uint)(obj.Amount - curItemCount), out _);
                     if (msg == InventoryResult.Ok)
                     {
                         Item item = player.StoreNewItem(dest, (uint)obj.ObjectID, true, new ItemRandomEnchantmentId());

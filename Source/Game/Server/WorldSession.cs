@@ -662,7 +662,7 @@ namespace Game
         }
 
         public AccountTypes GetSecurity() { return _security; }
-        public uint GetAccountId() { return _accountId; }
+        public int GetAccountId() { return _accountId; }
         public ObjectGuid GetAccountGUID() { return ObjectGuid.Create(HighGuid.WowAccount, GetAccountId()); }
         public string GetAccountName() { return _accountName; }
         public uint GetBattlenetAccountId() { return _battlenetAccountId; }
@@ -934,7 +934,7 @@ namespace Game
         string m_Address;
 
         AccountTypes _security;
-        uint _accountId;
+        int _accountId;
         string _accountName;
         uint _battlenetAccountId;
         Expansion m_accountExpansion;
@@ -1000,20 +1000,20 @@ namespace Game
 
     public struct ConnectToKey
     {
-        public ulong Raw
+        public long Raw
         {
-            get { return ((ulong)AccountId | ((ulong)connectionType << 32) | (Key << 33)); }
+            get { return (AccountId | ((int)connectionType << 32) | (Key << 33)); }
             set
             {
-                AccountId = (uint)(value & 0xFFFFFFFF);
+                AccountId = (int)value;
                 connectionType = (ConnectionType)((value >> 32) & 1);
-                Key = (value >> 33);
+                Key = (long)((ulong)value >> 33);
             }
         }
 
-        public uint AccountId;
+        public int AccountId;
         public ConnectionType connectionType;
-        public ulong Key;
+        public long Key;
     }
 
     public class DosProtection

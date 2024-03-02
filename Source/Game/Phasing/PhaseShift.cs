@@ -29,7 +29,7 @@ namespace Game
             IsDbPhaseShift = copy.IsDbPhaseShift;
         }
 
-        public bool AddPhase(uint phaseId, PhaseFlags flags, List<Condition> areaConditions, int references = 1)
+        public bool AddPhase(int phaseId, PhaseFlags flags, List<Condition> areaConditions, int references = 1)
         {
             bool newPhase = false;
 
@@ -47,7 +47,7 @@ namespace Game
             return newPhase;
         }
 
-        public bool RemovePhase(uint phaseId)
+        public bool RemovePhase(int phaseId)
         {
             var phaseRef = Phases.LookupByKey(phaseId);
             if (phaseRef != null)
@@ -231,22 +231,22 @@ namespace Game
             return false;
         }
         
-        public bool HasPhase(uint phaseId) { return Phases.ContainsKey(phaseId); }
-        public Dictionary<uint, PhaseRef> GetPhases() { return Phases; }
+        public bool HasPhase(int phaseId) { return Phases.ContainsKey(phaseId); }
+        public Dictionary<int, PhaseRef> GetPhases() { return Phases; }
 
         public bool HasVisibleMapId(int visibleMapId) { return VisibleMapIds.ContainsKey(visibleMapId); }
         public Dictionary<int, VisibleMapIdRef> GetVisibleMapIds() { return VisibleMapIds; }
 
-        public bool HasUiWorldMapAreaIdSwap(uint uiWorldMapAreaId) { return UiMapPhaseIds.ContainsKey(uiWorldMapAreaId); }
-        public Dictionary<uint, UiMapPhaseIdRef> GetUiMapPhaseIds() { return UiMapPhaseIds; }
+        public bool HasUiWorldMapAreaIdSwap(int uiWorldMapAreaId) { return UiMapPhaseIds.ContainsKey(uiWorldMapAreaId); }
+        public Dictionary<int, UiMapPhaseIdRef> GetUiMapPhaseIds() { return UiMapPhaseIds; }
 
         public ObjectGuid GetPersonalGuid() { return PersonalGuid; }
         
         public PhaseShiftFlags Flags = PhaseShiftFlags.Unphased;
         public ObjectGuid PersonalGuid;
-        public Dictionary<uint, PhaseRef> Phases = new();
+        public Dictionary<int, PhaseRef> Phases = new();
         public Dictionary<int, VisibleMapIdRef> VisibleMapIds = new();
-        public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds = new();
+        public Dictionary<int, UiMapPhaseIdRef> UiMapPhaseIds = new();
 
         int NonCosmeticReferences;
         int CosmeticReferences;

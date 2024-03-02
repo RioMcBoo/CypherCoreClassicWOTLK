@@ -22,14 +22,14 @@ namespace Game.Chat
         WorldObject Sender;
         WorldObject Receiver;
         string Text;
-        uint AchievementId;
+        int AchievementId;
         Locale Locale;
 
         // caches
         public ChatPkt UntranslatedPacket;
         public ChatPkt TranslatedPacket;
 
-        public ChatPacketSender(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, uint achievementId = 0, Locale locale = Locale.enUS)
+        public ChatPacketSender(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, int achievementId = 0, Locale locale = Locale.enUS)
         {
             Type = chatType;
             Language = language;
@@ -65,7 +65,7 @@ namespace Game.Chat
     
     public class BroadcastTextBuilder : MessageBuilder
     {
-        public BroadcastTextBuilder(WorldObject obj, ChatMsg msgtype, uint textId, Gender gender, WorldObject target = null, uint achievementId = 0)
+        public BroadcastTextBuilder(WorldObject obj, ChatMsg msgtype, int textId, Gender gender, WorldObject target = null, int achievementId = 0)
         {
             _source = obj;
             _msgType = msgtype;
@@ -83,10 +83,10 @@ namespace Game.Chat
 
         WorldObject _source;
         ChatMsg _msgType;
-        uint _textId;
+        int _textId;
         Gender _gender;
         WorldObject _target;
-        uint _achievementId;
+        int _achievementId;
     }
 
     public class CustomChatTextBuilder : MessageBuilder

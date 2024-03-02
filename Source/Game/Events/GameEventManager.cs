@@ -1446,7 +1446,7 @@ namespace Game
                 BattlegroundTypeId bgTypeId = Global.BattlegroundMgr.WeekendHolidayIdToBGType(Event.holiday_id);
                 if (bgTypeId != BattlegroundTypeId.None)
                 {
-                    var bl = CliDB.BattlemasterListStorage.LookupByKey(Global.BattlegroundMgr.WeekendHolidayIdToBGType(Event.holiday_id));
+                    var bl = CliDB.BattlemasterListStorage.LookupByKey((int)Global.BattlegroundMgr.WeekendHolidayIdToBGType(Event.holiday_id));
                     if (bl != null)
                         if (bl.HolidayWorldState != 0)
                             Global.WorldStateMgr.SetValue(bl.HolidayWorldState, Activate ? 1 : 0, false, null);
@@ -1454,7 +1454,7 @@ namespace Game
             }
         }
 
-        public void HandleQuestComplete(uint quest_id)
+        public void HandleQuestComplete(int quest_id)
         {
             // translate the quest to event and condition
             var questToEvent = mQuestToEventConditions.LookupByKey(quest_id);
@@ -1570,7 +1570,7 @@ namespace Game
             if (gameEvent.holidayStage == 0) // Ignore holiday
                 return;
 
-            var holiday = CliDB.HolidaysStorage.LookupByKey(gameEvent.holiday_id);
+            var holiday = CliDB.HolidaysStorage.LookupByKey((int)gameEvent.holiday_id);
             if (holiday.Date[0] == 0 || holiday.Duration[0] == 0) // Invalid definitions
             {
                 Log.outError(LogFilter.Sql, $"Missing date or duration for holiday {gameEvent.holiday_id}.");
@@ -1683,33 +1683,33 @@ namespace Game
         void AddActiveEvent(ushort event_id) { m_ActiveEvents.Add(event_id); }
         void RemoveActiveEvent(ushort event_id) { m_ActiveEvents.Remove(event_id); }
 
-        List<Tuple<uint, uint>>[] mGameEventCreatureQuests;
-        List<Tuple<uint, uint>>[] mGameEventGameObjectQuests;
-        Dictionary<uint, VendorItem>[] mGameEventVendors;
-        List<Tuple<ulong, ModelEquip>>[] mGameEventModelEquip;
-        List<uint>[] mGameEventPoolIds;
+        List<(int, int)>[] mGameEventCreatureQuests;
+        List<(int, int)>[] mGameEventGameObjectQuests;
+        Dictionary<int, VendorItem>[] mGameEventVendors;
+        List<Tuple<long, ModelEquip>>[] mGameEventModelEquip;
+        List<int>[] mGameEventPoolIds;
         GameEventData[] mGameEvent;
-        Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new();
-        List<(ulong guid, ulong npcflag)>[] mGameEventNPCFlags;
+        Dictionary<int, GameEventQuestToEventConditionNum> mQuestToEventConditions = new();
+        List<(long guid, long npcflag)>[] mGameEventNPCFlags;
         List<ushort> m_ActiveEvents = new();
         bool isSystemInit;
 
-        public List<ulong>[] mGameEventCreatureGuids;
-        public List<ulong>[] mGameEventGameobjectGuids;
+        public List<long>[] mGameEventCreatureGuids;
+        public List<long>[] mGameEventGameobjectGuids;
     }
 
     public class GameEventFinishCondition
     {
         public float reqNum;  // required number // use float, since some events use percent
         public float done;    // done number
-        public uint max_world_state;  // max resource count world state update id
-        public uint done_world_state; // done resource count world state update id
+        public int max_world_state;  // max resource count world state update id
+        public int done_world_state; // done resource count world state update id
     }
 
     public class GameEventQuestToEventConditionNum
     {
         public ushort event_id;
-        public uint condition;
+        public int condition;
         public float num;
     }
 
@@ -1728,7 +1728,7 @@ namespace Game
         public HolidayIds holiday_id;
         public byte holidayStage;
         public GameEventState state;   // state of the game event, these are saved into the game_event table on change!
-        public Dictionary<uint, GameEventFinishCondition> conditions = new();  // conditions to finish
+        public Dictionary<int, GameEventFinishCondition> conditions = new();  // conditions to finish
         public List<ushort> prerequisite_events = new();  // events that must be completed before starting this event
         public string description;
         public byte announce;         // if 0 dont announce, if 1 announce, if 2 take config value

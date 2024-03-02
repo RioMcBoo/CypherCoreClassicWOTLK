@@ -31,13 +31,13 @@ namespace Game.Collision
 
         public static string VMapPath = Global.WorldMgr.GetDataPath() + "/vmaps/";
 
-        public void Initialize(MultiMap<uint, uint> mapData)
+        public void Initialize(MultiMap<int, int> mapData)
         {
             foreach (var pair in mapData)
                 iParentMapData[pair.Value] = pair.Key;
         }
 
-        public LoadResult LoadMap(uint mapId, int x, int y)
+        public LoadResult LoadMap(int mapId, int x, int y)
         {
             if (!IsMapLoadingEnabled())
                 return LoadResult.DisabledInConfig;
@@ -59,7 +59,7 @@ namespace Game.Collision
             return instanceTree.LoadMapTile(x, y, this);
         }
 
-        public void UnloadMap(uint mapId, int x, int y)
+        public void UnloadMap(int mapId, int x, int y)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
@@ -72,7 +72,7 @@ namespace Game.Collision
             }
         }
 
-        public void UnloadMap(uint mapId)
+        public void UnloadMap(int mapId)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
@@ -85,7 +85,7 @@ namespace Game.Collision
             }
         }
 
-        public bool IsInLineOfSight(uint mapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
+        public bool IsInLineOfSight(int mapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
         {
             if (!IsLineOfSightCalcEnabled() || Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLOS))
                 return true;
@@ -102,7 +102,7 @@ namespace Game.Collision
             return true;
         }
 
-        public bool GetObjectHitPos(uint mapId, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
+        public bool GetObjectHitPos(int mapId, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
         {
             if (IsLineOfSightCalcEnabled() && !Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLOS))
             {
@@ -128,7 +128,7 @@ namespace Game.Collision
             return false;
         }
 
-        public float GetHeight(uint mapId, float x, float y, float z, float maxSearchDist)
+        public float GetHeight(int mapId, float x, float y, float z, float maxSearchDist)
         {
             if (IsHeightCalcEnabled() && !Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapHeight))
             {
@@ -147,7 +147,7 @@ namespace Game.Collision
             return MapConst.VMAPInvalidHeightValue;
         }
 
-        public bool GetAreaInfo(uint mapId, float x, float y, ref float z, out uint flags, out int adtId, out int rootId, out int groupId)
+        public bool GetAreaInfo(int mapId, float x, float y, ref float z, out uint flags, out int adtId, out int rootId, out int groupId)
         {
             flags = 0;
             adtId = 0;
@@ -169,7 +169,7 @@ namespace Game.Collision
             return false;
         }
 
-        public bool GetLiquidLevel(uint mapId, float x, float y, float z, uint reqLiquidType, ref float level, ref float floor, ref uint type, ref uint mogpFlags)
+        public bool GetLiquidLevel(int mapId, float x, float y, float z, uint reqLiquidType, ref float level, ref float floor, ref int type, ref uint mogpFlags)
         {
             if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLiquidStatus))
             {
@@ -194,7 +194,7 @@ namespace Game.Collision
             return false;
         }
 
-        public AreaAndLiquidData GetAreaAndLiquidData(uint mapId, float x, float y, float z, uint reqLiquidType)
+        public AreaAndLiquidData GetAreaAndLiquidData(int mapId, float x, float y, float z, int reqLiquidType)
         {
             var data = new AreaAndLiquidData();
 
@@ -215,7 +215,7 @@ namespace Game.Collision
                 if (instanceTree.GetLocationInfo(pos, info))
                 {
                     data.floorZ = info.ground_Z;
-                    uint liquidType = info.hitModel.GetLiquidType();
+                    int liquidType = info.hitModel.GetLiquidType();
                     float liquidLevel = 0;
                     if (reqLiquidType == 0 || Convert.ToBoolean(Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType))
                         if (info.hitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
@@ -281,7 +281,7 @@ namespace Game.Collision
         public int GetParentMapId(int mapId)
         {
             if (iParentMapData.ContainsKey(mapId))
-                return (int)iParentMapData[mapId];
+                return iParentMapData[mapId];
 
             return -1;
         }
@@ -310,8 +310,8 @@ namespace Game.Collision
         public bool IsMapLoadingEnabled() { return _enableLineOfSightCalc || _enableHeightCalc; }
 
         Dictionary<string, ManagedModel> iLoadedModelFiles = new();
-        Dictionary<uint, StaticMapTree> iInstanceMapTrees = new();
-        Dictionary<uint, uint> iParentMapData = new();
+        Dictionary<int, StaticMapTree> iInstanceMapTrees = new();
+        Dictionary<int, int> iParentMapData = new();
         bool _enableLineOfSightCalc;
         bool _enableHeightCalc;
 
@@ -354,10 +354,10 @@ namespace Game.Collision
         }
         public struct LiquidInfo
         {
-            public uint LiquidType;
+            public int LiquidType;
             public float Level;
 
-            public LiquidInfo(uint type, float level)
+            public LiquidInfo(int type, float level)
             {
                 LiquidType = type;
                 Level = level;

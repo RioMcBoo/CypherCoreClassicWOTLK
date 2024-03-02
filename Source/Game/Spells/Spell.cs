@@ -8802,7 +8802,7 @@ namespace Game.Spells
 
         public SpellModOp op { get; set; }
         public SpellModType type { get; set; }
-        public uint spellId { get; set; }
+        public int spellId { get; set; }
         public Aura ownerAura { get; set; }
     }
 

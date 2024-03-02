@@ -46,12 +46,12 @@ namespace Game.AI
         /// <summary>
         /// Called when a player selects a gossip item in the gameobject's gossip menu.
         /// </summary>
-        public virtual bool OnGossipSelect(Player player, uint menuId, uint gossipListId) { return false; }
+        public virtual bool OnGossipSelect(Player player, int menuId, int gossipListId) { return false; }
 
         /// <summary>
         /// Called when a player selects a gossip with a code in the gameobject's gossip menu.
         /// </summary>
-        public virtual bool OnGossipSelectCode(Player player, uint sender, uint action, string code) { return false; }
+        public virtual bool OnGossipSelectCode(Player player, int sender, int action, string code) { return false; }
 
         /// <summary>
         /// Called when a player accepts a quest from the gameobject.
@@ -61,24 +61,24 @@ namespace Game.AI
         /// <summary>
         /// Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
         /// </summary>
-        public virtual void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
+        public virtual void OnQuestReward(Player player, Quest quest, LootItemType type, int opt) { }
 
         // Called when a Player clicks a GameObject, before GossipHello
         // prevents achievement tracking if returning true
         public virtual bool OnReportUse(Player player) { return false; }
 
-        public virtual void Destroyed(WorldObject attacker, uint eventId) { }
-        public virtual void Damaged(WorldObject attacker, uint eventId) { }
+        public virtual void Destroyed(WorldObject attacker, int eventId) { }
+        public virtual void Damaged(WorldObject attacker, int eventId) { }
 
-        public virtual void SetData64(uint id, ulong value) { }
-        public virtual ulong GetData64(uint id) { return 0; }
-        public virtual uint GetData(uint id) { return 0; }
-        public virtual void SetData(uint id, uint value) { }
+        public virtual void SetData64(int id, ulong value) { }
+        public virtual ulong GetData64(int id) { return 0; }
+        public virtual uint GetData(int id) { return 0; }
+        public virtual void SetData(int id, int value) { }
 
         public virtual void OnGameEvent(bool start, ushort eventId) { }
-        public virtual void OnLootStateChanged(uint state, Unit unit) { }
+        public virtual void OnLootStateChanged(LootState state, Unit unit) { }
         public virtual void OnStateChanged(GameObjectState state) { }
-        public virtual void EventInform(uint eventId) { }
+        public virtual void EventInform(int eventId) { }
 
         // Called when hit by a spell
         public virtual void SpellHit(WorldObject caster, SpellInfo spellInfo) { }

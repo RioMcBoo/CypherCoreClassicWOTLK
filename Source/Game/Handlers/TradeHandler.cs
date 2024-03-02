@@ -81,7 +81,7 @@ namespace Game
             SendPacket(tradeUpdated);
         }
 
-        void MoveTradeItems(Item[] myItems, Item[] hisItems, List<ItemPosCount>[] myDest, List<ItemPosCount>[] hisDest)
+        void MoveTradeItems(Item[] myItems, Item[] hisItems, List<(ItemPos item, int count)>[] myDest, List<(ItemPos item, int count)>[] hisDest)
         {
             Player trader = GetPlayer().GetTrader();
             if (trader == null)
@@ -371,8 +371,8 @@ namespace Game
                 // test if item will fit in each inventory
                 TradeStatusPkt myCanCompleteInfo = new();
                 TradeStatusPkt hisCanCompleteInfo = new();
-                hisCanCompleteInfo.BagResult = trader.CanStoreTradeItems(myItems, ref hisCanCompleteInfo.ItemID, out List<ItemPosCount>[] hisDest, hisItems);
-                myCanCompleteInfo.BagResult = GetPlayer().CanStoreTradeItems(hisItems, ref myCanCompleteInfo.ItemID, out List<ItemPosCount>[] myDest, myItems);
+                hisCanCompleteInfo.BagResult = trader.CanStoreTradeItems(myItems, ref hisCanCompleteInfo.ItemID, out List<(ItemPos item, int count)>[] hisDest, hisItems);
+                myCanCompleteInfo.BagResult = GetPlayer().CanStoreTradeItems(hisItems, ref myCanCompleteInfo.ItemID, out List<(ItemPos item, int count)>[] myDest, myItems);
 
                 ClearAcceptTradeMode(myItems, hisItems);
 

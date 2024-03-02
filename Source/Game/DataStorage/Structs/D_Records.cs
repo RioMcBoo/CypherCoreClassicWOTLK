@@ -9,18 +9,18 @@ namespace Game.DataStorage
 {
     public sealed class DestructibleModelDataRecord
     {
-        public uint Id;
+        public int Id;
         public sbyte State0ImpactEffectDoodadSet;
         public byte State0AmbientDoodadSet;
-        public uint State1Wmo;
+        public int State1Wmo;
         public sbyte State1DestructionDoodadSet;
         public sbyte State1ImpactEffectDoodadSet;
         public byte State1AmbientDoodadSet;
-        public uint State2Wmo;
+        public int State2Wmo;
         public sbyte State2DestructionDoodadSet;
         public sbyte State2ImpactEffectDoodadSet;
         public byte State2AmbientDoodadSet;
-        public uint State3Wmo;
+        public int State3Wmo;
         public byte State3InitDoodadSet;
         public byte State3AmbientDoodadSet;
         public byte EjectDirection;
@@ -28,10 +28,10 @@ namespace Game.DataStorage
         public uint State0Wmo;
         public byte HealEffect;
         public ushort HealEffectSpeed;
-        public sbyte State0NameSet;
-        public sbyte State1NameSet;
-        public sbyte State2NameSet;
-        public sbyte State3NameSet;
+        public byte State0NameSet;
+        public byte State1NameSet;
+        public byte State2NameSet;
+        public byte State3NameSet;
     }
 
     public sealed class DifficultyRecord

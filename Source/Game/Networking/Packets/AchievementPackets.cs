@@ -55,8 +55,8 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(CriteriaID);
-            _worldPacket.WriteUInt64(Quantity);
+            _worldPacket.WriteInt32(CriteriaID);
+            _worldPacket.WriteInt64(Quantity);
             _worldPacket.WritePackedGuid(PlayerGUID);
             _worldPacket.WriteUInt32(Unused_10_1_5);
             _worldPacket.WriteUInt32(Flags);
@@ -67,18 +67,18 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
 
             if (RafAcceptanceID.HasValue)
-                _worldPacket.WriteUInt64(RafAcceptanceID.Value);
+                _worldPacket.WriteInt64(RafAcceptanceID.Value);
         }
 
-        public uint CriteriaID;
-        public ulong Quantity;
+        public int CriteriaID;
+        public long Quantity;
         public ObjectGuid PlayerGUID;
         public uint Unused_10_1_5;
         public uint Flags;
         public long CurrentTime;
         public long ElapsedTime;
         public long CreationTime;
-        public ulong? RafAcceptanceID;
+        public long? RafAcceptanceID;
     }
 
     class AccountCriteriaUpdate : ServerPacket
@@ -99,10 +99,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(CriteriaID);
+            _worldPacket.WriteInt32(CriteriaID);
         }
 
-        public uint CriteriaID;
+        public int CriteriaID;
     }
 
     public class AchievementDeleted : ServerPacket
@@ -111,12 +111,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(AchievementID);
-            _worldPacket.WriteUInt32(Immunities);
+            _worldPacket.WriteInt32(AchievementID);
+            _worldPacket.WriteInt32(Immunities);
         }
 
-        public uint AchievementID;
-        public uint Immunities; // this is just garbage, not used by client
+        public int AchievementID;
+        public int Immunities; // this is just garbage, not used by client
     }
 
     public class AchievementEarned : ServerPacket
@@ -127,7 +127,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(Sender);
             _worldPacket.WritePackedGuid(Earner);
-            _worldPacket.WriteUInt32(AchievementID);
+            _worldPacket.WriteInt32(AchievementID);
             _worldPacket.WritePackedTime32(Time);
             _worldPacket.WriteUInt32(EarnerNativeRealm);
             _worldPacket.WriteUInt32(EarnerVirtualRealm);
@@ -138,7 +138,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Earner;
         public uint EarnerNativeRealm;
         public uint EarnerVirtualRealm;
-        public uint AchievementID;
+        public int AchievementID;
         public long Time;
         public bool Initial;
         public ObjectGuid Sender;
@@ -153,13 +153,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Name.GetByteCount(), 7);
             _worldPacket.WriteBit(GuildAchievement);
             _worldPacket.WritePackedGuid(PlayerGUID);
-            _worldPacket.WriteUInt32(AchievementID);
+            _worldPacket.WriteInt32(AchievementID);
             _worldPacket.WriteString(Name);
         }
 
         public ObjectGuid PlayerGUID;
         public string Name = string.Empty;
-        public uint AchievementID;
+        public int AchievementID;
         public bool GuildAchievement;
     }
 
@@ -220,12 +220,12 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(GuildGUID);
-            _worldPacket.WriteUInt32(AchievementID);
+            _worldPacket.WriteInt32(AchievementID);
             _worldPacket.WritePackedTime32(TimeDeleted);
         }
 
         public ObjectGuid GuildGUID;
-        public uint AchievementID;
+        public int AchievementID;
         public long TimeDeleted;
     }
 
@@ -236,11 +236,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(GuildGUID);
-            _worldPacket.WriteUInt32(AchievementID);
+            _worldPacket.WriteInt32(AchievementID);
             _worldPacket.WritePackedTime32(TimeEarned);
         }
 
-        public uint AchievementID;
+        public int AchievementID;
         public ObjectGuid GuildGUID;
         public long TimeEarned;
     }
@@ -299,14 +299,14 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Id);
+            data.WriteInt32(Id);
             data.WritePackedTime32(Date);
             data.WritePackedGuid(Owner);
             data.WriteUInt32(VirtualRealmAddress);
             data.WriteUInt32(NativeRealmAddress);
         }
 
-        public uint Id;
+        public int Id;
         public long Date;
         public ObjectGuid Owner;
         public uint VirtualRealmAddress;
@@ -317,8 +317,8 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Id);
-            data.WriteUInt64(Quantity);
+            data.WriteInt32(Id);
+            data.WriteInt64(Quantity);
             data.WritePackedGuid(Player);
             data.WriteUInt32(Unused_10_1_5);
             data.WriteUInt32(Flags);
@@ -329,18 +329,18 @@ namespace Game.Networking.Packets
             data.FlushBits();
 
             if (RafAcceptanceID.HasValue)
-                data.WriteUInt64(RafAcceptanceID.Value);
+                data.WriteInt64(RafAcceptanceID.Value);
         }
 
-        public uint Id;
-        public ulong Quantity;
+        public int Id;
+        public long Quantity;
         public ObjectGuid Player;
         public uint Unused_10_1_5;
         public uint Flags;
         public long Date;
         public long TimeFromStart;
         public long TimeFromCreate;
-        public ulong? RafAcceptanceID;
+        public long? RafAcceptanceID;
     }
 
     public struct GuildCriteriaProgress
@@ -349,7 +349,7 @@ namespace Game.Networking.Packets
         public long DateCreated;
         public long DateStarted;
         public long DateUpdated;
-        public ulong Quantity;
+        public long Quantity;
         public ObjectGuid PlayerGUID;
         public int Unused_10_1_5;
         public int Flags;

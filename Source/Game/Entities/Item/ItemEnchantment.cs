@@ -9,101 +9,77 @@ using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public class ItemEnchantmentManager
-    {
+    public static class ItemEnchantmentManager
+    { 
         public static void LoadRandomEnchantmentsTable()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            _storage.Clear();
+            RandomEnchantmentData.Clear();
 
-            //                                         0   1            2
-            SQLResult result = DB.World.Query("SELECT Id, BonusListID, Chance FROM item_random_bonus_list_template");
+            //                                         0              1      2
+            using var result = DB.World.Query("SELECT Id, EnchantmentId, Chance FROM item_random_enchantment_template");
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.Player, "Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
+                Log.outInfo(LogFilter.Player, "Loaded 0 Random item bonus list definitions. DB table `item_random_enchantment_template` is empty.");
                 return;
             }
             uint count = 0;
 
             do
             {
-                uint id = result.Read<uint>(0);
-                uint bonusListId = result.Read<uint>(1);
+                int id = result.Read<int>(0);
+                int enchantmentId = result.Read<int>(1);
                 float chance = result.Read<float>(2);
 
-                if (ItemBonusMgr.GetItemBonuses(bonusListId).Empty())
+                if (CliDB.ItemRandomPropertiesStorage.LookupByKey(enchantmentId) != null && CliDB.ItemRandomSuffixStorage.LookupByKey(enchantmentId) != null)
                 {
-                    Log.outError(LogFilter.Sql, $"Bonus list {bonusListId} used in `item_random_bonus_list_template` by id {id} doesn't have exist in ItemBonus.db2");
+                    Log.outError(LogFilter.Sql, $"ItemRandomProperties / ItemRandomSuffix Id {enchantmentId} used in `item_random_enchantment_template` by id {id} " +
+                        "doesn't have exist in its corresponding db2 file.");
                     continue;
                 }
 
                 if (chance < 0.000001f || chance > 100.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Random item enchantment for entry {entry} Type {type} Id {ench} has invalid Chance {chance}");
+                    Log.outError(LogFilter.Sql, $"Enchantment Id {enchantmentId} used in `item_random_enchantment_template` by id {id} has invalid chance {chance}");
                     continue;
                 }
 
-                if (!_storage.ContainsKey(id))
-                    _storage[id] = new RandomBonusListIds();
+                if (!RandomEnchantmentData.ContainsKey(id))
+                    RandomEnchantmentData[id] = new();
 
-                RandomBonusListIds ids = _storage[id];
-                ids.BonusListIDs.Add(bonusListId);
-                ids.Chances.Add(chance);
+                RandomEnchantmentData[id].Add((enchantmentId, chance));
 
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.Player, $"Loaded {count} Random item bonus list definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.Player, $"Loaded {count} Random item enchantment definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public static uint GenerateItemRandomBonusListId(uint item_id)
+        public static int GetRandomPropertyPoints(int itemLevel, ItemQuality quality, InventoryType inventoryType)
         {
-            ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
-            if (itemProto == null)
-                return 0;
-
-            // item must have one from this field values not null if it can have random enchantments
-            if (itemProto.RandomBonusListTemplateId == 0)
-                return 0;
-
-            var tab = _storage.LookupByKey(itemProto.RandomBonusListTemplateId);
-            if (tab == null)
-            {
-                Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
-                return 0;
-            }
-            //todo fix me this is ulgy
-            return tab.BonusListIDs.SelectRandomElementByWeight(x => (float)tab.Chances[tab.BonusListIDs.IndexOf(x)]);
-        }
-
-        public static float GetRandomPropertyPoints(uint itemLevel, ItemQuality quality, InventoryType inventoryType, uint subClass)
-        {
-            uint propIndex;
+            int propIndex;
 
             switch (inventoryType)
             {
+                // Items of that type don`t have points
+                case InventoryType.NonEquip:
+                case InventoryType.Bag:
+                case InventoryType.Tabard:
+                case InventoryType.Ammo:
+                case InventoryType.Quiver:
+                case InventoryType.Relic:
+                    return 0;
+
+                // Select point coefficient
                 case InventoryType.Head:
                 case InventoryType.Body:
                 case InventoryType.Chest:
                 case InventoryType.Legs:
-                case InventoryType.Ranged:
                 case InventoryType.Weapon2Hand:
                 case InventoryType.Robe:
-                case InventoryType.Thrown:
                     propIndex = 0;
-                    break;
-                case InventoryType.RangedRight:
-                    if ((ItemSubClassWeapon)subClass == ItemSubClassWeapon.Wand)
-                        propIndex = 3;
-                    else
-                        propIndex = 0;
-                    break;
-                case InventoryType.Weapon:
-                case InventoryType.WeaponMainhand:
-                case InventoryType.WeaponOffhand:
-                    propIndex = 3;
                     break;
                 case InventoryType.Shoulders:
                 case InventoryType.Waist:
@@ -120,7 +96,14 @@ namespace Game.Entities
                 case InventoryType.Holdable:
                     propIndex = 2;
                     break;
-                case InventoryType.Relic:
+                case InventoryType.Weapon:
+                case InventoryType.WeaponMainhand:
+                case InventoryType.WeaponOffhand:
+                    propIndex = 3;
+                    break;
+                case InventoryType.Ranged:
+                case InventoryType.Thrown:
+                case InventoryType.RangedRight:
                     propIndex = 4;
                     break;
                 default:
@@ -147,7 +130,27 @@ namespace Game.Entities
             return 0;
         }
 
-        static EnchantmentStore RandomItemEnch = new();
+        public static Dictionary<int, List<(int EnchantmentID, float Chance)>> RandomEnchantmentData;
+    }
+
+    public static ItemRandomProperties GenerateRandomProperties(int item_id)
+    {
+        ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
+        if (itemProto == null)
+            return 0;
+
+        // item must have one from this field values not null if it can have random enchantments
+        if (itemProto.RandomBonusListTemplateId == 0)
+            return 0;
+
+        var tab = _storage.LookupByKey(itemProto.RandomBonusListTemplateId);
+        if (tab == null)
+        {
+            Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
+            return 0;
+        }
+        //todo fix me this is ulgy
+        return tab.BonusListIDs.SelectRandomElementByWeight(x => (float)tab.Chances[tab.BonusListIDs.IndexOf(x)]);
     }
 
     public struct EnchStoreItem
@@ -183,7 +186,7 @@ namespace Game.Entities
 
     class EnchantmentStore
     {
-        private Dictionary<ItemRandomEnchantmentType, Dictionary<uint,List<EnchStoreItem>>> _data;
+        private Dictionary<ItemRandomEnchantmentType, Dictionary<uint, List<EnchStoreItem>>> _data;
         private ItemRandomEnchantmentType Check(ItemRandomEnchantmentType type)
         {
             // random bonus lists use RandomSuffix field in Item-sparse.db2
@@ -215,5 +218,17 @@ namespace Game.Entities
         Property = 0,
         Suffix = 1,
         BonusList = 2
-    };
+    }
+
+    public struct ItemRandomProperties
+    {
+        public ItemRandomProperties(int randomPropertiesId = 0, int randomPropertiesSeed = 0)
+        {
+            RandomPropertiesID = randomPropertiesId;
+            RandomPropertiesSeed = randomPropertiesSeed;
+        }
+
+        public int RandomPropertiesID;
+        public int RandomPropertiesSeed;
+    }
 }

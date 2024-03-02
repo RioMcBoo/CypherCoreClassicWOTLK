@@ -20,11 +20,11 @@ namespace Game.AI
     public class SmartScript
     {
         // Max number of nested ProcessEventsFor() calls to avoid infinite loops
-        const uint MaxNestedEvents = 10;
+        const int MaxNestedEvents = 10;
 
         public ObjectGuid LastInvoker;
 
-        Dictionary<uint, uint> _counterList = new();
+        Dictionary<int, int> _counterList = new();
 
         List<SmartScriptHolder> _events = new();
         List<SmartScriptHolder> _installEvents = new();
@@ -39,18 +39,18 @@ namespace Game.AI
         AreaTrigger _areaTrigger;
         SceneTemplate _sceneTemplate;
         Quest _quest;
-        uint _eventId;
+        int _eventId;
         SmartScriptType _scriptType;
-        uint _eventPhase;
+        int _eventPhase;
 
-        uint _pathId;
+        int _pathId;
         List<SmartScriptHolder> _storedEvents = new();
-        List<uint> _remIDs = new();
+        List<int> _remIDs = new();
 
         uint _textTimer;
-        uint _lastTextID;
+        int _lastTextID;
         ObjectGuid _textGUID;
-        uint _talkerEntry;
+        int _talkerEntry;
         bool _useTextTimer;
         uint _currentPriority;
         bool _eventSortingRequired;
@@ -99,7 +99,7 @@ namespace Game.AI
             LastInvoker.Clear();
         }
 
-        public void ProcessEventsFor(SmartEvents e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
+        public void ProcessEventsFor(SmartEvents e, Unit unit = null, int var0 = 0, int var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
         {
             _nestedEventsCounter++;
 
@@ -3832,9 +3832,9 @@ namespace Game.AI
             {
                 if (_textTimer < diff)
                 {
-                    uint textID = _lastTextID;
+                    int textID = _lastTextID;
                     _lastTextID = 0;
-                    uint entry = _talkerEntry;
+                    int entry = _talkerEntry;
                     _talkerEntry = 0;
                     _textTimer = 0;
                     _useTextTimer = false;
@@ -3871,7 +3871,7 @@ namespace Game.AI
             e.RunOnce = false;
         }
 
-        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Quest quest, uint eventId = 0)
+        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Quest quest, int eventId = 0)
         {
             if (e.Empty())
             {
@@ -3972,7 +3972,7 @@ namespace Game.AI
             }
         }
 
-        public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null, Quest qst = null, uint eventId = 0)
+        public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null, Quest qst = null, int eventId = 0)
         {
             if (at != null)
             {
@@ -4196,9 +4196,9 @@ namespace Game.AI
             return null;
         }
 
-        public void SetPathId(uint id) { _pathId = id; }
+        public void SetPathId(int id) { _pathId = id; }
 
-        public uint GetPathId() { return _pathId; }
+        public int GetPathId() { return _pathId; }
 
         WorldObject GetBaseObject()
         {
@@ -4307,7 +4307,7 @@ namespace Game.AI
             return null;
         }
 
-        void StoreCounter(uint id, uint value, uint reset)
+        void StoreCounter(int id, int value, uint reset)
         {
             if (_counterList.ContainsKey(id))
             {
@@ -4322,7 +4322,7 @@ namespace Game.AI
             ProcessEventsFor(SmartEvents.CounterSet, null, id);
         }
 
-        uint GetCounterValue(uint id)
+        int GetCounterValue(int id)
         {
             if (_counterList.ContainsKey(id))
                 return _counterList[id];
@@ -4385,20 +4385,20 @@ namespace Game.AI
             _meOrigGUID.Clear();
         }
 
-        void IncPhase(uint p)
+        void IncPhase(int p)
         {
             // protect phase from overflowing
-            SetPhase(Math.Min((uint)SmartPhase.Phase12, _eventPhase + p));
+            SetPhase(Math.Min((int)SmartPhase.Phase12, _eventPhase + p));
         }
 
-        void DecPhase(uint p)
+        void DecPhase(int p)
         {
             if (p >= _eventPhase)
                 SetPhase(0);
             else
                 SetPhase(_eventPhase - p);
         }
-        void SetPhase(uint p)
+        void SetPhase(int p)
         {
             _eventPhase = p;
         }
@@ -4407,10 +4407,10 @@ namespace Game.AI
             if (_eventPhase == 0)
                 return false;
 
-            return ((1 << (int)(_eventPhase - 1)) & p) != 0;
+            return ((1 << (_eventPhase - 1)) & p) != 0;
         }
 
-        void RemoveStoredEvent(uint id)
+        void RemoveStoredEvent(int id)
         {
             if (!_storedEvents.Empty())
             {

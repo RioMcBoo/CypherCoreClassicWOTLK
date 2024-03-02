@@ -42,7 +42,7 @@ namespace Game.Loots
             return AllowedForPlayer(player, loot, itemid, needs_quest, follow_loot_rules, false, conditions);
         }
 
-        public static bool AllowedForPlayer(Player player, Loot loot, uint itemid, bool needs_quest, bool follow_loot_rules, bool strictUsabilityCheck, List<Condition> conditions)
+        public static bool AllowedForPlayer(Player player, Loot loot, int itemid, bool needs_quest, bool follow_loot_rules, bool strictUsabilityCheck, List<Condition> conditions)
         {
             // DB conditions check
             if (!Global.ConditionMgr.IsObjectMeetToConditions(player, conditions))
@@ -74,7 +74,7 @@ namespace Game.Loots
                     if (itemEffect.TriggerType != ItemSpelltriggerType.OnLearn)
                         continue;
 
-                    if (player.HasSpell((uint)itemEffect.SpellID))
+                    if (player.HasSpell(itemEffect.SpellID))
                         return false;
                 }
             }
@@ -175,9 +175,9 @@ namespace Game.Loots
 
         public List<ObjectGuid> GetAllowedLooters() { return allowedGUIDs; }
 
-        public uint itemid;
-        public uint LootListId;
-        public uint randomSuffix;
+        public int itemid;
+        public int LootListId;
+        public int randomSuffix;
         public ItemRandomEnchantmentId randomPropertyId;
         public List<int> BonusListIDs = new();
         public ItemContext context;
@@ -701,7 +701,7 @@ namespace Game.Loots
                 if (!lootItem.rollWinnerGUID.IsEmpty() && lootItem.rollWinnerGUID != GetGUID())
                     continue;
                                 
-                List<ItemPosCount> dest = null;
+                List<(ItemPos item, int count)> dest = null;
                 InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out dest, lootItem.itemid, lootItem.count);                
                 if (msg != InventoryResult.Ok)
                 {

@@ -21,8 +21,8 @@ namespace Game.Achievements
 {
     public class AchievementManager : CriteriaHandler
     {
-        protected Dictionary<uint, CompletedAchievementData> _completedAchievements = new();
-        protected uint _achievementPoints;
+        protected Dictionary<int, CompletedAchievementData> _completedAchievements = new();
+        protected int _achievementPoints;
 
         /// <summary>
         /// called at player login. The player might have fulfilled some achievements when the achievement system wasn't working yet
@@ -35,17 +35,17 @@ namespace Game.Achievements
                 UpdateCriteria(i, 0, 0, 0, null, referencePlayer);
         }
 
-        public bool HasAchieved(uint achievementId)
+        public bool HasAchieved(int achievementId)
         {
             return _completedAchievements.ContainsKey(achievementId);
         }
 
-        public uint GetAchievementPoints()
+        public int GetAchievementPoints()
         {
             return _achievementPoints;
         }
 
-        public ICollection<uint> GetCompletedAchievementIds()
+        public ICollection<int> GetCompletedAchievementIds()
         {
             return _completedAchievements.Keys;
         }
@@ -165,14 +165,14 @@ namespace Game.Achievements
             return IsCompletedCriteriaTree(tree);
         }
 
-        public override bool RequiredAchievementSatisfied(uint achievementId)
+        public override bool RequiredAchievementSatisfied(int achievementId)
         {
             return HasAchieved(achievementId);
         }
 
         public virtual void CompletedAchievement(AchievementRecord entry, Player referencePlayer) { }
 
-        public Func<KeyValuePair<uint, CompletedAchievementData>, AchievementRecord> VisibleAchievementCheck = value =>
+        public Func<KeyValuePair<int, CompletedAchievementData>, AchievementRecord> VisibleAchievementCheck = value =>
         {
             AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(value.Key);
             if (achievement != null && !achievement.Flags.HasAnyFlag(AchievementFlags.Hidden))
@@ -230,7 +230,7 @@ namespace Game.Achievements
             {
                 do
                 {
-                    uint achievementid = achievementResult.Read<uint>(0);
+                    int achievementid = achievementResult.Read<int>(0);
 
                     // must not happen: cleanup at server startup in sAchievementMgr.LoadCompletedAchievements()
                     AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(achievementid);
@@ -247,7 +247,7 @@ namespace Game.Achievements
                     var reward = Global.AchievementMgr.GetAchievementReward(achievement);
                     if (reward != null)
                     {
-                        uint titleId = reward.TitleId[Player.TeamForRace(_owner.GetRace()) == Team.Alliance ? 0 : 1];
+                        int titleId = reward.TitleId[Player.TeamForRace(_owner.GetRace()) == Team.Alliance ? 0 : 1];
                         if (titleId != 0)
                         {
                             CharTitlesRecord titleEntry = CliDB.CharTitlesStorage.LookupByKey(titleId);
@@ -265,8 +265,8 @@ namespace Game.Achievements
                 var now = GameTime.GetGameTime();
                 do
                 {
-                    uint id = criteriaResult.Read<uint>(0);
-                    ulong counter = criteriaResult.Read<ulong>(1);
+                    int id = criteriaResult.Read<int>(0);
+                    long counter = criteriaResult.Read<long>(1);
                     long date = criteriaResult.Read<long>(2);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
@@ -494,7 +494,7 @@ namespace Game.Achievements
             //! Since no common attributes were found, (not even in titleRewardFlags field)
             //! we explicitly check by ID. Maybe in the future we could move the achievement_reward
             //! condition fields to the condition system.
-            uint titleId = reward.TitleId[achievement.Id == 1793 ? (int)_owner.GetNativeGender() : (_owner.GetTeam() == Team.Alliance ? 0 : 1)];
+            int titleId = reward.TitleId[achievement.Id == 1793 ? (int)_owner.GetNativeGender() : (_owner.GetTeam() == Team.Alliance ? 0 : 1)];
             if (titleId != 0)
             {
                 CharTitlesRecord titleEntry = CliDB.CharTitlesStorage.LookupByKey(titleId);
@@ -544,7 +544,7 @@ namespace Game.Achievements
             }
         }
 
-        public bool ModifierTreeSatisfied(uint modifierTreeId)
+        public bool ModifierTreeSatisfied(int modifierTreeId)
         {
             ModifierTreeNode modifierTree = Global.CriteriaMgr.GetModifierTree(modifierTreeId);
             if (modifierTree != null)
@@ -589,7 +589,7 @@ namespace Game.Achievements
             }
         }
 
-        public override void SendCriteriaProgressRemoved(uint criteriaId)
+        public override void SendCriteriaProgressRemoved(int criteriaId)
         {
             CriteriaDeleted criteriaDeleted = new();
             criteriaDeleted.CriteriaID = criteriaId;
@@ -609,7 +609,7 @@ namespace Game.Achievements
                 Guild guild = Global.GuildMgr.GetGuildById(_owner.GetGuildId());
                 if (guild != null)
                 {
-                    BroadcastTextBuilder say_builder = new(_owner, ChatMsg.GuildAchievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetNativeGender(), _owner, achievement.Id);
+                    BroadcastTextBuilder say_builder = new(_owner, ChatMsg.GuildAchievement, (int)BroadcastTextIds.AchivementEarned, _owner.GetNativeGender(), _owner, achievement.Id);
                     var say_do = new LocalizedDo(say_builder);
                     guild.BroadcastWorker(say_do, _owner);
                 }
@@ -626,7 +626,7 @@ namespace Game.Achievements
                 // if player is in world he can tell his friends about new achievement
                 else if (_owner.IsInWorld)
                 {
-                    BroadcastTextBuilder _builder = new(_owner, ChatMsg.Achievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetNativeGender(), _owner, achievement.Id);
+                    BroadcastTextBuilder _builder = new(_owner, ChatMsg.Achievement, (int)BroadcastTextIds.AchivementEarned, _owner.GetNativeGender(), _owner, achievement.Id);
                     var _localizer = new LocalizedDo(_builder);
                     var _worker = new PlayerDistWorker(_owner, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), _localizer);
                     Cell.VisitWorldObjects(_owner, _worker, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay));
@@ -651,7 +651,7 @@ namespace Game.Achievements
             _owner.SendPacket(data);
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
+        public override List<Criteria> GetCriteriaByType(CriteriaType type, int asset)
         {
             return Global.CriteriaMgr.GetPlayerCriteriaByType(type, asset);
         }
@@ -711,7 +711,7 @@ namespace Game.Achievements
             {
                 do
                 {
-                    uint achievementid = achievementResult.Read<uint>(0);
+                    int achievementid = achievementResult.Read<int>(0);
 
                     // must not happen: cleanup at server startup in sAchievementMgr.LoadCompletedAchievements()
                     AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(achievementid);
@@ -725,7 +725,7 @@ namespace Game.Achievements
                     {
                         for (int i = 0; i < guids.Length; ++i)
                         {
-                            if (ulong.TryParse(guids[i], out ulong guid))
+                            if (long.TryParse(guids[i], out long guid))
                                 ca.CompletingPlayers.Add(ObjectGuid.Create(HighGuid.Player, guid));
                         }
                     }
@@ -741,10 +741,10 @@ namespace Game.Achievements
                 long now = GameTime.GetGameTime();
                 do
                 {
-                    uint id = criteriaResult.Read<uint>(0);
-                    ulong counter = criteriaResult.Read<ulong>(1);
+                    int id = criteriaResult.Read<int>(0);
+                    long counter = criteriaResult.Read<long>(1);
                     long date = criteriaResult.Read<long>(2);
-                    ulong guidLow = criteriaResult.Read<ulong>(3);
+                    long guidLow = criteriaResult.Read<long>(3);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
                     if (criteria == null)
@@ -839,7 +839,7 @@ namespace Game.Achievements
             receiver.SendPacket(allGuildAchievements);
         }
 
-        public void SendAchievementInfo(Player receiver, uint achievementId = 0)
+        public void SendAchievementInfo(Player receiver, int achievementId = 0)
         {
             GuildCriteriaUpdate guildCriteriaUpdate = new();
             AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(achievementId);
@@ -874,11 +874,11 @@ namespace Game.Achievements
             receiver.SendPacket(guildCriteriaUpdate);
         }
 
-        public void SendAllTrackedCriterias(Player receiver, List<uint> trackedCriterias)
+        public void SendAllTrackedCriterias(Player receiver, List<int> trackedCriterias)
         {
             GuildCriteriaUpdate guildCriteriaUpdate = new();
 
-            foreach (uint criteriaId in trackedCriterias)
+            foreach (var criteriaId in trackedCriterias)
             {
                 var progress = _criteriaProgress.LookupByKey(criteriaId);
                 if (progress == null)
@@ -899,7 +899,7 @@ namespace Game.Achievements
             receiver.SendPacket(guildCriteriaUpdate);
         }
 
-        public void SendAchievementMembers(Player receiver, uint achievementId)
+        public void SendAchievementMembers(Player receiver, int achievementId)
         {
             var achievementData = _completedAchievements.LookupByKey(achievementId);
             if (achievementData != null)
@@ -984,7 +984,7 @@ namespace Game.Achievements
             _owner.BroadcastPacketIfTrackingAchievement(guildCriteriaUpdate, entry.Id);
         }
 
-        public override void SendCriteriaProgressRemoved(uint criteriaId)
+        public override void SendCriteriaProgressRemoved(int criteriaId)
         {
             GuildCriteriaDeleted guildCriteriaDeleted = new();
             guildCriteriaDeleted.GuildGUID = _owner.GetGUID();
@@ -1017,7 +1017,7 @@ namespace Game.Achievements
             _owner.BroadcastPacket(data);
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
+        public override List<Criteria> GetCriteriaByType(CriteriaType type, int asset)
         {
             return Global.CriteriaMgr.GetGuildCriteriaByType(type);
         }
@@ -1031,18 +1031,18 @@ namespace Game.Achievements
     public class AchievementGlobalMgr : Singleton<AchievementGlobalMgr>
     {
         // store achievements by referenced achievement id to speed up lookup
-        MultiMap<uint, AchievementRecord> _achievementListByReferencedId = new();
+        MultiMap<int, AchievementRecord> _achievementListByReferencedId = new();
 
         // store realm first achievements
-        Dictionary<uint /*achievementId*/, DateTime /*completionTime*/> _allCompletedAchievements = new();
+        Dictionary<int /*achievementId*/, DateTime /*completionTime*/> _allCompletedAchievements = new();
 
-        Dictionary<uint, AchievementReward> _achievementRewards = new();
-        Dictionary<uint, AchievementRewardLocale> _achievementRewardLocales = new();
-        Dictionary<uint, uint> _achievementScripts = new();
+        Dictionary<int, AchievementReward> _achievementRewards = new();
+        Dictionary<int, AchievementRewardLocale> _achievementRewardLocales = new();
+        Dictionary<int, int> _achievementScripts = new();
 
         AchievementGlobalMgr() { }
 
-        public List<AchievementRecord> GetAchievementByReferencedId(uint id)
+        public List<AchievementRecord> GetAchievementByReferencedId(int id)
         {
             return _achievementListByReferencedId.LookupByKey(id);
         }
@@ -1130,7 +1130,7 @@ namespace Game.Achievements
 
             do
             {
-                uint achievementId = result.Read<uint>(0);
+                int achievementId = result.Read<int>(0);
                 string scriptName = result.Read<string>(1);
 
                 AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(achievementId);
@@ -1166,7 +1166,7 @@ namespace Game.Achievements
 
             do
             {
-                uint achievementId = result.Read<uint>(0);
+                int achievementId = result.Read<int>(0);
                 AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(achievementId);
                 if (achievement == null)
                 {
@@ -1203,7 +1203,7 @@ namespace Game.Achievements
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(id);
                 if (achievement == null)
                 {
@@ -1212,13 +1212,13 @@ namespace Game.Achievements
                 }
 
                 AchievementReward reward = new();
-                reward.TitleId[0] = result.Read<uint>(1);
-                reward.TitleId[1] = result.Read<uint>(2);
-                reward.ItemId = result.Read<uint>(3);
-                reward.SenderCreatureId = result.Read<uint>(4);
+                reward.TitleId[0] = result.Read<int>(1);
+                reward.TitleId[1] = result.Read<int>(2);
+                reward.ItemId = result.Read<int>(3);
+                reward.SenderCreatureId = result.Read<int>(4);
                 reward.Subject = result.Read<string>(5);
                 reward.Body = result.Read<string>(6);
-                reward.MailTemplateId = result.Read<uint>(7);
+                reward.MailTemplateId = result.Read<int>(7);
 
                 // must be title or mail at least
                 if (reward.TitleId[0] == 0 && reward.TitleId[1] == 0 && reward.SenderCreatureId == 0)
@@ -1317,7 +1317,7 @@ namespace Game.Achievements
 
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
 
                 if (!_achievementRewards.ContainsKey(id))
@@ -1341,7 +1341,7 @@ namespace Game.Achievements
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement reward locale strings in {1} ms.", _achievementRewardLocales.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public uint GetAchievementScriptId(uint achievementId)
+        public int GetAchievementScriptId(int achievementId)
         {
             return _achievementScripts.LookupByKey(achievementId);
         }
@@ -1349,12 +1349,12 @@ namespace Game.Achievements
 
     public class AchievementReward
     {
-        public uint[] TitleId = new uint[2];
-        public uint ItemId;
-        public uint SenderCreatureId;
+        public int[] TitleId = new int[2];
+        public int ItemId;
+        public int SenderCreatureId;
         public string Subject;
         public string Body;
-        public uint MailTemplateId;
+        public int MailTemplateId;
     }
 
     public class AchievementRewardLocale

@@ -164,12 +164,12 @@ namespace Game
             _warnDiff = 0;
         }
 
-        public WorldSession FindSession(uint id)
+        public WorldSession FindSession(int id)
         {
             return m_sessions.LookupByKey(id);
         }
 
-        bool RemoveSession(uint id)
+        bool RemoveSession(int id)
         {
             // Find the session, kick the user, but we can't delete session at this moment to prevent iterator invalidation
             var session = m_sessions.LookupByKey(id);
@@ -451,16 +451,16 @@ namespace Game
             //Load weighted graph on taxi nodes path
             TaxiPathGraph.Initialize();
 
-            MultiMap<uint, uint> mapData = new();
+            MultiMap<int, int> mapData = new();
             foreach (MapRecord mapEntry in CliDB.MapStorage.Values)
             {
                 if (mapEntry.ParentMapID != -1)
                 {
                     Cypher.Assert(mapEntry.CosmeticParentMapID == -1 || mapEntry.ParentMapID == mapEntry.CosmeticParentMapID, $"Inconsistent parent map data for map {mapEntry.Id} (ParentMapID = {mapEntry.ParentMapID}, CosmeticParentMapID = {mapEntry.CosmeticParentMapID})");
-                    mapData.Add((uint)mapEntry.ParentMapID, mapEntry.Id);
+                    mapData.Add(mapEntry.ParentMapID, mapEntry.Id);
                 }
                 else if (mapEntry.CosmeticParentMapID != -1)
-                    mapData.Add((uint)mapEntry.CosmeticParentMapID, mapEntry.Id);
+                    mapData.Add(mapEntry.CosmeticParentMapID, mapEntry.Id);
             }
 
             Global.TerrainMgr.InitializeParentMapData(mapData);
@@ -1580,7 +1580,7 @@ namespace Game
         }
 
         // Send a packet to all players (or players selected team) in the zone (except self if mentioned)
-        public bool SendZoneMessage(uint zone, ServerPacket packet, WorldSession self = null, uint team = 0)
+        public bool SendZoneMessage(int zone, ServerPacket packet, WorldSession self = null, uint team = 0)
         {
             bool foundPlayerToSend = false;
             foreach (var session in m_sessions.Values)
@@ -1597,7 +1597,7 @@ namespace Game
         }
 
         // Send a System Message to all players in the zone (except self if mentioned)
-        public void SendZoneText(uint zone, string text, WorldSession self = null, uint team = 0)
+        public void SendZoneText(int zone, string text, WorldSession self = null, uint team = 0)
         {
             ChatPkt data = new();
             data.Initialize(ChatMsg.System, Language.Universal, null, null, text);
@@ -1646,13 +1646,14 @@ namespace Game
                     // No SQL injection with prepared statements
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
                     stmt.AddValue(0, nameOrIP);
-                    resultAccounts = DB.Login.Query(stmt);
-                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_IP_BANNED);
-                    stmt.AddValue(0, nameOrIP);
-                    stmt.AddValue(1, duration_secs);
-                    stmt.AddValue(2, author);
-                    stmt.AddValue(3, reason);
-                    DB.Login.Execute(stmt);
+                    dataBase = DB.Login;
+
+                    var stmt2 = LoginDatabase.GetPreparedStatement(LoginStatements.INS_IP_BANNED);
+                    stmt2.AddValue(0, nameOrIP);
+                    stmt2.AddValue(1, duration_secs);
+                    stmt2.AddValue(2, author);
+                    stmt2.AddValue(3, reason);
+                    DB.Login.Execute(stmt2);
                     break;
                 case BanMode.Account:
                     // No SQL injection with prepared statements
@@ -1684,7 +1685,7 @@ namespace Game
             SQLTransaction trans = new();
             do
             {
-                uint account = resultAccounts.Read<uint>(0);
+                int account = resultAccounts.Read<int>(0);
 
                 if (mode != BanMode.IP)
                 {
@@ -2587,9 +2588,9 @@ namespace Game
         long mail_timer_expires;
         long blackmarket_timer;
 
-        ConcurrentDictionary<uint, WorldSession> m_sessions = new();
+        ConcurrentDictionary<int, WorldSession> m_sessions = new();
         MultiMap<ObjectGuid, WorldSession> m_sessionsByBnetGuid = new();
-        Dictionary<uint, long> m_disconnects = new();
+        Dictionary<int, long> m_disconnects = new();
         uint m_maxActiveSessionCount;
         uint m_maxQueuedSessionCount;
         uint m_PlayerCount;

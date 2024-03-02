@@ -56,7 +56,7 @@ namespace Game.Entities
                 SendTalentsInfoData(false);   // update at client
         }
 
-        public bool AddTalent(uint spellId, byte spec, bool learning)
+        public bool AddTalent(int spellId, byte spec, bool learning)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
@@ -203,7 +203,7 @@ namespace Game.Entities
                 return;
 
             // spell not set in talent.dbc
-            uint spellid = (uint)talentInfo.SpellRank[talentRank];
+            int spellid = talentInfo.SpellRank[talentRank];
             if (spellid == 0)
             {
                 Log.outError(LogFilter.Player, "Player::LearnTalent: Talent.dbc has no spellInfo for talent: {0} (spell id = 0)", talentId);
@@ -255,7 +255,7 @@ namespace Game.Entities
             */
         }
 
-        bool HasTalent(uint talentId, byte group)
+        bool HasTalent(int talentId, byte group)
         {
             if (GetTalentMap(group).TryGetValue(talentId, out PlayerTalent itr))
                 return itr.state != PlayerSpellState.Removed;
@@ -273,11 +273,11 @@ namespace Game.Entities
 
         public ChrSpecialization GetPrimarySpecialization() { return (ChrSpecialization)m_playerData.CurrentSpecID.GetValue(); }
 
-        void SetPrimarySpecialization(uint spec) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.CurrentSpecID), spec); }
+        void SetPrimarySpecialization(ChrSpecialization spec) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.CurrentSpecID), (int)spec); }
 
         public ChrSpecializationRecord GetPrimarySpecializationEntry()
         {
-            return CliDB.ChrSpecializationStorage.LookupByKey((uint)GetPrimarySpecialization());
+            return CliDB.ChrSpecializationStorage.LookupByKey((int)GetPrimarySpecialization());
         }
         
         public byte GetActiveTalentGroup() { return _specializationInfo.ActiveGroup; }
@@ -285,11 +285,11 @@ namespace Game.Entities
         void SetActiveTalentGroup(byte group) { _specializationInfo.ActiveGroup = group; }
 
         // Loot Spec
-        public void SetLootSpecId(uint id) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); }
+        public void SetLootSpecId(ChrSpecialization id) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); }
 
-        public uint GetLootSpecId() { return m_activePlayerData.LootSpecID; }
+        public ChrSpecialization GetLootSpecId() { return (ChrSpecialization)m_activePlayerData.LootSpecID.GetValue(); }
 
-        public uint GetDefaultSpecId()
+        public ChrSpecialization GetDefaultSpecId()
         {
             return Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass()).Id;
         }
@@ -339,11 +339,11 @@ namespace Game.Entities
                 if (talentInfo.SpellID == 0)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talentInfo.SpellID, Difficulty.None);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                 if (spellInfo == null)
                     continue;
 
-                RemoveSpell((uint)talentInfo.SpellID, true);
+                RemoveSpell(talentInfo.SpellID, true);
 
                 // search for spells that the talent teaches and unlearn them
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -356,11 +356,11 @@ namespace Game.Entities
 
             foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talentInfo.SpellID, Difficulty.None);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                 if (spellInfo == null)
                     continue;
 
-                RemoveSpell((uint)talentInfo.SpellID, true);
+                RemoveSpell(talentInfo.SpellID, true);
 
                 // search for spells that the talent teaches and unlearn them
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -376,7 +376,7 @@ namespace Game.Entities
             // Remove spec specific spells
             RemoveSpecializationSpells();
 
-            foreach (uint glyphId in GetGlyphs(GetActiveTalentGroup()))
+            foreach (var glyphId in GetGlyphs(GetActiveTalentGroup()))
                 RemoveAurasDueToSpell(CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID);
 
             SetActiveTalentGroup((byte)spec.OrderIndex);
@@ -403,9 +403,9 @@ namespace Game.Entities
 
                 if (HasTalent(talentInfo.Id, GetActiveTalentGroup()))
                 {
-                    LearnSpell((uint)talentInfo.SpellID, true);      // add the talent to the PlayerSpellMap
+                    LearnSpell(talentInfo.SpellID, true);      // add the talent to the PlayerSpellMap
                     if (talentInfo.OverridesSpellID != 0)
-                        AddOverrideSpell((uint)talentInfo.OverridesSpellID, (uint)talentInfo.SpellID);
+                        AddOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
                 }
             }
 
@@ -455,14 +455,14 @@ namespace Game.Entities
                     SetVisibleItemSlot(i, equippedItem);
             }
 
-            foreach (uint glyphId in GetGlyphs((byte)spec.OrderIndex))
+            foreach (var glyphId in GetGlyphs((byte)spec.OrderIndex))
                 CastSpell(this, CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID, true);
 
             ActiveGlyphs activeGlyphs = new();
-            foreach (uint glyphId in GetGlyphs((byte)spec.OrderIndex))
+            foreach (var glyphId in GetGlyphs((byte)spec.OrderIndex))
             {
-                List<uint> bindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
-                foreach (uint bindableSpell in bindableSpells)
+                List<int> bindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
+                foreach (var bindableSpell in bindableSpells)
                     if (HasSpell(bindableSpell) && !m_overrideSpells.ContainsKey(bindableSpell))
                         activeGlyphs.Glyphs.Add(new GlyphBinding(bindableSpell, (ushort)glyphId));
             }
@@ -520,8 +520,8 @@ namespace Game.Entities
                 }));
         }
 
-        public Dictionary<uint, PlayerSpellState> GetTalentMap(uint spec) { return _specializationInfo.Talents[spec]; }
-        public uint[] GetGlyphs(byte spec) { return _specializationInfo.Glyphs[spec]; }
+        public Dictionary<int, PlayerTalent> GetTalentMap(int spec) { return _specializationInfo.Talents[spec]; }
+        public int[] GetGlyphs(byte spec) { return _specializationInfo.Glyphs[spec]; }
 
         public uint GetNextResetTalentsCost()
         {

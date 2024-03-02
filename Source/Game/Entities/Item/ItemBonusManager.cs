@@ -13,10 +13,10 @@ namespace Game.Entities
     class ItemBonusMgr
     {
         static MultiMap<int /*itemBonusListId*/, ItemBonusRecord> _itemBonusLists = new();
-        static Dictionary<short /*itemLevelDelta*/, uint /*itemBonusListId*/> _itemLevelDeltaToBonusListContainer = new();
-        static SortedMultiMap<uint /*itemLevelSelectorQualitySetId*/, ItemLevelSelectorQualityRecord> _itemLevelQualitySelectorQualities = new();
-        static MultiMap<uint /*itemBonusTreeId*/, ItemBonusTreeNodeRecord> _itemBonusTrees = new();
-        static MultiMap<uint /*itemId*/, uint /*itemBonusTreeId*/> _itemToBonusTree = new();
+        static Dictionary<short /*itemLevelDelta*/, int /*itemBonusListId*/> _itemLevelDeltaToBonusListContainer = new();
+        static SortedMultiMap<int /*itemLevelSelectorQualitySetId*/, ItemLevelSelectorQualityRecord> _itemLevelQualitySelectorQualities = new();
+        static MultiMap<int /*itemBonusTreeId*/, ItemBonusTreeNodeRecord> _itemBonusTrees = new();
+        static MultiMap<int /*itemId*/, int /*itemBonusTreeId*/> _itemToBonusTree = new();
 
         public static void Load()
         {
@@ -97,12 +97,12 @@ namespace Game.Entities
             return _itemBonusLists.LookupByKey(bonusListId);
         }
 
-        public static uint GetItemBonusListForItemLevelDelta(short delta)
+        public static int GetItemBonusListForItemLevelDelta(short delta)
         {
             return _itemLevelDeltaToBonusListContainer.LookupByKey(delta);
         }
 
-        public static bool CanApplyBonusTreeToItem(ItemTemplate itemTemplate, uint itemBonusTreeId, ItemBonusGenerationParams generationParams)
+        public static bool CanApplyBonusTreeToItem(ItemTemplate itemTemplate, int itemBonusTreeId, ItemBonusGenerationParams generationParams)
         {
             var bonusTreeNodes = _itemBonusTrees.LookupByKey(itemBonusTreeId);
             if (!bonusTreeNodes.Empty())
@@ -124,14 +124,14 @@ namespace Game.Entities
             return true;
         }
 
-        public static uint GetBonusTreeIdOverride(uint itemBonusTreeId, ItemBonusGenerationParams generationParams)
+        public static int GetBonusTreeIdOverride(int itemBonusTreeId, ItemBonusGenerationParams generationParams)
         {
             return itemBonusTreeId;
         }
 
-        public static void ApplyBonusTreeHelper(ItemTemplate itemTemplate, uint itemBonusTreeId, ItemBonusGenerationParams generationParams, int sequenceLevel, ref uint itemLevelSelectorId, List<uint> bonusListIDs)
+        public static void ApplyBonusTreeHelper(ItemTemplate itemTemplate, int itemBonusTreeId, ItemBonusGenerationParams generationParams, int sequenceLevel, ref int itemLevelSelectorId, List<int> bonusListIDs)
         {
-            uint originalItemBonusTreeId = itemBonusTreeId;
+            int originalItemBonusTreeId = itemBonusTreeId;
 
             // override bonus tree with season specific values
             itemBonusTreeId = GetBonusTreeIdOverride(itemBonusTreeId, generationParams);
@@ -159,20 +159,20 @@ namespace Game.Entities
             }
         }
 
-        public static uint GetAzeriteUnlockBonusList(ushort azeriteUnlockMappingSetId, ushort minItemLevel, InventoryType inventoryType)
+        public static int GetAzeriteUnlockBonusList(ushort azeriteUnlockMappingSetId, ushort minItemLevel, InventoryType inventoryType)
         {
             return 0;
         }
 
-        public static List<uint> GetBonusListsForItem(uint itemId, ItemBonusGenerationParams generationParams)
+        public static List<int> GetBonusListsForItem(int itemId, ItemBonusGenerationParams generationParams)
         {
-            List<uint> bonusListIDs = new();
+            List<int> bonusListIDs = new();
 
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
             if (itemTemplate == null)
                 return bonusListIDs;
 
-            uint itemLevelSelectorId = 0;
+            int itemLevelSelectorId = 0;
 
             foreach (var itemBonusTreeId in _itemToBonusTree.LookupByKey(itemId))
                 ApplyBonusTreeHelper(itemTemplate, itemBonusTreeId, generationParams, 0, ref itemLevelSelectorId, bonusListIDs);
@@ -182,7 +182,7 @@ namespace Game.Entities
             {
                 short delta = (short)(selector.MinItemLevel - itemTemplate.GetBaseItemLevel());
 
-                uint bonus = GetItemBonusListForItemLevelDelta(delta);
+                int bonus = GetItemBonusListForItemLevelDelta(delta);
                 if (bonus != 0)
                     bonusListIDs.Add(bonus);
 
@@ -198,7 +198,7 @@ namespace Game.Entities
                         else if (selector.MinItemLevel >= selectorQualitySet.IlvlRare)
                             quality = ItemQuality.Rare;
 
-                        var itemSelectorQuality = itemSelectorQualities.First(record => record.Quality < (sbyte)quality);
+                        var itemSelectorQuality = itemSelectorQualities.First(record => record.Quality < quality);
 
                         if (itemSelectorQuality != null)
                             bonusListIDs.Add(itemSelectorQuality.QualityItemBonusListID);
@@ -209,7 +209,7 @@ namespace Game.Entities
             return bonusListIDs;
         }
 
-        public static void VisitItemBonusTree(uint itemBonusTreeId, Action<ItemBonusTreeNodeRecord> visitor)
+        public static void VisitItemBonusTree(int itemBonusTreeId, Action<ItemBonusTreeNodeRecord> visitor)
         {
             var treeItr = _itemBonusTrees.LookupByKey(itemBonusTreeId);
             if (treeItr.Empty())
@@ -223,9 +223,9 @@ namespace Game.Entities
             }
         }
 
-        public static List<uint> GetAllBonusListsForTree(uint itemBonusTreeId)
+        public static List<int> GetAllBonusListsForTree(int itemBonusTreeId)
         {
-            List<uint> bonusListIDs = new();
+            List<int> bonusListIDs = new();
             VisitItemBonusTree(itemBonusTreeId, bonusTreeNode =>
             {
                 if (bonusTreeNode.ChildItemBonusListID != 0)

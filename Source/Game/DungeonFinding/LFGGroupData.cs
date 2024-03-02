@@ -100,7 +100,7 @@ namespace Game.DungeonFinding
             return m_Leader;
         }
 
-        public uint GetDungeon(bool asId = true)
+        public int GetDungeon(bool asId = true)
         {
             if (asId)
                 return (m_Dungeon & 0x00FFFFFF);

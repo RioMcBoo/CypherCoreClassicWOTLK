@@ -979,7 +979,7 @@ namespace Game.Spells
 
             // can the player store the new item?
             uint no_space;
-            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, pProto, num_to_add, out no_space);
+            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, pProto, num_to_add, out no_space);
             if (msg != InventoryResult.Ok)
             {
                 // convert to possible store amount
@@ -1367,7 +1367,7 @@ namespace Game.Spells
 
             if (pos.IsInventoryPos)
             {
-                InventoryResult msg = player.CanStoreItem(pos, out List<ItemPosCount> dest, pNewItem, forSwap: true);
+                InventoryResult msg = player.CanStoreItem(pos, out List<(ItemPos item, int count)> dest, pNewItem, forSwap: true);
                 if (msg == InventoryResult.Ok)
                 {
                     player.DestroyItem(pos, true);
@@ -1389,7 +1389,7 @@ namespace Game.Spells
             }
             else if (pos.IsBankPos)
             {
-                InventoryResult msg = player.CanBankItem(pos, out List<ItemPosCount> dest, pNewItem, true);
+                InventoryResult msg = player.CanBankItem(pos, out List<(ItemPos item, int count)> dest, pNewItem, true);
                 if (msg == InventoryResult.Ok)
                 {
                     player.DestroyItem(pos, true);
@@ -4658,7 +4658,7 @@ namespace Game.Spells
             gameObjTarget.SetDestructibleState((GameObjectDestructibleState)effectInfo.MiscValue, m_caster, true);
         }
 
-        void SummonGuardian(SpellEffectInfo effect, uint entry, SummonPropertiesRecord properties, uint numGuardians, ObjectGuid privateObjectOwner)
+        void SummonGuardian(SpellEffectInfo effect, int entry, SummonPropertiesRecord properties, int numGuardians, ObjectGuid privateObjectOwner)
         {
             Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster == null)
@@ -4674,7 +4674,7 @@ namespace Game.Spells
             //TempSummonType summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
             Map map = unitCaster.GetMap();
 
-            for (uint count = 0; count < numGuardians; ++count)
+            for (int count = 0; count < numGuardians; ++count)
             {
                 Position pos;
                 if (count == 0)
@@ -4695,11 +4695,11 @@ namespace Game.Spells
                         ItemTemplate proto = m_CastItem.GetTemplate();
                         if (proto != null)
                         {
-                            if (proto.GetRequiredSkill() == (uint)SkillType.Engineering)
+                            if (proto.GetRequiredSkill() == SkillType.Engineering)
                             {
                                 ushort skill202 = unitCaster.ToPlayer().GetSkillValue(SkillType.Engineering);
                                 if (skill202 != 0)
-                                    ((Guardian)summon).InitStatsForLevel((uint)(skill202 / 5));
+                                    ((Guardian)summon).InitStatsForLevel((skill202 / 5));
                             }
                         }
                     }

@@ -25,7 +25,6 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Game.AI.SmartTarget;
 
 using static Global;
 
@@ -156,7 +155,7 @@ namespace Game.Entities
         }
 
         //Core
-        public bool Create(ulong guidlow, CharacterCreateInfo createInfo)
+        public bool Create(long guidlow, CharacterCreateInfo createInfo)
         {
             _Create(ObjectGuid.Create(HighGuid.Player, guidlow));
 
@@ -170,7 +169,7 @@ namespace Game.Entities
                 return false;
             }
 
-            var cEntry = CliDB.ChrClassesStorage.LookupByKey(createInfo.ClassId);
+            var cEntry = CliDB.ChrClassesStorage.LookupByKey((int)createInfo.ClassId);
             if (cEntry == null)
             {
                 Log.outError(LogFilter.Player, "PlayerCreate: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid character class ({2}) - refusing to do so (wrong DBC-files?)",
@@ -298,7 +297,7 @@ namespace Game.Entities
                 Item pItem = GetItemByPos(i);
                 if (pItem != null)
                 {
-                    List<ItemPosCount> destList;
+                    List<(ItemPos item, int count)> destList;
                     // equip offhand weapon/shield if it attempt equipped before main-hand weapon
                     InventoryResult msg = CanEquipItem(ItemSlot.Null, out destList, pItem, false);
                     if (msg == InventoryResult.Ok)
@@ -1250,6 +1249,7 @@ namespace Game.Entities
 
             SendPacket(petSpellsPacket);
         }
+
         public void VehicleSpellInitialize()
         {
             Creature vehicle = GetVehicleCreatureBase();
@@ -1265,12 +1265,12 @@ namespace Game.Entities
             petSpells.CommandState = CommandStates.Follow;
             petSpells.Flag = 0x8;
 
-            for (uint i = 0; i < SharedConst.MaxSpellControlBar; ++i)
-                petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(0, i + 8);
+            for (int i = 0; i < SharedConst.MaxSpellControlBar; ++i)
+                petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(0, (byte)(i + 8));
 
-            for (uint i = 0; i < SharedConst.MaxCreatureSpells; ++i)
+            for (int i = 0; i < SharedConst.MaxCreatureSpells; ++i)
             {
-                uint spellId = vehicle.m_spells[i];
+                int spellId = vehicle.m_spells[i];
                 SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
                 if (spellInfo == null)
                     continue;
@@ -1287,7 +1287,7 @@ namespace Game.Entities
                 if (spellInfo.IsPassive())
                     vehicle.CastSpell(vehicle, spellInfo.Id, true);
 
-                petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(spellId, i + 8);
+                petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(spellId, (byte)(i + 8));
             }
 
             // Cooldowns
@@ -1297,12 +1297,12 @@ namespace Game.Entities
         }
 
         //Currency
-        void SetCreateCurrency(CurrencyTypes id, uint amount)
+        void SetCreateCurrency(CurrencyTypes id, int amount)
         {
-            SetCreateCurrency((uint)id, amount);
+            SetCreateCurrency((int)id, amount);
         }
 
-        void SetCreateCurrency(uint id, uint amount)
+        void SetCreateCurrency(int id, int amount)
         {
             if (!_currencyStorage.ContainsKey(id))
             {
@@ -1313,7 +1313,7 @@ namespace Game.Entities
             }
         }
 
-        public void ModifyCurrency(uint id, int amount, CurrencyGainSource gainSource = CurrencyGainSource.Cheat, CurrencyDestroyReason destroyReason = CurrencyDestroyReason.Cheat)
+        public void ModifyCurrency(int id, int amount, CurrencyGainSource gainSource = CurrencyGainSource.Cheat, CurrencyDestroyReason destroyReason = CurrencyDestroyReason.Cheat)
         {
             if (amount == 0)
                 return;
@@ -1322,8 +1322,8 @@ namespace Game.Entities
             Cypher.Assert(currency != null);
 
             // Check faction
-            if ((currency.IsAlliance() && GetTeam() != Team.Alliance) ||
-                (currency.IsHorde() && GetTeam() != Team.Horde))
+            if ((currency.IsAlliance && GetTeam() != Team.Alliance) ||
+                (currency.IsHorde && GetTeam() != Team.Horde))
                 return;
 
             // Check award condition
@@ -1505,7 +1505,7 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public uint GetCurrencyQuantity(uint id)
+        public int GetCurrencyQuantity(int id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1514,7 +1514,7 @@ namespace Game.Entities
             return playerCurrency.Quantity;
         }
 
-        public uint GetCurrencyWeeklyQuantity(uint id)
+        public int GetCurrencyWeeklyQuantity(int id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1523,7 +1523,7 @@ namespace Game.Entities
             return playerCurrency.WeeklyQuantity;
         }
 
-        public uint GetCurrencyTrackedQuantity(uint id)
+        public int GetCurrencyTrackedQuantity(int id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1901,11 +1901,11 @@ namespace Game.Entities
         void SetCanDelayTeleport(bool setting) { m_bCanDelayTeleport = setting; }
         bool IsHasDelayedTeleport() { return m_bHasDelayedTeleport; }
         void SetDelayedTeleportFlag(bool setting) { m_bHasDelayedTeleport = setting; }
-        public bool TeleportTo(WorldLocation loc, TeleportToOptions options = 0, uint? instanceId = null)
+        public bool TeleportTo(WorldLocation loc, TeleportToOptions options = 0, int? instanceId = null)
         {
             return TeleportTo(loc.GetMapId(), loc.posX, loc.posY, loc.posZ, loc.Orientation, options, instanceId);
         }
-        public bool TeleportTo(uint mapid, float x, float y, float z, float orientation, TeleportToOptions options = 0, uint? instanceId = null)
+        public bool TeleportTo(int mapid, float x, float y, float z, float orientation, TeleportToOptions options = 0, uint? instanceId = null)
         {
             if (!GridDefines.IsValidMapCoord(mapid, x, y, z, orientation))
             {
@@ -3209,16 +3209,16 @@ namespace Game.Entities
 
         public CinematicManager GetCinematicMgr() { return _cinematicMgr; }
 
-        public void SendUpdateWorldState(WorldStates variable, uint value, bool hidden = false)
+        public void SendUpdateWorldState(WorldStates variable, int value, bool hidden = false)
         {
-            SendUpdateWorldState((uint)variable, value, hidden);
+            SendUpdateWorldState((int)variable, value, hidden);
         }
 
-        public void SendUpdateWorldState(uint variable, uint value, bool hidden = false)
+        public void SendUpdateWorldState(int variable, int value, bool hidden = false)
         {
             UpdateWorldState worldstate = new();
             worldstate.VariableID = variable;
-            worldstate.Value = (int)value;
+            worldstate.Value = value;
             worldstate.Hidden = hidden;
             SendPacket(worldstate);
         }
@@ -3226,7 +3226,7 @@ namespace Game.Entities
         void SendInitWorldStates(uint zoneId, uint areaId)
         {
             // data depends on zoneid/mapid...
-            uint mapid = GetMapId();
+            int mapid = GetMapId();
 
             InitWorldStates packet = new();
             packet.MapID = mapid;
@@ -4663,7 +4663,7 @@ namespace Game.Entities
                         if (spellInfo.Reagent[i] > 0)
                         {
                             //for succubus, voidwalker, felhunter and felguard credit soulshard when despawn reason other than death (out of range, logout)
-                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, (uint)spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
+                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, (uint)spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
                             if (msg == InventoryResult.Ok)
                             {
                                 Item item = StoreNewItem(dest, (uint)spellInfo.Reagent[i], true, new ItemRandomEnchantmentId());
@@ -5103,14 +5103,15 @@ namespace Game.Entities
         public int GetEffectiveTeamId() { return GetEffectiveTeam() == Team.Alliance ? TeamId.Alliance : TeamId.Horde; }
 
         //Money
-        public ulong GetMoney() { return m_activePlayerData.Coinage; }
-        public bool HasEnoughMoney(ulong amount) { return GetMoney() >= amount; }
+        public long GetMoney() { return m_activePlayerData.Coinage; }
+
         public bool HasEnoughMoney(long amount)
         {
             if (amount > 0)
-                return (GetMoney() >= (ulong)amount);
+                return (GetMoney() >= amount);
             return true;
         }
+
         public bool ModifyMoney(long amount, bool sendError = true)
         {
             if (amount == 0)
@@ -5119,7 +5120,7 @@ namespace Game.Entities
             ScriptMgr.OnPlayerMoneyChanged(this, amount);
 
             if (amount < 0)
-                SetMoney((ulong)(GetMoney() > (ulong)-amount ? (long)GetMoney() + amount : 0));
+                SetMoney((GetMoney() > (ulong)-amount ? GetMoney() + amount : 0));
             else
             {
                 if (GetMoney() <= (PlayerConst.MaxMoneyAmount - (ulong)amount))
@@ -5133,12 +5134,12 @@ namespace Game.Entities
             }
             return true;
         }
-        public void SetMoney(ulong value)
+        public void SetMoney(long value)
         {
             bool loading = GetSession().PlayerLoading();
 
             if (!loading)
-                MoneyChanged((uint)value);
+                MoneyChanged(value);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), value);
 
@@ -5192,13 +5193,16 @@ namespace Game.Entities
         public void SetGuildLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildLevel), (int)level); }
         public uint GetGuildLevel() { return (uint)m_playerData.GuildLevel.GetValue(); }
         public void SetGuildIdInvited(ulong GuildId) { m_GuildIdInvited = GuildId; }
-        public ulong GetGuildId() { return ((ObjectGuid)m_unitData.GuildGUID).GetCounter(); }
+        public long GetGuildId() { return ((ObjectGuid)m_unitData.GuildGUID).GetCounter(); }
+
         public Guild GetGuild()
         {
-            ulong guildId = GetGuildId();
+            long guildId = GetGuildId();
             return guildId != 0 ? GuildMgr.GetGuildById(guildId) : null;
         }
-        public ulong GetGuildIdInvited() { return m_GuildIdInvited; }
+
+        public long GetGuildIdInvited() { return m_GuildIdInvited; }
+
         public string GetGuildName()
         {
             return GetGuildId() != 0 ? GuildMgr.GetGuildById(GetGuildId()).GetName() : "";
@@ -7462,7 +7466,7 @@ namespace Game.Entities
             if (!force && (CanTitanGrip() || (offtemplate.GetInventoryType() != InventoryType.Weapon2Hand && !IsTwoHandUsed())))
                 return;
 
-            List<ItemPosCount> off_dest;
+            List<(ItemPos item, int count)> off_dest;
             InventoryResult off_msg = CanStoreItem(ItemPos.Undefined, out off_dest, offItem);
             if (off_msg == InventoryResult.Ok)
             {

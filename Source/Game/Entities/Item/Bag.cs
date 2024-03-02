@@ -58,7 +58,7 @@ namespace Game.Entities
             base.RemoveFromWorld();
         }
 
-        public override bool Create(ulong guidlow, uint itemid, ItemContext context, Player owner)
+        public override bool Create(long guidlow, int itemid, ItemContext context, Player owner)
         {
             var itemProto = Global.ObjectMgr.GetItemTemplate(itemid);
 
@@ -94,7 +94,7 @@ namespace Game.Entities
             return true;
         }
 
-        public override bool LoadFromDB(ulong guid, ObjectGuid owner_guid, SQLFields fields, uint entry)
+        public override bool LoadFromDB(long guid, ObjectGuid owner_guid, SQLFields fields, int entry)
         {
             if (!base.LoadFromDB(guid, owner_guid, fields, entry))
                 return false;

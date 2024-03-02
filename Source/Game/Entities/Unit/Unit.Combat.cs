@@ -615,7 +615,7 @@ namespace Game.Entities
                     if (attType == WeaponAttackType.OffAttack)
                         hitInfo |= HitInfo.OffHand;
 
-                    SendAttackStateUpdate(hitInfo, victim, GetMeleeDamageSchoolMask(), 0, 0, 0, VictimState.Hit, 0);
+                    SendAttackStateUpdate(hitInfo, victim, GetMeleeDamageSchool().GetSpellSchoolMask(), 0, 0, 0, VictimState.Hit, 0);
                 }
             }
         }
@@ -648,7 +648,7 @@ namespace Game.Entities
             dmgInfo.Target = target;
             dmgInfo.Damage = Damage - AbsorbDamage - Resist - BlockedAmount;
             dmgInfo.OriginalDamage = Damage;
-            dmgInfo.DamageSchoolMask = (uint)damageSchoolMask;
+            dmgInfo.DamageSchoolMask = damageSchoolMask;
             dmgInfo.Absorb = AbsorbDamage;
             dmgInfo.Resist = Resist;
             dmgInfo.TargetState = TargetState;

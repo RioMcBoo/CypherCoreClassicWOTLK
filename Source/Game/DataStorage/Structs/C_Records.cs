@@ -182,8 +182,8 @@ namespace Game.DataStorage
     public sealed class ChrCustomizationChoiceRecord
     {
         public LocalizedString Name;
-        public uint Id;
-        private int _chrCustomizationOptionID;
+        public int Id;
+        public int ChrCustomizationOptionID;
         public int ChrCustomizationReqID;
         public int ChrCustomizationVisReqID;
         public ushort SortOrder;
@@ -192,10 +192,6 @@ namespace Game.DataStorage
         public int AddedInPatch;
         public int SoundKitID;
         public int[] SwatchColor = new int[2];
-
-        #region Properties
-        public uint ChrCustomizationOptionID => (uint)_chrCustomizationOptionID;
-        #endregion
     }
 
     public sealed class ChrCustomizationDisplayInfoRecord
@@ -213,33 +209,28 @@ namespace Game.DataStorage
 
     public sealed class ChrCustomizationElementRecord
     {
-        public uint Id;
-        private int _chrCustomizationChoiceID;
+        public int Id;
+        public int ChrCustomizationChoiceID;
         public int RelatedChrCustomizationChoiceID;
         public int ChrCustomizationGeosetID;
         public int ChrCustomizationSkinnedModelID;
         public int ChrCustomizationMaterialID;
         public int ChrCustomizationBoneSetID;
         public int ChrCustomizationCondModelID;
-        private int _chrCustomizationDisplayInfoID;
+        public int ChrCustomizationDisplayInfoID;
         public int ChrCustItemGeoModifyID;
         public int ChrCustomizationVoiceID;
         public int AnimKitID;
         public int ParticleColorID;
-
-        #region Properties
-        public uint ChrCustomizationDisplayInfoID => (uint)_chrCustomizationDisplayInfoID;
-        public uint ChrCustomizationChoiceID => (uint)_chrCustomizationChoiceID;
-        #endregion
     }
 
     public sealed class ChrCustomizationOptionRecord
     {
         public LocalizedString Name;
-        public uint Id;
+        public int Id;
         public ushort SecondaryID;
         public int Flags;
-        private int _chrModelID;
+        public int ChrModelID;
         public int SortIndex;
         public int ChrCustomizationCategoryID;
         public int OptionType;
@@ -247,10 +238,6 @@ namespace Game.DataStorage
         public int ChrCustomizationID;
         public int ChrCustomizationReqID;
         public int UiOrderIndex;
-
-        #region Properties
-        public uint ChrModelID => (uint)_chrModelID;
-        #endregion
     }
 
     public sealed class ChrCustomizationReqRecord
@@ -288,20 +275,16 @@ namespace Game.DataStorage
 
     public sealed class ChrCustomizationReqChoiceRecord
     {
-        public uint Id;
-        private int _chrCustomizationChoiceID;
-        public uint ChrCustomizationReqID;
-
-        #region Properties
-        public uint ChrCustomizationChoiceID => (uint)_chrCustomizationChoiceID;
-        #endregion
+        public int Id;
+        public int ChrCustomizationChoiceID;
+        public int ChrCustomizationReqID;
     }
 
     public sealed class ChrModelRecord
     {
         public float[] FaceCustomizationOffset = new float[3];
         public float[] CustomizeOffset = new float[3];
-        public uint Id;
+        public int Id;
         public sbyte Sex;
         public int DisplayID;
         public int CharComponentTextureLayoutID;
@@ -323,21 +306,21 @@ namespace Game.DataStorage
 
     public sealed class ChrRaceXChrModelRecord
     {
-        public uint Id;
+        public int Id;
         private int _chrRacesID;
-        private int _chrModelID;
-        public int Sex;
+        public int ChrModelID;
+        private int _sex;
         public int AllowedTransmogSlots;
 
         #region Properties
-        public uint ChrRacesID => (uint)_chrRacesID;
-        public uint ChrModelID => (uint)_chrModelID;
+        public Race ChrRacesID => (Race)_chrRacesID;
+        public Gender Sex => (Gender)_sex;
         #endregion
     }
 
     public sealed class ChrRacesRecord
     {
-        public uint Id;
+        private int _id;
         public string ClientPrefix;
         public string ClientFileString;
         public LocalizedString Name;
@@ -383,7 +366,7 @@ namespace Game.DataStorage
         public sbyte CreatureType;
         public sbyte Alliance;
         public sbyte Race_related;
-        public sbyte UnalteredVisualRaceID;
+        private sbyte _unalteredVisualRaceID;
         public sbyte DefaultClassID;
         public sbyte NeutralRaceID;
         public sbyte MaleModelFallbackRaceID;
@@ -397,7 +380,9 @@ namespace Game.DataStorage
         public sbyte UnalteredVisualCustomizationRaceID;
 
         #region Properties
+        public Race Id => (Race)_id;
         public ChrRacesFlag Flags => (ChrRacesFlag)_flags;
+        public Race UnalteredVisualRaceID => (Race)_unalteredVisualRaceID;
         #endregion
 
         #region Helpers
@@ -418,7 +403,7 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public LocalizedString FemaleName;
         public LocalizedString Description;
-        public uint Id;
+        private int _id;
         private byte _classID;
         public sbyte OrderIndex;
         public sbyte PetTalentType;
@@ -430,6 +415,7 @@ namespace Game.DataStorage
         public int[] MasterySpellID = new int[PlayerConst.MaxMasterySpells];
 
         #region Properties
+        public ChrSpecialization Id => (ChrSpecialization)_id;
         public Class ClassID => (Class)_classID;
         public ChrSpecializationFlag Flags => (ChrSpecializationFlag)_flags;
         public ChrSpecializationRole Role => (ChrSpecializationRole)_role;        
@@ -473,15 +459,15 @@ namespace Game.DataStorage
 
     public sealed class CinematicSequencesRecord
     {
-        public uint Id;
-        public uint SoundID;
+        public int Id;
+        public int SoundID;
         public ushort[] Camera = new ushort[8];
     }
 
     public sealed class ConditionalChrModelRecord
     {
         public int Id;
-        public uint ChrModelID;                                      // This is the PK
+        public int ChrModelID;                                      // This is the PK
         public int ChrCustomizationReqID;
         public int PlayerConditionID;
         public int Flags;
@@ -490,16 +476,16 @@ namespace Game.DataStorage
 
     public sealed class ConditionalContentTuningRecord
     {
-        public uint Id;
+        public int Id;
         public int OrderIndex;
         public int RedirectContentTuningID;
         public int RedirectFlag;
-        public uint ParentContentTuningID;
+        public int ParentContentTuningID;
     }
 
     public sealed class ContentTuningRecord
     {
-        public uint Id;
+        public int Id;
         public int MinLevel;
         public int MaxLevel;
         private int _flags;
@@ -538,9 +524,9 @@ namespace Game.DataStorage
     
     public sealed class ConversationLineRecord
     {
-        public uint Id;
-        public uint BroadcastTextID;
-        public uint SpellVisualKitID;
+        public int Id;
+        public int BroadcastTextID;
+        public int SpellVisualKitID;
         public int AdditionalDuration;
         public ushort NextConversationLineID;
         public ushort AnimKitID;
@@ -551,7 +537,7 @@ namespace Game.DataStorage
 
     public sealed class CreatureDisplayInfoRecord
     {
-        public uint Id;
+        public int Id;
         public ushort ModelID;
         public ushort SoundID;
         public sbyte SizeClass;
@@ -600,7 +586,7 @@ namespace Game.DataStorage
 
     public sealed class CreatureFamilyRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public float MinScale;
         public sbyte MinScaleLevel;
@@ -610,7 +596,11 @@ namespace Game.DataStorage
         public sbyte PetTalentType;
         public int CategoryEnumID;
         public int IconFileID;
-        public short[] SkillLine = new short[2];
+        private short[] _skillLine = new short[2];
+
+        #region Properties
+        public SkillType SkillLine(int index) => (SkillType)_skillLine[index];
+        #endregion
     }
 
     public sealed class CreatureModelDataRecord
@@ -671,10 +661,10 @@ namespace Game.DataStorage
 
     public sealed class CriteriaRecord
     {
-        public uint Id;
+        public int Id;
         private short _type;
         public int Asset;
-        public uint ModifierTreeId;
+        public int ModifierTreeId;
         public int StartEvent;
         public int StartAsset;
         public ushort StartTimer;
@@ -704,12 +694,12 @@ namespace Game.DataStorage
 
     public sealed class CriteriaTreeRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Description;
-        public uint Parent;
-        public uint Amount;
+        public int Parent;
+        public int Amount;
         public int Operator;
-        public uint CriteriaID;
+        public int CriteriaID;
         public int OrderIndex;
         private int _flags;
 
@@ -732,7 +722,7 @@ namespace Game.DataStorage
 
     public sealed class CurrencyContainerRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString ContainerName;
         public LocalizedString ContainerDescription;
         public int MinAmount;
@@ -740,20 +730,20 @@ namespace Game.DataStorage
         public int ContainerIconID;
         public int ContainerQuality;
         public int OnLootSpellVisualKitID;
-        public uint CurrencyTypesID;
+        public int CurrencyTypesID;
     }
 
     public sealed class CurrencyTypesRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public LocalizedString Description;
         public byte CategoryID;
         public int InventoryIconFileID;
-        public uint SpellWeight;
+        public int SpellWeight;
         public byte SpellCategory;
-        public uint MaxQty;
-        public uint MaxEarnablePerWeek;
+        public int MaxQty;
+        public int MaxEarnablePerWeek;
         public sbyte Quality;
         public int FactionID;
         public int AwardConditionID;
@@ -819,21 +809,21 @@ namespace Game.DataStorage
 
     public sealed class CurveRecord
     {
-        public uint Id;
+        public int Id;
         public byte Type;
         public byte Flags;
+
+        #region Properties
+        //public ??? Type => (???)_type;
+        #endregion
     }
 
     public sealed class CurvePointRecord
     {
         public Vector2 Pos;
         public Vector2 PreSLSquishPos;
-        public uint Id;
-        private int _curveID;
+        public int Id;
+        public int CurveID;
         public byte OrderIndex;
-
-        #region Properties
-        public uint CurveID => (uint)_curveID;
-        #endregion
     }
 }

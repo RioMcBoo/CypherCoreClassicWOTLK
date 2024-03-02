@@ -22,8 +22,8 @@ namespace Game.Achievements
 {
     public class CriteriaHandler
     {
-        protected Dictionary<uint, CriteriaProgress> _criteriaProgress = new();
-        Dictionary<uint /*criteriaID*/, TimeSpan /*time left*/> _startedCriteria = new();
+        protected Dictionary<int, CriteriaProgress> _criteriaProgress = new();
+        Dictionary<int /*criteriaID*/, TimeSpan /*time left*/> _startedCriteria = new();
 
         public virtual void Reset()
         {
@@ -42,7 +42,7 @@ namespace Game.Achievements
         /// <param name="miscValue3"></param>
         /// <param name="refe"></param>
         /// <param name="referencePlayer"></param>
-        public void UpdateCriteria(CriteriaType type, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, WorldObject refe = null, Player referencePlayer = null)
+        public void UpdateCriteria(CriteriaType type, long miscValue1 = 0, long miscValue2 = 0, long miscValue3 = 0, WorldObject refe = null, Player referencePlayer = null)
         {
             if (type >= CriteriaType.Count)
             {
@@ -66,7 +66,7 @@ namespace Game.Achievements
 
             Log.outDebug(LogFilter.Achievement, "UpdateCriteria({0}, {1}, {2}, {3}) {4}", type, type, miscValue1, miscValue2, miscValue3, GetOwnerInfo());
 
-            List<Criteria> criteriaList = GetCriteriaByType(type, (uint)miscValue1);
+            List<Criteria> criteriaList = GetCriteriaByType(type, (int)miscValue1);
             foreach (Criteria criteria in criteriaList)
             {
                 List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
@@ -279,7 +279,7 @@ namespace Game.Achievements
                             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spellId);
                             foreach (var skill in bounds)
                             {
-                                if (skill.SkillLine == criteria.Entry.Asset)
+                                if (skill.SkillLine == (SkillType)criteria.Entry.Asset)
                                 {
                                     // do not add couter twice if by any Chance skill is listed twice in dbc (eg. skill 777 and spell 22717)
                                     ++spellCount;
@@ -312,7 +312,7 @@ namespace Game.Achievements
                         break;
                     case CriteriaType.EarnPersonalArenaRating:
                     {
-                        uint reqTeamType = criteria.Entry.Asset;
+                        int reqTeamType = criteria.Entry.Asset;
 
                         if (miscValue1 != 0)
                         {
@@ -445,7 +445,7 @@ namespace Game.Achievements
 
         public void UpdateTimedCriteria(TimeSpan timeDiff)
         {
-            List<uint> toRemove = null;            
+            List<int> toRemove = null;            
 
             foreach (var item in _startedCriteria)
             {
@@ -542,7 +542,7 @@ namespace Game.Achievements
             return _criteriaProgress.LookupByKey(entry.Id);
         }
 
-        public void SetCriteriaProgress(Criteria criteria, ulong changeValue, Player referencePlayer, ProgressType progressType = ProgressType.Set)
+        public void SetCriteriaProgress(Criteria criteria, long changeValue, Player referencePlayer, ProgressType progressType = ProgressType.Set)
         {
             Log.outDebug(LogFilter.Achievement, $"SetCriteriaProgress({criteria.Id}, {changeValue}) for {GetOwnerInfo()}.");
 
@@ -560,7 +560,7 @@ namespace Game.Achievements
             }
             else
             {
-                ulong newValue = 0;
+                long newValue = 0;
                 switch (progressType)
                 {
                     case ProgressType.Set:
@@ -569,7 +569,7 @@ namespace Game.Achievements
                     case ProgressType.Accumulate:
                     {
                         // avoid overflow
-                        ulong max_value = ulong.MaxValue;
+                        long max_value = long.MaxValue;
                         newValue = max_value - progress.Counter > changeValue ? progress.Counter + changeValue : max_value;
                         break;
                     }
@@ -630,7 +630,7 @@ namespace Game.Achievements
             if (!CanCompleteCriteriaTree(tree))
                 return false;
 
-            ulong requiredCount = tree.Entry.Amount;
+            long requiredCount = tree.Entry.Amount;
             switch ((CriteriaTreeOperator)tree.Entry.Operator)
             {
                 case CriteriaTreeOperator.Complete:
@@ -644,7 +644,7 @@ namespace Game.Achievements
                     return true;
                 case CriteriaTreeOperator.Sum:
                 {
-                    ulong progress = 0;
+                    long progress = 0;
                     CriteriaManager.WalkCriteriaTree(tree, criteriaTree =>
                     {
                         if (criteriaTree.Criteria != null)
@@ -658,7 +658,7 @@ namespace Game.Achievements
                 }
                 case CriteriaTreeOperator.Highest:
                 {
-                    ulong progress = 0;
+                    long progress = 0;
                     CriteriaManager.WalkCriteriaTree(tree, criteriaTree =>
                     {
                         if (criteriaTree.Criteria != null)
@@ -673,7 +673,7 @@ namespace Game.Achievements
                 }
                 case CriteriaTreeOperator.StartedAtLeast:
                 {
-                    ulong progress = 0;
+                    long progress = 0;
                     foreach (CriteriaTree node in tree.Children)
                     {
                         if (node.Criteria != null)
@@ -690,7 +690,7 @@ namespace Game.Achievements
                 }
                 case CriteriaTreeOperator.CompleteAtLeast:
                 {
-                    ulong progress = 0;
+                    long progress = 0;
                     foreach (CriteriaTree node in tree.Children)
                         if (IsCompletedCriteriaTree(node))
                             if (++progress >= requiredCount)
@@ -700,7 +700,7 @@ namespace Game.Achievements
                 }
                 case CriteriaTreeOperator.ProgressBar:
                 {
-                    ulong progress = 0;
+                    long progress = 0;
                     CriteriaManager.WalkCriteriaTree(tree, criteriaTree =>
                     {
                         if (criteriaTree.Criteria != null)
@@ -737,7 +737,7 @@ namespace Game.Achievements
             return true;
         }
 
-        bool IsCompletedCriteria(Criteria criteria, ulong requiredAmount)
+        bool IsCompletedCriteria(Criteria criteria, long requiredAmount)
         {
             CriteriaProgress progress = GetCriteriaProgress(criteria);
             if (progress == null)
@@ -836,7 +836,7 @@ namespace Game.Achievements
             return false;
         }
 
-        bool CanUpdateCriteria(Criteria criteria, List<CriteriaTree> trees, ulong miscValue1, ulong miscValue2, ulong miscValue3, WorldObject refe, Player referencePlayer)
+        bool CanUpdateCriteria(Criteria criteria, List<CriteriaTree> trees, long miscValue1, long miscValue2, long miscValue3, WorldObject refe, Player referencePlayer)
         {
             if (Global.DisableMgr.IsDisabledFor(DisableType.Criteria, criteria.Id, null))
             {
@@ -890,7 +890,7 @@ namespace Game.Achievements
             return true;
         }
 
-        bool RequirementsSatisfied(Criteria criteria, ulong miscValue1, ulong miscValue2, ulong miscValue3, WorldObject refe, Player referencePlayer)
+        bool RequirementsSatisfied(Criteria criteria, long miscValue1, long miscValue2, long miscValue3, WorldObject refe, Player referencePlayer)
         {
             switch (criteria.Entry.Type)
             {
@@ -975,7 +975,7 @@ namespace Game.Achievements
                 case CriteriaType.CompleteQuestsInZone:
                     if (miscValue1 != 0)
                     {
-                        Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)miscValue1);
+                        Quest quest = Global.ObjectMgr.GetQuestTemplate((int)miscValue1);
                         if (quest == null || quest.QuestSortID != criteria.Entry.Asset)
                             return false;
                     }
@@ -1107,7 +1107,7 @@ namespace Game.Achievements
                     if (miscValue1 == 0 || miscValue2 != criteria.Entry.Asset)
                         return false;
 
-                    ItemTemplate proto = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
+                    ItemTemplate proto = Global.ObjectMgr.GetItemTemplate((int)miscValue1);
                     if (proto == null)
                         return false;
                     break;
@@ -1197,7 +1197,7 @@ namespace Game.Achievements
             return true;
         }
 
-        public bool ModifierTreeSatisfied(ModifierTreeNode tree, ulong miscValue1, ulong miscValue2, WorldObject refe, Player referencePlayer)
+        public bool ModifierTreeSatisfied(ModifierTreeNode tree, long miscValue1, long miscValue2, WorldObject refe, Player referencePlayer)
         {
             switch ((ModifierTreeOperator)tree.Entry.Operator)
             {
@@ -1227,9 +1227,9 @@ namespace Game.Achievements
             return false;
         }
 
-        bool ModifierSatisfied(ModifierTreeRecord modifier, ulong miscValue1, ulong miscValue2, WorldObject refe, Player referencePlayer)
+        bool ModifierSatisfied(ModifierTreeRecord modifier, long miscValue1, long miscValue2, WorldObject refe, Player referencePlayer)
         {
-            uint reqValue = modifier.Asset;
+            int reqValue = modifier.Asset;
             int secondaryAsset = modifier.SecondaryAsset;
             int tertiaryAsset = modifier.TertiaryAsset;
 
@@ -1252,7 +1252,7 @@ namespace Game.Achievements
                 case ModifierTreeType.MinimumItemLevel: // 3
                 {
                     // miscValue1 is itemid
-                    ItemTemplate item = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
+                    ItemTemplate item = Global.ObjectMgr.GetItemTemplate((int)miscValue1);
                     if (item == null || item.GetBaseItemLevel() < reqValue)
                         return false;
                     break;
@@ -1300,7 +1300,7 @@ namespace Game.Achievements
                 case ModifierTreeType.ItemQualityIsAtLeast: // 14
                 {
                     // miscValue1 is itemid
-                    ItemTemplate item = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
+                    ItemTemplate item = Global.ObjectMgr.GetItemTemplate((int)miscValue1);
                     if (item == null || (uint)item.GetQuality() < reqValue)
                         return false;
                     break;
@@ -1308,7 +1308,7 @@ namespace Game.Achievements
                 case ModifierTreeType.ItemQualityIsExactly: // 15
                 {
                     // miscValue1 is itemid
-                    ItemTemplate item = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
+                    ItemTemplate item = Global.ObjectMgr.GetItemTemplate((int)miscValue1);
                     if (item == null || (uint)item.GetQuality() != reqValue)
                         return false;
                     break;
@@ -1319,7 +1319,7 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.PlayerIsInArea: // 17
                 {
-                    uint zoneId, areaId;
+                    int zoneId, areaId;
                     referencePlayer.GetZoneAndAreaId(out zoneId, out areaId);
                     if (zoneId != reqValue && areaId != reqValue)
                         return false;
@@ -1329,7 +1329,7 @@ namespace Game.Achievements
                 {
                     if (refe == null)
                         return false;
-                    uint zoneId, areaId;
+                    int zoneId, areaId;
                     refe.GetZoneAndAreaId(out zoneId, out areaId);
                     if (zoneId != reqValue && areaId != reqValue)
                         return false;
@@ -1341,7 +1341,7 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.LegacyDungeonDifficulty: // 20
                 {
-                    DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(referencePlayer.GetMap().GetDifficultyID());
+                    DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey((int)referencePlayer.GetMap().GetDifficultyID());
                     if (difficulty == null || difficulty.OldEnumValue == -1 || difficulty.OldEnumValue != reqValue)
                         return false;
                     break;
@@ -1428,7 +1428,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.HasTitle: // 38
-                    if (!referencePlayer.HasTitle((int)reqValue))
+                    if (!referencePlayer.HasTitle(reqValue))
                         return false;
                     break;
                 case ModifierTreeType.PlayerLevelEqual: // 39
@@ -1441,9 +1441,9 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.PlayerIsInZone: // 41
                 {
-                    uint zoneId = referencePlayer.GetAreaId();
+                    int zoneId = referencePlayer.GetAreaId();
                     AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
-                    if (areaEntry != null && areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                    if (areaEntry != null && areaEntry.HasFlag(AreaFlags.IsSubzone))
                         zoneId = areaEntry.ParentAreaID;
                     if (zoneId != reqValue)
                         return false;
@@ -1453,24 +1453,24 @@ namespace Game.Achievements
                 {
                     if (refe == null)
                         return false;
-                    uint zoneId = refe.GetAreaId();
+                    int zoneId = refe.GetAreaId();
                     AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
-                    if (areaEntry != null && areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                    if (areaEntry != null && areaEntry.HasFlag(AreaFlags.IsSubzone))
                         zoneId = areaEntry.ParentAreaID;
                     if (zoneId != reqValue)
                         return false;
                     break;
                 }
                 case ModifierTreeType.PlayerHealthBelowPercent: // 43
-                    if (referencePlayer.GetHealthPct() > (float)reqValue)
+                    if (referencePlayer.GetHealthPct() > reqValue)
                         return false;
                     break;
                 case ModifierTreeType.PlayerHealthAbovePercent: // 44
-                    if (referencePlayer.GetHealthPct() < (float)reqValue)
+                    if (referencePlayer.GetHealthPct() < reqValue)
                         return false;
                     break;
                 case ModifierTreeType.PlayerHealthEqualsPercent: // 45
-                    if (referencePlayer.GetHealthPct() != (float)reqValue)
+                    if (referencePlayer.GetHealthPct() != reqValue)
                         return false;
                     break;
                 case ModifierTreeType.TargetHealthBelowPercent: // 46
@@ -1620,8 +1620,8 @@ namespace Game.Achievements
                         return category;
                     }
 
-                    uint petAchievementPoints = 0;
-                    foreach (uint achievementId in referencePlayer.GetCompletedAchievementIds())
+                    int petAchievementPoints = 0;
+                    foreach (int achievementId in referencePlayer.GetCompletedAchievementIds())
                     {
                         var achievement = CliDB.AchievementStorage.LookupByKey(achievementId);
                         if (getRootAchievementCategory(achievement) == SharedConst.AchivementCategoryPetBattles)
@@ -1638,7 +1638,7 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.BattlePetType: // 78
                 {
-                    var speciesEntry = CliDB.BattlePetSpeciesStorage.LookupByKey(miscValue1);
+                    var speciesEntry = CliDB.BattlePetSpeciesStorage.LookupByKey((int)miscValue1);
                     if (speciesEntry?.PetTypeEnum != reqValue)
                         return false;
                     break;
@@ -1715,8 +1715,8 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.ItemClassAndSubclass: // 96
                 {
-                    ItemTemplate item = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
-                    if (item == null || item.GetClass() != (ItemClass)reqValue || item.GetSubClass() != secondaryAsset)
+                    ItemTemplate item = Global.ObjectMgr.GetItemTemplate((int)miscValue1);
+                    if (item == null || item.GetClass() != (ItemClass)reqValue || item.GetSubClass().data != secondaryAsset)
                         return false;
                     break;
                 }
@@ -3153,34 +3153,34 @@ namespace Game.Achievements
 
         public virtual void SendAllData(Player receiver) { }
         public virtual void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted) { }
-        public virtual void SendCriteriaProgressRemoved(uint criteriaId) { }
+        public virtual void SendCriteriaProgressRemoved(int criteriaId) { }
 
         public virtual void CompletedCriteriaTree(CriteriaTree tree, Player referencePlayer) { }
         public virtual void AfterCriteriaTreeUpdate(CriteriaTree tree, Player referencePlayer) { }
 
         public virtual void SendPacket(ServerPacket data) { }
 
-        public virtual bool RequiredAchievementSatisfied(uint achievementId) { return false; }
+        public virtual bool RequiredAchievementSatisfied(int achievementId) { return false; }
 
         public virtual string GetOwnerInfo() { return ""; }
-        public virtual List<Criteria> GetCriteriaByType(CriteriaType type, uint asset) { return null; }
+        public virtual List<Criteria> GetCriteriaByType(CriteriaType type, int asset) { return null; }
     }
 
     public class CriteriaManager : Singleton<CriteriaManager>
     {
-        Dictionary<uint, CriteriaDataSet> _criteriaDataMap = new();
+        Dictionary<int, CriteriaDataSet> _criteriaDataMap = new();
 
-        Dictionary<uint, CriteriaTree> _criteriaTrees = new();
-        Dictionary<uint, Criteria> _criteria = new();
-        Dictionary<uint, ModifierTreeNode> _criteriaModifiers = new();
+        Dictionary<int, CriteriaTree> _criteriaTrees = new();
+        Dictionary<int, Criteria> _criteria = new();
+        Dictionary<int, ModifierTreeNode> _criteriaModifiers = new();
 
-        MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new();
+        MultiMap<int, CriteriaTree> _criteriaTreeByCriteria = new();
 
         // store criterias by type to speed up lookup
         MultiMap<CriteriaType, Criteria> _criteriasByType = new();
-        MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
+        MultiMap<int, Criteria>[] _criteriasByAsset = new MultiMap<int, Criteria>[(int)CriteriaType.Count];
         MultiMap<CriteriaType, Criteria> _guildCriteriasByType = new();
-        MultiMap<uint, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
+        MultiMap<int, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<int, Criteria>[(int)CriteriaType.Count];
         MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
 
         MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Count];
@@ -3190,8 +3190,8 @@ namespace Game.Achievements
         {
             for (var i = 0; i < (int)CriteriaType.Count; ++i)
             {
-                _criteriasByAsset[i] = new MultiMap<uint, Criteria>();
-                _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<uint, Criteria>();
+                _criteriasByAsset[i] = new MultiMap<int, Criteria>();
+                _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<int, Criteria>();
             }
         }
 
@@ -3224,7 +3224,7 @@ namespace Game.Achievements
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} criteria modifiers in {1} ms", _criteriaModifiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        T GetEntry<T>(Dictionary<uint, T> map, CriteriaTreeRecord tree) where T : new()
+        T GetEntry<T>(Dictionary<int, T> map, CriteriaTreeRecord tree) where T : new()
         {
             CriteriaTreeRecord cur = tree;
             var obj = map.LookupByKey(tree.Id);
@@ -3310,10 +3310,10 @@ namespace Game.Achievements
                 _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
 
             // Load criteria
-            uint criterias = 0;
-            uint guildCriterias = 0;
-            uint scenarioCriterias = 0;
-            uint questObjectiveCriterias = 0;
+            int criterias = 0;
+            int guildCriterias = 0;
+            int scenarioCriterias = 0;
+            int questObjectiveCriterias = 0;
             foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
             {
                 Cypher.Assert(criteriaEntry.Type < CriteriaType.Count,
@@ -3472,17 +3472,17 @@ namespace Game.Achievements
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} additional criteria data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public CriteriaTree GetCriteriaTree(uint criteriaTreeId)
+        public CriteriaTree GetCriteriaTree(int criteriaTreeId)
         {
             return _criteriaTrees.LookupByKey(criteriaTreeId);
         }
 
-        public Criteria GetCriteria(uint criteriaId)
+        public Criteria GetCriteria(int criteriaId)
         {
             return _criteria.LookupByKey(criteriaId);
         }
 
-        public ModifierTreeNode GetModifierTree(uint modifierTreeId)
+        public ModifierTreeNode GetModifierTree(int modifierTreeId)
         {
             return _criteriaModifiers.LookupByKey(modifierTreeId);
         }
@@ -3528,7 +3528,7 @@ namespace Game.Achievements
             }
         }
 
-        public List<Criteria> GetPlayerCriteriaByType(CriteriaType type, uint asset)
+        public List<Criteria> GetPlayerCriteriaByType(CriteriaType type, int asset)
         {
             if (asset != 0 && IsCriteriaTypeStoredByAsset(type))
             {
@@ -3541,7 +3541,7 @@ namespace Game.Achievements
             return _criteriasByType.LookupByKey(type);
         }
 
-        public List<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, uint scenarioId)
+        public List<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, int scenarioId)
         {
             return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
         }
@@ -3561,6 +3561,11 @@ namespace Game.Achievements
             return _criteriasByFailEvent[(int)failEvent];
         }
 
+        public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
+        {
+            return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
+        }
+
         public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
         {
             return _guildCriteriasByType.LookupByKey(type);
@@ -3571,7 +3576,7 @@ namespace Game.Achievements
             return _questObjectiveCriteriasByType[type];
         }
 
-        public List<CriteriaTree> GetCriteriaTreesByCriteria(uint criteriaId)
+        public List<CriteriaTree> GetCriteriaTreesByCriteria(int criteriaId)
         {
             return _criteriaTreeByCriteria.LookupByKey(criteriaId);
         }
@@ -3616,7 +3621,7 @@ namespace Game.Achievements
 
     public class Criteria
     {
-        public uint Id;
+        public int Id;
         public CriteriaRecord Entry;
         public ModifierTreeNode Modifier;
         public CriteriaFlagsCu FlagsCu;
@@ -3624,7 +3629,7 @@ namespace Game.Achievements
 
     public class CriteriaTree
     {
-        public uint Id;
+        public int Id;
         public CriteriaTreeRecord Entry;
         public AchievementRecord Achievement;
         public ScenarioStepRecord ScenarioStep;
@@ -3635,7 +3640,7 @@ namespace Game.Achievements
 
     public class CriteriaProgress
     {
-        public ulong Counter;
+        public long Counter;
         public long Date;                                            // latest update time.
         public ObjectGuid PlayerGUID;                               // GUID of the player that completed this criteria (guild achievements)
         public bool Changed;
@@ -3968,7 +3973,7 @@ namespace Game.Achievements
             }
         }
 
-        public bool Meets(uint criteriaId, Player source, WorldObject target, uint miscValue1 = 0, uint miscValue2 = 0)
+        public bool Meets(int criteriaId, Player source, WorldObject target, uint miscValue1 = 0, uint miscValue2 = 0)
         {
             switch (DataType)
             {
@@ -4080,7 +4085,7 @@ namespace Game.Achievements
                 {
                     Criteria entry = Global.CriteriaMgr.GetCriteria(criteriaId);
 
-                    uint itemId = entry.Entry.Type == CriteriaType.EquipItemInSlot ? miscValue2 : miscValue1;
+                    int itemId = entry.Entry.Type == CriteriaType.EquipItemInSlot ? miscValue2 : miscValue1;
                     ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
                     if (itemTemplate == null)
                         return false;
@@ -4114,14 +4119,14 @@ namespace Game.Achievements
         // criteria_data_TYPE_T_CREATURE        = 1
         public struct CreatureStruct
         {
-            public uint Id;
+            public int Id;
         }
         // criteria_data_TYPE_T_PLAYER_CLASS_RACE = 2
         // criteria_data_TYPE_S_PLAYER_CLASS_RACE = 21
         public struct ClassRaceStruct
         {
-            public uint ClassId;
-            public uint RaceId;
+            public int ClassId;
+            public int RaceId;
         }
         // criteria_data_TYPE_T_PLAYER_LESS_HEALTH = 3
         public struct HealthStruct
@@ -4132,8 +4137,8 @@ namespace Game.Achievements
         // criteria_data_TYPE_T_AURA            = 7
         public struct AuraStruct
         {
-            public uint SpellId;
-            public uint EffectIndex;
+            public int SpellId;
+            public int EffectIndex;
         }
         // criteria_data_TYPE_VALUE             = 8
         public struct ValueStruct

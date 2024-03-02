@@ -17,7 +17,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(ScenarioGUID);
             _worldPacket.WriteInt32(ScenarioID);
             _worldPacket.WriteInt32(CurrentStep);
-            _worldPacket.WriteUInt32(DifficultyID);
+            _worldPacket.WriteInt32(DifficultyID);
             _worldPacket.WriteUInt32(WaveCurrent);
             _worldPacket.WriteUInt32(WaveMax);
             _worldPacket.WriteUInt32(TimerDuration);
@@ -28,7 +28,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(PlayerGUID);
 
             for (int i = 0; i < PickedSteps.Count; ++i)
-                _worldPacket.WriteUInt32(PickedSteps[i]);
+                _worldPacket.WriteInt32(PickedSteps[i]);
 
             _worldPacket.WriteBit(ScenarioComplete);
             _worldPacket.FlushBits();
@@ -46,13 +46,13 @@ namespace Game.Networking.Packets
         public ObjectGuid ScenarioGUID;
         public int ScenarioID;
         public int CurrentStep = -1;
-        public uint DifficultyID;
+        public int DifficultyID;
         public uint WaveCurrent;
         public uint WaveMax;
         public uint TimerDuration;
         public List<CriteriaProgressPkt> CriteriaProgress = new();
         public List<BonusObjectiveData> BonusObjectives = new();
-        public List<uint> PickedSteps = new();
+        public List<int> PickedSteps = new();
         public List<ScenarioSpellUpdate> Spells = new();
         public ObjectGuid PlayerGUID;
         public bool ScenarioComplete;
@@ -72,17 +72,17 @@ namespace Game.Networking.Packets
 
     class ScenarioCompleted : ServerPacket
     {
-        public ScenarioCompleted(uint scenarioId) : base(ServerOpcodes.ScenarioCompleted, ConnectionType.Instance)
+        public ScenarioCompleted(int scenarioId) : base(ServerOpcodes.ScenarioCompleted, ConnectionType.Instance)
         {
             ScenarioID = scenarioId;
         }
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(ScenarioID);
+            _worldPacket.WriteInt32(ScenarioID);
         }
         
-        public uint ScenarioID;
+        public int ScenarioID;
     }
 
     class ScenarioVacate : ServerPacket

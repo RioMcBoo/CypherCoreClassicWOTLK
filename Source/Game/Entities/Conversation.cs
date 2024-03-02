@@ -254,7 +254,7 @@ namespace Game.Entities
             return actor.ToCreature();
         }
 
-        public uint GetScriptId()
+        public int GetScriptId()
         {
             return Global.ConversationDataStorage.GetConversationTemplate(GetEntry()).ScriptId;
         }
@@ -326,7 +326,7 @@ namespace Game.Entities
 
         public ObjectGuid GetCreatorGuid() { return _creatorGuid; }
         public override ObjectGuid GetOwnerGUID() { return GetCreatorGuid(); }
-        public override uint GetFaction() { return 0; }
+        public override int GetFaction() { return 0; }
 
         public override float GetStationaryX() { return _stationaryPosition.GetPositionX(); }
         public override float GetStationaryY() { return _stationaryPosition.GetPositionY(); }

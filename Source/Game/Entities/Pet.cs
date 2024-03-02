@@ -1377,7 +1377,7 @@ namespace Game.Entities
             return true;
         }
 
-        public override bool HasSpell(uint spell)
+        public override bool HasSpell(int spell)
         {
             var petSpell = m_spells.LookupByKey(spell);
             return petSpell != null && petSpell.state != PetSpellState.Removed;
@@ -1480,7 +1480,7 @@ namespace Game.Entities
 
         public override float GetNativeObjectScale()
         {
-            var creatureFamily = CliDB.CreatureFamilyStorage.LookupByKey(GetCreatureTemplate().Family);
+            var creatureFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)GetCreatureTemplate().Family);
             if (creatureFamily != null && creatureFamily.MinScale > 0.0f && GetPetType() == PetType.Hunter)
             {
                 float scale;
@@ -1497,7 +1497,7 @@ namespace Game.Entities
             return base.GetNativeObjectScale();
         }
 
-        public override void SetDisplayId(uint modelId, bool setNative = false)
+        public override void SetDisplayId(int modelId, bool setNative = false)
         {
             base.SetDisplayId(modelId, setNative);
 
@@ -1515,7 +1515,7 @@ namespace Game.Entities
         public override bool IsLoading() { return m_loading; }
 
         public override byte GetPetAutoSpellSize() { return (byte)m_autospells.Count; }
-        public override uint GetPetAutoSpellOnPos(byte pos)
+        public override int GetPetAutoSpellOnPos(byte pos)
         {
             if (pos >= m_autospells.Count)
                 return 0;
@@ -1526,7 +1526,7 @@ namespace Game.Entities
         public void SetDuration(uint dur) { m_duration = (int)dur; }
         public int GetDuration() { return m_duration; }
 
-        public void SetPetExperience(uint xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetExperience), xp); }
+        public void SetPetExperience(int xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetExperience), xp); }
         public void SetPetNextLevelExperience(int xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNextLevelExperience), xp); }
 
         public ushort GetSpecialization() { return m_petSpecialization; }
@@ -1644,8 +1644,8 @@ namespace Game.Entities
 
         public DeclinedName GetDeclinedNames() { return _declinedname; }
 
-        public new Dictionary<uint, PetSpell> m_spells = new();
-        List<uint> m_autospells = new();
+        public new Dictionary<int, PetSpell> m_spells = new();
+        List<int> m_autospells = new();
         public bool m_removed;
 
         PetType m_petType;

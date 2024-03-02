@@ -63,10 +63,10 @@ namespace Framework.Constants
         public const uint LFGTimeBoot = 120;
         public const uint LFGTimeProposal = 45;
         public const uint LFGQueueUpdateInterval = 15 * Time.InMilliseconds;
-        public const uint LFGSpellDungeonCooldown = 71328;
-        public const uint LFGSpellDungeonDeserter = 71041;
-        public const uint LFGSpellLuckOfTheDraw = 72221;
-        public const uint LFGKickVotesNeeded = 3;
+        public const int LFGSpellDungeonCooldown = 71328;
+        public const int LFGSpellDungeonDeserter = 71041;
+        public const int LFGSpellLuckOfTheDraw = 72221;
+        public const int LFGKickVotesNeeded = 3;
         public const byte LFGMaxKicks = 3;
         public const int LFGTanksNeeded = 1;
         public const int LFGHealersNeeded = 1;
@@ -838,7 +838,8 @@ namespace Framework.Constants
 
     public enum Expansion : sbyte
     {
-        LevelCurrent = -1,
+        Unk = -2,
+        LevelCurrent = -1,        
         Classic = 0,
         BurningCrusade = 1,
         WrathOfTheLichKing = 2,

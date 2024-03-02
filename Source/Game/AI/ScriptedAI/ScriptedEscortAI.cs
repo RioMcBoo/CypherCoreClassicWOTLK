@@ -267,7 +267,7 @@ namespace Game.AI
             DoMeleeAttackIfReady();
         }
 
-        public override void MovementInform(MovementGeneratorType moveType, uint Id)
+        public override void MovementInform(MovementGeneratorType moveType, int Id)
         {
             // no action allowed if there is no escort
             if (!HasEscortState(EscortState.Escorting))
@@ -296,7 +296,7 @@ namespace Game.AI
             else if (moveType == MovementGeneratorType.Waypoint)
             {
                 Cypher.Assert(Id < _path.nodes.Count, $"EscortAI::MovementInform: referenced movement id ({Id}) points to non-existing node in loaded path ({me.GetGUID()})");
-                WaypointNode waypoint = _path.nodes[(int)Id];
+                WaypointNode waypoint = _path.nodes[Id];
 
                 Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::MovementInform: waypoint node {waypoint.id} reached ({me.GetGUID()})");
 

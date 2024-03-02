@@ -151,7 +151,7 @@ namespace Game.Entities
             }
         }
 
-        public static GameObject CreateGameObject(uint entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit = 0)
+        public static GameObject CreateGameObject(int entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit = 0)
         {
             GameObjectTemplate goInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
             if (goInfo == null)
@@ -173,7 +173,7 @@ namespace Game.Entities
             return go;
         }
 
-        bool Create(uint entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit, bool dynamic, ulong spawnid)
+        bool Create(int entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit, bool dynamic, ulong spawnid)
         {
             Cypher.Assert(map != null);
             SetMap(map);
@@ -1224,12 +1224,12 @@ namespace Game.Entities
             return true;
         }
 
-        public override bool HasQuest(uint questId)
+        public override bool HasQuest(int questId)
         {
             return Global.ObjectMgr.GetGOQuestRelations(GetEntry()).HasQuest(questId);
         }
 
-        public override bool HasInvolvedQuest(uint questId)
+        public override bool HasInvolvedQuest(int questId)
         {
             return Global.ObjectMgr.GetGOQuestInvolvedRelations(GetEntry()).HasQuest(questId);
         }
@@ -1408,7 +1408,7 @@ namespace Game.Entities
             return false;
         }
 
-        public void TriggeringLinkedGameObject(uint trapEntry, Unit target)
+        public void TriggeringLinkedGameObject(int trapEntry, Unit target)
         {
             GameObjectTemplate trapInfo = Global.ObjectMgr.GetGameObjectTemplate(trapEntry);
             if (trapInfo == null || trapInfo.type != GameObjectTypes.Trap)
@@ -1636,7 +1636,7 @@ namespace Game.Entities
         {
             // by default spell caster is user
             Unit spellCaster = user;
-            uint spellId = 0;
+            int spellId = 0;
             bool triggered = false;
 
             Player playerUser = user.ToPlayer();
@@ -1716,7 +1716,7 @@ namespace Game.Entities
                             GameEvents.Trigger(info.Chest.triggeredEvent, player, this);
 
                         // triggering linked GO
-                        uint trapEntry = info.Chest.linkedTrap;
+                        int trapEntry = info.Chest.linkedTrap;
                         if (trapEntry != 0)
                             TriggeringLinkedGameObject(trapEntry, player);
                     }
@@ -2490,7 +2490,7 @@ namespace Game.Entities
                             GameEvents.Trigger(info.GatheringNode.triggeredEvent, player, this);
 
                         // triggering linked GO
-                        uint trapEntry = info.GatheringNode.linkedTrap;
+                        int trapEntry = info.GatheringNode.linkedTrap;
                         if (trapEntry != 0)
                             TriggeringLinkedGameObject(trapEntry, player);
 
@@ -2597,12 +2597,12 @@ namespace Game.Entities
                 && dz < info.GeoBoxMax.Z + radius && dz > info.GeoBoxMin.Z - radius;
         }
 
-        public uint GetScriptId()
+        public int GetScriptId()
         {
             GameObjectData gameObjectData = GetGameObjectData();
             if (gameObjectData != null)
             {
-                uint scriptId = gameObjectData.ScriptId;
+                int scriptId = gameObjectData.ScriptId;
                 if (scriptId != 0)
                     return scriptId;
             }
@@ -2757,7 +2757,7 @@ namespace Game.Entities
             if (player == null)
                 return null;
 
-            uint lockId = GetGoInfo().GetLockId();
+            int lockId = GetGoInfo().GetLockId();
             if (lockId == 0)
                 return null;
 
@@ -2772,7 +2772,7 @@ namespace Game.Entities
 
                 if (lockEntry.Type[i] == (byte)LockKeyType.Spell)
                 {
-                    SpellInfo spell = Global.SpellMgr.GetSpellInfo((uint)lockEntry.Index[i], GetMap().GetDifficultyID());
+                    SpellInfo spell = Global.SpellMgr.GetSpellInfo(lockEntry.Index[i], GetMap().GetDifficultyID());
                     if (spell != null)
                         return spell;
                 }
@@ -2796,7 +2796,7 @@ namespace Game.Entities
             return null;
         }
 
-        public void ModifyHealth(int change, WorldObject attackerOrHealer = null, uint spellId = 0)
+        public void ModifyHealth(int change, WorldObject attackerOrHealer = null, int spellId = 0)
         {
             if (m_goValue.Building.MaxHealth == 0 || change == 0)
                 return;
@@ -2872,7 +2872,7 @@ namespace Game.Entities
                     RemoveFlag(GameObjectFlags.Destroyed);
                     SetFlag(GameObjectFlags.Damaged);
 
-                    uint modelId = m_goInfo.displayId;
+                    int modelId = m_goInfo.displayId;
                     DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                     if (modelData != null)
                         if (modelData.State1Wmo != 0)
@@ -2907,7 +2907,7 @@ namespace Game.Entities
                     RemoveFlag(GameObjectFlags.Damaged);
                     SetFlag(GameObjectFlags.Destroyed);
 
-                    uint modelId = m_goInfo.displayId;
+                    int modelId = m_goInfo.displayId;
                     DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                     if (modelData != null)
                         if (modelData.State2Wmo != 0)
@@ -2928,7 +2928,7 @@ namespace Game.Entities
                         GameEvents.Trigger(GetGoInfo().DestructibleBuilding.RebuildingEvent, attackerOrHealer, this);
                     RemoveFlag(GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
 
-                    uint modelId = m_goInfo.displayId;
+                    int modelId = m_goInfo.displayId;
                     DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                     if (modelData != null)
                         if (modelData.State3Wmo != 0)
@@ -2951,7 +2951,7 @@ namespace Game.Entities
         {
             m_lootState = state;
             m_lootStateUnitGUID = unit != null ? unit.GetGUID() : ObjectGuid.Empty;
-            GetAI().OnLootStateChanged((uint)state, unit);
+            GetAI().OnLootStateChanged(state, unit);
 
             // Start restock timer if the chest is partially looted or not looted at all
             if (GetGoType() == GameObjectTypes.Chest && state == LootState.Activated && GetGoInfo().Chest.chestRestockTime > 0 && m_restockTime == 0 && loot != null && loot.IsChanged())
@@ -3074,9 +3074,9 @@ namespace Game.Entities
             viewer.SendPacket(setStateLocal);
         }
 
-        public void SetDisplayId(uint displayid)
+        public void SetDisplayId(int displayid)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.DisplayID), (int)displayid);
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.DisplayID), displayid);
             UpdateModel();
         }
 
@@ -3716,7 +3716,7 @@ namespace Game.Entities
 
         bool HasLootRecipient() { return !m_tapList.Empty(); }
 
-        public override uint GetLevelForTarget(WorldObject target)
+        public override int GetLevelForTarget(WorldObject target)
         {
             Unit owner = GetOwner();
             if (owner != null)
@@ -3755,8 +3755,8 @@ namespace Game.Entities
 
         public uint GetDisplayId() { return (uint)m_gameObjectData.DisplayID.GetValue(); }
 
-        public override uint GetFaction() { return (uint)m_gameObjectData.FactionTemplate.GetValue(); }
-        public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.FactionTemplate), (int)faction); }
+        public override int GetFaction() { return m_gameObjectData.FactionTemplate.GetValue(); }
+        public override void SetFaction(int faction) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.FactionTemplate), faction); }
 
         public override float GetStationaryX() { return StationaryPosition.GetPositionX(); }
         public override float GetStationaryY() { return StationaryPosition.GetPositionY(); }

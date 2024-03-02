@@ -1020,9 +1020,9 @@ namespace Game
             return Convert.ToInt32(Values.LookupByKey(confi));
         }
 
-        public static ulong GetUInt64Value(WorldCfg confi)
+        public static long GetInt64Value(WorldCfg confi)
         {
-            return Convert.ToUInt64(Values.LookupByKey(confi));
+            return Convert.ToInt64(Values.LookupByKey(confi));
         }
 
         public static bool GetBoolValue(WorldCfg confi)

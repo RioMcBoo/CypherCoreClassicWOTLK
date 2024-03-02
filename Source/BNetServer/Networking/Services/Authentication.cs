@@ -78,7 +78,7 @@ namespace BNetServer.Networking
                 {
                     do
                     {
-                        var realmId = new RealmId(characterCountsResult.Read<byte>(3), characterCountsResult.Read<byte>(4), characterCountsResult.Read<uint>(2));
+                        var realmId = new RealmId(characterCountsResult.Read<byte>(3), characterCountsResult.Read<byte>(4), characterCountsResult.Read<int>(2));
                         accountInfo.GameAccounts[characterCountsResult.Read<uint>(0)].CharacterCounts[realmId.GetAddress()] = characterCountsResult.Read<byte>(1);
 
                     } while (characterCountsResult.NextRow());
@@ -94,7 +94,7 @@ namespace BNetServer.Networking
                 {
                     do
                     {
-                        var realmId = new RealmId(lastPlayerCharactersResult.Read<byte>(1), lastPlayerCharactersResult.Read<byte>(2), lastPlayerCharactersResult.Read<uint>(3));
+                        var realmId = new RealmId(lastPlayerCharactersResult.Read<byte>(1), lastPlayerCharactersResult.Read<byte>(2), lastPlayerCharactersResult.Read<int>(3));
 
                         LastPlayedCharacterInfo lastPlayedCharacter = new();
                         lastPlayedCharacter.RealmId = realmId;

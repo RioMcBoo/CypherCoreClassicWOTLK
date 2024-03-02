@@ -14,7 +14,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(SceneID);
             _worldPacket.WriteUInt32(PlaybackFlags);
-            _worldPacket.WriteUInt32(SceneInstanceID);
+            _worldPacket.WriteInt32(SceneInstanceID);
             _worldPacket.WriteInt32(SceneScriptPackageID);
             _worldPacket.WritePackedGuid(TransportGUID);
             _worldPacket.WriteVector4(Location.GetPosition4D());
@@ -24,7 +24,7 @@ namespace Game.Networking.Packets
 
         public int SceneID;
         public uint PlaybackFlags;
-        public uint SceneInstanceID;
+        public int SceneInstanceID;
         public int SceneScriptPackageID;
         public ObjectGuid TransportGUID;
         public Position Location;

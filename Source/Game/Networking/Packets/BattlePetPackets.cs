@@ -340,17 +340,17 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Guid;
-        public uint Species;
-        public uint CreatureID;
-        public uint DisplayID;
+        public int Species;
+        public int CreatureID;
+        public int DisplayID;
         public ushort Breed;
         public ushort Level;
         public ushort Exp;
         public ushort Flags;
-        public uint Power;
-        public uint Health;
-        public uint MaxHealth;
-        public uint Speed;
+        public int Power;
+        public int Health;
+        public int MaxHealth;
+        public int Speed;
         public byte Quality;
         public BattlePetOwnerInfo? OwnerInfo;
         public string Name;

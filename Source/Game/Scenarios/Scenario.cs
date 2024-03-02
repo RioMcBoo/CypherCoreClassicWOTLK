@@ -65,13 +65,13 @@ namespace Game.Scenarios
                 }
             }
 
-            if (step.IsBonusObjective())
+            if (step.IsBonusObjective)
                 return;
 
             ScenarioStepRecord newStep = null;
             foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (scenarioStep.IsBonusObjective())
+                if (scenarioStep.IsBonusObjective)
                     continue;
 
                 if (GetStepState(scenarioStep) == ScenarioStepState.Done)
@@ -128,7 +128,7 @@ namespace Game.Scenarios
         {
             foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (scenarioStep.IsBonusObjective())
+                if (scenarioStep.IsBonusObjective)
                     continue;
 
                 if (GetStepState(scenarioStep) != ScenarioStepState.Done)
@@ -180,7 +180,7 @@ namespace Game.Scenarios
             if (currentStep == null)
                 return false;
 
-            if (step.IsBonusObjective())
+            if (step.IsBonusObjective)
                 return true;
 
             return currentStep == step;
@@ -200,7 +200,7 @@ namespace Game.Scenarios
             if (currentStep == null)
                 return false;
 
-            if (step.IsBonusObjective())
+            if (step.IsBonusObjective)
                 if (step != currentStep)
                     return false;
 
@@ -248,7 +248,7 @@ namespace Game.Scenarios
             // Don't know exactly what this is for, but seems to contain list of scenario steps that we're either on or that are completed
             foreach (var state in _stepStates)
             {
-                if (state.Key.IsBonusObjective())
+                if (state.Key.IsBonusObjective)
                     continue;
 
                 switch (state.Value)
@@ -272,7 +272,7 @@ namespace Game.Scenarios
             ScenarioStepRecord firstStep = null;
             foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (scenarioStep.IsBonusObjective())
+                if (scenarioStep.IsBonusObjective)
                     continue;
 
                 if (firstStep == null || scenarioStep.OrderIndex < firstStep.OrderIndex)
@@ -288,7 +288,7 @@ namespace Game.Scenarios
             ScenarioStepRecord lastStep = null;
             foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (scenarioStep.IsBonusObjective())
+                if (scenarioStep.IsBonusObjective)
                     continue;
 
                 if (lastStep == null || scenarioStep.OrderIndex > lastStep.OrderIndex)
@@ -310,13 +310,13 @@ namespace Game.Scenarios
             List<BonusObjectiveData> bonusObjectivesData = new();
             foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (!scenarioStep.IsBonusObjective())
+                if (!scenarioStep.IsBonusObjective)
                     continue;
 
                 if (Global.CriteriaMgr.GetCriteriaTree(scenarioStep.CriteriaTreeId) != null)
                 {
                     BonusObjectiveData bonusObjectiveData;
-                    bonusObjectiveData.BonusObjectiveID = (int)scenarioStep.Id;
+                    bonusObjectiveData.BonusObjectiveID = scenarioStep.Id;
                     bonusObjectiveData.ObjectiveComplete = GetStepState(scenarioStep) == ScenarioStepState.Done;
                     bonusObjectivesData.Add(bonusObjectiveData);
                 }
@@ -345,7 +345,7 @@ namespace Game.Scenarios
             return criteriasProgress;
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
+        public override List<Criteria> GetCriteriaByType(CriteriaType type, int asset)
         {
             return Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(type, _data.Entry.Id);
         }
@@ -354,7 +354,7 @@ namespace Game.Scenarios
         {
             ScenarioVacate scenarioBoot = new();
             scenarioBoot.ScenarioGUID = _guid;
-            scenarioBoot.ScenarioID = (int)_data.Entry.Id;
+            scenarioBoot.ScenarioID = _data.Entry.Id;
             player.SendPacket(scenarioBoot);
         }
 
@@ -366,7 +366,7 @@ namespace Game.Scenarios
             return _currentstep;
         }
 
-        public override void SendCriteriaProgressRemoved(uint criteriaId) { }
+        public override void SendCriteriaProgressRemoved(int criteriaId) { }
         public override void AfterCriteriaTreeUpdate(CriteriaTree tree, Player referencePlayer) { }
         public override void SendAllData(Player receiver) { }
 

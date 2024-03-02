@@ -263,9 +263,9 @@ namespace Game.Entities
         public uint Id;
         public AreaTriggerTemplate Template;
 
-        public uint MoveCurveId;
-        public uint ScaleCurveId;
-        public uint MorphCurveId;
+        public CurveInterpolationMode MoveCurveId;
+        public CurveInterpolationMode ScaleCurveId;
+        public CurveInterpolationMode MorphCurveId;
         public uint FacingCurveId;
 
         public int AnimId;
@@ -285,21 +285,21 @@ namespace Game.Entities
         public List<Vector3> SplinePoints = new();
         public AreaTriggerOrbitInfo OrbitInfo;
 
-        public uint ScriptId;
+        public int ScriptId;
     }
 
     public class AreaTriggerSpawn : SpawnData
     {
         public AreaTriggerId TriggerId;
         public AreaTriggerShapeInfo Shape = new();
-        public uint? SpellForVisuals;
+        public int? SpellForVisuals;
 
         public AreaTriggerSpawn() : base(SpawnObjectType.AreaTrigger) { }
     }
 
     public struct AreaTriggerAction
     {
-        public uint Param;
+        public int Param;
         public AreaTriggerActionTypes ActionType;
         public AreaTriggerActionUserTypes TargetType;
     }

@@ -1503,7 +1503,7 @@ namespace Framework.Constants
         ItemMask = TradeItem | Item | GameobjectItem
     }
 
-    public enum SpellFamilyNames
+    public enum SpellFamilyNames : byte
     {
         Generic = 0,
         Events = 1,                            // Events, Holidays

@@ -293,7 +293,7 @@ namespace Game.Entities
 
         public void SetOverrideSpellsId(uint overrideSpellsId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideSpellsID), (int)overrideSpellsId); }
 
-        public void AddOverrideSpell(uint overridenSpellId, uint newSpellId)
+        public void AddOverrideSpell(int overridenSpellId, int newSpellId)
         {
             m_overrideSpells.Add(overridenSpellId, newSpellId);
         }
@@ -1255,7 +1255,7 @@ namespace Game.Entities
                             if (professionItem != null)
                             {
                                 // Store item in bag
-                                List<ItemPosCount> professionItemDest = new();
+                                List<(ItemPos item, int count)> professionItemDest = new();
 
                                 if (CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, professionItemDest, professionItem, false) != InventoryResult.Ok)
                                 {
@@ -1931,15 +1931,15 @@ namespace Game.Entities
             return false;
         }
 
-        public Dictionary<uint, PlayerSpell> GetSpellMap() { return m_spells; }
+        public Dictionary<int, PlayerSpell> GetSpellMap() { return m_spells; }
 
-        public override SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        public override SpellSchools GetMeleeDamageSchool(WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
             Item weapon = GetWeaponForAttack(attackType, true);
             if (weapon != null)
-                return (SpellSchoolMask)(1 << (int)weapon.GetTemplate().GetDamageType());
+                return weapon.GetTemplate().GetDamageType();
 
-            return SpellSchoolMask.Normal;
+            return SpellSchools.Normal;
         }
 
         void CastAllObtainSpells()
@@ -2084,7 +2084,7 @@ namespace Game.Entities
             m_spells[spellId] = newspell;
         }
 
-        public void RemoveTemporarySpell(uint spellId)
+        public void RemoveTemporarySpell(int spellId)
         {
             var spell = m_spells.LookupByKey(spellId);
             // spell already not in list - do not do anything
@@ -2097,7 +2097,7 @@ namespace Game.Entities
             m_spells.Remove(spellId);
         }
 
-        public void UpdateZoneDependentAuras(uint newZone)
+        public void UpdateZoneDependentAuras(int newZone)
         {
             // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone.area update
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newZone);
@@ -2107,7 +2107,7 @@ namespace Game.Entities
                         CastSpell(this, spell.spellId, true);
         }
 
-        public void UpdateAreaDependentAuras(uint newArea)
+        public void UpdateAreaDependentAuras(int newArea)
         {
             // remove auras from spells with area limitations
             foreach (var pair in GetOwnedAuras())
@@ -2238,7 +2238,7 @@ namespace Game.Entities
             SendPacket(new SendUnlearnSpells());
         }
 
-        public void LearnSpell(uint spellId, bool dependent, uint fromSkill = 0, bool suppressMessaging = false, int? traitDefinitionId = null)
+        public void LearnSpell(int spellId, bool dependent, SkillType fromSkill = 0, bool suppressMessaging = false, int? traitDefinitionId = null)
         {
             PlayerSpell spell = m_spells.LookupByKey(spellId);
 
@@ -2872,7 +2872,7 @@ namespace Game.Entities
             if (spellLearnSkill != null)
             {
                 // add dependent skills if this spell is not learned from adding skill already
-                if ((uint)spellLearnSkill.skill != fromSkill)
+                if (spellLearnSkill.skill != fromSkill)
                 {
                     ushort skill_value = GetPureSkillValue(spellLearnSkill.skill);
                     ushort skill_max_value = GetPureMaxSkillValue(spellLearnSkill.skill);
@@ -2884,7 +2884,7 @@ namespace Game.Entities
 
                     if (new_skill_max_value == 0)
                     {
-                        var rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo((uint)spellLearnSkill.skill, GetRace(), GetClass());
+                        var rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo(spellLearnSkill.skill, GetRace(), GetClass());
                         if (rcInfo != null)
                         {
                             switch (Global.SpellMgr.GetSkillRangeType(rcInfo))
@@ -2925,7 +2925,7 @@ namespace Game.Entities
                 // not ranked skills
                 foreach (var _spell_idx in skill_bounds)
                 {
-                    SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey(_spell_idx.SkillLine);
+                    SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey((int)_spell_idx.SkillLine);
                     if (pSkill == null)
                         continue;
 
@@ -2934,7 +2934,7 @@ namespace Game.Entities
 
                     // Runeforging special case
                     if ((_spell_idx.AcquireMethod == AbilityLearnType.OnSkillLearn && !HasSkill((SkillType)_spell_idx.SkillLine))
-                        || ((_spell_idx.SkillLine == (int)SkillType.Runeforging) && _spell_idx.TrivialSkillLineRankHigh == 0))
+                        || ((_spell_idx.SkillLine == SkillType.Runeforging) && _spell_idx.TrivialSkillLineRankHigh == 0))
                     {
                         SkillRaceClassInfoRecord rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo((SkillType)_spell_idx.SkillLine, GetRace(), GetClass());
                         if (rcInfo != null)
@@ -2989,7 +2989,7 @@ namespace Game.Entities
             return false;
         }
 
-        public bool HasActiveSpell(uint spellId)
+        public bool HasActiveSpell(int spellId)
         {
             var spell = m_spells.LookupByKey(spellId);
             if (spell != null)
