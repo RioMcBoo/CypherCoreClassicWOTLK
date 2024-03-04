@@ -60,20 +60,20 @@ namespace Game.Networking.Packets
                 for (var i = 0; i < 2; ++i)
                     _worldPacket.WriteUInt32(Stats.Flags[i]);
 
-                _worldPacket.WriteInt32(Stats.CreatureType);
-                _worldPacket.WriteInt32(Stats.CreatureFamily);
-                _worldPacket.WriteInt32(Stats.Classification);
-                _worldPacket.WriteUInt32(Stats.PetSpellDataId);
+                _worldPacket.WriteInt32((int)Stats.CreatureType);
+                _worldPacket.WriteInt32((int)Stats.CreatureFamily);
+                _worldPacket.WriteInt32((int)Stats.Classification);
+                _worldPacket.WriteInt32(Stats.PetSpellDataId);
 
                 for (var i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
-                    _worldPacket.WriteUInt32(Stats.ProxyCreatureID[i]);
+                    _worldPacket.WriteInt32(Stats.ProxyCreatureID[i]);
 
                 _worldPacket.WriteInt32(Stats.Display.CreatureDisplay.Count);
                 _worldPacket.WriteFloat(Stats.Display.TotalProbability);
 
                 foreach (CreatureXDisplay display in Stats.Display.CreatureDisplay)
                 {
-                    _worldPacket.WriteUInt32(display.CreatureDisplayID);
+                    _worldPacket.WriteInt32(display.CreatureDisplayID);
                     _worldPacket.WriteFloat(display.Scale);
                     _worldPacket.WriteFloat(display.Probability);
                 }
@@ -82,11 +82,11 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteFloat(Stats.EnergyMulti);
 
                 _worldPacket.WriteInt32(Stats.QuestItems.Count);
-                _worldPacket.WriteUInt32(Stats.CreatureMovementInfoID);
-                _worldPacket.WriteInt32(Stats.HealthScalingExpansion);
-                _worldPacket.WriteUInt32(Stats.RequiredExpansion);
-                _worldPacket.WriteUInt32(Stats.VignetteID);
-                _worldPacket.WriteInt32(Stats.Class);
+                _worldPacket.WriteInt32(Stats.CreatureMovementInfoID);
+                _worldPacket.WriteInt32((int)Stats.HealthScalingExpansion);
+                _worldPacket.WriteInt32((int)Stats.RequiredExpansion);
+                _worldPacket.WriteInt32(Stats.VignetteID);
+                _worldPacket.WriteInt32((int)Stats.Class);
                 _worldPacket.WriteInt32(Stats.CreatureDifficultyID);
                 _worldPacket.WriteInt32(Stats.WidgetSetID);
                 _worldPacket.WriteInt32(Stats.WidgetSetUnitConditionID);
@@ -101,7 +101,7 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteCString(Stats.CursorName);
 
                 foreach (var questItem in Stats.QuestItems)
-                    _worldPacket.WriteUInt32(questItem);
+                    _worldPacket.WriteInt32(questItem);
             }
         }
 
@@ -281,7 +281,7 @@ namespace Game.Networking.Packets
                 foreach (uint questItem in Stats.QuestItems)
                     statsData.WriteUInt32(questItem);
 
-                statsData.WriteUInt32(Stats.ContentTuningId);
+                statsData.WriteInt32(Stats.ContentTuningId);
             }
 
             _worldPacket.WriteUInt32(statsData.GetSize());
@@ -741,7 +741,7 @@ namespace Game.Networking.Packets
         public bool Leader;
         public List<int> QuestItems = new();
         public int CreatureMovementInfoID;
-        public int HealthScalingExpansion;
+        public Expansion HealthScalingExpansion;
         public Expansion RequiredExpansion;
         public int VignetteID;
         public Class Class;
@@ -770,7 +770,7 @@ namespace Game.Networking.Packets
         public int[] Data = new int[SharedConst.MaxGOData];
         public float Size;
         public List<int> QuestItems = new();
-        public uint ContentTuningId;
+        public int ContentTuningId;
     }
 
     class QuestCompletionNPC

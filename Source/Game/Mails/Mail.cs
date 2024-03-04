@@ -10,7 +10,7 @@ namespace Game.Mails
 {
     public class Mail
     {
-        public void AddItem(ulong itemGuidLow, uint item_template)
+        public void AddItem(long itemGuidLow, int item_template)
         {
             MailItemInfo mii = new();
             mii.item_guid = itemGuidLow;
@@ -18,7 +18,7 @@ namespace Game.Mails
             items.Add(mii);
         }
 
-        public bool RemoveItem(ulong itemGuid)
+        public bool RemoveItem(long itemGuid)
         {
             foreach (var item in items)
             {
@@ -33,10 +33,10 @@ namespace Game.Mails
 
         public bool HasItems() { return !items.Empty(); }
 
-        public ulong messageID;
+        public long messageID;
         public MailMessageType messageType;
         public MailStationery stationery;
-        public uint mailTemplateId;
+        public int mailTemplateId;
         public long sender;
         public long receiver;
         public string subject;
@@ -53,13 +53,13 @@ namespace Game.Mails
 
     public class MailItemInfo
     {
-        public ulong item_guid;
-        public uint item_template;
+        public long item_guid;
+        public int item_template;
     }
 
     public class MailReceiver
     {
-        public MailReceiver(ulong receiver_lowguid)
+        public MailReceiver(long receiver_lowguid)
         {
             m_receiver = null;
             m_receiver_lowguid = receiver_lowguid;
@@ -71,7 +71,7 @@ namespace Game.Mails
             m_receiver_lowguid = receiver.GetGUID().GetCounter();            
         }
 
-        public MailReceiver(Player receiver, ulong receiver_lowguid)
+        public MailReceiver(Player receiver, long receiver_lowguid)
         {
             m_receiver = receiver;
             m_receiver_lowguid = receiver_lowguid;

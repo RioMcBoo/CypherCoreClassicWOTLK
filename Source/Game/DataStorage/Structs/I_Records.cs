@@ -191,13 +191,20 @@ namespace Game.DataStorage
     public sealed class ItemDisenchantLootRecord
     {
         public int Id;
-        public sbyte Subclass;
-        public byte Quality;
+        private sbyte _subclass;
+        private byte _quality;
         public ushort MinLevel;
         public ushort MaxLevel;
         public ushort SkillRequired;
-        public sbyte ExpansionID;
-        public uint Class;
+        private sbyte _expansionID;
+        private uint _class;
+
+        #region Properties
+        public ItemSubClass Subclass => (ItemSubClass)_subclass;
+        public ItemQuality Quality => (ItemQuality)_quality;
+        public Expansion ExpansionID => (Expansion)_expansionID;
+        public ItemClass Class => (ItemClass)_class;
+        #endregion
     }
 
     public sealed class ItemEffectRecord
@@ -249,7 +256,7 @@ namespace Game.DataStorage
         /// <summary>
         /// required curency count
         /// </summary>
-        public uint[] CurrencyCount = new uint[ItemConst.MaxItemExtCostCurrencies];
+        public int[] CurrencyCount = new int[ItemConst.MaxItemExtCostCurrencies];
     }
 
     public sealed class ItemLevelSelectorRecord
@@ -463,7 +470,7 @@ namespace Game.DataStorage
         public short[] Resistances = new short[7];
         public ushort ScalingStatDistributionID;
         public short[] StatModifierBonusAmount = new short[ItemConst.MaxStats];
-        public byte ExpansionID;
+        private byte _expansionID;
         public byte ArtifactID;
         public byte SpellWeight;
         public byte SpellWeightCategory;
@@ -490,6 +497,7 @@ namespace Game.DataStorage
         public ItemModType StatModifierBonusStat(int itemStatSlot) => (ItemModType)_statModifierBonusStat[itemStatSlot];
         public InventoryType InventoryType => (InventoryType)_inventoryType;
         public ItemQuality OverallQualityID => (ItemQuality)_overallQualityID;
+        public Expansion ExpansionID => (Expansion)_expansionID;
         #endregion
     }
 

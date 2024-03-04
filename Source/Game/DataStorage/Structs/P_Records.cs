@@ -213,11 +213,11 @@ namespace Game.DataStorage
 
     public sealed class PvpDifficultyRecord
     {
-        public uint Id;
+        public int Id;
         private byte RangeIndex;
         public byte MinLevel;
         public byte MaxLevel;
-        public uint MapID;
+        public int MapID;
 
         #region Helpers
         public BattlegroundBracketId BracketId => (BattlegroundBracketId)RangeIndex;
@@ -226,18 +226,14 @@ namespace Game.DataStorage
 
     public sealed class PvpItemRecord
     {
-        public uint Id;
-        private int _itemID;
+        public int Id;
+        public int ItemID;
         public byte ItemLevelDelta;
-
-        #region Properties
-        public uint ItemID => (uint)_itemID;
-        #endregion
     }
 
     public sealed class PvpSeasonRecord
     {
-        public uint Id;
+        public int Id;
         public int MilestoneSeason;
         public int AllianceAchievementID;
         public int HordeAchievementID;
@@ -246,8 +242,8 @@ namespace Game.DataStorage
     public sealed class PvpTalentRecord
     {
         public LocalizedString Description;
-        public uint Id;
-        public uint SpecID;
+        public int Id;
+        public int SpecID;
         public int SpellID;
         public int OverridesSpellID;
         public int Flags;
@@ -258,13 +254,13 @@ namespace Game.DataStorage
 
     public sealed class PvpTalentCategoryRecord
     {
-        public uint Id;
+        public int Id;
         public byte TalentSlotMask;
     }
 
     public sealed class PvpTalentSlotUnlockRecord
     {
-        public uint Id;
+        public int Id;
         public sbyte Slot;
         public int LevelRequired;
         public int DeathKnightLevelRequired;
@@ -273,7 +269,7 @@ namespace Game.DataStorage
 
     public sealed class PvpTierRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;        
         public short MinRating;
         public short MaxRating;

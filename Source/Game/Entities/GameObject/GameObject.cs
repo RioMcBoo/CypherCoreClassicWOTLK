@@ -3473,8 +3473,8 @@ namespace Game.Entities
                 if (ai.OnCapturePointUpdated(m_goValue.CapturePoint.State))
                     return;
 
-            uint spellVisualId = 0;
-            uint customAnim = 0;
+            int spellVisualId = 0;
+            int customAnim = 0;
 
             switch (m_goValue.CapturePoint.State)
             {
@@ -3616,7 +3616,7 @@ namespace Game.Entities
         public GameObjectData GetGameObjectData() { return m_goData; }
         public GameObjectValue GetGoValue() { return m_goValue; }
 
-        public ulong GetSpawnId() { return m_spawnId; }
+        public long GetSpawnId() { return m_spawnId; }
 
         public Quaternion GetLocalRotation() { return m_localRotation; }
         public long GetPackedLocalRotation() { return m_packedRotation; }
@@ -3633,12 +3633,12 @@ namespace Game.Entities
         }
         public override ObjectGuid GetOwnerGUID() { return m_gameObjectData.CreatedBy; }
 
-        public void SetSpellId(uint id)
+        public void SetSpellId(int id)
         {
             m_spawnedByDefault = false;                     // all summoned object is despawned after delay
             m_spellId = id;
         }
-        public uint GetSpellId() { return m_spellId; }
+        public int GetSpellId() { return m_spellId; }
 
         public long GetRespawnTime() { return m_respawnTime; }
         public long GetRespawnTimeEx()
@@ -3709,7 +3709,7 @@ namespace Game.Entities
         public void AddUse() { ++m_usetimes; }
 
         public uint GetUseCount() { return m_usetimes; }
-        uint GetUniqueUseCount() { return (uint)m_unique_users.Count; }
+        int GetUniqueUseCount() { return m_unique_users.Count; }
 
         List<ObjectGuid> GetTapList() { return m_tapList; }
         void SetTapList(List<ObjectGuid> tapList) { m_tapList = tapList; }
@@ -3805,8 +3805,8 @@ namespace Game.Entities
         protected GameObjectTemplate m_goInfo;
         protected GameObjectTemplateAddon m_goTemplateAddon;
         GameObjectData m_goData;
-        ulong m_spawnId;
-        uint m_spellId;
+        long m_spawnId;
+        int m_spellId;
         long m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
         uint m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
         uint m_despawnDelay;

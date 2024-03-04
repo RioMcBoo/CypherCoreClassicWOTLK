@@ -419,7 +419,7 @@ namespace Game
                 {
                     if (pProto.GetSellPrice() > 0)
                     {
-                        ulong money = pProto.GetSellPrice() * packet.Amount;
+                        long money = pProto.GetSellPrice() * packet.Amount;
 
                         if (!_player.ModifyMoney((long)money)) // ensure player doesn't exceed gold limit
                         {
@@ -552,7 +552,7 @@ namespace Game
             ItemPos destBagSlot = new(ItemSlot.Null, packet.ContainerSlotB);
 
             Item item = GetPlayer().GetItemByPos(src);
-            if (!item)
+            if (item == null)
                 return;
 
             if (!GetPlayer().IsValidPos(destBagSlot, false))      // can be autostore pos
@@ -581,7 +581,7 @@ namespace Game
             }
 
             // no-op: placed in same slot
-            if (dest.Count == 1 && dest[0].Pos == src)
+            if (dest.Count == 1 && dest[0].item == src)
             {
                 // just remove grey item state
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, item);
@@ -592,7 +592,7 @@ namespace Game
             GetPlayer().StoreItem(dest, item, true);
         }
 
-        public void SendEnchantmentLog(ObjectGuid owner, ObjectGuid caster, ObjectGuid itemGuid, uint itemId, uint enchantId, uint enchantSlot)
+        public void SendEnchantmentLog(ObjectGuid owner, ObjectGuid caster, ObjectGuid itemGuid, int itemId, int enchantId, EnchantmentSlot enchantSlot)
         {
             EnchantmentLog packet = new(); 
             packet.Owner = owner;
@@ -605,7 +605,7 @@ namespace Game
             GetPlayer().SendMessageToSet(packet, true);
         }
 
-        public void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, uint slot, uint Duration)
+        public void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, int slot, uint Duration)
         {
             ItemEnchantTimeUpdate data = new();
             data.ItemGuid = Itemguid;

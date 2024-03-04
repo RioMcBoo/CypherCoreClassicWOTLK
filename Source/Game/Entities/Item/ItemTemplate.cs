@@ -332,7 +332,7 @@ namespace Game.Entities
             Cypher.Assert(index < ItemConst.MaxGemSockets);
             return (SocketColor)ExtendedData.SocketType[index];
         }
-        public uint GetSocketBonus() { return ExtendedData.SocketMatchEnchantmentId; }
+        public int GetSocketBonus() { return ExtendedData.SocketMatchEnchantmentId; }
         public int GetGemProperties() { return ExtendedData.GemProperties; }
         public float GetQualityModifier() { return ExtendedData.QualityModifier; }
         public uint GetDuration() { return ExtendedData.DurationInInventory; }
@@ -340,7 +340,7 @@ namespace Game.Entities
         public HolidayIds GetHolidayID() { return (HolidayIds)ExtendedData.RequiredHoliday; }
         public float GetDmgVariance() { return ExtendedData.DmgVariance; }
         public byte GetArtifactID() { return ExtendedData.ArtifactID; }
-        public byte GetRequiredExpansion() { return (byte)ExtendedData.ExpansionID; }
+        public Expansion GetRequiredExpansion() { return ExtendedData.ExpansionID; }
 
         public bool IsCurrencyToken() { return (GetBagFamily() & BagFamilyMask.CurrencyTokens) != 0; }
 
@@ -364,7 +364,7 @@ namespace Game.Entities
                    GetSubClass().Weapon == ItemSubClassWeapon.Gun || GetSubClass().Weapon == ItemSubClassWeapon.Crossbow);
         }
 
-        public uint MaxDurability;
+        public int MaxDurability;
         public List<ItemEffectRecord> Effects = new();
 
         // extra fields, not part of db2 files

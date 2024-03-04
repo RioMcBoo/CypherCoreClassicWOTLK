@@ -16,7 +16,7 @@ namespace Game.Entities
 {
     public class Vehicle : ITransport, IDisposable
     {
-        public Vehicle(Unit unit, VehicleRecord vehInfo, uint creatureEntry)
+        public Vehicle(Unit unit, VehicleRecord vehInfo, int creatureEntry)
         {
             _me = unit;
             _vehicleInfo = vehInfo;
@@ -25,7 +25,7 @@ namespace Game.Entities
 
             for (uint i = 0; i < SharedConst.MaxVehicleSeats; ++i)
             {
-                uint seatId = _vehicleInfo.SeatID[i];
+                int seatId = _vehicleInfo.SeatID[i];
                 if (seatId != 0)
                 {
                     VehicleSeatRecord veSeat = CliDB.VehicleSeatStorage.LookupByKey(seatId);
@@ -33,7 +33,7 @@ namespace Game.Entities
                     {
                         VehicleSeatAddon addon = Global.ObjectMgr.GetVehicleSeatAddon(seatId);
                         Seats.Add((sbyte)i, new VehicleSeat(veSeat, addon));
-                        if (veSeat.CanEnterOrExit())
+                        if (veSeat.CanEnterOrExit)
                             ++UsableSeatNum;
                     }
                 }
@@ -130,9 +130,9 @@ namespace Game.Entities
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolImmunity, true);
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModUnattackable, true);
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolAbsorb, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Banish, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Shield, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.ImmuneShield, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, Mechanics.Banish, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, Mechanics.Shield, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, Mechanics.ImmuneShield, true);
 
                 // ... Resistance, Split damage, Change stats ...
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.DamageShield, true);
@@ -223,7 +223,7 @@ namespace Game.Entities
                 return null;
 
             var newSeatId = seatId;
-            while (!seat.IsEmpty() || HasPendingEventForSeat(newSeatId) || (!seat.SeatInfo.CanEnterOrExit() && !seat.SeatInfo.IsUsableByOverride()))
+            while (!seat.IsEmpty() || HasPendingEventForSeat(newSeatId) || (!seat.SeatInfo.CanEnterOrExit && !seat.SeatInfo.IsUsableByOverride))
             {
                 if (next)
                 {
@@ -261,7 +261,7 @@ namespace Game.Entities
             return null;
         }
         
-        void InstallAccessory(uint entry, sbyte seatId, bool minion, byte type, uint summonTime)
+        void InstallAccessory(int entry, sbyte seatId, bool minion, byte type, uint summonTime)
         {
             // @Prevent adding accessories when vehicle is uninstalling. (Bad script in OnUninstall/OnRemovePassenger/PassengerBoarded hook.)
             
@@ -313,7 +313,7 @@ namespace Game.Entities
                 foreach (var _seat in Seats)
                 {
                     seat = _seat;
-                    if (seat.Value.IsEmpty() && !HasPendingEventForSeat(seat.Key) && (_seat.Value.SeatInfo.CanEnterOrExit() || _seat.Value.SeatInfo.IsUsableByOverride()))
+                    if (seat.Value.IsEmpty() && !HasPendingEventForSeat(seat.Key) && (_seat.Value.SeatInfo.CanEnterOrExit || _seat.Value.SeatInfo.IsUsableByOverride))
                         break;
                 }
 
@@ -365,7 +365,7 @@ namespace Game.Entities
             Log.outDebug( LogFilter.Vehicle, "Unit {0} exit vehicle entry {1} id {2} dbguid {3} seat {4}",
                 unit.GetName(), _me.GetEntry(), _vehicleInfo.Id, _me.GetGUID().ToString(), seat.Key);
 
-            if (seat.Value.SeatInfo.CanEnterOrExit() && ++UsableSeatNum != 0)
+            if (seat.Value.SeatInfo.CanEnterOrExit && ++UsableSeatNum != 0)
                 _me.SetNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
 
             // Enable gravity for passenger when he did not have it active before entering the vehicle
@@ -480,7 +480,7 @@ namespace Game.Entities
         {
             byte ret = 0;
             foreach (var pair in Seats)
-                if (pair.Value.IsEmpty() && !HasPendingEventForSeat(pair.Key) && (pair.Value.SeatInfo.CanEnterOrExit() || pair.Value.SeatInfo.IsUsableByOverride()))
+                if (pair.Value.IsEmpty() && !HasPendingEventForSeat(pair.Key) && (pair.Value.SeatInfo.CanEnterOrExit || pair.Value.SeatInfo.IsUsableByOverride))
                     ++ret;
 
             return ret;
@@ -648,7 +648,7 @@ namespace Game.Entities
             Seat.Value.Passenger.Guid = Passenger.GetGUID();
             Seat.Value.Passenger.IsUninteractible = Passenger.IsUninteractible();
             Seat.Value.Passenger.IsGravityDisabled = Passenger.HasUnitMovementFlag(MovementFlag.DisableGravity);
-            if (Seat.Value.SeatInfo.CanEnterOrExit())
+            if (Seat.Value.SeatInfo.CanEnterOrExit)
             {
                 Cypher.Assert(Target.UsableSeatNum != 0);
                 --Target.UsableSeatNum;

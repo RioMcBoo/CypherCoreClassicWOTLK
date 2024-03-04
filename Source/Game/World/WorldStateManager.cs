@@ -298,9 +298,9 @@ namespace Game
     {
         public int Id;
         public int DefaultValue;
-        public uint ScriptId;
+        public int ScriptId;
 
         public List<int> MapIds = new();
-        public List<uint> AreaIds = new();
+        public List<int> AreaIds = new();
     }
 }

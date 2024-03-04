@@ -7,13 +7,13 @@ namespace Game.DataStorage
 {
     public sealed class QuestFactionRewardRecord
     {
-        public uint Id;
+        public int Id;
         public short[] Difficulty = new short[10];
     }
 
     public sealed class QuestInfoRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString InfoName;
         public sbyte Type;
         public int Modifiers;
@@ -22,10 +22,10 @@ namespace Game.DataStorage
 
     public sealed class QuestLineXQuestRecord
     {
-        public uint Id;
-        public uint QuestLineID;
-        public uint QuestID;
-        public uint OrderIndex;
+        public int Id;
+        public int QuestLineID;
+        public int QuestID;
+        public int OrderIndex;
     }
 
     public sealed class QuestMoneyRewardRecord
@@ -36,10 +36,10 @@ namespace Game.DataStorage
 
     public sealed class QuestPackageItemRecord
     {
-        public uint Id;
+        public int Id;
         public ushort PackageID;
         public int ItemID;
-        public uint ItemQuantity;
+        public int ItemQuantity;
         private byte _displayType;
 
         #region Helpers
@@ -49,20 +49,20 @@ namespace Game.DataStorage
 
     public sealed class QuestSortRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString SortName;
         public sbyte UiOrderIndex;
     }
 
     public sealed class QuestV2Record
     {
-        public uint Id;
+        public int Id;
         public ushort UniqueBitFlag;
     }
 
     public sealed class QuestXPRecord
     {
-        public uint Id;
+        public int Id;
         public ushort[] Difficulty = new ushort[10];
     }
 }

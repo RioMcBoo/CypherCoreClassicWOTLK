@@ -2409,7 +2409,7 @@ namespace Game.Chat
             List<(ItemPos item, int count)> dest;
             InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
-                count -= (int)noSpaceForCount;
+                count -= noSpaceForCount;
 
             if (count == 0 || dest.Empty())                         // can't add any
             {
@@ -2424,7 +2424,7 @@ namespace Game.Chat
             {
                 foreach (var itemPosCount in dest)
                 {
-                    Item item1 = player.GetItemByPos(itemPosCount.Pos);
+                    Item item1 = player.GetItemByPos(itemPosCount.item);
                     if (item1 != null)
                         item1.SetBinding(false);
                 }

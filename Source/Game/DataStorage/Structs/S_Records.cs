@@ -72,7 +72,7 @@ namespace Game.DataStorage
     public sealed class ScalingStatValuesRecord
     {
         public int Id;
-        private int _charlevel;
+        public int Charlevel;
         public int WeaponDPS1H;
         public int WeaponDPS2H;
         public int SpellcasterDPS1H;
@@ -95,10 +95,6 @@ namespace Game.DataStorage
         public int LeatherChestArmor;
         public int MailChestArmor;
         public int PlateChestArmor;
-
-        #region Properties
-        public uint Charlevel => (uint)_charlevel;
-        #endregion
 
         #region Helpers
         public int getSSDMultiplier(uint mask)

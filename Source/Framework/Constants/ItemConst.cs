@@ -193,6 +193,7 @@ namespace Framework.Constants
         public const byte End = 19;
     }
 
+    [Flags]
     public enum SocketColor : int
     {
         Meta = 0x00001,
@@ -224,6 +225,7 @@ namespace Framework.Constants
         Standard = (Red | Yellow | Blue)
     }
 
+    [Flags]
     public enum ItemExtendedCostFlags
     {
         RequireGuild = 0x01,

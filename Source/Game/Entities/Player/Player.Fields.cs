@@ -43,7 +43,7 @@ namespace Game.Entities
         Item[] m_items = new Item[(int)PlayerSlots.Count];
         uint m_WeaponProficiency;
         uint m_ArmorProficiency;
-        uint m_currentBuybackSlot;
+        byte m_currentBuybackSlot;
         TradeData m_trade;
 
         //PVP
@@ -51,7 +51,7 @@ namespace Game.Entities
         public BGData m_bgData;
         bool m_IsBGRandomWinner;
         public PvPInfo pvpInfo;
-        uint m_ArenaTeamIdInvited;
+        int m_ArenaTeamIdInvited;
         long m_lastHonorUpdateTime;
         uint m_contestedPvPTimer;
         bool _usePvpItemLevels;
@@ -94,11 +94,11 @@ namespace Game.Entities
         PlayerUnderwaterState m_MirrorTimerFlagsLast;
 
         //Stats
-        uint m_baseSpellPower;
-        uint m_baseManaRegen;
-        uint m_baseHealthRegen;
+        int m_baseSpellPower;
+        int m_baseManaRegen;
+        int m_baseHealthRegen;
         int m_spellPenetrationItemMod;
-        uint m_lastPotionId;
+        int m_lastPotionId;
 
         //Spell
         Dictionary<int, PlayerSpell> m_spells = new();
@@ -188,7 +188,7 @@ namespace Game.Entities
         uint m_nextSave;
         byte m_cinematic;
 
-        uint m_movie;
+        int m_movie;
         bool m_customizationsChanged;
 
         SpecializationInfo _specializationInfo;
@@ -558,7 +558,7 @@ namespace Game.Entities
     public class BgBattlegroundQueueID_Rec
     {
         public BattlegroundQueueTypeId bgQueueTypeId;
-        public uint invitedToInstance;
+        public int invitedToInstance;
         public uint joinTime;
         public bool mercenary;
     }
@@ -573,7 +573,7 @@ namespace Game.Entities
             joinPos = new WorldLocation();
         }
 
-        public uint bgInstanceID;                    //< This variable is set to bg.m_InstanceID,
+        public int bgInstanceID;                    //< This variable is set to bg.m_InstanceID,
         //  when player is teleported to BG - (it is Battleground's GUID)
         public BattlegroundTypeId bgTypeID;
 
@@ -581,10 +581,10 @@ namespace Game.Entities
         public byte bgAfkReportedCount;
         public long bgAfkReportedTimer;
 
-        public uint bgTeam;                          //< What side the player will be added to
+        public Team bgTeam;                          //< What side the player will be added to
 
-        public uint mountSpell;
-        public uint[] taxiPath = new uint[2];
+        public int mountSpell;
+        public int[] taxiPath = new int[2];
 
         public WorldLocation joinPos;                  //< From where player entered BG
         public BattlegroundQueueTypeId queueId;

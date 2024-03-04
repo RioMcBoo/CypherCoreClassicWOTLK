@@ -323,17 +323,17 @@ namespace Game.Entities
             return (int)Math.Max(tmpDamage, 0.0f);
         }
 
-        public uint SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
+        public int SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         {
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
             {
                 float overrideSP = thisPlayer.m_activePlayerData.OverrideSpellPowerByAPPercent;
                 if (overrideSP > 0.0f)
-                    return (uint)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
+                    return (int)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
             }
 
-            uint advertisedBenefit = (uint)GetTotalAuraModifier(AuraType.ModHealingDone, aurEff =>
+            int advertisedBenefit = GetTotalAuraModifier(AuraType.ModHealingDone, aurEff =>
             {
                 if (aurEff.GetMiscValue() == 0 || (aurEff.GetMiscValue() & (int)schoolMask) != 0)
                     return true;
@@ -421,7 +421,7 @@ namespace Game.Entities
             // Done fixed damage bonus auras
             uint DoneAdvertisedBenefit = SpellBaseHealingBonusDone(spellProto.GetSchoolMask());
             // modify spell power by victim's SPELL_AURA_MOD_HEALING auras (eg Amplify/Dampen Magic)
-            DoneAdvertisedBenefit += (uint)victim.GetTotalAuraModifierByMiscMask(AuraType.ModHealing, (int)spellProto.GetSchoolMask());
+            DoneAdvertisedBenefit += (uint)victim.GetTotalAuraModifierByMiscMask(AuraType.ModHealing, (uint)spellProto.GetSchoolMask());
 
             // Pets just add their bonus damage to their spell damage
             // note that their spell damage is just gain of their own auras
@@ -880,7 +880,7 @@ namespace Game.Entities
                     bool matches = auraEffect.GetMiscValue() != 0 ? auraEffect.GetMiscValue() == spellInfo.Id : auraEffect.IsAffectingSpell(spellInfo);
                     if (matches)
                     {
-                        SpellInfo info = Global.SpellMgr.GetSpellInfo((uint)auraEffect.GetAmount(), GetMap().GetDifficultyID());
+                        SpellInfo info = Global.SpellMgr.GetSpellInfo(auraEffect.GetAmount(), GetMap().GetDifficultyID());
                         if (info != null)
                             return info;
                     }
@@ -907,7 +907,7 @@ namespace Game.Entities
             {
                 if (effect.GetMiscValue() == spellInfo.Id)
                 {
-                    SpellInfo visualSpell = Global.SpellMgr.GetSpellInfo((uint)effect.GetMiscValueB(), GetMap().GetDifficultyID());
+                    SpellInfo visualSpell = Global.SpellMgr.GetSpellInfo(effect.GetMiscValueB(), GetMap().GetDifficultyID());
                     if (visualSpell != null)
                     {
                         spellInfo = visualSpell;
@@ -995,7 +995,7 @@ namespace Game.Entities
             return hitMask;
         }
 
-        public void SetAuraStack(uint spellId, Unit target, uint stack)
+        public void SetAuraStack(int spellId, Unit target, uint stack)
         {
             Aura aura = target.GetAura(spellId, GetGUID());
             if (aura == null)
@@ -1004,7 +1004,7 @@ namespace Game.Entities
                 aura.SetStackAmount((byte)stack);
         }
 
-        public Spell FindCurrentSpellBySpellId(uint spell_id)
+        public Spell FindCurrentSpellBySpellId(int spell_id)
         {
             foreach (var spell in m_currentSpells.Values)
             {
@@ -1016,7 +1016,7 @@ namespace Game.Entities
             return null;
         }
 
-        public int GetCurrentSpellCastTime(uint spell_id)
+        public int GetCurrentSpellCastTime(int spell_id)
         {
             Spell spell = FindCurrentSpellBySpellId(spell_id);
             if (spell != null)
@@ -1060,7 +1060,7 @@ namespace Game.Entities
             return false;
         }
 
-        public bool HasBreakableByDamageAuraType(AuraType type, uint excludeAura = 0)
+        public bool HasBreakableByDamageAuraType(AuraType type, int excludeAura = 0)
         {
             var auras = GetAuraEffectsByType(type);
             foreach (var eff in auras)
@@ -1072,7 +1072,7 @@ namespace Game.Entities
 
         public bool HasBreakableByDamageCrowdControlAura(Unit excludeCasterChannel = null)
         {
-            uint excludeAura = 0;
+            int excludeAura = 0;
             Spell currentChanneledSpell = excludeCasterChannel?.GetCurrentSpell(CurrentSpellTypes.Channeled);
             if (currentChanneledSpell != null)
                 excludeAura = currentChanneledSpell.GetSpellInfo().Id; //Avoid self interrupt of channeled Crowd Control spells like Seduction
@@ -1189,6 +1189,11 @@ namespace Game.Entities
         }
 
         public void ApplySpellImmune(int spellId, SpellImmunity op, SpellEffectName type, bool apply)
+        {
+            ApplySpellImmune(spellId, op, type, apply);
+        }
+
+        public void ApplySpellImmune(int spellId, SpellImmunity op, Mechanics type, bool apply)
         {
             ApplySpellImmune(spellId, op, type, apply);
         }

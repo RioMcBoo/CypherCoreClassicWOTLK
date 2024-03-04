@@ -67,8 +67,8 @@ namespace Game.Maps
             double x_offset = ((double)x - MapConst.CenterGridOffset) / MapConst.SizeofGrids;
             double y_offset = ((double)y - MapConst.CenterGridOffset) / MapConst.SizeofGrids;
 
-            uint x_val = (uint)(x_offset + MapConst.CenterGridId + 0.5f);
-            uint y_val = (uint)(y_offset + MapConst.CenterGridId + 0.5f);
+            int x_val = (int)(x_offset + MapConst.CenterGridId + 0.5f);
+            int y_val = (int)(y_offset + MapConst.CenterGridId + 0.5f);
             return new GridCoord(x_val, y_val);
         }
 
@@ -76,7 +76,7 @@ namespace Game.Maps
         {
             int gx = (int)(MapConst.CenterGridId - x / MapConst.SizeofGrids);
             int gy = (int)(MapConst.CenterGridId - y / MapConst.SizeofGrids);
-            return new GridCoord((uint)((MapConst.MaxGrids - 1) - gx), (uint)((MapConst.MaxGrids - 1) - gy));
+            return new GridCoord(MapConst.MaxGrids - 1 - gx, MapConst.MaxGrids - 1 - gy);
         }
 
         public static CellCoord ComputeCellCoord(float x, float y)
@@ -84,8 +84,8 @@ namespace Game.Maps
             double x_offset = ((double)x - MapConst.CenterGridCellOffset) / MapConst.SizeofCells;
             double y_offset = ((double)y - MapConst.CenterGridCellOffset) / MapConst.SizeofCells;
 
-            uint x_val = (uint)(x_offset + MapConst.CenterGridCellId + 0.5f);
-            uint y_val = (uint)(y_offset + MapConst.CenterGridCellId + 0.5f);
+            int x_val = (int)(x_offset + MapConst.CenterGridCellId + 0.5f);
+            int y_val = (int)(y_offset + MapConst.CenterGridCellId + 0.5f);
             return new CellCoord(x_val, y_val);
         }
     }
@@ -94,7 +94,7 @@ namespace Game.Maps
     {
         const int Limit = MapConst.TotalCellsPerMap;
 
-        public CellCoord(uint x, uint y)
+        public CellCoord(int x, int y)
         {
             X_coord = x;
             Y_coord = y;
@@ -109,25 +109,27 @@ namespace Game.Maps
         {
             return X_coord < Limit && Y_coord < Limit;
         }
+
         public ICoord Normalize()
         {
             X_coord = Math.Min(X_coord, Limit - 1);
             Y_coord = Math.Min(Y_coord, Limit - 1);
             return this;
         }
-        public uint GetId()
+
+        public int GetId()
         {
             return Y_coord * Limit + X_coord;
         }
 
-        public void Dec_x(uint val)
+        public void Dec_x(int val)
         {
             if (X_coord > val)
                 X_coord -= val;
             else
                 X_coord = 0;
         }
-        public void Inc_x(uint val)
+        public void Inc_x(int val)
         {
             if (X_coord + val < Limit)
                 X_coord += val;
@@ -135,14 +137,14 @@ namespace Game.Maps
                 X_coord = Limit - 1;
         }
 
-        public void Dec_y(uint val)
+        public void Dec_y(int val)
         {
             if (Y_coord > val)
                 Y_coord -= val;
             else
                 Y_coord = 0;
         }
-        public void Inc_y(uint val)
+        public void Inc_y(int val)
         {
             if (Y_coord + val < Limit)
                 Y_coord += val;
@@ -173,15 +175,15 @@ namespace Game.Maps
             return X_coord.GetHashCode() ^ Y_coord.GetHashCode();
         }
 
-        public uint X_coord { get; set; }
-        public uint Y_coord { get; set; }
+        public int X_coord { get; set; }
+        public int Y_coord { get; set; }
     }
 
     public class GridCoord : ICoord
     {
         const int Limit = MapConst.MaxGrids;
 
-        public GridCoord(uint x, uint y)
+        public GridCoord(int x, int y)
         {
             X_coord = x;
             Y_coord = y;
@@ -196,25 +198,27 @@ namespace Game.Maps
         {
             return X_coord < Limit && Y_coord < Limit;
         }
+
         public ICoord Normalize()
         {
             X_coord = Math.Min(X_coord, Limit - 1);
             Y_coord = Math.Min(Y_coord, Limit - 1);
             return this;
         }
-        public uint GetId()
+
+        public int GetId()
         {
             return Y_coord * Limit + X_coord;
         }
         
-        public void Dec_x(uint val)
+        public void Dec_x(int val)
         {
             if (X_coord > val)
                 X_coord -= val;
             else
                 X_coord = 0;
         }
-        public void Inc_x(uint val)
+        public void Inc_x(int val)
         {
             if (X_coord + val < Limit)
                 X_coord += val;
@@ -222,14 +226,14 @@ namespace Game.Maps
                 X_coord = Limit - 1;
         }
 
-        public void Dec_y(uint val)
+        public void Dec_y(int val)
         {
             if (Y_coord > val)
                 Y_coord -= val;
             else
                 Y_coord = 0;
         }
-        public void Inc_y(uint val)
+        public void Inc_y(int val)
         {
             if (Y_coord + val < Limit)
                 Y_coord += val;
@@ -269,21 +273,21 @@ namespace Game.Maps
         }
 
 
-        public uint X_coord { get; set; }
-        public uint Y_coord { get; set; }
+        public int X_coord { get; set; }
+        public int Y_coord { get; set; }
     }
 
     public interface ICoord
     {
         bool IsCoordValid();
         ICoord Normalize();
-        uint GetId();
-        void Dec_x(uint val);
-        void Inc_x(uint val);
-        void Dec_y(uint val);
-        void Inc_y(uint val);
+        int GetId();
+        void Dec_x(int val);
+        void Inc_x(int val);
+        void Dec_y(int val);
+        void Inc_y(int val);
 
-        uint X_coord { get; set; }
-        uint Y_coord { get; set; }
+        int X_coord { get; set; }
+        int Y_coord { get; set; }
     }
 }

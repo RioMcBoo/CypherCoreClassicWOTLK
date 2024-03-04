@@ -1345,11 +1345,11 @@ namespace Game.Entities
 
             if (amount > 0 && !isGainOnRefund && gainSource != CurrencyGainSource.Vendor)
             {
-                amount = (int)(amount * GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyGain, (int)id));
+                amount = (int)(amount * GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyGain, id));
                 amount = (int)(amount * GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyCategoryGainPct, currency.CategoryID));
             }
 
-            int scaler = currency.Scaler();
+            int scaler = currency.Scaler;
 
             // Currency that is immediately converted into reputation with that faction instead
             FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(currency.FactionID);
@@ -1368,7 +1368,7 @@ namespace Game.Entities
                 _currencyStorage.Add(id, playerCurrency);
             }
 
-            uint weeklyCap = GetCurrencyWeeklyCap(currency);
+            int weeklyCap = GetCurrencyWeeklyCap(currency);
             if (!ignoreCaps) // Ignore weekly cap for refund
             {
                 // Weekly cap
@@ -1376,7 +1376,7 @@ namespace Game.Entities
                     amount = (int)(weeklyCap - playerCurrency.WeeklyQuantity);
 
                 // Max cap
-                uint maxCap = GetCurrencyMaxQuantity(currency, false, gainSource == CurrencyGainSource.UpdatingVersion);
+                int maxCap = GetCurrencyMaxQuantity(currency, false, gainSource == CurrencyGainSource.UpdatingVersion);
                 if (maxCap != 0 && amount > 0 && (playerCurrency.Quantity + amount) > maxCap)
                     amount = (int)(maxCap - playerCurrency.Quantity);
             }
@@ -1391,38 +1391,38 @@ namespace Game.Entities
             if (playerCurrency.state != PlayerCurrencyState.New)
                 playerCurrency.state = PlayerCurrencyState.Changed;
 
-            playerCurrency.Quantity += (uint)amount;
+            playerCurrency.Quantity += amount;
 
             if (amount > 0 && !ignoreCaps) // Ignore total values update for refund
             {
                 if (weeklyCap != 0)
-                    playerCurrency.WeeklyQuantity += (uint)amount;
+                    playerCurrency.WeeklyQuantity += amount;
 
-                if (currency.IsTrackingQuantity())
-                    playerCurrency.TrackedQuantity += (uint)amount;
+                if (currency.IsTrackingQuantity)
+                    playerCurrency.TrackedQuantity += amount;
 
-                if (currency.HasTotalEarned())
-                    playerCurrency.EarnedQuantity += (uint)amount;
+                if (currency.HasTotalEarned)
+                    playerCurrency.EarnedQuantity += amount;
 
                 if (!isGainOnRefund)
-                    UpdateCriteria(CriteriaType.CurrencyGained, id, (ulong)amount);
+                    UpdateCriteria(CriteriaType.CurrencyGained, id, amount);
             }
 
             CurrencyChanged(id, amount);
 
             SetCurrency packet = new();
             packet.Type = currency.Id;
-            packet.Quantity = (int)playerCurrency.Quantity;
+            packet.Quantity = playerCurrency.Quantity;
             packet.Flags = CurrencyGainFlags.None; // TODO: Check when flags are applied
 
-            if ((playerCurrency.WeeklyQuantity / currency.Scaler()) > 0)
+            if ((playerCurrency.WeeklyQuantity / currency.Scaler) > 0)
                 packet.WeeklyQuantity = (int)playerCurrency.WeeklyQuantity;
 
             if (currency.HasMaxQuantity(false, gainSource == CurrencyGainSource.UpdatingVersion))
-                packet.MaxQuantity = (int)GetCurrencyMaxQuantity(currency);
+                packet.MaxQuantity = GetCurrencyMaxQuantity(currency);
 
-            if (currency.HasTotalEarned())
-                packet.TotalEarned = (int)playerCurrency.EarnedQuantity;
+            if (currency.HasTotalEarned)
+                packet.TotalEarned = playerCurrency.EarnedQuantity;
 
             packet.SuppressChatLog = currency.IsSuppressingChatLog(gainSource == CurrencyGainSource.UpdatingVersion);
             packet.QuantityChange = amount;
@@ -1436,17 +1436,17 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public void AddCurrency(uint id, uint amount, CurrencyGainSource gainSource = CurrencyGainSource.Cheat)
+        public void AddCurrency(int id, int amount, CurrencyGainSource gainSource = CurrencyGainSource.Cheat)
         {
-            ModifyCurrency(id, (int)amount, gainSource);
+            ModifyCurrency(id, amount, gainSource);
         }
 
-        public void RemoveCurrency(uint id, int amount, CurrencyDestroyReason destroyReason = CurrencyDestroyReason.Cheat)
+        public void RemoveCurrency(int id, int amount, CurrencyDestroyReason destroyReason = CurrencyDestroyReason.Cheat)
         {
             ModifyCurrency(id, -amount, default, destroyReason);
         }
 
-        public void IncreaseCurrencyCap(uint id, uint amount)
+        public void IncreaseCurrencyCap(int id, int amount)
         {
             if (amount == 0)
                 return;
@@ -1455,18 +1455,18 @@ namespace Game.Entities
             Cypher.Assert(currency != null);
 
             // Check faction
-            if ((currency.IsAlliance() && GetTeam() != Team.Alliance) ||
-                (currency.IsHorde() && GetTeam() != Team.Horde))
+            if ((currency.IsAlliance && GetTeam() != Team.Alliance) ||
+                (currency.IsHorde && GetTeam() != Team.Horde))
                 return;
 
             // Check dynamic maximum flag
-            if (!currency.GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum))
+            if (!currency.HasFlag(CurrencyTypesFlags.DynamicMaximum))
                 return;
 
             // Ancient mana maximum cap
-            if (id == (uint)CurrencyTypes.AncientMana)
+            if (id == (int)CurrencyTypes.AncientMana)
             {
-                uint maxQuantity = GetCurrencyMaxQuantity(currency);
+                int maxQuantity = GetCurrencyMaxQuantity(currency);
 
                 if ((maxQuantity + amount) > PlayerConst.CurrencyMaxCapAncientMana)
                     amount = PlayerConst.CurrencyMaxCapAncientMana - maxQuantity;
@@ -1490,16 +1490,16 @@ namespace Game.Entities
 
             SetCurrency packet = new();
             packet.Type = currency.Id;
-            packet.Quantity = (int)playerCurrency.Quantity;
+            packet.Quantity = playerCurrency.Quantity;
             packet.Flags = CurrencyGainFlags.None;
 
-            if ((playerCurrency.WeeklyQuantity / currency.Scaler()) > 0)
-                packet.WeeklyQuantity = (int)playerCurrency.WeeklyQuantity;
+            if ((playerCurrency.WeeklyQuantity / currency.Scaler) > 0)
+                packet.WeeklyQuantity = playerCurrency.WeeklyQuantity;
 
-            if (currency.IsTrackingQuantity())
-                packet.TrackedQuantity = (int)playerCurrency.TrackedQuantity;
+            if (currency.IsTrackingQuantity)
+                packet.TrackedQuantity = playerCurrency.TrackedQuantity;
 
-            packet.MaxQuantity = (int)GetCurrencyMaxQuantity(currency);
+            packet.MaxQuantity = GetCurrencyMaxQuantity(currency);
             packet.SuppressChatLog = currency.IsSuppressingChatLog();
 
             SendPacket(packet);
@@ -1532,7 +1532,7 @@ namespace Game.Entities
             return playerCurrency.TrackedQuantity;
         }
 
-        uint GetCurrencyIncreasedCapQuantity(uint id)
+        int GetCurrencyIncreasedCapQuantity(int id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1541,13 +1541,13 @@ namespace Game.Entities
             return playerCurrency.IncreasedCapQuantity;
         }
 
-        public uint GetCurrencyMaxQuantity(CurrencyTypesRecord currency, bool onLoad = false, bool onUpdateVersion = false)
+        public int GetCurrencyMaxQuantity(CurrencyTypesRecord currency, bool onLoad = false, bool onUpdateVersion = false)
         {
             if (!currency.HasMaxQuantity(onLoad, onUpdateVersion))
                 return 0;
 
-            uint maxQuantity = currency.MaxQty;
-            uint increasedCap = 0;
+            int maxQuantity = currency.MaxQty;
+            int increasedCap = 0;
 
             if (currency.HasFlag(CurrencyTypesFlags.DynamicMaximum))
                 increasedCap = GetCurrencyIncreasedCapQuantity(currency.Id);
@@ -1555,7 +1555,7 @@ namespace Game.Entities
             return maxQuantity + increasedCap;
         }
 
-        uint GetCurrencyWeeklyCap(uint id)
+        int GetCurrencyWeeklyCap(int id)
         {
             CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(id);
             if (currency == null)
@@ -1564,13 +1564,13 @@ namespace Game.Entities
             return GetCurrencyWeeklyCap(currency);
         }
 
-        uint GetCurrencyWeeklyCap(CurrencyTypesRecord currency)
+        int GetCurrencyWeeklyCap(CurrencyTypesRecord currency)
         {
             // TODO: CurrencyTypeFlags::ComputedWeeklyMaximum
             return currency.MaxEarnablePerWeek;
         }
 
-        public bool HasCurrency(uint id, uint amount)
+        public bool HasCurrency(int id, int amount)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             return playerCurrency != null && playerCurrency.Quantity >= amount;
@@ -6390,7 +6390,7 @@ namespace Game.Entities
         {
             new CommandHandler(_session).SendSysMessage(string.Format(str, args));
         }
-        public void SendBuyError(BuyResult msg, Creature creature, uint item)
+        public void SendBuyError(BuyResult msg, Creature creature, int item)
         {
             BuyFailed packet = new();
             packet.VendorGUID = creature != null ? creature.GetGUID() : ObjectGuid.Empty;
@@ -6552,10 +6552,10 @@ namespace Game.Entities
         public byte GetCinematic() { return m_cinematic; }
         public void SetCinematic(byte cine) { m_cinematic = cine; }
 
-        public uint GetMovie() { return m_movie; }
-        public void SetMovie(uint movie) { m_movie = movie; }
+        public int GetMovie() { return m_movie; }
+        public void SetMovie(int movie) { m_movie = movie; }
 
-        public void SendCinematicStart(uint CinematicSequenceId)
+        public void SendCinematicStart(int CinematicSequenceId)
         {
             TriggerCinematic packet = new();
             packet.CinematicID = CinematicSequenceId;
@@ -6565,7 +6565,7 @@ namespace Game.Entities
             if (sequence != null)
                 _cinematicMgr.BeginCinematic(sequence);
         }
-        public void SendMovieStart(uint movieId)
+        public void SendMovieStart(int movieId)
         {
             SetMovie(movieId);
             TriggerMovie packet = new();
@@ -6592,9 +6592,9 @@ namespace Game.Entities
         public uint GetXP() { return (uint)m_activePlayerData.XP.GetValue(); }
         public uint GetXPForNextLevel() { return  (uint)m_activePlayerData.NextLevelXP.GetValue(); }
 
-        public void SetXP(uint xp)
+        public void SetXP(int xp)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.XP), (int)xp);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.XP), xp);
 
             int playerLevelDelta = 0;
 
@@ -6605,7 +6605,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ScalingPlayerLevelDelta), playerLevelDelta);
         }
 
-        public void GiveXP(uint xp, Unit victim, float group_rate = 1.0f)
+        public void GiveXP(int xp, Unit victim, float group_rate = 1.0f)
         {
             if (xp < 1)
                 return;
@@ -6619,7 +6619,7 @@ namespace Game.Entities
             if (victim != null && victim.IsTypeId(TypeId.Unit) && !victim.ToCreature().HasLootRecipient())
                 return;
 
-            uint level = GetLevel();
+            int level = GetLevel();
 
             ScriptMgr.OnGivePlayerXP(this, ref xp, victim);
 
@@ -6627,7 +6627,7 @@ namespace Game.Entities
             if (IsMaxLevel())
                 return;
 
-            uint bonus_xp;
+            int bonus_xp;
             bool recruitAFriend = GetsRecruitAFriendBonus(true);
 
             // RaF does NOT stack with rested experience
@@ -7061,17 +7061,17 @@ namespace Game.Entities
 
         public void ContinueTaxiFlight()
         {
-            uint sourceNode = m_taxi.GetTaxiSource();
+            int sourceNode = m_taxi.GetTaxiSource();
             if (sourceNode == 0)
                 return;
 
             Log.outDebug(LogFilter.Unit, "WORLD: Restart character {0} taxi flight", GetGUID().ToString());
 
-            uint mountDisplayId = ObjectMgr.GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
+            int mountDisplayId = ObjectMgr.GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
             if (mountDisplayId == 0)
                 return;
 
-            uint path = m_taxi.GetCurrentTaxiPath();
+            int path = m_taxi.GetCurrentTaxiPath();
 
             // search appropriate start path node
             uint startNode = 0;
@@ -7244,11 +7244,11 @@ namespace Game.Entities
             {
                 // skip wrong race skills
                 var raceMask = _spell_idx.RaceMask;
-                if (!raceMask.IsEmpty() && !raceMask.HasRace(GetRace()))
+                if (raceMask != RaceMask.None && !raceMask.HasRace(GetRace()))
                     continue;
 
                 // skip wrong class skills
-                if (_spell_idx.ClassMask != 0 && (_spell_idx.ClassMask & classmask) == 0)
+                if (_spell_idx.ClassMask != ClassMask.None && (_spell_idx.ClassMask.HasClass(class_)))
                     continue;
 
                 // skip wrong class and race skill saved in SkillRaceClassInfo.dbc
@@ -7261,15 +7261,17 @@ namespace Game.Entities
             return false;
         }
 
-
-        void SetActiveCombatTraitConfigID(int traitConfigId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ActiveCombatTraitConfigID), (uint)traitConfigId); }
+        void SetActiveCombatTraitConfigID(int traitConfigId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ActiveCombatTraitConfigID), traitConfigId); }
 
         void InitPrimaryProfessions()
         {
             SetFreePrimaryProfessions(WorldConfig.GetUIntValue(WorldCfg.MaxPrimaryTradeSkill));
         }
-        public uint GetFreePrimaryProfessionPoints() { return (uint)m_activePlayerData.CharacterPoints.GetValue(); }
+
+        public int GetFreePrimaryProfessionPoints() { return m_activePlayerData.CharacterPoints; }
+
         void SetFreePrimaryProfessions(ushort profs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs); }
+
         public bool HaveAtClient(WorldObject u)
         {
             bool one = u.GetGUID() == GetGUID();
@@ -7277,16 +7279,19 @@ namespace Game.Entities
 
             return one || two;
         }
+
         public bool HasTitle(CharTitlesRecord title) { return HasTitle(title.MaskID); }
+
         public bool HasTitle(int bitIndex)
         {
             uint fieldIndexOffset = (uint)bitIndex / 64;
             if (fieldIndexOffset >= m_activePlayerData.KnownTitles.Size())
                 return false;
 
-            ulong flag = 1ul << ((int)bitIndex % 64);
+            ulong flag = 1ul << (bitIndex % 64);
             return (m_activePlayerData.KnownTitles[(int)fieldIndexOffset] & flag) != 0;
         }
+
         public void SetTitle(CharTitlesRecord title, bool lost = false)
         {
             int fieldIndexOffset = (title.MaskID / 64);
@@ -7512,7 +7517,7 @@ namespace Game.Entities
             RestInfo restInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RestInfo, (int)type);
             SetUpdateFieldValue(restInfo.ModifyValue(restInfo.StateID), (byte)state);
         }
-        public void SetRestThreshold(RestTypes type, uint threshold)
+        public void SetRestThreshold(RestTypes type, int threshold)
         {
             RestInfo restInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RestInfo, (int)type);
             SetUpdateFieldValue(restInfo.ModifyValue(restInfo.Threshold), threshold);
@@ -7531,7 +7536,7 @@ namespace Game.Entities
         public void SetAverageItemLevelTotal(float newItemLevel) { SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.AvgItemLevel, 0), newItemLevel); }
         public void SetAverageItemLevelEquipped(float newItemLevel) { SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.AvgItemLevel, 1), newItemLevel); }
 
-        public uint GetCustomizationChoice(uint chrCustomizationOptionId)
+        public int GetCustomizationChoice(int chrCustomizationOptionId)
         {
             int choiceIndex = m_playerData.Customizations.FindIndexIf(choice =>
             {

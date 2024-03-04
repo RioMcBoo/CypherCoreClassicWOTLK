@@ -80,7 +80,7 @@ namespace Game.DataStorage
             foreach (var customizationChoice in ChrCustomizationChoiceStorage.Values)
                 _chrCustomizationChoicesByOption.Add(customizationChoice.ChrCustomizationOptionID, customizationChoice);
 
-            MultiMap<int, (int, byte)> shapeshiftFormByModel = new();
+            MultiMap<int, (int, ShapeShiftForm)> shapeshiftFormByModel = new();
             Dictionary<int, ChrCustomizationDisplayInfoRecord> displayInfoByCustomizationChoice = new();
 
             // build shapeshift form model lookup
@@ -150,7 +150,7 @@ namespace Game.DataStorage
                                 data.Displays.Add(displayInfoByCustomizationChoice.LookupByKey(data.Choices[i].Id));
                         }
 
-                        _chrCustomizationChoicesForShapeshifts[Tuple.Create((byte)raceModel.ChrRacesID, (byte)raceModel.Sex, shapeshiftOptionsForModel.Item2)] = data;
+                        _chrCustomizationChoicesForShapeshifts[(raceModel.ChrRacesID, raceModel.Sex, shapeshiftOptionsForModel.Item2)] = data;
                     }
                 }
             }
@@ -301,7 +301,7 @@ namespace Game.DataStorage
                         _nameGenData[entry.RaceID][i] = new List<NameGenRecord>();
                 }
 
-                _nameGenData[entry.RaceID][entry.Sex].Add(entry);
+                _nameGenData[entry.RaceID][(int)entry.Sex].Add(entry);
             }
 
             foreach (var namesProfanity in NamesProfanityStorage.Values)
@@ -618,7 +618,7 @@ namespace Game.DataStorage
             do
             {
                 int id = result.Read<int>(0);
-                uint uniqueId = result.Read<uint>(1);
+                int uniqueId = result.Read<int>(1);
                 uint tableHash = result.Read<uint>(2);
                 int recordId = result.Read<int>(3);
                 HotfixRecord.Status status = (HotfixRecord.Status)result.Read<byte>(4);
@@ -701,7 +701,7 @@ namespace Game.DataStorage
         public void LoadHotfixOptionalData(BitSet availableDb2Locales)
         {
             // Register allowed optional data keys
-            _allowedHotfixOptionalData.Add(BroadcastTextStorage.GetTableHash(), Tuple.Create(TactKeyStorage.GetTableHash(), (AllowedHotfixOptionalData)ValidateBroadcastTextTactKeyOptionalData));
+            _allowedHotfixOptionalData.Add(BroadcastTextStorage.GetTableHash(), (TactKeyStorage.GetTableHash(), ValidateBroadcastTextTactKeyOptionalData));
 
             uint oldMSTime = Time.GetMSTime();
 
@@ -744,12 +744,12 @@ namespace Game.DataStorage
                     continue;
 
                 HotfixOptionalData optionalData = new();
-                optionalData.Key = result.Read<uint>(3);
+                optionalData.Key = result.Read<int>(3);
                 var allowedHotfixItr = allowedHotfixes.Find(v =>
                 {
                     return v.Item1 == optionalData.Key;
                 });
-                if (allowedHotfixItr == null)
+                if (allowedHotfixItr == default)
                 {
                     Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references non-allowed optional data key 0x{optionalData.Key:X} for DB2 store by hash 0x{tableHash:X} and RecordID: {recordId}");
                     continue;
@@ -819,30 +819,12 @@ namespace Game.DataStorage
             return false;
         }
 
-        public ContentTuningRecord GetContentTuningForArea(AreaTableRecord areaEntry)
-        {
-            if (areaEntry == null)
-                return null;
-
-            // Get ContentTuning for the area
-            var contentTuning = ContentTuningStorage.LookupByKey(areaEntry.ContentTuningID);
-            if (contentTuning != null)
-                return contentTuning;
-
-            // If there is no data for the current area and it has a parent area, get data from the last (recursive)
-            var parentAreaEntry = AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
-            if (parentAreaEntry != null)
-                return GetContentTuningForArea(parentAreaEntry);
-
-            return null;
-        }
-
         public List<ArtifactPowerRecord> GetArtifactPowers(byte artifactId)
         {
             return _artifactPowers.LookupByKey(artifactId);
         }
 
-        public List<uint> GetArtifactPowerLinks(uint artifactPowerId)
+        public List<int> GetArtifactPowerLinks(int artifactPowerId)
         {
             return _artifactPowerLinks.LookupByKey(artifactPowerId);
         }
@@ -1642,7 +1624,7 @@ namespace Game.DataStorage
             return slots;
         }
 
-        public List<QuestLineXQuestRecord> GetQuestsForQuestLine(uint questLineId)
+        public List<QuestLineXQuestRecord> GetQuestsForQuestLine(int questLineId)
         {
             return _questsByQuestLine.LookupByKey(questLineId);
         }
@@ -1698,24 +1680,24 @@ namespace Game.DataStorage
             return null;
         }
 
-        public byte GetPvpItemLevelBonus(uint itemId)
+        public byte GetPvpItemLevelBonus(int itemId)
         {
             return _pvpItemBonus.LookupByKey(itemId);
         }
 
-        public List<RewardPackXCurrencyTypeRecord> GetRewardPackCurrencyTypesByRewardID(uint rewardPackID)
+        public List<RewardPackXCurrencyTypeRecord> GetRewardPackCurrencyTypesByRewardID(int rewardPackID)
         {
             return _rewardPackCurrencyTypes.LookupByKey(rewardPackID);
         }
 
-        public List<RewardPackXItemRecord> GetRewardPackItemsByRewardID(uint rewardPackID)
+        public List<RewardPackXItemRecord> GetRewardPackItemsByRewardID(int rewardPackID)
         {
             return _rewardPackItems.LookupByKey(rewardPackID);
         }
 
         public ShapeshiftFormModelData GetShapeshiftFormModelData(Race race, Gender gender, ShapeShiftForm form)
         {
-            return _chrCustomizationChoicesForShapeshifts.LookupByKey(Tuple.Create((byte)race, (byte)gender, (byte)form));
+            return _chrCustomizationChoicesForShapeshifts.LookupByKey((race, gender, form));
         }
 
         public List<SkillLineRecord> GetSkillLinesForParentSkill(SkillType parentSkillId)
@@ -2157,25 +2139,25 @@ namespace Game.DataStorage
         Dictionary<uint, IDB2Storage> _storage = new();
         MultiMap<int, HotfixRecord> _hotfixData = new();
         Dictionary<(uint tableHash, int recordId), byte[]>[] _hotfixBlob = new Dictionary<(uint tableHash, int recordId), byte[]>[(int)Locale.Total];
-        MultiMap<uint, Tuple<uint, AllowedHotfixOptionalData>> _allowedHotfixOptionalData = new();
+        MultiMap<uint, (uint, AllowedHotfixOptionalData)> _allowedHotfixOptionalData = new();
         MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[] _hotfixOptionalData = new MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[(int)Locale.Total];
 
         MultiMap<int, int> _areaGroupMembers = new();
-        MultiMap<uint, ArtifactPowerRecord> _artifactPowers = new();
-        MultiMap<uint, uint> _artifactPowerLinks = new();
+        MultiMap<int, ArtifactPowerRecord> _artifactPowers = new();
+        MultiMap<int, int> _artifactPowerLinks = new();
         Dictionary<Tuple<int, byte>, ArtifactPowerRankRecord> _artifactPowerRanks = new();
         Dictionary<int, AzeriteEmpoweredItemRecord> _azeriteEmpoweredItems = new();
         Dictionary<(int azeriteEssenceId, uint rank), AzeriteEssencePowerRecord> _azeriteEssencePowersByIdAndRank = new();
         List<AzeriteItemMilestonePowerRecord> _azeriteItemMilestonePowers = new();
         AzeriteItemMilestonePowerRecord[] _azeriteItemMilestonePowerByEssenceSlot = new AzeriteItemMilestonePowerRecord[SharedConst.MaxAzeriteEssenceSlot];
-        MultiMap<uint, AzeritePowerSetMemberRecord> _azeritePowers = new();
+        MultiMap<int, AzeritePowerSetMemberRecord> _azeritePowers = new();
         Dictionary<(int azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new();
         Dictionary<(int broadcastTextId, CascLocaleBit cascLocaleBit), int> _broadcastTextDurations = new();
         ChrClassUIDisplayRecord[] _uiDisplayByClass = new ChrClassUIDisplayRecord[(int)Class.Max];
         uint[][] _powersByClass = new uint[(int)Class.Max][];
         MultiMap<int, ChrCustomizationChoiceRecord> _chrCustomizationChoicesByOption = new();
         Dictionary<(Race, Gender), ChrModelRecord> _chrModelsByRaceAndGender = new();
-        Dictionary<Tuple<byte, byte, byte>, ShapeshiftFormModelData> _chrCustomizationChoicesForShapeshifts = new();
+        Dictionary<(Race, Gender, ShapeShiftForm), ShapeshiftFormModelData> _chrCustomizationChoicesForShapeshifts = new();
         MultiMap<(Race, Gender), ChrCustomizationOptionRecord> _chrCustomizationOptionsByRaceAndGender = new();
         Dictionary<int, MultiMap<int, int>> _chrCustomizationRequiredChoices = new();
         ChrSpecializationRecord[][] _chrSpecializationsByIndex = new ChrSpecializationRecord[(int)Class.Max + 1][];
@@ -2209,12 +2191,12 @@ namespace Game.DataStorage
         Dictionary<int, ParagonReputationRecord> _paragonReputations = new();
         MultiMap<int, int> _phasesByGroup = new();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new();
-        Dictionary<uint, byte> _pvpItemBonus = new();
+        Dictionary<int, byte> _pvpItemBonus = new();
         PvpTalentSlotUnlockRecord[] _pvpTalentSlotUnlock = new PvpTalentSlotUnlockRecord[PlayerConst.MaxPvpTalentSlots];
-        MultiMap<uint, QuestLineXQuestRecord> _questsByQuestLine = new();
+        MultiMap<int, QuestLineXQuestRecord> _questsByQuestLine = new();
         Dictionary<int, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>> _questPackages = new();
-        MultiMap<uint, RewardPackXCurrencyTypeRecord> _rewardPackCurrencyTypes = new();
-        MultiMap<uint, RewardPackXItemRecord> _rewardPackItems = new();
+        MultiMap<int, RewardPackXCurrencyTypeRecord> _rewardPackCurrencyTypes = new();
+        MultiMap<int, RewardPackXItemRecord> _rewardPackItems = new();
         MultiMap<SkillType, SkillLineRecord> _skillLinesByParentSkillLine = new();
         MultiMap<SkillType, SkillLineAbilityRecord> _skillLineAbilitiesBySkillupSkill = new();
         MultiMap<SkillType, SkillRaceClassInfoRecord> _skillRaceClassInfoBySkill = new();
@@ -2223,7 +2205,7 @@ namespace Game.DataStorage
         List<SpellFamilyNames> _spellFamilyNames = new();
         MultiMap<int, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new();
         MultiMap<int, SpellVisualMissileRecord> _spellVisualMissilesBySet = new();
-        MultiMap<uint, ScalingStatValuesRecord> _scalingStatValuesByLevel = new();
+        MultiMap<int, ScalingStatValuesRecord> _scalingStatValuesByLevel = new();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
         List<uint> _toys = new();
         MultiMap<int, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new();
@@ -2431,24 +2413,24 @@ namespace Game.DataStorage
     public struct HotfixId
     {
         public int PushID;
-        public uint UniqueID;
+        public int UniqueID;
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(PushID);
-            data.WriteUInt32(UniqueID);
+            data.WriteInt32(UniqueID);
         }
 
         public void Read(WorldPacket data)
         {
             PushID = data.ReadInt32();
-            UniqueID = data.ReadUInt32();
+            UniqueID = data.ReadInt32();
         }
     }
 
     public class HotfixOptionalData
     {
-        public uint Key;
+        public int Key;
         public byte[] Data;
     }
 

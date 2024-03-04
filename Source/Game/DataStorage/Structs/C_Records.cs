@@ -196,14 +196,14 @@ namespace Game.DataStorage
 
     public sealed class ChrCustomizationDisplayInfoRecord
     {
-        public uint Id;
+        public int Id;
         private int _shapeshiftFormID;
         public int DisplayID;
         public float BarberShopMinCameraDistance;
         public float BarberShopHeightOffset;
 
         #region Properties
-        public byte ShapeshiftFormID => (byte)_shapeshiftFormID;
+        public ShapeShiftForm ShapeshiftFormID => (ShapeShiftForm)_shapeshiftFormID;
         #endregion
     }
 

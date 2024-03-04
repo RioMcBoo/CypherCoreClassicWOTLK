@@ -2847,7 +2847,7 @@ namespace Game
                 CreatureDifficulty creatureDifficulty = new();
                 creatureDifficulty.MinLevel = result.Read<byte>(2);
                 creatureDifficulty.MaxLevel = result.Read<byte>(3);
-                creatureDifficulty.HealthScalingExpansion = result.Read<int>(4);
+                creatureDifficulty.HealthScalingExpansion = (Expansion)result.Read<int>(4);
                 creatureDifficulty.HealthModifier = result.Read<float>(5);
                 creatureDifficulty.ManaModifier = result.Read<float>(6);
                 creatureDifficulty.ArmorModifier = result.Read<float>(7);
@@ -2898,7 +2898,7 @@ namespace Game
                     creatureDifficulty.MinLevel = creatureDifficulty.MaxLevel;
                 }
 
-                if (creatureDifficulty.HealthScalingExpansion < (int)Expansion.LevelCurrent || creatureDifficulty.HealthScalingExpansion >= (int)Expansion.Max)
+                if (creatureDifficulty.HealthScalingExpansion < Expansion.LevelCurrent || creatureDifficulty.HealthScalingExpansion >= Expansion.Max)
                 {
                     Log.outError(LogFilter.Sql,$"Table `creature_template_difficulty` lists creature (ID: {entry}) with invalid `HealthScalingExpansion` " +
                         $"{creatureDifficulty.HealthScalingExpansion}. Ignored and set to 0.");
@@ -3917,7 +3917,7 @@ namespace Game
             return mapPersonalObjectGuidsStore.ContainsKey((mapid, spawnMode, phaseId));
         }
 
-        public CellObjectGuids GetCellPersonalObjectGuids(int mapid, Difficulty spawnMode, int phaseId, uint cell_id)
+        public CellObjectGuids GetCellPersonalObjectGuids(int mapid, Difficulty spawnMode, int phaseId, int cell_id)
         {
             var guids = mapPersonalObjectGuidsStore.LookupByKey((mapid, spawnMode, phaseId));
             if (guids != null)
@@ -3928,7 +3928,7 @@ namespace Game
 
         void AddSpawnDataToGrid(SpawnData data)
         {
-            uint cellId = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId();
+            var cellId = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId();
             bool isPersonalPhase = PhasingHandler.IsPersonalPhase(data.PhaseId);
             if (!isPersonalPhase)
             {
@@ -3962,7 +3962,7 @@ namespace Game
 
         void RemoveSpawnDataFromGrid(SpawnData data)
         {
-            uint cellId = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId();
+            var cellId = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId();
             bool isPersonalPhase = PhasingHandler.IsPersonalPhase(data.PhaseId);
             if (!isPersonalPhase)
             {
@@ -4234,7 +4234,7 @@ namespace Game
                             got.Raw.data[x] = result.Read<int>(8 + x);
                     }
 
-                    got.ContentTuningId = result.Read<uint>(43);
+                    got.ContentTuningId = result.Read<int>(43);
                     got.AIName = result.Read<string>(44);
                     got.ScriptId = GetScriptId(result.Read<string>(45));
                     got.StringId = result.Read<string>(46);
@@ -5256,7 +5256,7 @@ namespace Game
             0.66f, // ITEM_SUBCLASS_WEAPON_FISHING_POLE
         };
 
-        uint FillMaxDurability(ItemClass itemClass, ItemSubClass itemSubClass, InventoryType inventoryType, ItemQuality quality, uint itemLevel)
+        int FillMaxDurability(ItemClass itemClass, ItemSubClass itemSubClass, InventoryType inventoryType, ItemQuality quality, int itemLevel)
         {
             if (itemClass != ItemClass.Armor && itemClass != ItemClass.Weapon)
                 return 0;
@@ -5270,10 +5270,10 @@ namespace Game
                 if (inventoryType > InventoryType.Robe)
                     return 0;
 
-                return 5 * (uint)(Math.Round(25.0f * qualityMultipliers[(int)quality] * armorMultipliers[(int)inventoryType] * levelPenalty));
+                return 5 * (int)(Math.Round(25.0f * qualityMultipliers[(int)quality] * armorMultipliers[(int)inventoryType] * levelPenalty));
             }
 
-            return 5 * (uint)(Math.Round(18.0f * qualityMultipliers[(int)quality] * weaponMultipliers[itemSubClass.data] * levelPenalty));
+            return 5 * (int)(Math.Round(18.0f * qualityMultipliers[(int)quality] * weaponMultipliers[itemSubClass.data] * levelPenalty));
         }
 
         public void LoadItemTemplateAddon()
@@ -6852,13 +6852,13 @@ namespace Game
             }
         }
 
-        public float GetOCTRegenHP(Class class_, uint level)
+        public float GetOCTRegenHP(Class class_, int level)
         {
             if (level < 1 || class_ >= Class.Max)
                 return 0.0f;
 
-            if (level > WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel))
-                level = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
+            if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                level = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
 
             GtOCTRegenHPRecord octRegenHP = CliDB.OCTRegenHPGameTable.GetRow(level);
             if (octRegenHP is null)
@@ -6870,13 +6870,13 @@ namespace Game
             return CliDB.GetGameTableColumnForClass(octRegenHP, class_);
         }
 
-        public float GetRegenHPPerSpt(Class class_, uint level)
+        public float GetRegenHPPerSpt(Class class_, int level)
         {
             if (level < 1 || class_ >= Class.Max)
                 return 0.0f;
 
-            if (level > WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel))
-                level = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
+            if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                level = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
 
             GtRegenHPPerSptRecord regenHPPerSpt = CliDB.RegenHPPerSptGameTable.GetRow(level);
             if (regenHPPerSpt is null)
@@ -10097,7 +10097,7 @@ namespace Game
                     return;                                             // any mails need to be returned or deleted
                 }
 
-                MultiMap<ulong, MailItemInfo> itemsCache = new();
+                MultiMap<long, MailItemInfo> itemsCache = new();
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_EXPIRED_MAIL_ITEMS);
                 stmt.AddValue(0, curTime);
                 using (var items = DB.Characters.Query(stmt))
@@ -10107,9 +10107,9 @@ namespace Game
                         MailItemInfo item = new();
                         do
                         {
-                            item.item_guid = result.Read<ulong>(0);
-                            item.item_template = result.Read<uint>(1);
-                            ulong mailId = result.Read<ulong>(2);
+                            item.item_guid = result.Read<long>(0);
+                            item.item_template = result.Read<int>(1);
+                            long mailId = result.Read<long>(2);
                             itemsCache.Add(mailId, item);
                         } while (items.NextRow());
                     }
@@ -10124,7 +10124,7 @@ namespace Game
                         continue;
 
                     Mail m = new();
-                    m.messageID = result.Read<ulong>(0);
+                    m.messageID = result.Read<long>(0);
                     m.messageType = (MailMessageType)result.Read<byte>(1);
                     m.sender = result.Read<long>(2);
                     m.receiver = receiver;
@@ -10900,7 +10900,7 @@ namespace Game
             using (var result = DB.Characters.Query("SELECT MAX(arenateamid) FROM arena_team"))
             {
                 if (!result.IsEmpty())
-                    Global.ArenaTeamMgr.SetNextArenaTeamId(result.Read<uint>(0) + 1);
+                    Global.ArenaTeamMgr.SetNextArenaTeamId(result.Read<int>(0) + 1);
             }
 
             using (var result = DB.Characters.Query("SELECT MAX(maxguid) FROM ((SELECT MAX(setguid) AS maxguid FROM character_equipmentsets) UNION (SELECT MAX(setguid) AS maxguid FROM character_transmog_outfits)) allsets"))
@@ -11073,12 +11073,12 @@ namespace Game
             return 0;
         }
 
-        CellObjectGuids CreateCellObjectGuids(int mapid, Difficulty difficulty, uint cellid)
+        CellObjectGuids CreateCellObjectGuids(int mapid, Difficulty difficulty, int cellid)
         {
             var key = (mapid, difficulty);
 
             if (!mapObjectGuidsStore.ContainsKey(key))
-                mapObjectGuidsStore.Add(key, new Dictionary<uint, CellObjectGuids>());
+                mapObjectGuidsStore.Add(key, new Dictionary<int, CellObjectGuids>());
 
             if (!mapObjectGuidsStore[key].ContainsKey(cellid))
                 mapObjectGuidsStore[key].Add(cellid, new CellObjectGuids());
@@ -11086,7 +11086,7 @@ namespace Game
             return mapObjectGuidsStore[key][cellid];
         }
 
-        public CellObjectGuids GetCellObjectGuids(int mapid, Difficulty difficulty, uint cellid)
+        public CellObjectGuids GetCellObjectGuids(int mapid, Difficulty difficulty, int cellid)
         {
             var key = (mapid, difficulty);
 
@@ -11096,7 +11096,7 @@ namespace Game
             return null;
         }
 
-        public Dictionary<uint, CellObjectGuids> GetMapObjectGuids(int mapid, Difficulty difficulty)
+        public Dictionary<int, CellObjectGuids> GetMapObjectGuids(int mapid, Difficulty difficulty)
         {
             var key = (mapid, difficulty);
             return mapObjectGuidsStore.LookupByKey(key);
@@ -11107,11 +11107,11 @@ namespace Game
             return _pageTextStorage.LookupByKey(pageEntry);
         }
 
-        public uint GetNearestTaxiNode(Vector3 point3d, int mapid, Team team)
+        public int GetNearestTaxiNode(Vector3 point3d, int mapid, Team team)
         {
             bool found = false;
             float dist = 10000;
-            uint id = 0;
+            int id = 0;
 
             TaxiNodeFlags requireFlag = (team == Team.Alliance) ? TaxiNodeFlags.ShowOnAllianceMap : TaxiNodeFlags.ShowOnHordeMap;
             foreach (var node in CliDB.TaxiNodesStorage.Values)
@@ -11120,8 +11120,8 @@ namespace Game
                 if (node.ContinentID != mapid || !node.HasAnyFlag(requireFlag) || node.HasAnyFlag(TaxiNodeFlags.IgnoreForFindNearest))
                     continue;
 
-                uint field = (i - 1) / 8;
-                byte submask = (byte)(1 << (int)((i - 1) % 8));
+                var field = (i - 1) / 8;
+                byte submask = (byte)(1 << ((i - 1) % 8));
 
                 // skip not taxi network nodes
                 if ((CliDB.TaxiNodesMask[field] & submask) == 0)
@@ -11147,7 +11147,7 @@ namespace Game
             return id;
         }
 
-        public void GetTaxiPath(uint source, uint destination, out uint path, out uint cost)
+        public void GetTaxiPath(int source, int destination, out int path, out uint cost)
         {
             var pathSet = CliDB.TaxiPathSetBySource.LookupByKey(source);
             if (pathSet == null)
@@ -11577,8 +11577,8 @@ namespace Game
 
         //Maps
         public Dictionary<int, GameTele> gameTeleStorage = new();
-        Dictionary<(int mapId, Difficulty difficulty), Dictionary<uint, CellObjectGuids>> mapObjectGuidsStore = new();
-        Dictionary<(int mapId, Difficulty diffuculty, int phaseId), Dictionary<uint, CellObjectGuids>> mapPersonalObjectGuidsStore = new();
+        Dictionary<(int mapId, Difficulty difficulty), Dictionary<int, CellObjectGuids>> mapObjectGuidsStore = new();
+        Dictionary<(int mapId, Difficulty diffuculty, int phaseId), Dictionary<int, CellObjectGuids>> mapPersonalObjectGuidsStore = new();
         Dictionary<int, InstanceTemplate> instanceTemplateStorage = new();
         public MultiMap<int, GraveyardData> GraveyardStorage = new();
         List<ushort> _transportMaps = new();

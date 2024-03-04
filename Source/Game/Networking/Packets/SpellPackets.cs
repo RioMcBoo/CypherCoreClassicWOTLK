@@ -696,7 +696,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Target);
             _worldPacket.WritePackedGuid(Transport);
             _worldPacket.WriteVector3(TargetPosition);
-            _worldPacket.WriteUInt32(SpellVisualID);
+            _worldPacket.WriteInt32(SpellVisualID);
             _worldPacket.WriteFloat(TravelSpeed);
             _worldPacket.WriteUInt16(HitReason);
             _worldPacket.WriteUInt16(MissReason);
@@ -711,7 +711,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Target;
         public ObjectGuid Transport; // Used when Target = Empty && (SpellVisual::Flags & 0x400) == 0
         public Vector3 TargetPosition; // Overrides missile destination for SpellVisual::SpellVisualMissileSetID
-        public uint SpellVisualID;
+        public int SpellVisualID;
         public float TravelSpeed;
         public ushort HitReason;
         public ushort MissReason;

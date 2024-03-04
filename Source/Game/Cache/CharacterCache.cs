@@ -29,13 +29,13 @@ namespace Game.Cache
 
             do
             {
-                AddCharacterCacheEntry(ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0)), result.Read<uint>(2), result.Read<string>(1), result.Read<byte>(4), result.Read<byte>(3), result.Read<byte>(5), result.Read<byte>(6), result.Read<uint>(7) != 0);
+                AddCharacterCacheEntry(ObjectGuid.Create(HighGuid.Player, result.Read<long>(0)), result.Read<int>(2), result.Read<string>(1), result.Read<byte>(4), result.Read<byte>(3), result.Read<byte>(5), result.Read<byte>(6), result.Read<uint>(7) != 0);
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded character infos for {_characterCacheStore.Count} characters in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        public void AddCharacterCacheEntry(ObjectGuid guid, uint accountId, string name, byte gender, byte race, byte playerClass, byte level, bool isDeleted)
+        public void AddCharacterCacheEntry(ObjectGuid guid, int accountId, string name, byte gender, byte race, byte playerClass, byte level, bool isDeleted)
         {
             var data = new CharacterCacheEntry();
             data.Guid = guid;
@@ -101,7 +101,7 @@ namespace Game.Cache
             _characterCacheStore[guid].Level = level;
         }
 
-        public void UpdateCharacterAccountId(ObjectGuid guid, uint accountId)
+        public void UpdateCharacterAccountId(ObjectGuid guid, int accountId)
         {
             if (!_characterCacheStore.ContainsKey(guid))
                 return;
@@ -109,7 +109,7 @@ namespace Game.Cache
             _characterCacheStore[guid].AccountId = accountId;
         }
 
-        public void UpdateCharacterGuildId(ObjectGuid guid, ulong guildId)
+        public void UpdateCharacterGuildId(ObjectGuid guid, long guildId)
         {
             if (!_characterCacheStore.ContainsKey(guid))
                 return;
@@ -117,7 +117,7 @@ namespace Game.Cache
             _characterCacheStore[guid].GuildId = guildId;
         }
 
-        public void UpdateCharacterArenaTeamId(ObjectGuid guid, byte slot, uint arenaTeamId)
+        public void UpdateCharacterArenaTeamId(ObjectGuid guid, byte slot, int arenaTeamId)
         {
             if (!_characterCacheStore.ContainsKey(guid))
                 return;
@@ -179,7 +179,7 @@ namespace Game.Cache
             return Player.TeamForRace(characterCacheEntry.RaceId);
         }
 
-        public uint GetCharacterAccountIdByGuid(ObjectGuid guid)
+        public int GetCharacterAccountIdByGuid(ObjectGuid guid)
         {
             var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
             if (characterCacheEntry == null)
@@ -188,7 +188,7 @@ namespace Game.Cache
             return characterCacheEntry.AccountId;
         }
 
-        public uint GetCharacterAccountIdByName(string name)
+        public int GetCharacterAccountIdByName(string name)
         {
             var characterCacheEntry = _characterCacheByNameStore.LookupByKey(name);
             if (characterCacheEntry != null)
@@ -206,7 +206,7 @@ namespace Game.Cache
             return characterCacheEntry.Level;
         }
 
-        public ulong GetCharacterGuildIdByGuid(ObjectGuid guid)
+        public long GetCharacterGuildIdByGuid(ObjectGuid guid)
         {
             var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
             if (characterCacheEntry == null)
@@ -215,7 +215,7 @@ namespace Game.Cache
             return characterCacheEntry.GuildId;
         }
 
-        public uint GetCharacterArenaTeamIdByGuid(ObjectGuid guid, byte type)
+        public int GetCharacterArenaTeamIdByGuid(ObjectGuid guid, byte type)
         {
             var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
             if (characterCacheEntry == null)
@@ -244,13 +244,13 @@ namespace Game.Cache
     {
         public ObjectGuid Guid;
         public string Name;
-        public uint AccountId;
+        public int AccountId;
         public Class ClassId;
         public Race RaceId;
         public Gender Sex;
         public byte Level;
-        public ulong GuildId;
-        public uint[] ArenaTeamId = new uint[SharedConst.MaxArenaSlot];
+        public long GuildId;
+        public int[] ArenaTeamId = new int[SharedConst.MaxArenaSlot];
         public bool IsDeleted;
     }
 }

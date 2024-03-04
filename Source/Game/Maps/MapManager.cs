@@ -107,7 +107,7 @@ namespace Game.Entities
         /// <param name="player"></param>
         /// <param name="loginInstanceId"></param>
         /// <returns>the right instance for the object, based on its InstanceId</returns>
-        public Map CreateMap(uint mapId, Player player)
+        public Map CreateMap(int mapId, Player player)
         {
             if (player == null)
                 return null;
@@ -121,7 +121,7 @@ namespace Game.Entities
                 Map map = null;
                 uint newInstanceId = 0;                       // instanceId of the resulting map
 
-                if (entry.IsBattlegroundOrArena())
+                if (entry.IsBattlegroundOrArena)
                 {
                     // instantiate or find existing bg map for player
                     // the instance id is set in battlegroundid

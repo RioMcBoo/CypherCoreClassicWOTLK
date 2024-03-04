@@ -290,11 +290,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(CinematicID);
+            _worldPacket.WriteInt32(CinematicID);
             _worldPacket.WritePackedGuid(ConversationGuid);
         }
 
-        public uint CinematicID;
+        public int CinematicID;
         public ObjectGuid ConversationGuid;
     }
 
@@ -304,10 +304,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MovieID);
+            _worldPacket.WriteInt32(MovieID);
         }
 
-        public uint MovieID;
+        public int MovieID;
     }
 
     public class ServerTimeOffsetRequest : ClientPacket

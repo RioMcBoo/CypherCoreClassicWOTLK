@@ -14,10 +14,10 @@ namespace Game.Entities
     public class PlayerTaxi
     {
         public byte[] m_taximask;
-        List<uint> m_TaxiDestinations = new();
-        uint m_flightMasterFactionId;
+        List<int> m_TaxiDestinations = new();
+        int m_flightMasterFactionId;
 
-        public void InitTaxiNodesForLevel(Race race, Class chrClass, uint level)
+        public void InitTaxiNodesForLevel(Race race, Class chrClass, int level)
         {
             m_taximask = new byte[((CliDB.TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8];
 
@@ -115,11 +115,11 @@ namespace Game.Entities
 
             var stringArray = new StringArray(values, ' ');
             if (stringArray.Length > 0)
-                uint.TryParse(stringArray[0], out m_flightMasterFactionId);
+                int.TryParse(stringArray[0], out m_flightMasterFactionId);
 
             for (var i = 1; i < stringArray.Length; ++i)
             {
-                if (uint.TryParse(stringArray[i], out uint node))
+                if (int.TryParse(stringArray[i], out int node))
                     AddTaxiDestination(node);
             }
 
@@ -132,7 +132,7 @@ namespace Game.Entities
 
             for (int i = 1; i < m_TaxiDestinations.Count; ++i)
             {
-                uint path;
+                int path;
                 Global.ObjectMgr.GetTaxiPath(m_TaxiDestinations[i - 1], m_TaxiDestinations[i], out path, out _);
                 if (path == 0)
                     return false;
@@ -161,12 +161,12 @@ namespace Game.Entities
             return ss.ToString();
         }
 
-        public uint GetCurrentTaxiPath()
+        public int GetCurrentTaxiPath()
         {
             if (m_TaxiDestinations.Count < 2)
                 return 0;
 
-            uint path;
+            int path;
 
             Global.ObjectMgr.GetTaxiPath(m_TaxiDestinations[0], m_TaxiDestinations[1], out path, out _);
 
@@ -199,24 +199,25 @@ namespace Game.Entities
             return CliDB.FactionTemplateStorage.LookupByKey(m_flightMasterFactionId);
         }
 
-        public void SetFlightMasterFactionTemplateId(uint factionTemplateId)
+        public void SetFlightMasterFactionTemplateId(int factionTemplateId)
         {
             m_flightMasterFactionId = factionTemplateId;
         }
 
-        public bool IsTaximaskNodeKnown(uint nodeidx)
+        public bool IsTaximaskNodeKnown(int nodeidx)
         {
-            uint field = (nodeidx - 1) / 8;
-            uint submask = (uint)(1 << (int)((nodeidx - 1) % 8));
+            int field = (nodeidx - 1) / 8;
+            byte submask = (byte)(1 << ((nodeidx - 1) % 8));
             return (m_taximask[field] & submask) == submask;
         }
-        public bool SetTaximaskNode(uint nodeidx)
+
+        public bool SetTaximaskNode(int nodeidx)
         {
-            uint field = (nodeidx - 1) / 8;
-            uint submask = (uint)(1 << (int)((nodeidx - 1) % 8));
+            int field = (nodeidx - 1) / 8;
+            byte submask = (byte)(1 << ((nodeidx - 1) % 8));
             if ((m_taximask[field] & submask) != submask)
             {
-                m_taximask[field] |= (byte)submask;
+                m_taximask[field] |= submask;
                 return true;
             }
             else
@@ -224,20 +225,20 @@ namespace Game.Entities
         }
 
         public void ClearTaxiDestinations() { m_TaxiDestinations.Clear(); }
-        public void AddTaxiDestination(uint dest) { m_TaxiDestinations.Add(dest); }
-        void SetTaxiDestination(List<uint> nodes)
+        public void AddTaxiDestination(int dest) { m_TaxiDestinations.Add(dest); }
+        void SetTaxiDestination(List<int> nodes)
         {
             m_TaxiDestinations.Clear();
             m_TaxiDestinations.AddRange(nodes);
         }
-        public uint GetTaxiSource() { return m_TaxiDestinations.Empty() ? 0 : m_TaxiDestinations[0]; }
-        public uint GetTaxiDestination() { return m_TaxiDestinations.Count < 2 ? 0 : m_TaxiDestinations[1]; }
-        public uint NextTaxiDestination()
+        public int GetTaxiSource() { return m_TaxiDestinations.Empty() ? 0 : m_TaxiDestinations[0]; }
+        public int GetTaxiDestination() { return m_TaxiDestinations.Count < 2 ? 0 : m_TaxiDestinations[1]; }
+        public int NextTaxiDestination()
         {
             m_TaxiDestinations.RemoveAt(0);
             return GetTaxiDestination();
         }
-        public List<uint> GetPath() { return m_TaxiDestinations; }
+        public List<int> GetPath() { return m_TaxiDestinations; }
         public bool Empty() { return m_TaxiDestinations.Empty(); }
     }
 }

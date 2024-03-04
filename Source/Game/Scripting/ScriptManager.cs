@@ -429,11 +429,11 @@ namespace Game.Scripting
         {
             ForEach<FormulaScript>(p => p.OnGrayLevelCalculation(grayLevel, playerLevel));
         }
-        public void OnColorCodeCalculation(XPColorChar color, int playerLevel, uint mobLevel)
+        public void OnColorCodeCalculation(XPColorChar color, int playerLevel, int mobLevel)
         {
             ForEach<FormulaScript>(p => p.OnColorCodeCalculation(color, playerLevel, mobLevel));
         }
-        public void OnZeroDifferenceCalculation(uint diff, int playerLevel)
+        public void OnZeroDifferenceCalculation(int diff, int playerLevel)
         {
             ForEach<FormulaScript>(p => p.OnZeroDifferenceCalculation(diff, playerLevel));
         }
@@ -1075,21 +1075,21 @@ namespace Game.Scripting
         }
 
         //SceneScript
-        public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneStart(Player player, int sceneInstanceID, SceneTemplate sceneTemplate)
         {
             Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneStart(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
         }
-        public void OnSceneTrigger(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
+        public void OnSceneTrigger(Player player, int sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneTriggerEvent(player, sceneInstanceID, sceneTemplate, triggerName), sceneTemplate.ScriptId);
         }
-        public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneCancel(Player player, int sceneInstanceID, SceneTemplate sceneTemplate)
         {
             Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);

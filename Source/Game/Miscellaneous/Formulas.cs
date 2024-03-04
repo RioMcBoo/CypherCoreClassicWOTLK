@@ -20,12 +20,12 @@ namespace Game
 
         public static int HKHonorAtLevel(int level, float multiplier = 1.0f)
         {
-            return Math.Ceiling(HKHonorAtLevelF(level, multiplier));
+            return (int)Math.Ceiling(HKHonorAtLevelF(level, multiplier));
         }
 
-        public static uint GetGrayLevel(uint pl_level)
+        public static int GetGrayLevel(int pl_level)
         {
-            uint level;
+            int level;
 
             if (pl_level <= 5)
                 level = 0;
@@ -40,7 +40,7 @@ namespace Game
             return level;
         }
 
-        public static XPColorChar GetColorCode(uint pl_level, uint mob_level)
+        public static XPColorChar GetColorCode(int pl_level, int mob_level)
         {
             XPColorChar color;
 
@@ -59,9 +59,9 @@ namespace Game
             return color;
         }
 
-        public static uint GetZeroDifference(uint pl_level)
+        public static int GetZeroDifference(int pl_level)
         {
-            uint diff;
+            int diff;
 
             if (pl_level < 4)
                 diff = 5;
@@ -92,10 +92,10 @@ namespace Game
             return diff;
         }
 
-        public static uint BaseGain(uint pl_level, uint mob_level, ContentLevels content)
+        public static int BaseGain(int pl_level, int mob_level, ContentLevels content)
         {
-            uint baseGain;
-            uint nBaseExp;
+            int baseGain;
+            int nBaseExp;
 
             switch (content)
             {
@@ -116,7 +116,7 @@ namespace Game
 
             if (mob_level >= pl_level)
             {
-                uint nLevelDiff = mob_level - pl_level;
+                var nLevelDiff = mob_level - pl_level;
                 if (nLevelDiff > 4)
                     nLevelDiff = 4;
 
@@ -124,10 +124,10 @@ namespace Game
             }
             else
             {
-                uint gray_level = GetGrayLevel(pl_level);
+                var gray_level = GetGrayLevel(pl_level);
                 if (mob_level > gray_level)
                 {
-                    uint ZD = GetZeroDifference(pl_level);
+                    int ZD = GetZeroDifference(pl_level);
                     baseGain = (pl_level * 5 + nBaseExp) * (ZD + mob_level - pl_level) / ZD;
                 }
                 else
@@ -137,7 +137,7 @@ namespace Game
             if (WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) != 0)
             {
                 // Use mob level instead of player level to avoid overscaling on gain in a min is enforced
-                uint baseGainMin = (mob_level * 5 + nBaseExp) * WorldConfig.GetUIntValue(WorldCfg.MinCreatureScaledXpRatio) / 100;
+                var baseGainMin = (mob_level * 5 + nBaseExp) * WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) / 100;
                 baseGain = Math.Max(baseGainMin, baseGain);
             }
 
@@ -145,10 +145,10 @@ namespace Game
             return baseGain;
         }
 
-        public static uint XPGain(Player player, Unit u, bool isBattleGround = false)
+        public static int XPGain(Player player, Unit u, bool isBattleGround = false)
         {
             Creature creature = u.ToCreature();
-            uint gain = 0;
+            int gain = 0;
 
             if (creature == null || creature.CanGiveExperience())
             {
@@ -160,7 +160,7 @@ namespace Game
                 {
                     // Players get only 10% xp for killing creatures of lower expansion levels than himself
                     if ((creature.GetCreatureDifficulty().GetHealthScalingExpansion() < (int)GetExpansionForLevel(player.GetLevel())))
-                        gain = (uint)Math.Round(gain / 10.0f);
+                        gain = Math.Round(gain / 10.0);
 
                     if (creature.IsElite())
                     {

@@ -37,16 +37,16 @@ namespace Game.Networking.Packets
             VendorGUID = _worldPacket.ReadPackedGuid();
             ContainerGUID = _worldPacket.ReadPackedGuid();
             Quantity = _worldPacket.ReadInt32();
-            Muid = _worldPacket.ReadUInt32();
-            Slot = _worldPacket.ReadUInt32();
+            Muid = _worldPacket.ReadInt32();
+            Slot = _worldPacket.ReadInt32();
             ItemType = (ItemVendorType)_worldPacket.ReadInt32();
             Item.Read(_worldPacket);
         }
 
         public ObjectGuid VendorGUID;
         public ItemInstance Item;
-        public uint Muid;
-        public uint Slot;
+        public int Muid;
+        public int Slot;
         public ItemVendorType ItemType;
         public int Quantity;
         public ObjectGuid ContainerGUID;
@@ -77,12 +77,12 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(VendorGUID);
-            _worldPacket.WriteUInt32(Muid);
+            _worldPacket.WriteInt32(Muid);
             _worldPacket.WriteUInt8((byte)Reason);
         }
 
         public ObjectGuid VendorGUID;
-        public uint Muid;
+        public int Muid;
         public BuyResult Reason = BuyResult.CantFindItem;
     }
 
@@ -183,12 +183,12 @@ namespace Game.Networking.Packets
         {
             VendorGUID = _worldPacket.ReadPackedGuid();
             ItemGUID = _worldPacket.ReadPackedGuid();
-            Amount = _worldPacket.ReadUInt32();
+            Amount = _worldPacket.ReadInt32();
         }
 
         public ObjectGuid VendorGUID;
         public ObjectGuid ItemGUID;
-        public uint Amount;
+        public int Amount;
     }
 
     public class ItemTimeUpdate : ServerPacket
@@ -551,17 +551,17 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Owner);
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WritePackedGuid(ItemGUID);
-            _worldPacket.WriteUInt32(ItemID);
-            _worldPacket.WriteUInt32(Enchantment);
-            _worldPacket.WriteUInt32(EnchantSlot);
+            _worldPacket.WriteInt32(ItemID);
+            _worldPacket.WriteInt32(Enchantment);
+            _worldPacket.WriteInt32((int)EnchantSlot);
         }
 
         public ObjectGuid Owner;
         public ObjectGuid Caster;
         public ObjectGuid ItemGUID;
-        public uint ItemID;
-        public uint Enchantment;
-        public uint EnchantSlot;
+        public int ItemID;
+        public int Enchantment;
+        public EnchantmentSlot EnchantSlot;
     }
 
     class ItemEnchantTimeUpdate : ServerPacket
@@ -572,14 +572,14 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(ItemGuid);
             _worldPacket.WriteUInt32(DurationLeft);
-            _worldPacket.WriteUInt32(Slot);
+            _worldPacket.WriteInt32(Slot);
             _worldPacket.WritePackedGuid(OwnerGuid);
         }
 
         public ObjectGuid OwnerGuid;
         public ObjectGuid ItemGuid;
         public uint DurationLeft;
-        public uint Slot;
+        public int Slot;
     }
 
     class UseCritterItem : ClientPacket

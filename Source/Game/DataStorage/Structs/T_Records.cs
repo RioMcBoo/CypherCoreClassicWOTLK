@@ -36,7 +36,7 @@ namespace Game.DataStorage
 
     public sealed class TalentTabRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public string BackgroundFile;
         public int OrderIndex;
@@ -52,15 +52,15 @@ namespace Game.DataStorage
         public Vector3 Pos;
         public Vector2 MapOffset;
         public Vector2 FlightMapOffset;
-        public uint Id;
-        public uint ContinentID;
-        public uint ConditionID;
+        public int Id;
+        public int ContinentID;
+        public int ConditionID;
         public ushort CharacterBitNumber;
         private int _flags;
         public int UiTextureKitID;
         public float Facing;
-        public uint SpecialIconConditionID;
-        public uint VisibilityConditionID;
+        public int SpecialIconConditionID;
+        public int VisibilityConditionID;
         private int[] _mountCreatureID = new int[2];
 
         #region Properties

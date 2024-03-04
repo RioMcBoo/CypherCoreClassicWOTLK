@@ -261,11 +261,11 @@ namespace Game.DataStorage
 
     public sealed class MountCapabilityRecord
     {
-        public uint Id;
+        public int Id;
         private byte _flags;
         public ushort ReqRidingSkill;
         public ushort ReqAreaID;
-        public uint ReqSpellAuraID;
+        public int ReqSpellAuraID;
         public int ReqSpellKnownID;
         public int ModSpellAuraID;
         public short ReqMapID;

@@ -751,7 +751,7 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             RequesterGuid = data.ReadPackedGuid();
-            Id = data.ReadUInt32();
+            Id = data.ReadInt32();
             Type = (RideType)data.ReadUInt32();
             Time = data.ReadInt64();
             Unknown925 = data.HasBit();
@@ -761,7 +761,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(RequesterGuid);
-            data.WriteUInt32(Id);
+            data.WriteInt32(Id);
             data.WriteUInt32((uint)Type);
             data.WriteInt64(Time);
             data.WriteBit(Unknown925);
@@ -769,7 +769,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid RequesterGuid;
-        public uint Id;
+        public int Id;
         public RideType Type;
         public long Time;
         public bool Unknown925;

@@ -732,7 +732,7 @@ namespace Game.Loots
             _changed = true;
         }
 
-        public LootItem GetItemInSlot(uint lootListId)
+        public LootItem GetItemInSlot(int lootListId)
         {
             if (lootListId < items.Count)
                 return items[(int)lootListId];
@@ -741,7 +741,7 @@ namespace Game.Loots
         }
 
         // Calls processor of corresponding LootTemplate (which handles everything including references)
-        public bool FillLoot(uint lootId, LootStore store, Player lootOwner, bool personal, bool noEmptyError = false, LootModes lootMode = LootModes.Default, ItemContext context = 0)
+        public bool FillLoot(int lootId, LootStore store, Player lootOwner, bool personal, bool noEmptyError = false, LootModes lootMode = LootModes.Default, ItemContext context = 0)
         {
             // Must be provided
             if (lootOwner == null)
@@ -1085,8 +1085,8 @@ namespace Game.Loots
 
         public ObjectGuid GetLootMasterGUID() { return _lootMaster; }
 
-        public uint GetDungeonEncounterId() { return _dungeonEncounterId; }
-        public void SetDungeonEncounterId(uint dungeonEncounterId) { _dungeonEncounterId = dungeonEncounterId; }
+        public int GetDungeonEncounterId() { return _dungeonEncounterId; }
+        public void SetDungeonEncounterId(int dungeonEncounterId) { _dungeonEncounterId = dungeonEncounterId; }
 
         public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerFFAItems() { return PlayerFFAItems; }
 
@@ -1109,7 +1109,7 @@ namespace Game.Loots
         List<ObjectGuid> _allowedLooters = new();
         bool _wasOpened;                                                // true if at least one player received the loot content
         bool _changed;
-        uint _dungeonEncounterId;
+        int _dungeonEncounterId;
     }
 
     public class AELootResult

@@ -691,7 +691,7 @@ namespace Game.Maps
     public class LiquidData
     {
         public LiquidHeaderTypeFlags type_flags;
-        public uint entry;
+        public int entry;
         public float level;
         public float depth_level;
     }

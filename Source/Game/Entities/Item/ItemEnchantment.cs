@@ -135,22 +135,23 @@ namespace Game.Entities
 
     public static ItemRandomProperties GenerateRandomProperties(int item_id)
     {
-        ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
-        if (itemProto == null)
-            return 0;
+        //ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
+        //if (itemProto == null)
+        //    return 0;
 
-        // item must have one from this field values not null if it can have random enchantments
-        if (itemProto.RandomBonusListTemplateId == 0)
-            return 0;
+        //// item must have one from this field values not null if it can have random enchantments
+        //if (itemProto.RandomBonusListTemplateId == 0)
+        //    return 0;
 
-        var tab = _storage.LookupByKey(itemProto.RandomBonusListTemplateId);
-        if (tab == null)
-        {
-            Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
-            return 0;
-        }
-        //todo fix me this is ulgy
-        return tab.BonusListIDs.SelectRandomElementByWeight(x => (float)tab.Chances[tab.BonusListIDs.IndexOf(x)]);
+        //var tab = _storage.LookupByKey(itemProto.RandomBonusListTemplateId);
+        //if (tab == null)
+        //{
+        //    Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
+        //    return 0;
+        //}
+        ////todo fix me this is ulgy
+        //return tab.BonusListIDs.SelectRandomElementByWeight(x => (float)tab.Chances[tab.BonusListIDs.IndexOf(x)]);
+        return new();
     }
 
     public struct EnchStoreItem
@@ -158,14 +159,14 @@ namespace Game.Entities
         public EnchStoreItem() { }
         public EnchStoreItem(ItemRandomEnchantmentId itemRandomEnchantmentId, float chance)
         {
-            this.itemRandomEnchantmentId = itemRandomEnchantmentId;
-            this.Chance = chance;
+            itemRandomEnchantmentId = itemRandomEnchantmentId;
+            Chance = chance;
         }
-        public EnchStoreItem(ItemRandomEnchantmentType type, uint id, float chance)
+        public EnchStoreItem(ItemRandomEnchantmentType type, int id, float chance)
         {
-            this.itemRandomEnchantmentId.Type = type;
-            this.itemRandomEnchantmentId.Id = id;
-            this.Chance = chance;
+            itemRandomEnchantmentId.Type = type;
+            itemRandomEnchantmentId.Id = id;
+            Chance = chance;
         }
         public ItemRandomEnchantmentId itemRandomEnchantmentId;
         public float Chance;
@@ -174,14 +175,14 @@ namespace Game.Entities
     public struct ItemRandomEnchantmentId
     {
         public ItemRandomEnchantmentId() { }
-        public ItemRandomEnchantmentId(ItemRandomEnchantmentType type, uint id)
+        public ItemRandomEnchantmentId(ItemRandomEnchantmentType type, int id)
         {
-            this.Type = type;
-            this.Id = id;
+            Type = type;
+            Id = id;
         }
 
         public ItemRandomEnchantmentType Type;
-        public uint Id;
+        public int Id;
     };
 
     class EnchantmentStore

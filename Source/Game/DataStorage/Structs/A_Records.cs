@@ -229,7 +229,7 @@ namespace Game.DataStorage
     public sealed class ArtifactRecord
     {
         public LocalizedString Name;
-        public uint Id;
+        public int Id;
         public ushort UiTextureKitID;
         public int UiNameColor;
         public int UiBarOverlayColor;
@@ -237,8 +237,8 @@ namespace Game.DataStorage
         public ushort ChrSpecializationID;
         public byte Flags;
         public byte ArtifactCategoryID;
-        public uint UiModelSceneID;
-        public uint SpellVisualKitID;
+        public int UiModelSceneID;
+        public int SpellVisualKitID;
     }
 
     public sealed class ArtifactAppearanceRecord
@@ -247,15 +247,15 @@ namespace Game.DataStorage
         public int Id;
         public ushort ArtifactAppearanceSetID;
         public byte DisplayIndex;
-        public uint UnlockPlayerConditionID;
+        public int UnlockPlayerConditionID;
         public byte ItemAppearanceModifierID;
         public int UiSwatchColor;
         public float UiModelSaturation;
         public float UiModelOpacity;
         public byte OverrideShapeshiftFormID;
-        public uint OverrideShapeshiftDisplayID;
-        public uint UiItemAppearanceID;
-        public uint UiAltItemAppearanceID;
+        public int OverrideShapeshiftDisplayID;
+        public int UiItemAppearanceID;
+        public int UiAltItemAppearanceID;
         public byte Flags;
         public ushort UiCameraID;
     }
@@ -264,18 +264,18 @@ namespace Game.DataStorage
     {
         public LocalizedString Name;
         public LocalizedString Description;
-        public uint Id;
+        public int Id;
         public byte DisplayIndex;
         public ushort UiCameraID;
         public ushort AltHandUICameraID;
         public sbyte ForgeAttachmentOverride;
         public byte Flags;
-        public uint ArtifactID;
+        public int ArtifactID;
     }
 
     public sealed class ArtifactCategoryRecord
     {
-        public uint Id;
+        public int Id;
         public short XpMultCurrencyID;
         public short XpMultCurveID;
     }
@@ -283,7 +283,7 @@ namespace Game.DataStorage
     public sealed class ArtifactPowerRecord
     {
         public Vector2 DisplayPos;
-        public uint Id;
+        public int Id;
         public byte ArtifactID;
         public byte MaxPurchasableRank;
         public int Label;
@@ -309,15 +309,15 @@ namespace Game.DataStorage
 
     public sealed class ArtifactPowerLinkRecord
     {
-        public uint Id;
+        public int Id;
         public ushort PowerA;
         public ushort PowerB;
     }
 
     public sealed class ArtifactPowerPickerRecord
     {
-        public uint Id;
-        public uint PlayerConditionID;
+        public int Id;
+        public int PlayerConditionID;
     }
 
     public sealed class ArtifactPowerRankRecord
@@ -358,7 +358,7 @@ namespace Game.DataStorage
 
     public sealed class AuctionHouseRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         /// <summary>
         /// id of faction.dbc for player factions associated with city
@@ -370,15 +370,15 @@ namespace Game.DataStorage
 
     public sealed class AzeriteEmpoweredItemRecord
     {
-        public uint Id;
+        public int Id;
         public int ItemID;
-        public uint AzeriteTierUnlockSetID;
-        public uint AzeritePowerSetID;
+        public int AzeriteTierUnlockSetID;
+        public int AzeritePowerSetID;
     }
 
     public sealed class AzeriteEssenceRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public LocalizedString Description;
         public int SpecSetID;
@@ -386,7 +386,7 @@ namespace Game.DataStorage
 
     public sealed class AzeriteEssencePowerRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString SourceAlliance;
         public LocalizedString SourceHorde;
         public int AzeriteEssenceID;

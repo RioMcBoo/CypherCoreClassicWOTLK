@@ -161,10 +161,10 @@ namespace Game.Scripting
         public virtual void OnGrayLevelCalculation(int grayLevel, int playerLevel) { }
 
         // Called after calculating experience color.
-        public virtual void OnColorCodeCalculation(XPColorChar color, int playerLevel, uint mobLevel) { }
+        public virtual void OnColorCodeCalculation(XPColorChar color, int playerLevel, int mobLevel) { }
 
         // Called after calculating zero difference.
-        public virtual void OnZeroDifferenceCalculation(uint diff, int playerLevel) { }
+        public virtual void OnZeroDifferenceCalculation(int diff, int playerLevel) { }
 
         // Called after calculating base experience gain.
         public virtual void OnBaseGainCalculation(int gain, int playerLevel, int mobLevel, ContentLevels content) { }

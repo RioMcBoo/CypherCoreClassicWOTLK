@@ -13,20 +13,20 @@ namespace Game.DataStorage
         }
 
         // ordered by entropy; that way memcmp will have a minimal medium runtime
-        int groupId;
-        int rootId;
-        int adtId;
+        public int groupId;
+        public int rootId;
+        public int adtId;
     }
 
     public class TaxiPathBySourceAndDestination
     {
-        public TaxiPathBySourceAndDestination(uint _id, uint _price)
+        public TaxiPathBySourceAndDestination(int _id, uint _price)
         {
             Id = _id;
             price = _price;
         }
 
-        public uint Id;
+        public int Id;
         public uint price;
     }
 }

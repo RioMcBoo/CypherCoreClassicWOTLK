@@ -98,8 +98,8 @@ namespace Game.Entities
             // Grant back extendedcost items
             for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
             {
-                uint count = iece.ItemCount[i];
-                uint itemid = iece.ItemID[i];
+                int count = iece.ItemCount[i];
+                int itemid = iece.ItemID[i];
                 if (count != 0 && itemid != 0)
                 {
                     InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemid, count);
@@ -115,8 +115,8 @@ namespace Game.Entities
                 if (iece.Flags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                     continue;
 
-                uint count = iece.CurrencyCount[i];
-                uint currencyid = iece.CurrencyID[i];
+                int count = iece.CurrencyCount[i];
+                int currencyid = iece.CurrencyID[i];
                 if (count != 0 && currencyid != 0)
                     AddCurrency(currencyid, count, CurrencyGainSource.ItemRefund);
             }
@@ -1431,7 +1431,7 @@ namespace Game.Entities
             }
         }
 
-        void QuickEquipItem(List<(ItemPos item, int count)> pos, Item pItem)
+        void QuickEquipItem(List<(ItemPos Pos, int count)> pos, Item pItem)
         {
             QuickEquipItem(pos.FirstOrDefault().Pos, pItem);
         }
@@ -1461,7 +1461,7 @@ namespace Game.Entities
             }
         }
 
-        public void SendEquipError(InventoryResult msg, Item item1 = null, Item item2 = null, uint itemId = 0)
+        public void SendEquipError(InventoryResult msg, Item item1 = null, Item item2 = null, int itemId = 0)
         {
             InventoryChangeFailure failure = new();
             failure.BagResult = msg;
@@ -1496,7 +1496,7 @@ namespace Game.Entities
                     case InventoryResult.ItemMaxLimitCategoryEquippedExceededIs:
                     {
                         ItemTemplate proto = item1 != null ? item1.GetTemplate() : Global.ObjectMgr.GetItemTemplate(itemId);
-                        failure.LimitCategory = (int)(proto != null ? proto.GetItemLimitCategory() : 0u);
+                        failure.LimitCategory = (int)(proto != null ? proto.GetItemLimitCategory() : 0);
                         break;
                     }
                     default:
@@ -1508,13 +1508,13 @@ namespace Game.Entities
         }
 
         //Add/Remove/Misc Item 
-        public bool AddItem(uint itemId, uint count)
+        public bool AddItem(int itemId, int count)
         {
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
             if (itemTemplate == null)
                 return false;
 
-            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemTemplate, count, out uint noSpaceForCount);
+            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemTemplate, count, out int noSpaceForCount);
             if (msg != InventoryResult.Ok)
                 count -= noSpaceForCount;
 
@@ -2174,7 +2174,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void SendNewItem(Item item, uint quantity, bool pushed, bool created, bool broadcast = false, uint dungeonEncounterId = 0)
+        public void SendNewItem(Item item, int quantity, bool pushed, bool created, bool broadcast = false, uint dungeonEncounterId = 0)
         {
             if (item == null) // prevent crash
                 return;
@@ -2191,10 +2191,10 @@ namespace Game.Entities
             //packet.QuestLogItemID;
             packet.Quantity = quantity;
             packet.QuantityInInventory = GetItemCount(item.GetEntry());
-            packet.BattlePetSpeciesID = (int)item.GetModifier(ItemModifier.BattlePetSpeciesId);
-            packet.BattlePetBreedID = (int)item.GetModifier(ItemModifier.BattlePetBreedData) & 0xFFFFFF;
-            packet.BattlePetBreedQuality = (item.GetModifier(ItemModifier.BattlePetBreedData) >> 24) & 0xFF;
-            packet.BattlePetLevel = (int)item.GetModifier(ItemModifier.BattlePetLevel);
+            packet.BattlePetSpeciesID = item.GetModifier(ItemModifier.BattlePetSpeciesId);
+            packet.BattlePetBreedID = item.GetModifier(ItemModifier.BattlePetBreedData) & 0xFFFFFF;
+            packet.BattlePetBreedQuality = (uint)(item.GetModifier(ItemModifier.BattlePetBreedData) >> 24) & 0xFF;
+            packet.BattlePetLevel = item.GetModifier(ItemModifier.BattlePetLevel);
 
             packet.ItemGUID = item.GetGUID();
 
@@ -2274,7 +2274,7 @@ namespace Game.Entities
                 //cycle all (gem)enchants
                 for (EnchantmentSlot enchant_slot = EnchantmentSlot.EnhancementSocket1; enchant_slot < EnchantmentSlot.EnhancementSocket1 + 3; ++enchant_slot)
                 {
-                    uint enchant_id = pItem.GetEnchantmentId(enchant_slot);
+                    int enchant_id = pItem.GetEnchantmentId(enchant_slot);
                     if (enchant_id == 0)                                 //if no enchant go to next enchant(slot)
                         continue;
 
@@ -2407,7 +2407,7 @@ namespace Game.Entities
             return result;
         }
 
-        public List<Item> GetItemListByEntry(uint entry, bool inBankAlso = false)
+        public List<Item> GetItemListByEntry(int entry, bool inBankAlso = false)
         {
             ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.ReagentBank;
             if (inBankAlso)
@@ -2431,7 +2431,7 @@ namespace Game.Entities
             if (inBankAlso)
                 location |= ItemSearchLocation.Bank;
 
-            uint currentCount = 0;
+            int currentCount = 0;
             return !ForEachItem(location, pItem =>
             {
                 if (pItem != null && pItem.GetEntry() == item && !pItem.IsInTrade())
@@ -2472,9 +2472,10 @@ namespace Game.Entities
 
             return result;
         }
-        uint GetItemCountWithLimitCategory(uint limitCategory, Item skipItem)
+
+        int GetItemCountWithLimitCategory(int limitCategory, Item skipItem)
         {
-            uint count = 0;
+            int count = 0;
             ForEachItem(ItemSearchLocation.Everywhere, item =>
             {
                 if (item != skipItem)
@@ -2489,6 +2490,7 @@ namespace Game.Entities
 
             return count;
         }
+
         public byte GetItemLimitCategoryQuantity(ItemLimitCategoryRecord limitEntry)
         {
             byte limit = limitEntry.Quantity;
@@ -2547,7 +2549,7 @@ namespace Game.Entities
                         DestroyItem(i, update);
             }
         }
-        void DestroyZoneLimitedItem(bool update, uint new_zone)
+        void DestroyZoneLimitedItem(bool update, int new_zone)
         {
             Log.outDebug(LogFilter.Player, $"STORAGE: DestroyZoneLimitedItem in map {GetMapId()} and area {new_zone}.");
 
@@ -2611,7 +2613,7 @@ namespace Game.Entities
                 return InventoryResult.ItemNotFound;
 
             // Used by group, function GroupLoot, to know if a prototype can be used by a player
-            if ((proto.GetAllowableClass() & GetClassMask()) == 0 || !proto.GetAllowableRace().HasRace(GetRace()))
+            if (proto.GetAllowableClass().HasClass(GetClass()) || !proto.GetAllowableRace().HasRace(GetRace()))
                 return InventoryResult.CantEquipEver;
 
             if (proto.GetRequiredSpell() != 0 && !HasSpell(proto.GetRequiredSpell()))
@@ -2630,7 +2632,7 @@ namespace Game.Entities
 
             if (proto.GetClass() == ItemClass.Armor && proto.GetInventoryType() != InventoryType.Cloak)
             {
-                ChrClassesRecord classesEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
+                ChrClassesRecord classesEntry = CliDB.ChrClassesStorage.LookupByKey((int)GetClass());
                 if ((classesEntry.ArmorTypeMask & 1 << (int)proto.GetSubClass()) == 0)
                     return InventoryResult.ClientLockedOut;
             }
@@ -2642,12 +2644,12 @@ namespace Game.Entities
         {
             if (pItem != null)
             {
-                uint slot = m_currentBuybackSlot;
+                var slot = m_currentBuybackSlot;
                 // if current back slot non-empty search oldest or free
                 if (m_items[slot] != null)
                 {
                     long oldest_time = m_activePlayerData.BuybackTimestamp[0];
-                    uint oldest_slot = InventorySlots.BuyBackStart;
+                    var oldest_slot = InventorySlots.BuyBackStart;
 
                     for (byte i = InventorySlots.BuyBackStart + 1; i < InventorySlots.BuyBackEnd; ++i)
                     {
@@ -2676,12 +2678,12 @@ namespace Game.Entities
                 m_items[slot] = pItem;
                 var time = GameTime.GetGameTime();
                 uint etime = (uint)(time - m_logintime + (30 * 3600));
-                uint eslot = slot - InventorySlots.BuyBackStart;
+                ItemSlot eslot = slot - InventorySlots.BuyBackStart;
 
                 SetInvSlot(slot, pItem.GetGUID());
                 ItemTemplate proto = pItem.GetTemplate();
                 if (proto != null)
-                    SetBuybackPrice(eslot, proto.GetSellPrice() * pItem.GetCount());
+                    SetBuybackPrice(eslot, (uint)(proto.GetSellPrice() * pItem.GetCount()));
                 else
                     SetBuybackPrice(eslot, 0);
 
@@ -2693,7 +2695,7 @@ namespace Game.Entities
             }
         }
 
-        public bool BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint vendorSlot, uint currency, uint count)
+        public bool BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, int vendorSlot, int currency, int count)
         {
             // cheating attempt
             if (count < 1)
@@ -2847,7 +2849,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool BuyItemFromVendorSlot(ObjectGuid vendorguid, uint vendorslot, uint item, byte count, ItemPos pos)
+        public bool BuyItemFromVendorSlot(ObjectGuid vendorguid, int vendorslot, int item, byte count, ItemPos pos)
         {
             // cheating attempt
             if (count < 1)
@@ -2863,7 +2865,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (!Convert.ToBoolean(pProto.GetAllowableClass() & GetClassMask()) && pProto.GetBonding() == ItemBondingType.OnAcquire && !IsGameMaster())
+            if (!pProto.GetAllowableClass().HasClass(GetClass()) && pProto.GetBonding() == ItemBondingType.OnAcquire && !IsGameMaster())
             {
                 SendBuyError(BuyResult.CantFindItem, null, item);
                 return false;
@@ -3105,8 +3107,8 @@ namespace Game.Entities
             draft.SendMailTo(trans, new MailReceiver(this, GetGUID().GetCounter()), sender);
             DB.Characters.CommitTransaction(trans);
         }
-        public void SetBuybackPrice(uint slot, uint price) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackPrice, (int)slot), price); }
-        public void SetBuybackTimestamp(uint slot, long timestamp) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackTimestamp, (int)slot), timestamp); }
+        public void SetBuybackPrice(int slot, uint price) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackPrice, slot), price); }
+        public void SetBuybackTimestamp(int slot, long timestamp) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackTimestamp, slot), timestamp); }
 
         public Item GetItemFromBuyBackSlot(uint slot)
         {

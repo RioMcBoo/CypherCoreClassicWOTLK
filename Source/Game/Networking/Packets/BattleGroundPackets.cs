@@ -118,13 +118,13 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             Hdr.Write(_worldPacket);
-            _worldPacket.WriteUInt32(Mapid);
+            _worldPacket.WriteInt32(Mapid);
             _worldPacket.WriteUInt32(Timeout);
             _worldPacket.WriteUInt8(Role);
         }
 
         public uint Timeout;
-        public uint Mapid;
+        public int Mapid;
         public BattlefieldStatusHeader Hdr = new();
         public byte Role;
     }
@@ -136,7 +136,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             Hdr.Write(_worldPacket);
-            _worldPacket.WriteUInt32(Mapid);
+            _worldPacket.WriteInt32(Mapid);
             _worldPacket.WriteUInt32(ShutdownTimer);
             _worldPacket.WriteUInt32(StartTimer);
             _worldPacket.WriteBit(ArenaFaction != 0);
@@ -149,7 +149,7 @@ namespace Game.Networking.Packets
         public byte ArenaFaction;
         public bool LeftEarly;
         public uint StartTimer;
-        public uint Mapid;
+        public int Mapid;
     }
 
     public class BattlefieldStatusQueued : ServerPacket
@@ -479,12 +479,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt8((byte)State);
             _worldPacket.WriteInt64(StartTime);
             _worldPacket.WriteInt64(Duration);
             _worldPacket.WriteUInt8(ArenaFaction);
-            _worldPacket.WriteUInt32(BattlemasterListID);
+            _worldPacket.WriteInt32((int)BattlemasterListID);
             _worldPacket.WriteBit(Registered);
             _worldPacket.WriteBit(AffectsRating);
             _worldPacket.WriteBit(DeserterPenalty != null);
@@ -494,13 +494,13 @@ namespace Game.Networking.Packets
                 DeserterPenalty.Write(_worldPacket);
         }
 
-        public uint MapID;
+        public int MapID;
         public PVPMatchState State = PVPMatchState.Inactive;
         public long StartTime;
         public long Duration; //TODO: Ask IDA to be sure
         public RatedMatchDeserterPenalty DeserterPenalty;
         public byte ArenaFaction;
-        public uint BattlemasterListID;
+        public BattlegroundTypeId BattlemasterListID;
         public bool Registered;
         public bool AffectsRating;
     }

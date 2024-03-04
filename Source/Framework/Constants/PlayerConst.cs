@@ -26,7 +26,7 @@ namespace Framework.Constants
 
         public const int ReqPrimaryTreeTalents = 31;
         public const int ExploredZonesSize = 192;
-        public const ulong MaxMoneyAmount = 99999999999UL;
+        public const long MaxMoneyAmount = 99999999999;
         public const int MaxActionButtons = 180;
         public const int MaxActionButtonActionValue = 0x00FFFFFF + 1;
 
@@ -55,21 +55,21 @@ namespace Framework.Constants
 
         public const int MaxHonorLevel = 500;
         public const byte LevelMinHonor = 10;
-        public const uint SpellPvpRulesEnabled = 134735;
+        public const int SpellPvpRulesEnabled = 134735;
 
         //Azerite
-        public const uint ItemIdHeartOfAzeroth = 158075;
-        public const uint MaxAzeriteItemLevel = 129;
-        public const uint MaxAzeriteItemKnowledgeLevel = 30;
-        public const uint PlayerConditionIdUnlockedAzeriteEssences = 69048;
-        public const uint SpellIdHeartEssenceActionBarOverride = 298554;
+        public const int ItemIdHeartOfAzeroth = 158075;
+        public const int MaxAzeriteItemLevel = 129;
+        public const int MaxAzeriteItemKnowledgeLevel = 30;
+        public const int PlayerConditionIdUnlockedAzeriteEssences = 69048;
+        public const int SpellIdHeartEssenceActionBarOverride = 298554;
 
         //Warmode
-        public const uint WarmodeEnlistedSpellOutside = 269083;
+        public const int WarmodeEnlistedSpellOutside = 269083;
 
-        public const uint SpellExperienceEliminated = 206662;
+        public const int SpellExperienceEliminated = 206662;
 
-        public const uint CurrencyMaxCapAncientMana = 2000;
+        public const int CurrencyMaxCapAncientMana = 2000;
 
         public const float MaxAreaSpiritHealerRange = 20.0f;
     }

@@ -123,9 +123,9 @@ namespace Framework.Constants
         /// BGs / Arena Const
         /// </summary>
         public const int PvpTeamsCount = 2;
-        public const uint CountOfPlayersToAverageWaitTime = 10;
-        public const uint MaxPlayerBGQueues = 3;
-        public const uint BGAwardArenaPointsMinLevel = 71;
+        public const int CountOfPlayersToAverageWaitTime = 10;
+        public const int MaxPlayerBGQueues = 3;
+        public const int BGAwardArenaPointsMinLevel = 71;
         public const int ArenaTimeLimitPointsLoss = -16;
         public const int MaxArenaSlot = 3;
 

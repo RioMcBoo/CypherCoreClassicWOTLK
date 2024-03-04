@@ -727,7 +727,7 @@ namespace Game.Entities
             }
 
             // GO created by some spell
-            uint spellid = gameObj.GetSpellId();
+            int spellid = gameObj.GetSpellId();
             if (spellid != 0)
             {
                 RemoveAurasDueToSpell(spellid);
@@ -888,7 +888,7 @@ namespace Game.Entities
         {
             var entry = GetFactionTemplateEntry();
             if (entry != null)
-                return entry.IsContestedGuardFaction();
+                return entry.IsContestedGuardFaction;
 
             return false;
         }
@@ -1178,7 +1178,7 @@ namespace Game.Entities
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.AbandonVehicle);
         }
 
-        public void SendPlaySpellVisual(Unit target, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
+        public void SendPlaySpellVisual(Unit target, int spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
         {
             PlaySpellVisual playSpellVisual = new();
             playSpellVisual.Source = GetGUID();
@@ -1193,7 +1193,7 @@ namespace Game.Entities
             SendMessageToSet(playSpellVisual, true);
         }
 
-        public void SendPlaySpellVisual(Position targetPosition, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
+        public void SendPlaySpellVisual(Position targetPosition, int spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
         {
             PlaySpellVisual playSpellVisual = new();
             playSpellVisual.Source = GetGUID();
@@ -1207,7 +1207,7 @@ namespace Game.Entities
             SendMessageToSet(playSpellVisual, true);
         }
 
-        public void SendCancelSpellVisual(uint id)
+        public void SendCancelSpellVisual(int id)
         {
             CancelSpellVisual cancelSpellVisual = new();
             cancelSpellVisual.Source = GetGUID();
@@ -1215,7 +1215,7 @@ namespace Game.Entities
             SendMessageToSet(cancelSpellVisual, true);
         }
 
-        public void SendPlaySpellVisualKit(uint id, uint type, uint duration)
+        public void SendPlaySpellVisualKit(int id, int type, uint duration)
         {
             PlaySpellVisualKit playSpellVisualKit = new();
             playSpellVisualKit.Unit = GetGUID();
@@ -1225,7 +1225,7 @@ namespace Game.Entities
             SendMessageToSet(playSpellVisualKit, true);
         }
 
-        public void SendCancelSpellVisualKit(uint id)
+        public void SendCancelSpellVisualKit(int id)
         {
             CancelSpellVisualKit cancelSpellVisualKit = new();
             cancelSpellVisualKit.Source = GetGUID();
@@ -1233,7 +1233,7 @@ namespace Game.Entities
             SendMessageToSet(cancelSpellVisualKit, true);
         }
 
-        public void CancelSpellMissiles(uint spellId, bool reverseMissile = false, bool abortSpell = false)
+        public void CancelSpellMissiles(int spellId, bool reverseMissile = false, bool abortSpell = false)
         {
             bool hasMissile = false;
             if (abortSpell)
@@ -1392,7 +1392,7 @@ namespace Game.Entities
 
         public virtual void OnPhaseChange() { }
 
-        public uint GetModelForForm(ShapeShiftForm form, uint spellId)
+        public uint GetModelForForm(ShapeShiftForm form, int spellId)
         {
             // Hardcoded cases
             switch (spellId)
@@ -2006,7 +2006,7 @@ namespace Game.Entities
             else if (!shapeshiftAura.Empty()) // we've found shapeshift
             {
                 // only one such aura possible at a time
-                uint modelId = GetModelForForm(GetShapeshiftForm(), shapeshiftAura[0].GetId());
+                int modelId = GetModelForForm(GetShapeshiftForm(), shapeshiftAura[0].GetId());
                 if (modelId != 0)
                 {
                     if (!ignorePositiveAurasPreventingMounting || !IsDisallowedMountForm(0, GetShapeshiftForm(), modelId))
@@ -2173,7 +2173,7 @@ namespace Game.Entities
         public void RemovePetFlag(UnitPetFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetFlags), (byte)flags); }
         public void ReplaceAllPetFlags(UnitPetFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetFlags), (byte)flags); }
 
-        public void SetPetNumberForClient(uint petNumber) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNumber), petNumber); }
+        public void SetPetNumberForClient(int petNumber) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNumber), petNumber); }
         public void SetPetNameTimestamp(uint timestamp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNameTimestamp), timestamp); }
 
         public ShapeShiftForm GetShapeshiftForm() { return (ShapeShiftForm)(byte)m_unitData.ShapeshiftForm; }

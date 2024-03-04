@@ -244,9 +244,9 @@ namespace Game.Entities
         public float[] BaseDamage = new float[(int)Expansion.Current + 1];
 
         //Helpers
-        public int GenerateHealth(CreatureDifficulty  difficulty)
+        public int GenerateHealth(CreatureDifficulty difficulty)
         { 
-            return (int)Math.Ceiling(BaseHealth[difficulty.GetHealthScalingExpansion()] * difficulty.HealthModifier); 
+            return (int)Math.Ceiling(BaseHealth[(int)difficulty.GetHealthScalingExpansion()] * difficulty.HealthModifier); 
         }
 
         public int GenerateMana(CreatureDifficulty difficulty)
@@ -265,7 +265,7 @@ namespace Game.Entities
 
         public float GenerateBaseDamage(CreatureDifficulty difficulty) 
         { 
-            return BaseDamage[difficulty.GetHealthScalingExpansion()]; 
+            return BaseDamage[(int)difficulty.GetHealthScalingExpansion()]; 
         }
     }
 
@@ -461,7 +461,7 @@ namespace Game.Entities
     {
         public byte MinLevel;
         public byte MaxLevel;
-        public int HealthScalingExpansion;
+        public Expansion HealthScalingExpansion;
         public float HealthModifier;
         public float ManaModifier;
         public float ArmorModifier;
@@ -487,9 +487,9 @@ namespace Game.Entities
         }
 
         // Helpers
-        public int GetHealthScalingExpansion()
+        public Expansion GetHealthScalingExpansion()
         {
-            return HealthScalingExpansion == (int)Expansion.LevelCurrent ? (int)PlayerConst.CurrentExpansion : HealthScalingExpansion;
+            return HealthScalingExpansion == Expansion.LevelCurrent ? PlayerConst.CurrentExpansion : HealthScalingExpansion;
         }
 
         public SkillType GetRequiredLootSkill()

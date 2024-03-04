@@ -42,7 +42,7 @@ namespace Game.Arenas
             EmblemColor = emblemColor;
             BorderStyle = borderStyle;
             BorderColor = borderColor;
-            ulong captainLowGuid = captainGuid.GetCounter();
+            long captainLowGuid = captainGuid.GetCounter();
 
             // Save arena team to db
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ARENA_TEAM);
@@ -164,9 +164,9 @@ namespace Game.Arenas
             if (result.IsEmpty())
                 return false;
 
-            teamId = result.Read<uint>(0);
+            teamId = result.Read<int>(0);
             TeamName = result.Read<string>(1);
-            CaptainGuid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2));
+            CaptainGuid = ObjectGuid.Create(HighGuid.Player, result.Read<long>(2));
             type = result.Read<byte>(3);
             BackgroundColor = result.Read<uint>(4);
             EmblemStyle = result.Read<byte>(5);
@@ -199,7 +199,7 @@ namespace Game.Arenas
                     break;
 
                 ArenaTeamMember newMember = new();
-                newMember.Guid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1));
+                newMember.Guid = ObjectGuid.Create(HighGuid.Player, result.Read<long>(1));
                 newMember.WeekGames = result.Read<ushort>(2);
                 newMember.WeekWins = result.Read<ushort>(3);
                 newMember.SeasonGames = result.Read<ushort>(4);
@@ -469,14 +469,14 @@ namespace Game.Arenas
             return matchMakerRating;
         }
 
-        float GetChanceAgainst(uint ownRating, uint opponentRating)
+        float GetChanceAgainst(int ownRating, int opponentRating)
         {
             // Returns the Chance to win against a team with the given rating, used in the rating adjustment calculation
             // ELO system
             return (float)(1.0f / (1.0f + Math.Exp(Math.Log(10.0f) * ((float)opponentRating - ownRating) / 650.0f)));
         }
 
-        int GetMatchmakerRatingMod(uint ownRating, uint opponentRating, bool won)
+        int GetMatchmakerRatingMod(int ownRating, int opponentRating, bool won)
         {
             // 'Chance' calculation - to beat the opponent
             // This is a simulation. Not much info on how it really works
@@ -502,7 +502,7 @@ namespace Game.Arenas
             return (int)Math.Ceiling(mod);
         }
 
-        int GetRatingMod(uint ownRating, uint opponentRating, bool won)
+        int GetRatingMod(int ownRating, int opponentRating, bool won)
         {
             // 'Chance' calculation - to beat the opponent
             // This is a simulation. Not much info on how it really works
@@ -561,7 +561,7 @@ namespace Game.Arenas
                     ++stats.Rank;
         }
 
-        public int WonAgainst(uint ownMMRating, uint opponentMMRating, ref int ratingChange)
+        public int WonAgainst(int ownMMRating, int opponentMMRating, ref int ratingChange)
         {
             // Called when the team has won
             // Change in Matchmaker rating
@@ -581,7 +581,7 @@ namespace Game.Arenas
             return mod;
         }
 
-        public int LostAgainst(uint ownMMRating, uint opponentMMRating, ref int ratingChange)
+        public int LostAgainst(int ownMMRating, int opponentMMRating, ref int ratingChange)
         {
             // Called when the team has lost
             // Change in Matchmaker Rating
@@ -597,7 +597,7 @@ namespace Game.Arenas
             return mod;
         }
 
-        public void MemberLost(Player player, uint againstMatchmakerRating, int matchmakerRatingChange = -12)
+        public void MemberLost(Player player, int againstMatchmakerRating, int matchmakerRatingChange = -12)
         {
             // Called for each participant of a match after losing
             foreach (var member in Members)
@@ -623,7 +623,7 @@ namespace Game.Arenas
             }
         }
 
-        public void OfflineMemberLost(ObjectGuid guid, uint againstMatchmakerRating, int matchmakerRatingChange = -12)
+        public void OfflineMemberLost(ObjectGuid guid, int againstMatchmakerRating, int matchmakerRatingChange = -12)
         {
             // Called for offline player after ending rated arena match!
             foreach (var member in Members)
@@ -645,7 +645,7 @@ namespace Game.Arenas
             }
         }
 
-        public void MemberWon(Player player, uint againstMatchmakerRating, int matchmakerRatingChange)
+        public void MemberWon(Player player, int againstMatchmakerRating, int matchmakerRatingChange)
         {
             // called for each participant after winning a match
             foreach (var member in Members)
@@ -766,7 +766,7 @@ namespace Game.Arenas
             return null;
         }
 
-        public uint GetId() { return teamId; }
+        public int GetId() { return teamId; }
         public byte GetArenaType() { return type; }
         public byte GetSlot() { return GetSlotByType(GetArenaType()); }
 
@@ -782,7 +782,7 @@ namespace Game.Arenas
             return Members;
         }
 
-        uint teamId;
+        int teamId;
         byte type;
         string TeamName;
         ObjectGuid CaptainGuid;

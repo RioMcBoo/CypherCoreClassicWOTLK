@@ -283,7 +283,7 @@ namespace Game.DataStorage
 
     public sealed class GemPropertiesRecord
     {
-        public uint Id;
+        public int Id;
         public ushort EnchantId;
         private int _type;
         public ushort MinItemLevel;

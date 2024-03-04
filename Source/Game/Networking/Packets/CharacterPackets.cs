@@ -914,10 +914,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Index);
+            _worldPacket.WriteInt32(Index);
         }
 
-        public uint Index;
+        public int Index;
     }
 
     class SetFactionAtWar : ClientPacket

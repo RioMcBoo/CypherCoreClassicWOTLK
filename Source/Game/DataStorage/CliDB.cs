@@ -832,8 +832,8 @@ namespace Game.DataStorage
         public static byte[] OldContinentsNodesMask;
         public static byte[] HordeTaxiNodesMask;
         public static byte[] AllianceTaxiNodesMask;
-        public static Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new();
-        public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
+        public static Dictionary<int, Dictionary<int, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new();
+        public static Dictionary<int, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
         #endregion
 
         #region Talent Collections

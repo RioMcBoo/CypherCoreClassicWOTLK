@@ -14,7 +14,7 @@ namespace Game.Arenas
             NextArenaTeamId = 1;
         }
 
-        public ArenaTeam GetArenaTeamById(uint arenaTeamId)
+        public ArenaTeam GetArenaTeamById(int arenaTeamId)
         {
             return ArenaTeamStorage.LookupByKey(arenaTeamId);
         }
@@ -44,14 +44,14 @@ namespace Game.Arenas
             Cypher.Assert(!added, $"Duplicate arena team with ID {arenaTeam.GetId()}");
         }
 
-        public void RemoveArenaTeam(uint arenaTeamId)
+        public void RemoveArenaTeam(int arenaTeamId)
         {
             ArenaTeamStorage.Remove(arenaTeamId);
         }
 
-        public uint GenerateArenaTeamId()
+        public int GenerateArenaTeamId()
         {
-            if (NextArenaTeamId >= 0xFFFFFFFE)
+            if (NextArenaTeamId >= -2)
             {
                 Log.outError(LogFilter.Battleground, "Arena team ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
@@ -103,11 +103,11 @@ namespace Game.Arenas
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} arena teams in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public void SetNextArenaTeamId(uint Id) { NextArenaTeamId = Id; }
+        public void SetNextArenaTeamId(int Id) { NextArenaTeamId = Id; }
 
-        public Dictionary<uint, ArenaTeam> GetArenaTeamMap() { return ArenaTeamStorage; }
+        public Dictionary<int, ArenaTeam> GetArenaTeamMap() { return ArenaTeamStorage; }
 
-        uint NextArenaTeamId;
-        Dictionary<uint, ArenaTeam> ArenaTeamStorage = new();
+        int NextArenaTeamId;
+        Dictionary<int, ArenaTeam> ArenaTeamStorage = new();
     }
 }

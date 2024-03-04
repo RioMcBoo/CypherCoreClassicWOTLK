@@ -40,7 +40,7 @@ namespace Game
             }
 
             // find taxi node
-            uint nearest = Global.ObjectMgr.GetNearestTaxiNode(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetMapId(), player.GetTeam());
+            int nearest = Global.ObjectMgr.GetNearestTaxiNode(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetMapId(), player.GetTeam());
 
             TaxiNodeStatusPkt data = new();
             data.Unit = guid;
@@ -111,7 +111,7 @@ namespace Game
             GetPlayer().SetTaxiCheater(lastTaxiCheaterState);
         }
 
-        public void SendDoFlight(uint mountDisplayId, uint path, uint pathNode = 0)
+        public void SendDoFlight(int mountDisplayId, int path, int pathNode = 0)
         {
             // remove fake death
             if (GetPlayer().HasUnitState(UnitState.Died))

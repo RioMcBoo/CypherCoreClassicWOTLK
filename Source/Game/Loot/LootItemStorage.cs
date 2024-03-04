@@ -5,7 +5,6 @@ using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
@@ -29,16 +28,16 @@ namespace Game.Loots
                 {
                     do
                     {
-                        ulong key = result.Read<ulong>(0);
+                        long key = result.Read<long>(0);
                         if (!_lootItemStorage.ContainsKey(key))
                             _lootItemStorage[key] = new StoredLootContainer(key);
 
                         StoredLootContainer storedContainer = _lootItemStorage[key];
 
                         LootItem lootItem = new();
-                        lootItem.itemid = result.Read<uint>(1);
+                        lootItem.itemid = result.Read<int>(1);
                         lootItem.count = result.Read<byte>(2);
-                        lootItem.LootListId = result.Read<uint>(3);
+                        lootItem.LootListId = result.Read<int>(3);
                         lootItem.follow_loot_rules = result.Read<bool>(4);
                         lootItem.freeforall = result.Read<bool>(5);
                         lootItem.is_blocked = result.Read<bool>(6);
@@ -46,8 +45,8 @@ namespace Game.Loots
                         lootItem.is_underthreshold = result.Read<bool>(8);
                         lootItem.needs_quest = result.Read<bool>(9);
                         lootItem.randomPropertyId.Type = (ItemRandomEnchantmentType)result.Read<byte>(10);
-                        lootItem.randomPropertyId.Id = result.Read<uint>(11);
-                        lootItem.randomSuffix = result.Read<uint>(12);
+                        lootItem.randomPropertyId.Id = result.Read<int>(11);
+                        lootItem.randomSuffix = result.Read<int>(12);
                         lootItem.context = (ItemContext)result.Read<byte>(13);
                         StringArray bonusLists = new(result.Read<string>(14), ' ');
 
@@ -73,7 +72,7 @@ namespace Game.Loots
                     count = 0;
                     do
                     {
-                        ulong key = result.Read<ulong>(0);
+                        long key = result.Read<long>(0);
                         if (!_lootItemStorage.ContainsKey(key))
                             _lootItemStorage.TryAdd(key, new StoredLootContainer(key));
 
@@ -141,7 +140,7 @@ namespace Game.Loots
             return true;
         }
 
-        public void RemoveStoredMoneyForContainer(ulong containerId)
+        public void RemoveStoredMoneyForContainer(long containerId)
         {
             if (!_lootItemStorage.ContainsKey(containerId))
                 return;
@@ -149,7 +148,7 @@ namespace Game.Loots
             _lootItemStorage[containerId].RemoveMoney();
         }
 
-        public void RemoveStoredLootForContainer(ulong containerId)
+        public void RemoveStoredLootForContainer(long containerId)
         {
             _lootItemStorage.TryRemove(containerId, out _);
 
@@ -165,7 +164,7 @@ namespace Game.Loots
             DB.Characters.CommitTransaction(trans);
         }
 
-        public void RemoveStoredLootItemForContainer(ulong containerId, uint itemId, uint count, uint itemIndex)
+        public void RemoveStoredLootItemForContainer(long containerId, int itemId, int count, int itemIndex)
         {
             if (!_lootItemStorage.ContainsKey(containerId))
                 return;
@@ -173,7 +172,7 @@ namespace Game.Loots
             _lootItemStorage[containerId].RemoveItem(itemId, count, itemIndex);
         }
 
-        public void AddNewStoredLoot(ulong containerId, Loot loot, Player player)
+        public void AddNewStoredLoot(long containerId, Loot loot, Player player)
         {
             // Saves the money and item loot associated with an openable item to the DB
             if (loot.IsLooted()) // no money and no loot
@@ -218,12 +217,12 @@ namespace Game.Loots
             _lootItemStorage.TryAdd(containerId, container);
         }
 
-        ConcurrentDictionary<ulong, StoredLootContainer> _lootItemStorage = new();
+        ConcurrentDictionary<long, StoredLootContainer> _lootItemStorage = new();
     }
 
     class StoredLootContainer
     {
-        public StoredLootContainer(ulong containerId)
+        public StoredLootContainer(long containerId)
         {
             _containerId = containerId;
         }
@@ -285,7 +284,7 @@ namespace Game.Loots
             DB.Characters.Execute(stmt);
         }
 
-        public void RemoveItem(uint itemId, uint count, uint itemIndex)
+        public void RemoveItem(int itemId, int count, int itemIndex)
         {
             var bounds = _lootItems.LookupByKey(itemId);
             foreach (var itr in bounds)
@@ -306,14 +305,14 @@ namespace Game.Loots
             DB.Characters.Execute(stmt);
         }
 
-        ulong GetContainer() { return _containerId; }
+        long GetContainer() { return _containerId; }
 
         public uint GetMoney() { return _money; }
 
-        public MultiMap<uint, StoredLootItem> GetLootItems() { return _lootItems; }
+        public MultiMap<int, StoredLootItem> GetLootItems() { return _lootItems; }
 
-        MultiMap<uint, StoredLootItem> _lootItems = new();
-        ulong _containerId;
+        MultiMap<int, StoredLootItem> _lootItems = new();
+        long _containerId;
         uint _money;
     }
 
@@ -336,16 +335,16 @@ namespace Game.Loots
             BonusListIDs = lootItem.BonusListIDs;
         }
 
-        public uint ItemId;
-        public uint Count;
-        public uint ItemIndex;
+        public int ItemId;
+        public int Count;
+        public int ItemIndex;
         public bool FollowRules;
         public bool FFA;
         public bool Blocked;
         public bool Counted;
         public bool UnderThreshold;
         public bool NeedsQuest;
-        public uint RandomSuffix;
+        public int RandomSuffix;
         public ItemRandomEnchantmentId RandomPropertyId;
         public ItemContext Context;
         public List<int> BonusListIDs = new();

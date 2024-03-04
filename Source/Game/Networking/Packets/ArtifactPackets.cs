@@ -102,10 +102,10 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ArtifactGUID);
-            _worldPacket.WriteUInt64(Amount);
+            _worldPacket.WriteInt64(Amount);
         }
 
         public ObjectGuid ArtifactGUID;
-        public ulong Amount;
+        public long Amount;
     }
 }

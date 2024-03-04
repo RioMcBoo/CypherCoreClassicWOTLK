@@ -739,7 +739,7 @@ namespace Game.Entities
             return true;
         }
 
-        public MountCapabilityRecord GetMountCapability(uint mountType)
+        public MountCapabilityRecord GetMountCapability(int mountType)
         {
             if (mountType == 0)
                 return null;
@@ -748,8 +748,8 @@ namespace Game.Entities
             if (capabilities == null)
                 return null;
 
-            uint areaId = GetAreaId();
-            uint ridingSkill = 5000;
+            int areaId = GetAreaId();
+            int ridingSkill = 5000;
             AreaMountFlags mountFlags = 0;
             bool isSubmerged;
             bool isInWater;
@@ -1398,7 +1398,7 @@ namespace Game.Entities
                  UnitState.Root | UnitState.Stunned | UnitState.Distracted) && GetOwnerGUID().IsEmpty();
         }
 
-        public void Mount(uint mount, uint VehicleId = 0, uint creatureEntry = 0)
+        public void Mount(int mount, int VehicleId = 0, int creatureEntry = 0)
         {
             RemoveAurasByType(AuraType.CosmeticMounted);
             if (mount != 0)
@@ -1466,7 +1466,7 @@ namespace Game.Entities
             }
         }
 
-        public bool CreateVehicleKit(uint id, uint creatureEntry, bool loading = false)
+        public bool CreateVehicleKit(int id, int creatureEntry, bool loading = false)
         {
             VehicleRecord vehInfo = CliDB.VehicleStorage.LookupByKey(id);
             if (vehInfo == null)
@@ -1499,7 +1499,7 @@ namespace Game.Entities
             RemoveNpcFlag(NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
         }
 
-        void SendSetVehicleRecId(uint vehicleId)
+        void SendSetVehicleRecId(int vehicleId)
         {
             Player player = ToPlayer();
             if (player != null)
@@ -1529,7 +1529,7 @@ namespace Game.Entities
             force.Origin = origin;
             force.Direction = direction;
             if (transportGuid.IsMOTransport())
-                force.TransportID = (uint)transportGuid.GetCounter();
+                force.TransportID = (int)transportGuid.GetCounter();
 
             force.Magnitude = magnitude;
             force.Type = type;

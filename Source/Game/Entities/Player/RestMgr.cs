@@ -105,14 +105,14 @@ namespace Game.Entities
             }
         }
 
-        public uint GetRestBonusFor(RestTypes restType, uint xp)
+        public int GetRestBonusFor(RestTypes restType, int xp)
         {
-            uint rested_bonus = (uint)GetRestBonus(restType); // xp for each rested bonus
+            int rested_bonus = (int)GetRestBonus(restType); // xp for each rested bonus
 
             if (rested_bonus > xp) // max rested_bonus == xp or (r+x) = 200% xp
                 rested_bonus = xp;
 
-            uint rested_loss = rested_bonus;
+            int rested_loss = rested_bonus;
             if (restType == RestTypes.XP)
                MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
 
@@ -142,7 +142,7 @@ namespace Game.Entities
         {
             _restBonus[(int)restType] = restBonus;
             _player.SetRestState(restType, state);
-            _player.SetRestThreshold(restType, (uint)restBonus);
+            _player.SetRestThreshold(restType, (int)restBonus);
         }
 
         public float CalcExtraPerSec(RestTypes restType, float bubble)

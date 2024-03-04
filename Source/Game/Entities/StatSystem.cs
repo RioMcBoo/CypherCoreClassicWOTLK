@@ -1290,9 +1290,9 @@ namespace Game.Entities
 
         public void UpdateCombatSkills(Unit victim, WeaponAttackType attType, bool defense)
         {
-            uint plevel = GetLevel();                              // if defense than victim == attacker
-            uint greylevel = Formulas.GetGrayLevel(plevel);
-            uint moblevel = victim.GetLevelForTarget(this);
+            int plevel = GetLevel();                              // if defense than victim == attacker
+            int greylevel = Formulas.GetGrayLevel(plevel);
+            int moblevel = victim.GetLevelForTarget(this);
 
             if (moblevel > plevel + 5)
                 moblevel = plevel + 5;
@@ -1332,7 +1332,7 @@ namespace Game.Entities
                 return 0;
 
             // weapon skill or (unarmed for base attack)
-            SkillType skill = item ? item.GetSkill() : SkillType.Unarmed;
+            SkillType skill = item != null ? item.GetSkill() : SkillType.Unarmed;
             return GetBaseSkillValue(skill);
         }
 
@@ -1438,7 +1438,7 @@ namespace Game.Entities
 
             //MathFunctions.AddPct(ref versaDmgMod, GetRatingBonusValue(CombatRating.VersatilityDamageDone) + (float)GetTotalAuraModifier(AuraType.ModVersatility));
 
-            SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetShapeshiftForm());
+            SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey((int)GetShapeshiftForm());
             if (shapeshift != null && shapeshift.CombatRoundTime != 0)
             {
                 weaponMinDamage = weaponMinDamage * shapeshift.CombatRoundTime / 1000.0f / attackPowerMod;
@@ -1530,14 +1530,14 @@ namespace Game.Entities
             }
         }
 
-        public uint GetBaseSpellPowerBonus() { return m_baseSpellPower; }
+        public int GetBaseSpellPowerBonus() { return m_baseSpellPower; }
 
         public override void UpdateAttackPowerAndDamage(bool ranged = false)
         {
             float val2;
             float level = GetLevel();
 
-            var entry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
+            var entry = CliDB.ChrClassesStorage.LookupByKey((int)GetClass());
             UnitMods unitMod = ranged ? UnitMods.AttackPowerRanged : UnitMods.AttackPower;
 
             if (!HasAuraType(AuraType.OverrideAttackPowerBySpPct))
@@ -1547,7 +1547,7 @@ namespace Game.Entities
                     float strengthValue = Math.Max((GetStat(Stats.Strength)) * entry.AttackPowerPerStrength, 0.0f);
                     float agilityValue = Math.Max((GetStat(Stats.Agility)) * entry.AttackPowerPerAgility, 0.0f);
 
-                    var form = CliDB.SpellShapeshiftFormStorage.LookupByKey((uint)GetShapeshiftForm());
+                    var form = CliDB.SpellShapeshiftFormStorage.LookupByKey((int)GetShapeshiftForm());
                     // Directly taken from client, SHAPESHIFT_FLAG_AP_FROM_STRENGTH ?
                     if (form != null && Convert.ToBoolean((uint)form.Flags & 0x20))
                         agilityValue += Math.Max(GetStat(Stats.Agility) * entry.AttackPowerPerStrength, 0.0f);
@@ -1821,7 +1821,7 @@ namespace Game.Entities
             if (chrSpec == null)
                 return;
 
-            foreach (uint masterySpellId in chrSpec.MasterySpellID)
+            foreach (int masterySpellId in chrSpec.MasterySpellID)
             {
                 Aura aura = GetAura(masterySpellId);
                 if (aura != null)
@@ -2151,7 +2151,7 @@ namespace Game.Entities
             if (specialization != null)
                 primaryStatPriority = (byte)specialization.PrimaryStatPriority;
             else
-                primaryStatPriority = CliDB.ChrClassesStorage.LookupByKey(GetClass()).PrimaryStatPriority;
+                primaryStatPriority = CliDB.ChrClassesStorage.LookupByKey((int)GetClass()).PrimaryStatPriority;
 
 
             if (primaryStatPriority >= 4)
@@ -2217,13 +2217,13 @@ namespace Game.Entities
 
         void ApplyManaRegenBonus(int amount, bool apply)
         {
-            _ModifyUInt32(apply, ref m_baseManaRegen, ref amount);
+            _Modify(apply, ref m_baseManaRegen, ref amount);
             UpdateManaRegen();
         }
 
         void ApplyHealthRegenBonus(int amount, bool apply)
         {
-            _ModifyUInt32(apply, ref m_baseHealthRegen, ref amount);
+            _Modify(apply, ref m_baseHealthRegen, ref amount);
         }
 
         void ApplySpellPowerBonus(int amount, bool apply)
@@ -2231,7 +2231,7 @@ namespace Game.Entities
             if (HasAuraType(AuraType.OverrideSpellPowerByApPct))
                 return;
 
-            apply = _ModifyUInt32(apply, ref m_baseSpellPower, ref amount);
+            apply = _Modify(apply, ref m_baseSpellPower, ref amount);
 
             // For speed just update for client
             ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePos), amount, apply);
@@ -2245,7 +2245,7 @@ namespace Game.Entities
             }
         }
 
-        public bool _ModifyUInt32(bool apply, ref uint baseValue, ref int amount)
+        public bool _Modify(bool apply, ref int baseValue, ref int amount)
         {
             // If amount is negative, change sign and value of apply.
             if (amount < 0)
@@ -2254,13 +2254,13 @@ namespace Game.Entities
                 amount = -amount;
             }
             if (apply)
-                baseValue += (uint)amount;
+                baseValue += amount;
             else
             {
                 // Make sure we do not get public uint overflow.
                 if (amount > baseValue)
-                    amount = (int)baseValue;
-                baseValue -= (uint)amount;
+                    amount = baseValue;
+                baseValue -= amount;
             }
             return apply;
         }
@@ -2272,7 +2272,7 @@ namespace Game.Entities
         {
             var powerType = Global.DB2Mgr.GetPowerTypeEntry(power);
             if (powerType != null)
-                if (!powerType.GetFlags().HasFlag(PowerTypeFlags.IsUsedByNPCs))
+                if (!powerType.HasFlag(PowerTypeFlags.IsUsedByNPCs))
                     return 0;
 
             return base.GetCreatePowerValue(power);

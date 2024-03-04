@@ -401,12 +401,12 @@ namespace Game.Entities
         public UpdateField<uint> DynamicFlags = new(0, 9);
         public UpdateField<int> PropertySeed = new(0, 10);
         public UpdateField<int> RandomPropertiesID = new(0, 11);
-        public UpdateField<uint> Durability = new(0, 12);
-        public UpdateField<uint> MaxDurability = new(0, 13);
+        public UpdateField<int> Durability = new(0, 12);
+        public UpdateField<int> MaxDurability = new(0, 13);
         public UpdateField<uint> CreatePlayedTime = new(0, 14);
         public UpdateField<int> Context = new(0, 15);
         public UpdateField<long> CreateTime = new(0, 16);
-        public UpdateField<ulong> ArtifactXP = new(0, 17);
+        public UpdateField<long> ArtifactXP = new(0, 17);
         public UpdateField<byte> ItemAppearanceModID = new(0, 18);
         public UpdateField<ItemModList> Modifiers = new(0, 19);
         public UpdateField<uint> DynamicFlags2 = new(0, 20);
@@ -442,15 +442,15 @@ namespace Game.Entities
             data.WriteInt32(RandomPropertiesID);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
-                data.WriteUInt32(Durability);
-                data.WriteUInt32(MaxDurability);
+                data.WriteInt32(Durability);
+                data.WriteInt32(MaxDurability);
             }
             data.WriteUInt32(CreatePlayedTime);
             data.WriteInt32(Context);
             data.WriteInt64(CreateTime);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
-                data.WriteUInt64(ArtifactXP);
+                data.WriteInt64(ArtifactXP);
                 data.WriteUInt8(ItemAppearanceModID);
             }
             data.WriteInt32(ArtifactPowers.Size());
@@ -580,11 +580,11 @@ namespace Game.Entities
                 }
                 if (changesMask[12])
                 {
-                    data.WriteUInt32(Durability);
+                    data.WriteInt32(Durability);
                 }
                 if (changesMask[13])
                 {
-                    data.WriteUInt32(MaxDurability);
+                    data.WriteInt32(MaxDurability);
                 }
                 if (changesMask[14])
                 {
@@ -600,7 +600,7 @@ namespace Game.Entities
                 }
                 if (changesMask[17])
                 {
-                    data.WriteUInt64(ArtifactXP);
+                    data.WriteInt64(ArtifactXP);
                 }
                 if (changesMask[18])
                 {
@@ -879,7 +879,7 @@ namespace Game.Entities
         public UpdateField<byte> PetTalentPoints = new(32, 57);
         public UpdateField<byte> VisFlags = new(32, 58);
         public UpdateField<byte> AnimTier = new(32, 59);
-        public UpdateField<uint> PetNumber = new(32, 60);
+        public UpdateField<int> PetNumber = new(32, 60);
         public UpdateField<uint> PetNameTimestamp = new(32, 61);
         public UpdateField<int> PetExperience = new(32, 62);
         public UpdateField<int> PetNextLevelExperience = new(32, 63);
@@ -1040,7 +1040,7 @@ namespace Game.Entities
             data.WriteUInt8(PetTalentPoints);
             data.WriteUInt8(VisFlags);
             data.WriteUInt8(AnimTier);
-            data.WriteUInt32(PetNumber);
+            data.WriteInt32(PetNumber);
             data.WriteUInt32(PetNameTimestamp);
             data.WriteInt32(PetExperience);
             data.WriteInt32(PetNextLevelExperience);
@@ -1462,7 +1462,7 @@ namespace Game.Entities
                 }
                 if (changesMask[60])
                 {
-                    data.WriteUInt32(PetNumber);
+                    data.WriteInt32(PetNumber);
                 }
                 if (changesMask[61])
                 {
@@ -2725,7 +2725,7 @@ namespace Game.Entities
 
     public class RestInfo : HasChangesMask
     {
-        public UpdateField<uint> Threshold = new(0, 1);
+        public UpdateField<int> Threshold = new(0, 1);
         public UpdateField<byte> StateID = new(0, 2);
         static int changeMaskLength = 3;
 
@@ -2733,7 +2733,7 @@ namespace Game.Entities
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
-            data.WriteUInt32(Threshold);
+            data.WriteInt32(Threshold);
             data.WriteUInt8(StateID);
         }
 
@@ -2750,7 +2750,7 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteUInt32(Threshold);
+                    data.WriteInt32(Threshold);
                 }
                 if (changesMask[2])
                 {
@@ -2772,21 +2772,21 @@ namespace Game.Entities
         public UpdateField<bool> Disqualified = new(0, 1);
         public UpdateField<sbyte> Bracket = new(0, 2);
         public UpdateField<int> PvpRatingID = new(0, 3);
-        public UpdateField<uint> WeeklyPlayed = new(0, 4);
-        public UpdateField<uint> WeeklyWon = new(0, 5);
-        public UpdateField<uint> SeasonPlayed = new(0, 6);
-        public UpdateField<uint> SeasonWon = new(0, 7);
-        public UpdateField<uint> Rating = new(0, 8);
-        public UpdateField<uint> WeeklyBestRating = new(0, 9);
-        public UpdateField<uint> SeasonBestRating = new(0, 10);
-        public UpdateField<uint> PvpTierID = new(0, 11);
-        public UpdateField<uint> WeeklyBestWinPvpTierID = new(0, 12);
+        public UpdateField<int> WeeklyPlayed = new(0, 4);
+        public UpdateField<int> WeeklyWon = new(0, 5);
+        public UpdateField<int> SeasonPlayed = new(0, 6);
+        public UpdateField<int> SeasonWon = new(0, 7);
+        public UpdateField<int> Rating = new(0, 8);
+        public UpdateField<int> WeeklyBestRating = new(0, 9);
+        public UpdateField<int> SeasonBestRating = new(0, 10);
+        public UpdateField<int> PvpTierID = new(0, 11);
+        public UpdateField<int> WeeklyBestWinPvpTierID = new(0, 12);
         public UpdateField<uint> Field_28 = new(0, 13);
         public UpdateField<uint> Field_2C = new(0, 14);
-        public UpdateField<uint> WeeklyRoundsPlayed = new(0, 15);
-        public UpdateField<uint> WeeklyRoundsWon = new(0, 16);
-        public UpdateField<uint> SeasonRoundsPlayed = new(0, 17);
-        public UpdateField<uint> SeasonRoundsWon = new(0, 18);
+        public UpdateField<int> WeeklyRoundsPlayed = new(0, 15);
+        public UpdateField<int> WeeklyRoundsWon = new(0, 16);
+        public UpdateField<int> SeasonRoundsPlayed = new(0, 17);
+        public UpdateField<int> SeasonRoundsWon = new(0, 18);
         static int changeMaskLength = 19;
 
         public PVPInfo() : base(changeMaskLength) { }
@@ -2795,21 +2795,21 @@ namespace Game.Entities
         {
             data.WriteInt8(Bracket);
             data.WriteInt32(PvpRatingID);
-            data.WriteUInt32(WeeklyPlayed);
-            data.WriteUInt32(WeeklyWon);
-            data.WriteUInt32(SeasonPlayed);
-            data.WriteUInt32(SeasonWon);
-            data.WriteUInt32(Rating);
-            data.WriteUInt32(WeeklyBestRating);
-            data.WriteUInt32(SeasonBestRating);
-            data.WriteUInt32(PvpTierID);
-            data.WriteUInt32(WeeklyBestWinPvpTierID);
+            data.WriteInt32(WeeklyPlayed);
+            data.WriteInt32(WeeklyWon);
+            data.WriteInt32(SeasonPlayed);
+            data.WriteInt32(SeasonWon);
+            data.WriteInt32(Rating);
+            data.WriteInt32(WeeklyBestRating);
+            data.WriteInt32(SeasonBestRating);
+            data.WriteInt32(PvpTierID);
+            data.WriteInt32(WeeklyBestWinPvpTierID);
             data.WriteUInt32(Field_28);
             data.WriteUInt32(Field_2C);
-            data.WriteUInt32(WeeklyRoundsPlayed);
-            data.WriteUInt32(WeeklyRoundsWon);
-            data.WriteUInt32(SeasonRoundsPlayed);
-            data.WriteUInt32(SeasonRoundsWon);
+            data.WriteInt32(WeeklyRoundsPlayed);
+            data.WriteInt32(WeeklyRoundsWon);
+            data.WriteInt32(SeasonRoundsPlayed);
+            data.WriteInt32(SeasonRoundsWon);
             data.WriteBit(Disqualified);
             data.FlushBits();
         }
@@ -2842,39 +2842,39 @@ namespace Game.Entities
                 }
                 if (changesMask[4])
                 {
-                    data.WriteUInt32(WeeklyPlayed);
+                    data.WriteInt32(WeeklyPlayed);
                 }
                 if (changesMask[5])
                 {
-                    data.WriteUInt32(WeeklyWon);
+                    data.WriteInt32(WeeklyWon);
                 }
                 if (changesMask[6])
                 {
-                    data.WriteUInt32(SeasonPlayed);
+                    data.WriteInt32(SeasonPlayed);
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt32(SeasonWon);
+                    data.WriteInt32(SeasonWon);
                 }
                 if (changesMask[8])
                 {
-                    data.WriteUInt32(Rating);
+                    data.WriteInt32(Rating);
                 }
                 if (changesMask[9])
                 {
-                    data.WriteUInt32(WeeklyBestRating);
+                    data.WriteInt32(WeeklyBestRating);
                 }
                 if (changesMask[10])
                 {
-                    data.WriteUInt32(SeasonBestRating);
+                    data.WriteInt32(SeasonBestRating);
                 }
                 if (changesMask[11])
                 {
-                    data.WriteUInt32(PvpTierID);
+                    data.WriteInt32(PvpTierID);
                 }
                 if (changesMask[12])
                 {
-                    data.WriteUInt32(WeeklyBestWinPvpTierID);
+                    data.WriteInt32(WeeklyBestWinPvpTierID);
                 }
                 if (changesMask[13])
                 {
@@ -2886,19 +2886,19 @@ namespace Game.Entities
                 }
                 if (changesMask[15])
                 {
-                    data.WriteUInt32(WeeklyRoundsPlayed);
+                    data.WriteInt32(WeeklyRoundsPlayed);
                 }
                 if (changesMask[16])
                 {
-                    data.WriteUInt32(WeeklyRoundsWon);
+                    data.WriteInt32(WeeklyRoundsWon);
                 }
                 if (changesMask[17])
                 {
-                    data.WriteUInt32(SeasonRoundsPlayed);
+                    data.WriteInt32(SeasonRoundsPlayed);
                 }
                 if (changesMask[18])
                 {
-                    data.WriteUInt32(SeasonRoundsWon);
+                    data.WriteInt32(SeasonRoundsWon);
                 }
             }
             data.FlushBits();
@@ -3600,7 +3600,7 @@ namespace Game.Entities
         public UpdateField<ResearchHistory> ResearchHistory = new(102, 116);
         public UpdateField<PerksVendorItem> FrozenPerksVendorItem = new(102, 117);
         public UpdateField<int> TransportServerTime = new(102, 118);
-        public UpdateField<uint> ActiveCombatTraitConfigID = new(102, 119);
+        public UpdateField<int> ActiveCombatTraitConfigID = new(102, 119);
         public UpdateField<byte> GlyphsEnabled = new(102, 120);
         public UpdateField<byte> LfgRoles = new(102, 121);
         public OptionalUpdateField<StableInfo> PetStable = new(102, 122);
@@ -3822,7 +3822,7 @@ namespace Game.Entities
             data.WriteInt32(TaskQuests.Size());
             data.WriteInt32(TransportServerTime);
             data.WriteInt32(TraitConfigs.Size());
-            data.WriteUInt32(ActiveCombatTraitConfigID);            
+            data.WriteInt32(ActiveCombatTraitConfigID);            
             for (int i = 0; i < 6; ++i)
             {
                 data.WriteUInt32(GlyphSlots[i]);
@@ -4690,7 +4690,7 @@ namespace Game.Entities
                 }
                 if (changesMask[119])
                 {
-                    data.WriteUInt32(ActiveCombatTraitConfigID);
+                    data.WriteInt32(ActiveCombatTraitConfigID);
                 }
                 if (changesMask[120])
                 {

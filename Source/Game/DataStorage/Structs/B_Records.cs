@@ -108,16 +108,16 @@ namespace Game.DataStorage
 
     public sealed class BattlemasterListRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public LocalizedString GameType;
         public LocalizedString ShortDescription;
         public LocalizedString LongDescription;
         public sbyte InstanceType;
-        public sbyte MinLevel;
-        public sbyte MaxLevel;
+        public byte MinLevel;
+        public byte MaxLevel;
         public sbyte RatedPlayers;
-        private sbyte _minPlayers;
+        private byte _minPlayers;
         private int _maxPlayers;
         public sbyte GroupsAllowed;
         public sbyte MaxGroupSize;
@@ -125,12 +125,12 @@ namespace Game.DataStorage
         private sbyte _flags;
         public int IconFileDataID;
         public int RequiredPlayerConditionID;
-        public short[] MapID = new short[16];
+        public short[] MapId = new short[16];
 
         #region Properties
         public BattlemasterListFlags Flags => (BattlemasterListFlags)_flags;
-        public sbyte MinPlayers { get => _minPlayers; internal set => _minPlayers = value; }
-        public sbyte MaxPlayers { get => (sbyte)_maxPlayers; internal set => _maxPlayers = value; }
+        public byte MinPlayers { get => _minPlayers; internal set => _minPlayers = value; }
+        public byte MaxPlayers { get => (byte)_maxPlayers; internal set => _maxPlayers = value; }
         #endregion
 
         #region Helpers

@@ -225,7 +225,7 @@ namespace Game.Entities
                     _charmspells[x].SetType(apply ? ActiveStates.Enabled : ActiveStates.Disabled);
         }
 
-        public void SetPetNumber(uint petnumber, bool statwindow)
+        public void SetPetNumber(int petnumber, bool statwindow)
         {
             _petnumber = petnumber;
             if (statwindow)
@@ -246,7 +246,7 @@ namespace Game.Entities
             for (byte i = 0; i < tokens.Length && index < SharedConst.ActionBarIndexEnd; ++i, ++index)
             {
                 ActiveStates type = tokens[i++].ToEnum<ActiveStates>();
-                uint.TryParse(tokens[i], out uint action);
+                int.TryParse(tokens[i], out int action);
 
                 PetActionBar[index].SetActionAndType(action, type);
 
@@ -265,7 +265,7 @@ namespace Game.Entities
         public void BuildActionBar(WorldPacket data)
         {
             for (int i = 0; i < SharedConst.ActionBarIndexMax; ++i)
-                data.WriteUInt32(PetActionBar[i].packedData);
+                data.WriteInt32(PetActionBar[i].packedData);
         }
 
         public void SetSpellAutocast(SpellInfo spellInfo, bool state)
@@ -355,7 +355,7 @@ namespace Game.Entities
             return _isReturning;
         }
 
-        public uint GetPetNumber() { return _petnumber; }
+        public int GetPetNumber() { return _petnumber; }
         public void SetCommandState(CommandStates st) { _CommandState = st; }
         public CommandStates GetCommandState() { return _CommandState; }
         public bool HasCommandState(CommandStates state) { return (_CommandState == state); }
@@ -372,7 +372,7 @@ namespace Game.Entities
         UnitActionBarEntry[] PetActionBar = new UnitActionBarEntry[SharedConst.ActionBarIndexMax];
         UnitActionBarEntry[] _charmspells = new UnitActionBarEntry[4];
         CommandStates _CommandState;
-        uint _petnumber;
+        int _petnumber;
 
         ReactStates _oldReactState;
 
