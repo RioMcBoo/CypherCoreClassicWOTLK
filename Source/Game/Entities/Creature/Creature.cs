@@ -396,7 +396,7 @@ namespace Game.Entities
             InitializeMovementFlags();
 
             LoadCreaturesAddon();
-            LoadCreaturesSparringHealth();
+            LoadCreaturesSparringHealth(true);
             LoadTemplateImmunities();
             GetThreatManager().EvaluateSuppressed();
 
@@ -871,7 +871,7 @@ namespace Game.Entities
             }
 
             LoadCreaturesAddon();
-            LoadCreaturesSparringHealth();
+            LoadCreaturesSparringHealth(true);
 
             //! Need to be called after LoadCreaturesAddon - MOVEMENTFLAG_HOVER is set there
             posZ += GetHoverOffset();
@@ -2587,10 +2587,10 @@ namespace Game.Entities
             return true;
         }
 
-        public void LoadCreaturesSparringHealth()
+        public void LoadCreaturesSparringHealth(bool force = false)
         {
             var templateValues = Global.ObjectMgr.GetCreatureTemplateSparringValues(GetCreatureTemplate().Entry);
-            if (!templateValues.Empty())
+            if (force || !templateValues.Empty())
             {
                 if (templateValues.Contains(_sparringHealthPct)) // only re-randomize sparring value if it was loaded from template (not when set to custom value from script)
                     _sparringHealthPct = templateValues.SelectRandom();
