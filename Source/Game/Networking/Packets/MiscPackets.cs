@@ -925,6 +925,28 @@ namespace Game.Networking.Packets
         public int SoundKitID;
     }    
 
+    class StopSpeakerbotSound : ServerPacket
+    {
+        ObjectGuid SourceObjectGUID;
+
+        public StopSpeakerbotSound(ObjectGuid sourceObjectGUID) : base(ServerOpcodes.StopSpeakerbotSound)
+        {
+            SourceObjectGUID = sourceObjectGUID;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(SourceObjectGUID);
+        }
+    }
+
+    class OpeningCinematic : ClientPacket
+    {
+        public OpeningCinematic(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
     class CompleteCinematic : ClientPacket
     {
         public CompleteCinematic(WorldPacket packet) : base(packet) { }
@@ -1106,13 +1128,6 @@ namespace Game.Networking.Packets
 
         public ObjectGuid UnitGUID;
         public bool PlayHoverAnim;
-    }
-
-    class OpeningCinematic : ClientPacket
-    {
-        public OpeningCinematic(WorldPacket packet) : base(packet) { }
-
-        public override void Read() { }
     }
 
     class TogglePvP : ClientPacket

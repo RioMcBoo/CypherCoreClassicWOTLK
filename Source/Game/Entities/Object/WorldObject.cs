@@ -2956,6 +2956,14 @@ namespace Game.Entities
                 SendMessageToSet(playSpeakerBoxSound, true);
         }
 
+        void StopDistanceSound(Player target = null)
+        {
+            if (target != null)
+                target.SendPacket(new StopSpeakerbotSound(GetGUID()));
+            else
+                SendMessageToSet(new StopSpeakerbotSound(GetGUID()), true);
+        }
+
         public void PlayDirectSound(int soundId, Player target = null, int broadcastTextId = 0)
         {
             PlaySound sound = new(GetGUID(), soundId, broadcastTextId);
