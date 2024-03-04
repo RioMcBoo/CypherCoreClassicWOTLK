@@ -48,15 +48,11 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
+            Global.ScriptMgr.OnConversationUpdate(this, diff);
+
             if (GetDuration() > TimeSpan.FromMilliseconds(diff))
             {
-                _duration -= TimeSpan.FromMilliseconds(diff);
-                DoWithSuppressingObjectUpdates(() =>
-                {
-                    // Only sent in CreateObject
-                    ApplyModUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Progress), diff, true);
-                    m_conversationData.ClearChanged(m_conversationData.Progress);
-                });
+                _duration -= TimeSpan.FromMilliseconds(diff);                
             }
             else
             {
@@ -126,8 +122,8 @@ namespace Game.Entities
                     continue;
 
                 ConversationLine lineField = new();
-                lineField.ConversationLineID = (int)line.Id;
-                lineField.UiCameraID = (int)line.UiCameraID;
+                lineField.ConversationLineID = line.Id;
+                lineField.UiCameraID = line.UiCameraID;
                 lineField.ActorIndex = line.ActorIdx;
                 lineField.Flags = line.Flags;
 
@@ -158,7 +154,7 @@ namespace Game.Entities
             Global.ScriptMgr.OnConversationCreate(this, creator);
         }
 
-        bool Start()
+        public bool Start()
         {
             foreach (ConversationLine line in m_conversationData.Lines.GetValue())
             {
@@ -173,6 +169,7 @@ namespace Game.Entities
             if (!GetMap().AddToMap(this))
                 return false;
 
+            Global.ScriptMgr.OnConversationStart(this);
             return true;
         }
 
@@ -206,7 +203,58 @@ namespace Game.Entities
             return _lastLineEndTimes[(int)locale];
         }
 
-        public uint GetScriptId()
+        public int GetLineDuration(Locale locale, int lineId)
+        {
+            var convoLine = CliDB.ConversationLineStorage.LookupByKey(lineId);
+            if (convoLine == null)
+            {
+                Log.outError(LogFilter.Conversation, $"Conversation::GetLineDuration: Tried to get duration for invalid ConversationLine id {lineId}.");
+                return 0;
+            }
+
+            return 0;
+        }
+
+        public TimeSpan GetLineEndTime(Locale locale, int lineId)
+        {
+            TimeSpan lineStartTime = GetLineStartTime(locale, lineId);
+            if (lineStartTime == TimeSpan.Zero)
+            {
+                Log.outError(LogFilter.Conversation, $"Conversation::GetLineEndTime: Unable to get line start time for locale {locale}, lineid {lineId} (Conversation ID: {GetEntry()}).");
+                return TimeSpan.Zero;
+            }
+            return lineStartTime + TimeSpan.FromMilliseconds(GetLineDuration(locale, lineId));
+        }
+
+        public Locale GetPrivateObjectOwnerLocale()
+        {
+            Locale privateOwnerLocale = Locale.enUS;
+            Player owner = Global.ObjAccessor.GetPlayer(this, GetPrivateObjectOwner());
+            if (owner != null)
+                privateOwnerLocale = owner.GetSession().GetSessionDbLocaleIndex();
+            return privateOwnerLocale;
+        }
+
+        public Unit GetActorUnit(int actorIdx)
+        {
+            if (m_conversationData.Actors.Size() <= actorIdx)
+            {
+                Log.outError(LogFilter.Conversation, $"Conversation::GetActorUnit: Tried to access invalid actor idx {actorIdx} (Conversation ID: {GetEntry()}).");
+                return null;
+            }
+            return Global.ObjAccessor.GetUnit(this, m_conversationData.Actors[actorIdx].ActorGUID);
+        }
+
+        public Creature GetActorCreature(int actorIdx)
+        {
+            Unit actor = GetActorUnit(actorIdx);
+            if (actor == null)
+                return null;
+
+            return actor.ToCreature();
+        }
+
+        public int GetScriptId()
         {
             return Global.ConversationDataStorage.GetConversationTemplate(GetEntry()).ScriptId;
         }
@@ -278,7 +326,7 @@ namespace Game.Entities
 
         public ObjectGuid GetCreatorGuid() { return _creatorGuid; }
         public override ObjectGuid GetOwnerGUID() { return GetCreatorGuid(); }
-        public override uint GetFaction() { return 0; }
+        public override int GetFaction() { return 0; }
 
         public override float GetStationaryX() { return _stationaryPosition.GetPositionX(); }
         public override float GetStationaryY() { return _stationaryPosition.GetPositionY(); }
@@ -363,7 +411,7 @@ namespace Game.Entities
                     break;
             }
 
-            if (bestFit)
+            if (bestFit != null)
                 _conversation.AddActor(_actor.Id, _actor.Index, bestFit.GetGUID());
         }
 

@@ -15,7 +15,7 @@ namespace Game
         void HandleInspect(Inspect inspect)
         {
             Player player = Global.ObjAccessor.GetPlayer(_player, inspect.Target);
-            if (!player)
+            if (player == null)
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleInspectOpcode: Target {0} not found.", inspect.Target.ToString());
                 return;
@@ -38,10 +38,20 @@ namespace Game
                     if (v.Value.state != PlayerSpellState.Removed)
                         inspectResult.Talents.Add((ushort)v.Key);
                 }
+
+                var pvpTalents = player.GetPvpTalentMap(player.GetActiveTalentGroup());
+                for (int i = 0; i < pvpTalents.Length; ++i)
+                    inspectResult.PvpTalents[i] = (ushort)pvpTalents[i];
+
+                inspectResult.TalentTraits.Level = (int)player.GetLevel();
+                inspectResult.TalentTraits.ChrSpecializationID = (int)player.GetPrimarySpecialization();
+                TraitConfig traitConfig = player.GetTraitConfig((int)(uint)player.m_activePlayerData.ActiveCombatTraitConfigID);
+                if (traitConfig != null)
+                    inspectResult.TalentTraits.Config = new TraitConfigPacket(traitConfig);
             }
 
             Guild guild = Global.GuildMgr.GetGuildById(player.GetGuildId());
-            if (guild)
+            if (guild != null)
             {
                 InspectGuildData guildData;
                 guildData.GuildGUID = guild.GetGUID();
@@ -65,7 +75,7 @@ namespace Game
         void HandleQueryInspectAchievements(QueryInspectAchievements inspect)
         {
             Player player = Global.ObjAccessor.GetPlayer(_player, inspect.Guid);
-            if (!player)
+            if (player == null)
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleQueryInspectAchievements: [{0}] inspected unknown Player [{1}]", GetPlayer().GetGUID().ToString(), inspect.Guid.ToString());
                 return;

@@ -8,11 +8,11 @@ namespace Game.DataStorage
 {
     public sealed class HeirloomRecord
     {
-        public string SourceText;
-        public uint Id;
-        public uint ItemID;
+        public LocalizedString SourceText;
+        public int Id;
+        public int ItemID;
         public int LegacyUpgradedItemID;
-        public uint StaticUpgradedItemID;
+        public int StaticUpgradedItemID;
         public sbyte SourceTypeEnum;
         public byte Flags;
         public int LegacyItemID;
@@ -32,7 +32,10 @@ namespace Game.DataStorage
         public byte Flags;
         public uint WorldStateExpressionID;
         public ushort[] Duration = new ushort[SharedConst.MaxHolidayDurations];
-        public uint[] Date = new uint[SharedConst.MaxHolidayDates];                                 // dates in unix time starting at January, 1, 2000
+        /// <summary>
+        /// dates in unix time starting at January, 1, 2000
+        /// </summary>
+        public uint[] Date = new uint[SharedConst.MaxHolidayDates];
         public byte[] CalendarFlags = new byte[SharedConst.MaxHolidayFlags];
         public int[] TextureFileDataID = new int[3];
     }

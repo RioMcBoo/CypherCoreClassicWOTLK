@@ -11,7 +11,7 @@ namespace Game.Mails
 {
     public class MailDraft
     {
-        public MailDraft(uint mailTemplateId, bool need_items = true)
+        public MailDraft(int mailTemplateId, bool need_items = true)
         {
             m_mailTemplateId = mailTemplateId;
             m_mailTemplateItemsNeed = need_items;
@@ -116,14 +116,14 @@ namespace Game.Mails
             uint deliver_delay = needItemDelay ? WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay) : 0;
 
             // will delete item or place to receiver mail list
-            SendMailTo(trans, new MailReceiver(receiver, receiver_guid), new MailSender(MailMessageType.Normal, senderGuid), MailCheckMask.Returned, deliver_delay);
+            SendMailTo(trans, new MailReceiver(receiver, receiver_guid), new MailSender(MailMessageType.Normal, senderGuid), MailCheckFlags.Returned, deliver_delay);
         }
 
-        public void SendMailTo(SQLTransaction trans, Player receiver, MailSender sender, MailCheckMask checkMask = MailCheckMask.None, uint deliver_delay = 0)
+        public void SendMailTo(SQLTransaction trans, Player receiver, MailSender sender, MailCheckFlags checkMask = MailCheckFlags.None, uint deliver_delay = 0)
         {
             SendMailTo(trans, new MailReceiver(receiver), sender, checkMask, deliver_delay);
         }
-        public void SendMailTo(SQLTransaction trans, MailReceiver receiver, MailSender sender, MailCheckMask checkMask = MailCheckMask.None, uint deliver_delay = 0)
+        public void SendMailTo(SQLTransaction trans, MailReceiver receiver, MailSender sender, MailCheckFlags checkMask = MailCheckFlags.None, uint deliver_delay = 0)
         {
             Player pReceiver = receiver.GetPlayer();               // can be NULL
             Player pSender = sender.GetMailMessageType() == MailMessageType.Normal ? Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, sender.GetSenderId())) : null;
@@ -131,7 +131,7 @@ namespace Game.Mails
             if (pReceiver != null)
                 PrepareItems(pReceiver, trans);                            // generate mail template items
 
-            uint mailId = Global.ObjectMgr.GenerateMailID();
+            ulong mailId = Global.ObjectMgr.GenerateMailID();
 
             long deliver_time = GameTime.GetGameTime() + deliver_delay;
 
@@ -216,7 +216,7 @@ namespace Game.Mails
                 DeleteIncludedItems(null);
         }
 
-        uint GetMailTemplateId() { return m_mailTemplateId; }
+        int GetMailTemplateId() { return m_mailTemplateId; }
         string GetSubject() { return m_subject; }
         ulong GetMoney() { return m_money; }
         ulong GetCOD() { return m_COD; }
@@ -233,7 +233,7 @@ namespace Game.Mails
             return this;
         }
 
-        uint m_mailTemplateId;
+        int m_mailTemplateId;
         bool m_mailTemplateItemsNeed;
         string m_subject;
         string m_body;

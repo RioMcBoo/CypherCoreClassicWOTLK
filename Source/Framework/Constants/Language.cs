@@ -142,7 +142,7 @@ namespace Framework.Constants
         GoinfoAddon = 85,
         GoinfoModel = 86,
         UnknownError = 87,
-    TwoFACommandsNotSetup = 88,
+        TwoFACommandsNotSetup = 88,
         TwoFAAlreadySetup = 89,
         TwoFAInvalidToken = 90,
         TwoFASecretSuggestion = 91,
@@ -1271,14 +1271,5 @@ namespace Framework.Constants
         AchivementEarned = 29245,
         CallForHelp = 2541,
         FleeForAssist = 1150
-    }
-
-    public enum LanguageType
-    {
-        BasicLatin = 0x00,
-        ExtendenLatin = 0x01,
-        Cyrillic = 0x02,
-        EastAsia = 0x04,
-        Any = 0xFFFF
     }
 }

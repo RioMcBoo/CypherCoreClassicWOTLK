@@ -15,6 +15,8 @@ using Framework.Realm;
 
 public class RealmManager : Singleton<RealmManager>
 {
+    public static uint HardcodedDevelopmentRealmCategoryId = 1;
+
     RealmManager() { }
 
     public void Initialize(int updateInterval)
@@ -90,27 +92,26 @@ public class RealmManager : Singleton<RealmManager>
             do
             {
                 var realm = new Realm();
-                uint realmId = result.Read<uint>(0);
+                int realmId = result.Read<int>(0);
                 realm.Name = result.Read<string>(1);
-                realm.ExternalAddress = IPAddress.Parse(result.Read<string>(2));
-                realm.LocalAddress = IPAddress.Parse(result.Read<string>(3));
-                realm.LocalSubnetMask = IPAddress.Parse(result.Read<string>(4));
-                realm.Port = result.Read<ushort>(5);
-                RealmType realmType = (RealmType)result.Read<byte>(6);
+                realm.Addresses.Add(IPAddress.Parse(result.Read<string>(2)));
+                realm.Addresses.Add(IPAddress.Parse(result.Read<string>(3)));
+                realm.Port = result.Read<ushort>(4);
+                RealmType realmType = (RealmType)result.Read<byte>(5);
                 if (realmType == RealmType.FFAPVP)
                     realmType = RealmType.PVP;
                 if (realmType >= RealmType.MaxType)
                     realmType = RealmType.Normal;
 
                 realm.Type = (byte)realmType;
-                realm.Flags = (RealmFlags)result.Read<byte>(7);
-                realm.Timezone = result.Read<byte>(8);
-                AccountTypes allowedSecurityLevel = (AccountTypes)result.Read<byte>(9);
+                realm.Flags = (RealmFlags)result.Read<byte>(6);
+                realm.Timezone = result.Read<byte>(7);
+                AccountTypes allowedSecurityLevel = (AccountTypes)result.Read<byte>(8);
                 realm.AllowedSecurityLevel = (allowedSecurityLevel <= AccountTypes.Administrator ? allowedSecurityLevel : AccountTypes.Administrator);
-                realm.PopulationLevel = result.Read<float>(10);
-                realm.Build = result.Read<uint>(11);
-                byte region = result.Read<byte>(12);
-                byte battlegroup = result.Read<byte>(13);
+                realm.PopulationLevel = result.Read<float>(9);
+                realm.Build = result.Read<uint>(10);
+                byte region = result.Read<byte>(11);
+                byte battlegroup = result.Read<byte>(12);
 
                 realm.Id = new RealmId(region, battlegroup, realmId);
 
@@ -121,9 +122,9 @@ public class RealmManager : Singleton<RealmManager>
                     _subRegions.Add(subRegion);
 
                 if (!existingRealms.ContainsKey(realm.Id))
-                    Log.outInfo(LogFilter.Realmlist, "Added realm \"{0}\" at {1}:{2}", realm.Name, realm.ExternalAddress.ToString(), realm.Port);
+                    Log.outInfo(LogFilter.Realmlist, "Added realm \"{0}\" at {1}:{2}", realm.Name, realm.Addresses[0].ToString(), realm.Port);
                 else
-                    Log.outDebug(LogFilter.Realmlist, "Updating realm \"{0}\" at {1}:{2}", realm.Name, realm.ExternalAddress.ToString(), realm.Port);
+                    Log.outDebug(LogFilter.Realmlist, "Updating realm \"{0}\" at {1}:{2}", realm.Name, realm.Addresses[0].ToString(), realm.Port);
 
                 existingRealms.Remove(realm.Id);
             }
@@ -139,7 +140,21 @@ public class RealmManager : Singleton<RealmManager>
         return _realms.LookupByKey(id);
     }
 
-    public RealmBuildInfo GetBuildInfo(uint build)
+    public bool GetRealmNames(RealmId id, out string name, out string normalizedName)
+    {
+        name = null;
+        normalizedName = null;
+
+        Realm realm = GetRealm(id);
+        if (realm == null)
+            return false;
+
+        name = realm.Name;
+        normalizedName = realm.NormalizedName;
+        return true;
+    }
+
+public RealmBuildInfo GetBuildInfo(uint build)
     {
         foreach (var clientBuild in _builds)
             if (clientBuild.Build == build)
@@ -270,7 +285,7 @@ public class RealmManager : Singleton<RealmManager>
             addressFamily.Id = 1;
 
             var address = new Address();
-            address.Ip = realm.GetAddressForClient(clientAddress).Address.ToString();
+            address.Ip = realm.GetAddressForClient(clientAddress).ToString();
             address.Port = realm.Port;
             addressFamily.Addresses.Add(address);
             serverAddresses.Families.Add(addressFamily);

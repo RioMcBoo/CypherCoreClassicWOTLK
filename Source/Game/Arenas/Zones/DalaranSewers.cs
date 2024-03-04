@@ -43,12 +43,12 @@ namespace Game.Arenas
             foreach (var pair in GetPlayers())
             {
                 Player player = _GetPlayer(pair, "BattlegroundDS::StartingEventOpenDoors");
-                if (player)
+                if (player != null)
                     player.RemoveAurasDueToSpell(DalaranSewersSpells.DemonicCircle);
             }
         }
 
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
+        public override void HandleAreaTrigger(Player player, int trigger, bool entered)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -92,9 +92,9 @@ namespace Game.Arenas
 
             result &= AddObject(DalaranSewersObjectTypes.Water1, DalaranSewersGameObjects.Water1, 1291.56f, 790.837f, 7.1f, 3.14238f, 0, 0, 0.694215f, -0.719768f, 120);
             result &= AddObject(DalaranSewersObjectTypes.Water2, DalaranSewersGameObjects.Water2, 1291.56f, 790.837f, 7.1f, 3.14238f, 0, 0, 0.694215f, -0.719768f, 120);
-            result &= AddCreature(DalaranSewersData.NpcWaterSpout, DalaranSewersCreatureTypes.WaterfallKnockback, 1292.587f, 790.2205f, 7.19796f, 3.054326f, TeamId.Neutral, BattlegroundConst.RespawnImmediately);
-            result &= AddCreature(DalaranSewersData.NpcWaterSpout, DalaranSewersCreatureTypes.PipeKnockback1, 1369.977f, 817.2882f, 16.08718f, 3.106686f, TeamId.Neutral, BattlegroundConst.RespawnImmediately);
-            result &= AddCreature(DalaranSewersData.NpcWaterSpout, DalaranSewersCreatureTypes.PipeKnockback2, 1212.833f, 765.3871f, 16.09484f, 0.0f, TeamId.Neutral, BattlegroundConst.RespawnImmediately);
+            result &= AddCreature(DalaranSewersData.NpcWaterSpout, DalaranSewersCreatureTypes.WaterfallKnockback, 1292.587f, 790.2205f, 7.19796f, 3.054326f, TeamId.Neutral, BattlegroundConst.RespawnImmediately) != null;
+            result &= AddCreature(DalaranSewersData.NpcWaterSpout, DalaranSewersCreatureTypes.PipeKnockback1, 1369.977f, 817.2882f, 16.08718f, 3.106686f, TeamId.Neutral, BattlegroundConst.RespawnImmediately) != null;
+            result &= AddCreature(DalaranSewersData.NpcWaterSpout, DalaranSewersCreatureTypes.PipeKnockback2, 1212.833f, 765.3871f, 16.09484f, 0.0f, TeamId.Neutral, BattlegroundConst.RespawnImmediately) != null;
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "DalaranSewersArena: Failed to spawn collision object!");
@@ -135,7 +135,7 @@ namespace Game.Arenas
                     {
                         // Repeat knockback while the waterfall still active
                         Creature waterSpout = GetBGCreature(DalaranSewersCreatureTypes.WaterfallKnockback);
-                        if (waterSpout)
+                        if (waterSpout != null)
                             waterSpout.CastSpell(waterSpout, DalaranSewersSpells.WaterSpout, true);
                         _events.ScheduleEvent(eventId, DalaranSewersData.WaterfallKnockbackTimer);
                     }
@@ -145,7 +145,7 @@ namespace Game.Arenas
                         for (int i = DalaranSewersCreatureTypes.PipeKnockback1; i <= DalaranSewersCreatureTypes.PipeKnockback2; ++i)
                         {
                             Creature waterSpout = GetBGCreature(i);
-                            if (waterSpout)
+                            if (waterSpout != null)
                                 waterSpout.CastSpell(waterSpout, DalaranSewersSpells.Flush, true);
                         }
                     }
@@ -154,17 +154,17 @@ namespace Game.Arenas
             });
         }
 
-        EventMap _events;
+        EventMap _events = new();
     }
 
     struct DalaranSewersEvents
     {
         public const int WaterfallWarning = 1; // Water starting to fall, but no LoS Blocking nor movement blocking
-        public const uint WaterfallOn = 2; // LoS and Movement blocking active
-        public const uint WaterfallOff = 3;
-        public const uint WaterfallKnockback = 4;
+        public const int WaterfallOn = 2; // LoS and Movement blocking active
+        public const int WaterfallOff = 3;
+        public const int WaterfallKnockback = 4;
 
-        public const uint PipeKnockback = 5;
+        public const int PipeKnockback = 5;
     }
 
     struct DalaranSewersObjectTypes
@@ -180,12 +180,12 @@ namespace Game.Arenas
 
     struct DalaranSewersGameObjects
     {
-        public const uint Door1 = 192642;
-        public const uint Door2 = 192643;
-        public const uint Water1 = 194395; // Collision
-        public const uint Water2 = 191877;
-        public const uint Buff1 = 184663;
-        public const uint Buff2 = 184664;
+        public const int Door1 = 192642;
+        public const int Door2 = 192643;
+        public const int Water1 = 194395; // Collision
+        public const int Water2 = 191877;
+        public const int Buff1 = 184663;
+        public const int Buff2 = 184664;
     }
 
     struct DalaranSewersCreatureTypes
@@ -207,17 +207,17 @@ namespace Game.Arenas
 
         public static TimeSpan PipeKnockbackFirstDelay = TimeSpan.FromSeconds(5);
         public static TimeSpan PipeKnockbackDelay = TimeSpan.FromSeconds(3);
-        public const uint PipeKnockbackTotalCount = 2;
+        public const int PipeKnockbackTotalCount = 2;
 
-        public const uint NpcWaterSpout = 28567;
+        public const int NpcWaterSpout = 28567;
     }
 
     struct DalaranSewersSpells
     {
-        public const uint Flush = 57405; // Visual And Target Selector For The Starting Knockback From The Pipe
-        public const uint FlushKnockback = 61698; // Knockback Effect For Previous Spell (Triggered, Not Needed To Be Cast)
-        public const uint WaterSpout = 58873; // Knockback Effect Of The Central Waterfall
+        public const int Flush = 57405; // Visual And Target Selector For The Starting Knockback From The Pipe
+        public const int FlushKnockback = 61698; // Knockback Effect For Previous Spell (Triggered, Not Needed To Be Cast)
+        public const int WaterSpout = 58873; // Knockback Effect Of The Central Waterfall
 
-        public const uint DemonicCircle = 48018;  // Demonic Circle Summon
+        public const int DemonicCircle = 48018;  // Demonic Circle Summon
     }
 }

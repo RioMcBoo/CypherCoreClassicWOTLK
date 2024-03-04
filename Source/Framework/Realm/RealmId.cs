@@ -7,11 +7,11 @@ namespace Framework.Realm
 {
     public struct RealmId : IEquatable<RealmId>
     {   
-        public uint Index { get; set; }
+        public int Index { get; set; }
         public byte Region { get; set; }
         public byte Site { get; set; }
 
-        public RealmId(byte region, byte battlegroup, uint index)
+        public RealmId(byte region, byte battlegroup, int index)
         {
             Region = region;
             Site = battlegroup;
@@ -22,7 +22,7 @@ namespace Framework.Realm
         {
             Region = (byte)((realmAddress >> 24) & 0xFF);
             Site = (byte)((realmAddress >> 16) & 0xFF);
-            Index = realmAddress & 0xFFFF;
+            Index = (int)realmAddress & 0xFFFF;
         }
 
         public uint GetAddress()

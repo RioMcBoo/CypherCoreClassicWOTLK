@@ -17,27 +17,27 @@ namespace Game.DataStorage
 {
     public interface IDB2Storage
     {
-        bool HasRecord(uint id);
+        bool HasRecord(int id);
 
-        void WriteRecord(uint id, Locale locale, ByteBuffer buffer);
+        void WriteRecord(int id, Locale locale, ByteBuffer buffer);
 
-        void EraseRecord(uint id);
+        void EraseRecord(int id);
 
         string GetName();
     }
 
     [Serializable]
-    public class DB6Storage<T> : Dictionary<uint, T>, IDB2Storage where T : new()
+    public class DB6Storage<T> : Dictionary<int, T>, IDB2Storage where T : new()
     {
         WDCHeader _header;
         string _tableName = typeof(T).Name;
 
-        public void LoadData(string fullFileName)
+        public bool LoadData(string fullFileName)
         {
             if (!File.Exists(fullFileName))
             {
                 Log.outError(LogFilter.ServerLoading, $"File {fullFileName} not found.");
-                return;
+                return false;
             }
 
             DBReader reader = new();
@@ -46,14 +46,16 @@ namespace Game.DataStorage
                 if (!reader.Load(stream))
                 {
                     Log.outError(LogFilter.ServerLoading, $"Error loading {fullFileName}.");
-                    return;
+                    return false;
                 }
             }
 
             _header = reader.Header;
 
             foreach (var b in reader.Records)
-                Add((uint)b.Key, b.Value.As<T>());
+                Add(b.Key, b.Value.As<T>());
+
+            return true;
         }
 
         public void LoadHotfixData(BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
@@ -222,7 +224,7 @@ namespace Game.DataStorage
                     }
                 }
 
-                var id = (uint)fields[_header.IdIndex == -1 ? 0 : _header.IdIndex].GetValue(obj);
+                var id = (int)fields[_header.IdIndex == -1 ? 0 : _header.IdIndex].GetValue(obj);
                 base[id] = obj;
             }
             while (result.NextRow());
@@ -240,7 +242,7 @@ namespace Game.DataStorage
             do
             {
                 int index = 0;
-                var obj = this.LookupByKey(result.Read<uint>(index++));
+                var obj = this.LookupByKey(result.Read<int>(index++));
                 if (obj == null)
                     continue;
 
@@ -264,12 +266,12 @@ namespace Game.DataStorage
             return values;
         }
 
-        public bool HasRecord(uint id)
+        public bool HasRecord(int id)
         {
             return ContainsKey(id);
         }
 
-        public void WriteRecord(uint id, Locale locale, ByteBuffer buffer)
+        public void WriteRecord(int id, Locale locale, ByteBuffer buffer)
         {
             T entry = this.LookupByKey(id);
 
@@ -354,7 +356,7 @@ namespace Game.DataStorage
                                 buffer.WriteUInt32(flagArray128[3]);
                                 break;
                             default:
-                                throw new Exception($"Unhandled Custom Type: {type.Name}");
+                                throw new Exception($"Unhandled Custom type: {type.Name}");
                         }
                         break;
                 }
@@ -407,14 +409,14 @@ namespace Game.DataStorage
             }
         }
 
-        public void EraseRecord(uint id)
+        public void EraseRecord(int id)
         {
             Remove(id);
         }
 
         public uint GetTableHash() { return _header.TableHash; }
 
-        public uint GetNumRows() { return Keys.Max() + 1; }
+        public int GetNumRows() { return Keys.Max() + 1; }
 
         public string GetName()
         {

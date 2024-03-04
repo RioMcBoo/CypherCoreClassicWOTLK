@@ -13,21 +13,19 @@ namespace Game.Entities
     {
         UpdateMask _changesMask = new((int)TypeId.Max);
 
-        public UpdateFieldHolder(WorldObject owner) { }
-
-        public BaseUpdateData<T> ModifyValue<T>(BaseUpdateData<T> updateData)
+        public HasChangesMask ModifyValue(HasChangesMask updateData)
         {
             _changesMask.Set(updateData.Bit);
             return updateData;
         }
 
-        public void ClearChangesMask<T>(BaseUpdateData<T> updateData)
+        public void ClearChangesMask(HasChangesMask updateData)
         {
             _changesMask.Reset(updateData.Bit);
             updateData.ClearChangesMask();
         }
 
-        public void ClearChangesMask<T, U>(BaseUpdateData<T> updateData, ref UpdateField<U> updateField) where T : new() where U : new()
+        public void ClearChangesMask<U>(HasChangesMask updateData, ref UpdateField<U> updateField) where U : new()
         {
             _changesMask.Reset(updateData.Bit);
 
@@ -51,6 +49,29 @@ namespace Game.Entities
     {
         void SetValue(T value);
         T GetValue();
+    }
+
+    public class UpdateFieldString : IUpdateField<string>
+    {
+        public string _value;
+        public int BlockBit;
+        public int Bit;
+
+        public UpdateFieldString(int blockBit, int bit)
+        {
+            BlockBit = blockBit;
+            Bit = bit;
+            _value = string.Empty;
+        }
+
+        public static implicit operator string(UpdateFieldString updateField)
+        {
+            return updateField._value;
+        }
+
+        public void SetValue(string value) { _value = value; }
+
+        public string GetValue() { return _value; }
     }
 
     public class UpdateField<T> : IUpdateField<T> where T : new()
@@ -104,7 +125,7 @@ namespace Game.Entities
 
         public bool HasValue() { return _hasValue; }
     }
-    
+
     public class UpdateFieldArray<T> where T : new()
     {
         public T[] _values;
@@ -319,20 +340,20 @@ namespace Game.Entities
         UpdateMask GetUpdateMask();
     }
 
-    public abstract class BaseUpdateData<T> : IHasChangesMask
+    public abstract class HasChangesMask : IHasChangesMask
     {
         public UpdateMask _changesMask;
         public int _blockBit;
         public int Bit;
 
-        public BaseUpdateData(int blockBit, TypeId bit, int changeMask)
+        public HasChangesMask(int blockBit, TypeId bit, int changeMask)
         {
             _blockBit = blockBit;
             Bit = (int)bit;
             _changesMask = new UpdateMask(changeMask);
         }
 
-        public BaseUpdateData(int changeMask)
+        public HasChangesMask(int changeMask)
         {
             _changesMask = new UpdateMask(changeMask);
         }
@@ -366,6 +387,8 @@ namespace Game.Entities
                 ((IHasChangesMask)updateField._value).ClearChangesMask();
         }
 
+        public void ClearChangesMask(UpdateFieldString updateField) { }
+
         public void ClearChangesMask<U>(OptionalUpdateField<U> updateField) where U : new()
         {
             if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)) && updateField.HasValue())
@@ -393,6 +416,18 @@ namespace Game.Entities
         }
 
         public UpdateField<U> ModifyValue<U>(UpdateField<U> updateField) where U : new()
+        {
+            MarkChanged(updateField);
+            return updateField;
+        }
+
+        public OptionalUpdateField<U> ModifyValue<U>(OptionalUpdateField<U> updateField) where U : new()
+        {
+            MarkChanged(updateField);
+            return updateField;
+        }
+
+        public UpdateFieldString ModifyValue(UpdateFieldString updateField)
         {
             MarkChanged(updateField);
             return updateField;
@@ -428,6 +463,18 @@ namespace Game.Entities
         }
 
         public void MarkChanged<U>(UpdateField<U> updateField) where U : new()
+        {
+            _changesMask.Set(updateField.BlockBit);
+            _changesMask.Set(updateField.Bit);
+        }
+
+        public void MarkChanged<U>(OptionalUpdateField<U> updateField) where U : new()
+        {
+            _changesMask.Set(updateField.BlockBit);
+            _changesMask.Set(updateField.Bit);
+        }
+
+        public void MarkChanged(UpdateFieldString updateField)
         {
             _changesMask.Set(updateField.BlockBit);
             _changesMask.Set(updateField.Bit);

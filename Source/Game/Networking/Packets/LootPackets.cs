@@ -83,9 +83,12 @@ namespace Game.Networking.Packets
 
                 Loot.Add(loot);
             }
-        }
 
+            IsSoftInteract = _worldPacket.HasBit();
+        }
+        
         public List<LootRequest> Loot = new();
+        public bool IsSoftInteract;
     }
 
     class MasterLootItem : ClientPacket
@@ -94,7 +97,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint Count = _worldPacket.ReadUInt32();
+            int Count = _worldPacket.ReadInt32();
             Target = _worldPacket.ReadPackedGuid();
 
             for (int i = 0; i < Count; ++i)
@@ -142,7 +145,12 @@ namespace Game.Networking.Packets
     {
         public LootMoney(WorldPacket packet) : base(packet) { }
 
-        public override void Read() { }
+        public override void Read()
+        {
+            IsSoftInteract = _worldPacket.HasBit();
+        }
+        
+        public bool IsSoftInteract;
     }
 
     class LootMoneyNotify : ServerPacket
@@ -259,16 +267,22 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt32(RollTime);
             _worldPacket.WriteUInt8((byte)ValidRolls);
+            foreach (var reason in LootRollIneligibleReason)
+                _worldPacket.WriteUInt32((uint)reason);
+
             _worldPacket.WriteUInt8((byte)Method);
+            _worldPacket.WriteInt32(DungeonEncounterID);
             Item.Write(_worldPacket);
         }
-
+        
         public ObjectGuid LootObj;
         public int MapID;
         public uint RollTime;
         public LootMethod Method;
         public RollMask ValidRolls;
+        public Array<LootRollIneligibilityReason> LootRollIneligibleReason = new Array<LootRollIneligibilityReason>(4);
         public LootItemData Item = new();
+        public int DungeonEncounterID;
     }
 
     class LootRollBroadcast : ServerPacket
@@ -281,17 +295,21 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Player);
             _worldPacket.WriteInt32(Roll);
             _worldPacket.WriteUInt8((byte)RollType);
+            _worldPacket.WriteInt32(DungeonEncounterID);
             Item.Write(_worldPacket);
             _worldPacket.WriteBit(Autopassed);
+            _worldPacket.WriteBit(OffSpec);
             _worldPacket.FlushBits();
         }
-
+        
         public ObjectGuid LootObj;
         public ObjectGuid Player;
         public int Roll;             // Roll value can be negative, it means that it is an "offspec" roll but only during roll selection broadcast (not when sending the result)
         public RollVote RollType;
         public LootItemData Item = new();
         public bool Autopassed;    // Triggers message |HlootHistory:%d|h[Loot]|h: You automatically passed on: %s because you cannot loot that item.
+        public bool OffSpec;
+        public int DungeonEncounterID;
     }
 
     class LootRollWon : ServerPacket
@@ -304,17 +322,19 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Winner);
             _worldPacket.WriteInt32(Roll);
             _worldPacket.WriteUInt8((byte)RollType);
+            _worldPacket.WriteInt32(DungeonEncounterID);
             Item.Write(_worldPacket);
             _worldPacket.WriteBit(MainSpec);
             _worldPacket.FlushBits();
         }
-
+        
         public ObjectGuid LootObj;
         public ObjectGuid Winner;
         public int Roll;
         public RollVote RollType;
         public LootItemData Item = new();
         public bool MainSpec;
+        public int DungeonEncounterID;
     }
 
     class LootAllPassed : ServerPacket
@@ -324,11 +344,13 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(LootObj);
+            _worldPacket.WriteInt32(DungeonEncounterID);
             Item.Write(_worldPacket);
         }
-
+        
         public ObjectGuid LootObj;
         public LootItemData Item = new();
+        public int DungeonEncounterID;
     }
 
     class LootRollsComplete : ServerPacket
@@ -339,10 +361,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(LootObj);
             _worldPacket.WriteUInt8(LootListID);
+            _worldPacket.WriteInt32(DungeonEncounterID);
         }
-
+        
         public ObjectGuid LootObj;
         public byte LootListID;
+        public int DungeonEncounterID;
     }
 
     class MasterLootCandidateList : ServerPacket
@@ -353,7 +377,8 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(LootObj);
             _worldPacket.WriteInt32(Players.Count);
-            Players.ForEach(guid => _worldPacket.WritePackedGuid(guid));
+            foreach (var player in Players)
+                _worldPacket.WritePackedGuid(player);
         }
 
         public List<ObjectGuid> Players = new();
@@ -388,7 +413,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteBits(Type, 2);
-            data.WriteBits(UIType, 3);
+            data.WriteBits((byte)UIType, 3);
             data.WriteBit(CanTradeToTapList);
             data.FlushBits();
             Loot.Write(data); // WorldPackets::Item::ItemInstance

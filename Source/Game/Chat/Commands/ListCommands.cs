@@ -72,7 +72,7 @@ namespace Game.Chat.Commands
                             thisMap = handler.GetSession().GetPlayer().GetMap();
 
                         // If map found, try to find active version of this creature
-                        if (thisMap)
+                        if (thisMap != null)
                         {
                             var creBounds = thisMap.GetCreatureBySpawnIdStore().LookupByKey(guid);
                             foreach (var creature in creBounds)
@@ -82,7 +82,7 @@ namespace Game.Chat.Commands
 
                         if (!liveFound)
                         {
-                            if (handler.GetSession())
+                            if (handler.GetSession() != null)
                                 handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, "", "");
                             else
                                 handler.SendSysMessage(CypherStrings.CreatureListConsole, guid, cInfo.Name, x, y, z, mapId, "", "");
@@ -128,7 +128,7 @@ namespace Game.Chat.Commands
                         ObjectGuid itemGuid = ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(0));
                         ItemPos itemPos = new
                         (
-                            bagSlot: (byte)result.Read<uint>(1),
+                            container: (byte)result.Read<uint>(1),
                             slot: result.Read<byte>(2)
                         );
 
@@ -431,18 +431,18 @@ namespace Game.Chat.Commands
                         if (handler.GetSession() != null)
                             thisMap = handler.GetSession().GetPlayer().GetMap();
 
-                        // If map found, try to find active version of this object
-                        if (thisMap)
-                        {
-                            var goBounds = thisMap.GetGameObjectBySpawnIdStore().LookupByKey(guid);
-                            foreach (var go in goBounds)
-                                handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, go.GetGUID().ToString(), go.IsSpawned() ? "*" : " ");
-                            liveFound = !goBounds.Empty();
-                        }
+                    // If map found, try to find active version of this object
+                    if (thisMap != null)
+                    {
+                        var goBounds = thisMap.GetGameObjectBySpawnIdStore().LookupByKey(guid);
+                        foreach (var go in goBounds)
+                            handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, go.GetGUID().ToString(), go.IsSpawned() ? "*" : " ");
+                        liveFound = !goBounds.Empty();
+                    }
 
                         if (!liveFound)
                         {
-                            if (handler.GetSession())
+                            if (handler.GetSession() != null)
                                 handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, "", "");
                             else
                                 handler.SendSysMessage(CypherStrings.GoListConsole, guid, gInfo.name, x, y, z, mapId, "", "");
@@ -515,10 +515,10 @@ namespace Game.Chat.Commands
         static bool HandleListScenesCommand(CommandHandler handler)
         {
             Player target = handler.GetSelectedPlayer();
-            if (!target)
+            if (target == null)
                 target = handler.GetSession().GetPlayer();
 
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
@@ -602,7 +602,7 @@ namespace Game.Chat.Commands
             static bool ListAurasCommand(CommandHandler handler, uint? spellId, string namePart)
             {
                 Unit unit = handler.GetSelectedUnit();
-                if (!unit)
+                if (unit == null)
                 {
                     handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                     return false;

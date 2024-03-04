@@ -11,9 +11,9 @@ namespace Game.BattleFields
 {
     public class BattleFieldManager : Singleton<BattleFieldManager>
     {
-        static uint[] BattlefieldIdToMapId = { 0, 571, 732 };
-        static uint[] BattlefieldIdToZoneId = { 0, 4197, 5095 }; // imitate World_PVP_Area.db2
-        static uint[] BattlefieldIdToScriptId = { 0, 0, 0 };
+        static int[] BattlefieldIdToMapId = { 0, 571, 732 };
+        static int[] BattlefieldIdToZoneId = { 0, 4197, 5095 }; // imitate World_PVP_Area.db2
+        static int[] BattlefieldIdToScriptId = { 0, 0, 0 };
 
         BattleFieldManager() { }
 
@@ -91,7 +91,7 @@ namespace Game.BattleFields
             Log.outDebug(LogFilter.Battlefield, "Player {0} entered battlefield id {1}", player.GetGUID().ToString(), bf.GetTypeId());
         }
 
-        public void HandlePlayerLeaveZone(Player player, uint zoneId)
+        public void HandlePlayerLeaveZone(Player player, int zoneId)
         {
             var bf = _battlefieldsByZone.LookupByKey((player.GetMap(), zoneId));
             if (bf == null)
@@ -105,12 +105,12 @@ namespace Game.BattleFields
             Log.outDebug(LogFilter.Battlefield, "Player {0} left battlefield id {1}", player.GetGUID().ToString(), bf.GetTypeId());
         }
 
-        public bool IsWorldPvpArea(uint zoneId)
+        public bool IsWorldPvpArea(int zoneId)
         {
             return BattlefieldIdToZoneId.Contains(zoneId);
         }
 
-        public BattleField GetBattlefieldToZoneId(Map map, uint zoneId)
+        public BattleField GetBattlefieldToZoneId(Map map, int zoneId)
         {
             var bf = _battlefieldsByZone.LookupByKey((map, zoneId));
             if (bf == null)
@@ -153,7 +153,7 @@ namespace Game.BattleFields
         MultiMap<Map, BattleField>  _battlefieldsByMap = new();
         // maps the zone ids to an battlefield event
         // used in player event handling
-        Dictionary<(Map map, uint zoneId), BattleField>  _battlefieldsByZone = new();
+        Dictionary<(Map map, int zoneId), BattleField>  _battlefieldsByZone = new();
         // update interval
         uint _updateTimer;
     }

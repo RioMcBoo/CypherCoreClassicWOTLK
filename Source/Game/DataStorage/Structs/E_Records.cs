@@ -1,12 +1,15 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
+using Game.Miscellaneous;
+
 namespace Game.DataStorage
 {
     public sealed class EmotesRecord
     {
         public uint Id;
-        public long RaceMask;
+        private long _raceMask;
         public string EmoteSlashCommand;
         public int AnimId;
         public uint EmoteFlags;
@@ -15,29 +18,39 @@ namespace Game.DataStorage
         public uint EventSoundID;
         public uint SpellVisualKitId;
         public int ClassMask;
+
+        #region Properties
+        public RaceMask RaceMask => (RaceMask)_raceMask;
+        #endregion
     }
 
     public sealed class EmotesTextRecord
     {
-        public uint Id;
+        public int Id;
         public string Name;
         public ushort EmoteId;
     }
 
     public sealed class EmotesTextSoundRecord
     {
-        public uint Id;
-        public byte RaceId;
-        public byte ClassId;
-        public byte SexId;
-        public uint SoundId;
-        public uint EmotesTextId;
+        public int Id;
+        private byte _raceId;
+        private byte _classId;
+        private byte _sexId;
+        public int SoundId;
+        public int EmotesTextId;
+
+        #region Properties
+        public Race RaceId => (Race)_raceId;
+        public Class ClassId => (Class)_classId;
+        public Gender SexId => (Gender)_sexId;
+        #endregion
     }
 
     public sealed class ExpectedStatRecord
     {
-        public uint Id;
-        public int ExpansionID;
+        public int Id;
+        private int _expansionID;
         public float CreatureHealth;
         public float PlayerHealth;
         public float CreatureAutoAttackDps;
@@ -47,7 +60,11 @@ namespace Game.DataStorage
         public float PlayerSecondaryStat;
         public float ArmorConstant;
         public float CreatureSpellDamage;
-        public uint Lvl;
+        public int Lvl;
+
+        #region Properties
+        public Expansion ExpansionID => (Expansion)_expansionID;
+        #endregion
     }
 
     public sealed class ExpectedStatModRecord

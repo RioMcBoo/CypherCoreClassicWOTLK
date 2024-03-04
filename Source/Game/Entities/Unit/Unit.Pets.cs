@@ -83,13 +83,13 @@ namespace Game.Entities
 
         public void SetMinion(Minion minion, bool apply)
         {
-            Log.outDebug(LogFilter.Unit, "SetMinion {0} for {1}, apply {2}", minion.GetEntry(), GetEntry(), apply);
+            Log.outDebug(LogFilter.Unit, $"SetMinion {minion.GetEntry()} for {GetEntry()}, apply {apply}");
 
             if (apply)
             {
                 if (!minion.GetOwnerGUID().IsEmpty())
                 {
-                    Log.outFatal(LogFilter.Unit, "SetMinion: Minion {0} is not the minion of owner {1}", minion.GetEntry(), GetEntry());
+                    Log.outFatal(LogFilter.Unit, $"SetMinion: Minion {minion.GetEntry()} is not the minion of owner {GetEntry()}");
                     return;
                 }
 
@@ -114,13 +114,12 @@ namespace Game.Entities
                 if (minion.IsGuardianPet())
                 {
                     Guardian oldPet = GetGuardianPet();
-                    if (oldPet)
+                    if (oldPet != null)
                     {
                         if (oldPet != minion && (oldPet.IsPet() || minion.IsPet() || oldPet.GetEntry() != minion.GetEntry()))
                         {
                             // remove existing minion pet
-                            Pet oldPetAsPet = oldPet.ToPet();
-                            if (oldPetAsPet != null)
+                            if (oldPet.ToPet() is Pet oldPetAsPet)
                                 oldPetAsPet.Remove(PetSaveMode.NotInSlot);
                             else
                                 oldPet.UnSummon();
@@ -141,7 +140,26 @@ namespace Game.Entities
 
                 var properties = minion.m_Properties;
                 if (properties != null && properties.Title == SummonTitle.Companion)
+                { 
                     SetCritterGUID(minion.GetGUID());
+                    if (ToPlayer() is Player thisPlayer)
+                    {
+                        if (properties.HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
+                        {
+                            var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
+                            if (pet != null)
+                            {
+                                minion.SetBattlePetCompanionGUID(thisPlayer.GetSummonedBattlePetGUID());
+                                minion.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
+                                minion.SetWildBattlePetLevel(pet.PacketInfo.Level);
+
+                                uint display = pet.PacketInfo.DisplayID;
+                                if (display != 0)
+                                    minion.SetDisplayId(display, true);
+                            }
+                        }
+                    }
+                }
 
                 // PvP, FFAPvP
                 minion.ReplaceAllPvpFlags(GetPvpFlags());
@@ -160,7 +178,7 @@ namespace Game.Entities
             {
                 if (minion.GetOwnerGUID() != GetGUID())
                 {
-                    Log.outFatal(LogFilter.Unit, "SetMinion: Minion {0} is not the minion of owner {1}", minion.GetEntry(), GetEntry());
+                    Log.outFatal(LogFilter.Unit, $"SetMinion: Minion {minion.GetEntry()} is not the minion of owner {GetEntry()}");
                     return;
                 }
 
@@ -198,7 +216,7 @@ namespace Game.Entities
                 if (spellInfo != null && spellInfo.IsCooldownStartedOnEvent())
                     GetSpellHistory().SendCooldownEvent(spellInfo);
 
-                if (GetMinionGUID() == minion.GetGUID())
+                //if (GetMinionGUID() == minion.GetGUID())
                 {
                     SetMinionGUID(ObjectGuid.Empty);
                     // Check if there is another minion
@@ -231,13 +249,12 @@ namespace Game.Entities
                     }
                 }
             }
-
             UpdatePetCombatState();
         }
 
         public bool SetCharmedBy(Unit charmer, CharmType type, AuraApplication aurApp = null)
         {
-            if (!charmer)
+            if (charmer == null)
                 return false;
 
             // dismount players when charmed
@@ -248,7 +265,7 @@ namespace Game.Entities
                 charmer.RemoveAurasByType(AuraType.Mounted);
 
             Cypher.Assert(type != CharmType.Possess || charmer.IsTypeId(TypeId.Player));
-            Cypher.Assert((type == CharmType.Vehicle) == (GetVehicleKit() && GetVehicleKit().IsControllableVehicle()));
+            Cypher.Assert((type == CharmType.Vehicle) == (GetVehicleKit() != null && GetVehicleKit().IsControllableVehicle()));
 
             Log.outDebug(LogFilter.Unit, "SetCharmedBy: charmer {0} (GUID {1}), charmed {2} (GUID {3}), Type {4}.", charmer.GetEntry(), charmer.GetGUID().ToString(), GetEntry(), GetGUID().ToString(), type);
 
@@ -277,7 +294,7 @@ namespace Game.Entities
             Player playerCharmer = charmer.ToPlayer();
 
             // Charmer stop charming
-            if (playerCharmer)
+            if (playerCharmer != null)
             {
                 playerCharmer.StopCastingCharm();
                 playerCharmer.StopCastingBindSight();
@@ -320,7 +337,7 @@ namespace Game.Entities
             charmer.SetCharm(this, true);
 
             Player player = ToPlayer();
-            if (player)
+            if (player != null)
             {
                 if (player.IsAFK())
                     player.ToggleAFK();
@@ -349,7 +366,7 @@ namespace Game.Entities
                     GetCharmInfo().InitCharmCreateSpells();
             }
 
-            if (playerCharmer)
+            if (playerCharmer != null)
             {
                 switch (type)
                 {
@@ -413,12 +430,12 @@ namespace Game.Entities
             if (!IsCharmed())
                 return;
 
-            if (charmer)
+            if (charmer != null)
                 Cypher.Assert(charmer == GetCharmer());
             else
                 charmer = GetCharmer();
 
-            Cypher.Assert(charmer);
+            Cypher.Assert(charmer != null);
 
             CharmType type;
             if (HasUnitState(UnitState.Possessed))
@@ -453,7 +470,7 @@ namespace Game.Entities
             m_combatManager.RevalidateCombat();
 
             Player playerCharmer = charmer.ToPlayer();
-            if (playerCharmer)
+            if (playerCharmer != null)
             {
                 switch (type)
                 {
@@ -492,7 +509,7 @@ namespace Game.Entities
             if (player != null)
                 player.SetClientControl(this, true);
 
-            if (playerCharmer && this != charmer.GetFirstControlled())
+            if (playerCharmer != null && this != charmer.GetFirstControlled())
                 playerCharmer.SendRemoveControlBar();
 
             // a guardian should always have charminfo
@@ -587,7 +604,7 @@ namespace Game.Entities
                     charm.SetUnitFlag(UnitFlags.PlayerControlled);
                     charm.ToPlayer().UpdatePvPState();
                 }
-                else if (player)
+                else if (player != null)
                 {
                     charm.m_ControlledByPlayer = true;
                     charm.SetUnitFlag(UnitFlags.PlayerControlled);
@@ -617,7 +634,7 @@ namespace Game.Entities
         {
             // Sequence: charmed, pet, other guardians
             Unit unit = GetCharmed();
-            if (!unit)
+            if (unit == null)
             {
                 ObjectGuid guid = GetMinionGUID();
                 if (!guid.IsEmpty())
@@ -665,7 +682,7 @@ namespace Game.Entities
         public void SendPetActionFeedback(PetActionFeedback msg, uint spellId)
         {
             Unit owner = GetOwner();
-            if (!owner || !owner.IsTypeId(TypeId.Player))
+            if (owner == null || !owner.IsTypeId(TypeId.Player))
                 return;
 
             PetActionFeedbackPacket petActionFeedback = new();
@@ -677,7 +694,7 @@ namespace Game.Entities
         public void SendPetTalk(PetTalk pettalk)
         {
             Unit owner = GetOwner();
-            if (!owner || !owner.IsTypeId(TypeId.Player))
+            if (owner == null || !owner.IsTypeId(TypeId.Player))
                 return;
 
             PetActionSound petActionSound = new();
@@ -689,7 +706,7 @@ namespace Game.Entities
         public void SendPetAIReaction(ObjectGuid guid)
         {
             Unit owner = GetOwner();
-            if (!owner || !owner.IsTypeId(TypeId.Player))
+            if (owner == null || !owner.IsTypeId(TypeId.Player))
                 return;
 
             AIReaction packet = new();
@@ -750,10 +767,8 @@ namespace Game.Entities
 
             pet.SetCreatorGUID(GetGUID());
             pet.SetFaction(GetFaction());
-            pet.SetCreatedBySpell(spell_id);
-
-            if (IsTypeId(TypeId.Player))
-                pet.SetUnitFlag(UnitFlags.PlayerControlled);
+            pet.SetCreatedBySpell(spell_id);            
+            pet.SetUnitFlag(UnitFlags.PlayerControlled);
 
             if (!pet.InitStatsForLevel(level))
             {
@@ -772,6 +787,7 @@ namespace Game.Entities
 
             PetStable.PetInfo petInfo = new();
             pet.FillPetInfo(petInfo);
+            player.AddPetToUpdateFields(petInfo, (PetSaveMode)petStable.GetCurrentActivePetIndex(), PetStableFlags.Active);
             petStable.ActivePets[freeActiveSlot] = petInfo;
             return true;
         }

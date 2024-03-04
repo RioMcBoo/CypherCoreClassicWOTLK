@@ -9,6 +9,8 @@ namespace Game.Networking.Packets
 {
     class TransmogrifyItems : ClientPacket
     {
+        public static int MAX_TRANSMOGRIFY_ITEMS = 13;
+
         public TransmogrifyItems(WorldPacket packet) : base(packet) { }
 
         public override void Read()
@@ -27,7 +29,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Npc;
-        public Array<TransmogrifyItem> Items = new(13);
+        public Array<TransmogrifyItem> Items = new(MAX_TRANSMOGRIFY_ITEMS);
         public bool CurrentSpecOnly;
     }
 
@@ -45,7 +47,7 @@ namespace Game.Networking.Packets
             foreach (uint itemModifiedAppearanceId in FavoriteAppearances)
                 _worldPacket.WriteUInt32(itemModifiedAppearanceId);
 
-            foreach (var newAppearance in NewAppearances)
+            foreach (uint newAppearance in NewAppearances)
                 _worldPacket.WriteUInt32(newAppearance);
         }
 
@@ -53,21 +55,6 @@ namespace Game.Networking.Packets
         public bool IsSetFavorite;
         public List<uint> FavoriteAppearances = new();
         public List<uint> NewAppearances = new();
-    }
-
-    class TransmogrifyNPC : ServerPacket
-    {
-        public TransmogrifyNPC(ObjectGuid guid) : base(ServerOpcodes.TransmogrifyNpc, ConnectionType.Instance)
-        {
-            Guid = guid;
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(Guid);
-        }
-
-        ObjectGuid Guid;
     }
 
     struct TransmogrifyItem

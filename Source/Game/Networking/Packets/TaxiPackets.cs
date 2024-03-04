@@ -25,12 +25,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket .WritePackedGuid( Unit);
-            _worldPacket.WriteBits(Status, 2);
+            _worldPacket.WritePackedGuid(Unit);
+            _worldPacket.WriteBits((byte)Status, 2);
             _worldPacket.FlushBits();
         }
 
-        public TaxiNodeStatus Status; // replace with TaxiStatus enum
+        public TaxiNodeStatus Status;     
         public ObjectGuid Unit;
     }
 
@@ -43,8 +43,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(WindowInfo.HasValue);
             _worldPacket.FlushBits();
 
-            _worldPacket.WriteInt32(CanLandNodes.Length);
-            _worldPacket.WriteInt32(CanUseNodes.Length);
+            _worldPacket.WriteInt32(CanLandNodes.Length / 8);  // client reads this in uint64 blocks, size is ensured to be divisible by 8 in TaxiMask constructor
+            _worldPacket.WriteInt32(CanUseNodes.Length / 8);  // client reads this in uint64 blocks, size is ensured to be divisible by 8 in TaxiMask constructor
 
             if (WindowInfo.HasValue)
             {
@@ -119,7 +119,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Reply, 4);
+            _worldPacket.WriteBits((byte)Reply, 4);
             _worldPacket.FlushBits();
         }
 

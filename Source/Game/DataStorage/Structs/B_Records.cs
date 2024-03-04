@@ -2,7 +2,9 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.Entities;
 using System;
+using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
@@ -22,21 +24,39 @@ namespace Game.DataStorage
 
     public sealed class BarberShopStyleRecord
     {        
-        public string DisplayName;
-        public string Description;
+        public LocalizedString DisplayName;
+        public LocalizedString Description;
         public uint Id;
-        public byte Type;                                                     // value 0 . hair, value 2 . facialhair
+        /// <summary>
+        /// value 0 . hair, value 2 . facialhair
+        /// </summary>
+        public byte Type;
         public float CostModifier;
         public byte Race;
         public byte Sex;
-        public byte Data;                                                     // real ID to hair/facial hair
+        /// <summary>
+        /// real ID to hair/facial hair
+        /// </summary>
+        public byte Data;
+    }
+
+    public sealed class BattlePetAbilityRecord
+    {
+        public uint Id;
+        public LocalizedString Name;
+        public LocalizedString Description;
+        public int IconFileDataId;
+        public sbyte PetTypeEnum;
+        public uint Cooldown;
+        public ushort BattlePetVisualID;
+        public byte Flags;
     }
 
     public sealed class BattlePetBreedQualityRecord
     {
         public uint Id;
         public float StateMultiplier;
-        public sbyte QualityEnum;
+        public byte QualityEnum;
     }
 
     public sealed class BattlePetBreedStateRecord
@@ -44,32 +64,46 @@ namespace Game.DataStorage
         public uint Id;
         public byte BattlePetStateID;
         public ushort Value;
-        public int BattlePetBreedID;
+        public uint BattlePetBreedID;
     }
 
     public sealed class BattlePetSpeciesRecord
     {
-        public string Description;
-        public string SourceText;
+        public LocalizedString Description;
+        public LocalizedString SourceText;
         public uint Id;
-        public uint CreatureID;
-        public uint SummonSpellID;
+        public int CreatureID;
+        public int SummonSpellID;
         public int IconFileDataID;
         public byte PetTypeEnum;
-        public ushort Flags;
+        private int _flags;
         public sbyte SourceTypeEnum;
         public int CardUIModelSceneID;
         public int LoadoutUIModelSceneID;
 
-        public BattlePetSpeciesFlags GetFlags() { return (BattlePetSpeciesFlags)Flags; }
-}
+        #region Properties
+        public BattlePetSpeciesFlags Flags => (BattlePetSpeciesFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(BattlePetSpeciesFlags flag)
+        {
+            return _flags.HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(BattlePetSpeciesFlags flag)
+        {
+            return _flags.HasAnyFlag((int)flag);
+        }
+        #endregion
+    }
 
     public sealed class BattlePetSpeciesStateRecord
     {
         public uint Id;
         public byte BattlePetStateID;
         public int Value;
-        public int BattlePetSpeciesID;
+        public uint BattlePetSpeciesID;
     }
 
     public sealed class BattlemasterListRecord
@@ -80,22 +114,42 @@ namespace Game.DataStorage
         public LocalizedString ShortDescription;
         public LocalizedString LongDescription;
         public sbyte InstanceType;
-        public byte MinLevel;
-        public byte MaxLevel;
+        public sbyte MinLevel;
+        public sbyte MaxLevel;
         public sbyte RatedPlayers;
-        public byte MinPlayers;
-        public int MaxPlayers;
+        private sbyte _minPlayers;
+        private int _maxPlayers;
         public sbyte GroupsAllowed;
         public sbyte MaxGroupSize;
-        public ushort HolidayWorldState;
-        public BattlemasterListFlags Flags;
+        public short HolidayWorldState;
+        private sbyte _flags;
         public int IconFileDataID;
         public int RequiredPlayerConditionID;
         public short[] MapID = new short[16];
+
+        #region Properties
+        public BattlemasterListFlags Flags => (BattlemasterListFlags)_flags;
+        public sbyte MinPlayers { get => _minPlayers; internal set => _minPlayers = value; }
+        public sbyte MaxPlayers { get => (sbyte)_maxPlayers; internal set => _maxPlayers = value; }
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(BattlemasterListFlags flag)
+        {
+            return _flags.HasFlag((sbyte)flag);
+        }
+
+        public bool HasAnyFlag(BattlemasterListFlags flag)
+        {
+            return _flags.HasAnyFlag((sbyte)flag);
+        }
+        #endregion
     }
 
     public sealed class BroadcastTextRecord
     {
+        static int MAX_BROADCAST_TEXT_EMOTES = 3;
+
         public LocalizedString Text;
         public LocalizedString Text1;
         public uint Id;
@@ -105,8 +159,8 @@ namespace Game.DataStorage
         public byte Flags;
         public uint ChatBubbleDurationMs;
         public int VoiceOverPriorityID;
-        public uint[] SoundKitID = new uint[2];
-        public ushort[] EmoteID = new ushort[3];
-        public ushort[] EmoteDelay = new ushort[3];
+        public int[] SoundKitID = new int[2];
+        public ushort[] EmoteID = new ushort[MAX_BROADCAST_TEXT_EMOTES];
+        public ushort[] EmoteDelay = new ushort[MAX_BROADCAST_TEXT_EMOTES];
     }
 }

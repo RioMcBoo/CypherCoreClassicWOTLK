@@ -39,11 +39,11 @@ namespace BNetServer.Networking
             os = logonRequest.Platform;
             build = (uint)logonRequest.ApplicationVersion;
 
-            var endpoint = Global.LoginServiceMgr.GetAddressForClient(GetRemoteIpEndPoint().Address);
+            var hostname = Global.LoginServiceMgr.GetHostnameForClient(GetRemoteIpEndPoint());
 
             ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";
-            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/");
+            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{Global.LoginServiceMgr.GetHostnameForClient(GetRemoteIpEndPoint())}:{Global.LoginServiceMgr.GetPort()}/bnetserver/login/");
 
             SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;
@@ -55,7 +55,7 @@ namespace BNetServer.Networking
             if (verifyWebCredentialsRequest.WebCredentials.IsEmpty)
                 return BattlenetRpcErrorCode.Denied;
 
-            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetAccountInfo);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_INFO);
             stmt.AddValue(0, verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
 
             using (var result = DB.Login.Query(stmt))
@@ -78,14 +78,14 @@ namespace BNetServer.Networking
                 {
                     do
                     {
-                        var realmId = new RealmId(characterCountsResult.Read<byte>(3), characterCountsResult.Read<byte>(4), characterCountsResult.Read<uint>(2));
+                        var realmId = new RealmId(characterCountsResult.Read<byte>(3), characterCountsResult.Read<byte>(4), characterCountsResult.Read<int>(2));
                         accountInfo.GameAccounts[characterCountsResult.Read<uint>(0)].CharacterCounts[realmId.GetAddress()] = characterCountsResult.Read<byte>(1);
 
                     } while (characterCountsResult.NextRow());
                 }
             }
 
-            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetLastPlayerCharacters);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_LAST_PLAYER_CHARACTERS);
             stmt.AddValue(0, accountInfo.Id);
 
             using (var lastPlayerCharactersResult = DB.Login.Query(stmt))
@@ -94,7 +94,7 @@ namespace BNetServer.Networking
                 {
                     do
                     {
-                        var realmId = new RealmId(lastPlayerCharactersResult.Read<byte>(1), lastPlayerCharactersResult.Read<byte>(2), lastPlayerCharactersResult.Read<uint>(3));
+                        var realmId = new RealmId(lastPlayerCharactersResult.Read<byte>(1), lastPlayerCharactersResult.Read<byte>(2), lastPlayerCharactersResult.Read<int>(3));
 
                         LastPlayedCharacterInfo lastPlayedCharacter = new();
                         lastPlayedCharacter.RealmId = realmId;

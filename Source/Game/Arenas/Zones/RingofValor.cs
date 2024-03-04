@@ -88,7 +88,7 @@ namespace Game.Arenas
             TogglePillarCollision(true);
         }
 
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
+        public override void HandleAreaTrigger(Player player, int trigger, bool entered)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -160,7 +160,7 @@ namespace Game.Arenas
             for (byte i = RingofValorObjectTypes.Pilar1; i <= RingofValorObjectTypes.PilarCollision4; ++i)
             {
                 GameObject go = GetBGObject(i);
-                if (go)
+                if (go != null)
                 {
                     if (i >= RingofValorObjectTypes.PilarCollision1)
                     {
@@ -171,7 +171,7 @@ namespace Game.Arenas
                     foreach (var guid in GetPlayers().Keys)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(guid);
-                        if (player)
+                        if (player != null)
                             go.SendUpdateToPlayer(player);
                     }
                 }
@@ -219,28 +219,28 @@ namespace Game.Arenas
 
     struct RingofValorGameObjects
     {
-        public const uint Buff1 = 184663;
-        public const uint Buff2 = 184664;
-        public const uint Fire1 = 192704;
-        public const uint Fire2 = 192705;
+        public const int Buff1 = 184663;
+        public const int Buff2 = 184664;
+        public const int Fire1 = 192704;
+        public const int Fire2 = 192705;
 
-        public const uint Firedoor2 = 192387;
-        public const uint Firedoor1 = 192388;
-        public const uint Pulley1 = 192389;
-        public const uint Pulley2 = 192390;
-        public const uint Gear1 = 192393;
-        public const uint Gear2 = 192394;
-        public const uint Elevator1 = 194582;
-        public const uint Elevator2 = 194586;
+        public const int Firedoor2 = 192387;
+        public const int Firedoor1 = 192388;
+        public const int Pulley1 = 192389;
+        public const int Pulley2 = 192390;
+        public const int Gear1 = 192393;
+        public const int Gear2 = 192394;
+        public const int Elevator1 = 194582;
+        public const int Elevator2 = 194586;
 
-        public const uint PilarCollision1 = 194580; // Axe
-        public const uint PilarCollision2 = 194579; // Arena
-        public const uint PilarCollision3 = 194581; // Lightning
-        public const uint PilarCollision4 = 194578; // Ivory
+        public const int PilarCollision1 = 194580; // Axe
+        public const int PilarCollision2 = 194579; // Arena
+        public const int PilarCollision3 = 194581; // Lightning
+        public const int PilarCollision4 = 194578; // Ivory
 
-        public const uint Pilar1 = 194583; // Axe
-        public const uint Pilar2 = 194584; // Arena
-        public const uint Pilar3 = 194585; // Lightning
-        public const uint Pilar4 = 194587;  // Ivory
+        public const int Pilar1 = 194583; // Axe
+        public const int Pilar2 = 194584; // Arena
+        public const int Pilar3 = 194585; // Lightning
+        public const int Pilar4 = 194587;  // Ivory
     }
 }

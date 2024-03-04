@@ -23,7 +23,7 @@ namespace Game.Maps
 {
     public class Map : IDisposable
     {
-        public Map(uint id, long expiry, uint instanceId, Difficulty spawnmode)
+        public Map(int id, long expiry, int instanceId, Difficulty spawnmode)
         {
             i_mapRecord = CliDB.MapStorage.LookupByKey(id);
             i_spawnMode = spawnmode;
@@ -56,7 +56,7 @@ namespace Game.Maps
 
             Global.TransportMgr.CreateTransportsForMap(this);
 
-            Global.MMapMgr.LoadMapInstance(Global.WorldMgr.GetDataPath(), GetId(), i_InstanceId);
+            m_terrain.LoadMMapInstance(GetId(), GetInstanceId());
 
             _worldStateValues = Global.WorldStateMgr.GetInitialWorldStatesForMap(this);
 
@@ -88,7 +88,7 @@ namespace Game.Maps
             Global.OutdoorPvPMgr.DestroyOutdoorPvPForMap(this);
             Global.BattleFieldMgr.DestroyBattlefieldsForMap(this);
 
-            Global.MMapMgr.UnloadMapInstance(GetId(), i_InstanceId);
+            m_terrain.UnloadMMapInstance(GetId(), GetInstanceId());
         }
 
         public void LoadAllCells()
@@ -336,6 +336,9 @@ namespace Game.Maps
 
             player.UpdateObjectVisibility(false);
             PhasingHandler.SendToPlayer(player);
+
+            if (Instanceable())
+                player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EnteringInstance);
 
             if (player.IsAlive())
                 ConvertCorpseToBones(player.GetGUID());
@@ -587,7 +590,7 @@ namespace Game.Maps
 
                 // If player is using far sight or mind vision, visit that object too
                 WorldObject viewPoint = player.GetViewpoint();
-                if (viewPoint)
+                if (viewPoint != null)
                     VisitNearbyCellsOf(viewPoint, grid_object_update, world_object_update);
 
                 // Handle updates for creatures in combat with player and are more than 60 yards away
@@ -651,7 +654,7 @@ namespace Game.Maps
             for (var i = 0; i < _transports.Count; ++i)
             {
                 Transport transport = _transports[i];
-                if (!transport)
+                if (transport == null)
                     continue;
 
                 transport.Update(diff);
@@ -1116,7 +1119,7 @@ namespace Game.Maps
                 }
 
                 creature._moveState = ObjectCellMoveState.None;
-                if (!creature.IsInWorld)
+                if (creature.IsInWorld)
                     continue;
 
                 // do move or do move to respawn or remove creature if previous all fail
@@ -1133,7 +1136,7 @@ namespace Game.Maps
                 {
                     // if creature can't be move in new cell/grid (not loaded) move it to repawn cell/grid
                     // creature coordinates will be updated and notifiers send
-                    if (!CreatureRespawnRelocation(creature, false))
+                    if (CreatureRespawnRelocation(creature, false))
                     {
                         // ... or unload (if respawn grid also not loaded)
                         //This may happen when a player just logs in and a pet moves to a nearby unloaded cell
@@ -1554,12 +1557,12 @@ namespace Game.Maps
             return m_terrain.GetZoneId(phaseShift, GetId(), x, y, z, _dynamicTree);
         }
 
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, Position pos)
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out int zoneid, out int areaid, Position pos)
         {
             m_terrain.GetZoneAndAreaId(phaseShift, GetId(), out zoneid, out areaid, pos.posX, pos.posY, pos.posZ, _dynamicTree);
         }
 
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, float x, float y, float z)
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out int zoneid, out int areaid, float x, float y, float z)
         {
             m_terrain.GetZoneAndAreaId(phaseShift, GetId(), out zoneid, out areaid, x, y, z, _dynamicTree);
         }
@@ -1668,7 +1671,7 @@ namespace Game.Maps
 
             Group group = player.GetGroup();
             if (entry.IsRaid() && (int)entry.Expansion() >= WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
-                if ((!group || !group.IsRaidGroup()) && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
+                if ((group == null || !group.IsRaidGroup()) && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
                     return new TransferAbortParams(TransferAbortReason.NeedGroup);
 
             if (entry.Instanceable())
@@ -1844,7 +1847,7 @@ namespace Game.Maps
                     var range = _creatureBySpawnIdStore.LookupByKey(info.spawnId);
                     foreach (var creature in range)
                     {
-                        if (!creature.IsAlive())
+                        if (creature.IsAlive())
                             continue;
 
                         // escort NPCs are allowed to respawn as long as all other instances are already escorting
@@ -1909,7 +1912,7 @@ namespace Game.Maps
             SaveRespawnInfoDB(info, dbTrans);
         }
 
-        public void RemoveRespawnTime(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null, bool alwaysDeleteFromDB = false)
+        public void RemoveRespawnTime(SpawnObjectType type, long spawnId, SQLTransaction dbTrans = null, bool alwaysDeleteFromDB = false)
         {
             RespawnInfo info = GetRespawnInfo(type, spawnId);
             if (info != null)
@@ -1919,7 +1922,7 @@ namespace Game.Maps
                 DeleteRespawnInfoFromDB(type, spawnId, dbTrans);
         }
 
-        int DespawnAll(SpawnObjectType type, ulong spawnId)
+        int DespawnAll(SpawnObjectType type, long spawnId)
         {
             List<WorldObject> toUnload = new();
             switch (type)
@@ -1976,7 +1979,7 @@ namespace Game.Maps
             return true;
         }
 
-        static void PushRespawnInfoFrom(List<RespawnInfo> data, Dictionary<ulong, RespawnInfo> map)
+        static void PushRespawnInfoFrom(List<RespawnInfo> data, Dictionary<long, RespawnInfo> map)
         {
             foreach (var pair in map)
                 data.Add(pair.Value);
@@ -1990,7 +1993,7 @@ namespace Game.Maps
                 PushRespawnInfoFrom(respawnData, _gameObjectRespawnTimesBySpawnId);
         }
 
-        public RespawnInfo GetRespawnInfo(SpawnObjectType type, ulong spawnId)
+        public RespawnInfo GetRespawnInfo(SpawnObjectType type, long spawnId)
         {
             var map = GetRespawnMapForType(type);
             if (map == null)
@@ -2003,7 +2006,7 @@ namespace Game.Maps
             return respawnInfo;
         }
 
-        Dictionary<ulong, RespawnInfo> GetRespawnMapForType(SpawnObjectType type)
+        Dictionary<long, RespawnInfo> GetRespawnMapForType(SpawnObjectType type)
         {
             switch (type)
             {
@@ -2206,7 +2209,7 @@ namespace Game.Maps
             return true;
         }
 
-        SpawnGroupTemplateData GetSpawnGroupData(uint groupId)
+        SpawnGroupTemplateData GetSpawnGroupData(int groupId)
         {
             SpawnGroupTemplateData data = Global.ObjectMgr.GetSpawnGroupData(groupId);
             if (data != null && (data.flags.HasAnyFlag(SpawnGroupFlags.System) || data.mapId == GetId()))
@@ -2215,7 +2218,7 @@ namespace Game.Maps
             return null;
         }
 
-        public bool SpawnGroupSpawn(uint groupId, bool ignoreRespawn = false, bool force = false, List<WorldObject> spawnedObjects = null)
+        public bool SpawnGroupSpawn(int groupId, bool ignoreRespawn = false, bool force = false, List<WorldObject> spawnedObjects = null)
         {
             var groupData = GetSpawnGroupData(groupId);
             if (groupData == null || groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
@@ -2312,7 +2315,7 @@ namespace Game.Maps
             return SpawnGroupDespawn(groupId, deleteRespawnTimes, out _);
         }
 
-        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes, out int count)
+        public bool SpawnGroupDespawn(int groupId, bool deleteRespawnTimes, out int count)
         {
             count = 0;
             SpawnGroupTemplateData groupData = GetSpawnGroupData(groupId);
@@ -2334,7 +2337,7 @@ namespace Game.Maps
             return true;
         }
 
-        public void SetSpawnGroupActive(uint groupId, bool state)
+        public void SetSpawnGroupActive(int groupId, bool state)
         {
             SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
             if (data == null || data.flags.HasAnyFlag(SpawnGroupFlags.System))
@@ -2350,9 +2353,9 @@ namespace Game.Maps
 
         // Disable the spawn group, which prevents any creatures in the group from respawning until re-enabled
         // This will not affect any already-present creatures in the group
-        public void SetSpawnGroupInactive(uint groupId) { SetSpawnGroupActive(groupId, false); }
+        public void SetSpawnGroupInactive(int groupId) { SetSpawnGroupActive(groupId, false); }
 
-        public bool IsSpawnGroupActive(uint groupId)
+        public bool IsSpawnGroupActive(int groupId)
         {
             SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
             if (data == null)
@@ -2371,7 +2374,7 @@ namespace Game.Maps
         public void UpdateSpawnGroupConditions()
         {
             var spawnGroups = Global.ObjectMgr.GetSpawnGroupsForMap(GetId());
-            foreach (uint spawnGroupId in spawnGroups)
+            foreach (var spawnGroupId in spawnGroups)
             {
                 SpawnGroupTemplateData spawnGroupTemplate = GetSpawnGroupData(spawnGroupId);
 
@@ -2502,7 +2505,7 @@ namespace Game.Maps
                     case TypeId.GameObject:
                         GameObject go = obj.ToGameObject();
                         Transport transport = go.ToTransport();
-                        if (transport)
+                        if (transport != null)
                             RemoveFromMap(transport, true);
                         else
                             RemoveFromMap(go, true);
@@ -2788,8 +2791,8 @@ namespace Game.Maps
                     return;
 
 
-                MultiMap<ulong, uint> phases = new();
-                MultiMap<ulong, ChrCustomizationChoice> customizations = new();
+                MultiMap<long, int> phases = new();
+                MultiMap<long, ChrCustomizationChoice> customizations = new();
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CORPSE_PHASES);
                 stmt.AddValue(0, GetId());
@@ -2824,11 +2827,11 @@ namespace Game.Maps
                     {
                         do
                         {
-                            ulong guid = customizationResult.Read<ulong>(0);
+                            long guid = customizationResult.Read<long>(0);
 
                             ChrCustomizationChoice choice = new();
-                            choice.ChrCustomizationOptionID = customizationResult.Read<uint>(1);
-                            choice.ChrCustomizationChoiceID = customizationResult.Read<uint>(2);
+                            choice.ChrCustomizationOptionID = customizationResult.Read<int>(1);
+                            choice.ChrCustomizationChoiceID = customizationResult.Read<int>(2);
                             customizations.Add(guid, choice);
 
                         } while (customizationResult.NextRow());
@@ -2841,7 +2844,7 @@ namespace Game.Maps
                     ulong guid = result.Read<ulong>(15);
                     if (type >= CorpseType.Max || type == CorpseType.Bones)
                     {
-                        Log.outError(LogFilter.Maps, "Corpse (guid: {0}) have wrong corpse Type ({1}), not loading.", guid, type);
+                        Log.outError(LogFilter.Maps, $"Corpse (guid: {guid}) have wrong corpse Type ({type}), not loading.");
                         continue;
                     }
 
@@ -2881,7 +2884,7 @@ namespace Game.Maps
 
         void RemoveCorpse(Corpse corpse)
         {
-            Cypher.Assert(corpse);
+            Cypher.Assert(corpse != null);
 
             corpse.UpdateObjectVisibilityOnDestroy();
             if (corpse.GetCurrentCell() != null)
@@ -2902,7 +2905,7 @@ namespace Game.Maps
         public Corpse ConvertCorpseToBones(ObjectGuid ownerGuid, bool insignia = false)
         {
             Corpse corpse = GetCorpseByPlayer(ownerGuid);
-            if (!corpse)
+            if (corpse == null)
                 return null;
 
             RemoveCorpse(corpse);
@@ -2983,13 +2986,13 @@ namespace Game.Maps
             }
         }
 
-        public void SendZoneDynamicInfo(uint zoneId, Player player)
+        public void SendZoneDynamicInfo(int zoneId, Player player)
         {
             var zoneInfo = _zoneDynamicInfo.LookupByKey(zoneId);
             if (zoneInfo == null)
                 return;
 
-            uint music = zoneInfo.MusicId;
+            int music = zoneInfo.MusicId;
             if (music != 0)
                 player.SendPacket(new PlayMusic(music));
 
@@ -3005,7 +3008,7 @@ namespace Game.Maps
             }
         }
 
-        public void SendZoneWeather(uint zoneId, Player player)
+        public void SendZoneWeather(int zoneId, Player player)
         {
             if (!player.HasAuraType(AuraType.ForceWeather))
             {
@@ -3033,7 +3036,7 @@ namespace Game.Maps
                 Weather.SendFineWeatherUpdateToPlayer(player);
         }
 
-        public void SetZoneMusic(uint zoneId, uint musicId)
+        public void SetZoneMusic(int zoneId, int musicId)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
@@ -3051,7 +3054,7 @@ namespace Game.Maps
             }
         }
 
-        public Weather GetOrGenerateZoneDefaultWeather(uint zoneId)
+        public Weather GetOrGenerateZoneDefaultWeather(int zoneId)
         {
             WeatherData weatherData = Global.WeatherMgr.GetWeatherData(zoneId);
             if (weatherData == null)
@@ -3071,7 +3074,7 @@ namespace Game.Maps
             return info.DefaultWeather;
         }
 
-        public WeatherState GetZoneWeather(uint zoneId)
+        public WeatherState GetZoneWeather(int zoneId)
         {
             ZoneDynamicInfo zoneDynamicInfo = _zoneDynamicInfo.LookupByKey(zoneId);
             if (zoneDynamicInfo != null)
@@ -3086,7 +3089,7 @@ namespace Game.Maps
             return WeatherState.Fine;
         }
 
-        public void SetZoneWeather(uint zoneId, WeatherState weatherId, float intensity)
+        public void SetZoneWeather(int zoneId, WeatherState weatherId, float intensity)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
@@ -3108,7 +3111,7 @@ namespace Game.Maps
             }
         }
 
-        public void SetZoneOverrideLight(uint zoneId, uint areaLightId, uint overrideLightId, TimeSpan transitionTime)
+        public void SetZoneOverrideLight(int zoneId, int areaLightId, int overrideLightId, TimeSpan transitionTime)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
@@ -3123,7 +3126,7 @@ namespace Game.Maps
                 ZoneDynamicInfo.LightOverride lightOverride = new();
                 lightOverride.AreaLightId = areaLightId;
                 lightOverride.OverrideLightId = overrideLightId;
-                lightOverride.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
+                lightOverride.TransitionMilliseconds = (int)transitionTime.TotalMilliseconds;
                 info.LightOverrides.Add(lightOverride);
             }
 
@@ -3134,7 +3137,7 @@ namespace Game.Maps
                 OverrideLight overrideLight = new();
                 overrideLight.AreaLightID = areaLightId;
                 overrideLight.OverrideLightID = overrideLightId;
-                overrideLight.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
+                overrideLight.TransitionMilliseconds = (int)transitionTime.TotalMilliseconds;
 
                 foreach (var player in players)
                     if (player.GetZoneId() == zoneId)
@@ -3147,7 +3150,7 @@ namespace Game.Maps
             var players = GetPlayers();
             foreach (var player in players)
             {
-                if (player)
+                if (player != null)
                 {
                     if (player.IsInWorld)
                     {
@@ -3215,7 +3218,7 @@ namespace Game.Maps
 
         public TerrainInfo GetTerrain() { return m_terrain; }
 
-        public uint GetInstanceId()
+        public int GetInstanceId()
         {
             return i_InstanceId;
         }
@@ -3232,47 +3235,34 @@ namespace Game.Maps
             return Global.DB2Mgr.GetMapDifficultyData(GetId(), GetDifficultyID());
         }
 
-        public ItemContext GetDifficultyLootItemContext()
-        {
-            MapDifficultyRecord mapDifficulty = GetMapDifficulty();
-            if (mapDifficulty != null && mapDifficulty.ItemContext != 0)
-                return (ItemContext)mapDifficulty.ItemContext;
-
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(GetDifficultyID());
-            if (difficulty != null)
-                return (ItemContext)difficulty.ItemContext;
-
-            return ItemContext.None;
-        }
-
-        public uint GetId()
+        public int GetId()
         {
             return i_mapRecord.Id;
         }
 
         public bool Instanceable()
         {
-            return i_mapRecord != null && i_mapRecord.Instanceable();
+            return i_mapRecord != null && i_mapRecord.Instanceable;
         }
 
         public bool IsDungeon()
         {
-            return i_mapRecord != null && i_mapRecord.IsDungeon();
+            return i_mapRecord != null && i_mapRecord.IsDungeon;
         }
 
         public bool IsNonRaidDungeon()
         {
-            return i_mapRecord != null && i_mapRecord.IsNonRaidDungeon();
+            return i_mapRecord != null && i_mapRecord.IsNonRaidDungeon;
         }
 
         public bool IsRaid()
         {
-            return i_mapRecord != null && i_mapRecord.IsRaid();
+            return i_mapRecord != null && i_mapRecord.IsRaid;
         }
 
         public bool IsHeroic()
         {
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(i_spawnMode);
+            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey((int)i_spawnMode);
             if (difficulty != null)
                 return difficulty.Flags.HasAnyFlag(DifficultyFlags.Heroic);
             return false;
@@ -3286,44 +3276,27 @@ namespace Game.Maps
 
         public bool IsBattleground()
         {
-            return i_mapRecord != null && i_mapRecord.IsBattleground();
+            return i_mapRecord != null && i_mapRecord.IsBattleground;
         }
 
         public bool IsBattleArena()
         {
-            return i_mapRecord != null && i_mapRecord.IsBattleArena();
+            return i_mapRecord != null && i_mapRecord.IsBattleArena;
         }
 
         public bool IsBattlegroundOrArena()
         {
-            return i_mapRecord != null && i_mapRecord.IsBattlegroundOrArena();
+            return i_mapRecord != null && i_mapRecord.IsBattlegroundOrArena;
         }
 
         public bool IsScenario()
         {
-            return i_mapRecord != null && i_mapRecord.IsScenario();
+            return i_mapRecord != null && i_mapRecord.IsScenario;
         }
 
         public bool IsGarrison()
         {
-            return i_mapRecord != null && i_mapRecord.IsGarrison();
-        }
-
-        private bool GetEntrancePos(out uint mapid, out Vector2 pos)
-        {
-            mapid = 0;
-            pos = new Vector2();
-
-            if (i_mapRecord == null)
-                return false;
-
-            if (i_mapRecord.CorpseMapID < 0)
-                return false;
-
-            Vector2 corpse = Global.ObjectMgr.GetMapCorpsePosition(i_mapRecord.Id);
-            mapid = (uint)i_mapRecord.CorpseMapID;
-            pos = corpse;
-            return true;
+            return i_mapRecord != null && i_mapRecord.IsGarrison;
         }
 
         void ResetMarkedCells()
@@ -3531,7 +3504,7 @@ namespace Game.Maps
                 return null;
 
             GameObject go = GetGameObject(guid);
-            return go ? go.ToTransport() : null;
+            return go != null ? go.ToTransport() : null;
         }
 
         public Creature GetCreatureBySpawnId(ulong spawnId)
@@ -3594,7 +3567,7 @@ namespace Game.Maps
             }
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
+        public TempSummon SummonCreature(int entry, Position pos, SummonPropertiesRecord properties = null, TimeSpan duration = default, WorldObject summoner = null, int spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
         {
             var mask = UnitTypeMask.Summon;
             if (properties != null)
@@ -3633,7 +3606,7 @@ namespace Game.Maps
                                 mask = UnitTypeMask.Minion;
                                 break;
                             default:
-                                if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
+                                if (properties.HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
                                     mask = UnitTypeMask.Guardian;
                                 break;
                         }
@@ -3683,12 +3656,12 @@ namespace Game.Maps
             }
 
             // Set the summon to the summoner's phase
-            if (summoner != null && !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
+            if (summoner != null && !(properties != null && properties.HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
                 PhasingHandler.InheritPhaseShift(summon, summoner);
 
             summon.SetCreatedBySpell(spellId);
             summon.SetHomePosition(pos);
-            summon.InitStats(duration);
+            summon.InitStats(summoner, duration);
             summon.SetPrivateObjectOwner(privateObjectOwner);
 
             if (smoothPhasingInfo != null)
@@ -3719,7 +3692,7 @@ namespace Game.Maps
                 return null;
             }
 
-            summon.InitSummon();
+            summon.InitSummon(summoner);
 
             // call MoveInLineOfSight for nearby creatures
             AIRelocationNotifier notifier = new(summon);
@@ -3728,12 +3701,12 @@ namespace Game.Maps
             return summon;
         }
 
-        public ulong GenerateLowGuid(HighGuid high)
+        public long GenerateLowGuid(HighGuid high)
         {
             return GetGuidSequenceGenerator(high).Generate();
         }
 
-        public ulong GetMaxLowGuid(HighGuid high)
+        public long GetMaxLowGuid(HighGuid high)
         {
             return GetGuidSequenceGenerator(high).GetNextAfterMaxUsed();
         }
@@ -3756,11 +3729,6 @@ namespace Game.Maps
             _updateObjects.Remove(obj);
         }
 
-        public static implicit operator bool(Map map)
-        {
-            return map != null;
-        }
-
         public MultiPersonalPhaseTracker GetMultiPersonalPhaseTracker() { return _multiPersonalPhaseTracker; }
 
         public SpawnedPoolData GetPoolData() { return _poolData; }
@@ -3768,12 +3736,12 @@ namespace Game.Maps
         #region Scripts
 
         // Put scripts in the execution queue
-        public void ScriptsStart(ScriptsType scriptsType, uint id, WorldObject source, WorldObject target)
+        public void ScriptsStart(ScriptsType scriptsType, int id, WorldObject source, WorldObject target)
         {
             var scripts = Global.ObjectMgr.GetScriptsMapByType(scriptsType);
 
             // Find the script map
-            MultiMap<uint, ScriptInfo> list = scripts.LookupByKey(id);
+            MultiMap<int, ScriptInfo> list = scripts.LookupByKey(id);
             if (list == null)
                 return;
 
@@ -3851,8 +3819,8 @@ namespace Game.Maps
 
                 if (player == null)
                     Log.outError(LogFilter.Scripts, "{0} neither source nor target object is player (source: TypeId: {1}, Entry: {2}, {3}; target: TypeId: {4}, Entry: {5}, {6}), skipping.",
-                        scriptInfo.GetDebugInfo(), source ? source.GetTypeId() : 0, source ? source.GetEntry() : 0, source ? source.GetGUID().ToString() : "",
-                        target ? target.GetTypeId() : 0, target ? target.GetEntry() : 0, target ? target.GetGUID().ToString() : "");
+                        scriptInfo.GetDebugInfo(), source != null ? source.GetTypeId() : 0, source != null ? source.GetEntry() : 0, source != null ? source.GetGUID().ToString() : "",
+                        target != null ? target.GetTypeId() : 0, target != null ? target.GetEntry() : 0, target != null ? target.GetGUID().ToString() : "");
             }
             return player;
         }
@@ -3883,8 +3851,8 @@ namespace Game.Maps
 
                 if (creature == null)
                     Log.outError(LogFilter.Scripts, "{0} neither source nor target are creatures (source: TypeId: {1}, Entry: {2}, {3}; target: TypeId: {4}, Entry: {5}, {6}), skipping.",
-                        scriptInfo.GetDebugInfo(), source ? source.GetTypeId() : 0, source ? source.GetEntry() : 0, source ? source.GetGUID().ToString() : "",
-                        target ? target.GetTypeId() : 0, target ? target.GetEntry() : 0, target ? target.GetGUID().ToString() : "");
+                        scriptInfo.GetDebugInfo(), source != null ? source.GetTypeId() : 0, source != null ? source.GetEntry() : 0, source != null ? source.GetGUID().ToString() : "",
+                        target != null ? target.GetTypeId() : 0, target != null ? target.GetEntry() : 0, target != null ? target.GetGUID().ToString() : "");
             }
             return creature;
         }
@@ -4134,10 +4102,10 @@ namespace Game.Maps
                         else
                             source = _GetScriptCreatureSourceOrTarget(source, target, step.script);
 
-                        if (source)
+                        if (source != null)
                         {
                             Unit sourceUnit = source.ToUnit();
-                            if (!sourceUnit)
+                            if (sourceUnit == null)
                             {
                                 Log.outError(LogFilter.Scripts, "{0} source object ({1}) is not an unit, skipping.", step.script.GetDebugInfo(), source.GetGUID().ToString());
                                 break;
@@ -4158,8 +4126,8 @@ namespace Game.Maps
                                 case ChatMsg.Whisper:
                                 case ChatMsg.RaidBossWhisper:
                                 {
-                                    Player receiver = target ? target.ToPlayer() : null;
-                                    if (!receiver)
+                                    Player receiver = target != null ? target.ToPlayer() : null;
+                                    if (receiver == null)
                                         Log.outError(LogFilter.Scripts, "{0} attempt to whisper to non-player unit, skipping.", step.script.GetDebugInfo());
                                     else
                                         sourceUnit.Whisper((uint)step.script.Talk.TextID, receiver, step.script.Talk.ChatType == ChatMsg.RaidBossWhisper);
@@ -4175,7 +4143,7 @@ namespace Game.Maps
                     {
                         // Source or target must be Creature.
                         Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-                        if (cSource)
+                        if (cSource != null)
                         {
                             if (step.script.Emote.Flags.HasAnyFlag(eScriptFlags.EmoteUseState))
                                 cSource.SetEmoteState((Emote)step.script.Emote.EmoteID);
@@ -4188,7 +4156,7 @@ namespace Game.Maps
                     {
                         // Source or target must be Creature.
                         Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-                        if (cSource)
+                        if (cSource != null)
                         {
                             Unit unit = cSource.ToUnit();
                             if (step.script.MoveTo.TravelTime != 0)
@@ -4211,7 +4179,7 @@ namespace Game.Maps
                         {
                             // Source or target must be Creature.
                             Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-                            if (cSource)
+                            if (cSource != null)
                                 cSource.NearTeleportTo(step.script.TeleportTo.DestX, step.script.TeleportTo.DestY,
                                     step.script.TeleportTo.DestZ, step.script.TeleportTo.Orientation);
                         }
@@ -4219,7 +4187,7 @@ namespace Game.Maps
                         {
                             // Source or target must be Player.
                             Player player = _GetScriptPlayerSourceOrTarget(source, target, step.script);
-                            if (player)
+                            if (player != null)
                                 player.TeleportTo(step.script.TeleportTo.MapID, step.script.TeleportTo.DestX,
                                     step.script.TeleportTo.DestY, step.script.TeleportTo.DestZ, step.script.TeleportTo.Orientation);
                         }
@@ -4227,12 +4195,12 @@ namespace Game.Maps
                     }
                     case ScriptCommands.QuestExplored:
                     {
-                        if (!source)
+                        if (source == null)
                         {
                             Log.outError(LogFilter.Scripts, "{0} source object is NULL.", step.script.GetDebugInfo());
                             break;
                         }
-                        if (!target)
+                        if (target == null)
                         {
                             Log.outError(LogFilter.Scripts, "{0} target object is NULL.", step.script.GetDebugInfo());
                             break;
@@ -4287,7 +4255,7 @@ namespace Game.Maps
                     {
                         // Source or target must be Player.
                         Player player = _GetScriptPlayerSourceOrTarget(source, target, step.script);
-                        if (player)
+                        if (player != null)
                         {
                             if (step.script.KillCredit.Flags.HasAnyFlag(eScriptFlags.KillcreditRewardGroup))
                                 player.RewardPlayerAndGroupAtEvent(step.script.KillCredit.CreatureEntry, player);
@@ -4306,7 +4274,7 @@ namespace Game.Maps
 
                         // Source or target must be WorldObject.
                         WorldObject pSummoner = _GetScriptWorldObject(source, true, step.script);
-                        if (pSummoner)
+                        if (pSummoner != null)
                         {
                             GameObject pGO = _FindGameObject(pSummoner, step.script.RespawnGameObject.GOGuid);
                             if (pGO == null)
@@ -4340,7 +4308,7 @@ namespace Game.Maps
                     {
                         // Source must be WorldObject.
                         WorldObject pSummoner = _GetScriptWorldObject(source, true, step.script);
-                        if (pSummoner)
+                        if (pSummoner != null)
                         {
                             if (step.script.TempSummonCreature.CreatureEntry == 0)
                                 Log.outError(LogFilter.Scripts, "{0} creature entry (datalong) is not specified.", step.script.GetDebugInfo());
@@ -4366,7 +4334,7 @@ namespace Game.Maps
                     {
                         // Source must be Unit.
                         Unit unit = _GetScriptUnit(source, true, step.script);
-                        if (unit)
+                        if (unit != null)
                         {
                             // Target must be GameObject.
                             if (target == null)
@@ -4383,7 +4351,7 @@ namespace Game.Maps
                                 break;
                             }
                             GameObject pGO = target.ToGameObject();
-                            if (pGO)
+                            if (pGO != null)
                                 pGO.Use(unit);
                         }
                         break;
@@ -4393,7 +4361,7 @@ namespace Game.Maps
                         // Source (datalong2 != 0) or target (datalong2 == 0) must be Unit.
                         bool bReverse = step.script.RemoveAura.Flags.HasAnyFlag(eScriptFlags.RemoveauraReverse);
                         Unit unit = _GetScriptUnit(bReverse ? source : target, bReverse, step.script);
-                        if (unit)
+                        if (unit != null)
                             unit.RemoveAurasDueToSpell(step.script.RemoveAura.SpellID);
                         break;
                     }
@@ -4454,7 +4422,7 @@ namespace Game.Maps
                     case ScriptCommands.PlaySound:
                         // Source must be WorldObject.
                         WorldObject obj = _GetScriptWorldObject(source, true, step.script);
-                        if (obj)
+                        if (obj != null)
                         {
                             // PlaySound.Flags bitmask: 0/1=anyone/target
                             Player player2 = null;
@@ -4477,9 +4445,9 @@ namespace Game.Maps
                     case ScriptCommands.CreateItem:
                         // Target or source must be Player.
                         Player pReceiver = _GetScriptPlayerSourceOrTarget(source, target, step.script);
-                        if (pReceiver)
+                        if (pReceiver != null)
                         {
-                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
+                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
                             if (msg == InventoryResult.Ok)
                             {
                                 Item item = pReceiver.StoreNewItem(dest, step.script.CreateItem.ItemEntry, true, new ItemRandomEnchantmentId());
@@ -4509,7 +4477,7 @@ namespace Game.Maps
                     {
                         // Source must be Unit.
                         Unit unit = _GetScriptUnit(source, true, step.script);
-                        if (unit)
+                        if (unit != null)
                         {
                             if (Global.WaypointMgr.GetPath(step.script.LoadPath.PathID) == null)
                                 Log.outError(LogFilter.Scripts, "{0} source object has an invalid path ({1}), skipping.", step.script.GetDebugInfo(), step.script.LoadPath.PathID);
@@ -4533,7 +4501,7 @@ namespace Game.Maps
 
                         Creature cTarget = null;
                         var creatureBounds = _creatureBySpawnIdStore.LookupByKey(step.script.CallScript.CreatureEntry);
-                        if (!creatureBounds.Empty())
+                        if (creatureBounds.Empty())
                         {
                             // Prefer alive (last respawned) creature
                             var foundCreature = creatureBounds.Find(creature => creature.IsAlive());
@@ -4556,7 +4524,7 @@ namespace Game.Maps
                     {
                         // Source or target must be Creature.
                         Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-                        if (cSource)
+                        if (cSource != null)
                         {
                             if (cSource.IsDead())
                                 Log.outError(LogFilter.Scripts, "{0} creature is already dead (Entry: {1}, GUID: {2})", step.script.GetDebugInfo(), cSource.GetEntry(), cSource.GetGUID().ToString());
@@ -4573,7 +4541,7 @@ namespace Game.Maps
                     {
                         // Source must be Unit.
                         Unit sourceUnit = _GetScriptUnit(source, true, step.script);
-                        if (sourceUnit)
+                        if (sourceUnit != null)
                         {
                             if (step.script.Orientation.Flags.HasAnyFlag(eScriptFlags.OrientationFaceTarget))
                             {
@@ -4592,16 +4560,16 @@ namespace Game.Maps
                     case ScriptCommands.Equip:
                     {
                         // Source must be Creature.
-                        Creature cSource = _GetScriptCreature(source, target, step.script);
-                        if (cSource)
+                        Creature cSource = _GetScriptCreature(source, target != null, step.script);
+                        if (cSource != null)
                             cSource.LoadEquipment((int)step.script.Equip.EquipmentID);
                         break;
                     }
                     case ScriptCommands.Model:
                     {
                         // Source must be Creature.
-                        Creature cSource = _GetScriptCreature(source, target, step.script);
-                        if (cSource)
+                        Creature cSource = _GetScriptCreature(source, target != null, step.script);
+                        if (cSource != null)
                             cSource.SetDisplayId(step.script.Model.ModelID);
                         break;
                     }
@@ -4617,7 +4585,7 @@ namespace Game.Maps
                     {
                         // Source must be Player.
                         Player player = _GetScriptPlayer(source, true, step.script);
-                        if (player)
+                        if (player != null)
                             player.SendMovieStart(step.script.PlayMovie.MovieID);
                         break;
                     }
@@ -4625,7 +4593,7 @@ namespace Game.Maps
                     {
                         // Source must be Creature.
                         Creature cSource = _GetScriptCreature(source, true, step.script);
-                        if (cSource)
+                        if (cSource != null)
                         {
                             if (!cSource.IsAlive())
                                 return;
@@ -4648,7 +4616,7 @@ namespace Game.Maps
                     {
                         // Source must be Creature.
                         Creature cSource = _GetScriptCreature(source, true, step.script);
-                        if (cSource)
+                        if (cSource != null)
                             cSource.PlayOneShotAnimKitId((ushort)step.script.PlayAnimKit.AnimKitID);
                         break;
                     }
@@ -4682,11 +4650,11 @@ namespace Game.Maps
         DynamicMapTree _dynamicTree = new();
 
         SortedSet<RespawnInfo> _respawnTimes = new(new CompareRespawnInfo());
-        Dictionary<ulong, RespawnInfo> _creatureRespawnTimesBySpawnId = new();
-        Dictionary<ulong, RespawnInfo> _gameObjectRespawnTimesBySpawnId = new();
-        List<uint> _toggledSpawnGroupIds = new();
+        Dictionary<long, RespawnInfo> _creatureRespawnTimesBySpawnId = new();
+        Dictionary<long, RespawnInfo> _gameObjectRespawnTimesBySpawnId = new();
+        List<int> _toggledSpawnGroupIds = new();
         uint _respawnCheckTimer;
-        Dictionary<uint, uint> _zonePlayerCountMap = new();
+        Dictionary<int, int> _zonePlayerCountMap = new();
 
         List<Transport> _transports = new();
         Grid[][] i_grids = new Grid[MapConst.MaxGrids][];
@@ -4703,7 +4671,7 @@ namespace Game.Maps
 
         BitSet marked_cells = new(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
         public Dictionary<ulong, CreatureGroup> CreatureGroupHolder = new();
-        internal uint i_InstanceId;
+        internal int i_InstanceId;
         long i_gridExpiry;
         bool i_scriptLock;
 
@@ -4711,14 +4679,14 @@ namespace Game.Maps
         public float m_VisibleDistance;
         internal uint m_unloadTimer;
 
-        Dictionary<uint, ZoneDynamicInfo> _zoneDynamicInfo = new();
+        Dictionary<int, ZoneDynamicInfo> _zoneDynamicInfo = new();
         IntervalTimer _weatherUpdateTimer;
         Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new();
         SpawnedPoolData _poolData;
         Dictionary<ObjectGuid, WorldObject> _objectsStore = new();
-        MultiMap<ulong, Creature> _creatureBySpawnIdStore = new();
-        MultiMap<ulong, GameObject> _gameobjectBySpawnIdStore = new();
-        MultiMap<ulong, AreaTrigger> _areaTriggerBySpawnIdStore = new();
+        MultiMap<long, Creature> _creatureBySpawnIdStore = new();
+        MultiMap<long, GameObject> _gameobjectBySpawnIdStore = new();
+        MultiMap<long, AreaTrigger> _areaTriggerBySpawnIdStore = new();
         MultiMap<uint, Corpse> _corpsesByCell = new();
         Dictionary<ObjectGuid, Corpse> _corpsesByPlayer = new();
         List<Corpse> _corpseBones = new();
@@ -4736,7 +4704,7 @@ namespace Game.Maps
 
     public class InstanceMap : Map
     {
-        public InstanceMap(uint id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
+        public InstanceMap(int id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
         {
             i_instanceLock = instanceLock;
 
@@ -4812,7 +4780,7 @@ namespace Game.Maps
             player.AddInstanceEnterTime(GetInstanceId(), GameTime.GetGameTime());
 
             MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-            if (entries.MapDifficulty.HasResetSchedule() && i_instanceLock != null && i_instanceLock.GetData().CompletedEncountersMask != 0)
+            if (entries.MapDifficulty.HasResetSchedule() && i_instanceLock != null && !i_instanceLock.IsNew())
             {
                 if (!entries.MapDifficulty.IsUsingEncounterLocks())
                 {
@@ -4901,7 +4869,7 @@ namespace Game.Maps
             if (i_data == null)
                 return;
 
-            if (i_instanceLock == null || i_instanceLock.GetInstanceId() == 0)
+            if (i_instanceLock == null || i_instanceLock.IsNew())
             {
                 i_data.Create();
                 return;
@@ -4937,7 +4905,7 @@ namespace Game.Maps
         public InstanceResetResult Reset(InstanceResetMethod method)
         {
             // raids can be reset if no boss was killed
-            if (method != InstanceResetMethod.Expire && i_instanceLock != null && i_instanceLock.GetData().CompletedEncountersMask != 0)
+            if (method != InstanceResetMethod.Expire && i_instanceLock != null && !i_instanceLock.IsNew())
                 return InstanceResetResult.CannotReset;
 
             if (HavePlayers())
@@ -5026,7 +4994,7 @@ namespace Game.Maps
                         playerCompletedEncounters = playerLock.GetData().CompletedEncountersMask | (1u << updateSaveDataEvent.DungeonEncounter.Bit);
                     }
 
-                    bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
+                    bool isNewLock = playerLock == null || playerLock.IsNew() || playerLock.IsExpired();
 
                     InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateBossStateSaveData(oldData, updateSaveDataEvent),
                         instanceCompletedEncounters, updateSaveDataEvent.DungeonEncounter, i_data.GetEntranceLocationForCompletedEncounters(playerCompletedEncounters)));
@@ -5069,7 +5037,7 @@ namespace Game.Maps
                     if (playerLock != null)
                         oldData = playerLock.GetData().Data;
 
-                    bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
+                    bool isNewLock = playerLock == null || playerLock.IsNew() || playerLock.IsExpired();
 
                     InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateAdditionalSaveData(oldData, updateSaveDataEvent),
                         instanceCompletedEncounters, null, null));
@@ -5093,7 +5061,7 @@ namespace Game.Maps
             MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
             InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
 
-            bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
+            bool isNewLock = playerLock == null || playerLock.IsNew() || playerLock.IsExpired();
 
             SQLTransaction trans = new();
 
@@ -5111,7 +5079,7 @@ namespace Game.Maps
             }
         }
 
-        public uint GetMaxPlayers()
+        public int GetMaxPlayers()
         {
             MapDifficultyRecord mapDiff = GetMapDifficulty();
             if (mapDiff != null && mapDiff.MaxPlayers != 0)
@@ -5131,7 +5099,7 @@ namespace Game.Maps
 
         public Team GetTeamInInstance() { return GetTeamIdInInstance() == TeamId.Alliance ? Team.Alliance : Team.Horde; }
 
-        public uint GetScriptId()
+        public int GetScriptId()
         {
             return i_script_id;
         }
@@ -5153,7 +5121,7 @@ namespace Game.Maps
         public InstanceLock GetInstanceLock() { return i_instanceLock; }
 
         InstanceScript i_data;
-        uint i_script_id;
+        int i_script_id;
         InstanceScenario i_scenario;
         InstanceLock i_instanceLock;
         GroupInstanceReference i_owningGroupRef = new();
@@ -5162,7 +5130,7 @@ namespace Game.Maps
 
     public class BattlegroundMap : Map
     {
-        public BattlegroundMap(uint id, uint expiry, uint InstanceId, Difficulty spawnMode)
+        public BattlegroundMap(int id, int expiry, int InstanceId, Difficulty spawnMode)
             : base(id, expiry, InstanceId, spawnMode)
         {
             InitVisibilityDistance();
@@ -5249,7 +5217,7 @@ namespace Game.Maps
 
     public class ZoneDynamicInfo
     {
-        public uint MusicId;
+        public int MusicId;
         public Weather DefaultWeather;
         public WeatherState WeatherId;
         public float Intensity;
@@ -5257,9 +5225,9 @@ namespace Game.Maps
 
         public struct LightOverride
         {
-            public uint AreaLightId;
-            public uint OverrideLightId;
-            public uint TransitionMilliseconds;
+            public int AreaLightId;
+            public int OverrideLightId;
+            public int TransitionMilliseconds;
         }
     }
 
@@ -5281,7 +5249,7 @@ namespace Game.Maps
             }
         }
 
-        public uint AreaId;
+        public int AreaId;
         public float FloorZ;
         public bool outdoors = true;
         public ZLiquidStatus LiquidStatus;

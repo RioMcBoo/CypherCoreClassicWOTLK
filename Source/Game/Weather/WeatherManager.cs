@@ -363,10 +363,10 @@ namespace Game
             }
         }
 
-        public uint GetZone() { return m_zone; }
-        public uint GetScriptId() { return m_weatherChances.ScriptId; }
+        public int GetZone() { return m_zone; }
+        public int GetScriptId() { return m_weatherChances.ScriptId; }
 
-        uint m_zone;
+        int m_zone;
         WeatherType m_type;
         float m_intensity;
         IntervalTimer m_timer = new();
@@ -376,7 +376,7 @@ namespace Game
     public class WeatherData
     {
         public WeatherSeasonChances[] data = new WeatherSeasonChances[4];
-        public uint ScriptId;
+        public int ScriptId;
     }
 
     public struct WeatherSeasonChances

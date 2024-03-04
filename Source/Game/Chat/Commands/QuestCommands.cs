@@ -16,7 +16,7 @@ namespace Game.Chat
         static bool HandleQuestAdd(CommandHandler handler, Quest quest)
         {
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -52,7 +52,7 @@ namespace Game.Chat
         static bool HandleQuestComplete(CommandHandler handler, Quest quest)
         {
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -76,7 +76,7 @@ namespace Game.Chat
         static bool HandleQuestRemove(CommandHandler handler, Quest quest)
         {
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -97,7 +97,7 @@ namespace Game.Chat
                         // we ignore unequippable quest items in this case, its' still be equipped
                         player.TakeQuestSourceItem(logQuest, false);
 
-                        if (quest.HasFlag(QuestFlags.Pvp))
+                        if (quest.HasAnyFlag(QuestFlags.Pvp))
                         {
                             player.pvpInfo.IsHostile = player.pvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
                             player.UpdatePvPState();
@@ -125,7 +125,7 @@ namespace Game.Chat
         static bool HandleQuestReward(CommandHandler handler, Quest quest)
         {
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -149,7 +149,7 @@ namespace Game.Chat
             static bool HandleQuestObjectiveComplete(CommandHandler handler, uint objectiveId)
             {
                 Player player = handler.GetSelectedPlayerOrSelf();
-                if (!player)
+                if (player == null)
                 {
                     handler.SendSysMessage(CypherStrings.NoCharSelected);
                     return false;
@@ -179,7 +179,7 @@ namespace Game.Chat
 
                     uint curItemCount = player.GetItemCount(itemTemplate.GetId(), true);   
 
-                    var msg = player.CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, itemTemplate, (uint)(obj.Amount - curItemCount), out _);
+                    var msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemTemplate, (uint)(obj.Amount - curItemCount), out _);
                     if (msg == InventoryResult.Ok)
                     {
                         Item item = player.StoreNewItem(dest, (uint)obj.ObjectID, true, new ItemRandomEnchantmentId());

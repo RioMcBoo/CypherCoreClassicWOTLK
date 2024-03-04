@@ -60,12 +60,9 @@ namespace Game.Entities
             for (byte i = 0; i < (int)WeaponAttackType.Max; ++i)
                 m_weaponDamage[i] = new float[] { 1.0f, 2.0f };
 
-            if (IsTypeId(TypeId.Player))
-            {
-                ModMeleeHitChance = 7.5f;
-                ModRangedHitChance = 7.5f;
-                ModSpellHitChance = 15.0f;
-            }
+            ModMeleeHitChance = 0.0f;
+            ModRangedHitChance = 0.0f;
+            ModSpellHitChance = 0.0f;
             BaseSpellCritChance = 5;
 
             for (byte i = 0; i < (int)UnitMoveType.Max; ++i)
@@ -229,7 +226,7 @@ namespace Game.Entities
             {
                 if (pair.Value != null && pair.Value.IsExpired())
                     RemoveOwnedAura(pair, AuraRemoveMode.Expire);
-                else if (pair.Value.GetSpellInfo().IsChanneled() && pair.Value.GetCasterGUID() != GetGUID() && !Global.ObjAccessor.GetWorldObject(this, pair.Value.GetCasterGUID()))
+                else if (pair.Value.GetSpellInfo().IsChanneled() && pair.Value.GetCasterGUID() != GetGUID() && Global.ObjAccessor.GetWorldObject(this, pair.Value.GetCasterGUID()) == null)
                     RemoveOwnedAura(pair, AuraRemoveMode.Cancel); // remove channeled auras when caster is not on the same map
             }
 
@@ -383,7 +380,7 @@ namespace Game.Entities
 
         public virtual void Whisper(string text, Language language, Player target, bool isBossWhisper = false)
         {
-            if (!target)
+            if (target == null)
                 return;
 
             Locale locale = target.GetSession().GetSessionDbLocaleIndex();
@@ -423,7 +420,7 @@ namespace Game.Entities
 
         public virtual void Whisper(uint textId, Player target, bool isBossWhisper = false)
         {
-            if (!target)
+            if (target == null)
                 return;
 
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textId);
@@ -466,6 +463,9 @@ namespace Game.Entities
 
             if (IsInWorld)
             {
+                if (IsAreaSpiritHealer())
+                    ToCreature()?.SummonGraveyardTeleporter();
+
                 m_duringRemoveFromWorld = true;
                 UnitAI ai = GetAI();
                 if (ai != null)
@@ -518,6 +518,12 @@ namespace Game.Entities
 
             if (IsInWorld)
                 RemoveFromWorld();
+            else
+            {
+                // cleanup that must happen even if not in world
+                if (IsVehicle())
+                    RemoveVehicleKit(true);
+            }
 
             // A unit may be in removelist and not in world, but it is still in grid
             // and may have some references during delete
@@ -538,7 +544,7 @@ namespace Game.Entities
         }
 
         public void SetTransformSpell(uint spellid) { m_transformSpell = spellid; }
-        public uint GetTransformSpell() { return m_transformSpell; }
+        public int GetTransformSpell() { return m_transformSpell; }
 
         public Vehicle GetVehicleKit() { return VehicleKit; }
         public Vehicle GetVehicle() { return m_vehicle; }
@@ -552,18 +558,18 @@ namespace Game.Entities
         {
             Unit vehicleRoot = GetVehicleBase();
 
-            if (!vehicleRoot)
+            if (vehicleRoot == null)
                 return null;
 
             for (; ; )
             {
-                if (!vehicleRoot.GetVehicleBase())
+                if (vehicleRoot.GetVehicleBase() == null)
                     return vehicleRoot;
 
                 vehicleRoot = vehicleRoot.GetVehicleBase();
             }
         }
-        
+
         public Creature GetVehicleCreatureBase()
         {
             Unit veh = GetVehicleBase();
@@ -581,6 +587,46 @@ namespace Game.Entities
             if (veh != null)
                 return veh;
             return GetTransport();
+        }
+
+        public void AtStartOfEncounter(EncounterType type)
+        {
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfEncounter);
+
+            switch (type)
+            {
+                case EncounterType.DungeonEncounter:
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfDungeonEncounter);
+                    break;
+                case EncounterType.MythicPlusRun:
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfMythicPlusRun);
+                    break;
+                default:
+                    break;
+            }
+
+            if (IsAlive())
+                Unit.ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.EncounterStart), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+        }
+
+        public void AtEndOfEncounter(EncounterType type)
+        {
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfEncounter);
+
+            switch (type)
+            {
+                case EncounterType.DungeonEncounter:
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfDungeonEncounter);
+                    break;
+                default:
+                    break;
+            }
+
+            GetSpellHistory().ResetCooldowns(pair =>
+            {
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
+                return spellInfo.HasAttribute(SpellAttr10.ResetCooldownOnEncounterEnd);
+            }, true);
         }
 
         public void _RegisterDynObject(DynamicObject dynObj)
@@ -821,7 +867,7 @@ namespace Game.Entities
         public bool IsBanker() { return HasNpcFlag(NPCFlags.Banker); }
         public bool IsInnkeeper() { return HasNpcFlag(NPCFlags.Innkeeper); }
         public bool IsSpiritHealer() { return HasNpcFlag(NPCFlags.SpiritHealer); }
-        public bool IsSpiritGuide() { return HasNpcFlag(NPCFlags.SpiritGuide); }
+        public bool IsAreaSpiritHealer() { return HasNpcFlag(NPCFlags.AreaSpiritHealer); }
         public bool IsTabardDesigner() { return HasNpcFlag(NPCFlags.TabardDesigner); }
         public bool IsAuctioner() { return HasNpcFlag(NPCFlags.Auctioneer); }
         public bool IsArmorer() { return HasNpcFlag(NPCFlags.Repair); }
@@ -831,9 +877,10 @@ namespace Game.Entities
             return HasNpcFlag(NPCFlags.Vendor | NPCFlags.Trainer | NPCFlags.FlightMaster |
                 NPCFlags.Petitioner | NPCFlags.BattleMaster | NPCFlags.Banker |
                 NPCFlags.Innkeeper | NPCFlags.SpiritHealer |
-                NPCFlags.SpiritGuide | NPCFlags.TabardDesigner | NPCFlags.Auctioneer);
+                NPCFlags.AreaSpiritHealer | NPCFlags.TabardDesigner | NPCFlags.Auctioneer);
         }
-        public bool IsSpiritService() { return HasNpcFlag(NPCFlags.SpiritHealer | NPCFlags.SpiritGuide); }
+        public bool IsSpiritService() { return HasNpcFlag(NPCFlags.SpiritHealer | NPCFlags.AreaSpiritHealer); }
+        public bool IsAreaSpiritHealerIndividual() { return HasNpcFlag2(NPCFlags2.AreaSpiritHealerIndividual); }
         public bool IsCritter() { return GetCreatureType() == CreatureType.Critter; }
         public bool IsInFlight() { return HasUnitState(UnitState.InFlight); }
 
@@ -891,7 +938,7 @@ namespace Game.Entities
 
             return str;
         }
-        
+
         public Guardian GetGuardianPet()
         {
             ObjectGuid pet_guid = GetPetGUID();
@@ -917,10 +964,10 @@ namespace Game.Entities
             Cell.VisitAllObjects(this, searcher, dist);
 
             // remove current target
-            if (GetVictim())
+            if (GetVictim() != null)
                 targets.Remove(GetVictim());
 
-            if (exclude)
+            if (exclude != null)
                 targets.Remove(exclude);
 
             // remove not LoS targets
@@ -990,7 +1037,7 @@ namespace Game.Entities
                 }
             }
 
-            Cypher.Assert(!m_vehicle);
+            Cypher.Assert(m_vehicle == null);
             vehicle.AddVehiclePassenger(this, seatId);
         }
 
@@ -1066,7 +1113,7 @@ namespace Game.Entities
             Player player = ToPlayer();
 
             // If the player is on mounted duel and exits the mount, he should immediatly lose the duel
-            if (player && player.duel != null && player.duel.IsMounted)
+            if (player != null && player.duel != null && player.duel.IsMounted)
                 player.DuelComplete(DuelCompleteType.Fled);
 
             SetControlled(false, UnitState.Root);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
@@ -1127,6 +1174,8 @@ namespace Game.Entities
                 else
                     ToTempSummon().UnSummon(2000); // Approximation
             }
+
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.AbandonVehicle);
         }
 
         public void SendPlaySpellVisual(Unit target, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
@@ -1184,21 +1233,26 @@ namespace Game.Entities
             SendMessageToSet(cancelSpellVisualKit, true);
         }
 
-        public void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
+        public void CancelSpellMissiles(uint spellId, bool reverseMissile = false, bool abortSpell = false)
         {
             bool hasMissile = false;
-            foreach (var pair in m_Events.GetEvents())
+            if (abortSpell)
             {
-                Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
-                if (spell != null)
+                foreach (var pair in m_Events.GetEvents())
                 {
-                    if (spell.GetSpellInfo().Id == spellId)
+                    Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
+                    if (spell != null)
                     {
-                        pair.Value.ScheduleAbort();
-                        hasMissile = true;
+                        if (spell.GetSpellInfo().Id == spellId)
+                        {
+                            pair.Value.ScheduleAbort();
+                            hasMissile = true;
+                        }
                     }
                 }
             }
+            else
+                hasMissile = true;
 
             if (hasMissile)
             {
@@ -1232,6 +1286,8 @@ namespace Game.Entities
         public bool IsAIEnabled() { return i_AI != null; }
 
         public virtual UnitAI GetAI() { return i_AI; }
+
+        public virtual T GetAI<T>() where T : UnitAI { return (T)i_AI; }
 
         public UnitAI GetTopAI() { return i_AIs.Count == 0 ? null : i_AIs.Peek(); }
 
@@ -1315,12 +1371,12 @@ namespace Game.Entities
             else
                 return true;
         }
-        
+
         public bool IsPossessedByPlayer()
         {
             return HasUnitState(UnitState.Possessed) && GetCharmerGUID().IsPlayer();
         }
-        
+
         public bool IsPossessing()
         {
             Unit u = GetCharmed();
@@ -1406,7 +1462,7 @@ namespace Game.Entities
                             if (displayInfo != null)
                             {
                                 ChrCustomizationReqRecord choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(formModelData.Choices[i].ChrCustomizationReqID);
-                                if (choiceReq == null || thisPlayer.GetSession().MeetsChrCustomizationReq(choiceReq, GetClass(), false, thisPlayer.m_playerData.Customizations))
+                                if (choiceReq == null || thisPlayer.GetSession().MeetsChrCustomizationReq(choiceReq, GetRace(), GetClass(), false, thisPlayer.m_playerData.Customizations))
                                     displayIds.Add(displayInfo.DisplayID);
                             }
                         }
@@ -1643,7 +1699,7 @@ namespace Game.Entities
             }
         }
 
-        public void UpdateDisplayPower()
+        public PowerType CalculateDisplayPowerType()
         {
             PowerType displayPower = PowerType.Mana;
             switch (GetShapeshiftForm())
@@ -1667,27 +1723,23 @@ namespace Game.Entities
                         AuraEffect powerTypeAura = powerTypeAuras.First();
                         displayPower = (PowerType)powerTypeAura.GetMiscValue();
                     }
-                    else if (GetTypeId() == TypeId.Player)
+                    else
                     {
                         ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
                         if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
                             displayPower = cEntry.DisplayPower;
-                    }
-                    else if (GetTypeId() == TypeId.Unit)
-                    {
+
                         Vehicle vehicle = GetVehicleKit();
-                        if (vehicle)
+                        if (vehicle != null)
                         {
                             PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
                             if (powerDisplay != null)
                                 displayPower = (PowerType)powerDisplay.ActualType;
-                            else if (GetClass() == Class.Rogue)
-                                displayPower = PowerType.Energy;
                         }
                         else
                         {
                             Pet pet = ToPet();
-                            if (pet)
+                            if (pet != null)
                             {
                                 if (pet.GetPetType() == PetType.Hunter) // Hunter pets have focus
                                     displayPower = PowerType.Focus;
@@ -1700,7 +1752,12 @@ namespace Game.Entities
                 }
             }
 
-            SetPowerType(displayPower);
+            return displayPower;
+        }
+
+        public void UpdateDisplayPower()
+        {
+            SetPowerType(CalculateDisplayPowerType());
         }
 
         public void SetSheath(SheathState sheathed)
@@ -1830,34 +1887,33 @@ namespace Game.Entities
         }
 
         //Unit
-        public void SetLevel(uint lvl, bool sendUpdate = true)
+        public void SetLevel(int lvl, bool sendUpdate = true)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Level), (int)lvl);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Level), lvl);
 
             if (!sendUpdate)
                 return;
 
-            Player player = ToPlayer();
-            if (player != null)
+            if (ToPlayer() is Player player)
             {
-                if (player.GetGroup())
+                if (player.GetGroup() != null)
                     player.SetGroupUpdateFlag(GroupUpdateFlags.Level);
 
-                Global.CharacterCacheStorage.UpdateCharacterLevel(ToPlayer().GetGUID(), (byte)lvl);
+                Global.CharacterCacheStorage.UpdateCharacterLevel(GetGUID(), (byte)lvl);
             }
         }
-        public uint GetLevel() { return (uint)m_unitData.Level.GetValue(); }
-        public override uint GetLevelForTarget(WorldObject target) { return GetLevel(); }
+
+        public int GetLevel() { return m_unitData.Level.GetValue(); }
+        public override int GetLevelForTarget(WorldObject target) { return GetLevel(); }
 
         public Race GetRace() { return (Race)(byte)m_unitData.Race; }
         public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Race), (byte)race); }
         public Class GetClass() { return (Class)(byte)m_unitData.ClassId; }
-        public void SetClass(Class classId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ClassId), (byte)classId); }
-        public uint GetClassMask() { return (uint)(1 << ((int)GetClass() - 1)); }
+        public void SetClass(Class classId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ClassId), (byte)classId); }        
         public Gender GetGender() { return (Gender)(byte)m_unitData.Sex; }
         public void SetGender(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Sex), (byte)sex); }
 
-        public virtual Gender GetNativeGender() { return GetGender();    }
+        public virtual Gender GetNativeGender() { return GetGender(); }
         public virtual void SetNativeGender(Gender gender) { SetGender(gender); }
 
         public void RecalculateObjectScale()
@@ -1869,17 +1925,37 @@ namespace Game.Entities
         }
 
         public virtual float GetNativeObjectScale() { return 1.0f; }
-        
-        public uint GetDisplayId() { return (uint)m_unitData.DisplayID.GetValue(); }
 
-        public virtual void SetDisplayId(uint modelId, float displayScale = 1f)
+        public float GetDisplayScale() { return m_unitData.DisplayScale; }
+        
+        public int GetDisplayId() { return m_unitData.DisplayID; }
+
+        public virtual void SetDisplayId(int displayId, bool setNative = false)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID), (int)modelId);
+            float displayScale = SharedConst.DefaultPlayerDisplayScale;
+
+            if (IsCreature() && !IsPet())
+            {
+                CreatureModel model = ToCreature().GetCreatureTemplate().GetModelWithDisplayId(displayId);
+                if (model != null)
+                    displayScale = model.DisplayScale;
+            }
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID), displayId);
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayScale), displayScale);
-            // Set Gender by modelId
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
-            if (minfo != null)
-                SetGender((Gender)minfo.gender);
+
+            if (setNative)
+            {
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeDisplayID), displayId);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeXDisplayScale), displayScale);
+            }
+
+            // Set Gender by ModelInfo
+            CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(displayId);
+            if (modelInfo != null)
+                SetGender(modelInfo.gender);
+
+            CalculateHoverHeight();
         }
 
         public void RestoreDisplayId(bool ignorePositiveAurasPreventingMounting = false)
@@ -1943,20 +2019,41 @@ namespace Game.Entities
             // no auras found - set modelid to default
             SetDisplayId(GetNativeDisplayId());
         }
-        public uint GetNativeDisplayId() { return (uint)m_unitData.NativeDisplayID.GetValue(); }
-        public void SetNativeDisplayId(uint displayId, float displayScale = 1f)
-        {
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeDisplayID), (int)displayId);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeXDisplayScale), displayScale);
-        }
+        public int GetNativeDisplayId() { return m_unitData.NativeDisplayID; }
         public float GetNativeDisplayScale() { return m_unitData.NativeXDisplayScale; }
 
         public bool IsMounted()
         {
             return HasUnitFlag(UnitFlags.Mount);
         }
-        public uint GetMountDisplayId() { return (uint)m_unitData.MountDisplayID.GetValue(); }
-        public void SetMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), (int)mountDisplayId); }
+        public int GetMountDisplayId() { return m_unitData.MountDisplayID; }
+        public void SetMountDisplayId(int mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), mountDisplayId); }
+
+        void CalculateHoverHeight()
+        {
+            float hoverHeight = SharedConst.DefaultPlayerHoverHeight;
+            float displayScale = SharedConst.DefaultPlayerDisplayScale;
+
+            int displayId = IsMounted() ? GetMountDisplayId() : GetDisplayId();
+
+            // Get DisplayScale for creatures
+            if (IsCreature())
+            {
+                CreatureModel model = ToCreature().GetCreatureTemplate().GetModelWithDisplayId(displayId);
+                if (model != null)
+                    displayScale = model.DisplayScale;
+            }
+
+            var displayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(displayId);
+            if (displayInfo != null)
+            {
+                var modelData = CliDB.CreatureModelDataStorage.LookupByKey(displayInfo.ModelID);
+                if (modelData != null)
+                    hoverHeight = modelData.HoverHeight * modelData.ModelScale * displayInfo.CreatureModelScale * displayScale;
+            }
+
+            SetHoverHeight(hoverHeight != 0 ? hoverHeight : SharedConst.DefaultPlayerHoverHeight);
+        }
 
         public virtual float GetFollowAngle() { return MathFunctions.PiOver2; }
 
@@ -1993,7 +2090,7 @@ namespace Game.Entities
         public void SetBattlePetCompanionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionGUID), guid); }
         public ObjectGuid GetDemonCreatorGUID() { return m_unitData.DemonCreator; }
         public void SetDemonCreatorGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DemonCreator), guid); }
-        
+
         public ObjectGuid GetCharmerGUID() { return m_unitData.CharmedBy; }
 
         public Unit GetCharmer() { return m_charmer; }
@@ -2051,7 +2148,7 @@ namespace Game.Entities
         public void RemoveDynamicFlag(UnitDynFlags flag) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
         public void ReplaceAllDynamicFlags(UnitDynFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
 
-        public void SetCreatedBySpell(uint spellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBySpell), (int)spellId); }
+        public void SetCreatedBySpell(int spellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBySpell), spellId); }
 
         public Emote GetEmoteState() { return (Emote)(int)m_unitData.EmoteState; }
         public void SetEmoteState(Emote emote) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.EmoteState), (int)emote); }
@@ -2085,13 +2182,13 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Player))
             {
                 ShapeShiftForm form = GetShapeshiftForm();
-                var ssEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey((uint)form);
+                var ssEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey((int)form);
                 if (ssEntry != null && ssEntry.CreatureType > 0)
                     return (CreatureType)ssEntry.CreatureType;
                 else
                 {
-                    var raceEntry = CliDB.ChrRacesStorage.LookupByKey(GetRace());
-                    return  (CreatureType)raceEntry.CreatureType;
+                    var raceEntry = CliDB.ChrRacesStorage.LookupByKey((int)GetRace());
+                    return (CreatureType)raceEntry.CreatureType;
                 }
             }
             else
@@ -2115,6 +2212,8 @@ namespace Game.Entities
         public bool IsHunterPet() { return UnitTypeMask.HasAnyFlag(UnitTypeMask.HunterPet); }
         public bool IsTotem() { return UnitTypeMask.HasAnyFlag(UnitTypeMask.Totem); }
         public bool IsVehicle() { return UnitTypeMask.HasAnyFlag(UnitTypeMask.Vehicle); }
+
+        public int GetContentTuning() { return m_unitData.ContentTuningID; }
 
         public void AddUnitState(UnitState f)
         {
@@ -2147,7 +2246,7 @@ namespace Game.Entities
                 if (owner != null)
                 {
                     Player ownerPlayer = owner.ToPlayer();
-                    if (ownerPlayer)
+                    if (ownerPlayer != null)
                         if (ownerPlayer.IsGroupVisibleFor(seerPlayer))
                             return true;
                 }
@@ -2156,14 +2255,15 @@ namespace Game.Entities
             return false;
         }
 
-        public override uint GetFaction() { return (uint)m_unitData.FactionTemplate.GetValue(); }
-        public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), (int)faction); }
+        public override int GetFaction() { return m_unitData.FactionTemplate; }
+        public override void SetFaction(int faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), faction); }
+        public override void SetFaction(FactionTemplates faction) { SetFaction((int)faction); }
 
         public void RestoreFaction()
         {
             if (HasAuraType(AuraType.ModFaction))
             {
-                SetFaction((uint)GetAuraEffectsByType(AuraType.ModFaction).LastOrDefault().GetMiscValue());
+                SetFaction((int)GetAuraEffectsByType(AuraType.ModFaction).LastOrDefault().GetMiscValue());
                 return;
             }
 
@@ -2174,7 +2274,7 @@ namespace Game.Entities
                 if (HasUnitTypeMask(UnitTypeMask.Minion))
                 {
                     Unit owner = GetOwner();
-                    if (owner)
+                    if (owner != null)
                     {
                         SetFaction(owner.GetFaction());
                         return;
@@ -2198,8 +2298,8 @@ namespace Game.Entities
 
             if (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Player))
                 return u1.ToPlayer().IsInSameGroupWith(u2.ToPlayer());
-            else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)) ||
-                (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)))
+            else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)) ||
+                (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
                 return true;
 
             return u1.GetTypeId() == TypeId.Unit && u2.GetTypeId() == TypeId.Unit && u1.GetFaction() == u2.GetFaction();
@@ -2217,8 +2317,8 @@ namespace Game.Entities
 
             if (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Player))
                 return u1.ToPlayer().IsInSameRaidWith(u2.ToPlayer());
-            else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)) ||
-                    (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)))
+            else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)) ||
+                    (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
                 return true;
 
             // else u1.GetTypeId() == u2.GetTypeId() == TYPEID_UNIT
@@ -2265,7 +2365,7 @@ namespace Game.Entities
         }
 
         public AnimTier GetAnimTier() { return (AnimTier)(byte)m_unitData.AnimTier; }
-        
+
         public void SetAnimTier(AnimTier animTier, bool notifyClient = true)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AnimTier), (byte)animTier);
@@ -2284,7 +2384,7 @@ namespace Game.Entities
         {
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, (int)channelSpellId);
         }
-        public uint GetChannelSpellXSpellVisualId() { return (uint)m_unitData.ChannelData.GetValue().SpellXSpellVisualID; }
+
         public void SetChannelSpellXSpellVisual(uint spellXSpellVisualId)
         {
             UnitChannel unitChannel = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData);
@@ -2472,6 +2572,11 @@ namespace Game.Entities
             {
                 uint tmpDamage = damageTaken;
 
+                // sparring
+                Creature victimCreature = victim.ToCreature();
+                if (victimCreature != null)
+                    tmpDamage = victimCreature.CalculateDamageForSparring(attacker, tmpDamage);
+
                 victim.GetAI()?.DamageTaken(attacker, ref tmpDamage, damagetype, spellProto);
 
                 attacker?.GetAI()?.DamageDealt(victim, ref tmpDamage, damagetype);
@@ -2482,7 +2587,7 @@ namespace Game.Entities
                 // if any script modified damage, we need to also apply the same modification to unscaled damage value
                 if (tmpDamage != damageTaken)
                 {
-                    if (attacker)
+                    if (attacker != null)
                         damageDone = (uint)(tmpDamage * victim.GetHealthMultiplierForTarget(attacker));
                     else
                         damageDone = tmpDamage;
@@ -2505,7 +2610,7 @@ namespace Game.Entities
                     }
                 }
             }
-            
+
             Player player = victim.ToPlayer();
             if (player != null && player.GetCommandStatus(PlayerCommandStates.God))
                 return 0;
@@ -2580,7 +2685,7 @@ namespace Game.Entities
             bool duel_wasMounted = false;
             if (victim.IsPlayer() && victim.ToPlayer().duel != null && damageTaken >= (health - 1))
             {
-                if (!attacker)
+                if (attacker == null)
                     return 0;
 
                 // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
@@ -2592,13 +2697,17 @@ namespace Game.Entities
             else if (victim.IsCreature() && damageTaken >= health && victim.ToCreature().HasFlag(CreatureStaticFlags.Unkillable))
             {
                 damageTaken = health - 1;
+
+                // If we had damage (aka health was not 1 already) trigger OnHealthDepleted
+                if (damageTaken > 0)
+                    victim.ToCreature().GetAI()?.OnHealthDeleted(attacker, false);
             }
             else if (victim.IsVehicle() && damageTaken >= (health - 1) && victim.GetCharmer() != null && victim.GetCharmer().IsTypeId(TypeId.Player))
             {
                 Player victimRider = victim.GetCharmer().ToPlayer();
                 if (victimRider != null && victimRider.duel != null && victimRider.duel.IsMounted)
                 {
-                    if (!attacker)
+                    if (attacker == null)
                         return 0;
 
                     // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
@@ -2668,24 +2777,23 @@ namespace Game.Entities
                         if (damageTaken >= victim.CountPctFromMaxHealth(100 + absorbAurEff.GetMiscValueB()))
                             continue;
 
-                        // get amount which can be still absorbed by the aura
-                        int currentAbsorb = absorbAurEff.GetAmount();
-                        // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
-                        if (currentAbsorb < 0)
-                            currentAbsorb = 0;
-
-                        uint tempAbsorb = (uint)currentAbsorb;
+                        // absorb all damage by default
+                        uint currentAbsorb = damageInfo.GetDamage();
 
                         // This aura Type is used both by Spirit of Redemption (death not really prevented, must grant all credit immediately) and Cheat Death (death prevented)
                         // repurpose PreventDefaultAction for this
                         bool deathFullyPrevented = false;
 
-                        absorbAurEff.GetBase().CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb, ref deathFullyPrevented);
-                        currentAbsorb = (int)tempAbsorb;
+                        absorbAurEff.GetBase().CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref currentAbsorb, ref deathFullyPrevented);
 
                         // absorb must be smaller than the damage itself
-                        currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, (int)damageInfo.GetDamage());
-                        damageInfo.AbsorbDamage((uint)currentAbsorb);
+                        currentAbsorb = Math.Min(currentAbsorb, damageInfo.GetDamage());
+
+                        // if nothing is absorbed (for example because of a scripted cooldown) then skip this aura and proceed with dying
+                        if (currentAbsorb == 0)
+                            continue;
+
+                        damageInfo.AbsorbDamage(currentAbsorb);
 
                         if (deathFullyPrevented)
                             killed = false;
@@ -2700,7 +2808,7 @@ namespace Game.Entities
                             absorbLog.Caster = baseAura.GetCasterGUID();
                             absorbLog.AbsorbedSpellID = spellProto != null ? spellProto.Id : 0;
                             absorbLog.AbsorbSpellID = baseAura.GetId();
-                            absorbLog.Absorbed = currentAbsorb;
+                            absorbLog.Absorbed = (int)currentAbsorb;
                             absorbLog.OriginalDamage = damageInfo.GetOriginalDamage();
                             absorbLog.LogData.Initialize(victim);
                             victim.SendCombatLogMessage(absorbLog);
@@ -2814,7 +2922,7 @@ namespace Game.Entities
                 {
                     Player he = duel_wasMounted ? victim.GetCharmer().ToPlayer() : victim.ToPlayer();
 
-                    Cypher.Assert(he && he.duel != null);
+                    Cypher.Assert(he != null && he.duel != null);
 
                     if (duel_wasMounted) // In this case victim==mount
                         victim.SetHealth(1);
@@ -2937,10 +3045,10 @@ namespace Game.Entities
 
                     uint damage = (uint)dmgShield.GetAmount();
                     Unit caster = dmgShield.GetCaster();
-                    if (caster)
+                    if (caster != null)
                     {
-                        damage = caster.SpellDamageBonusDone(this, spellInfo, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
-                        damage = SpellDamageBonusTaken(caster, spellInfo, damage, DamageEffectType.SpellDirect);
+                        damage = (uint)caster.SpellDamageBonusDone(this, spellInfo, (int)damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
+                        damage = (uint)SpellDamageBonusTaken(caster, spellInfo, (int)damage, DamageEffectType.SpellDirect);
                     }
 
                     DamageInfo damageInfo1 = new(this, victim, damage, spellInfo, spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
@@ -3002,7 +3110,7 @@ namespace Game.Entities
                 packet.Health = (long)GetHealth();
 
                 Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
-                if (player)
+                if (player != null)
                     player.SendPacket(packet);
             }
 
@@ -3135,6 +3243,16 @@ namespace Game.Entities
 
         public virtual void SetImmuneToNPC(bool apply) { SetImmuneToNPC(apply, false); }
 
+        public bool IsUninteractible() { return HasUnitFlag(UnitFlags.Uninteractible); }
+
+        public void SetUninteractible(bool apply)
+        {
+            if (apply)
+                SetUnitFlag(UnitFlags.Uninteractible);
+            else
+                RemoveUnitFlag(UnitFlags.Uninteractible);
+        }
+
         public virtual float GetBlockPercent(uint attackerLevel) { return 30.0f; }
 
         void UpdateReactives(uint p_time)
@@ -3209,7 +3327,7 @@ namespace Game.Entities
                 return null;
             Group group = player.GetGroup();
             // When there is no group check pet presence
-            if (!group)
+            if (group == null)
             {
                 // We are pet now, return owner
                 if (player != this)
@@ -3228,7 +3346,7 @@ namespace Game.Entities
             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player target = refe.GetSource();
-                if (target)
+                if (target != null)
                 {
                     // IsHostileTo check duel and controlled by enemy
                     if (target != this && IsWithinDistInMap(target, radius) && target.IsAlive() && !IsHostileTo(target))
@@ -3236,7 +3354,7 @@ namespace Game.Entities
 
                     // Push player's pet to vector
                     Unit pet = target.GetGuardianPet();
-                    if (pet)
+                    if (pet != null)
                         if (pet != this && IsWithinDistInMap(pet, radius) && pet.IsAlive() && !IsHostileTo(pet))
                             nearMembers.Add(pet);
                 }
@@ -3247,47 +3365,6 @@ namespace Game.Entities
 
             int randTarget = RandomHelper.IRand(0, nearMembers.Count - 1);
             return nearMembers[randTarget];
-        }
-
-        public uint GetComboPoints() { return (uint)GetPower(PowerType.ComboPoints); }
-
-        public void AddComboPoints(sbyte count, Spell spell = null)
-        {
-            if (count == 0)
-                return;
-
-            sbyte comboPoints = (sbyte)(spell != null ? spell.m_comboPointGain : GetPower(PowerType.ComboPoints));
-
-            comboPoints += count;
-
-            if (comboPoints > 5)
-                comboPoints = 5;
-            else if (comboPoints < 0)
-                comboPoints = 0;
-
-            if (!spell)
-                SetPower(PowerType.ComboPoints, comboPoints);
-            else
-                spell.m_comboPointGain = comboPoints;
-        }
-
-        void GainSpellComboPoints(sbyte count)
-        {
-            if (count == 0)
-                return;
-
-            sbyte cp = (sbyte)GetPower(PowerType.ComboPoints);
-
-            cp += count;
-            if (cp > 5) cp = 5;
-            else if (cp < 0) cp = 0;
-
-            SetPower(PowerType.ComboPoints, cp);
-        }
-
-        public void ClearComboPoints()
-        {
-            SetPower(PowerType.ComboPoints, 0);
         }
 
         public void ClearAllReactives()
@@ -3406,7 +3483,7 @@ namespace Game.Entities
 
             uint bossLevel = 83;
             float bossResistanceConstant = 510.0f;
-            uint level = caster ? victim.GetLevelForTarget(caster) : victim.GetLevel();
+            uint level = caster != null ? victim.GetLevelForTarget(caster) : victim.GetLevel();
             float resistanceConstant;
 
             if (level == bossLevel)
@@ -3419,7 +3496,7 @@ namespace Game.Entities
 
         public static void CalcAbsorbResist(DamageInfo damageInfo, Spell spell = null)
         {
-            if (!damageInfo.GetVictim() || !damageInfo.GetVictim().IsAlive() || damageInfo.GetDamage() == 0)
+            if (damageInfo.GetVictim() == null || !damageInfo.GetVictim().IsAlive() || damageInfo.GetDamage() == 0)
                 return;
 
             uint resistedDamage = CalcSpellResistedDamage(damageInfo.GetAttacker(), damageInfo.GetVictim(), damageInfo.GetDamage(), damageInfo.GetSchoolMask(), damageInfo.GetSpellInfo());
@@ -3482,7 +3559,7 @@ namespace Game.Entities
                     tempAbsorb = (uint)currentAbsorb;
                     absorbAurEff.GetBase().CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb);
 
-                    // Check if our aura is using amount to count damage
+                    // Check if our aura is using amount to count heal
                     if (absorbAurEff.GetAmount() >= 0)
                     {
                         // Reduce shield amount
@@ -3613,7 +3690,7 @@ namespace Game.Entities
 
                     // Damage can be splitted only if aura has an alive caster
                     Unit caster = itr.GetCaster();
-                    if (!caster || (caster == damageInfo.GetVictim()) || !caster.IsInWorld || !caster.IsAlive())
+                    if (caster == null || (caster == damageInfo.GetVictim()) || !caster.IsInWorld || !caster.IsAlive())
                         continue;
 
                     uint splitDamage = MathFunctions.CalculatePct(damageInfo.GetDamage(), itr.GetAmount());
@@ -3635,6 +3712,14 @@ namespace Game.Entities
                     uint split_absorb = 0;
                     DealDamageMods(damageInfo.GetAttacker(), caster, ref splitDamage, ref split_absorb);
 
+                    // sparring
+                    Creature victimCreature = damageInfo.GetVictim().ToCreature();
+                    if (victimCreature != null)
+                    {
+                        if (victimCreature.ShouldFakeDamageFrom(damageInfo.GetAttacker()))
+                            damageInfo.ModifyDamage((int)(damageInfo.GetDamage() * -1));
+                    }
+
                     SpellNonMeleeDamage log = new(damageInfo.GetAttacker(), caster, itr.GetSpellInfo(), itr.GetBase().GetSpellVisual(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastId());
                     CleanDamage cleanDamage = new(splitDamage, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
                     DealDamage(damageInfo.GetAttacker(), caster, splitDamage, cleanDamage, DamageEffectType.Direct, damageInfo.GetSchoolMask(), itr.GetSpellInfo(), false);
@@ -3654,11 +3739,7 @@ namespace Game.Entities
             if (healInfo.GetHeal() == 0)
                 return;
 
-            // Need remove expired auras after
-            bool existExpired = false;
-
-            // absorb without mana cost
-            var vHealAbsorb = healInfo.GetTarget().GetAuraEffectsByType(AuraType.SchoolHealAbsorb);
+            var vHealAbsorb = new List<AuraEffect>(healInfo.GetTarget().GetAuraEffectsByType(AuraType.SchoolHealAbsorb));
             for (var i = 0; i < vHealAbsorb.Count && healInfo.GetHeal() > 0; ++i)
             {
                 AuraEffect absorbAurEff = vHealAbsorb[i];
@@ -3707,7 +3788,7 @@ namespace Game.Entities
                 if (currentAbsorb != 0)
                 {
                     SpellHealAbsorbLog absorbLog = new();
-                    absorbLog.Healer = healInfo.GetHealer() ? healInfo.GetHealer().GetGUID() : ObjectGuid.Empty;
+                    absorbLog.Healer = healInfo.GetHealer() != null ? healInfo.GetHealer().GetGUID() : ObjectGuid.Empty;
                     absorbLog.Target = healInfo.GetTarget().GetGUID();
                     absorbLog.AbsorbCaster = absorbAurEff.GetBase().GetCasterGUID();
                     absorbLog.AbsorbedSpellID = (int)(healInfo.GetSpellInfo() != null ? healInfo.GetSpellInfo().Id : 0);
@@ -3715,23 +3796,6 @@ namespace Game.Entities
                     absorbLog.Absorbed = currentAbsorb;
                     absorbLog.OriginalHeal = (int)healInfo.GetOriginalHeal();
                     healInfo.GetTarget().SendMessageToSet(absorbLog, true);
-                }
-            }
-
-            // Remove all expired absorb auras
-            if (existExpired)
-            {
-                for (var i = 0; i < vHealAbsorb.Count;)
-                {
-                    AuraEffect auraEff = vHealAbsorb[i];
-                    ++i;
-                    if (auraEff.GetAmount() <= 0)
-                    {
-                        uint removedAuras = healInfo.GetTarget().m_removedAurasCount;
-                        auraEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
-                        if (removedAuras + 1 < healInfo.GetTarget().m_removedAurasCount)
-                            i = 0;
-                    }
                 }
             }
         }
@@ -3775,12 +3839,6 @@ namespace Game.Entities
                 {
                     float arpPct = attacker.ToPlayer().GetRatingBonusValue(CombatRating.ArmorPenetration);
 
-                    Item weapon = attacker.ToPlayer().GetWeaponForAttack(attackType, true);
-                    arpPct += attacker.GetTotalAuraModifier(AuraType.ModArmorPenetrationPercent, bool (AuraEffect aurEff) => 
-                    {
-                        return aurEff.GetSpellInfo().IsItemFitToSpellRequirements(weapon);
-                    });
-
                     // no more than 100%
                     MathFunctions.RoundToInterval(ref arpPct, 0.0f, 100.0f);
 
@@ -3804,14 +3862,16 @@ namespace Game.Entities
             if (levelModifier > 59.0f)
                 levelModifier = levelModifier + 4.5f * (levelModifier - 59.0f);
 
-            float damageReduction = 0.1f * armor / (8.5f * levelModifier + 40.0f);
-            damageReduction /= (1.0f + damageReduction);
+            // Expansion and ContentTuningID necessary? Does Player get a ContentTuningID too ?
+            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, attackerClass, 0);
+            if ((armor + armorConstant) == 0)
+                return damage;
 
             MathFunctions.RoundToInterval(ref damageReduction, 0.0f, 0.75f);
             return (uint)Math.Ceiling(Math.Max(damage * (1.0f - damageReduction), 0.0f));
         }
 
-        public uint MeleeDamageBonusDone(Unit victim, uint damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellEffectInfo spellEffectInfo = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
+        public int MeleeDamageBonusDone(Unit victim, int damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, Mechanics mechanic = default, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, Spell spell = null, AuraEffect aurEff = null)
         {
             if (victim == null || damage == 0)
                 return 0;
@@ -3822,7 +3882,7 @@ namespace Game.Entities
             int DoneFlatBenefit = 0;
 
             // ..done
-            DoneFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, (int)creatureTypeMask);
+            DoneFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, (uint)creatureTypeMask);
 
             // ..done
             // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
@@ -3835,14 +3895,14 @@ namespace Game.Entities
                 APbonus += victim.GetTotalAuraModifier(AuraType.RangedAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature Type)
-                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (int)creatureTypeMask);
+                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (uint)creatureTypeMask);
             }
             else
             {
                 APbonus += victim.GetTotalAuraModifier(AuraType.MeleeAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature Type)
-                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (int)creatureTypeMask);
+                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (uint)creatureTypeMask);
             }
 
             if (APbonus != 0)                                       // Can be negative
@@ -3896,13 +3956,26 @@ namespace Game.Entities
                 return false;
             });
 
+            // bonus against target aura mechanic
+            DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamagePercentDoneByTargetAuraMechanic, aurEff =>
+            {
+                if (victim.HasAuraWithMechanic(1ul << aurEff.GetMiscValue()))
+                    return true;
+                return false;
+            });
+
             // Add SPELL_AURA_MOD_DAMAGE_DONE_FOR_MECHANIC percent bonus
-            if (spellEffectInfo != null && spellEffectInfo.Mechanic != 0)
-                MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellEffectInfo.Mechanic));
+            if (mechanic != Mechanics.None)
+                MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)mechanic));
             else if (spellProto != null && spellProto.Mechanic != 0)
                 MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
 
-            float damageF = damage;
+            if (spell != null)
+                spell.CallScriptCalcDamageHandlers(victim, ref damage, ref DoneFlatBenefit, ref DoneTotalMod);
+            else if (aurEff != null)
+                aurEff.GetBase().CallScriptCalcDamageAndHealingHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref damage, ref DoneFlatBenefit, ref DoneTotalMod);
+
+            float damageF = (float)(damage + DoneFlatBenefit) * DoneTotalMod;
 
             // apply spellmod to Done damage
             if (spellProto != null)
@@ -3912,13 +3985,11 @@ namespace Game.Entities
                     modOwner.ApplySpellMod(spellProto, damagetype == DamageEffectType.DOT ? SpellModOp.PeriodicHealingAndDamage : SpellModOp.HealingAndDamage, ref damageF);
             }
 
-            damageF = (damageF + DoneFlatBenefit) * DoneTotalMod;
-
             // bonus result can be negative
-            return (uint)Math.Max(damageF, 0.0f);
+            return (int)Math.Max(damageF, 0.0f);
         }
 
-        public uint MeleeDamageBonusTaken(Unit attacker, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
+        public int MeleeDamageBonusTaken(Unit attacker, int pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
         {
             if (pdamage == 0)
                 return 0;
@@ -3926,7 +3997,7 @@ namespace Game.Entities
             int TakenFlatBenefit = 0;
 
             // ..taken
-            TakenFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)attacker.GetMeleeDamageSchoolMask());
+            TakenFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (uint)attacker.GetMeleeDamageSchool().GetSpellSchoolMask());
 
             if (attType != WeaponAttackType.RangedAttack)
                 TakenFlatBenefit += GetTotalAuraModifier(AuraType.ModMeleeDamageTaken);
@@ -3940,7 +4011,7 @@ namespace Game.Entities
             float TakenTotalMod = 1.0f;
 
             // ..taken
-            TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentTaken, (uint)attacker.GetMeleeDamageSchoolMask());
+            TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentTaken, (uint)attacker.GetMeleeDamageSchool().GetSpellSchoolMask());
 
             // .. taken pct (special attacks)
             if (spellProto != null)
@@ -3957,7 +4028,7 @@ namespace Game.Entities
                 });
 
                 // Mod damage from spell mechanic
-                uint mechanicMask = spellProto.GetAllEffectsMechanicMask();
+                ulong mechanicMask = spellProto.GetAllEffectsMechanicMask();
 
                 // Shred, Maul - "Effects which increase Bleed damage also increase Shred damage"
                 if (spellProto.SpellFamilyName == SpellFamilyNames.Druid && spellProto.SpellFamilyFlags[0].HasAnyFlag(0x00008800u))
@@ -3967,7 +4038,7 @@ namespace Game.Entities
                 {
                     TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMechanicDamageTakenPercent, aurEff =>
                     {
-                        if ((mechanicMask & (1 << (aurEff.GetMiscValue()))) != 0)
+                        if ((mechanicMask & (1ul << (aurEff.GetMiscValue()))) != 0)
                             return true;
                         return false;
                     });
@@ -3991,16 +4062,7 @@ namespace Game.Entities
             if (attType != WeaponAttackType.RangedAttack)
                 TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMeleeDamageTakenPct);
             else
-                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModRangedDamageTakenPct);
-
-            // Versatility
-            Player modOwner = GetSpellModOwner();
-            if (modOwner)
-            {
-                // only 50% of SPELL_AURA_MOD_VERSATILITY for damage reduction
-                float versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;
-                MathFunctions.AddPct(ref TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
-            }
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModRangedDamageTakenPct);            
 
             // Sanctified Wrath (bypass damage reduction)
             if (TakenTotalMod < 1.0f)
@@ -4021,7 +4083,7 @@ namespace Game.Entities
             }
 
             float tmpDamage = (float)(pdamage + TakenFlatBenefit) * TakenTotalMod;
-            return (uint)Math.Max(tmpDamage, 0.0f);
+            return (int)Math.Max(tmpDamage, 0.0f);
         }
 
         bool IsBlockCritical()
@@ -4031,7 +4093,7 @@ namespace Game.Entities
             return false;
         }
 
-        public virtual SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return SpellSchoolMask.None; }
+        public virtual SpellSchools GetMeleeDamageSchool(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return SpellSchools.Normal; }
 
         public virtual void UpdateDamageDoneMods(WeaponAttackType attackType, int skipEnchantSlot = -1)
         {
@@ -4089,6 +4151,17 @@ namespace Game.Entities
             for (var attackType = WeaponAttackType.BaseAttack; attackType < WeaponAttackType.Max; ++attackType)
                 UpdateDamagePctDoneMods(attackType);
         }
+
+        public void AddWorldEffect(int worldEffectId) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WorldEffects), worldEffectId); }
+
+        public void RemoveWorldEffect(int worldEffectId)
+        {
+            int index = m_unitData.WorldEffects.FindIndex(worldEffectId);
+            if (index >= 0)
+                RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WorldEffects), index);
+        }
+
+        public void ClearWorldEffects() { ClearDynamicUpdateFieldValues(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WorldEffects)); }
 
         public CombatManager GetCombatManager() { return m_combatManager; }
 

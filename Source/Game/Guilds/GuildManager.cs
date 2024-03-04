@@ -6,6 +6,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Guilds;
+using Game.Miscellaneous;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,7 +21,7 @@ namespace Game
             GuildStore[guild.GetId()] = guild;
         }
 
-        public void RemoveGuild(ulong guildId)
+        public void RemoveGuild(long guildId)
         {
             GuildStore.Remove(guildId);
         }
@@ -31,7 +32,7 @@ namespace Game
                 guild.SaveToDB();
         }
 
-        public uint GenerateGuildId()
+        public int GenerateGuildId()
         {
             if (NextGuildId >= 0xFFFFFFFE)
             {
@@ -41,7 +42,7 @@ namespace Game
             return NextGuildId++;
         }
 
-        public Guild GetGuildById(ulong guildId)
+        public Guild GetGuildById(long guildId)
         {
             return GuildStore.LookupByKey(guildId);
         }
@@ -52,7 +53,7 @@ namespace Game
             // everywhere else guild id is used
             if (guid.IsGuild())
             {
-                ulong guildId = guid.GetCounter();
+                long guildId = guid.GetCounter();
                 if (guildId != 0)
                     return GetGuildById(guildId);
             }
@@ -140,9 +141,9 @@ namespace Game
                     {
                         do
                         {
-                            uint guildId = result.Read<uint>(0);
+                            int guildId = result.Read<int>(0);
                             Guild guild = GetGuildById(guildId);
-                            if (guild)
+                            if (guild != default)
                                 guild.LoadRankFromDB(result.GetFields());
 
                             ++count;
@@ -178,9 +179,9 @@ namespace Game
                     {
                         do
                         {
-                            uint guildId = result.Read<uint>(0);
+                            int guildId = result.Read<int>(0);
                             Guild guild = GetGuildById(guildId);
-                            if (guild)
+                            if (guild != default)
                                 guild.LoadMemberFromDB(result.GetFields());
 
                             ++count;
@@ -215,7 +216,7 @@ namespace Game
                         {
                             uint guildId = result.Read<uint>(0);
                             Guild guild = GetGuildById(guildId);
-                            if (guild)
+                            if (guild != null)
                                 guild.LoadBankRightFromDB(result.GetFields());
 
                             ++count;
@@ -249,7 +250,7 @@ namespace Game
                         {
                             uint guildId = result.Read<uint>(0);
                             Guild guild = GetGuildById(guildId);
-                            if (guild)
+                            if (guild != null)
                                 guild.LoadEventLogFromDB(result.GetFields());
 
                             ++count;
@@ -283,7 +284,7 @@ namespace Game
                         {
                             uint guildId = result.Read<uint>(0);
                             Guild guild = GetGuildById(guildId);
-                            if (guild)
+                            if (guild != null)
                                 guild.LoadBankEventLogFromDB(result.GetFields());
 
                             ++count;
@@ -314,7 +315,7 @@ namespace Game
                         {
                             uint guildId = result.Read<uint>(0);
                             Guild guild = GetGuildById(guildId);
-                            if (guild)
+                            if (guild != null)
                                 guild.LoadGuildNewsLogFromDB(result.GetFields());
 
                             ++count;
@@ -348,7 +349,7 @@ namespace Game
                         {
                             uint guildId = result.Read<uint>(0);
                             Guild guild = GetGuildById(guildId);
-                            if (guild)
+                            if (guild != null)
                                 guild.LoadBankTabFromDB(result.GetFields());
 
                             ++count;
@@ -379,9 +380,9 @@ namespace Game
                     {
                         do
                         {
-                            ulong guildId = result.Read<ulong>(52);
+                            long guildId = result.Read<long>(52);
                             Guild guild = GetGuildById(guildId);
-                            if (guild)
+                            if (guild != null)
                                 guild.LoadBankItemFromDB(result.GetFields());
 
                             ++count;
@@ -447,9 +448,9 @@ namespace Game
             {
                 GuildReward reward = new();
 
-                reward.ItemID = result.Read<uint>(0);
+                reward.ItemID = result.Read<int>(0);
                 reward.MinGuildRep = result.Read<byte>(1);
-                reward.RaceMask = result.Read<ulong>(2);
+                reward.RaceMask = (RaceMask)(result.Read<long>(2));
                 reward.Cost = result.Read<ulong>(3);
 
                 if (Global.ObjectMgr.GetItemTemplate(reward.ItemID) == null)
@@ -471,7 +472,7 @@ namespace Game
                 {
                     do
                     {
-                        uint requiredAchievementId = reqAchievementResult.Read<uint>(0);
+                        int requiredAchievementId = reqAchievementResult.Read<int>(0);
                         if (!CliDB.AchievementStorage.ContainsKey(requiredAchievementId))
                         {
                             Log.outError(LogFilter.ServerLoading, "Guild rewards constains not existing achievement entry {0}", requiredAchievementId);
@@ -497,21 +498,21 @@ namespace Game
                     guild.ResetTimes(week);
         }
 
-        public void SetNextGuildId(uint Id) { NextGuildId = Id; }
+        public void SetNextGuildId(long Id) { NextGuildId = Id; }
 
         public List<GuildReward> GetGuildRewards() { return guildRewards; }
 
-        uint NextGuildId;
-        Dictionary<ulong, Guild> GuildStore = new();
+        long NextGuildId;
+        Dictionary<long, Guild> GuildStore = new();
         List<GuildReward> guildRewards = new();
     }
 
     public class GuildReward
     {
-        public uint ItemID;
+        public int ItemID;
         public byte MinGuildRep;
-        public ulong RaceMask;
+        public RaceMask RaceMask;
         public ulong Cost;
-        public List<uint> AchievementsRequired = new();
+        public List<int> AchievementsRequired = new();
     }
 }

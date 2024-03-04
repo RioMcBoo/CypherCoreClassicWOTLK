@@ -15,12 +15,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            AreaTriggerID = _worldPacket.ReadUInt32();
+            AreaTriggerID = _worldPacket.ReadInt32();
             Entered = _worldPacket.HasBit();
             FromClient = _worldPacket.HasBit();
         }
 
-        public uint AreaTriggerID;
+        public int AreaTriggerID;
         public bool Entered;
         public bool FromClient;
     }
@@ -84,7 +84,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(TimeToTarget);
             data.WriteUInt32(ElapsedTimeForMovement);
 
-            data.WriteBits(Points.Count, 16);
+            data.WriteBits(Points.Length, 16);
             data.FlushBits();
 
             foreach (Vector3 point in Points)
@@ -93,6 +93,6 @@ namespace Game.Networking.Packets
 
         public uint TimeToTarget;
         public uint ElapsedTimeForMovement;
-        public List<Vector3> Points = new();
+        public Vector3[] Points = new Vector3[0];
     }
 }

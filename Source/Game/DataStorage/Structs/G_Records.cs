@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using System;
 using System.Numerics;
+using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
@@ -19,22 +20,12 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string ModelName;
-        public float[] GeoBox = new float[6];
+        public Vector3 GeoBoxMin;
+        public Vector3 GeoBoxMax;
         public int FileDataID;
         public short ObjectEffectPackageID;
         public float OverrideLootEffectScale;
         public float OverrideNameScale;
-
-        public Vector3 GeoBoxMin
-        {
-            get { return new Vector3(GeoBox[0], GeoBox[1], GeoBox[2]); }
-            set { GeoBox[0] = value.X; GeoBox[1] = value.Y; GeoBox[2] = value.Z; }
-        }
-        public Vector3 GeoBoxMax
-        {
-            get { return new Vector3(GeoBox[3], GeoBox[4], GeoBox[5]); }
-            set { GeoBox[3] = value.X; GeoBox[4] = value.Y; GeoBox[5] = value.Z; }
-        }
     }
 
     public sealed class GameObjectsRecord
@@ -42,40 +33,60 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public Vector3 Pos;
         public float[] Rot = new float[4];
-        public uint Id;
+        public int Id;
         public ushort OwnerID;
-        public uint DisplayID;
+        public int DisplayID;
         public float Scale;
-        public GameObjectTypes TypeID;
+        private byte _typeID;
         public byte PhaseUseFlags;
         public ushort PhaseID;
         public ushort PhaseGroupID;
         public int[] PropValue = new int[8];
+
+        #region Properties
+        public GameObjectTypes TypeID => (GameObjectTypes)_typeID;
+        #endregion
     }
 
     public sealed class GarrAbilityRecord
     {        
-        public string Name;
-        public string Description;
+        public LocalizedString Name;
+        public LocalizedString Description;
         public uint Id;
         public byte GarrAbilityCategoryID;
         public byte GarrFollowerTypeID;
         public int IconFileDataID;
         public ushort FactionChangeGarrAbilityID;
-        public GarrisonAbilityFlags Flags;
+        private ushort _flags;
+
+        #region Properties
+        public GarrisonAbilityFlags Flags => (GarrisonAbilityFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(GarrisonAbilityFlags flag)
+        {
+            return _flags.HasFlag((ushort)flag);
+        }
+
+        public bool HasAnyFlag(GarrisonAbilityFlags flag)
+        {
+            return _flags.HasAnyFlag((ushort)flag);
+        }
+        #endregion
     }
 
     public sealed class GarrBuildingRecord
     {
         public uint Id;
-        public string HordeName;
-        public string AllianceName;
-        public string Description;
-        public string Tooltip;
+        public LocalizedString HordeName;
+        public LocalizedString AllianceName;
+        public LocalizedString Description;
+        public LocalizedString Tooltip;
         public byte GarrTypeID;
         public byte BuildingType;
-        public uint HordeGameObjectID;
-        public uint AllianceGameObjectID;
+        public int HordeGameObjectID;
+        public int AllianceGameObjectID;
         public byte GarrSiteID;
         public byte UpgradeLevel;
         public int BuildSeconds;
@@ -91,7 +102,23 @@ namespace Game.DataStorage
         public ushort GarrAbilityID;
         public ushort BonusGarrAbilityID;
         public ushort GoldCost;
-        public GarrisonBuildingFlags Flags;
+        private byte _flags;
+
+        #region Properties
+        public GarrisonBuildingFlags Flags => (GarrisonBuildingFlags)_flags;
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(GarrisonBuildingFlags flag)
+        {
+            return _flags.HasFlag((byte)flag);
+        }
+
+        public bool HasAnyFlag(GarrisonBuildingFlags flag)
+        {
+            return _flags.HasAnyFlag((byte)flag);
+        }
+        #endregion
     }
 
     public sealed class GarrBuildingPlotInstRecord
@@ -105,9 +132,9 @@ namespace Game.DataStorage
 
     public sealed class GarrClassSpecRecord
     {       
-        public string ClassSpec;
-        public string ClassSpecMale;
-        public string ClassSpecFemale;
+        public LocalizedString ClassSpec;
+        public LocalizedString ClassSpecMale;
+        public LocalizedString ClassSpecFemale;
         public uint Id;
         public ushort UiTextureAtlasMemberID;
         public ushort GarrFollItemSetID;
@@ -117,9 +144,9 @@ namespace Game.DataStorage
 
     public sealed class GarrFollowerRecord
     {        
-        public string HordeSourceText;
-        public string AllianceSourceText;
-        public string TitleName;
+        public LocalizedString HordeSourceText;
+        public LocalizedString AllianceSourceText;
+        public LocalizedString TitleName;
         public uint Id;
         public byte GarrTypeID;
         public byte GarrFollowerTypeID;
@@ -168,7 +195,7 @@ namespace Game.DataStorage
         public Vector2 MapPos;
         public Vector2 WorldPos;
         public uint Id;
-        public byte GarrTypeID;
+        public sbyte GarrTypeID;
         public byte GarrMissionTypeID;
         public byte GarrFollowerTypeID;
         public byte MaxFollowers;
@@ -190,7 +217,7 @@ namespace Game.DataStorage
         public byte FollowerDeathChance;
         public uint AreaID;
         public uint Flags;
-        public int GarrMissionSetID;
+        public uint GarrMissionSetID;
     }
 
     public sealed class GarrPlotRecord
@@ -198,8 +225,8 @@ namespace Game.DataStorage
         public uint Id;
         public string Name;
         public byte PlotType;
-        public uint HordeConstructObjID;
-        public uint AllianceConstructObjID;
+        public int HordeConstructObjID;
+        public int AllianceConstructObjID;
         public byte Flags;
         public byte UiCategoryID;
         public uint[] UpgradeRequirement = new uint[2];
@@ -245,50 +272,32 @@ namespace Game.DataStorage
     public sealed class GarrTalentTreeRecord
     {
         public uint Id;
-        public string Name;
-        public byte GarrTypeID;
+        public LocalizedString Name;
+        public int GarrTypeID;
         public int ClassID;
         public sbyte MaxTiers;
         public sbyte UiOrder;
-        public int Flags;
+        public sbyte Flags;
         public ushort UiTextureKitID;
-        public int GarrTalentTreeType;
-        public int PlayerConditionID;
-        public sbyte FeatureTypeIndex;
-        public sbyte FeatureSubtypeIndex;
-        public int CurrencyID;
     }
 
     public sealed class GemPropertiesRecord
     {
         public uint Id;
         public ushort EnchantId;
-        public SocketColor Type;
+        private int _type;
         public ushort MinItemLevel;
+
+        #region Properties
+        public SocketColor Type => (SocketColor)_type;
+        #endregion
     }
 
     public sealed class GlyphBindableSpellRecord
     {
-        public uint Id;
+        public int Id;
         public int SpellID;
-        public uint GlyphPropertiesID;
-    }
-
-    public sealed class GlyphPropertiesRecord
-    {
-        public uint Id;
-        public uint SpellID;
-        public byte GlyphType;
-        public byte GlyphExclusiveCategoryID;
-        public uint SpellIconFileDataID;
-        public uint GlyphSlotFlags;
-    }
-
-    public sealed class GlyphRequiredSpecRecord
-    {
-        public uint Id;
-        public ushort ChrSpecializationID;
-        public uint GlyphPropertiesID;
+        public int GlyphPropertiesID;
     }
 
     public sealed class GlyphSlotRecord
@@ -296,7 +305,41 @@ namespace Game.DataStorage
         public uint Id;
         public int ToolTip;
         public uint Type;
-    };
+    }
+
+    public sealed class GlyphPropertiesRecord
+    {
+        public int Id;
+        public int SpellID;
+        public byte GlyphType;
+        public byte GlyphExclusiveCategoryID;
+        public int SpellIconFileDataID;
+        public uint GlyphSlotFlags;
+    }
+
+    public sealed class GlyphRequiredSpecRecord
+    {
+        public int Id;
+        public ushort ChrSpecializationID;
+        public int GlyphPropertiesID;
+    }
+
+    public sealed class GossipNPCOptionRecord
+    {
+        public int Id;
+        public int GossipNpcOption;
+        public int LFGDungeonsID;
+        public int Unk341_1;
+        public int Unk341_2;
+        public int Unk341_3;
+        public int Unk341_4;
+        public int Unk341_5;
+        public int Unk341_6;
+        public int Unk341_7;
+        public int Unk341_8;
+        public int Unk341_9;
+        public int GossipOptionID;
+    }
 
     public sealed class GuildColorBackgroundRecord
     {
@@ -325,6 +368,6 @@ namespace Game.DataStorage
     public sealed class GuildPerkSpellsRecord
     {
         public uint Id;
-        public uint SpellID;
+        public int SpellID;
     }
 }

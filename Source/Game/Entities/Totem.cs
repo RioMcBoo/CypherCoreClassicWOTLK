@@ -26,42 +26,47 @@ namespace Game.Entities
                 return;
             }
 
-            if (m_duration <= diff)
+            if (m_duration <= TimeSpan.FromMilliseconds(diff))
             {
                 UnSummon();                                         // remove self
                 return;
             }
-            else
-                m_duration -= diff;
+
+            m_duration -= TimeSpan.FromMilliseconds(diff);
+
             base.Update(diff);
 
         }
 
-        public override void InitStats(uint duration)
+        public override void InitStats(WorldObject summoner, TimeSpan duration)
         {
             // client requires SMSG_TOTEM_CREATED to be sent before adding to world and before removing old totem
             Player owner = GetOwner().ToPlayer();
-            if (owner)
+            if (owner != null)
             {
-                if (m_Properties.Slot >= (int)SummonSlot.Totem && m_Properties.Slot < SharedConst.MaxTotemSlot)
+                int slot = m_Properties.Slot;
+                if (slot == (int)SummonSlot.Any)
+                    slot = FindUsableTotemSlot(owner);
+
+                if (slot >= (int)SummonSlot.Totem && slot < SharedConst.MaxTotemSlot)
                 {
                     TotemCreated packet = new();
                     packet.Totem = GetGUID();
-                    packet.Slot = (byte)(m_Properties.Slot - (int)SummonSlot.Totem);
+                    packet.Slot = (byte)(slot - (int)SummonSlot.Totem);
                     packet.Duration = duration;
                     packet.SpellID = (uint)m_unitData.CreatedBySpell.GetValue();
                     owner.ToPlayer().SendPacket(packet);
                 }
 
                 // set display id depending on caster's race
-                uint totemDisplayId = Global.SpellMgr.GetModelForTotem((uint)m_unitData.CreatedBySpell.GetValue(), owner.GetRace());
+                int totemDisplayId = Global.SpellMgr.GetModelForTotem(m_unitData.CreatedBySpell, owner.GetRace());
                 if (totemDisplayId != 0)
                     SetDisplayId(totemDisplayId);
                 else
                     Log.outDebug(LogFilter.Misc, $"Totem with entry {GetEntry()}, does not have a specialized model for spell {m_unitData.CreatedBySpell} and race {owner.GetRace()}. Set to default.");
             }
 
-            base.InitStats(duration);
+            base.InitStats(summoner, duration);
 
             // Get spell cast by totem
             SpellInfo totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell(), GetMap().GetDifficultyID());
@@ -72,7 +77,7 @@ namespace Game.Entities
             m_duration = duration;
         }
 
-        public override void InitSummon()
+        public override void InitSummon(WorldObject summoner)
         {
             if (m_type == TotemType.Passive && GetSpell() != 0)
                 CastSpell(this, GetSpell(), true);
@@ -111,17 +116,17 @@ namespace Game.Entities
             {
                 owner.SendAutoRepeatCancel(this);
 
-                SpellInfo spell = Global.SpellMgr.GetSpellInfo((uint)m_unitData.CreatedBySpell.GetValue(), GetMap().GetDifficultyID());
+                SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
                 if (spell != null)
                     GetSpellHistory().SendCooldownEvent(spell, 0, null, false);
 
                 Group group = owner.GetGroup();
-                if (group)
+                if (group != null)
                 {
                     for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player target = refe.GetSource();
-                        if (target && target.IsInMap(owner) && group.SameSubGroup(owner, target))
+                        if (target != null && target.IsInMap(owner) && group.SameSubGroup(owner, target))
                             target.RemoveAurasDueToSpell(GetSpell(), GetGUID());
                     }
                 }
@@ -154,11 +159,11 @@ namespace Game.Entities
             return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster, requireImmunityPurgesEffectAttribute);
         }
 
-        public uint GetSpell(byte slot = 0) { return m_spells[slot]; }
+        public int GetSpell(byte slot = 0) { return m_spells[slot]; }
 
-        public uint GetTotemDuration() { return m_duration; }
+        public TimeSpan GetTotemDuration() { return m_duration; }
 
-        public void SetTotemDuration(uint duration) { m_duration = duration; }
+        public void SetTotemDuration(TimeSpan duration) { m_duration = duration; }
 
         public TotemType GetTotemType() { return m_type; }
 
@@ -174,7 +179,7 @@ namespace Game.Entities
         public override void UpdateDamagePhysical(WeaponAttackType attType) { }
 
         TotemType m_type;
-        uint m_duration;
+        TimeSpan m_duration;
     }
 
     public enum TotemType

@@ -16,16 +16,19 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(UnspentTalentPoints);
             _worldPacket.WriteUInt8(ActiveGroup);
-            _worldPacket.WriteUInt32((uint)TalentGroupInfos.Count);
+            _worldPacket.WriteInt32(TalentGroupInfos.Count);
 
             foreach (var talentGroupInfo in TalentGroupInfos)
                 talentGroupInfo.Write(_worldPacket);
+
+            _worldPacket.WriteBit(IsPetTalents);
         }
 
         public uint UnspentTalentPoints;
         public byte ActiveGroup;
+        public bool IsPetTalents;
         public List<TalentGroupInfo> TalentGroupInfos = new();        
-    }
+    }    
 
     class LearnTalents : ClientPacket
     {
@@ -33,33 +36,14 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            TalentID = _worldPacket.ReadInt32();
-            Rank = _worldPacket.ReadUInt16();
+            int count = _worldPacket.ReadBits<int>(6);
+            for (int i = 0; i < count; i++)
+                Talents.Add(_worldPacket.ReadUInt16());
         }
 
         public int TalentID;
-        public ushort Rank;
-    }
-
-    class LearnTalentsGroup : ClientPacket
-    {
-        public LearnTalentsGroup(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            count = _worldPacket.ReadUInt32();
-
-            for (int i = 0; i < count; i++)
-            {
-                TalentInfo talentInfo = new TalentInfo();
-                talentInfo.Read(_worldPacket);
-                talentInfos.Add(talentInfo);
-            }
-        }
-
-        public uint count;
-        public List<TalentInfo> talentInfos= new();
-    }
+        public Array<ushort> Talents = new(PlayerConst.MaxTalentTiers);
+    }    
 
     class RespecWipeConfirm : ServerPacket
     {
@@ -149,7 +133,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteBits(Reason, 4);
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteInt32(Talents.Count);
 
             foreach (var pvpTalent in Talents)
@@ -157,16 +141,59 @@ namespace Game.Networking.Packets
         }
 
         public uint Reason;
-        public uint SpellID;
+        public int SpellID;
         public List<PvPTalent> Talents = new();
     }
 
-    //Structs
+    class LearnTalent : ClientPacket
+    {
+        public LearnTalent(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TalentID = _worldPacket.ReadInt32();
+            Rank = _worldPacket.ReadUInt16();
+        }
+
+        public int TalentID;
+        public ushort Rank;
+    }
+
+    class LearnPreviewTalents : ClientPacket
+    {
+        public LearnPreviewTalents(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            count = _worldPacket.ReadUInt32();
+
+            for (int i = 0; i < count; i++)
+            {
+                TalentInfo talentInfo = new TalentInfo();
+                talentInfo.Read(_worldPacket);
+                talentInfos.Add(talentInfo);
+            }
+        }
+
+        public uint count;
+        public Array<TalentInfo> talentInfos = new(60);
+    }
+
+    class RemoveGlyph : ClientPacket
+    {
+        public RemoveGlyph(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            _worldPacket.ReadUInt8();
+        }
+
+        public byte GlyphSlot;
+    }
+
+//Structs
     public struct PvPTalent
     {
-        public ushort PvPTalentID;
-        public byte Slot;
-
         public PvPTalent(WorldPacket data)
         {
             PvPTalentID = data.ReadUInt16();
@@ -178,6 +205,9 @@ namespace Game.Networking.Packets
             data.WriteUInt16(PvPTalentID);
             data.WriteUInt8(Slot);
         }
+        
+        public ushort PvPTalentID;
+        public byte Slot;
     }
 
     struct GlyphBinding
@@ -200,28 +230,30 @@ namespace Game.Networking.Packets
 
     public struct TalentGroupInfo
     {
+        public TalentGroupInfo()
+        {
+            Talents = new();
+        }
+
         public void Write(WorldPacket data)
         {
-            data.WriteUInt8((byte)TalentInfos.Count);
-            data.WriteUInt32((uint)TalentInfos.Count);
+            data.WriteUInt8((byte)Talents.Count);
+            data.WriteUInt32((uint)Talents.Count);
+
             data.WriteUInt8(PlayerConst.MaxGlyphSlotIndex);
             data.WriteUInt32(PlayerConst.MaxGlyphSlotIndex);
+
             data.WriteUInt8(SpecID);
-            foreach (var talentInfo in TalentInfos)
+
+            foreach (var talentInfo in Talents)
                 talentInfo.Write(data);
-            foreach (var glyphInfo in GlyphInfo)
-                data.WriteUInt16(glyphInfo);
+            foreach (var glyphInfo in GlyphIDs)
+                data.WriteUInt16((ushort)glyphInfo);
         }
 
         public byte SpecID;
-        public List<TalentInfo> TalentInfos;
-        public ushort[] GlyphInfo;
-
-        public TalentGroupInfo()
-        {
-            GlyphInfo = new ushort[PlayerConst.MaxGlyphSlotIndex];
-            TalentInfos = new();
-        }
+        public List<TalentInfo> Talents;
+        public uint[] GlyphIDs;
     }
 
     public struct TalentInfo

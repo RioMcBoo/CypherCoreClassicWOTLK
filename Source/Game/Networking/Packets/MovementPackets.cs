@@ -11,328 +11,16 @@ using System.Numerics;
 
 namespace Game.Networking.Packets
 {
-    public static class MovementExtensions
-    {
-        public static void ReadTransportInfo(WorldPacket data, ref MovementInfo.TransportInfo transportInfo)
-        {
-            transportInfo.guid = data.ReadPackedGuid();                 // Transport Guid
-            transportInfo.pos.posX = data.ReadFloat();
-            transportInfo.pos.posY = data.ReadFloat();
-            transportInfo.pos.posZ = data.ReadFloat();
-            transportInfo.pos.Orientation = data.ReadFloat();
-            transportInfo.seat = data.ReadInt8();                 // VehicleSeatIndex
-            transportInfo.time = data.ReadUInt32();                 // MoveTime
-
-            bool hasPrevTime = data.HasBit();
-            bool hasVehicleId = data.HasBit();
-
-            if (hasPrevTime)
-                transportInfo.prevTime = data.ReadUInt32();         // PrevMoveTime
-
-            if (hasVehicleId)
-                transportInfo.vehicleId = data.ReadUInt32();        // VehicleRecID
-        }
-
-        public static void WriteTransportInfo(WorldPacket data, MovementInfo.TransportInfo transportInfo)
-        {
-            bool hasPrevTime = transportInfo.prevTime != 0;
-            bool hasVehicleId = transportInfo.vehicleId != 0;
-
-            data.WritePackedGuid(transportInfo.guid);                 // Transport Guid
-            data.WriteFloat(transportInfo.pos.GetPositionX());
-            data.WriteFloat(transportInfo.pos.GetPositionY());
-            data.WriteFloat(transportInfo.pos.GetPositionZ());
-            data.WriteFloat(transportInfo.pos.GetOrientation());
-            data.WriteInt8(transportInfo.seat);                 // VehicleSeatIndex
-            data.WriteUInt32(transportInfo.time);                 // MoveTime
-
-            data.WriteBit(hasPrevTime);
-            data.WriteBit(hasVehicleId);
-            data.FlushBits();
-
-            if (hasPrevTime)
-                data.WriteUInt32(transportInfo.prevTime);         // PrevMoveTime
-
-            if (hasVehicleId)
-                data.WriteUInt32(transportInfo.vehicleId);        // VehicleRecID
-        }
-
-        public static MovementInfo ReadMovementInfo(WorldPacket data)
-        {
-            var movementInfo = new MovementInfo();
-            movementInfo.Guid = data.ReadPackedGuid();
-            movementInfo.SetMovementFlags((MovementFlag)data.ReadUInt32());
-            movementInfo.SetMovementFlags2((MovementFlag2)data.ReadUInt32());
-            movementInfo.SetExtraMovementFlags2((MovementFlags3)data.ReadUInt32());
-            movementInfo.Time = data.ReadUInt32();
-            float x = data.ReadFloat();
-            float y = data.ReadFloat();
-            float z = data.ReadFloat();
-            float o = data.ReadFloat();
-
-            movementInfo.Pos.Relocate(x, y, z, o);
-            movementInfo.Pitch = data.ReadFloat();
-            movementInfo.stepUpStartElevation = data.ReadFloat();
-
-            uint removeMovementForcesCount = data.ReadUInt32();
-
-            uint moveIndex = data.ReadUInt32();
-
-            for (uint i = 0; i < removeMovementForcesCount; ++i)
-            {
-                data.ReadPackedGuid();
-            }
-
-            // ResetBitReader
-
-            bool hasTransport = data.HasBit();
-            bool hasFall = data.HasBit();
-            bool hasSpline = data.HasBit(); // todo 6.x read this infos
-
-            data.ReadBit(); // HeightChangeFailed
-            data.ReadBit(); // RemoteTimeValid
-            bool hasInertia = data.HasBit();
-
-            if (hasTransport)
-                ReadTransportInfo(data, ref movementInfo.transport);
-
-            if (hasInertia)
-            {
-                MovementInfo.Inertia inertia = new();
-                inertia.guid = data.ReadPackedGuid();
-                inertia.force = data.ReadPosition();
-                inertia.lifetime = data.ReadUInt32();
-
-                movementInfo.inertia = inertia;
-            }
-
-            if (hasFall)
-            {
-                movementInfo.jump.fallTime = data.ReadUInt32();
-                movementInfo.jump.zspeed = data.ReadFloat();
-
-                // ResetBitReader
-
-                bool hasFallDirection = data.HasBit();
-                if (hasFallDirection)
-                {
-                    movementInfo.jump.sinAngle = data.ReadFloat();
-                    movementInfo.jump.cosAngle = data.ReadFloat();
-                    movementInfo.jump.xyspeed = data.ReadFloat();
-                }
-            }
-
-            return movementInfo;
-        }
-
-        public static void WriteMovementInfo(WorldPacket data, MovementInfo movementInfo)
-        {
-            bool hasTransportData = !movementInfo.transport.guid.IsEmpty();
-            bool hasFallDirection = movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar);
-            bool hasFallData = hasFallDirection || movementInfo.jump.fallTime != 0;
-            bool hasSpline = false; // todo 6.x send this infos
-            bool hasInertia = movementInfo.inertia.HasValue;
-
-            data.WritePackedGuid(movementInfo.Guid);
-            data.WriteUInt32((uint)movementInfo.GetMovementFlags());
-            data.WriteUInt32((uint)movementInfo.GetMovementFlags2());
-            data.WriteUInt32((uint)movementInfo.GetExtraMovementFlags2());
-            data.WriteUInt32(movementInfo.Time);
-            data.WriteFloat(movementInfo.Pos.GetPositionX());
-            data.WriteFloat(movementInfo.Pos.GetPositionY());
-            data.WriteFloat(movementInfo.Pos.GetPositionZ());
-            data.WriteFloat(movementInfo.Pos.GetOrientation());
-            data.WriteFloat(movementInfo.Pitch);
-            data.WriteFloat(movementInfo.stepUpStartElevation);
-
-            uint removeMovementForcesCount = 0;
-            data.WriteUInt32(removeMovementForcesCount);
-
-            uint moveIndex = 0;
-            data.WriteUInt32(moveIndex);
-
-            /*for (public uint i = 0; i < removeMovementForcesCount; ++i)
-            {
-                _worldPacket << ObjectGuid;
-            }*/
-
-            data.WriteBit(hasTransportData);
-            data.WriteBit(hasFallData);
-            data.WriteBit(hasSpline);
-            data.WriteBit(false); // HeightChangeFailed
-            data.WriteBit(false); // RemoteTimeValid
-            data.WriteBit(hasInertia);
-            data.FlushBits();
-
-            if (hasTransportData)
-                WriteTransportInfo(data, movementInfo.transport);
-
-            if (hasInertia)
-            {
-                data.WritePackedGuid(movementInfo.inertia.Value.guid);
-                data.WriteXYZ(movementInfo.inertia.Value.force);
-                data.WriteUInt32(movementInfo.inertia.Value.lifetime);
-            }
-
-            if (hasFallData)
-            {
-                data.WriteUInt32(movementInfo.jump.fallTime);
-                data.WriteFloat(movementInfo.jump.zspeed);
-
-                data.WriteBit(hasFallDirection);
-                data.FlushBits();
-                if (hasFallDirection)
-                {
-                    data.WriteFloat(movementInfo.jump.sinAngle);
-                    data.WriteFloat(movementInfo.jump.cosAngle);
-                    data.WriteFloat(movementInfo.jump.xyspeed);
-                }
-            }
-        }
-
-        public static void WriteCreateObjectSplineDataBlock(MoveSpline moveSpline, WorldPacket data)
-        {
-            data.WriteUInt32(moveSpline.GetId());                                         // ID
-
-            if (!moveSpline.IsCyclic())                                                 // Destination
-                data.WriteVector3(moveSpline.FinalDestination());
-            else
-                data.WriteVector3(Vector3.Zero);
-
-            bool hasSplineMove = data.WriteBit(!moveSpline.Finalized() && !moveSpline.splineIsFacingOnly);
-            data.FlushBits();
-
-            if (hasSplineMove)
-            {
-                data.WriteUInt32((uint)moveSpline.splineflags.Flags);   // SplineFlags
-                data.WriteInt32(moveSpline.TimePassed());               // Elapsed
-                data.WriteInt32(moveSpline.Duration());                // Duration
-                data.WriteFloat(1.0f);                                  // DurationModifier
-                data.WriteFloat(1.0f);                                  // NextDurationModifier
-                data.WriteBits((byte)moveSpline.facing.type, 2);        // Face
-                bool hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
-                data.WriteBits(moveSpline.GetPath().Length, 16);
-                data.WriteBit(false);                                       // HasSplineFilter
-                data.WriteBit(moveSpline.spell_effect_extra != null);  // HasSpellEffectExtraData
-                bool hasJumpExtraData = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0));
-                data.WriteBit(moveSpline.anim_tier != null);                   // HasAnimTierTransition
-                data.WriteBit(false);                                                   // HasUnknown901
-                data.FlushBits();
-
-                //if (HasSplineFilterKey)
-                //{
-                //    data << uint32(FilterKeysCount);
-                //    for (var i = 0; i < FilterKeysCount; ++i)
-                //    {
-                //        data << float(In);
-                //        data << float(Out);
-                //    }
-
-                //    data.WriteBits(FilterFlags, 2);
-                //    data.FlushBits();
-                //}
-
-                switch (moveSpline.facing.type)
-                {
-                    case MonsterMoveType.FacingSpot:
-                        data.WriteVector3(moveSpline.facing.f);         // FaceSpot
-                        break;
-                    case MonsterMoveType.FacingTarget:
-                        data.WritePackedGuid(moveSpline.facing.target); // FaceGUID
-                        break;
-                    case MonsterMoveType.FacingAngle:
-                        data.WriteFloat(moveSpline.facing.angle);       // FaceDirection
-                        break;
-                }
-
-                if (hasFadeObjectTime)
-                    data.WriteInt32(moveSpline.effect_start_time);     // FadeObjectTime
-
-                foreach (var vec in moveSpline.GetPath())
-                    data.WriteVector3(vec);
-
-                if (moveSpline.spell_effect_extra != null)
-                {
-                    data.WritePackedGuid(moveSpline.spell_effect_extra.Target);
-                    data.WriteUInt32(moveSpline.spell_effect_extra.SpellVisualId);
-                    data.WriteUInt32(moveSpline.spell_effect_extra.ProgressCurveId);
-                    data.WriteUInt32(moveSpline.spell_effect_extra.ParabolicCurveId);
-                }
-
-                if (hasJumpExtraData)
-                {
-                    data.WriteFloat(moveSpline.vertical_acceleration);
-                    data.WriteInt32(moveSpline.effect_start_time);
-                    data.WriteUInt32(0);                                                  // Duration (override)
-                }
-
-                if (moveSpline.anim_tier != null)
-                {
-                    data.WriteUInt32(moveSpline.anim_tier.TierTransitionId);
-                    data.WriteInt32(moveSpline.effect_start_time);
-                    data.WriteUInt32(0);
-                    data.WriteUInt8(moveSpline.anim_tier.AnimTier);
-                }
-            }
-        }
-
-        public static void WriteCreateObjectAreaTriggerSpline(Spline<int> spline, WorldPacket data)
-        {
-            data.WriteBits(spline.GetPoints().Length, 16);
-            foreach (var point in spline.GetPoints())
-                data.WriteVector3(point);
-        }
-
-        public static void WriteMovementForceWithDirection(MovementForce movementForce, WorldPacket data, Position objectPosition = null)
-        {
-            data.WritePackedGuid(movementForce.ID);
-            data.WriteVector3(movementForce.Origin);
-            if (movementForce.Type == MovementForceType.Gravity && objectPosition != null) // gravity
-            {
-                Vector3 direction = Vector3.Zero;
-                if (movementForce.Magnitude != 0.0f)
-                {
-                    Position tmp = new(movementForce.Origin.X - objectPosition.GetPositionX(),
-                        movementForce.Origin.Y - objectPosition.GetPositionY(),
-                        movementForce.Origin.Z - objectPosition.GetPositionZ());
-                    float lengthSquared = tmp.GetExactDistSq(0.0f, 0.0f, 0.0f);
-                    if (lengthSquared > 0.0f)
-                    {
-                        float mult = 1.0f / (float)Math.Sqrt(lengthSquared) * movementForce.Magnitude;
-                        tmp.posX *= mult;
-                        tmp.posY *= mult;
-                        tmp.posZ *= mult;
-                        float minLengthSquared = (tmp.GetPositionX() * tmp.GetPositionX() * 0.04f) +
-                            (tmp.GetPositionY() * tmp.GetPositionY() * 0.04f) +
-                            (tmp.GetPositionZ() * tmp.GetPositionZ() * 0.04f);
-                        if (lengthSquared > minLengthSquared)
-                            direction = new Vector3(tmp.posX, tmp.posY, tmp.posZ);
-                    }
-                }
-
-                data.WriteVector3(direction);
-            }
-            else
-                data.WriteVector3(movementForce.Direction);
-
-            data.WriteUInt32(movementForce.TransportID);
-            data.WriteFloat(movementForce.Magnitude);
-            data.WriteInt32(movementForce.Unused910);
-            data.WriteBits((byte)movementForce.Type, 2);
-            data.FlushBits();
-        }
-    }
-
     public class ClientPlayerMovement : ClientPacket
     {
         public ClientPlayerMovement(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
-            Status = MovementExtensions.ReadMovementInfo(_worldPacket);
+            Status.Read(_worldPacket);
         }
 
-        public MovementInfo Status;
+        public MovementInfo Status = new();
     }
 
     public class MoveUpdate : ServerPacket
@@ -341,7 +29,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
+            Status.Write(_worldPacket);
         }
 
         public MovementInfo Status;
@@ -489,7 +177,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid MoverGUID;
-        public uint SequenceIndex = 0; // Unit movement packet index, incremented each time
+        public uint SequenceIndex; // Unit movement packet index, incremented each time
         public float Speed = 1.0f;
     }
 
@@ -499,7 +187,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
+            Status.Write(_worldPacket);
             _worldPacket.WriteFloat(Speed);
         }
 
@@ -530,7 +218,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid MoverGUID;
-        public uint SequenceIndex = 0; // Unit movement packet index, incremented each time
+        public uint SequenceIndex; // Unit movement packet index, incremented each time
     }
 
     public class TransferPending : ServerPacket
@@ -573,16 +261,16 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt8(Arg);
-            _worldPacket.WriteUInt32(MapDifficultyXConditionID);
-            _worldPacket.WriteBits(TransfertAbort, 6);
+            _worldPacket.WriteInt32(MapDifficultyXConditionID);
+            _worldPacket.WriteBits((uint)TransfertAbort, 6);
             _worldPacket.FlushBits();
         }
 
-        public uint MapID;
+        public int MapID;
         public byte Arg;
-        public uint MapDifficultyXConditionID;
+        public int MapDifficultyXConditionID;
         public TransferAbortReason TransfertAbort;
     }
 
@@ -592,13 +280,13 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteInt32(MapID);
             Loc.Write(_worldPacket);
             _worldPacket.WriteUInt32(Reason);
             _worldPacket.WriteXYZ(MovementOffset);
         }
 
-        public uint MapID;
+        public int MapID;
         public uint Reason;
         public TeleportLocation Loc = new();
         public Position MovementOffset;    // Adjusts all pending movement events by this offset
@@ -654,7 +342,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
+            Status.Write(_worldPacket);
 
             _worldPacket.WriteInt32(MovementForces != null ? MovementForces.Count : 0);
             _worldPacket.WriteBit(WalkSpeed.HasValue);
@@ -779,12 +467,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
+            Status.Write(_worldPacket);
             Force.Write(_worldPacket);
         }
 
-        public MovementInfo Status = new();
-        public MovementForce Force = new();
+        public MovementInfo Status;
+        public MovementForce Force;
     }
 
     class MoveUpdateRemoveMovementForce : ServerPacket
@@ -793,11 +481,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
+            Status.Write(_worldPacket);
             _worldPacket.WritePackedGuid(TriggerGUID);
         }
 
-        public MovementInfo Status = new();
+        public MovementInfo Status;
         public ObjectGuid TriggerGUID;
     }
 
@@ -813,8 +501,8 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid MoverGUID;
-        int AckIndex;
-        int MoveTime;
+        public int AckIndex;
+        public int MoveTime;
     }
 
     public class MovementAckMessage : ClientPacket
@@ -826,7 +514,7 @@ namespace Game.Networking.Packets
             Ack.Read(_worldPacket);
         }
 
-        public MovementAck Ack;
+        public MovementAck Ack = new();
     }
 
     public class MovementSpeedAck : ClientPacket
@@ -839,32 +527,32 @@ namespace Game.Networking.Packets
             Speed = _worldPacket.ReadFloat();
         }
 
-        public MovementAck Ack;
+        public MovementAck Ack = new();
         public float Speed;
     }
 
     public class SetActiveMover : ClientPacket
     {
-        public ObjectGuid ActiveMover;
-
         public SetActiveMover(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             ActiveMover = _worldPacket.ReadPackedGuid();
         }
+        
+        public ObjectGuid ActiveMover;
     }
 
     public class MoveSetActiveMover : ServerPacket
     {
-        public ObjectGuid MoverGUID;
-
         public MoveSetActiveMover() : base(ServerOpcodes.MoveSetActiveMover) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
         }
+        
+        public ObjectGuid MoverGUID;
     }
 
     class MoveKnockBack : ServerPacket
@@ -881,7 +569,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid MoverGUID;
         public Vector2 Direction;
-        public MoveKnockBackSpeeds Speeds;
+        public MoveKnockBackSpeeds Speeds = new();
         public uint SequenceIndex;
     }
 
@@ -891,7 +579,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
+            Status.Write(_worldPacket);
         }
 
         public MovementInfo Status;
@@ -911,7 +599,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public MovementAck Ack;
+        public MovementAck Ack = new();
         public MoveKnockBackSpeeds? Speeds;
     }
 
@@ -945,7 +633,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
+            Status.Write(_worldPacket);
             _worldPacket.WriteFloat(Height);
             _worldPacket.WriteFloat(Scale);
         }
@@ -967,7 +655,7 @@ namespace Game.Networking.Packets
             Reason = (UpdateCollisionHeightReason)_worldPacket.ReadUInt8();
         }
 
-        public MovementAck Data;
+        public MovementAck Data = new();
         public UpdateCollisionHeightReason Reason;
         public uint MountDisplayID;
         public float Height = 1.0f;
@@ -1026,8 +714,8 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool On;
         public ObjectGuid Guid;
+        public bool On;        
     }
 
     class MoveSplineDone : ClientPacket
@@ -1036,11 +724,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Status = MovementExtensions.ReadMovementInfo(_worldPacket);
+            Status.Read(_worldPacket);
             SplineID = _worldPacket.ReadInt32();
         }
 
-        public MovementInfo Status;
+        public MovementInfo Status = new();
         public int SplineID;
     }
 
@@ -1064,7 +752,7 @@ namespace Game.Networking.Packets
         public SummonReason Reason;
         public bool SkipStartingArea;
 
-        public enum SummonReason
+        public enum SummonReason : byte
         {
             Spell = 0,
             Scenario = 1
@@ -1142,6 +830,12 @@ namespace Game.Networking.Packets
             public float InitVertSpeed;
         }
 
+        public class SpeedRange
+        {
+            public float Min;
+            public float Max;
+        }
+
         public class MoveStateChange
         {
             public MoveStateChange(ServerOpcodes messageId, uint sequenceIndex)
@@ -1155,12 +849,13 @@ namespace Game.Networking.Packets
                 data.WriteUInt16((ushort)MessageID);
                 data.WriteUInt32(SequenceIndex);
                 data.WriteBit(Speed.HasValue);
+                data.WriteBit(SpeedRange != null);
                 data.WriteBit(KnockBack.HasValue);
                 data.WriteBit(VehicleRecID.HasValue);
                 data.WriteBit(CollisionHeight.HasValue);
                 data.WriteBit(@MovementForce != null);
                 data.WriteBit(MovementForceGUID.HasValue);
-                data.WriteBit(MovementInertiaGUID.HasValue);
+                data.WriteBit(MovementInertiaID.HasValue);
                 data.WriteBit(MovementInertiaLifetimeMs.HasValue);
                 data.FlushBits();
 
@@ -1169,6 +864,12 @@ namespace Game.Networking.Packets
 
                 if (Speed.HasValue)
                     data.WriteFloat(Speed.Value);
+
+                if (SpeedRange != null)
+                {
+                    data.WriteFloat(SpeedRange.Min);
+                    data.WriteFloat(SpeedRange.Max);
+                }
 
                 if (KnockBack.HasValue)
                 {
@@ -1184,15 +885,15 @@ namespace Game.Networking.Packets
                 {
                     data.WriteFloat(CollisionHeight.Value.Height);
                     data.WriteFloat(CollisionHeight.Value.Scale);
-                    data.WriteBits(CollisionHeight.Value.Reason, 2);
+                    data.WriteBits((byte)CollisionHeight.Value.Reason, 2);
                     data.FlushBits();
                 }
 
                 if (MovementForceGUID.HasValue)
                     data.WritePackedGuid(MovementForceGUID.Value);
 
-                if (MovementInertiaGUID.HasValue)
-                    data.WritePackedGuid(MovementInertiaGUID.Value);
+                if (MovementInertiaID.HasValue)
+                    data.WriteInt32(MovementInertiaID.Value);
 
                 if (MovementInertiaLifetimeMs.HasValue)
                     data.WriteUInt32(MovementInertiaLifetimeMs.Value);
@@ -1201,12 +902,13 @@ namespace Game.Networking.Packets
             public ServerOpcodes MessageID;
             public uint SequenceIndex;
             public float? Speed;
+            public SpeedRange SpeedRange;
             public KnockBackInfo? KnockBack;
             public int? VehicleRecID;
             public CollisionHeightInfo? CollisionHeight;
             public MovementForce MovementForce;
             public ObjectGuid? MovementForceGUID;
-            public ObjectGuid? MovementInertiaGUID;
+            public int? MovementInertiaID;
             public uint? MovementInertiaLifetimeMs;
         }
     }
@@ -1224,15 +926,15 @@ namespace Game.Networking.Packets
     }
     
     //Structs
-    public struct MovementAck
+    public class MovementAck
     {
         public void Read(WorldPacket data)
         {
-            Status = MovementExtensions.ReadMovementInfo(data);
+            Status.Read(data);
             AckIndex = data.ReadInt32();
         }
 
-        public MovementInfo Status;
+        public MovementInfo Status = new();
         public int AckIndex;
     }
 
@@ -1258,7 +960,8 @@ namespace Game.Networking.Packets
             data.WriteFloat(DistToPrevFilterKey);
             data.WriteInt16(AddedToStart);
 
-            FilterKeys.ForEach(p => p.Write(data));
+            foreach (var filterKey in FilterKeys)
+                filterKey.Write(data);
 
             data.WriteBits(FilterFlags, 2);
             data.FlushBits();
@@ -1314,7 +1017,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(TierTransitionID);
-            data .WriteUInt32(StartTime);
+            data.WriteUInt32(StartTime);
             data.WriteUInt32(EndTime);
             data.WriteUInt8(AnimTier);
         }

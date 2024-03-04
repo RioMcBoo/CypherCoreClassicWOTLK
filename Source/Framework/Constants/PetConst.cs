@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Framework.Constants
 {
     public enum CharmType
@@ -29,6 +31,13 @@ namespace Framework.Constants
         NotInSlot = -1,                       // for avoid conflict with stable size grow will use negative value
     }
 
+    [Flags]
+    public enum PetStableFlags
+    {
+        Active = 0x1,
+        Inactive = 0x2
+    }
+
     public enum PetSpellState
     {
         Unchanged = 0,
@@ -44,7 +53,7 @@ namespace Framework.Constants
         Talent = 2
     }
 
-    public enum PetActionFeedback
+    public enum PetActionFeedback : byte
     {
         None = 0,
         Dead = 1,
@@ -59,7 +68,7 @@ namespace Framework.Constants
         Attack = 1
     }
 
-    public enum CommandStates
+    public enum CommandStates : byte
     {
         Stay = 0,
         Follow = 1,
@@ -68,7 +77,7 @@ namespace Framework.Constants
         MoveTo = 4
     }
 
-    public enum PetNameInvalidReason
+    public enum PetNameInvalidReason : byte
     {
         // custom, not send
         Success = 0,
@@ -88,23 +97,6 @@ namespace Framework.Constants
         DeclensionDoesntMatchBaseName = 16
     }
 
-    public enum PetStableinfo : byte
-    {
-        Active = 1,
-        Inactive = 2
-    }
-
-    public enum StableResult
-    {
-        NotEnoughMoney = 1,                              // "you don't have enough money"
-        InvalidSlot = 3,                              // "That slot is locked"
-        StableSuccess = 8,                              // stable success
-        UnstableSuccess = 9,                              // unstable/swap success
-        BuySlotSuccess = 10,                             // buy slot success
-        CantControlExotic = 11,                             // "you are unable to control exotic creatures"
-        InternalError = 12,                             // "Internal pet error"
-    }
-
     public enum PetTameResult
     {
         Ok = 0,
@@ -122,5 +114,16 @@ namespace Framework.Constants
         CantControlExotic = 12,
         InvalidSlot = 13,
         EliteTooHighLevel = 14
+    }
+
+    public enum StableResult : byte
+    {
+        NotEnoughMoney = 1,                              // "you don't have enough money"
+        InvalidSlot = 3,                              // "That slot is locked"
+        StableSuccess = 8,                              // stable success
+        UnstableSuccess = 9,                              // unstable/swap success
+        BuySlotSuccess = 10,                             // buy slot success
+        CantControlExotic = 11,                             // "you are unable to control exotic creatures"
+        InternalError = 12,                             // "Internal pet error"
     }
 }

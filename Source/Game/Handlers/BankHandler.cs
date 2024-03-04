@@ -23,10 +23,10 @@ namespace Game
 
             ItemPos itemPos = new(packet.Slot, packet.Bag);
             Item item = GetPlayer().GetItemByPos(itemPos);
-            if (!item)
+            if (item == null)
                 return;
 
-            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<ItemPosCount> dest, item, false);
+            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item, false);
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, item);
@@ -48,9 +48,9 @@ namespace Game
         void HandleBankerActivate(Hello packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Banker, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
-                Log.outError(LogFilter.Network, "HandleBankerActivate: {0} not found or you can not interact with him.", packet.Unit.ToString());
+                Log.outError(LogFilter.Network, $"HandleBankerActivate: {packet.Unit} not found or you can not interact with him.");
                 return;
             }
 
@@ -71,12 +71,12 @@ namespace Game
 
             ItemPos itemPos = new(packet.Slot, packet.Bag);
             Item item = GetPlayer().GetItemByPos(itemPos);
-            if (!item)
+            if (item == null)
                 return;
 
             if (itemPos.IsBankPos)                 // moving from bank to inventory
             {
-                InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, item);
+                InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);
@@ -85,12 +85,12 @@ namespace Game
 
                 GetPlayer().RemoveItem(itemPos, true);
                 Item storedItem = GetPlayer().StoreItem(dest, item, true);
-                if (storedItem)
+                if (storedItem != null)
                     GetPlayer().ItemAddedQuestCheck(storedItem.GetEntry(), storedItem.GetCount());
             }
             else                                                    // moving from inventory to bank
             {
-                InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<ItemPosCount> dest, item, false);
+                InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item, false);
                 if (msg != InventoryResult.Ok)
                 {
                     GetPlayer().SendEquipError(msg, item);
@@ -107,7 +107,7 @@ namespace Game
         {
             if (!CanUseBank(packet.Guid))
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleBuyBankSlot - {0} not found or you can't interact with him.", packet.Guid.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleBuyBankSlot - {packet.Guid} not found or you can't interact with him.");
                 return;
             }
 
@@ -132,9 +132,11 @@ namespace Game
         {
             _player.PlayerTalkClass.GetInteractionData().Reset();
             _player.PlayerTalkClass.GetInteractionData().SourceGuid = guid;
-            ShowBank packet = new();
-            packet.Guid = guid;
-            SendPacket(packet);
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.Banker;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
         }
     }
 }

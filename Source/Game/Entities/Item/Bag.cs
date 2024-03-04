@@ -24,7 +24,7 @@ namespace Game.Entities
             for (byte i = 0; i < ItemConst.MaxBagSize; ++i)
             {
                 Item item = m_bagslot[i];
-                if (item)
+                if (item != null)
                 {
                     if (item.IsInWorld)
                     {
@@ -58,7 +58,7 @@ namespace Game.Entities
             base.RemoveFromWorld();
         }
 
-        public override bool Create(ulong guidlow, uint itemid, ItemContext context, Player owner)
+        public override bool Create(long guidlow, int itemid, ItemContext context, Player owner)
         {
             var itemProto = Global.ObjectMgr.GetItemTemplate(itemid);
 
@@ -72,7 +72,7 @@ namespace Game.Entities
             SetEntry(itemid);
             SetObjectScale(1.0f);
 
-            if (owner)
+            if (owner != null)
             {
                 SetOwnerGUID(owner.GetGUID());
                 SetContainedIn(owner.GetGUID());
@@ -94,7 +94,7 @@ namespace Game.Entities
             return true;
         }
 
-        public override bool LoadFromDB(ulong guid, ObjectGuid owner_guid, SQLFields fields, uint entry)
+        public override bool LoadFromDB(long guid, ObjectGuid owner_guid, SQLFields fields, int entry)
         {
             if (!base.LoadFromDB(guid, owner_guid, fields, entry))
                 return false;
@@ -261,14 +261,14 @@ namespace Game.Entities
             return null;
         }
 
-        public uint GetBagSize() { return m_containerData.NumSlots; }
+        public byte GetBagSize() { return (byte)m_containerData.NumSlots; }
         public bool IsValidSlot(ItemSlot slotInThisBag) => slotInThisBag < GetBagSize();
         void SetBagSize(uint numSlots) { SetUpdateFieldValue(m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.NumSlots), numSlots); }
 
         void SetSlot(int slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.Slots, slot), guid); }
 
         ContainerData m_containerData;
-        Item[] m_bagslot = new Item[36];
+        Item[] m_bagslot = new Item[ItemConst.MaxBagSize];
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
         {

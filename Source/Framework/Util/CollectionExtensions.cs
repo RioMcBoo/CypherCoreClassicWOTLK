@@ -39,17 +39,19 @@ namespace System.Collections.Generic
         /// <param name="dict">The dictionary to operate on.</param>
         /// <param name="key">The key of the element to retrieve.</param>
         /// <returns>The value (if any).</returns>
-        public static TValue LookupByKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, object key)
-        {
-            TValue val;
-            TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
-            return dict.TryGetValue(newkey, out val) ? val : default;
-        }
+        //public static TValue LookupByKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, object key)
+        //{
+        //    TValue val;
+        //    TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
+        //    return dict.TryGetValue(newkey, out val) ? val : default;
+        //}
+
         public static TValue LookupByKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
         {
             TValue val;
             return dict.TryGetValue(key, out val) ? val : default;
         }
+
         public static KeyValuePair<TKey, TValue> Find<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
         {
             if (!dict.ContainsKey(key))
@@ -58,11 +60,11 @@ namespace System.Collections.Generic
             return new KeyValuePair<TKey, TValue>(key, dict[key]);
         }
 
-        public static bool ContainsKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, object key)
-        {
-            TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
-            return dict.ContainsKey(newkey);
-        }
+        //public static bool ContainsKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, object key)
+        //{
+        //    TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
+        //    return dict.ContainsKey(newkey);
+        //}
 
         public static void RemoveAll<T>(this List<T> collection, ICheck<T> check)
         {
@@ -118,6 +120,18 @@ namespace System.Collections.Generic
 
             if (size != 0)
                 list.Resize(size);
+        }
+
+        public static void RandomShuffle<T>(this IList<T> array, int first, int count)
+        {
+            for (int n = count; n > 1;)
+            {
+                int k = (int)RandomHelper.Rand32(n);
+                --n;
+                T temp = array[n + first];
+                array[n + first] = array[k + first];
+                array[k + first] = temp;
+            }
         }
 
         public static T SelectRandom<T>(this IEnumerable<T> source)

@@ -9,11 +9,11 @@ namespace Game.Entities
 {
     public class TrainerSpell
     {
-        public uint SpellId;
+        public int SpellId;
         public uint MoneyCost;
-        public uint ReqSkillLine;
+        public int ReqSkillLine;
         public uint ReqSkillRank;
-        public Array<uint> ReqAbility = new(3);
+        public Array<int> ReqAbility = new(3);
         public byte ReqLevel;
 
         public bool IsCastable() { return Global.SpellMgr.GetSpellInfo(SpellId, Difficulty.None).HasEffect(SpellEffectName.LearnSpell); }
@@ -21,7 +21,7 @@ namespace Game.Entities
 
     public class Trainer
     {
-        public Trainer(uint id, TrainerType type, string greeting, List<TrainerSpell> spells)
+        public Trainer(int id, TrainerType type, string greeting, List<TrainerSpell> spells)
         {
             _id = id;
             _type = type;

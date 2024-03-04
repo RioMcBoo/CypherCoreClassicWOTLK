@@ -203,10 +203,10 @@ namespace Game.Chat
 
         ObjectGuid CreateCustomChannelGuid()
         {
-            ulong high = 0;
-            high |= (ulong)HighGuid.ChatChannel << 58;
-            high |= (ulong)Global.WorldMgr.GetRealmId().Index << 42;
-            high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
+            long high = 0;
+            high |= (long)HighGuid.ChatChannel << 58;
+            high |= (long)Global.WorldMgr.GetRealmId().Index << 42;
+            high |= (long)(_team == Team.Alliance ? 3 : 5) << 4;
 
             ObjectGuid channelGuid = new();
             channelGuid.SetRawValue(high, _guidGenerator.Generate());

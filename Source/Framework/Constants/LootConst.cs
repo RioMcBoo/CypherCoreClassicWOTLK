@@ -3,7 +3,7 @@
 
 namespace Framework.Constants
 {
-    public enum RollVote
+    public enum RollVote : byte
     {
         Pass = 0,
         Need = 1,
@@ -13,18 +13,19 @@ namespace Framework.Constants
         NotValid = 5
     }
 
-    public enum RollMask
+    public enum RollMask : byte
     {
         Pass = 0x01,
         Need = 0x02,
         Greed = 0x04,
         Disenchant = 0x08,
+        Transmog = 0x10,
 
         AllNoDisenchant = 0x07,
         AllMask = 0x0f
     }
 
-    public enum LootMethod
+    public enum LootMethod : byte
     {
         FreeForAll = 0,
         RoundRobin = 1,
@@ -64,13 +65,13 @@ namespace Framework.Constants
         Milling = 24
     }
 
-    public enum LootItemType
+    public enum LootItemType : byte
     {
         Item = 0,
         Currency = 1
     }
 
-    public enum LootError
+    public enum LootError : byte
     {
         DidntKill = 0,    // You don't have permission to loot that corpse.
         TooFar = 4,    // You are too far away to loot that corpse.
@@ -89,12 +90,23 @@ namespace Framework.Constants
     }
 
     // type of Loot Item in Loot View
-    public enum LootSlotType
+    public enum LootSlotType : byte
     {
         AllowLoot = 0,                     // Player Can Loot The Item.
         RollOngoing = 1,                   // Roll Is Ongoing. Player Cannot Loot.
         Locked = 2,                        // Item Is Shown In Red. Player Cannot Loot.
         Master = 3,                        // Item Can Only Be Distributed By Group Loot Master.
         Owner = 4                         // Ignore Binding Confirmation And Etc, For Single Player Looting
+    }
+
+    public enum LootRollIneligibilityReason
+    {
+        None = 0,
+        UnusableByClass = 1, // Your class may not roll need on this item.
+        MaxUniqueItemCount = 2, // You already have the maximum amount of this item.
+        CannotBeDisenchanted = 3, // This item may not be disenchanted.
+        EnchantingSkillTooLow = 4, // You do not have an Enchanter of skill %d in your group.
+        NeedDisabled = 5, // Need rolls are disabled for this item.
+        OwnBetterItem = 6  // You already have a powerful version of this item.
     }
 }

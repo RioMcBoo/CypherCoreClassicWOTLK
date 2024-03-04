@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Achievements;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
@@ -14,9 +15,11 @@ namespace Game.Scenarios
 {
     public class Scenario : CriteriaHandler
     {
-        public Scenario(ScenarioData scenarioData)
+        public Scenario(Map map, ScenarioData scenarioData)
         {
+            _map = map;
             _data = scenarioData;
+            _guid = ObjectGuid.Create(HighGuid.Scenario, map.GetId(), scenarioData.Entry.Id, map.GenerateLowGuid(HighGuid.Scenario));
             _currentstep = null;
 
             //ASSERT(_data);
@@ -35,8 +38,8 @@ namespace Game.Scenarios
         {
             foreach (ObjectGuid guid in _players)
             {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                Player player = Global.ObjAccessor.GetPlayer(_map, guid);
+                if (player != null)
                     SendBootPlayer(player);
             }
 
@@ -56,19 +59,19 @@ namespace Game.Scenarios
             {
                 foreach (ObjectGuid guid in _players)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    Player player = Global.ObjAccessor.GetPlayer(_map, guid);
+                    if (player != null)
                         player.RewardQuest(quest, LootItemType.Item, 0, null, false);
                 }
             }
 
-            if (step.IsBonusObjective())
+            if (step.IsBonusObjective)
                 return;
 
             ScenarioStepRecord newStep = null;
             foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (scenarioStep.IsBonusObjective())
+                if (scenarioStep.IsBonusObjective)
                     continue;
 
                 if (GetStepState(scenarioStep) == ScenarioStepState.Done)
@@ -94,7 +97,15 @@ namespace Game.Scenarios
         {
             _currentstep = step;
             if (step != null)
+            {
                 SetStepState(step, ScenarioStepState.InProgress);
+                foreach (ObjectGuid guid in _players)
+                {
+                    Player player = Global.ObjAccessor.GetPlayer(_map, guid);
+                    if (player != null)
+                        player.StartCriteria(CriteriaStartEvent.BeginScenarioStep, step.Id);
+                }
+            }
 
             ScenarioState scenarioState = new();
             BuildScenarioState(scenarioState);
@@ -117,7 +128,7 @@ namespace Game.Scenarios
         {
             foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (scenarioStep.IsBonusObjective())
+                if (scenarioStep.IsBonusObjective)
                     continue;
 
                 if (GetStepState(scenarioStep) != ScenarioStepState.Done)
@@ -169,7 +180,7 @@ namespace Game.Scenarios
             if (currentStep == null)
                 return false;
 
-            if (step.IsBonusObjective())
+            if (step.IsBonusObjective)
                 return true;
 
             return currentStep == step;
@@ -189,7 +200,7 @@ namespace Game.Scenarios
             if (currentStep == null)
                 return false;
 
-            if (step.IsBonusObjective())
+            if (step.IsBonusObjective)
                 if (step != currentStep)
                     return false;
 
@@ -219,14 +230,15 @@ namespace Game.Scenarios
         {
             foreach (ObjectGuid guid in _players)
             {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                Player player = Global.ObjAccessor.GetPlayer(_map, guid);
+                if (player != null)
                     player.SendPacket(data);
             }
         }
 
         void BuildScenarioState(ScenarioState scenarioState)
         {
+            scenarioState.ScenarioGUID = _guid;
             scenarioState.ScenarioID = (int)_data.Entry.Id;
             ScenarioStepRecord step = GetStep();
             if (step != null)
@@ -236,7 +248,7 @@ namespace Game.Scenarios
             // Don't know exactly what this is for, but seems to contain list of scenario steps that we're either on or that are completed
             foreach (var state in _stepStates)
             {
-                if (state.Key.IsBonusObjective())
+                if (state.Key.IsBonusObjective)
                     continue;
 
                 switch (state.Value)
@@ -260,7 +272,7 @@ namespace Game.Scenarios
             ScenarioStepRecord firstStep = null;
             foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (scenarioStep.IsBonusObjective())
+                if (scenarioStep.IsBonusObjective)
                     continue;
 
                 if (firstStep == null || scenarioStep.OrderIndex < firstStep.OrderIndex)
@@ -276,7 +288,7 @@ namespace Game.Scenarios
             ScenarioStepRecord lastStep = null;
             foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (scenarioStep.IsBonusObjective())
+                if (scenarioStep.IsBonusObjective)
                     continue;
 
                 if (lastStep == null || scenarioStep.OrderIndex > lastStep.OrderIndex)
@@ -298,13 +310,13 @@ namespace Game.Scenarios
             List<BonusObjectiveData> bonusObjectivesData = new();
             foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (!scenarioStep.IsBonusObjective())
+                if (!scenarioStep.IsBonusObjective)
                     continue;
 
                 if (Global.CriteriaMgr.GetCriteriaTree(scenarioStep.CriteriaTreeId) != null)
                 {
                     BonusObjectiveData bonusObjectiveData;
-                    bonusObjectiveData.BonusObjectiveID = (int)scenarioStep.Id;
+                    bonusObjectiveData.BonusObjectiveID = scenarioStep.Id;
                     bonusObjectiveData.ObjectiveComplete = GetStepState(scenarioStep) == ScenarioStepState.Done;
                     bonusObjectivesData.Add(bonusObjectiveData);
                 }
@@ -333,7 +345,7 @@ namespace Game.Scenarios
             return criteriasProgress;
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
+        public override List<Criteria> GetCriteriaByType(CriteriaType type, int asset)
         {
             return Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(type, _data.Entry.Id);
         }
@@ -341,7 +353,8 @@ namespace Game.Scenarios
         void SendBootPlayer(Player player)
         {
             ScenarioVacate scenarioBoot = new();
-            scenarioBoot.ScenarioID = (int)_data.Entry.Id;
+            scenarioBoot.ScenarioGUID = _guid;
+            scenarioBoot.ScenarioID = _data.Entry.Id;
             player.SendPacket(scenarioBoot);
         }
 
@@ -353,12 +366,14 @@ namespace Game.Scenarios
             return _currentstep;
         }
 
-        public override void SendCriteriaProgressRemoved(uint criteriaId) { }
+        public override void SendCriteriaProgressRemoved(int criteriaId) { }
         public override void AfterCriteriaTreeUpdate(CriteriaTree tree, Player referencePlayer) { }
         public override void SendAllData(Player receiver) { }
 
+        protected Map _map;
         List<ObjectGuid> _players = new();
         protected ScenarioData _data;
+        ObjectGuid _guid;
         ScenarioStepRecord _currentstep;
         Dictionary<ScenarioStepRecord, ScenarioStepState> _stepStates = new();
     }

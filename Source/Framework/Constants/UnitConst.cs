@@ -154,10 +154,13 @@ namespace Framework.Constants
         ArcaneCharges,
         Fury,
         Pain,
-        Unused_19,
+        Essence,
         RuneBlood,
         RuneFrost,
         RuneUnholy,
+        AlternateQuest,
+        AlternateEncounter,
+        AlternateMount,
         Armor, // ARMOR..RESISTANCE_ARCANE must be in existed order, it's accessed by index values of SpellSchools enum.
         ResistanceHoly,
         ResistanceFire,
@@ -179,6 +182,7 @@ namespace Framework.Constants
         PowerStart = Mana,
         PowerEnd = RuneUnholy + 1
     }
+
     public enum UnitModifierFlatType
     {
         Base = 0,
@@ -186,12 +190,14 @@ namespace Framework.Constants
         Total = 2,
         End = 3
     }
+
     public enum UnitModifierPctType
     {
         Base = 0,
         Total = 1,
         End = 2
     }
+
     public enum VictimState
     {
         Intact = 0, // set when attacker misses
@@ -206,7 +212,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum HitInfo
+    public enum HitInfo : uint
     {
         NormalSwing = 0x0,
         Unk1 = 0x01,               // req correct packet structure
@@ -236,7 +242,7 @@ namespace Framework.Constants
         FakeDamage = 0x1000000                // enables damage animation even if no damage done, set only if no damage
     }
 
-    public enum ReactStates
+    public enum ReactStates : byte
     {
         Passive = 0,
         Defensive = 1,
@@ -244,9 +250,6 @@ namespace Framework.Constants
         Assist = 3
     }
 
-    /// <summary>
-    /// UnitStandStateType
-    /// </summary>
     public enum UnitStandStateType : byte
     {
         Stand = 0,
@@ -265,8 +268,8 @@ namespace Framework.Constants
 
     public enum UnitVisFlags
     {
-        Unk1 = 0x01,
-        Creep = 0x02,
+        Invisible = 0x01,
+        Stealthed = 0x02,
         Untrackable = 0x04,
         Unk4 = 0x08,
         Unk5 = 0x10,
@@ -401,12 +404,14 @@ namespace Framework.Constants
         AuraStack,
         CritChance,
         DurationPct,
-        Duration
+        Duration,
+        ParentSpellTargetCount,
+        ParentSpellTargetIndex
     }
 
     public enum CombatRating
     {
-        Amplify = 0,
+        WeaponSkill = 0,
         DefenseSkill = 1,
         Dodge = 2,
         Parry = 3,
@@ -417,28 +422,21 @@ namespace Framework.Constants
         CritMelee = 8,
         CritRanged = 9,
         CritSpell = 10,
-        Corruption = 11,
-        CorruptionResistance = 12,
-        Speed = 13,
-        ResilienceCritTaken = 14,
-        ResiliencePlayerDamage = 15,
-        Lifesteal = 16,
+        HitTakenMelee = 11,
+        HitTakenRanged = 12,
+        HitTakenSpell = 13,
+        CritTakenMelee = 14,
+        CritTakenRanged = 15,
+        CritTakenSpell = 16,
         HasteMelee = 17,
         HasteRanged = 18,
         HasteSpell = 19,
-        Avoidance = 20,
-        Studiness = 21,
-        Unused7 = 22,
+        WeaponSkillMainhand = 20,
+        WeaponSkillOffhand = 21,
+        WeaponSkillRanged = 22,
         Expertise = 23,
         ArmorPenetration = 24,
-        Mastery = 25,
-        PvpPower = 26,
-        Cleave = 27,
-        VersatilityDamageDone = 28,
-        VersatilityHealingDone = 29,
-        VersatilityDamageTaken = 30,
-        Unused12 = 31,
-        Max = 32
+        Max = 25
     }
 
     public enum DeathState

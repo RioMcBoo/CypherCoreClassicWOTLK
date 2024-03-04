@@ -288,7 +288,7 @@ namespace Game.Movement
 
         public void Update(uint diff)
         {
-            if (!_owner)
+            if (_owner == null)
                 return;
 
             if (HasFlag(MotionMasterFlags.InitializationPending | MotionMasterFlags.Initializing))
@@ -556,7 +556,7 @@ namespace Game.Movement
         public void MoveFollow(Unit target, float dist, ChaseAngle angle, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active)
         {
             // Ignore movement request if target not exist
-            if (!target || target == _owner)
+            if (target == null || target == _owner)
                 return;
 
             Add(new FollowMovementGenerator(target, dist, angle, duration), slot);
@@ -567,7 +567,7 @@ namespace Game.Movement
         public void MoveChase(Unit target, ChaseRange? dist = null, ChaseAngle? angle = null)
         {
             // Ignore movement request if target not exist
-            if (!target || target == _owner)
+            if (target == null || target == _owner)
                 return;
 
             Add(new ChaseMovementGenerator(target, dist, angle));
@@ -583,7 +583,7 @@ namespace Game.Movement
 
         public void MoveFleeing(Unit enemy, TimeSpan time = default)
         {
-            if (!enemy)
+            if (enemy == null)
                 return;
 
             if (_owner.IsCreature())
@@ -632,12 +632,24 @@ namespace Game.Movement
             }
         }
 
-        public void MoveLand(uint id, Position pos, float? velocity = null)
+        public void MoveLand(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
         {
             var initializer = (MoveSplineInit init) =>
             {
                 init.MoveTo(pos, false);
-                init.SetAnimation(AnimTier.Ground);
+                init.SetAnimation(AnimTier.Ground, tierTransitionId.GetValueOrDefault(0));
+                switch (speedSelectionMode)
+                {
+                    case MovementWalkRunSpeedSelectionMode.ForceRun:
+                        init.SetWalk(false);
+                        break;
+                    case MovementWalkRunSpeedSelectionMode.ForceWalk:
+                        init.SetWalk(true);
+                        break;
+                    case MovementWalkRunSpeedSelectionMode.Default:
+                    default:
+                        break;
+                }
                 if (velocity.HasValue)
                     init.SetVelocity(velocity.Value);
             };
@@ -645,12 +657,24 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id));
         }
 
-        public void MoveTakeoff(uint id, Position pos, float? velocity = null)
+        public void MoveTakeoff(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
         {
             var initializer = (MoveSplineInit init) =>
             {
                 init.MoveTo(pos, false);
-                init.SetAnimation(AnimTier.Hover);
+                init.SetAnimation(AnimTier.Hover, tierTransitionId.GetValueOrDefault(0));
+                switch (speedSelectionMode)
+                {
+                    case MovementWalkRunSpeedSelectionMode.ForceRun:
+                        init.SetWalk(false);
+                        break;
+                    case MovementWalkRunSpeedSelectionMode.ForceWalk:
+                        init.SetWalk(true);
+                        break;
+                    case MovementWalkRunSpeedSelectionMode.Default:
+                    default:
+                        break;
+                }
                 if (velocity.HasValue)
                     init.SetVelocity(velocity.Value);
             };
@@ -677,6 +701,8 @@ namespace Game.Movement
             Vector3 dest = path.GetActualEndPosition();
 
             MoveCharge(dest.X, dest.Y, dest.Z, SPEED_CHARGE, EventId.ChargePrepath);
+
+            // If this is ever changed to not happen immediately then all spell effect handlers that use this must be updated
 
             // Charge movement is not started when using EVENT_CHARGE_PREPATH
             MoveSplineInit init = new(_owner);
@@ -873,7 +899,7 @@ namespace Game.Movement
         public void MoveAlongSplineChain(uint pointId, uint dbChainId, bool walk)
         {
             Creature owner = _owner.ToCreature();
-            if (!owner)
+            if (owner == null)
             {
                 Log.outError(LogFilter.Misc, "MotionMaster.MoveAlongSplineChain: non-creature {0} tried to walk along DB spline chain. Ignoring.", _owner.GetGUID().ToString());
                 return;
@@ -1276,9 +1302,9 @@ namespace Game.Movement
 
         public float JumpGravity;
 
-        public uint? SpellVisualId;
-        public uint? ProgressCurveId;
-        public uint? ParabolicCurveId;
+        public int? SpellVisualId;
+        public int? ProgressCurveId;
+        public int? ParabolicCurveId;
     }
 
     public struct ChaseRange

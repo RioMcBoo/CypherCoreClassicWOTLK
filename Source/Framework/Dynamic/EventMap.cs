@@ -94,13 +94,13 @@ namespace Framework.Dynamic
         /// <param name="time">The time in milliseconds until the event occurs.</param>
         /// <param name="group">The group which the event is associated to. Has to be between 1 and 8. 0 means it has no group.</param>
         /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
-        public void ScheduleEvent(uint eventId, TimeSpan time, uint group = 0, byte phase = 0)
+        public void ScheduleEvent(int eventId, TimeSpan time, int group = 0, byte phase = 0)
         {
             if (group != 0 && group <= 8)
-                eventId |= (uint)(1 << ((int)group + 15));
+                eventId |= (1 << (group + 15));
 
             if (phase != 0 && phase <= 8)
-                eventId |= (uint)(1 << (phase + 23));
+                eventId |= (1 << (phase + 23));
 
             _eventMap.Add(_time + time, eventId);
         }
@@ -113,7 +113,7 @@ namespace Framework.Dynamic
         /// <param name="maxTime">The maximum time until the event occurs as TimeSpan type.</param>
         /// <param name="group">The group which the event is associated to. Has to be between 1 and 8. 0 means it has no group.</param>
         /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
-        public void ScheduleEvent(uint eventId, TimeSpan minTime, TimeSpan maxTime, uint group = 0, byte phase = 0)
+        public void ScheduleEvent(int eventId, TimeSpan minTime, TimeSpan maxTime, int group = 0, byte phase = 0)
         {
             ScheduleEvent(eventId, RandomHelper.RandTime(minTime, maxTime), group, phase);
         }
@@ -125,7 +125,7 @@ namespace Framework.Dynamic
         /// <param name="time">The time in milliseconds as TimeSpan until the event occurs.</param>
         /// <param name="group">The group which the event is associated to. Has to be between 1 and 8. 0 means it has no group.</param>
         /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
-        public void RescheduleEvent(uint eventId, TimeSpan time, uint group = 0, byte phase = 0)
+        public void RescheduleEvent(int eventId, TimeSpan time, int group = 0, byte phase = 0)
         {
             CancelEvent(eventId);
             RescheduleEvent(eventId, time, group, phase);
@@ -139,7 +139,7 @@ namespace Framework.Dynamic
         /// <param name="maxTime">The maximum time until the event occurs as TimeSpan type.</param>
         /// <param name="group">The group which the event is associated to. Has to be between 1 and 8. 0 means it has no group.</param>
         /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
-        public void RescheduleEvent(uint eventId, TimeSpan minTime, TimeSpan maxTime, uint group = 0, byte phase = 0)
+        public void RescheduleEvent(int eventId, TimeSpan minTime, TimeSpan maxTime, int group = 0, byte phase = 0)
         {
             RescheduleEvent(eventId, RandomHelper.RandTime(minTime, maxTime), group, phase);
         }
@@ -168,7 +168,7 @@ namespace Framework.Dynamic
         /// </summary>
         /// <returns>Id of the event to execute.</returns>
         ///
-        public uint ExecuteEvent()
+        public int ExecuteEvent()
         {
             while (!Empty())
             {
@@ -180,7 +180,7 @@ namespace Framework.Dynamic
                     _eventMap.Remove(pair);
                 else
                 {
-                    uint eventId = (pair.Value & 0x0000FFFF);
+                    int eventId = pair.Value & 0x0000FFFF;
                     _lastEvent = pair.Value; // include phase/group
                     _eventMap.Remove(pair);
                     return eventId;
@@ -190,9 +190,9 @@ namespace Framework.Dynamic
             return 0;
         }
 
-        public void ExecuteEvents(Action<uint> action)
+        public void ExecuteEvents(Action<int> action)
         {
-            uint id;
+            int id;
             while ((id = ExecuteEvent()) != 0)
                 action(id);
         }
@@ -206,7 +206,7 @@ namespace Framework.Dynamic
             if (Empty())
                 return;
 
-            MultiMap<TimeSpan, uint> delayed = new();
+            MultiMap<TimeSpan, int> delayed = new();
 
             foreach (var pair in _eventMap.KeyValueList)
             {
@@ -228,7 +228,7 @@ namespace Framework.Dynamic
             if (group == 0 || group > 8 || Empty())
                 return;
 
-            MultiMap<TimeSpan, uint> delayed = new();
+            MultiMap<TimeSpan, int> delayed = new();
 
             foreach (var pair in _eventMap.KeyValueList)
             {
@@ -247,7 +247,7 @@ namespace Framework.Dynamic
         /// Cancels all events of the specified id.
         /// </summary>
         /// <param name="eventId">Event id to cancel.</param>
-        public void CancelEvent(uint eventId)
+        public void CancelEvent(int eventId)
         {
             if (Empty())
                 return;
@@ -263,14 +263,14 @@ namespace Framework.Dynamic
         /// Cancel events belonging to specified group.
         /// </summary>
         /// <param name="group">Group to cancel.</param>
-        public void CancelEventGroup(uint group)
+        public void CancelEventGroup(int group)
         {
             if (group == 0 || group > 8 || Empty())
                 return;
 
             foreach (var pair in _eventMap.KeyValueList)
             {
-                if (Convert.ToBoolean(pair.Value & (uint)(1 << ((int)group + 15))))
+                if (Convert.ToBoolean(pair.Value & (uint)(1 << (group + 15))))
                     _eventMap.Remove(pair.Key, pair.Value);
             }
         }
@@ -319,7 +319,7 @@ namespace Framework.Dynamic
         /// <summary>
         /// Stores information on the most recently executed event
         /// </summary>
-        uint _lastEvent;
+        int _lastEvent;
 
         /// <summary>
         /// Key: Time as uint when the event should occur.
@@ -331,6 +331,6 @@ namespace Framework.Dynamic
         /// - Bit 24 - 31: Phase
         /// - Pattern: 0xPPGGEEEE
         /// </summary>
-        SortedMultiMap<TimeSpan, uint> _eventMap = new();
+        SortedMultiMap<TimeSpan, int> _eventMap = new();
     }
 }

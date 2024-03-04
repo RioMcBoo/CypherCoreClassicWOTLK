@@ -1,25 +1,10 @@
-﻿/*
- * Copyright (C) 2012-2016 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Game.Entities;
 using Framework.Constants;
-using System.Collections.Generic;
+using Game.Entities;
 using Game.Networking.Packets;
-using Game.DataStorage;
+using System.Collections.Generic;
 
 namespace Game.BattleGrounds.Zones
 {
@@ -27,7 +12,6 @@ namespace Game.BattleGrounds.Zones
     {
         public BgEyeofStorm(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
-            m_BuffChange = true;
             BgObjects = new ObjectGuid[EotSObjectTypes.Max];
             BgCreatures= new ObjectGuid[EotSCreaturesTypes.Max];
             m_Points_Trigger[EotSPoints.FelReaver] = EotSPointsTrigger.FelReaverBuff;
@@ -134,7 +118,7 @@ namespace Game.BattleGrounds.Zones
             TriggerGameEvent(EotSMisc.EventStartBattle);
         }
 
-        void AddPoints(Team Team, uint Points)
+        void AddPoints(Team Team, int Points)
         {
             int team_index = GetTeamIndexByTeamId(Team);
             m_TeamScores[team_index] += Points;
@@ -169,13 +153,13 @@ namespace Game.BattleGrounds.Zones
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {
                 obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TowerCapFelReaver + i]);
-                if (obj)
+                if (obj != null)
                 {
                     byte j = 0;
                     while (j < m_PlayersNearPoint[EotSPoints.PointsMax].Count)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[EotSPoints.PointsMax][j]);
-                        if (!player)
+                        if (player == null)
                         {
                             Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneJoinedPoint: Player ({0}) could not be found!", m_PlayersNearPoint[EotSPoints.PointsMax][j].ToString());
                             ++j;
@@ -210,13 +194,13 @@ namespace Game.BattleGrounds.Zones
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {
                 obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TowerCapFelReaver + i]);
-                if (obj)
+                if (obj != null)
                 {
                     byte j = 0;
                     while (j < m_PlayersNearPoint[i].Count)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[i][j]);
-                        if (!player)
+                        if (player == null)
                         {
                             Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneLeftPoint Player ({0}) could not be found!", m_PlayersNearPoint[i][j].ToString());
                             //move non-existing players to "free space" - this will cause many errors showing in log, but it is a very important bug
@@ -272,7 +256,7 @@ namespace Game.BattleGrounds.Zones
                     for (byte i = 0; i < m_PlayersNearPoint[point].Count; ++i)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[point][i]);
-                        if (player)
+                        if (player != null)
                         {
                             player.SendUpdateWorldState(EotSWorldStateIds.ProgressBarStatus, (uint)m_PointBarStatus[point]);
                             Team team = GetPlayerTeam(player.GetGUID());
@@ -309,7 +293,7 @@ namespace Game.BattleGrounds.Zones
 
         void UpdateTeamScore(int team)
         {
-            uint score = GetTeamScore(team);
+            int score = GetTeamScore(team);
             if (score >= EotSScoreIds.MaxTeamScore)
             {
                 score = EotSScoreIds.MaxTeamScore;
@@ -368,10 +352,10 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        public override void AddPlayer(Player player)
+        public override void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
         {
             bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
-            base.AddPlayer(player);
+            base.AddPlayer(player, queueId);
             if (!isInBattleground)
                 PlayerScores[player.GetGUID()] = new BgEyeOfStormScore(player.GetGUID(), player.GetBGTeam());
 
@@ -391,7 +375,7 @@ namespace Game.BattleGrounds.Zones
             {
                 if (m_FlagKeeper == guid)
                 {
-                    if (player)
+                    if (player != null)
                         EventPlayerDroppedFlag(player);
                     else
                     {
@@ -402,7 +386,7 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
+        public override void HandleAreaTrigger(Player player, int trigger, bool entered)
         {
             if (!player.IsAlive())                                  //hack code, must be removed later
                 return;
@@ -594,7 +578,7 @@ namespace Game.BattleGrounds.Zones
             RespawnFlag(true);
 
             GameObject obj = GetBgMap().GetGameObject(GetDroppedFlagGUID());
-            if (obj)
+            if (obj != null)
                 obj.Delete();
             else
                 Log.outError(LogFilter.Battleground, "BattlegroundEY: Unknown dropped flag ({0}).", GetDroppedFlagGUID().ToString());
@@ -766,10 +750,10 @@ namespace Game.BattleGrounds.Zones
             if (!BgCreatures[Point].IsEmpty())
                 DelCreature(Point);
 
-            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
+            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[Point].GraveyardId);
             if (sg == null || !AddSpiritGuide(Point, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.124139f, GetTeamIndexByTeamId(Team)))
                 Log.outError(LogFilter.Battleground, "BatteGroundEY: Failed to spawn spirit guide. point: {0}, team: {1}, graveyard_id: {2}",
-                    Point, Team, EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
+                    Point, Team, EotSMisc.m_CapturingPointTypes[Point].GraveyardId);
 
             //    SpawnBGCreature(Point, RESPAWN_IMMEDIATELY);
 
@@ -780,20 +764,20 @@ namespace Game.BattleGrounds.Zones
                 return;
 
             Creature trigger = GetBGCreature(Point + 6);//0-5 spirit guides
-            if (!trigger)
+            if (trigger == null)
                 trigger = AddCreature(SharedConst.WorldTrigger, Point + 6, EotSMisc.TriggerPositions[Point], GetTeamIndexByTeamId(Team));
 
             //add bonus honor aura trigger creature when node is accupied
             //cast bonus aura (+50% honor in 25yards)
             //aura should only apply to players who have accupied the node, set correct faction for trigger
-            if (trigger)
+            if (trigger != null)
             {
-                trigger.SetFaction(Team == Team.Alliance ? 84u : 83);
+                trigger.SetFaction(Team == Team.Alliance ? 84 : 83);
                 trigger.CastSpell(trigger, BattlegroundConst.SpellHonorableDefender25y, false);
             }
         }
 
-        void EventPlayerCapturedFlag(Player player, uint BgObjectType)
+        void EventPlayerCapturedFlag(Player player, int BgObjectType)
         {
             if (GetStatus() != BattlegroundStatus.InProgress || GetFlagPickerGUID() != player.GetGUID())
                 return;
@@ -816,7 +800,7 @@ namespace Game.BattleGrounds.Zones
                 PlaySoundToAll(EotSSoundIds.FlagCapturedHorde);
             }
 
-            SpawnBGObject((int)BgObjectType, BattlegroundConst.RespawnImmediately);
+            SpawnBGObject(BgObjectType, BattlegroundConst.RespawnImmediately);
 
             m_FlagsTimer = EotSMisc.FlagRespawnTime;
             m_FlagCapturedBgObjectType = BgObjectType;
@@ -831,7 +815,7 @@ namespace Game.BattleGrounds.Zones
             UpdatePlayerScore(player, ScoreType.FlagCaptures, 1);
         }
 
-        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
+        public override bool UpdatePlayerScore(Player player, ScoreType type, int value, bool doAddHonor = true)
         {
             if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
                 return false;
@@ -847,9 +831,9 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
-        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
-            uint g_id;
+            int g_id;
             Team team = GetPlayerTeam(player.GetGUID());
             switch (team)
             {
@@ -881,9 +865,9 @@ namespace Game.BattleGrounds.Zones
             {
                 if (m_PointOwnedByTeam[i] == team && m_PointState[i] == EotSPointState.UnderControl)
                 {
-                    entry = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[i].GraveYardId);
+                    entry = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[i].GraveyardId);
                     if (entry == null)
-                        Log.outError(LogFilter.Battleground, "BattlegroundEY: Graveyard {0} could not be found.", EotSMisc.m_CapturingPointTypes[i].GraveYardId);
+                        Log.outError(LogFilter.Battleground, "BattlegroundEY: Graveyard {0} could not be found.", EotSMisc.m_CapturingPointTypes[i].GraveyardId);
                     else
                     {
                         distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
@@ -921,14 +905,14 @@ namespace Game.BattleGrounds.Zones
         public override void SetDroppedFlagGUID(ObjectGuid guid, int TeamID = -1) { m_DroppedFlagGUID = guid; }
         ObjectGuid GetDroppedFlagGUID() { return m_DroppedFlagGUID; }
 
-        uint[] m_HonorScoreTics = new uint[2];
-        uint[] m_TeamPointsCount = new uint[2];
+        int[] m_HonorScoreTics = new int[2];
+        int[] m_TeamPointsCount = new int[2];
 
         uint[] m_Points_Trigger = new uint[EotSPoints.PointsMax];
 
         ObjectGuid m_FlagKeeper;                                // keepers guid
         ObjectGuid m_DroppedFlagGUID;
-        uint m_FlagCapturedBgObjectType;                  // Type that should be despawned when flag is captured
+        int m_FlagCapturedBgObjectType;                  // Type that should be despawned when flag is captured
         EotSFlagState m_FlagState;                                  // for checking flag state
         int m_FlagsTimer;
         int m_TowerCapCheckTimer;
@@ -941,14 +925,14 @@ namespace Game.BattleGrounds.Zones
         byte[] m_CurrentPointPlayersCount = new byte[2 * EotSPoints.PointsMax];
 
         int m_PointAddingTimer;
-        uint m_HonorTics;
+        int m_HonorTics;
     }
 
     class BgEyeOfStormScore : BattlegroundScore
     {
         public BgEyeOfStormScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team) { }
 
-        public override void UpdateScore(ScoreType type, uint value)
+        public override void UpdateScore(ScoreType type, int value)
         {
             switch (type)
             {
@@ -968,14 +952,14 @@ namespace Game.BattleGrounds.Zones
             playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)EotSMisc.ObjectiveCaptureFlag, FlagCaptures));
         }
 
-        public override uint GetAttr1() { return FlagCaptures; }
+        public override int GetAttr1() { return FlagCaptures; }
 
-        uint FlagCaptures;
+        int FlagCaptures;
     }
 
     struct BattlegroundEYPointIconsStruct
     {
-        public BattlegroundEYPointIconsStruct(uint worldStateControlIndex, uint worldStateAllianceControlledIndex, uint worldStateHordeControlledIndex, uint worldStateAllianceStatusBarIcon, uint worldStateHordeStatusBarIcon)
+        public BattlegroundEYPointIconsStruct(int worldStateControlIndex, int worldStateAllianceControlledIndex, int worldStateHordeControlledIndex, int worldStateAllianceStatusBarIcon, int worldStateHordeStatusBarIcon)
         {
             WorldStateControlIndex = worldStateControlIndex;
             WorldStateAllianceControlledIndex = worldStateAllianceControlledIndex;
@@ -984,16 +968,16 @@ namespace Game.BattleGrounds.Zones
             WorldStateHordeStatusBarIcon = worldStateHordeStatusBarIcon;
         }
 
-        public uint WorldStateControlIndex;
-        public uint WorldStateAllianceControlledIndex;
-        public uint WorldStateHordeControlledIndex;
-        public uint WorldStateAllianceStatusBarIcon;
-        public uint WorldStateHordeStatusBarIcon;
+        public int WorldStateControlIndex;
+        public int WorldStateAllianceControlledIndex;
+        public int WorldStateHordeControlledIndex;
+        public int WorldStateAllianceStatusBarIcon;
+        public int WorldStateHordeStatusBarIcon;
     }
 
     struct BattlegroundEYLosingPointStruct
     {
-        public BattlegroundEYLosingPointStruct(int _SpawnNeutralObjectType, int _DespawnObjectTypeAlliance, uint _MessageIdAlliance, int _DespawnObjectTypeHorde, uint _MessageIdHorde)
+        public BattlegroundEYLosingPointStruct(int _SpawnNeutralObjectType, int _DespawnObjectTypeAlliance, int _MessageIdAlliance, int _DespawnObjectTypeHorde, int _MessageIdHorde)
         {
             SpawnNeutralObjectType = _SpawnNeutralObjectType;
             DespawnObjectTypeAlliance = _DespawnObjectTypeAlliance;
@@ -1004,47 +988,47 @@ namespace Game.BattleGrounds.Zones
 
         public int SpawnNeutralObjectType;
         public int DespawnObjectTypeAlliance;
-        public uint MessageIdAlliance;
+        public int MessageIdAlliance;
         public int DespawnObjectTypeHorde;
-        public uint MessageIdHorde;
+        public int MessageIdHorde;
     }
 
     struct BattlegroundEYCapturingPointStruct
     {
-        public BattlegroundEYCapturingPointStruct(int _DespawnNeutralObjectType, int _SpawnObjectTypeAlliance, uint _MessageIdAlliance, int _SpawnObjectTypeHorde, uint _MessageIdHorde, uint _GraveYardId)
+        public BattlegroundEYCapturingPointStruct(int _DespawnNeutralObjectType, int _SpawnObjectTypeAlliance, int _MessageIdAlliance, int _SpawnObjectTypeHorde, int _MessageIdHorde, int _GraveyardId)
         {
             DespawnNeutralObjectType = _DespawnNeutralObjectType;
             SpawnObjectTypeAlliance = _SpawnObjectTypeAlliance;
             MessageIdAlliance = _MessageIdAlliance;
             SpawnObjectTypeHorde = _SpawnObjectTypeHorde;
             MessageIdHorde = _MessageIdHorde;
-            GraveYardId = _GraveYardId;
+            GraveyardId = _GraveyardId;
         }
 
         public int DespawnNeutralObjectType;
         public int SpawnObjectTypeAlliance;
-        public uint MessageIdAlliance;
+        public int MessageIdAlliance;
         public int SpawnObjectTypeHorde;
-        public uint MessageIdHorde;
-        public uint GraveYardId;
+        public int MessageIdHorde;
+        public int GraveyardId;
     }
 
     struct EotSMisc
     {
-        public const uint EventStartBattle = 13180; // Achievement: Flurry
+        public const int EventStartBattle = 13180; // Achievement: Flurry
         public const int FlagRespawnTime = (8 * Time.InMilliseconds);
         public const int FPointsTickTime = (2 * Time.InMilliseconds);
 
-        public const uint NotEYWeekendHonorTicks = 260;
-        public const uint EYWeekendHonorTicks = 160;
+        public const int NotEYWeekendHonorTicks = 260;
+        public const int EYWeekendHonorTicks = 160;
 
-        public const uint ObjectiveCaptureFlag = 183;
+        public const int ObjectiveCaptureFlag = 183;
 
-        public const uint SpellNetherstormFlag = 34976;
-        public const uint SpellPlayerDroppedFlag = 34991;
+        public const int SpellNetherstormFlag = 34976;
+        public const int SpellPlayerDroppedFlag = 34991;
 
-        public const uint ExploitTeleportLocationAlliance = 3773;
-        public const uint ExploitTeleportLocationHorde = 3772;
+        public const int ExploitTeleportLocationAlliance = 3773;
+        public const int ExploitTeleportLocationHorde = 3772;
 
         public static Position[] TriggerPositions =
         {
@@ -1055,7 +1039,7 @@ namespace Game.BattleGrounds.Zones
         };
 
         public static byte[] TickPoints = { 1, 2, 5, 10 };
-        public static uint[] FlagPoints = { 75, 85, 100, 500 };
+        public static int[] FlagPoints = { 75, 85, 100, 500 };
 
         public static BattlegroundEYPointIconsStruct[] m_PointsIconStruct =
         {
@@ -1082,68 +1066,68 @@ namespace Game.BattleGrounds.Zones
 
     struct EotSBroadcastTexts
     {
-        public const uint AllianceTakenFelReaverRuins = 17828;
-        public const uint HordeTakenFelReaverRuins = 17829;
-        public const uint AllianceLostFelReaverRuins = 17835;
-        public const uint HordeLostFelReaverRuins = 17836;
+        public const int AllianceTakenFelReaverRuins = 17828;
+        public const int HordeTakenFelReaverRuins = 17829;
+        public const int AllianceLostFelReaverRuins = 17835;
+        public const int HordeLostFelReaverRuins = 17836;
 
-        public const uint AllianceTakenBloodElfTower = 17819;
-        public const uint HordeTakenBloodElfTower = 17823;
-        public const uint AllianceLostBloodElfTower = 17831;
-        public const uint HordeLostBloodElfTower = 17832;
+        public const int AllianceTakenBloodElfTower = 17819;
+        public const int HordeTakenBloodElfTower = 17823;
+        public const int AllianceLostBloodElfTower = 17831;
+        public const int HordeLostBloodElfTower = 17832;
 
-        public const uint AllianceTakenDraeneiRuins = 17827;
-        public const uint HordeTakenDraeneiRuins = 17826;
-        public const uint AllianceLostDraeneiRuins = 17833;
-        public const uint HordeLostDraeneiRuins = 17834;
+        public const int AllianceTakenDraeneiRuins = 17827;
+        public const int HordeTakenDraeneiRuins = 17826;
+        public const int AllianceLostDraeneiRuins = 17833;
+        public const int HordeLostDraeneiRuins = 17834;
 
-        public const uint AllianceTakenMageTower = 17824;
-        public const uint HordeTakenMageTower = 17825;
-        public const uint AllianceLostMageTower = 17837;
-        public const uint HordeLostMageTower = 17838;
+        public const int AllianceTakenMageTower = 17824;
+        public const int HordeTakenMageTower = 17825;
+        public const int AllianceLostMageTower = 17837;
+        public const int HordeLostMageTower = 17838;
 
-        public const uint TakenFlag = 18359;
-        public const uint FlagDropped = 18361;
-        public const uint FlagReset = 18364;
-        public const uint AllianceCapturedFlag = 18375;
-        public const uint HordeCapturedFlag = 18384;
+        public const int TakenFlag = 18359;
+        public const int FlagDropped = 18361;
+        public const int FlagReset = 18364;
+        public const int AllianceCapturedFlag = 18375;
+        public const int HordeCapturedFlag = 18384;
     }
 
     struct EotSWorldStateIds
     {
-        public const uint AllianceResources = 1776;
-        public const uint HordeResources = 1777;
-        public const uint MaxResources = 1780;
-        public const uint AllianceBase = 2752;
-        public const uint HordeBase = 2753;
-        public const uint DraeneiRuinsHordeControl = 2733;
-        public const uint DraeneiRuinsAllianceControl = 2732;
-        public const uint DraeneiRuinsUncontrol = 2731;
-        public const uint MageTowerAllianceControl = 2730;
-        public const uint MageTowerHordeControl = 2729;
-        public const uint MageTowerUncontrol = 2728;
-        public const uint FelReaverHordeControl = 2727;
-        public const uint FelReaverAllianceControl = 2726;
-        public const uint FelReaverUncontrol = 2725;
-        public const uint BloodElfHordeControl = 2724;
-        public const uint BloodElfAllianceControl = 2723;
-        public const uint BloodElfUncontrol = 2722;
-        public const uint ProgressBarPercentGrey = 2720;                 //100 = Empty (Only Grey); 0 = Blue|Red (No Grey)
-        public const uint ProgressBarStatus = 2719;                 //50 Init!; 48 ... Hordak Bere .. 33 .. 0 = Full 100% Hordacky; 100 = Full Alliance
-        public const uint ProgressBarShow = 2718;                 //1 Init; 0 Druhy Send - Bez Messagu; 1 = Controlled Aliance
-        public const uint NetherstormFlag = 8863;
+        public const int AllianceResources = 1776;
+        public const int HordeResources = 1777;
+        public const int MaxResources = 1780;
+        public const int AllianceBase = 2752;
+        public const int HordeBase = 2753;
+        public const int DraeneiRuinsHordeControl = 2733;
+        public const int DraeneiRuinsAllianceControl = 2732;
+        public const int DraeneiRuinsUncontrol = 2731;
+        public const int MageTowerAllianceControl = 2730;
+        public const int MageTowerHordeControl = 2729;
+        public const int MageTowerUncontrol = 2728;
+        public const int FelReaverHordeControl = 2727;
+        public const int FelReaverAllianceControl = 2726;
+        public const int FelReaverUncontrol = 2725;
+        public const int BloodElfHordeControl = 2724;
+        public const int BloodElfAllianceControl = 2723;
+        public const int BloodElfUncontrol = 2722;
+        public const int ProgressBarPercentGrey = 2720;                 //100 = Empty (Only Grey); 0 = Blue|Red (No Grey)
+        public const int ProgressBarStatus = 2719;                 //50 Init!; 48 ... Hordak Bere .. 33 .. 0 = Full 100% Hordacky; 100 = Full Alliance
+        public const int ProgressBarShow = 2718;                 //1 Init; 0 Druhy Send - Bez Messagu; 1 = Controlled Aliance
+        public const int NetherstormFlag = 8863;
         //Set To 2 When Flag Is Picked Up; And To 1 If It Is Dropped
-        public const uint NetherstormFlagStateAlliance = 9808;
-        public const uint NetherstormFlagStateHorde = 9809;
+        public const int NetherstormFlagStateAlliance = 9808;
+        public const int NetherstormFlagStateHorde = 9809;
 
-        public const uint DraeneiRuinsHordeControlState = 17362;
-        public const uint DraeneiRuinsAllianceControlState = 17366;
-        public const uint MageTowerHordeControlState = 17361;
-        public const uint MageTowerAllianceControlState = 17368;
-        public const uint FelReaverHordeControlState = 17364;
-        public const uint FelReaverAllianceControlState = 17367;
-        public const uint BloodElfHordeControlState = 17363;
-        public const uint BloodElfAllianceControlState = 17365;
+        public const int DraeneiRuinsHordeControlState = 17362;
+        public const int DraeneiRuinsAllianceControlState = 17366;
+        public const int MageTowerHordeControlState = 17361;
+        public const int MageTowerAllianceControlState = 17368;
+        public const int FelReaverHordeControlState = 17364;
+        public const int FelReaverAllianceControlState = 17367;
+        public const int BloodElfHordeControlState = 17363;
+        public const int BloodElfAllianceControlState = 17365;
     }
 
     enum EotSProgressBarConsts
@@ -1163,60 +1147,60 @@ namespace Game.BattleGrounds.Zones
     struct EotSSoundIds
     {
         //strange ids, but sure about them
-        public const uint FlagPickedUpAlliance = 8212;
-        public const uint FlagCapturedHorde = 8213;
-        public const uint FlagPickedUpHorde = 8174;
-        public const uint FlagCapturedAlliance = 8173;
-        public const uint FlagReset = 8192;
+        public const int FlagPickedUpAlliance = 8212;
+        public const int FlagCapturedHorde = 8213;
+        public const int FlagPickedUpHorde = 8174;
+        public const int FlagCapturedAlliance = 8173;
+        public const int FlagReset = 8192;
     }
 
     struct EotSObjectIds
     {
-        public const uint ADoorEyEntry = 184719;           //Alliance Door
-        public const uint HDoorEyEntry = 184720;           //Horde Door
-        public const uint Flag1EyEntry = 184493;           //Netherstorm Flag (Generic)
-        public const uint Flag2EyEntry = 208977;           //Netherstorm Flag (Flagstand)
-        public const uint ABannerEyEntry = 184381;           //Visual Banner (Alliance)
-        public const uint HBannerEyEntry = 184380;           //Visual Banner (Horde)
-        public const uint NBannerEyEntry = 184382;           //Visual Banner (Neutral)
-        public const uint BeTowerCapEyEntry = 184080;           //Be Tower Cap Pt
-        public const uint FrTowerCapEyEntry = 184081;           //Fel Reaver Cap Pt
-        public const uint HuTowerCapEyEntry = 184082;           //Human Tower Cap Pt
-        public const uint DrTowerCapEyEntry = 184083;           //Draenei Tower Cap Pt
-        public const uint SpeedBuffFelReaverEyEntry = 184970;
-        public const uint RestorationBuffFelReaverEyEntry = 184971;
-        public const uint BerserkBuffFelReaverEyEntry = 184972;
-        public const uint SpeedBuffBloodElfEyEntry = 184964;
-        public const uint RestorationBuffBloodElfEyEntry = 184965;
-        public const uint BerserkBuffBloodElfEyEntry = 184966;
-        public const uint SpeedBuffDraeneiRuinsEyEntry = 184976;
-        public const uint RestorationBuffDraeneiRuinsEyEntry = 184977;
-        public const uint BerserkBuffDraeneiRuinsEyEntry = 184978;
-        public const uint SpeedBuffMageTowerEyEntry = 184973;
-        public const uint RestorationBuffMageTowerEyEntry = 184974;
-        public const uint BerserkBuffMageTowerEyEntry = 184975;
+        public const int ADoorEyEntry = 184719;           //Alliance Door
+        public const int HDoorEyEntry = 184720;           //Horde Door
+        public const int Flag1EyEntry = 184493;           //Netherstorm Flag (Generic)
+        public const int Flag2EyEntry = 208977;           //Netherstorm Flag (Flagstand)
+        public const int ABannerEyEntry = 184381;           //Visual Banner (Alliance)
+        public const int HBannerEyEntry = 184380;           //Visual Banner (Horde)
+        public const int NBannerEyEntry = 184382;           //Visual Banner (Neutral)
+        public const int BeTowerCapEyEntry = 184080;           //Be Tower Cap Pt
+        public const int FrTowerCapEyEntry = 184081;           //Fel Reaver Cap Pt
+        public const int HuTowerCapEyEntry = 184082;           //Human Tower Cap Pt
+        public const int DrTowerCapEyEntry = 184083;           //Draenei Tower Cap Pt
+        public const int SpeedBuffFelReaverEyEntry = 184970;
+        public const int RestorationBuffFelReaverEyEntry = 184971;
+        public const int BerserkBuffFelReaverEyEntry = 184972;
+        public const int SpeedBuffBloodElfEyEntry = 184964;
+        public const int RestorationBuffBloodElfEyEntry = 184965;
+        public const int BerserkBuffBloodElfEyEntry = 184966;
+        public const int SpeedBuffDraeneiRuinsEyEntry = 184976;
+        public const int RestorationBuffDraeneiRuinsEyEntry = 184977;
+        public const int BerserkBuffDraeneiRuinsEyEntry = 184978;
+        public const int SpeedBuffMageTowerEyEntry = 184973;
+        public const int RestorationBuffMageTowerEyEntry = 184974;
+        public const int BerserkBuffMageTowerEyEntry = 184975;
     }
 
     struct EotSPointsTrigger
     {
-        public const uint BloodElfPoint = 4476;
-        public const uint FelReaverPoint = 4514;
-        public const uint MageTowerPoint = 4516;
-        public const uint DraeneiRuinsPoint = 4518;
-        public const uint BloodElfBuff = 4568;
-        public const uint FelReaverBuff = 4569;
-        public const uint MageTowerBuff = 4570;
-        public const uint DraeneiRuinsBuff = 4571;
+        public const int BloodElfPoint = 4476;
+        public const int FelReaverPoint = 4514;
+        public const int MageTowerPoint = 4516;
+        public const int DraeneiRuinsPoint = 4518;
+        public const int BloodElfBuff = 4568;
+        public const int FelReaverBuff = 4569;
+        public const int MageTowerBuff = 4570;
+        public const int DraeneiRuinsBuff = 4571;
     }
 
     struct EotSGaveyardIds
     {
         public const int MainAlliance = 1103;
-        public const uint MainHorde = 1104;
-        public const uint FelReaver = 1105;
-        public const uint BloodElf = 1106;
-        public const uint DraeneiRuins = 1107;
-        public const uint MageTower = 1108;
+        public const int MainHorde = 1104;
+        public const int FelReaver = 1105;
+        public const int BloodElf = 1106;
+        public const int DraeneiRuins = 1107;
+        public const int MageTower = 1108;
     }
 
     struct EotSPoints
@@ -1314,8 +1298,8 @@ namespace Game.BattleGrounds.Zones
 
     struct EotSScoreIds
     {
-        public const uint WarningNearVictoryScore = 1400;
-        public const uint MaxTeamScore = 1500;
+        public const int WarningNearVictoryScore = 1400;
+        public const int MaxTeamScore = 1500;
     }
 
     enum EotSFlagState

@@ -105,7 +105,7 @@ namespace Game.Chat.Commands
                     break;
             }
 
-            string author = handler.GetSession() ? handler.GetSession().GetPlayerName() : "Server";
+            string author = handler.GetSession() != null ? handler.GetSession().GetPlayerName() : "Server";
             switch (Global.WorldMgr.BanAccount(mode, nameOrIP, duration, reason, author))
             {
                 case BanReturn.Success:
@@ -180,7 +180,7 @@ namespace Game.Chat.Commands
             Player target = Global.ObjAccessor.FindPlayerByName(name);
             ObjectGuid targetGuid;
 
-            if (!target)
+            if (target == null)
             {
                 targetGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
                 if (targetGuid.IsEmpty())
@@ -325,7 +325,7 @@ namespace Game.Chat.Commands
 
 
                 // Chat short output
-                if (handler.GetSession())
+                if (handler.GetSession() != null)
                 {
                     do
                     {
@@ -416,7 +416,7 @@ namespace Game.Chat.Commands
 
             handler.SendSysMessage(CypherStrings.BanlistMatchingip);
             // Chat short output
-            if (handler.GetSession())
+            if (handler.GetSession() != null)
             {
                 do
                 {
@@ -469,7 +469,7 @@ namespace Game.Chat.Commands
             handler.SendSysMessage(CypherStrings.BanlistMatchingaccount);
 
             // Chat short output
-            if (handler.GetSession())
+            if (handler.GetSession() != null)
             {
                 do
                 {

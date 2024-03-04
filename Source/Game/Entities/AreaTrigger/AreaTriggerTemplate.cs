@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Maps;
 using Game.Networking;
 using System;
@@ -32,6 +31,9 @@ namespace Game.Entities
 
         [FieldOffset(0)]
         public diskDatas DiskDatas;
+
+        [FieldOffset(0)]
+        public boundedPlaneDatas BoundedPlaneDatas;
 
         public struct defaultdatas
         {
@@ -81,83 +83,45 @@ namespace Game.Entities
             public float LocationZOffset;
             public float LocationZOffsetTarget;
         }
+        // AREATRIGGER_TYPE_BOUNDED_PLANE
+        public struct boundedPlaneDatas
+        {
+            public fixed float Extents[2];
+            public fixed float ExtentsTarget[2];
+        }
     }
 
-    /// <summary>
-    /// Scale array definition
-    /// 0 - time offset from creation for starting of scaling
-    /// 1+2,3+4 are values for curve points Vector2[2]
-    //  5 is packed curve information (has_no_data & 1) | ((interpolation_mode & 0x7) << 1) | ((first_point_offset & 0x7FFFFF) << 4) | ((point_count & 0x1F) << 27)
-    /// 6 bool is_override, only valid for AREATRIGGER_OVERRIDE_SCALE_CURVE, if true then use data from AREATRIGGER_OVERRIDE_SCALE_CURVE instead of ScaleCurveId from CreateObject
-    /// </summary>
-    [StructLayout(LayoutKind.Explicit)]
-    public class AreaTriggerScaleInfo
+    public class AreaTriggerScaleCurvePointsTemplate
     {
-        [FieldOffset(0)]
-        public StructuredData Structured;
+        public CurveInterpolationMode Mode = CurveInterpolationMode.Linear;
+        public Vector2[] Points = new Vector2[2];
+    }
 
-        [FieldOffset(0)]
-        public RawData Raw;
-
-        [StructLayout(LayoutKind.Explicit)]
-        public struct StructuredData
-        {
-            [FieldOffset(0)]
-            public uint StartTimeOffset;
-
-            [FieldOffset(4)]
-            public float X;
-
-            [FieldOffset(8)]
-            public float Y;
-
-            [FieldOffset(12)]
-            public float Z;
-
-            [FieldOffset(16)]
-            public float W;
-
-            [FieldOffset(20)]
-            public uint CurveParameters;
-
-            [FieldOffset(24)]
-            public uint OverrideActive;
-
-            public struct curveparameters
-            {
-                public uint Raw;
-
-                public uint NoData { get { return Raw & 1; } }
-                public uint InterpolationMode { get { return (Raw & 0x7) << 1; } }
-                public uint FirstPointOffset { get { return (Raw & 0x7FFFFF) << 4; } }
-                public uint PointCount { get { return (Raw & 0x1F) << 27; } }
-            }
-        }
-
-        public unsafe struct RawData
-        {
-            public fixed uint Data[SharedConst.MaxAreatriggerScale];
-        }
+    public class AreaTriggerScaleCurveTemplate
+    {
+        public uint StartTimeOffset;
+        public float Curve = 1.0f;
+        public AreaTriggerScaleCurvePointsTemplate CurveTemplate;
     }
 
     public struct AreaTriggerMovementScriptInfo
     {
-        public uint SpellScriptID;
+        public int SpellScriptID;
         public Vector3 Center;
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(SpellScriptID);
+            data.WriteInt32(SpellScriptID);
             data.WriteVector3(Center);
         }
     }
 
     public struct AreaTriggerId
     {
-        public uint Id;
+        public int Id;
         public bool IsServerSide;
 
-        public AreaTriggerId(uint id, bool isServerSide)
+        public AreaTriggerId(int id, bool isServerSide)
         {
             Id = id;
             IsServerSide = isServerSide;
@@ -199,11 +163,13 @@ namespace Game.Entities
                 case AreaTriggerTypes.Sphere:
                     return Math.Max(SphereDatas.Radius, SphereDatas.RadiusTarget);
                 case AreaTriggerTypes.Box:
-                    return MathF.Sqrt(BoxDatas.Extents[0] * BoxDatas.Extents[0] / 4 + BoxDatas.Extents[1] * BoxDatas.Extents[1] / 4);
+                    return MathF.Sqrt(BoxDatas.Extents[0] * BoxDatas.Extents[0] + BoxDatas.Extents[1] * BoxDatas.Extents[1]);
                 case AreaTriggerTypes.Cylinder:
                     return Math.Max(CylinderDatas.Radius, CylinderDatas.RadiusTarget);
                 case AreaTriggerTypes.Disk:
                     return Math.Max(DiskDatas.OuterRadius, DiskDatas.OuterRadiusTarget);
+                case AreaTriggerTypes.BoundedPlane:
+                    return MathF.Sqrt(BoundedPlaneDatas.Extents[0] * BoundedPlaneDatas.Extents[0] / 4 + BoundedPlaneDatas.Extents[1] * BoundedPlaneDatas.Extents[1] / 4);
             }
 
             return 0.0f;
@@ -214,6 +180,7 @@ namespace Game.Entities
         public bool IsPolygon() { return TriggerType == AreaTriggerTypes.Polygon; }
         public bool IsCylinder() { return TriggerType == AreaTriggerTypes.Cylinder; }
         public bool IsDisk() { return TriggerType == AreaTriggerTypes.Disk; }
+        public bool IsBoudedPlane() { return TriggerType == AreaTriggerTypes.BoundedPlane; }
     }
 
     public class AreaTriggerOrbitInfo
@@ -267,10 +234,7 @@ namespace Game.Entities
     {
         public AreaTriggerCreateProperties()
         {
-            // legacy code from before it was known what each curve field does
-            ExtraScale.Raw.Data[5] = 1065353217;
-            // also OverrideActive does nothing on ExtraScale
-            ExtraScale.Structured.OverrideActive = 1;
+            ExtraScale = new();
         }
 
         public bool HasSplines() { return SplinePoints.Count >= 2; }
@@ -299,9 +263,9 @@ namespace Game.Entities
         public uint Id;
         public AreaTriggerTemplate Template;
 
-        public uint MoveCurveId;
-        public uint ScaleCurveId;
-        public uint MorphCurveId;
+        public CurveInterpolationMode MoveCurveId;
+        public CurveInterpolationMode ScaleCurveId;
+        public CurveInterpolationMode MorphCurveId;
         public uint FacingCurveId;
 
         public int AnimId;
@@ -312,8 +276,8 @@ namespace Game.Entities
         public uint TimeToTarget;
         public uint TimeToTargetScale;
 
-        public AreaTriggerScaleInfo OverrideScale = new();
-        public AreaTriggerScaleInfo ExtraScale = new();
+        public AreaTriggerScaleCurveTemplate OverrideScale;
+        public AreaTriggerScaleCurveTemplate ExtraScale;
 
         public AreaTriggerShapeInfo Shape = new();
         public List<Vector2> PolygonVertices = new();
@@ -321,20 +285,21 @@ namespace Game.Entities
         public List<Vector3> SplinePoints = new();
         public AreaTriggerOrbitInfo OrbitInfo;
 
-        public uint ScriptId;
+        public int ScriptId;
     }
 
     public class AreaTriggerSpawn : SpawnData
     {
         public AreaTriggerId TriggerId;
         public AreaTriggerShapeInfo Shape = new();
+        public int? SpellForVisuals;
 
         public AreaTriggerSpawn() : base(SpawnObjectType.AreaTrigger) { }
     }
 
     public struct AreaTriggerAction
     {
-        public uint Param;
+        public int Param;
         public AreaTriggerActionTypes ActionType;
         public AreaTriggerActionUserTypes TargetType;
     }

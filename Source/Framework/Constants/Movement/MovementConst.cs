@@ -30,6 +30,7 @@ namespace Framework.Constants
         Waypoint = 2, // WaypointMovement
 
         MaxDB = 3, // *** this and below motion types can't be set in DB.
+
         Confused = 4, // ConfusedMovementGenerator
         Chase = 5, // TargetedMovementGenerator
         Home = 6, // HomeMovementGenerator
@@ -126,7 +127,7 @@ namespace Framework.Constants
         Right
     }
 
-    public enum UpdateCollisionHeightReason
+    public enum UpdateCollisionHeightReason : byte
     {
         Scale = 0,
         Mount = 1,

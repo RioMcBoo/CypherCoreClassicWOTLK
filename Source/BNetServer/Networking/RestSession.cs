@@ -72,7 +72,7 @@ namespace BNetServer.Networking
                 }
             }
 
-            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetAuthentication);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_AUTHENTICATION);
             stmt.AddValue(0, login);
 
             using var result = DB.Login.Query(stmt);
@@ -93,7 +93,7 @@ namespace BNetServer.Networking
                         loginTicket = "TC-" + ticket.ToHexString();
                     }
 
-                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UpdBnetAuthentication);
+                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_AUTHENTICATION);
                     stmt.AddValue(0, loginTicket);
                     stmt.AddValue(1, Time.UnixTime + 3600);
                     stmt.AddValue(2, accountId);
@@ -111,7 +111,7 @@ namespace BNetServer.Networking
                     if (maxWrongPassword != 0)
                     {
                         SQLTransaction trans = new();
-                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UpdBnetFailedLogins);
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_FAILED_LOGINS);
                         stmt.AddValue(0, accountId);
                         trans.Append(stmt);
 
@@ -126,19 +126,19 @@ namespace BNetServer.Networking
 
                             if (banType == BanMode.Account)
                             {
-                                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.InsBnetAccountAutoBanned);
+                                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_ACCOUNT_AUTO_BANNED);
                                 stmt.AddValue(0, accountId);
                             }
                             else
                             {
-                                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.InsIpAutoBanned);
+                                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_IP_AUTO_BANNED);
                                 stmt.AddValue(0, request.Host);
                             }
 
                             stmt.AddValue(1, banTime);
                             trans.Append(stmt);
 
-                            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UpdBnetResetFailedLogins);
+                            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_RESET_FAILED_LOGINS);
                             stmt.AddValue(0, accountId);
                             trans.Append(stmt);
                         }

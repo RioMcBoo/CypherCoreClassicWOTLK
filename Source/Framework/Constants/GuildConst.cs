@@ -12,12 +12,12 @@ namespace Framework.Constants
         public const int BankMoneyLogsTab = 100;
 
         public const ulong MoneyLimit = 100000000000;
-        public const uint WithdrawMoneyUnlimited = 0xFFFFFFFF;
+        public const int WithdrawMoneyUnlimited = -1;
         public const int WithdrawSlotUnlimited = -1;
-        public const uint EventLogGuidUndefined = 0xFFFFFFFF;
+        public const int EventLogGuidUndefined = -1;
 
-        public const uint ChallengesTypes = 6;
-        public const uint CharterItemId = 5863;
+        public const int ChallengesTypes = 6;
+        public const int CharterItemId = 5863;
 
         public const int RankNone = 0xFF;
         public const int MinRanks = 5;
@@ -219,7 +219,7 @@ namespace Framework.Constants
         HasRestriction = 13
     }
 
-    public enum PetitionSigns
+    public enum PetitionSigns : byte
     {
         Ok = 0,
         AlreadySigned = 1,

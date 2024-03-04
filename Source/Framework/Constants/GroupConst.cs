@@ -13,7 +13,7 @@ namespace Framework.Constants
         KickLFG = 3
     }
 
-    public enum GroupMemberOnlineStatus
+    public enum GroupMemberOnlineStatus : ushort
     {
         Offline = 0x00,
         Online = 0x01,      // Lua_UnitIsConnected
@@ -41,14 +41,15 @@ namespace Framework.Constants
         MainAssist = 1
     }
 
-    public enum GroupType
+    public enum GroupType : byte
     {
         None = 0,
         Normal = 1,
         WorldPvp = 4,
     }
 
-    public enum GroupFlags
+    [Flags]
+    public enum GroupFlags : ushort
     {
         None = 0x00,
         FakeRaid = 0x01,
@@ -59,6 +60,8 @@ namespace Framework.Constants
         OnePersonParty = 0x020, // Script_IsOnePersonParty()
         EveryoneAssistant = 0x040, // Script_IsEveryoneAssistant()
         GuildGroup = 0x100,
+        CrossFaction = 0x200,
+        RestrictPings = 0x400,
 
         MaskBgRaid = FakeRaid | Raid
     }
@@ -148,6 +151,18 @@ namespace Framework.Constants
     {
         Home = 0,
         Instance = 1,
+
+        Max
+    }
+
+    public enum PingSubjectType : byte
+    {
+        Attack = 0,
+        Warning = 1,
+        Assist = 2,
+        OnMyWay = 3,
+        AlertThreat = 4,
+        AlertNotThreat = 5,
 
         Max
     }

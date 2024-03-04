@@ -186,7 +186,7 @@ namespace Game.Entities
         }
 
         public override ObjectGuid GetOwnerGUID() { return m_sceneObjectData.CreatedBy; }
-        public override uint GetFaction() { return 0; }
+        public override int GetFaction() { return 0; }
 
         public override float GetStationaryX() { return _stationaryPosition.GetPositionX(); }
         public override float GetStationaryY() { return _stationaryPosition.GetPositionY(); }

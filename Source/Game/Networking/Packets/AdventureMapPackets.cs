@@ -9,9 +9,9 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            QuestID = _worldPacket.ReadUInt32();
+            QuestID = _worldPacket.ReadInt32();
         }
 
-        public uint QuestID;
+        public int QuestID;
     }
 }

@@ -108,7 +108,7 @@ namespace Game.Chat
             }
 
             Player target = handler.GetSelectedPlayer();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -128,7 +128,7 @@ namespace Game.Chat
             string nameLink = handler.GetNameLink(target);
 
             Group grp = target.GetGroup();
-            if (!grp)
+            if (grp == null)
             {
                 handler.SendSysMessage(CypherStrings.NotInGroup, nameLink);
                 return false;
@@ -137,7 +137,7 @@ namespace Game.Chat
             for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player player = refe.GetSource();
-                if (!player || !player.GetSession())
+                if (player == null || player.GetSession() == null)
                     continue;
 
                 // check online security
@@ -223,7 +223,7 @@ namespace Game.Chat
         class TeleNameCommands
         {
             [Command("", RBACPermissions.CommandTeleName, true)]
-            static bool HandleTeleNameCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier player, [VariantArg(typeof(GameTele), typeof(string))] object where)
+            static bool HandleTeleNameCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier player, [VariantArg<GameTele, string>] object where)
             {
                 if (player == null)
                     player = PlayerIdentifier.FromTargetOrSelf(handler);
@@ -234,7 +234,7 @@ namespace Game.Chat
 
                 if (where is string && where.Equals("$home"))    // References target's homebind
                 {
-                    if (target)
+                    if (target != null)
                         target.TeleportTo(target.GetHomebind());
                     else
                     {

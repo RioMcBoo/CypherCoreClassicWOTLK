@@ -6,14 +6,14 @@ using System;
 namespace Framework.Constants
 {
     [Flags]
-    public enum BattlePetError
+    public enum BattlePetError : byte
     {
         CantHaveMorePetsOfThatType = 3, // You can't have any more pets of that type.
         CantHaveMorePets = 4, // You can't have any more pets.
         TooHighLevelToUncage = 7, // This pet is too high level for you to uncage.
     }
 
-    public enum FlagsControlType
+    public enum FlagsControlType : byte
     {
         Apply = 1,
         Remove = 2

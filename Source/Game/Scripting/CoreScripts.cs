@@ -45,12 +45,12 @@ namespace Game.Scripting
         // Using provided text, not from DB
         public static void AddGossipItemFor(Player player, GossipOptionNpc optionNpc, string text, uint sender, uint action)
         {
-            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, optionNpc, text, sender, action, "", 0);
+            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, false, 0, "", null, null, sender, action);
         }
         // Using provided texts, not from DB
         public static void AddGossipItemFor(Player player, GossipOptionNpc optionNpc, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded)
         {
-            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, optionNpc, text, sender, action, popupText, popupMoney, coded);
+            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, coded, popupMoney, popupText, null, null, sender, action);
         }
         // Uses gossip item info from DB
         public static void AddGossipItemFor(Player player, uint gossipMenuID, uint gossipMenuItemID, uint sender, uint action)
@@ -58,7 +58,11 @@ namespace Game.Scripting
             player.PlayerTalkClass.GetGossipMenu().AddMenuItem(gossipMenuID, gossipMenuItemID, sender, action);
         }
         public static void SendGossipMenuFor(Player player, uint npcTextID, ObjectGuid guid) { player.PlayerTalkClass.SendGossipMenu(npcTextID, guid); }
-        public static void SendGossipMenuFor(Player player, uint npcTextID, Creature creature) { if (creature) SendGossipMenuFor(player, npcTextID, creature.GetGUID()); }
+        public static void SendGossipMenuFor(Player player, uint npcTextID, Creature creature)
+        {
+            if (creature != null)
+                SendGossipMenuFor(player, npcTextID, creature.GetGUID());
+        }
         public static void CloseGossipMenuFor(Player player) { player.PlayerTalkClass.SendCloseGossip(); }
 
         string _name;
@@ -151,30 +155,30 @@ namespace Game.Scripting
         public FormulaScript(string name) : base(name) { }
 
         // Called after calculating honor.
-        public virtual void OnHonorCalculation(float honor, uint level, float multiplier) { }
+        public virtual void OnHonorCalculation(float honor, int level, float multiplier) { }
 
         // Called after gray level calculation.
-        public virtual void OnGrayLevelCalculation(uint grayLevel, uint playerLevel) { }
+        public virtual void OnGrayLevelCalculation(int grayLevel, int playerLevel) { }
 
         // Called after calculating experience color.
-        public virtual void OnColorCodeCalculation(XPColorChar color, uint playerLevel, uint mobLevel) { }
+        public virtual void OnColorCodeCalculation(XPColorChar color, int playerLevel, uint mobLevel) { }
 
         // Called after calculating zero difference.
-        public virtual void OnZeroDifferenceCalculation(uint diff, uint playerLevel) { }
+        public virtual void OnZeroDifferenceCalculation(uint diff, int playerLevel) { }
 
         // Called after calculating base experience gain.
-        public virtual void OnBaseGainCalculation(uint gain, uint playerLevel, uint mobLevel, ContentLevels content) { }
+        public virtual void OnBaseGainCalculation(int gain, int playerLevel, int mobLevel, ContentLevels content) { }
 
         // Called after calculating experience gain.
-        public virtual void OnGainCalculation(uint gain, Player player, Unit unit) { }
+        public virtual void OnGainCalculation(int gain, Player player, Unit unit) { }
 
         // Called when calculating the experience rate for group experience.
-        public virtual void OnGroupRateCalculation(float rate, uint count, bool isRaid) { }
+        public virtual void OnGroupRateCalculation(float rate, int count, bool isRaid) { }
     }
 
     public class MapScript<T> : ScriptObject where T : Map
     {
-        public MapScript(string name, uint mapId) : base(name)
+        public MapScript(string name, int mapId) : base(name)
         {
             _mapEntry = CliDB.MapStorage.LookupByKey(mapId);
 
@@ -204,9 +208,9 @@ namespace Game.Scripting
 
     public class WorldMapScript : MapScript<Map>
     {
-        public WorldMapScript(string name, uint mapId) : base(name, mapId)
+        public WorldMapScript(string name, int mapId) : base(name, mapId)
         {
-            if (GetEntry() != null && !GetEntry().IsWorldMap())
+            if (GetEntry() != null && !GetEntry().IsWorldMap)
                 Log.outError(LogFilter.Scripts, "WorldMapScript for map {0} is invalid.", mapId);
 
             Global.ScriptMgr.AddScript(this);
@@ -215,9 +219,9 @@ namespace Game.Scripting
 
     public class InstanceMapScript : MapScript<InstanceMap>
     {
-        public InstanceMapScript(string name, uint mapId) : base(name, mapId)
+        public InstanceMapScript(string name, int mapId) : base(name, mapId)
         {
-            if (GetEntry() != null && !GetEntry().IsDungeon())
+            if (GetEntry() != null && !GetEntry().IsDungeon)
                 Log.outError(LogFilter.Scripts, "InstanceMapScript for map {0} is invalid.", mapId);
 
             Global.ScriptMgr.AddScript(this);
@@ -231,9 +235,9 @@ namespace Game.Scripting
 
     public class BattlegroundMapScript : MapScript<BattlegroundMap>
     {
-        public BattlegroundMapScript(string name, uint mapId) : base(name, mapId)
+        public BattlegroundMapScript(string name, int mapId) : base(name, mapId)
         {
-            if (GetEntry() != null && GetEntry().IsBattleground())
+            if (GetEntry() != null && GetEntry().IsBattleground)
                 Log.outError(LogFilter.Scripts, "BattlegroundMapScript for map {0} is invalid.", mapId);
 
             Global.ScriptMgr.AddScript(this);
@@ -401,7 +405,7 @@ namespace Game.Scripting
         // returns true if the trigger was successfully handled, false if we should try again next time
         public virtual bool TryHandleOnce(Player player, AreaTriggerRecord trigger) { return false; }
 
-        void ResetAreaTriggerDone(InstanceScript script, uint triggerId)
+        void ResetAreaTriggerDone(InstanceScript script, int triggerId)
         {
             script.ResetAreaTriggerDone(triggerId);
         }
@@ -425,7 +429,7 @@ namespace Game.Scripting
 
         public virtual BattleField GetBattlefield(Map map) { return null; }
     }
-    
+
     public class BattlegroundScript : ScriptObject
     {
         public BattlegroundScript(string name) : base(name)
@@ -555,7 +559,7 @@ namespace Game.Scripting
         public virtual void OnRemovePassenger(Transport transport, Player player) { }
 
         // Called when a transport moves.
-        public virtual void OnRelocate(Transport transport, uint mapId, float x, float y, float z) { }
+        public virtual void OnRelocate(Transport transport, int mapId, float x, float y, float z) { }
 
         public virtual void OnUpdate(Transport obj, uint diff) { }
     }
@@ -572,7 +576,7 @@ namespace Game.Scripting
         // Called when an achievement is completed.
         public virtual void OnCompleted(Player player, AchievementRecord achievement) { }
     }
-    
+
     public class AchievementCriteriaScript : ScriptObject
     {
         public AchievementCriteriaScript(string name) : base(name)
@@ -615,10 +619,10 @@ namespace Game.Scripting
         public virtual void OnMoneyChanged(Player player, long amount) { }
 
         // Called when a player gains XP (before anything is given)
-        public virtual void OnGiveXP(Player player, uint amount, Unit victim) { }
+        public virtual int OnGiveXP(Player player, int amount, Unit victim) { return 0; }
 
         // Called when a player's reputation changes (before it is actually changed)
-        public virtual void OnReputationChange(Player player, uint factionId, int standing, bool incremental) { }
+        public virtual void OnReputationChange(Player player, int factionId, int standing, bool incremental) { }
 
         // Called when a duel is requested
         public virtual void OnDuelRequest(Player target, Player challenger) { }
@@ -643,13 +647,13 @@ namespace Game.Scripting
         // Both of the below are called on emote opcodes.
         public virtual void OnClearEmote(Player player) { }
 
-        public virtual void OnTextEmote(Player player, uint textEmote, uint emoteNum, ObjectGuid guid) { }
+        public virtual void OnTextEmote(Player player, int textEmote, int emoteNum, ObjectGuid guid) { }
 
         // Called in Spell.Cast.
         public virtual void OnSpellCast(Player player, Spell spell, bool skipCheck) { }
 
         // Called when a player logs in.
-        public virtual void OnLogin(Player player) { }
+        public virtual void OnLogin(Player player, bool firstLogin) { }
 
         // Called when a player logs out.
         public virtual void OnLogout(Player player) { }
@@ -658,34 +662,60 @@ namespace Game.Scripting
         public virtual void OnCreate(Player player) { }
 
         // Called when a player is deleted.
-        public virtual void OnDelete(ObjectGuid guid, uint accountId) { }
+        public virtual void OnDelete(ObjectGuid guid, int accountId) { }
 
         // Called when a player delete failed
-        public virtual void OnFailedDelete(ObjectGuid guid, uint accountId) { }
+        public virtual void OnFailedDelete(ObjectGuid guid, int accountId) { }
 
         // Called when a player is about to be saved.
         public virtual void OnSave(Player player) { }
 
         // Called when a player is bound to an instance
-        public virtual void OnBindToInstance(Player player, Difficulty difficulty, uint mapId, bool permanent, byte extendState) { }
+        public virtual void OnBindToInstance(Player player, Difficulty difficulty, int mapId, bool permanent, byte extendState) { }
 
         // Called when a player switches to a new zone
-        public virtual void OnUpdateZone(Player player, uint newZone, uint newArea) { }
+        public virtual void OnUpdateZone(Player player, int newZone, int newArea) { }
 
         // Called when a player changes to a new map (after moving to new map)
         public virtual void OnMapChanged(Player player) { }
 
         // Called after a player's quest status has been changed
-        public virtual void OnQuestStatusChange(Player player, uint questId) { }
+        public virtual void OnQuestStatusChange(Player player, int questId) { }
 
         // Called when a player presses release when he died
         public virtual void OnPlayerRepop(Player player) { }
 
         // Called when a player completes a movie
-        public virtual void OnMovieComplete(Player player, uint movieId) { }
+        public virtual void OnMovieComplete(Player player, int movieId) { }
 
         // Called when a player choose a response from a PlayerChoice
-        public virtual void OnPlayerChoiceResponse(Player player, uint choiceId, uint responseId) { }
+        public virtual void OnPlayerChoiceResponse(Player player, int choiceId, int responseId) { }
+    }
+
+    public class AccountScript : ScriptObject
+    {
+        public AccountScript(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        // Called when an account logged in succesfully
+        public virtual void OnAccountLogin(int accountId) { }
+
+        // Called when an account login failed
+        public virtual void OnFailedAccountLogin(int accountId) { }
+
+        // Called when Email is successfully changed for Account
+        public virtual void OnEmailChange(int accountId) { }
+
+        // Called when Email failed to change for Account
+        public virtual void OnFailedEmailChange(int accountId) { }
+
+        // Called when Password is successfully changed for Account
+        public virtual void OnPasswordChange(int accountId) { }
+
+        // Called when Password failed to change for Account
+        public virtual void OnFailedPasswordChange(int accountId) { }
     }
 
     public class GuildScript : ScriptObject
@@ -716,17 +746,17 @@ namespace Game.Scripting
         public virtual void OnDisband(Guild guild) { }
 
         // Called when a guild member withdraws money from a guild bank.
-        public virtual void OnMemberWitdrawMoney(Guild guild, Player player, ulong amount, bool isRepair) { }
+        public virtual void OnMemberWitdrawMoney(Guild guild, Player player, long amount, bool isRepair) { }
 
         // Called when a guild member deposits money in a guild bank.
-        public virtual void OnMemberDepositMoney(Guild guild, Player player, ulong amount) { }
+        public virtual void OnMemberDepositMoney(Guild guild, Player player, long amount) { }
 
         // Called when a guild member moves an item in a guild bank.
         public virtual void OnItemMove(Guild guild, Player player, Item pItem, bool isSrcBank, ItemPos src, bool isDestBank, ItemPos desc) { }
 
-        public virtual void OnEvent(Guild guild, byte eventType, ulong playerGuid1, ulong playerGuid2, byte newRank) { }
+        public virtual void OnEvent(Guild guild, byte eventType, long playerGuid1, long playerGuid2, byte newRank) { }
 
-        public virtual void OnBankEvent(Guild guild, byte eventType, byte tabId, ulong playerGuid, uint itemOrMoney, ushort itemStackCount, byte destTabId) { }
+        public virtual void OnBankEvent(Guild guild, byte eventType, byte tabId, long playerGuid, int itemOrMoney, ushort itemStackCount, byte destTabId) { }
     }
 
     public class GroupScript : ScriptObject
@@ -779,8 +809,14 @@ namespace Game.Scripting
         // Called when Conversation is created but not added to Map yet.
         public virtual void OnConversationCreate(Conversation conversation, Unit creator) { }
 
+        // Called when Conversation is started
+        public virtual void OnConversationStart(Conversation conversation) { }
+
         // Called when player sends CMSG_CONVERSATION_LINE_STARTED with valid conversation guid
         public virtual void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender) { }
+
+        // Called for each update tick
+        public virtual void OnConversationUpdate(Conversation conversation, uint diff) { }
     }
 
     public class SceneScript : ScriptObject
@@ -793,16 +829,16 @@ namespace Game.Scripting
         public override bool IsDatabaseBound() { return true; }
 
         // Called when a player start a scene
-        public virtual void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate) { }
+        public virtual void OnSceneStart(Player player, int sceneInstanceID, SceneTemplate sceneTemplate) { }
 
         // Called when a player receive trigger from scene
-        public virtual void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName) { }
+        public virtual void OnSceneTriggerEvent(Player player, int sceneInstanceID, SceneTemplate sceneTemplate, string triggerName) { }
 
         // Called when a scene is canceled
-        public virtual void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate) { }
+        public virtual void OnSceneCancel(Player player, int sceneInstanceID, SceneTemplate sceneTemplate) { }
 
         // Called when a scene is completed
-        public virtual void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate) { }
+        public virtual void OnSceneComplete(Player player, int sceneInstanceID, SceneTemplate sceneTemplate) { }
     }
 
     public class QuestScript : ScriptObject
@@ -835,5 +871,18 @@ namespace Game.Scripting
 
         // Called when worldstate changes value, map is optional
         public virtual void OnValueChange(int worldStateId, int oldValue, int newValue, Map map) { }
+    }
+
+    public class EventScript : ScriptObject
+    {
+        public EventScript(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        public override bool IsDatabaseBound() { return true; }
+
+        // Called when a game event is triggered
+        public virtual void OnTrigger(WorldObject obj, WorldObject invoker, int eventId) { }
     }
 }

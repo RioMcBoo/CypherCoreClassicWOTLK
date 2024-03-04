@@ -24,6 +24,14 @@ namespace Game.Entities
             Orientation = NormalizeOrientation(o);
         }
 
+        public Position(Vector4 vector)
+        {
+            posX = vector.X;
+            posY = vector.Y;
+            posZ = vector.Z;
+            Orientation = NormalizeOrientation(vector.W);
+        }
+
         public Position(Vector3 vector)
         {
             posX = vector.X;
@@ -130,6 +138,11 @@ namespace Game.Entities
             return new Vector3(posX, posY, posZ);
         }
 
+        public Vector4 GetPosition4D()
+        {
+            return new Vector4(posX, posY, posZ, Orientation);
+        }
+
         public void GetPosition(out float x, out float y, out float z, out float o)
         {
             x = posX;
@@ -142,6 +155,7 @@ namespace Game.Entities
         {
             return this;
         }
+
         public void GetPositionOffsetTo(Position endPos, out Position retOffset)
         {
             retOffset = new Position();
@@ -343,18 +357,18 @@ namespace Game.Entities
 
     public class WorldLocation : Position
     {
-        uint _mapId;
+        int _mapId;
         Cell currentCell;
         public ObjectCellMoveState _moveState;
 
         public Position _newPosition = new();
 
-        public WorldLocation(uint mapId = 0xFFFFFFFF, float x = 0, float y = 0, float z = 0, float o = 0)
+        public WorldLocation(int mapId = -1, float x = 0, float y = 0, float z = 0, float o = 0)
         {
             _mapId = mapId;
             Relocate(x, y, z, o);
         }
-        public WorldLocation(uint mapId, Position pos)
+        public WorldLocation(int mapId, Position pos)
         {
             _mapId = mapId;
             Relocate(pos);
@@ -366,11 +380,11 @@ namespace Game.Entities
         }
         public WorldLocation(Position pos)
         {
-            _mapId = 0xFFFFFFFF;
+            _mapId = -1;
             Relocate(pos);
         }
 
-        public void WorldRelocate(uint mapId, Position pos)
+        public void WorldRelocate(int mapId, Position pos)
         {
             _mapId = mapId;
             Relocate(pos);
@@ -382,14 +396,14 @@ namespace Game.Entities
             Relocate(loc);
         }
 
-        public void WorldRelocate(uint mapId = 0xFFFFFFFF, float x = 0.0f, float y = 0.0f, float z = 0.0f, float o = 0.0f)
+        public void WorldRelocate(int mapId = -1, float x = 0.0f, float y = 0.0f, float z = 0.0f, float o = 0.0f)
         {
             _mapId = mapId;
             Relocate(x, y, z, o);
         }
 
-        public uint GetMapId() { return _mapId; }
-        public void SetMapId(uint mapId) { _mapId = mapId; }
+        public int GetMapId() { return _mapId; }
+        public void SetMapId(int mapId) { _mapId = mapId; }
 
         public Cell GetCurrentCell()
         {

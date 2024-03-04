@@ -5,11 +5,13 @@ using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.Cache;
+using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Guilds;
 using Game.Maps;
+using Game.Miscellaneous;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -84,7 +86,7 @@ namespace Game
 
                             charInfo.Customizations.Clear();
 
-                            if (charInfo.Flags2 != CharacterCustomizeFlags.Customize)
+                            if (!charInfo.Flags2.HasAnyFlag(CharacterCustomizeFlags.Customize | CharacterCustomizeFlags.Faction | CharacterCustomizeFlags.Race))
                             {
                                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                                 stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
@@ -164,7 +166,7 @@ namespace Game
             SendPacket(charEnum);
         }
 
-        public bool MeetsChrCustomizationReq(ChrCustomizationReqRecord req, Class playerClass, bool checkRequiredDependentChoices, List<ChrCustomizationChoice> selectedChoices)
+        public bool MeetsChrCustomizationReq(ChrCustomizationReqRecord req, Race race, Class playerClass, bool checkRequiredDependentChoices, List<ChrCustomizationChoice> selectedChoices)
         {
             if (!req.GetFlags().HasFlag(ChrCustomizationReqFlag.HasRequirements))
                 return true;
@@ -172,11 +174,24 @@ namespace Game
             if (req.ClassMask != 0 && (req.ClassMask & (1 << ((int)playerClass - 1))) == 0)
                 return false;
 
+            var raceMask = new RaceMask<long>(req.RaceMask);
+            if (race != Race.None && !raceMask.IsEmpty() && raceMask.RawValue != -1 && !raceMask.HasRace(race))
+                return false;
+
             if (req.AchievementID != 0 /*&& !HasAchieved(req->AchievementID)*/)
                 return false;
 
             if (req.ItemModifiedAppearanceID != 0 && !GetCollectionMgr().HasItemAppearance(req.ItemModifiedAppearanceID).PermAppearance)
                 return false;
+
+            if (req.QuestID != 0)
+            {
+                if (_player == null)
+                    return false;
+
+                if (!_player.IsQuestRewarded((uint)req.QuestID))
+                    return false;
+            }
 
             if (checkRequiredDependentChoices)
             {
@@ -230,7 +245,7 @@ namespace Game
 
                 ChrCustomizationReqRecord req = CliDB.ChrCustomizationReqStorage.LookupByKey(customizationOptionData.ChrCustomizationReqID);
                 if (req != null)
-                    if (!MeetsChrCustomizationReq(req, playerClass, false, customizations))
+                    if (!MeetsChrCustomizationReq(req, race, playerClass, false, customizations))
                         return false;
 
                 var choicesForOption = Global.DB2Mgr.GetCustomiztionChoices(playerChoice.ChrCustomizationOptionID);
@@ -245,7 +260,7 @@ namespace Game
 
                 ChrCustomizationReqRecord reqEntry = CliDB.ChrCustomizationReqStorage.LookupByKey(customizationChoiceData.ChrCustomizationReqID);
                 if (reqEntry != null)
-                    if (!MeetsChrCustomizationReq(reqEntry, playerClass, true, customizations))
+                    if (!MeetsChrCustomizationReq(reqEntry, race, playerClass, true, customizations))
                         return false;
             }
 
@@ -304,14 +319,14 @@ namespace Game
             RaceUnlockRequirement raceExpansionRequirement = Global.ObjectMgr.GetRaceUnlockRequirement(charCreate.CreateInfo.RaceId);
             if (raceExpansionRequirement == null)
             {
-                Log.outError(LogFilter.Player, $"Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
-                SendCharCreate(ResponseCodes.AccountCreateFailed);
+                Log.outError(LogFilter.Cheat, $"Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
+                SendCharCreate(ResponseCodes.CharCreateFailed);
                 return;
             }
 
             if (raceExpansionRequirement.Expansion > (byte)GetAccountExpansion())
             {
-                Log.outError(LogFilter.Player, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
+                Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansion);
                 return;
             }
@@ -324,18 +339,33 @@ namespace Game
             //    return;
             //}
 
-            // prevent character creating Expansion class without Expansion account
-            ClassAvailability classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.RaceId, charCreate.CreateInfo.ClassId);
-            if (classExpansionRequirement == null)
+            // prevent character creating Expansion race without Expansion account
+            ClassAvailability raceClassExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.RaceId, charCreate.CreateInfo.ClassId);
+            if (raceClassExpansionRequirement != null)
             {
-                Log.outError(LogFilter.Player, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
-                SendCharCreate(ResponseCodes.CharCreateExpansionClass);
-                return;
+                if (raceClassExpansionRequirement.ActiveExpansionLevel > (byte)GetExpansion() || raceClassExpansionRequirement.AccountExpansionLevel > (byte)GetAccountExpansion())
+                {
+                    Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
+                        $"(had {GetExpansion()}/{GetAccountExpansion()}, required {raceClassExpansionRequirement.ActiveExpansionLevel}/{raceClassExpansionRequirement.AccountExpansionLevel})");
+                    SendCharCreate(ResponseCodes.CharCreateExpansionClass);
+                    return;
+                }
             }
-
-            if (classExpansionRequirement.ActiveExpansionLevel > (int)GetExpansion() || classExpansionRequirement.AccountExpansionLevel > (int)GetAccountExpansion())
+            else
             {
-                Log.outError(LogFilter.Player, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion(had {GetExpansion()}/{GetAccountExpansion()}, required {classExpansionRequirement.ActiveExpansionLevel}/{classExpansionRequirement.AccountExpansionLevel})");
+                ClassAvailability classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirementFallback((byte)charCreate.CreateInfo.ClassId);
+                if (classExpansionRequirement != null)
+                {
+                    if (classExpansionRequirement.MinActiveExpansionLevel > (byte)GetExpansion() || classExpansionRequirement.AccountExpansionLevel > (byte)GetAccountExpansion())
+                    {
+                        Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
+                            $"(had {GetExpansion()}/{GetAccountExpansion()}, required {classExpansionRequirement.ActiveExpansionLevel}/{classExpansionRequirement.AccountExpansionLevel})");
+                        SendCharCreate(ResponseCodes.CharCreateExpansionClass);
+                        return;
+                    }
+                }
+                else
+                    Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansionClass);
                 return;
             }
@@ -349,8 +379,8 @@ namespace Game
                     return;
                 }
 
-                ulong raceMaskDisabled = WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
-                if (Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(charCreate.CreateInfo.RaceId) & raceMaskDisabled))
+                RaceMask<ulong> raceMaskDisabled = new(WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask));
+                if (raceMaskDisabled.HasRace(charCreate.CreateInfo.RaceId))
                 {
                     SendCharCreate(ResponseCodes.CharCreateDisabled);
                     return;
@@ -436,9 +466,14 @@ namespace Game
 
                 int demonHunterReqLevel = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter);
                 bool hasDemonHunterReqLevel = demonHunterReqLevel == 0;
+                uint evokerReqLevel = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingMinLevelForEvoker);
+                bool hasEvokerReqLevel = (evokerReqLevel == 0);
                 bool allowTwoSideAccounts = !Global.WorldMgr.IsPvPRealm() || HasPermission(RBACPermissions.TwoSideCharacterCreation);
                 int skipCinematics = WorldConfig.GetIntValue(WorldCfg.SkipCinematics);
-                bool checkDemonHunterReqs = createInfo.ClassId == Class.DemonHunter && !HasPermission(RBACPermissions.SkipCheckCharacterCreationDemonHunter);
+                bool checkClassLevelReqs = (createInfo.ClassId == Class.DemonHunter || createInfo.ClassId == Class.Evoker)
+                                            && !HasPermission(RBACPermissions.SkipCheckCharacterCreationDemonHunter);
+                int evokerLimit = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingEvokersPerRealm);
+                bool hasEvokerLimit = evokerLimit != 0;
 
                 void finalizeCharacterCreation(SQLResult result1)
                 {
@@ -447,8 +482,9 @@ namespace Game
                     {
                         Team team = Player.TeamForRace(createInfo.RaceId);
                         byte accRace = result1.Read<byte>(1);
+                        byte accClass = result1.Read<byte>(2);
 
-                        if (checkDemonHunterReqs)
+                        if (checkClassLevelReqs)
                         {
                             if (!hasDemonHunterReqLevel)
                             {
@@ -456,7 +492,16 @@ namespace Game
                                 if (accLevel >= demonHunterReqLevel)
                                     hasDemonHunterReqLevel = true;
                             }
+                            if (!hasEvokerReqLevel)
+                            {
+                                byte accLevel = result1.Read<byte>(0);
+                                if (accLevel >= evokerReqLevel)
+                                    hasEvokerReqLevel = true;
+                            }
                         }
+
+                        if (accClass == (byte)Class.Evoker)
+                            --evokerLimit;
 
                         // need to check team only for first character
                         // @todo what to if account already has characters of both races?
@@ -475,17 +520,18 @@ namespace Game
 
                         // search same race for cinematic or same class if need
                         // @todo check if cinematic already shown? (already logged in?; cinematic field)
-                        while ((skipCinematics == 1 && !haveSameRace) || createInfo.ClassId == Class.DemonHunter)
+                        while ((skipCinematics == 1 && !haveSameRace) || createInfo.ClassId == Class.DemonHunter || createInfo.ClassId == Class.Evoker)
                         {
                             if (!result1.NextRow())
                                 break;
 
                             accRace = result1.Read<byte>(1);
+                            accClass = result1.Read<byte>(2);
 
                             if (!haveSameRace)
                                 haveSameRace = createInfo.RaceId == (Race)accRace;
 
-                            if (checkDemonHunterReqs)
+                            if (checkClassLevelReqs)
                             {
                                 if (!hasDemonHunterReqLevel)
                                 {
@@ -493,11 +539,33 @@ namespace Game
                                     if (acc_level >= demonHunterReqLevel)
                                         hasDemonHunterReqLevel = true;
                                 }
+                                if (!hasEvokerReqLevel)
+                                {
+                                    byte accLevel = result1.Read<byte>(0);
+                                    if (accLevel >= evokerReqLevel)
+                                        hasEvokerReqLevel = true;
+                                }
                             }
+                            if (accClass == (byte)Class.Evoker)
+                                --evokerLimit;
                         }
                     }
 
-                    if (checkDemonHunterReqs && !hasDemonHunterReqLevel)
+                    if (checkClassLevelReqs)
+                    {
+                        if (!hasDemonHunterReqLevel)
+                        {
+                            SendCharCreate(ResponseCodes.CharCreateNewPlayer);
+                            return;
+                        }
+                        if (!hasEvokerReqLevel)
+                        {
+                            SendCharCreate(ResponseCodes.CharCreateDracthyrLevelRequirement);
+                            return;
+                        }
+                    }
+
+                    if (createInfo.ClassId == Class.Evoker && hasEvokerLimit && evokerLimit < 1)
                     {
                         SendCharCreate(ResponseCodes.CharCreateNewPlayer);
                         return;
@@ -506,7 +574,7 @@ namespace Game
                     // Check name uniqueness in the same step as saving to database
                     if (Global.CharacterCacheStorage.GetCharacterCacheByName(createInfo.Name) != null)
                     {
-                        SendCharCreate(ResponseCodes.CharCreateNameInUse);
+                        SendCharCreate(ResponseCodes.CharCreateDracthyrDuplicate);
                         return;
                     }
 
@@ -534,7 +602,7 @@ namespace Game
                     createInfo.CharCount += 1;
 
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
-                    stmt.AddValue(0, (uint)createInfo.CharCount);
+                    stmt.AddValue(0, createInfo.CharCount);
                     stmt.AddValue(1, GetAccountId());
                     stmt.AddValue(2, Global.WorldMgr.GetRealm().Id.Index);
                     loginTransaction.Append(stmt);
@@ -567,7 +635,7 @@ namespace Game
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_CREATE_INFO);
                 stmt.AddValue(0, GetAccountId());
-                stmt.AddValue(1, (skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter) ? 1200 : 1); // 200 (max chars per realm) + 1000 (max deleted chars per realm)
+                stmt.AddValue(1, (skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter || createInfo.ClassId == Class.Evoker) ? 1200 : 1); // 200 (max chars per realm) + 1000 (max deleted chars per realm)
                 queryCallback.WithCallback(finalizeCharacterCreation).SetNextQuery(DB.Characters.AsyncQuery(stmt));
             }));
         }
@@ -579,14 +647,14 @@ namespace Game
             uint initAccountId = GetAccountId();
 
             // can't delete loaded character
-            if (Global.ObjAccessor.FindPlayer(charDelete.Guid))
+            if (Global.ObjAccessor.FindPlayer(charDelete.Guid) != null)
             {
                 Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
                 return;
             }
 
             // is guild leader
-            if (Global.GuildMgr.GetGuildByLeader(charDelete.Guid))
+            if (Global.GuildMgr.GetGuildByLeader(charDelete.Guid) != null)
             {
                 Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
                 SendCharDelete(ResponseCodes.CharDeleteFailedGuildLeader);
@@ -696,7 +764,7 @@ namespace Game
 
         public void HandleContinuePlayerLogin()
         {
-            if (!PlayerLoading() || GetPlayer())
+            if (!PlayerLoading() || GetPlayer() != null)
             {
                 KickPlayer("WorldSession::HandleContinuePlayerLogin incorrect player state when logging in");
                 return;
@@ -766,7 +834,7 @@ namespace Game
                 pCurrChar.SetInGuild(resultGuild.Read<uint>(0));
                 pCurrChar.SetGuildRank(resultGuild.Read<byte>(1));
                 Guild guild = Global.GuildMgr.GetGuildById(pCurrChar.GetGuildId());
-                if (guild)
+                if (guild != null)
                     pCurrChar.SetGuildLevel(guild.GetLevel());
             }
             else if (pCurrChar.GetGuildId() != 0)
@@ -775,10 +843,6 @@ namespace Game
                 pCurrChar.SetGuildRank(0);
                 pCurrChar.SetGuildLevel(0);
             }
-
-            // Send stable contents to display icons on Call Pet spells
-            if (pCurrChar.HasSpell(SharedConst.CallPetSpellId))
-                SendStablePet(ObjectGuid.Empty);
 
             pCurrChar.GetSession().GetBattlePetMgr().SendJournalLockStatus();
 
@@ -826,7 +890,7 @@ namespace Game
             if (pCurrChar.GetGuildId() != 0)
             {
                 Guild guild = Global.GuildMgr.GetGuildById(pCurrChar.GetGuildId());
-                if (guild)
+                if (guild != null)
                     guild.SendLoginInfo(this);
                 else
                 {
@@ -853,7 +917,7 @@ namespace Game
 
             // announce group about member online (must be after add to player list to receive announce to self)
             Group group = pCurrChar.GetGroup();
-            if (group)
+            if (group != null)
             {
                 group.SendUpdate();
                 if (group.GetLeaderGUID() == pCurrChar.GetGUID())
@@ -920,7 +984,8 @@ namespace Game
                 SendNotification(CypherStrings.ResetTalents);
             }
 
-            if (pCurrChar.HasAtLoginFlag(AtLoginFlags.FirstLogin))
+            bool firstLogin = pCurrChar.HasAtLoginFlag(AtLoginFlags.FirstLogin);
+            if (firstLogin)
             {
                 pCurrChar.RemoveAtLoginFlag(AtLoginFlags.FirstLogin);
 
@@ -1011,7 +1076,7 @@ namespace Game
                 SendNotification(CypherStrings.GmOn);
 
             string IP_str = GetRemoteAddress();
-            Log.outDebug(LogFilter.Network, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Login Character: [{pCurrChar.GetName()}] ({pCurrChar.GetGUID()}) Level: {pCurrChar.GetLevel()}, XP: { _player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
+            Log.outDebug(LogFilter.Network, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Login Character: [{pCurrChar.GetName()}] ({pCurrChar.GetGUID()}) Level: {pCurrChar.GetLevel()}, XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
 
             if (!pCurrChar.IsStandState() && !pCurrChar.HasUnitState(UnitState.Stunned))
                 pCurrChar.SetStandState(UnitStandStateType.Stand);
@@ -1024,12 +1089,12 @@ namespace Game
             // Handle Login-Achievements (should be handled after loading)
             _player.UpdateCriteria(CriteriaType.Login, 1);
 
-            Global.ScriptMgr.OnPlayerLogin(pCurrChar);
+            Global.ScriptMgr.OnPlayerLogin(pCurrChar, firstLogin);
         }
 
         public void AbortLogin(LoginFailureReason reason)
         {
-            if (!PlayerLoading() || GetPlayer())
+            if (!PlayerLoading() || GetPlayer() != null)
             {
                 KickPlayer("WorldSession::AbortLogin incorrect player state when logging in");
                 return;
@@ -1051,10 +1116,6 @@ namespace Game
 
             // START OF DUMMY VALUES
             features.ComplaintStatus = (byte)ComplaintStatus.EnabledWithAutoIgnore;
-            features.ScrollOfResurrectionRequestsRemaining = 1;
-            features.ScrollOfResurrectionMaxRequestsPerDay = 1;
-            features.TwitterPostThrottleLimit = 60;
-            features.TwitterPostThrottleCooldown = 20;
             features.CfgRealmID = 2;
             features.CfgRealmRecID = 0;
             features.TokenPollTimeSeconds = 300;
@@ -1106,18 +1167,18 @@ namespace Game
             switch (packet.Action)
             {
                 case TutorialAction.Update:
+                {
+                    byte index = (byte)(packet.TutorialBit >> 5);
+                    if (index >= SharedConst.MaxAccountTutorialValues)
                     {
-                        byte index = (byte)(packet.TutorialBit >> 5);
-                        if (index >= SharedConst.MaxAccountTutorialValues)
-                        {
-                            Log.outError(LogFilter.Network, "CMSG_TUTORIAL_FLAG received bad TutorialBit {0}.", packet.TutorialBit);
-                            return;
-                        }
-                        uint flag = GetTutorialInt(index);
-                        flag |= (uint)(1 << (int)(packet.TutorialBit & 0x1F));
-                        SetTutorialInt(index, flag);
-                        break;
+                        Log.outError(LogFilter.Network, "CMSG_TUTORIAL_FLAG received bad TutorialBit {0}.", packet.TutorialBit);
+                        return;
                     }
+                    uint flag = GetTutorialInt(index);
+                    flag |= (uint)(1 << (int)(packet.TutorialBit & 0x1F));
+                    SetTutorialInt(index, flag);
+                    break;
+                }
                 case TutorialAction.Clear:
                     for (byte i = 0; i < SharedConst.MaxAccountTutorialValues; ++i)
                         SetTutorialInt(i, 0xFFFFFFFF);
@@ -1323,11 +1384,28 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AlterAppearance)]
         void HandleAlterAppearance(AlterApperance packet)
         {
+            if (packet.CustomizedChrModelID != 0)
+            {
+                var conditionalChrModel = CliDB.ConditionalChrModelStorage.LookupByKey(packet.CustomizedChrModelID);
+                if (conditionalChrModel == null)
+                    return;
+
+                var req = CliDB.ChrCustomizationReqStorage.LookupByKey(conditionalChrModel.ChrCustomizationReqID);
+                if (req != null)
+                    if (!MeetsChrCustomizationReq(req, (Race)packet.CustomizedRace, _player.GetClass(), false, packet.Customizations))
+                        return;
+
+                var condition = CliDB.PlayerConditionStorage.LookupByKey(conditionalChrModel.PlayerConditionID);
+                if (condition != null)
+                    if (!ConditionManager.IsPlayerMeetingCondition(_player, condition))
+                        return;
+            }
+
             if (!ValidateAppearance(_player.GetRace(), _player.GetClass(), (Gender)packet.NewSex, packet.Customizations))
                 return;
 
             GameObject go = GetPlayer().FindNearestGameObjectOfType(GameObjectTypes.BarberChair, 5.0f);
-            if (!go)
+            if (go == null)
             {
                 SendPacket(new BarberShopResult(BarberShopResult.ResultEnum.NotOnChair));
                 return;
@@ -1506,7 +1584,7 @@ namespace Game
                             Item item = _player.GetItemByPos(i);
 
                             // cheating check 1 (item equipped but sent empty guid)
-                            if (!item)
+                            if (item == null)
                                 return;
 
                             // cheating check 2 (sent guid does not match equipped item)
@@ -1555,11 +1633,6 @@ namespace Game
                     if (illusion.ItemVisual == 0 || !illusion.GetFlags().HasFlag(SpellItemEnchantmentFlags.AllowTransmog))
                         return false;
 
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogUseConditionID);
-                    if (condition != null)
-                        if (!ConditionManager.IsPlayerMeetingCondition(_player, condition))
-                            return false;
-
                     if (illusion.ScalingClassRestricted > 0 && illusion.ScalingClassRestricted != (byte)_player.GetClass())
                         return false;
 
@@ -1604,10 +1677,10 @@ namespace Game
                 if (!item)
                 {
                     Item uItem = GetPlayer().GetItemByPos(i);
-                    if (!uItem)
+                    if (uItem == null)
                         continue;
                                         
-                    InventoryResult inventoryResult = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> itemPosCount, uItem);
+                    InventoryResult inventoryResult = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<(ItemPos item, int count)> itemPosCount, uItem);
                     if (inventoryResult == InventoryResult.Ok)
                     {
                         if (_player.CanUnequipItem(dstPos, true) != InventoryResult.Ok)
@@ -1683,6 +1756,7 @@ namespace Game
 
             AtLoginFlags atLoginFlags = (AtLoginFlags)result.Read<ushort>(0);
             string knownTitlesStr = result.Read<string>(1);
+            uint groupId = !result.IsNull(2) ? result.Read<uint>(2) : 0;
 
             AtLoginFlags usedLoginFlag = (factionChangeInfo.FactionChange ? AtLoginFlags.ChangeFaction : AtLoginFlags.ChangeRace);
             if (!atLoginFlags.HasAnyFlag(usedLoginFlag))
@@ -1706,8 +1780,8 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
-                ulong raceMaskDisabled = WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
-                if (Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(factionChangeInfo.RaceID) & raceMaskDisabled))
+                RaceMask raceMaskDisabled = (RaceMask)WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
+                if (raceMaskDisabled.HasRace(factionChangeInfo.RaceID))
                 {
                     SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
                     return;
@@ -1911,6 +1985,13 @@ namespace Game
                         Player.LeaveAllArenaTeams(factionChangeInfo.Guid);
                     }
 
+                    if (groupId != 0 && !WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup))
+                    {
+                        Group group = Global.GroupMgr.GetGroupByDbStoreId(groupId);
+                        if (group != null)
+                            group.RemoveMember(factionChangeInfo.Guid);
+                    }
+
                     if (!HasPermission(RBACPermissions.TwoSideAddFriend))
                     {
                         // Delete Friend List
@@ -2018,8 +2099,8 @@ namespace Game
                         var questTemplates = Global.ObjectMgr.GetQuestTemplates();
                         foreach (Quest quest in questTemplates.Values)
                         {
-                            long newRaceMask = (long)(newTeamId == TeamId.Alliance ? SharedConst.RaceMaskAlliance : SharedConst.RaceMaskHorde);
-                            if (quest.AllowableRaces != -1 && !Convert.ToBoolean(quest.AllowableRaces & newRaceMask))
+                            RaceMask newRaceMask = newTeamId == TeamId.Alliance ? RaceMask.Alliance : RaceMask.Horde;
+                            if (quest.AllowableRaces.RawValue != unchecked((ulong)-1) && (quest.AllowableRaces & newRaceMask).IsEmpty())
                             {
                                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);
                                 stmt.AddValue(0, lowGuid);
@@ -2344,13 +2425,16 @@ namespace Game
             uint team = (uint)GetPlayer().GetTeam();
 
             List<uint> graveyardIds = new();
-            var range = Global.ObjectMgr.GraveYardStorage.LookupByKey(zoneId);
+            var range = Global.ObjectMgr.GraveyardStorage.LookupByKey(zoneId);
 
             for (uint i = 0; i < range.Count && graveyardIds.Count < 16; ++i) // client max
             {
                 var gYard = range[(int)i];
-                if (gYard.team == 0 || gYard.team == team)
-                    graveyardIds.Add(i);
+                ConditionSourceInfo conditionSource = new(_player);
+                if (!Global.ConditionMgr.IsObjectMeetToConditions(conditionSource, gYard.Conditions))
+                    continue;
+
+                graveyardIds.Add(i);
             }
 
             if (graveyardIds.Empty())
@@ -2384,7 +2468,7 @@ namespace Game
                 return;
 
             Corpse corpse = GetPlayer().GetCorpse();
-            if (!corpse)
+            if (corpse == null)
                 return;
 
             // prevent resurrect before 30-sec delay after body release not finished
@@ -2417,7 +2501,7 @@ namespace Game
                 return;
 
             Player ressPlayer = Global.ObjAccessor.GetPlayer(GetPlayer(), packet.Resurrecter);
-            if (ressPlayer)
+            if (ressPlayer != null)
             {
                 InstanceScript instance = ressPlayer.GetInstanceScript();
                 if (instance != null)
@@ -2583,6 +2667,10 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Spells, stmt);
 
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SPELL_FAVORITES);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.SpellFavorites, stmt);
+
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.QuestStatus, stmt);
@@ -2627,13 +2715,25 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Artifacts, stmt);
 
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.Azerite, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.AzeriteMilestonePowers, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.AzeriteUnlockedEssences, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.AzeriteEmpowered, stmt);
+
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_VOID_STORAGE);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.VoidStorage, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACTIONS);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.Actions, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL);
             stmt.AddValue(0, lowGuid);
@@ -2646,6 +2746,22 @@ namespace Game
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_ARTIFACT);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.MailItemsArtifact, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.MailItemsAzerite, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_MILESTONE_POWER);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.MailItemsAzeriteMilestonePower, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.MailItemsAzeriteUnlockedEssence, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.MailItemsAzeriteEmpowered, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SOCIALLIST);
             stmt.AddValue(0, lowGuid);
@@ -2769,6 +2885,14 @@ namespace Game
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_GARRISON_FOLLOWER_ABILITIES);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.GarrisonFollowerAbilities, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_TRAIT_ENTRIES);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.TraitEntries, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_TRAIT_CONFIGS);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.TraitConfigs, stmt);
         }
 
         public ObjectGuid GetGuid() { return m_guid; }
@@ -2818,6 +2942,7 @@ namespace Game
         AuraEffects,
         AuraStoredLocations,
         Spells,
+        SpellFavorites,
         QuestStatus,
         QuestStatusObjectives,
         QuestStatusObjectivesCriteria,
@@ -2830,7 +2955,6 @@ namespace Game
         AzeriteMilestonePowers,
         AzeriteUnlockedEssences,
         AzeriteEmpowered,
-        Actions,
         Mails,
         MailItems,
         MailItemsArtifact,
@@ -2872,6 +2996,8 @@ namespace Game
         GarrisonBuildings,
         GarrisonFollowers,
         GarrisonFollowerAbilities,
+        TraitEntries,
+        TraitConfigs,
         Max
     }
 

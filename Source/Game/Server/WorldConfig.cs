@@ -3,6 +3,7 @@
 
 using Framework.Configuration;
 using Framework.Constants;
+using Game.DataStorage;
 using System;
 using System.Collections.Generic;
 
@@ -54,6 +55,7 @@ namespace Game
             SetRegenRate(WorldCfg.RatePowerArcaneCharges, "Rate.ArcaneCharges.Loss");
             SetRegenRate(WorldCfg.RatePowerFury, "Rate.Fury.Loss");
             SetRegenRate(WorldCfg.RatePowerPain, "Rate.Pain.Loss");
+            SetRegenRate(WorldCfg.RatePowerEssence, "Rate.Essence.Loss");
 
             Values[WorldCfg.RateSkillDiscovery] = GetDefaultValue("Rate.Skill.Discovery", 1.0f);
             Values[WorldCfg.RateDropItemPoor] = GetDefaultValue("Rate.Drop.Item.Poor", 1.0f);
@@ -311,12 +313,12 @@ namespace Game
 
             if (reload)
             {
-                int val = (int)GetDefaultValue("RealmZone", RealmZones.Development);
+                int val = (int)GetDefaultValue("RealmZone", RealmManager.HardcodedDevelopmentRealmCategoryId);
                 if (val != (int)Values[WorldCfg.RealmZone])
                     Log.outError(LogFilter.ServerLoading, "RealmZone option can't be changed at worldserver.conf reload, using current value ({0}).", Values[WorldCfg.RealmZone]);
             }
             else
-                Values[WorldCfg.RealmZone] = GetDefaultValue("RealmZone", (int)RealmZones.Development);
+                Values[WorldCfg.RealmZone] = GetDefaultValue("RealmZone", RealmManager.HardcodedDevelopmentRealmCategoryId);
 
             Values[WorldCfg.AllowTwoSideInteractionCalendar] = GetDefaultValue("AllowTwoSide.Interaction.Calendar", false);
             Values[WorldCfg.AllowTwoSideInteractionChannel] = GetDefaultValue("AllowTwoSide.Interaction.Channel", false);
@@ -358,7 +360,7 @@ namespace Game
             Values[WorldCfg.CharacterCreatingDisabledRacemask] = GetDefaultValue("CharacterCreating.Disabled.RaceMask", 0);
             Values[WorldCfg.CharacterCreatingDisabledClassmask] = GetDefaultValue("CharacterCreating.Disabled.ClassMask", 0);
 
-            Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 50);
+            Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 60);
             if ((int)Values[WorldCfg.CharactersPerRealm] < 1 || (int)Values[WorldCfg.CharactersPerRealm] > 200)
             {
                 Log.outError(LogFilter.ServerLoading, "CharactersPerRealm ({0}) must be in range 1..200. Set to 200.", Values[WorldCfg.CharactersPerRealm]);
@@ -366,14 +368,22 @@ namespace Game
             }
 
             // must be after CharactersPerRealm
-            Values[WorldCfg.CharactersPerAccount] = GetDefaultValue("CharactersPerAccount", 50);
+            Values[WorldCfg.CharactersPerAccount] = GetDefaultValue("CharactersPerAccount", 60);
             if ((int)Values[WorldCfg.CharactersPerAccount] < (int)Values[WorldCfg.CharactersPerRealm])
             {
                 Log.outError(LogFilter.ServerLoading, "CharactersPerAccount ({0}) can't be less than CharactersPerRealm ({1}).", Values[WorldCfg.CharactersPerAccount], Values[WorldCfg.CharactersPerRealm]);
                 Values[WorldCfg.CharactersPerAccount] = Values[WorldCfg.CharactersPerRealm];
             }
 
+            Values[WorldCfg.CharacterCreatingEvokersPerRealm] = GetDefaultValue("CharacterCreating.EvokersPerRealm", 1);
+            if ((int)Values[WorldCfg.CharacterCreatingEvokersPerRealm] < 0 || (int)Values[WorldCfg.CharacterCreatingEvokersPerRealm] > 10)
+            {
+                Log.outError(LogFilter.ServerLoading, $"CharacterCreating.EvokersPerRealm ({Values[WorldCfg.CharacterCreatingEvokersPerRealm]}) must be in range 0..10. Set to 1.");
+                Values[WorldCfg.CharacterCreatingEvokersPerRealm] = 1;
+            }
+
             Values[WorldCfg.CharacterCreatingMinLevelForDemonHunter] = GetDefaultValue("CharacterCreating.MinLevelForDemonHunter", 0);
+            Values[WorldCfg.CharacterCreatingMinLevelForEvoker] = GetDefaultValue("CharacterCreating.MinLevelForEvoker", 50);
             Values[WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement] = GetDefaultValue("CharacterCreating.DisableAlliedRaceAchievementRequirement", false);
 
             Values[WorldCfg.SkipCinematics] = GetDefaultValue("SkipCinematics", 0);
@@ -385,12 +395,12 @@ namespace Game
 
             if (reload)
             {
-                int val = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxLevel);
+                int val = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxPlayerLevel);
                 if (val != (int)Values[WorldCfg.MaxPlayerLevel])
                     Log.outError(LogFilter.ServerLoading, "MaxPlayerLevel option can't be changed at config reload, using current value ({0}).", Values[WorldCfg.MaxPlayerLevel]);
             }
             else
-                Values[WorldCfg.MaxPlayerLevel] = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxLevel);
+                Values[WorldCfg.MaxPlayerLevel] = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxPlayerLevel);
 
             if ((int)Values[WorldCfg.MaxPlayerLevel] > SharedConst.MaxLevel)
             {
@@ -440,6 +450,18 @@ namespace Game
                 Values[WorldCfg.StartDemonHunterPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
+            Values[WorldCfg.StartEvokerPlayerLevel] = GetDefaultValue("StartEvokerPlayerLevel", 58);
+            if ((int)Values[WorldCfg.StartEvokerPlayerLevel] < 1)
+            {
+                Log.outError(LogFilter.ServerLoading, $"StartEvokerPlayerLevel ({Values[WorldCfg.StartEvokerPlayerLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to 1.");
+                Values[WorldCfg.StartEvokerPlayerLevel] = 1;
+            }
+            else if ((int)Values[WorldCfg.StartEvokerPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
+            {
+                Log.outError(LogFilter.ServerLoading, $"StartEvokerPlayerLevel ({Values[WorldCfg.StartEvokerPlayerLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to {Values[WorldCfg.MaxPlayerLevel]}.");
+                Values[WorldCfg.StartEvokerPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
+            }
+
             Values[WorldCfg.StartAlliedRaceLevel] = GetDefaultValue("StartAlliedRacePlayerLevel", 10);
             if ((int)Values[WorldCfg.StartAlliedRaceLevel] < 1)
             {
@@ -482,34 +504,6 @@ namespace Game
                 Log.outError(LogFilter.ServerLoading, "Currency.ResetInterval ({0}) must be > 0, set to default 7.", Values[WorldCfg.CurrencyResetInterval]);
                 Values[WorldCfg.CurrencyResetInterval] = 7;
             }
-
-            Values[WorldCfg.CurrencyStartApexisCrystals] = GetDefaultValue("Currency.StartApexisCrystals", 0);
-            if ((int)Values[WorldCfg.CurrencyStartApexisCrystals] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.StartApexisCrystals ({0}) must be >= 0, set to default 0.", Values[WorldCfg.CurrencyStartApexisCrystals]);
-                Values[WorldCfg.CurrencyStartApexisCrystals] = 0;
-            }
-            Values[WorldCfg.CurrencyMaxApexisCrystals] = GetDefaultValue("Currency.MaxApexisCrystals", 20000);
-            if ((int)Values[WorldCfg.CurrencyMaxApexisCrystals] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.MaxApexisCrystals ({0}) can't be negative. Set to default 20000.", Values[WorldCfg.CurrencyMaxApexisCrystals]);
-                Values[WorldCfg.CurrencyMaxApexisCrystals] = 20000;
-            }
-            Values[WorldCfg.CurrencyMaxApexisCrystals] = (int)Values[WorldCfg.CurrencyMaxApexisCrystals] * 100;     //precision mod
-
-            Values[WorldCfg.CurrencyStartJusticePoints] = GetDefaultValue("Currency.StartJusticePoints", 0);
-            if ((int)Values[WorldCfg.CurrencyStartJusticePoints] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.StartJusticePoints ({0}) must be >= 0, set to default 0.", Values[WorldCfg.CurrencyStartJusticePoints]);
-                Values[WorldCfg.CurrencyStartJusticePoints] = 0;
-            }
-            Values[WorldCfg.CurrencyMaxJusticePoints] = GetDefaultValue("Currency.MaxJusticePoints", 4000);
-            if ((int)Values[WorldCfg.CurrencyMaxJusticePoints] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.MaxJusticePoints ({0}) can't be negative. Set to default 4000.", Values[WorldCfg.CurrencyMaxJusticePoints]);
-                Values[WorldCfg.CurrencyMaxJusticePoints] = 4000;
-            }
-            Values[WorldCfg.CurrencyMaxJusticePoints] = (int)Values[WorldCfg.CurrencyMaxJusticePoints] * 100;     //precision mod
 
             Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = GetDefaultValue("RecruitAFriend.MaxLevel", 60);
             if ((int)Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
@@ -709,8 +703,11 @@ namespace Game
 
             Values[WorldCfg.ThreatRadius] = GetDefaultValue("ThreatRadius", 60.0f);
 
+            Values[WorldCfg.DeclinedNamesUsed] = GetDefaultValue("DeclinedNames", false);
             // always use declined names in the russian client
-            Values[WorldCfg.DeclinedNamesUsed] = (RealmZones)Values[WorldCfg.RealmZone] == RealmZones.Russian || GetDefaultValue("DeclinedNames", false);
+            var category = CliDB.CfgCategoriesStorage.LookupByKey((uint)Values[WorldCfg.RealmZone]);
+            if (category != null && category.GetCreateCharsetMask().HasFlag(CfgCategoriesCharsets.Russian))
+                Values[WorldCfg.DeclinedNamesUsed] = true;
 
             Values[WorldCfg.ListenRangeSay] = GetDefaultValue("ListenRange.Say", 25.0f);
             Values[WorldCfg.ListenRangeTextemote] = GetDefaultValue("ListenRange.TextEmote", 25.0f);
@@ -1005,6 +1002,9 @@ namespace Game
             // Specifies if IP addresses can be logged to the database
             Values[WorldCfg.AllowLogginIpAddressesInDatabase] = GetDefaultValue("AllowLoggingIPAddressesInDatabase", true);
 
+            //Loot Settings
+            Values[WorldCfg.EnableAELoot] = GetDefaultValue("EnableAELoot", false);
+
             // call ScriptMgr if we're reloading the configuration
             if (reload)
                 Global.ScriptMgr.OnConfigLoad(reload);
@@ -1020,9 +1020,9 @@ namespace Game
             return Convert.ToInt32(Values.LookupByKey(confi));
         }
 
-        public static ulong GetUInt64Value(WorldCfg confi)
+        public static long GetInt64Value(WorldCfg confi)
         {
-            return Convert.ToUInt64(Values.LookupByKey(confi));
+            return Convert.ToInt64(Values.LookupByKey(confi));
         }
 
         public static bool GetBoolValue(WorldCfg confi)

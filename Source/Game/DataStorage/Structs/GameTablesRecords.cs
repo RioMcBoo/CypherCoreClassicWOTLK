@@ -5,174 +5,209 @@ namespace Game.DataStorage
 {
     public sealed class GtArtifactKnowledgeMultiplierRecord
     {
-        public float Multiplier;
+        public readonly float Multiplier;
     }
 
     public sealed class GtArtifactLevelXPRecord
     {
-        public float XP;
-        public float XP2;
+        public readonly float XP;
+        public readonly float XP2;
     }
 
     public sealed class GtBarberShopCostBaseRecord
     {
-        public float Cost;
+        public readonly float Cost;
     }
 
     public sealed class GtBaseMPRecord
     {
-        public float Rogue;
-        public float Druid;
-        public float Hunter;
-        public float Mage;
-        public float Paladin;
-        public float Priest;
-        public float Shaman;
-        public float Warlock;
-        public float Warrior;
-        public float DeathKnight;
-        public float Monk;
-        public float DemonHunter;
+        public readonly float Rogue;
+        public readonly float Druid;
+        public readonly float Hunter;
+        public readonly float Mage;
+        public readonly float Paladin;
+        public readonly float Priest;
+        public readonly float Shaman;
+        public readonly float Warlock;
+        public readonly float Warrior;
+        public readonly float DeathKnight;
+        public readonly float Monk;
+        public readonly float DemonHunter;
     }
 
     public sealed class GtBattlePetXPRecord
     {
-        public float Wins;
-        public float Xp;
+        public readonly float Wins;
+        public readonly float Xp;
     }
 
     public sealed class GtCombatRatingsRecord
     {
-        public float Amplify;
-        public float DefenseSkill;
-        public float Dodge;
-        public float Parry;
-        public float Block;
-        public float HitMelee;
-        public float HitRanged;
-        public float HitSpell;
-        public float CritMelee;
-        public float CritRanged;
-        public float CritSpell;
-        public float Corruption;
-        public float CorruptionResistance;
-        public float Speed;
-        public float ResilienceCritTaken;
-        public float ResiliencePlayerDamage;
-        public float Lifesteal;
-        public float HasteMelee;
-        public float HasteRanged;
-        public float HasteSpell;
-        public float Avoidance;
-        public float Sturdiness;
-        public float Unused7;
-        public float Expertise;
-        public float ArmorPenetration;
-        public float Mastery;
-        public float PvPPower;
-        public float Cleave;
-        public float VersatilityDamageDone;
-        public float VersatilityHealingDone;
-        public float VersatilityDamageTaken;
-        public float Unused12;
+        public readonly float WeaponSkill;
+        public readonly float DefenseSkill;
+        public readonly float Dodge;
+        public readonly float Parry;
+        public readonly float Block;
+        public readonly float HitMelee;
+        public readonly float HitRanged;
+        public readonly float HitSpell;
+        public readonly float CritMelee;
+        public readonly float CritRanged;
+        public readonly float CritSpell;
+        public readonly float HitTakenMelee;
+        public readonly float HitTakenRanged;
+        public readonly float HitTakenSpell;
+        public readonly float CritTakenMelee;
+        public readonly float CritTakenRanged;
+        public readonly float CritTakenSpell;
+        public readonly float HasteMelee;
+        public readonly float HasteRanged;
+        public readonly float HasteSpell;
+        public readonly float Unknown0;
+        public readonly float Unknown1;
+        public readonly float Unknown2;
+        public readonly float Unknown3;
+        public readonly float Unknown4;
+        public readonly float Unknown5;
+        public readonly float Unknown6;
+        public readonly float Unknown7;
+        public readonly float Unknown8;
+        public readonly float Unknown9;
+        public readonly float Unknown10;
+        public readonly float Unknown11;
     }
 
-    public sealed class GtGenericMultByILvlRecord
+    public sealed class GtCombatRatingsMultByILvlRecord
     {
-        public float ArmorMultiplier;
-        public float WeaponMultiplier;
-        public float TrinketMultiplier;
-        public float JewelryMultiplier;
+        public readonly float ArmorMultiplier;
+        public readonly float WeaponMultiplier;
+        public readonly float TrinketMultiplier;
+        public readonly float JewelryMultiplier;
     }
 
     public sealed class GtHpPerStaRecord
     {
-        public float Health;
+        public readonly float Health;
     }
 
     public sealed class GtItemSocketCostPerLevelRecord
     {
-        public float SocketCost;
+        public readonly float SocketCost;
     }
 
     public sealed class GtNpcManaCostScalerRecord
     {
-        public float Scaler;
+        public readonly float Scaler;
     }
 
     public sealed class GtOCTRegenHPRecord
     {
-        public float Warrior;
-        public float Paladin;
-        public float Hunter;
-        public float Rogue;
-        public float Priest;
-        public float DeathKnight;
-        public float Shaman;
-        public float Mage;
-        public float Warlock;
-        public float Monk;
-        public float Druid;
+        public readonly float Warrior;
+        public readonly float Paladin;
+        public readonly float Hunter;
+        public readonly float Rogue;
+        public readonly float Priest;
+        public readonly float DeathKnight;
+        public readonly float Shaman;
+        public readonly float Mage;
+        public readonly float Warlock;
+        public readonly float Monk;
+        public readonly float Druid;
+    }
+
+    public sealed class GtOCTRegenMPRecord
+    {
+        public readonly float Warrior;
+        public readonly float Paladin;
+        public readonly float Hunter;
+        public readonly float Rogue;
+        public readonly float Priest;
+        public readonly float DeathKnight;
+        public readonly float Shaman;
+        public readonly float Mage;
+        public readonly float Warlock;
+        public readonly float Monk;
+        public readonly float Druid;
     }
 
     public sealed class GtRegenHPPerSptRecord
     {
-        public float Warrior;
-        public float Paladin;
-        public float Hunter;
-        public float Rogue;
-        public float Priest;
-        public float DeathKnight;
-        public float Shaman;
-        public float Mage;
-        public float Warlock;
-        public float Monk;
-        public float Druid;
+        public readonly float Warrior;
+        public readonly float Paladin;
+        public readonly float Hunter;
+        public readonly float Rogue;
+        public readonly float Priest;
+        public readonly float DeathKnight;
+        public readonly float Shaman;
+        public readonly float Mage;
+        public readonly float Warlock;
+        public readonly float Monk;
+        public readonly float Druid;
     }
 
     public sealed class GtRegenMPPerSptRecord
     {
-        public float Warrior;
-        public float Paladin;
-        public float Hunter;
-        public float Rogue;
-        public float Priest;
-        public float DeathKnight;
-        public float Shaman;
-        public float Mage;
-        public float Warlock;
-        public float Monk;
-        public float Druid;
+        public readonly float Warrior;
+        public readonly float Paladin;
+        public readonly float Hunter;
+        public readonly float Rogue;
+        public readonly float Priest;
+        public readonly float DeathKnight;
+        public readonly float Shaman;
+        public readonly float Mage;
+        public readonly float Warlock;
+        public readonly float Monk;
+        public readonly float Druid;
     }
+
+    public sealed class GtShieldBlockRegularRecord
+    {
+        public readonly float Poor;
+        public readonly float Standard;
+        public readonly float Good;
+        public readonly float Superior;
+        public readonly float Epic;
+        public readonly float Legendary;
+        public readonly float Artifact;
+        public readonly float ScalingStat;
+    };
 
     public sealed class GtSpellScalingRecord
     {
-        public float Rogue;
-        public float Druid;
-        public float Hunter;
-        public float Mage;
-        public float Paladin;
-        public float Priest;
-        public float Shaman;
-        public float Warlock;
-        public float Warrior;
-        public float DeathKnight;
-        public float Monk;
-        public float DemonHunter;
-        public float Item;
-        public float Consumable;
-        public float Gem1;
-        public float Gem2;
-        public float Gem3;
-        public float Health;
+        public readonly float Rogue;
+        public readonly float Druid;
+        public readonly float Hunter;
+        public readonly float Mage;
+        public readonly float Paladin;
+        public readonly float Priest;
+        public readonly float Shaman;
+        public readonly float Warlock;
+        public readonly float Warrior;
+        public readonly float DeathKnight;
+        public readonly float Monk;
+        public readonly float DemonHunter;
+        public readonly float Item;
+        public readonly float Consumable;
+        public readonly float Gem1;
+        public readonly float Gem2;
+        public readonly float Gem3;
+        public readonly float Health;
     }
+
+    public sealed class GtStaminaMultByILvlRecord
+    {
+        public readonly float ArmorMultiplier;
+        public readonly float WeaponMultiplier;
+        public readonly float TrinketMultiplier;
+        public readonly float JewelryMultiplier;
+    };
 
     public sealed class GtXpRecord
     {
-        public float Total;
-        public float PerKill;
-        public float Junk;
-        public float Stats;
-        public float Divisor;
+        public readonly float Total;
+        public readonly float PerKill;
+        public readonly float Junk;
+        public readonly float Stats;
+        public readonly float Divisor;
     }
 }

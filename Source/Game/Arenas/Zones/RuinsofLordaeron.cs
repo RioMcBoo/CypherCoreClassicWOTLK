@@ -64,7 +64,7 @@ namespace Game.Arenas
                 SpawnBGObject(i, 60);
         }
 
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
+        public override void HandleAreaTrigger(Player player, int trigger, bool entered)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;

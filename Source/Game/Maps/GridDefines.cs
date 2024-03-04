@@ -29,22 +29,22 @@ namespace Game.Maps
             return IsValidMapCoord(x, y, z) && float.IsFinite(o);
         }
         
-        public static bool IsValidMapCoord(uint mapid, float x, float y)
+        public static bool IsValidMapCoord(int mapid, float x, float y)
         {
             return Global.MapMgr.IsValidMAP(mapid) && IsValidMapCoord(x, y);
         }
 
-        public static bool IsValidMapCoord(uint mapid, float x, float y, float z)
+        public static bool IsValidMapCoord(int mapid, float x, float y, float z)
         {
             return Global.MapMgr.IsValidMAP(mapid) && IsValidMapCoord(x, y, z);
         }
 
-        public static bool IsValidMapCoord(uint mapid, float x, float y, float z, float o)
+        public static bool IsValidMapCoord(int mapid, float x, float y, float z, float o)
         {
             return Global.MapMgr.IsValidMAP(mapid) && IsValidMapCoord(x, y, z, o);
         }
 
-        public static bool IsValidMapCoord(uint mapid, Position pos)
+        public static bool IsValidMapCoord(int mapid, Position pos)
         {
             return IsValidMapCoord(mapid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
         }

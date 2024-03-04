@@ -19,7 +19,7 @@ namespace Game.Entities
 
         public void InitTaxiNodesForLevel(Race race, Class chrClass, uint level)
         {
-            m_taximask = new byte[((CliDB.TaxiNodesStorage.GetNumRows() - 1) / 8) + 1];
+            m_taximask = new byte[((CliDB.TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8];
 
             // class specific initial known nodes
             if (chrClass == Class.Deathknight)
@@ -59,7 +59,6 @@ namespace Game.Entities
                     SetTaximaskNode(23);    // Orgrimmar, Durotar
                     SetTaximaskNode(69);    // Moonglade (Horde)
                     SetTaximaskNode(82);    // Silvermoon City
-                    SetTaximaskNode(384);   // The Bulwark, Tirisfal
                     break;
             }
 
@@ -80,7 +79,7 @@ namespace Game.Entities
 
         public void LoadTaxiMask(string data)
         {
-            m_taximask = new byte[((CliDB.TaxiNodesStorage.GetNumRows() - 1) / 8) + 1];
+            m_taximask = new byte[((CliDB.TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8];
 
             var split = new StringArray(data, ' ');
 

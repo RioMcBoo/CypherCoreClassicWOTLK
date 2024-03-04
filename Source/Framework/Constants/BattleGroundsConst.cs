@@ -28,19 +28,19 @@ namespace Framework.Constants
         public const int EventIdCount = 4;
 
         //Quests
-        public const uint WsQuestReward = 43483;
-        public const uint AbQuestReward = 43484;
-        public const uint AvQuestReward = 43475;
-        public const uint AvQuestKilledBoss = 23658;
-        public const uint EyQuestReward = 43477;
-        public const uint SaQuestReward = 61213;
-        public const uint AbQuestReward4Bases = 24061;
-        public const uint AbQuestReward5Bases = 24064;
+        public const int WsQuestReward = 43483;
+        public const int AbQuestReward = 43484;
+        public const int AvQuestReward = 43475;
+        public const int AvQuestKilledBoss = 23658;
+        public const int EyQuestReward = 43477;
+        public const int SaQuestReward = 61213;
+        public const int AbQuestReward4Bases = 24061;
+        public const int AbQuestReward5Bases = 24064;
 
         //BuffObjects
-        public const uint SpeedBuff = 179871;
-        public const uint RegenBuff = 179904;
-        public const uint BerserkerBuff = 179905;
+        public const int SpeedBuff = 179871;
+        public const int RegenBuff = 179904;
+        public const int BerserkerBuff = 179905;
 
         //QueueGroupTypes
         public const uint BgQueuePremadeAlliance = 0;
@@ -62,25 +62,28 @@ namespace Framework.Constants
         public const sbyte PlayerPositionArenaSlot5 = 6;
 
         //Spells
-        public const uint SpellWaitingForResurrect = 2584;                 // Waiting To Resurrect
-        public const uint SpellSpiritHealChannel = 22011;                // Spirit Heal Channel
-        public const uint SpellSpiritHealChannelVisual = 3060;
-        public const uint SpellSpiritHeal = 22012;                // Spirit Heal
-        public const uint SpellResurrectionVisual = 24171;                // Resurrection Impact Visual
-        public const uint SpellArenaPreparation = 32727;                // Use This One, 32728 Not Correct
-        public const uint SpellPreparation = 44521;                // Preparation
-        public const uint SpellSpiritHealMana = 44535;                // Spirit Heal
-        public const uint SpellRecentlyDroppedFlag = 42792;                // Recently Dropped Flag
-        public const uint SpellAuraPlayerInactive = 43681;                // Inactive
-        public const uint SpellHonorableDefender25y = 68652;                // +50% Honor When Standing At A Capture Point That You Control, 25yards Radius (Added In 3.2)
-        public const uint SpellHonorableDefender60y = 66157;              // +50% Honor When Standing At A Capture Point That You Control, 60yards Radius (Added In 3.2), Probably For 40+ Player Battlegrounds
-        public const uint SpellMercenaryContractHorde = 193472;
-        public const uint SpellMercenaryContractAlliance = 193475;
-        public const uint SpellMercenaryHorde1 = 193864;
-        public const uint SpellMercenaryHordeReactions = 195838;
-        public const uint SpellMercenaryAlliance1 = 193863;
-        public const uint SpellMercenaryAllianceReactions = 195843;
-        public const uint SpellMercenaryShapeshift = 193970;
+        public const int SpellSpiritHealChannelAoE = 22011;                // used for AoE resurrections
+        public const int SpellSpiritHealPlayerAura = 156758;               // individual player timers for resurrection
+        public const int SpellSpiritHealChannelSelf = 305122;               // channel visual for individual area spirit healers
+        public const int SpellWaitingForResurrect = 2584;                 // Waiting To Resurrect
+        public const int SpellSpiritHealChannelVisual = 3060;
+        public const int SpellSpiritHeal = 22012;                // Spirit Heal
+        public const int SpellResurrectionVisual = 24171;                // Resurrection Impact Visual
+        public const int SpellArenaPreparation = 32727;                // Use This One, 32728 Not Correct
+        public const int SpellPreparation = 44521;                // Preparation
+        public const int SpellSpiritHealMana = 44535;                // Spirit Heal
+        public const int SpellRecentlyDroppedFlag = 42792;                // Recently Dropped Flag
+        public const int SpellAuraPlayerInactive = 43681;                // Inactive
+        public const int SpellHonorableDefender25y = 68652;                // +50% Honor When Standing At A Capture Point That You Control, 25yards Radius (Added In 3.2)
+        public const int SpellHonorableDefender60y = 66157;              // +50% Honor When Standing At A Capture Point That You Control, 60yards Radius (Added In 3.2), Probably For 40+ Player Battlegrounds
+        public const int SpellMercenaryContractHorde = 193472;
+        public const int SpellMercenaryContractAlliance = 193475;
+        public const int SpellMercenaryHorde1 = 193864;
+        public const int SpellMercenaryHordeReactions = 195838;
+        public const int SpellMercenaryAlliance1 = 193863;
+        public const int SpellMercenaryAllianceReactions = 195843;
+        public const int SpellMercenaryShapeshift = 193970;
+        public const int SpellPetSummoned = 6962; // used after resurrection
     }
 
     public enum BattlegroundEventFlags
@@ -221,13 +224,13 @@ namespace Framework.Constants
 
     public struct BattlegroundBroadcastTexts
     {
-        public const uint AllianceWins = 10633;
-        public const uint HordeWins = 10634;
+        public const int AllianceWins = 10633;
+        public const int HordeWins = 10634;
 
-        public const uint StartTwoMinutes = 18193;
-        public const uint StartOneMinute = 18194;
-        public const uint StartHalfMinute = 18195;
-        public const uint HasBegun = 18196;
+        public const int StartTwoMinutes = 18193;
+        public const int StartOneMinute = 18194;
+        public const int StartHalfMinute = 18195;
+        public const int HasBegun = 18196;
     }
 
     public enum BattlegroundSounds
@@ -273,13 +276,6 @@ namespace Framework.Constants
         WaitJoin = 2,                                // this means, that BG has already started and it is waiting for more players
         InProgress = 3,                                // means bg is running
         WaitLeave = 4                                 // means some faction has won BG and it is ending
-    }
-
-    public enum BGHonorMode
-    {
-        Normal = 0,
-        Holiday,
-        HonorModeNum
     }
 
     public enum GroupJoinBattlegroundResult
@@ -452,5 +448,15 @@ namespace Framework.Constants
         ContestedAlliance = 3,
         HordeCaptured = 4,
         AllianceCaptured = 5
+    }
+
+    public enum PVPMatchState : byte
+    {
+        Waiting = 0,
+        StartUp = 1,
+        Engaged = 2,
+        PostRound = 3,
+        Inactive = 4,
+        Complete = 5
     }
 }

@@ -23,7 +23,7 @@ namespace Game.Chat
             if (!handler.GetPlayerGroupAndGUIDByName(name, out Player player, out Group group, out _))
                 return false;
 
-            if (!group)
+            if (group == null)
             {
                 handler.SendSysMessage(CypherStrings.GroupNotInGroup, player.GetName());
                 return false;
@@ -39,7 +39,7 @@ namespace Game.Chat
             if (!handler.GetPlayerGroupAndGUIDByName(playerNameGroup, out Player playerSource, out Group groupSource, out _, true))
                 return false;
 
-            if (!groupSource)
+            if (groupSource == null)
             {
                 handler.SendSysMessage(CypherStrings.GroupNotInGroup, playerSource.GetName());
                 return false;
@@ -48,7 +48,7 @@ namespace Game.Chat
             if (!handler.GetPlayerGroupAndGUIDByName(playerName, out Player playerTarget, out Group groupTarget, out _, true))
                 return false;
 
-            if (groupTarget || playerTarget.GetGroup() == groupSource)
+            if (groupTarget != null || playerTarget.GetGroup() == groupSource)
             {
                 handler.SendSysMessage(CypherStrings.GroupAlreadyInGroup, playerTarget.GetName());
                 return false;
@@ -72,7 +72,7 @@ namespace Game.Chat
             if (!handler.GetPlayerGroupAndGUIDByName(name, out Player player, out Group group, out ObjectGuid guid))
                 return false;
 
-            if (!group)
+            if (group == null)
             {
                 handler.SendSysMessage(CypherStrings.GroupNotInGroup, player.GetName());
                 return false;
@@ -133,49 +133,30 @@ namespace Game.Chat
         }
 
         [Command("list", RBACPermissions.CommandGroupList)]
-        static bool HandleGroupListCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGroupListCommand(CommandHandler handler, PlayerIdentifier target)
         {
-            // Get ALL the variables!
-            Player playerTarget;
-            ObjectGuid guidTarget;
-            string nameTarget;
-            string zoneName = "";
-            string onlineState;
-
-            // Parse the guid to uint32...
-            ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
-
-            // ... and try to extract a player out of it.
-            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out nameTarget))
-            {
-                playerTarget = Global.ObjAccessor.FindPlayer(parseGUID);
-                guidTarget = parseGUID;
-            }
-            // If not, we return false and end right away.
-            else if (!handler.ExtractPlayerTarget(args, out playerTarget, out guidTarget, out nameTarget))
-                return false;
+            string zoneName = "<ERROR>";
+            string onlineState = "Offline";
 
             // Next, we need a group. So we define a group variable.
             Group groupTarget = null;
 
             // We try to extract a group from an online player.
-            if (playerTarget)
-                groupTarget = playerTarget.GetGroup();
-
-            // If not, we extract it from the SQL.
-            if (!groupTarget)
+            if (target.IsConnected())
+                groupTarget = target.GetConnectedPlayer().GetGroup();
+            else
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
-                stmt.AddValue(0, guidTarget.GetCounter());
+                stmt.AddValue(0, target.GetGUID().GetCounter());
                 using var resultGroup = DB.Characters.Query(stmt);
                 if (!resultGroup.IsEmpty())
                     groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
             }
 
             // If both fails, players simply has no party. Return false.
-            if (!groupTarget)
+            if (groupTarget == null)
             {
-                handler.SendSysMessage(CypherStrings.GroupNotInGroup, nameTarget);
+                handler.SendSysMessage(CypherStrings.GroupNotInGroup, target.GetName());
                 return false;
             }
 
@@ -212,27 +193,21 @@ namespace Game.Chat
                     flags = "None";
 
                 // Check if iterator is online. If is...
-                Player p = Global.ObjAccessor.FindPlayer(slot.guid);
+                Player player = Global.ObjAccessor.FindPlayer(slot.guid);
                 string phases = "";
-                if (p && p.IsInWorld)
+                if (player != null && player.IsInWorld)
                 {
                     // ... than, it prints information like "is online", where he is, etc...
                     onlineState = "online";
-                    phases = PhasingHandler.FormatPhases(p.GetPhaseShift());
+                    phases = PhasingHandler.FormatPhases(player.GetPhaseShift());
 
-                    AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(p.GetAreaId());
+                    AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(player.GetAreaId());
                     if (area != null)
                     {
                         AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                         if (zone != null)
                             zoneName = zone.AreaName[handler.GetSessionDbcLocale()];
                     }
-                }
-                else
-                {
-                    // ... else, everything is set to offline or neutral values.
-                    zoneName = "<ERROR>";
-                    onlineState = "Offline";
                 }
 
                 // Now we can print those informations for every single member of each group!
@@ -250,7 +225,7 @@ namespace Game.Chat
             if (!handler.GetPlayerGroupAndGUIDByName(name, out Player player, out Group group, out ObjectGuid guid))
                 return false;
 
-            if (!group)
+            if (group == null)
             {
                 handler.SendSysMessage(CypherStrings.GroupNotInGroup, player.GetName());
                 return false;
@@ -297,7 +272,7 @@ namespace Game.Chat
             for (GroupReference it = groupTarget.GetFirstMember(); it != null; it = it.Next())
             {
                 Player target = it.GetSource();
-                if (target)
+                if (target != null)
                 {
                     target.ResurrectPlayer(target.GetSession().HasPermission(RBACPermissions.ResurrectWithFullHps) ? 1.0f : 0.5f);
                     target.SpawnCorpseBones();
@@ -326,7 +301,7 @@ namespace Game.Chat
 
             string nameLink = handler.GetNameLink(target);
 
-            if (!group)
+            if (group == null)
             {
                 handler.SendSysMessage(CypherStrings.NotInGroup, nameLink);
                 return false;
@@ -343,7 +318,7 @@ namespace Game.Chat
             if (toInstance)
             {
                 Player groupLeader = Global.ObjAccessor.GetPlayer(gmMap, group.GetLeaderGUID());
-                if (!groupLeader || (groupLeader.GetMapId() != gmMap.GetId()) || (groupLeader.GetInstanceId() != gmMap.GetInstanceId()))
+                if (groupLeader == null || (groupLeader.GetMapId() != gmMap.GetId()) || (groupLeader.GetInstanceId() != gmMap.GetInstanceId()))
                 {
                     handler.SendSysMessage(CypherStrings.PartialGroupSummon);
                     onlyLocalSummon = true;
@@ -354,7 +329,7 @@ namespace Game.Chat
             {
                 Player player = refe.GetSource();
 
-                if (!player || player == gmPlayer || player.GetSession() == null)
+                if (player == null || player == gmPlayer || player.GetSession() == null)
                     continue;
 
                 // check online security
@@ -433,7 +408,7 @@ namespace Game.Chat
                 if (!handler.GetPlayerGroupAndGUIDByName(name, out Player player, out Group group, out ObjectGuid guid))
                     return false;
 
-                if (!group)
+                if (group == null)
                 {
                     handler.SendSysMessage(CypherStrings.NotInGroup, player.GetName());
                     return false;

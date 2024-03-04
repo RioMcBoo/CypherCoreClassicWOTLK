@@ -6,6 +6,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Groups
@@ -17,7 +18,7 @@ namespace Game.Groups
             NextGroupDbStoreId = 1;
             NextGroupId = 1;
         }
-
+        public void SetGroupDbStoreSize(int newSize) { GroupDbStore.EnsureCapacity(newSize); }
         public uint GenerateNewGroupDbStoreId()
         {
             uint newStorageId = NextGroupDbStoreId;
@@ -158,10 +159,10 @@ namespace Game.Groups
                     {
                         Group group = GetGroupByDbStoreId(result.Read<uint>(0));
 
-                        if (group)
-                            group.LoadMemberFromDB(result.Read<uint>(1), result.Read<byte>(2), result.Read<byte>(3), (LfgRoles)result.Read<byte>(4));
-                        else
-                            Log.outError(LogFilter.Server, "GroupMgr:LoadGroups: Consistency failed, can't find group (storage id: {0})", result.Read<uint>(0));
+                    if (group != null)
+                        group.LoadMemberFromDB(result.Read<uint>(1), result.Read<byte>(2), result.Read<byte>(3), (LfgRoles)result.Read<byte>(4));
+                    else
+                        Log.outError(LogFilter.Server, "GroupMgr:LoadGroups: Consistency failed, can't find group (storage id: {0})", result.Read<uint>(0));
 
                         ++count;
                     }

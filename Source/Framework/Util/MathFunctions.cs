@@ -76,7 +76,7 @@ public static class MathFunctions
         return 0.0000005f * aa;
     }
 
-    public static float lerp(float a, float b, float f)
+    public static float Lerp(float a, float b, float f)
     {
         return a + (b - a) * f;
     }
@@ -230,6 +230,10 @@ public static class MathFunctions
     public static ulong MakePair64(uint l, uint h)
     {
         return (ulong)l | ((ulong)h << 32);
+    }
+    public static long MakePair64(int l, int h)
+    {
+        return (long)l | ((long)h << 32);
     }
     public static uint Pair64_HiPart(ulong x)
     {

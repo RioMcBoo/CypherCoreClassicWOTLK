@@ -21,7 +21,7 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        public WorldSession GetSession() { return Session; }
+        public WorldSession GetSession() { return _session; }
         public PlayerSocial GetSocial() { return m_social; }
 
         //Gossip
@@ -48,13 +48,14 @@ namespace Game.Entities
 
         //PVP
         BgBattlegroundQueueID_Rec[] m_bgBattlegroundQueueID = new BgBattlegroundQueueID_Rec[SharedConst.MaxPlayerBGQueues];
-        BGData m_bgData;
+        public BGData m_bgData;
         bool m_IsBGRandomWinner;
         public PvPInfo pvpInfo;
         uint m_ArenaTeamIdInvited;
         long m_lastHonorUpdateTime;
         uint m_contestedPvPTimer;
         bool _usePvpItemLevels;
+        ObjectGuid _areaSpiritHealerGUID;
 
         //Groups/Raids
         GroupReference m_group = new();
@@ -100,18 +101,18 @@ namespace Game.Entities
         uint m_lastPotionId;
 
         //Spell
-        Dictionary<uint, PlayerSpell> m_spells = new();
+        Dictionary<int, PlayerSpell> m_spells = new();
         Dictionary<SkillType, SkillStatusData> mSkillStatus = new();
-        Dictionary<uint, PlayerCurrency> _currencyStorage = new();
+        Dictionary<int, PlayerCurrency> _currencyStorage = new();
         List<SpellModifier>[][] m_spellMods = new List<SpellModifier>[(int)SpellModOp.Max][];
-        MultiMap<uint, uint> m_overrideSpells = new();
+        MultiMap<int, int> m_overrideSpells = new();
         public Spell m_spellModTakingSpell;
-        uint m_oldpetspell;
+        int m_oldpetspell;
         Dictionary<uint, StoredAuraTeleportLocation> m_storedAuraTeleportLocations = new();
 
         //Mail
         List<Mail> m_mail = new();
-        Dictionary<ulong, Item> mMitems = new();
+        Dictionary<long, Item> mMitems = new();
         public byte unReadMails;
         long m_nextMailDelivereTime;
         public bool m_mailsUpdated;
@@ -120,6 +121,7 @@ namespace Game.Entities
         PetStable m_petStable;
         public List<PetAura> m_petAuras = new();
         uint m_temporaryUnsummonedPetNumber;
+        ReactStates? m_temporaryPetReactState;
         uint m_lastpetnumber;
 
         // Player summoning
@@ -141,21 +143,21 @@ namespace Game.Entities
         uint m_deathTimer;
         long m_deathExpireTime;
         byte m_swingErrorMsg;
-        uint m_combatExitTime;
+        DateTime m_regenInterruptTimestamp;
         uint m_regenTimerCount;
         uint m_foodEmoteTimerCount;
         uint m_weaponChangeTimer;
 
         //Quest
-        List<uint> m_timedquests = new();
-        List<uint> m_weeklyquests = new();
-        List<uint> m_monthlyquests = new();
-        Dictionary<uint, Dictionary<uint, long>> m_seasonalquests = new();
-        Dictionary<uint, QuestStatusData> m_QuestStatus = new();
+        List<int> m_timedquests = new();
+        List<int> m_weeklyquests = new();
+        List<int> m_monthlyquests = new();
+        Dictionary<int, Dictionary<uint, long>> m_seasonalquests = new();
+        Dictionary<int, QuestStatusData> m_QuestStatus = new();
         MultiMap<(QuestObjectiveType Type, int ObjectID), QuestObjectiveStatusData> m_questObjectiveStatus = new();
-        Dictionary<uint, QuestSaveType> m_QuestStatusSave = new();
-        List<uint> m_DFQuests = new();
-        List<uint> m_RewardedQuests = new();
+        Dictionary<int, QuestSaveType> m_QuestStatusSave = new();
+        List<int> m_DFQuests = new();
+        List<int> m_RewardedQuests = new();
         Dictionary<uint, QuestSaveType> m_RewardedQuestsSave = new();
 
         bool m_DailyQuestChanged;
@@ -175,7 +177,7 @@ namespace Game.Entities
         WorldLocation _corpseLocation;
 
         //Core
-        WorldSession Session;
+        WorldSession _session;
 
         public PlayerData m_playerData;
         public ActivePlayerData m_activePlayerData;
@@ -241,9 +243,11 @@ namespace Game.Entities
         uint m_PlayedTimeTotal;
         uint m_PlayedTimeLevel;
 
+        Dictionary<int, PlayerSpellState> m_traitConfigStates = new();
+
         Dictionary<byte, ActionButton> m_actionButtons = new();
         ObjectGuid m_playerSharingQuest;
-        uint m_sharedQuestId;
+        int m_sharedQuestId;
         uint m_ingametime;
 
         PlayerCommandStates _activeCheats;
@@ -278,22 +282,26 @@ namespace Game.Entities
         public CreatePosition createPosition;
         public CreatePosition? createPositionNPE;
 
+        public ItemContext itemContext;
         public List<PlayerCreateInfoItem> item = new();
-        public List<uint> customSpells = new();
-        public List<uint>[] castSpells = new List<uint>[(int)PlayerCreateMode.Max];
+        public List<int> customSpells = new();
+        public List<int>[] castSpells = new List<int>[(int)PlayerCreateMode.Max];
         public List<PlayerCreateInfoAction> action = new();
         public List<SkillRaceClassInfoRecord> skills = new();
 
-        public uint? introMovieId;
-        public uint? introSceneId;
-        public uint? introSceneIdNPE;
+        public int? introMovieId;
+        public int? introSceneId;
+        public int? introSceneIdNPE;
 
         public PlayerLevelInfo[] levelInfo = new PlayerLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
 
         public PlayerInfo()
         {
             for (var i = 0; i < castSpells.Length; ++i)
-                castSpells[i] = new List<uint>();
+                castSpells[i] = new();
+
+            for (var i = 0; i < levelInfo.Length; ++i)
+                levelInfo[i] = new();
         }
 
         public struct CreatePosition
@@ -305,14 +313,14 @@ namespace Game.Entities
 
     public class PlayerCreateInfoItem
     {
-        public PlayerCreateInfoItem(uint id, uint amount)
+        public PlayerCreateInfoItem(int id, int amount)
         {
             item_id = id;
             item_amount = amount;
         }
 
-        public uint item_id;
-        public uint item_amount;
+        public int item_id;
+        public int item_amount;
     }
 
     public class PlayerCreateInfoAction
@@ -338,10 +346,12 @@ namespace Game.Entities
     public class PlayerCurrency
     {
         public PlayerCurrencyState state;
-        public uint Quantity;
-        public uint WeeklyQuantity;
-        public uint TrackedQuantity;
-        public byte Flags;
+        public int Quantity;
+        public int WeeklyQuantity;
+        public int TrackedQuantity;
+        public int IncreasedCapQuantity;
+        public int EarnedQuantity;
+        public CurrencyDbFlags Flags;
     }
 
     public class SpecializationInfo
@@ -350,15 +360,15 @@ namespace Game.Entities
         {
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
-                Talents[i] = new Dictionary<uint, PlayerTalent>();
-                PvpTalents[i] = new uint[PlayerConst.MaxPvpTalentSlots];
-                Glyphs[i] = new ushort[PlayerConst.MaxGlyphSlotIndex];
+                Talents[i] = new Dictionary<int, PlayerTalent>();
+                PvpTalents[i] = new int[PlayerConst.MaxPvpTalentSlots];
+                Glyphs[i] = new int[PlayerConst.MaxGlyphSlotIndex];
             }
         }
 
-        public Dictionary<uint, PlayerTalent>[] Talents = new Dictionary<uint, PlayerTalent>[PlayerConst.MaxSpecializations];
-        public uint[][] PvpTalents = new uint[PlayerConst.MaxSpecializations][];
-        public ushort[][] Glyphs = new ushort[PlayerConst.MaxSpecializations][];
+        public Dictionary<int, PlayerTalent>[] Talents = new Dictionary<int, PlayerTalent>[PlayerConst.MaxSpecializations];
+        public int[][] PvpTalents = new int[PlayerConst.MaxSpecializations][];
+        public int[][] Glyphs = new int[PlayerConst.MaxSpecializations][];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;
         public uint UsedTalentCount;
@@ -401,11 +411,11 @@ namespace Game.Entities
 
         public ActionButtonType GetButtonType() { return (ActionButtonType)UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(packedData); }
 
-        public uint GetAction() { return UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packedData); }
+        public int GetAction() { return UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packedData); }
 
-        public void SetActionAndType(uint action, ActionButtonType type)
+        public void SetActionAndType(int action, ActionButtonType type)
         {
-            uint newData = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(action, (uint)type);
+            int newData = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(action, (byte)type);
             
             if (newData != packedData || uState == ActionButtonUpdateState.Deleted)
             {
@@ -415,7 +425,7 @@ namespace Game.Entities
             }
         }
 
-        public uint packedData;
+        public int packedData;
         public ActionButtonUpdateState uState;
     }
 
@@ -458,11 +468,11 @@ namespace Game.Entities
     {
         public byte levelMin;
         public byte levelMax;
-        public uint item;
-        public uint item2;
-        public uint quest_A;
-        public uint quest_H;
-        public uint achievement;
+        public int item;
+        public int item2;
+        public int quest_A;
+        public int quest_H;
+        public int achievement;
         public string questFailedText;
     }
 
@@ -482,7 +492,7 @@ namespace Game.Entities
 
     public class VoidStorageItem
     {
-        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, ItemRandomEnchantmentId randomPropertyId, uint itemSuffixFactor, uint fixedScalingLevel, uint artifactKnowledgeLevel, ItemContext context, List<int> bonuses)
+        public VoidStorageItem(long id, int entry, ObjectGuid creator, ItemRandomEnchantmentId randomPropertyId, int itemSuffixFactor, int fixedScalingLevel, int artifactKnowledgeLevel, ItemContext context, List<int> bonuses)
         {
             ItemId = id;
             ItemEntry = entry;
@@ -497,13 +507,13 @@ namespace Game.Entities
                 BonusListIDs.Add(value);
         }
 
-        public ulong ItemId;
-        public uint ItemEntry;
+        public long ItemId;
+        public int ItemEntry;
         public ObjectGuid CreatorGuid;
         public ItemRandomEnchantmentId ItemRandomPropertyId;
-        public uint ItemSuffixFactor;
-        public uint FixedScalingLevel;
-        public uint ArtifactKnowledgeLevel;
+        public int ItemSuffixFactor;
+        public int FixedScalingLevel;
+        public int ArtifactKnowledgeLevel;
         public ItemContext Context;
         public List<int> BonusListIDs = new();
     }
@@ -577,6 +587,7 @@ namespace Game.Entities
         public uint[] taxiPath = new uint[2];
 
         public WorldLocation joinPos;                  //< From where player entered BG
+        public BattlegroundQueueTypeId queueId;
 
         public void ClearTaxiPath() { taxiPath[0] = taxiPath[1] = 0; }
         public bool HasTaxiPath() { return taxiPath[0] != 0 && taxiPath[1] != 0; }
@@ -664,7 +675,7 @@ namespace Game.Entities
 
     struct QuestObjectiveStatusData
     {
-        public (uint QuestID, QuestStatusData Status) QuestStatusPair;
+        public (int QuestID, QuestStatusData Status) QuestStatusPair;
         public QuestObjective Objective;
     }
 

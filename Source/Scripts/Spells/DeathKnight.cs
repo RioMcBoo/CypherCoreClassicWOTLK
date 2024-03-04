@@ -1,4 +1,4 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
@@ -9,6 +9,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Global;
 
 namespace Scripts.Spells.DeathKnight
 {
@@ -24,50 +25,41 @@ namespace Scripts.Spells.DeathKnight
         public const uint BloodPlague = 55078;
         public const uint BloodShieldAbsorb = 77535;
         public const uint BloodShieldMastery = 77513;
+        public const uint BreathOfSindragosa = 152279;
         public const uint CorpseExplosionTriggered = 43999;
         public const uint DeathAndDecayDamage = 52212;
         public const uint DeathCoilDamage = 47632;
         public const uint DeathGripDummy = 243912;
         public const uint DeathGripJump = 49575;
         public const uint DeathGripTaunt = 51399;
-        public const uint DeathStrikeEnabler = 89832; //Server Side
         public const uint DeathStrikeHeal = 45470;
         public const uint DeathStrikeOffhand = 66188;
         public const uint FesteringWound = 194310;
         public const uint Frost = 137006;
+        public const uint FrostFever = 55095;
         public const uint FrostScythe = 207230;
         public const uint GlyphOfFoulMenagerie = 58642;
         public const uint GlyphOfTheGeist = 58640;
         public const uint GlyphOfTheSkeleton = 146652;
+        public const uint KillingMachineProc = 51124;
         public const uint MarkOfBloodHeal = 206945;
         public const uint NecrosisEffect = 216974;
+        public const uint Obliteration = 281238;
+        public const uint ObliterationRuneEnergize = 281327;
+        public const uint PillarOfFrost = 51271;
         public const uint RaiseDeadSummon = 52150;
         public const uint RecentlyUsedDeathStrike = 180612;
         public const uint RunicPowerEnergize = 49088;
         public const uint RunicReturn = 61258;
         public const uint SludgeBelcher = 207313;
         public const uint SludgeBelcherSummon = 212027;
+        public const uint DeathStrikeEnabler = 89832; // Server Side
         public const uint TighteningGrasp = 206970;
         public const uint TighteningGraspSlow = 143375;
         public const uint Unholy = 137007;
         public const uint UnholyVigor = 196263;
         public const uint VolatileShielding = 207188;
         public const uint VolatileShieldingDamage = 207194;
-
-        public static uint[] ArmyTransforms =
-        {
-            ArmyFleshBeastTransform,
-            ArmyGeistTransform,
-            ArmyNorthrendSkeletonTransform,
-            ArmySkeletonTransform,
-            ArmySpikedGhoulTransform,
-            ArmySuperZombieTransform
-        };
-    }
-
-    struct CreatureIds
-    {
-        public const uint DancingRuneWeapon = 27893;
     }
 
     [Script] // 70656 - Advantage (T10 4P Melee Bonus)
@@ -76,10 +68,10 @@ namespace Scripts.Spells.DeathKnight
         bool CheckProc(ProcEventInfo eventInfo)
         {
             Unit caster = eventInfo.GetActor();
-            if (caster)
+            if (caster != null)
             {
                 Player player = caster.ToPlayer();
-                if (!player || caster.GetClass() != Class.Deathknight)
+                if (player == null || caster.GetClass() != Class.Deathknight)
                     return false;
 
                 for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
@@ -94,7 +86,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            DoCheckProc.Add(new(CheckProc));
         }
     }
 
@@ -114,7 +106,8 @@ namespace Scripts.Spells.DeathKnight
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RunicPowerEnergize, SpellIds.VolatileShielding) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(SpellIds.RunicPowerEnergize, SpellIds.VolatileShielding)
+                && ValidateSpellEffect((spellInfo.Id, 1));
         }
 
         public override bool Load()
@@ -149,21 +142,32 @@ namespace Scripts.Spells.DeathKnight
             {
                 CastSpellExtraArgs args = new(volatileShielding);
                 args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbedAmount, volatileShielding.GetAmount()));
-                GetTarget().CastSpell((Unit)null, SpellIds.VolatileShieldingDamage, args);
+                GetTarget().CastSpell(null, SpellIds.VolatileShieldingDamage, args);
             }
         }
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-            AfterEffectAbsorb.Add(new EffectAbsorbHandler(Trigger, 0));
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real));
+            DoEffectCalcAmount.Add(new(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            AfterEffectAbsorb.Add(new(Trigger, 0));
+            AfterEffectRemove.Add(new(HandleEffectRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real));
         }
     }
 
-    [Script] // 127517 - Army Transform
+    // 127517 - Army Transform
+    [Script] /// 6.x, does this belong here or in spell_generic? where do we cast this? sniffs say this is only cast when caster has glyph of foul menagerie.
     class spell_dk_army_transform : SpellScript
     {
+        uint[] ArmyTransforms =
+        {
+            SpellIds.ArmyFleshBeastTransform,
+            SpellIds.ArmyGeistTransform,
+            SpellIds. ArmyNorthrendSkeletonTransform,
+            SpellIds.ArmySkeletonTransform,
+            SpellIds.ArmySpikedGhoulTransform,
+            SpellIds. ArmySuperZombieTransform,
+        };
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlyphOfFoulMenagerie);
@@ -177,7 +181,7 @@ namespace Scripts.Spells.DeathKnight
         SpellCastResult CheckCast()
         {
             Unit owner = GetCaster().GetOwner();
-            if (owner)
+            if (owner != null)
                 if (owner.HasAura(SpellIds.GlyphOfFoulMenagerie))
                     return SpellCastResult.SpellCastOk;
 
@@ -186,13 +190,13 @@ namespace Scripts.Spells.DeathKnight
 
         void HandleDummy(uint effIndex)
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.ArmyTransforms.SelectRandom(), true);
+            GetCaster().CastSpell(GetCaster(), ArmyTransforms.SelectRandom(), true);
         }
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnCheckCast.Add(new(CheckCast));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -211,16 +215,19 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnHit.Add(new HitHandler(HandleEffect));
+            OnHit.Add(new(HandleEffect));
         }
     }
 
-    [Script] // 49028 - Dancing Rune Weapon
+    // 49028 - Dancing Rune Weapon
+    [Script] /// 7.1.5
     class spell_dk_dancing_rune_weapon : AuraScript
     {
+        const uint NpcDkDancingRuneWeapon = 27893;
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            if (Global.ObjectMgr.GetCreatureTemplate(CreatureIds.DancingRuneWeapon) == null)
+            if (ObjectMgr.GetCreatureTemplate(NpcDkDancingRuneWeapon) == null)
                 return false;
             return true;
         }
@@ -230,20 +237,20 @@ namespace Scripts.Spells.DeathKnight
         {
             PreventDefaultAction();
             Unit caster = GetCaster();
-            if (!caster)
+            if (caster == null)
                 return;
 
             Unit drw = null;
             foreach (Unit controlled in caster.m_Controlled)
             {
-                if (controlled.GetEntry() == CreatureIds.DancingRuneWeapon)
+                if (controlled.GetEntry() == NpcDkDancingRuneWeapon)
                 {
                     drw = controlled;
                     break;
                 }
             }
 
-            if (!drw || !drw.GetVictim())
+            if (drw == null || drw.GetVictim() == null)
                 return;
 
             SpellInfo spellInfo = eventInfo.GetSpellInfo();
@@ -263,12 +270,12 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 1, AuraType.Dummy));
         }
     }
 
     [Script] // 43265 - Death and Decay
-    class spell_dk_death_and_decay_SpellScript : SpellScript
+    class spell_dk_death_and_decay : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -281,29 +288,29 @@ namespace Scripts.Spells.DeathKnight
             {
                 WorldLocation pos = GetExplTargetDest();
                 if (pos != null)
-                    GetCaster().CastSpell(pos, SpellIds.TighteningGraspSlow, new CastSpellExtraArgs(true));
+                    GetCaster().CastSpell(pos, SpellIds.TighteningGraspSlow, true);
             }
         }
 
         public override void Register()
         {
-            OnCast.Add(new CastHandler(HandleDummy));
+            OnCast.Add(new(HandleDummy));
         }
     }
 
-    [Script] // 43265 - Death and Decay
+    [Script] // 43265 - Death and Decay (Aura)
     class spell_dk_death_and_decay_AuraScript : AuraScript
     {
         void HandleDummyTick(AuraEffect aurEff)
         {
             Unit caster = GetCaster();
-            if (caster)
-                caster.CastSpell(GetTarget(), SpellIds.DeathAndDecayDamage, new CastSpellExtraArgs(aurEff));
+            if (caster != null)
+                caster.CastSpell(GetTarget(), SpellIds.DeathAndDecayDamage, aurEff);
         }
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 2, AuraType.PeriodicDummy));
+            OnEffectPeriodic.Add(new(HandleDummyTick, 2, AuraType.PeriodicDummy));
         }
     }
 
@@ -320,13 +327,13 @@ namespace Scripts.Spells.DeathKnight
             Unit caster = GetCaster();
             caster.CastSpell(GetHitUnit(), SpellIds.DeathCoilDamage, true);
             AuraEffect unholyAura = caster.GetAuraEffect(SpellIds.Unholy, 6);
-            if (unholyAura != null) // can be any effect, just here to send SpellFailedDontReport on failure
-                caster.CastSpell(caster, SpellIds.UnholyVigor, new CastSpellExtraArgs(unholyAura));
+            if (unholyAura != null) // can be any effect, just here to send SpellCastResult.DontReport on failure
+                caster.CastSpell(caster, SpellIds.UnholyVigor, unholyAura);
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -348,14 +355,14 @@ namespace Scripts.Spells.DeathKnight
         {
             PreventHitDefaultEffect(effIndex);
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
                 target.CastSpell(target, (uint)GetEffectValue(), false);
         }
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckClass));
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnCheckCast.Add(new(CheckClass));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -364,7 +371,7 @@ namespace Scripts.Spells.DeathKnight
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.DeathGripDummy, SpellIds.DeathGripJump, SpellIds.Blood, SpellIds.DeathGripTaunt);
+            return ValidateSpellInfo(SpellIds.DeathGripDummy, SpellIds.DeathGripJump, SpellIds.DeathGripTaunt, SpellIds.Blood);
         }
 
         SpellCastResult CheckCast()
@@ -387,24 +394,29 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect));
+            OnCheckCast.Add(new(CheckCast));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script] // 48743 - Death Pact
     class spell_dk_death_pact : AuraScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((spellInfo.Id, 2));
+        }
+
         void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             Unit caster = GetCaster();
-            if (caster)
-                amount = (int)caster.CountPctFromMaxHealth(amount);
+            if (caster != null)
+                amount = (int)caster.CountPctFromMaxHealth(GetEffectInfo(2).CalcValue(caster));
         }
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(HandleCalcAmount, 1, AuraType.SchoolHealAbsorb));
+            DoEffectCalcAmount.Add(new(HandleCalcAmount, 1, AuraType.SchoolHealAbsorb));
         }
     }
 
@@ -413,8 +425,8 @@ namespace Scripts.Spells.DeathKnight
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.DeathStrikeEnabler, SpellIds.DeathStrikeHeal, SpellIds.BloodShieldMastery, SpellIds.BloodShieldAbsorb, SpellIds.RecentlyUsedDeathStrike, SpellIds.Frost, SpellIds.DeathStrikeOffhand)
-                && spellInfo.GetEffects().Count > 2;
+            return ValidateSpellInfo(SpellIds.DeathStrikeEnabler, SpellIds.DeathStrikeHeal, SpellIds.BloodShieldMastery, SpellIds.BloodShieldAbsorb, SpellIds.Frost, SpellIds.DeathStrikeOffhand)
+                && ValidateSpellEffect((spellInfo.Id, 2));
         }
 
         void HandleDummy(uint effIndex)
@@ -448,16 +460,18 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectLaunch.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy));
-            AfterCast.Add(new CastHandler(TriggerRecentlyUsedDeathStrike));
+            OnEffectLaunch.Add(new(HandleDummy, 1, SpellEffectName.Dummy));
+            AfterCast.Add(new(TriggerRecentlyUsedDeathStrike));
         }
     }
 
-    [Script] // 89832 - Death Strike Enabler - SPELL_DK_DEATH_STRIKE_ENABLER
+    [Script] // 89832 - Death Strike Enabler - SpellDeathStrikeEnabler
     class spell_dk_death_strike_enabler : AuraScript
     {
         // Amount of seconds we calculate damage over
-        uint[] _damagePerSecond = new uint[5];
+        const byte LastSeconds = 5;
+
+        uint[] _damagePerSecond = new uint[LastSeconds];
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
@@ -484,13 +498,13 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicDummy));
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(HandleCalcAmount, 0, AuraType.PeriodicDummy));
-            OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(Update, 0, AuraType.PeriodicDummy));
+            DoCheckProc.Add(new(CheckProc));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.PeriodicDummy));
+            DoEffectCalcAmount.Add(new(HandleCalcAmount, 0, AuraType.PeriodicDummy));
+            OnEffectUpdatePeriodic.Add(new(Update, 0, AuraType.PeriodicDummy));
         }
     }
-    
+
     [Script] // 85948 - Festering Strike
     class spell_dk_festering_strike : SpellScript
     {
@@ -506,7 +520,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 2, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffectName.Dummy));
         }
     }
 
@@ -515,7 +529,7 @@ namespace Scripts.Spells.DeathKnight
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.CorpseExplosionTriggered) && spellInfo.GetEffects().Count > 2;
+            return ValidateSpellInfo(SpellIds.CorpseExplosionTriggered) && ValidateSpellEffect((spellInfo.Id, 2));
         }
 
         void HandleDamage(uint effIndex)
@@ -526,7 +540,7 @@ namespace Scripts.Spells.DeathKnight
         void Suicide(uint effIndex)
         {
             Unit unitTarget = GetHitUnit();
-            if (unitTarget)
+            if (unitTarget != null)
             {
                 // Corpse Explosion (Suicide)
                 unitTarget.CastSpell(unitTarget, SpellIds.CorpseExplosionTriggered, true);
@@ -535,8 +549,8 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDamage, 0, SpellEffectName.SchoolDamage));
-            OnEffectHitTarget.Add(new EffectHandler(Suicide, 1, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(HandleDamage, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(Suicide, 1, SpellEffectName.SchoolDamage));
         }
     }
 
@@ -553,7 +567,7 @@ namespace Scripts.Spells.DeathKnight
             {
                 SpellInfo spellInfo = aurEff.GetSpellInfo();
                 // search our Blood Plague and Frost Fever on target
-                if (spellInfo.SpellFamilyName == SpellFamilyNames.Deathknight && spellInfo.SpellFamilyFlags[2].HasAnyFlag(0x2u) &&
+                if (spellInfo.SpellFamilyName == SpellFamilyNames.Deathknight && (spellInfo.SpellFamilyFlags[2] & 0x2) != 0 &&
                     aurEff.GetCasterGUID() == caster.GetGUID())
                 {
                     int countMin = aurEff.GetBase().GetMaxDuration();
@@ -573,10 +587,29 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
+    [Script] // 49184 - Howling Blast
+    class spell_dk_howling_blast : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FrostFever);
+        }
+
+        void HandleFrostFever(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.FrostFever);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleFrostFever, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
     [Script] // 206940 - Mark of Blood
     class spell_dk_mark_of_blood : AuraScript
     {
@@ -589,13 +622,13 @@ namespace Scripts.Spells.DeathKnight
         {
             PreventDefaultAction();
             Unit caster = GetCaster();
-            if (caster)
+            if (caster != null)
                 caster.CastSpell(eventInfo.GetProcTarget(), SpellIds.MarkOfBloodHeal, true);
         }
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
     }
 
@@ -615,11 +648,38 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
     }
 
-    [Script] // 121916 - Glyph of the Geist (Unholy)
+    [Script] // 207256 - Obliteration
+    class spell_dk_obliteration : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Obliteration, SpellIds.ObliterationRuneEnergize, SpellIds.KillingMachineProc)
+                && ValidateSpellEffect((SpellIds.Obliteration, 1));
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit target = GetTarget();
+            target.CastSpell(target, SpellIds.KillingMachineProc, aurEff);
+
+            AuraEffect oblitaration = target.GetAuraEffect(SpellIds.Obliteration, 1);
+            if (oblitaration != null)
+                if (RandomHelper.randChance(oblitaration.GetAmount()))
+                    target.CastSpell(target, SpellIds.ObliterationRuneEnergize, aurEff);
+        }
+
+        public override void Register()
+        {
+            AfterEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+    // 121916 - Glyph of the Geist (Unholy)
+    [Script] /// 6.x, does this belong here or in spell_generic? apply this in creature_template_addon? sniffs say this is always cast on raise dead.
     class spell_dk_pet_geist_transform : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -635,7 +695,7 @@ namespace Scripts.Spells.DeathKnight
         SpellCastResult CheckCast()
         {
             Unit owner = GetCaster().GetOwner();
-            if (owner)
+            if (owner != null)
                 if (owner.HasAura(SpellIds.GlyphOfTheGeist))
                     return SpellCastResult.SpellCastOk;
 
@@ -644,11 +704,12 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
+            OnCheckCast.Add(new(CheckCast));
         }
     }
 
-    [Script] // 147157 Glyph of the Skeleton (Unholy)
+    // 147157 Glyph of the Skeleton (Unholy)
+    [Script] /// 6.x, does this belong here or in spell_generic? apply this in creature_template_addon? sniffs say this is always cast on raise dead.
     class spell_dk_pet_skeleton_transform : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -659,7 +720,7 @@ namespace Scripts.Spells.DeathKnight
         SpellCastResult CheckCast()
         {
             Unit owner = GetCaster().GetOwner();
-            if (owner)
+            if (owner != null)
                 if (owner.HasAura(SpellIds.GlyphOfTheSkeleton))
                     return SpellCastResult.SpellCastOk;
 
@@ -668,11 +729,12 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
+            OnCheckCast.Add(new(CheckCast));
         }
     }
 
-    [Script] // 61257 - Runic Power Back on Snare/Root
+    // 61257 - Runic Power Back on Snare/Root
+    [Script] /// 7.1.5
     class spell_dk_pvp_4p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -692,13 +754,13 @@ namespace Scripts.Spells.DeathKnight
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            eventInfo.GetActionTarget().CastSpell((Unit)null, SpellIds.RunicReturn, true);
+            eventInfo.GetActionTarget().CastSpell(null, SpellIds.RunicReturn, true);
         }
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            DoCheckProc.Add(new(CheckProc));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
     }
 
@@ -716,12 +778,12 @@ namespace Scripts.Spells.DeathKnight
             if (GetCaster().HasAura(SpellIds.SludgeBelcher))
                 spellId = SpellIds.SludgeBelcherSummon;
 
-            GetCaster().CastSpell((Unit)null, spellId, true);
+            GetCaster().CastSpell(null, spellId, true);
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -730,7 +792,7 @@ namespace Scripts.Spells.DeathKnight
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 1 && ValidateSpellInfo(SpellIds.FrostScythe);
+            return ValidateSpellEffect((spellInfo.Id, 1)) && ValidateSpellInfo(SpellIds.FrostScythe);
         }
 
         bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -744,10 +806,53 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+            DoCheckEffectProc.Add(new(CheckProc, 0, AuraType.ProcTriggerSpell));
         }
     }
-    
+
+    [Script] // 242057 - Rune Empowered
+    class spell_dk_t20_2p_rune_empowered : AuraScript
+    {
+        int _runicPowerSpent;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PillarOfFrost, SpellIds.BreathOfSindragosa);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            Spell procSpell = procInfo.GetProcSpell();
+            if (procSpell == null)
+                return;
+
+            Aura pillarOfFrost = GetTarget().GetAura(SpellIds.PillarOfFrost);
+            if (pillarOfFrost == null)
+                return;
+
+            _runicPowerSpent += procSpell.GetPowerTypeCostAmount(PowerType.RunicPower).GetValueOrDefault(0);
+            // Breath of Math.Sindragosa special case
+            SpellInfo breathOfSindragosa = SpellMgr.GetSpellInfo(SpellIds.BreathOfSindragosa, Difficulty.None);
+            if (procSpell.IsTriggeredByAura(breathOfSindragosa))
+            {
+                var powerRecord = breathOfSindragosa.PowerCosts.ToList().Find(power => power.PowerType == PowerType.RunicPower && power.PowerPctPerSecond > 0.0f);
+                if (powerRecord != null)
+                    _runicPowerSpent += MathFunctions.CalculatePct(GetTarget().GetMaxPower(PowerType.RunicPower), powerRecord.PowerPctPerSecond);
+            }
+
+            if (_runicPowerSpent >= 600)
+            {
+                pillarOfFrost.SetDuration(pillarOfFrost.GetDuration() + 1000);
+                _runicPowerSpent -= 600;
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
     [Script] // 55233 - Vampiric Blood
     class spell_dk_vampiric_blood : AuraScript
     {
@@ -758,7 +863,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModIncreaseHealth2));
+            DoEffectCalcAmount.Add(new(CalculateAmount, 1, AuraType.ModIncreaseHealth2));
         }
     }
 }

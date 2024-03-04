@@ -62,7 +62,7 @@ namespace Game.DungeonFinding
             m_Roles = roles;
         }
 
-        public void SetSelectedDungeons(List<uint> dungeons)
+        public void SetSelectedDungeons(List<int> dungeons)
         {
             m_SelectedDungeons = dungeons;
         }
@@ -97,7 +97,7 @@ namespace Game.DungeonFinding
             return m_Roles;
         }
 
-        public List<uint> GetSelectedDungeons()
+        public List<int> GetSelectedDungeons()
         {
             return m_SelectedDungeons;
         }
@@ -122,7 +122,7 @@ namespace Game.DungeonFinding
 
         // Queue
         LfgRoles m_Roles;
-        List<uint> m_SelectedDungeons = new();
+        List<int> m_SelectedDungeons = new();
 
         // Achievement-related
         byte m_NumberOfPartyMembersAtJoin;

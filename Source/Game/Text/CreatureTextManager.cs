@@ -43,7 +43,7 @@ namespace Game
             {
                 CreatureTextEntry temp = new();
 
-                temp.creatureId = result.Read<uint>(0);
+                temp.creatureId = result.Read<int>(0);
                 temp.groupId = result.Read<byte>(1);
                 temp.id = result.Read<byte>(2);
                 temp.text = result.Read<string>(3);
@@ -52,9 +52,9 @@ namespace Game
                 temp.probability = result.Read<float>(6);
                 temp.emote = (Emote)result.Read<uint>(7);
                 temp.duration = result.Read<uint>(8);
-                temp.sound = result.Read<uint>(9);
+                temp.sound = result.Read<int>(9);
                 temp.SoundPlayType = (SoundKitPlayType)result.Read<byte>(10);
-                temp.BroadcastTextId = result.Read<uint>(11);
+                temp.BroadcastTextId = result.Read<int>(11);
                 temp.TextRange = (CreatureTextRange)result.Read<byte>(12);
 
                 if (temp.sound != 0)
@@ -82,7 +82,7 @@ namespace Game
                 }
                 if (temp.emote != 0)
                 {
-                    if (!CliDB.EmotesStorage.ContainsKey((uint)temp.emote))
+                    if (!CliDB.EmotesStorage.ContainsKey((int)temp.emote))
                     {
                         Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Emote {temp.emote} but emote does not exist.");
                         temp.emote = Emote.OneshotNone;
@@ -130,9 +130,9 @@ namespace Game
 
             do
             {
-                uint creatureId = result.Read<uint>(0);
-                uint groupId = result.Read<byte>(1);
-                uint id = result.Read<byte>(2);
+                int creatureId = result.Read<int>(0);
+                int groupId = result.Read<byte>(1);
+                int id = result.Read<byte>(2);
                 string localeName = result.Read<string>(3);
                 Locale locale = localeName.ToEnum<Locale>();
                 if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
@@ -151,7 +151,7 @@ namespace Game
         }
 
         public uint SendChat(Creature source, byte textGroup, WorldObject whisperTarget = null, ChatMsg msgType = ChatMsg.Addon, Language language = Language.Addon,
-            CreatureTextRange range = CreatureTextRange.Normal, uint sound = 0, SoundKitPlayType playType = SoundKitPlayType.Normal, Team team = Team.Other, bool gmOnly = false, Player srcPlr = null)
+            CreatureTextRange range = CreatureTextRange.Normal, int sound = 0, SoundKitPlayType playType = SoundKitPlayType.Normal, Team team = Team.Other, bool gmOnly = false, Player srcPlr = null)
         {
             if (source == null)
                 return 0;
@@ -187,7 +187,7 @@ namespace Game
 
             ChatMsg finalType = (msgType == ChatMsg.Addon) ? textEntry.type : msgType;
             Language finalLang = (language == Language.Addon) ? textEntry.lang : language;
-            uint finalSound = textEntry.sound;
+            int finalSound = textEntry.sound;
             SoundKitPlayType finalPlayType = textEntry.SoundPlayType;
             if (sound != 0)
             {
@@ -199,7 +199,7 @@ namespace Game
                 BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textEntry.BroadcastTextId);
                 if (bct != null)
                 {
-                    uint broadcastTextSoundId = bct.SoundKitID[source.GetGender() == Gender.Female ? 1 : 0];
+                    int broadcastTextSoundId = bct.SoundKitID[source.GetGender() == Gender.Female ? 1 : 0];
                     if (broadcastTextSoundId != 0)
                         finalSound = broadcastTextSoundId;
                 }
@@ -212,13 +212,13 @@ namespace Game
                 SendSound(source, finalSound, finalType, whisperTarget, range, team, gmOnly, textEntry.BroadcastTextId, finalPlayType);
 
             Unit finalSource = source;
-            if (srcPlr)
+            if (srcPlr != null)
                 finalSource = srcPlr;
 
             if (textEntry.emote != 0)
                 SendEmote(finalSource, textEntry.emote);
 
-            if (srcPlr)
+            if (srcPlr != null)
             {
                 PlayerTextBuilder builder = new(source, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
                 SendChatPacket(finalSource, builder, finalType, whisperTarget, range, team, gmOnly);
@@ -252,9 +252,9 @@ namespace Game
             return dist;
         }
 
-        public void SendSound(Creature source, uint sound, ChatMsg msgType, WorldObject whisperTarget = null, CreatureTextRange range = CreatureTextRange.Normal, Team team = Team.Other, bool gmOnly = false, uint keyBroadcastTextId = 0, SoundKitPlayType playType = SoundKitPlayType.Normal)
+        public void SendSound(Creature source, int sound, ChatMsg msgType, WorldObject whisperTarget = null, CreatureTextRange range = CreatureTextRange.Normal, Team team = Team.Other, bool gmOnly = false, int keyBroadcastTextId = 0, SoundKitPlayType playType = SoundKitPlayType.Normal)
         {
-            if (sound == 0 || !source)
+            if (sound == 0 || source == null)
                 return;
 
             if (playType == SoundKitPlayType.ObjectSound)
@@ -264,7 +264,7 @@ namespace Game
                 pkt.SourceObjectGUID = source.GetGUID();
                 pkt.SoundKitID = sound;
                 pkt.Position = whisperTarget.GetWorldLocation();
-                pkt.BroadcastTextID = (int)keyBroadcastTextId;
+                pkt.BroadcastTextID = keyBroadcastTextId;
                 SendNonChatPacket(source, pkt, msgType, whisperTarget, range, team, gmOnly);
             }
             else if (playType == SoundKitPlayType.Normal)
@@ -278,14 +278,14 @@ namespace Game
             switch (msgType)
             {
                 case ChatMsg.MonsterParty:
-                    if (!whisperTarget)
+                    if (whisperTarget == null)
                         return;
 
                     Player whisperPlayer = whisperTarget.ToPlayer();
-                    if (whisperPlayer)
+                    if (whisperPlayer != null)
                     {
                         Group group = whisperPlayer.GetGroup();
-                        if (group)
+                        if (group != null)
                             group.BroadcastWorker(player => player.SendPacket(data));
                     }
                     return;
@@ -294,7 +294,7 @@ namespace Game
                     {
                         if (range == CreatureTextRange.Normal)//ignores team and gmOnly
                         {
-                            if (!whisperTarget || !whisperTarget.IsTypeId(TypeId.Player))
+                            if (whisperTarget == null || !whisperTarget.IsTypeId(TypeId.Player))
                                 return;
 
                             whisperTarget.ToPlayer().SendPacket(data);
@@ -310,7 +310,7 @@ namespace Game
             {
                 case CreatureTextRange.Area:
                     {
-                        uint areaId = source.GetAreaId();
+                        int areaId = source.GetAreaId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
                             if (pl.GetAreaId() == areaId && (team == 0 || pl.GetEffectiveTeam() == team) && (!gmOnly || pl.IsGameMaster()))
@@ -319,7 +319,7 @@ namespace Game
                     }
                 case CreatureTextRange.Zone:
                     {
-                        uint zoneId = source.GetZoneId();
+                        int zoneId = source.GetZoneId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
                             if (pl.GetZoneId() == zoneId && (team == 0 || pl.GetEffectiveTeam() == team) && (!gmOnly || pl.IsGameMaster()))
@@ -362,13 +362,13 @@ namespace Game
 
         void SendEmote(Unit source, Emote emote)
         {
-            if (!source)
+            if (source == null)
                 return;
 
             source.HandleEmoteCommand(emote);
         }
 
-        public bool TextExist(uint sourceEntry, byte textGroup)
+        public bool TextExist(int sourceEntry, byte textGroup)
         {
             if (sourceEntry == 0)
                 return false;
@@ -390,7 +390,7 @@ namespace Game
             return true;
         }
 
-        public string GetLocalizedChatString(uint entry, Gender gender, byte textGroup, uint id, Locale locale = Locale.enUS)
+        public string GetLocalizedChatString(int entry, Gender gender, byte textGroup, int id, Locale locale = Locale.enUS)
         {
             var multiMap = mTextMap.LookupByKey(entry);
             if (multiMap == null)
@@ -446,7 +446,7 @@ namespace Game
                     {
                         if (range == CreatureTextRange.Normal) //ignores team and gmOnly
                         {
-                            if (!whisperTarget || !whisperTarget.IsTypeId(TypeId.Player))
+                            if (whisperTarget == null || !whisperTarget.IsTypeId(TypeId.Player))
                                 return;
 
                             localizer.Invoke(whisperTarget.ToPlayer());
@@ -462,7 +462,7 @@ namespace Game
             {
                 case CreatureTextRange.Area:
                     {
-                        uint areaId = source.GetAreaId();
+                        int areaId = source.GetAreaId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
                             if (pl.GetAreaId() == areaId && (team == 0 || pl.GetEffectiveTeam() == team) && (!gmOnly || pl.IsGameMaster()))
@@ -471,7 +471,7 @@ namespace Game
                     }
                 case CreatureTextRange.Zone:
                     {
-                        uint zoneId = source.GetZoneId();
+                        int zoneId = source.GetZoneId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
                             if (pl.GetZoneId() == zoneId && (team == 0 || pl.GetEffectiveTeam() == team) && (!gmOnly || pl.IsGameMaster()))
@@ -514,13 +514,13 @@ namespace Game
             Cell.VisitWorldObjects(source, worker, dist);
         }
 
-        Dictionary<uint, MultiMap<byte, CreatureTextEntry>> mTextMap = new();
+        Dictionary<int, MultiMap<byte, CreatureTextEntry>> mTextMap = new();
         Dictionary<CreatureTextId, CreatureTextLocale> mLocaleTextMap = new();
     }
 
     public class CreatureTextEntry
     {
-        public uint creatureId;
+        public int creatureId;
         public byte groupId;
         public byte id;
         public string text;
@@ -529,9 +529,9 @@ namespace Game
         public float probability;
         public Emote emote;
         public uint duration;
-        public uint sound;
+        public int sound;
         public SoundKitPlayType SoundPlayType;
-        public uint BroadcastTextId;
+        public int BroadcastTextId;
         public CreatureTextRange TextRange;
     }
 
@@ -542,16 +542,16 @@ namespace Game
 
     public class CreatureTextId
     {
-        public CreatureTextId(uint e, uint g, uint i)
+        public CreatureTextId(int e, int g, int i)
         {
             entry = e;
             textGroup = g;
             textId = i;
         }
 
-        public uint entry;
-        public uint textGroup;
-        public uint textId;
+        public int entry;
+        public int textGroup;
+        public int textId;
     }
 
     public enum CreatureTextRange
@@ -615,7 +615,7 @@ namespace Game
 
     public class CreatureTextBuilder : MessageBuilder
     {
-        public CreatureTextBuilder(WorldObject obj, Gender gender, ChatMsg msgtype, byte textGroup, uint id, Language language, WorldObject target)
+        public CreatureTextBuilder(WorldObject obj, Gender gender, ChatMsg msgtype, byte textGroup, int id, Language language, WorldObject target)
         {
             _source = obj;
             _gender = gender;
@@ -636,14 +636,14 @@ namespace Game
         Gender _gender;
         ChatMsg _msgType;
         byte _textGroup;
-        uint _textId;
+        int _textId;
         Language _language;
         WorldObject _target;
     }
 
     public class PlayerTextBuilder : MessageBuilder
     {
-        public PlayerTextBuilder(WorldObject obj, WorldObject speaker, Gender gender, ChatMsg msgtype, byte textGroup, uint id, Language language, WorldObject target)
+        public PlayerTextBuilder(WorldObject obj, WorldObject speaker, Gender gender, ChatMsg msgtype, byte textGroup, int id, Language language, WorldObject target)
         {
             _source = obj;
             _gender = gender;
@@ -668,7 +668,7 @@ namespace Game
         Gender _gender;
         ChatMsg _msgType;
         byte _textGroup;
-        uint _textId;
+        int _textId;
         Language _language;
         WorldObject _target;
     }

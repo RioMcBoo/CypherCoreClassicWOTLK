@@ -7,20 +7,21 @@ using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
+using System.Collections.Generic;
 
 namespace Game
 {
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.LearnTalent, Processing = PacketProcessing.Inplace)]
-        void HandleLearnTalent(LearnTalents packet)
+        void HandleLearnTalent(LearnTalent packet)
         {
             _player.LearnTalent((uint)packet.TalentID, packet.Rank);
             _player.SendTalentsInfoData(false);
         }
 
         [WorldPacketHandler(ClientOpcodes.LearnPreviewTalents, Processing = PacketProcessing.Inplace)]
-        void HandleLearnTalentsGroup(LearnTalentsGroup packet)
+        void HandleLearnTalentsGroup(LearnPreviewTalents packet)
         {
             foreach(var talentInfo in packet.talentInfos)
             {
@@ -94,6 +95,36 @@ namespace Game
                 return;
 
             GetPlayer().SetSkill(packet.SkillLine, 0, 0, 0);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.TradeSkillSetFavorite, Processing = PacketProcessing.Inplace)]
+        void HandleTradeSkillSetFavorite(TradeSkillSetFavorite tradeSkillSetFavorite)
+        {
+            if (!_player.HasSpell(tradeSkillSetFavorite.RecipeID))
+                return;
+
+            _player.SetSpellFavorite(tradeSkillSetFavorite.RecipeID, tradeSkillSetFavorite.IsFavorite);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.RemoveGlyph)]
+        void HandleRemoveGlyphOpcode(RemoveGlyph packet)
+        {
+            if (packet.GlyphSlot >= PlayerConst.MaxGlyphSlotIndex)
+            {
+                Log.outDebug(LogFilter.Network, $"Client sent wrong glyph slot number in opcode CMSG_REMOVE_GLYPH {packet.GlyphSlot}.");
+                return;
+            }
+
+            var glyph = _player.GetGlyph(packet.GlyphSlot);
+            if (glyph != 0)
+            {
+                if (CliDB.GlyphPropertiesStorage.TryGetValue(glyph, out GlyphPropertiesRecord gp))
+                {
+                    _player.RemoveAurasDueToSpell(gp.SpellID);
+                    _player.SetGlyph(packet.GlyphSlot, 0);
+                    _player.SendTalentsInfoData();
+                }
+            }
         }
     }
 }

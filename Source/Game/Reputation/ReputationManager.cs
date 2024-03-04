@@ -52,10 +52,10 @@ namespace Game
         
         public FactionState GetState(FactionRecord factionEntry)
         {
-            return factionEntry.CanHaveReputation() ? GetState(factionEntry.ReputationIndex) : null;
+            return factionEntry.CanHaveReputation ? GetState(factionEntry.ReputationIndex) : null;
         }
 
-        public bool IsAtWar(uint factionId)
+        public bool IsAtWar(int factionId)
         {
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
             if (factionEntry == null)
@@ -75,7 +75,7 @@ namespace Game
             return false;
         }
 
-        public int GetReputation(uint faction_id)
+        public int GetReputation(int faction_id)
         {
             var factionEntry = CliDB.FactionStorage.LookupByKey(faction_id);
             if (factionEntry == null)
@@ -111,20 +111,28 @@ namespace Game
             if (paragonReputation != null)
             {
                 // has reward quest, cap is just before threshold for another quest reward
-                // for example: if current reputation is 12345 and questa are given every 10000 and player has unclaimed reward
+                // for example: if current reputation is 12345 and quests are given every 10000 and player has unclaimed reward
                 // then cap will be 19999
 
                 // otherwise cap is one theshold level larger
-                // if current reputation is 12345 and questa are given every 10000 and player does NOT have unclaimed reward
+                // if current reputation is 12345 and quests are given every 10000 and player does NOT have unclaimed reward
                 // then cap will be 29999
 
                 int reputation = GetReputation(factionEntry);
                 int cap = reputation + paragonReputation.LevelThreshold - reputation % paragonReputation.LevelThreshold - 1;
 
-                if (_player.GetQuestStatus((uint)paragonReputation.QuestID) == QuestStatus.None)
+                if (_player.GetQuestStatus(paragonReputation.QuestID) == QuestStatus.None)
                     cap += paragonReputation.LevelThreshold;
 
                 return cap;
+            }
+
+            if (IsRenownReputation(factionEntry))
+            {
+                // Compared to a paragon reputation, DF renown reputations
+                // have a maximum value of 2500 which resets with each level of renown acquired.
+                // We calculate the total reputation necessary to raise the renown to the maximum
+                return GetRenownMaxLevel(factionEntry) * GetRenownLevelThreshold(factionEntry);
             }
 
             var friendshipReactions = Global.DB2Mgr.GetFriendshipRepReactions(factionEntry.FriendshipRepID);
@@ -168,7 +176,15 @@ namespace Game
             return GetForcedRankIfAny(factionTemplateEntry.Faction);
         }
 
-        public int GetParagonLevel(uint paragonFactionId)
+        bool IsParagonReputation(FactionRecord factionEntry)
+        {
+            if (Global.DB2Mgr.GetParagonReputation(factionEntry.Id) != null)
+                return true;
+
+            return false;
+        }
+        
+        public int GetParagonLevel(int paragonFactionId)
         {
             return GetParagonLevel(CliDB.FactionStorage.LookupByKey(paragonFactionId));
         }
@@ -184,8 +200,57 @@ namespace Game
 
             return 0;
         }
+
+        bool HasMaximumRenownReputation(FactionRecord factionEntry)
+        {
+            if (!IsRenownReputation(factionEntry))
+                return false;
+
+            return GetRenownLevel(factionEntry) >= GetRenownMaxLevel(factionEntry);
+        }
+
+        bool IsRenownReputation(FactionRecord factionEntry)
+        {
+            return factionEntry.RenownCurrencyID > 0;
+        }
+
+        int GetRenownLevel(FactionRecord renownFactionEntry)
+        {
+            if (renownFactionEntry == null)
+                return 0;
+
+            CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(renownFactionEntry.RenownCurrencyID);
+            if (currency != null)
+                return (int)_player.GetCurrencyQuantity(currency.Id);
+
+            return 0;
+        }
+
+        int GetRenownLevelThreshold(FactionRecord renownFactionEntry)
+        {
+            if (renownFactionEntry == null || !IsRenownReputation(renownFactionEntry))
+                return 0;
+
+            int dataIndex = GetFactionDataIndexForRaceAndClass(renownFactionEntry);
+            if (dataIndex >= 0)
+                return renownFactionEntry.ReputationMax[dataIndex];
+
+            return 0;
+        }
+
+        int GetRenownMaxLevel(FactionRecord renownFactionEntry)
+        {
+            if (renownFactionEntry == null)
+                return 0;
+
+            CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(renownFactionEntry.RenownCurrencyID);
+            if (currency != null)
+                return (int)_player.GetCurrencyMaxQuantity(currency);
+
+            return 0;
+        }
         
-        public void ApplyForceReaction(uint faction_id, ReputationRank rank, bool apply)
+        public void ApplyForceReaction(int faction_id, ReputationRank rank, bool apply)
         {
             if (apply)
                 _forcedReactions[faction_id] = rank;
@@ -225,10 +290,15 @@ namespace Game
         public void SendState(FactionState faction)
         {
             SetFactionStanding setFactionStanding = new();
-            setFactionStanding.ReferAFriendBonus = 0.0f;
             setFactionStanding.BonusFromAchievementSystem = 0.0f;
+
+            int getStandingForPacket(FactionState state)
+            {
+                return state.VisualStandingIncrease != 0 ? state.VisualStandingIncrease : state.Standing;
+            }
+
             if (faction != null)
-                setFactionStanding.Faction.Add(new FactionStandingData((int)faction.ReputationListID, faction.Standing));
+                setFactionStanding.Faction.Add(new FactionStandingData((int)faction.ReputationListID, getStandingForPacket(faction)));
 
             foreach (var state in _factions.Values)
             {
@@ -236,7 +306,7 @@ namespace Game
                 {
                     state.needSend = false;
                     if (faction == null || state.ReputationListID != faction.ReputationListID)
-                        setFactionStanding.Faction.Add(new FactionStandingData((int)state.ReputationListID, state.Standing));
+                        setFactionStanding.Faction.Add(new FactionStandingData((int)state.ReputationListID, getStandingForPacket(state)));
                 }
             }
 
@@ -289,6 +359,7 @@ namespace Game
                     newFaction.Id = factionEntry.Id;
                     newFaction.ReputationListID = (uint)factionEntry.ReputationIndex;
                     newFaction.Standing = 0;
+                    newFaction.VisualStandingIncrease = 0;
                     newFaction.Flags = GetDefaultStateFlags(factionEntry);
                     newFaction.needSend = true;
                     newFaction.needSave = true;
@@ -406,16 +477,25 @@ namespace Game
 
         public bool SetOneFactionReputation(FactionRecord factionEntry, int standing, bool incremental)
         {
-            var factionState = _factions.LookupByKey((uint)factionEntry.ReputationIndex);
+            var factionState = _factions.LookupByKey(factionEntry.ReputationIndex);
             if (factionState != null)
             {
-                int BaseRep = GetBaseReputation(factionEntry);
+                // Ignore renown reputation already raised to the maximum level
+                if (HasMaximumRenownReputation(factionEntry) && standing > 0)
+                {
+                    factionState.needSend = false;
+                    factionState.needSave = false;
+                    return false;
+                }
 
-                if (incremental)
+                int baseRep = GetBaseReputation(factionEntry);
+                int oldStanding = factionState.Standing + baseRep;
+
+                if (incremental || IsRenownReputation(factionEntry))
                 {
                     // int32 *= float cause one point loss?
                     standing = (int)(Math.Floor(standing * WorldConfig.GetFloatValue(WorldCfg.RateReputationGain) + 0.5f));
-                    standing += factionState.Standing + BaseRep;
+                    standing += oldStanding;
                 }
 
                 if (standing > GetMaxReputation(factionEntry))
@@ -423,25 +503,63 @@ namespace Game
                 else if (standing < GetMinReputation(factionEntry))
                     standing = GetMinReputation(factionEntry);
 
-                ReputationRank old_rank = ReputationToRank(factionEntry, factionState.Standing + BaseRep);
-                ReputationRank new_rank = ReputationToRank(factionEntry, standing);
+                // Ignore rank for paragon or renown reputation
+                if (!IsParagonReputation(factionEntry) && !IsRenownReputation(factionEntry))
+                {
+                    ReputationRank oldRank = ReputationToRank(factionEntry, oldStanding);
+                    ReputationRank newRank = ReputationToRank(factionEntry, standing);
 
-                int oldStanding = factionState.Standing + BaseRep;
-                int newStanding = standing - BaseRep;
+                    if (newRank <= ReputationRank.Hostile)
+                        SetAtWar(factionState, true);
 
-                _player.ReputationChanged(factionEntry, newStanding - factionState.Standing);
+                    if (newRank > oldRank)
+                        _sendFactionIncreased = true;
+
+                    if (factionEntry.FriendshipRepID == 0)
+                        UpdateRankCounters(oldRank, newRank);
+                }
+                else
+                    _sendFactionIncreased = true; // TODO: Check Paragon reputation
+
+                // Calculate new standing and reputation change
+                int newStanding = 0;
+                int reputationChange = standing - oldStanding;
+
+                if (!IsRenownReputation(factionEntry))
+                    newStanding = standing - baseRep;
+                else
+                {
+                    CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(factionEntry.RenownCurrencyID);
+                    if (currency != null)
+                    {
+                        int renownLevelThreshold = GetRenownLevelThreshold(factionEntry);
+                        int oldRenownLevel = GetRenownLevel(factionEntry);
+
+                        int totalReputation = (oldRenownLevel * renownLevelThreshold) + (standing - baseRep);
+                        int newRenownLevel = totalReputation / renownLevelThreshold;
+                        newStanding = totalReputation % renownLevelThreshold;
+
+                        if (newRenownLevel >= GetRenownMaxLevel(factionEntry))
+                        {
+                            newStanding = 0;
+                            reputationChange += (GetRenownMaxLevel(factionEntry) * renownLevelThreshold) - totalReputation;
+                        }
+
+                        factionState.VisualStandingIncrease = reputationChange;
+
+                        // If the reputation is decreased by command, we will send CurrencyDestroyReason::Cheat
+                        if (oldRenownLevel != newRenownLevel)
+                            _player.ModifyCurrency(currency.Id, newRenownLevel - oldRenownLevel, CurrencyGainSource.RenownRepGain, CurrencyDestroyReason.Cheat);
+                    }
+                }
+
+                _player.ReputationChanged(factionEntry, reputationChange);
 
                 factionState.Standing = newStanding;
                 factionState.needSend = true;
                 factionState.needSave = true;
 
                 SetVisible(factionState);
-
-                if (new_rank <= ReputationRank.Hostile)
-                    SetAtWar(factionState, true);
-
-                if (new_rank > old_rank)
-                    _sendFactionIncreased = true;
 
                 ParagonReputationRecord paragonReputation = Global.DB2Mgr.GetParagonReputation(factionEntry.Id);
                 if (paragonReputation != null)
@@ -450,14 +568,11 @@ namespace Game
                     int newParagonLevel = standing / paragonReputation.LevelThreshold;
                     if (oldParagonLevel != newParagonLevel)
                     {
-                        Quest paragonRewardQuest = Global.ObjectMgr.GetQuestTemplate((uint)paragonReputation.QuestID);
+                        Quest paragonRewardQuest = Global.ObjectMgr.GetQuestTemplate(paragonReputation.QuestID);
                         if (paragonRewardQuest != null)
                             _player.AddQuestAndCheckCompletion(paragonRewardQuest, null);
                     }
                 }
-
-                if (factionEntry.FriendshipRepID == 0 && paragonReputation == null)
-                    UpdateRankCounters(old_rank, new_rank);
 
                 _player.UpdateCriteria(CriteriaType.TotalFactionsEncountered, factionEntry.Id);
                 _player.UpdateCriteria(CriteriaType.ReputationGained, factionEntry.Id);
@@ -478,16 +593,16 @@ namespace Game
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
             if (factionEntry.Id != 0)
                 // Never show factions of the opposing team
-                if (!Convert.ToBoolean(factionEntry.ReputationRaceMask[1] & SharedConst.GetMaskForRace(_player.GetRace())) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom)
+                if (!((RaceMask)factionEntry.ReputationRaceMask[1]).HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom)
                     SetVisible(factionEntry);
         }
 
         public void SetVisible(FactionRecord factionEntry)
         {
-            if (!factionEntry.CanHaveReputation())
+            if (!factionEntry.CanHaveReputation)
                 return;
 
-            var factionState = _factions.LookupByKey((uint)factionEntry.ReputationIndex);
+            var factionState = _factions.LookupByKey(factionEntry.ReputationIndex);
             if (factionState == null)
                 return;
 
@@ -519,7 +634,7 @@ namespace Game
             SendVisible(faction);
         }
 
-        public void SetAtWar(uint repListID, bool on)
+        public void SetAtWar(int repListID, bool on)
         {
             var factionState = _factions.LookupByKey(repListID);
             if (factionState == null)
@@ -551,7 +666,7 @@ namespace Game
             faction.needSave = true;
         }
 
-        public void SetInactive(uint repListID, bool on)
+        public void SetInactive(int repListID, bool on)
         {
             var factionState = _factions.LookupByKey(repListID);
             if (factionState == null)
@@ -588,10 +703,10 @@ namespace Game
             {
                 do
                 {
-                    var factionEntry = CliDB.FactionStorage.LookupByKey(result.Read<uint>(0));
-                    if (factionEntry != null && factionEntry.CanHaveReputation())
+                    var factionEntry = CliDB.FactionStorage.LookupByKey(result.Read<int>(0));
+                    if (factionEntry != null && factionEntry.CanHaveReputation)
                     {
-                        var faction = _factions.LookupByKey((uint)factionEntry.ReputationIndex);
+                        var faction = _factions.LookupByKey(factionEntry.ReputationIndex);
                         if (faction == null)
                             continue;
                         // update standing to current
@@ -606,7 +721,7 @@ namespace Game
                             UpdateRankCounters(old_rank, new_rank);
                         }
 
-                        ReputationFlags dbFactionFlags = (ReputationFlags)result.Read<uint>(2);
+                        ReputationFlags dbFactionFlags = (ReputationFlags)result.Read<int>(2);
 
                         if (dbFactionFlags.HasFlag(ReputationFlags.Visible))
                             SetVisible(faction);                    // have internal checks for forced invisibility
@@ -683,13 +798,12 @@ namespace Game
             if (factionEntry == null)
                 return -1;
 
-            long raceMask = SharedConst.GetMaskForRace(_player.GetRace());
-            short classMask = (short)_player.GetClassMask();
+            Class class_ = _player.GetClass();
+
             for (int i = 0; i < 4; i++)
             {
-                if ((factionEntry.ReputationRaceMask[i].HasAnyFlag(raceMask) || (factionEntry.ReputationRaceMask[i] == 0 && factionEntry.ReputationClassMask[i] != 0))
-                    && (factionEntry.ReputationClassMask[i].HasAnyFlag(classMask) || factionEntry.ReputationClassMask[i] == 0))
-
+                var raceMask = (RaceMask)factionEntry.ReputationRaceMask[i];
+                if ((raceMask.HasRace(_player.GetRace()) || (raceMask == RaceMask.None && factionEntry.ReputationClassMask(i) != ClassMask.None)) && (factionEntry.ReputationClassMask(i).HasClass(class_) || factionEntry.ReputationClassMask(i) == ClassMask.None))
                     return i;
             }
 
@@ -701,18 +815,18 @@ namespace Game
             if (!CliDB.FactionStorage.ContainsKey(factionEntry.ParagonFactionID))
                 return false;
 
-            if (GetRank(factionEntry) != ReputationRank.Exalted)
+            if (GetRank(factionEntry) != ReputationRank.Exalted && !HasMaximumRenownReputation(factionEntry))
                 return false;
 
             ParagonReputationRecord paragonReputation = Global.DB2Mgr.GetParagonReputation(factionEntry.ParagonFactionID);
             if (paragonReputation == null)
                 return false;
 
-            Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)paragonReputation.QuestID);
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(paragonReputation.QuestID);
             if (quest == null)
                 return false;
 
-            return _player.GetLevel() >= _player.GetQuestMinLevel(quest);
+            return _player.GetLevel() >= quest.MinLevel;
         }
         
         public byte GetVisibleFactionCount() { return _visibleFactionCount; }
@@ -723,19 +837,19 @@ namespace Game
 
         public byte GetExaltedFactionCount() { return _exaltedFactionCount; }
 
-        public SortedDictionary<uint, FactionState> GetStateList() { return _factions; }
+        public SortedDictionary<int, FactionState> GetStateList() { return _factions; }
 
         public FactionState GetState(int id)
         {
-            return _factions.LookupByKey((uint)id);
+            return _factions.LookupByKey(id);
         }
 
-        public uint GetReputationRankStrIndex(FactionRecord factionEntry)
+        public CypherStrings GetReputationRankStrIndex(FactionRecord factionEntry)
         {
-            return (uint)ReputationRankStrIndex[(int)GetRank(factionEntry)];
+            return ReputationRankStrIndex[(int)GetRank(factionEntry)];
         }
 
-        public ReputationRank GetForcedRankIfAny(uint factionId)
+        public ReputationRank GetForcedRankIfAny(int factionId)
         {
             var forced = _forcedReactions.ContainsKey(factionId);
             return forced ? _forcedReactions[factionId] : ReputationRank.None;
@@ -747,13 +861,10 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            long raceMask = SharedConst.GetMaskForRace(race);
-            uint classMask = (1u << ((int)playerClass - 1));
-
             for (int i = 0; i < 4; i++)
             {
-                if ((factionEntry.ReputationClassMask[i] == 0 || factionEntry.ReputationClassMask[i].HasAnyFlag((short)classMask))
-                    && (factionEntry.ReputationRaceMask[i] == 0 || factionEntry.ReputationRaceMask[i].HasAnyFlag(raceMask)))
+                var raceMask = (RaceMask)factionEntry.ReputationRaceMask[i];
+                if ((factionEntry.ReputationClassMask(i) == ClassMask.None || factionEntry.ReputationClassMask(i).HasClass(playerClass)) && (raceMask == RaceMask.None || raceMask.HasRace(race)))
                     return factionEntry.ReputationBase[i];
             }
 
@@ -795,19 +906,21 @@ namespace Game
             CypherStrings.RepFriendly, CypherStrings.RepHonored, CypherStrings.RepRevered, CypherStrings.RepExalted
         };
 
-        SortedDictionary<uint, FactionState> _factions = new();
-        Dictionary<uint, ReputationRank> _forcedReactions = new();
+        SortedDictionary<int, FactionState> _factions = new();
+        Dictionary<int, ReputationRank> _forcedReactions = new();
     }
 
     public class FactionState
     {
-        public uint Id;
-        public uint ReputationListID;
+        public int Id;
+        public int ReputationListID;
         public int Standing;
+        public int VisualStandingIncrease;
         public ReputationFlags Flags;
         public bool needSend;
         public bool needSave;
     }
+
     public class RepRewardRate
     {
         public float questRate;            // We allow rate = 0.0 in database. For this case, it means that
@@ -818,10 +931,11 @@ namespace Game
         public float creatureRate;         // no reputation are given at all for this faction/rate Type.
         public float spellRate;
     }
+
     public class ReputationOnKillEntry
     {
-        public uint RepFaction1;
-        public uint RepFaction2;
+        public int RepFaction1;
+        public int RepFaction2;
         public uint ReputationMaxCap1;
         public int RepValue1;
         public uint ReputationMaxCap2;
@@ -830,10 +944,11 @@ namespace Game
         public bool IsTeamAward2;
         public bool TeamDependent;
     }
+
     public class RepSpilloverTemplate
     {
-        public uint[] faction = new uint[5];
-        public float[] faction_rate = new float[5];
-        public uint[] faction_rank = new uint[5];
+        public int[] faction = new int[SharedConst.SpilloverFactionsMax];
+        public float[] faction_rate = new float[SharedConst.SpilloverFactionsMax];
+        public uint[] faction_rank = new uint[SharedConst.SpilloverFactionsMax];
     }
 }

@@ -9,7 +9,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 
-namespace Scripts.World.EmeraldDragons
+namespace Scripts.World.Achievements
 {
     struct CreatureIds
     {
@@ -80,16 +80,18 @@ namespace Scripts.World.EmeraldDragons
         public const uint SayTaerarSummonShades = 1;
     }
 
-    class emerald_dragonAI : WorldBossAI
+    [Script]
+    class emerald_dragon : WorldBossAI
     {
-        public emerald_dragonAI(Creature creature) : base(creature) { }
+        public emerald_dragon(Creature creature) : base(creature) { }
 
         public override void Reset()
         {
             base.Reset();
-            me.RemoveUnitFlag(UnitFlags.Uninteractible | UnitFlags.NonAttackable);
+            me.RemoveUnitFlag(UnitFlags.NonAttackable);
+            me.SetUninteractible(false);
             me.SetReactState(ReactStates.Aggressive);
-            DoCast(me, SpellIds.MarkOfNatureAura, new CastSpellExtraArgs(true));
+            DoCast(me, SpellIds.MarkOfNatureAura, true);
 
             _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
             {
@@ -97,20 +99,18 @@ namespace Scripts.World.EmeraldDragons
                 DoCast(me, SpellIds.TailSweep);
                 task.Repeat(TimeSpan.FromSeconds(2));
             });
-
             _scheduler.Schedule(TimeSpan.FromSeconds(7.5), TimeSpan.FromSeconds(15), task =>
             {
                 // Noxious Breath is cast on random intervals, no less than 7.5 seconds between
                 DoCast(me, SpellIds.NoxiousBreath);
-                task.Repeat();
+                task.Repeat(TimeSpan.FromSeconds(7.5), TimeSpan.FromSeconds(15));
             });
-
             _scheduler.Schedule(TimeSpan.FromSeconds(12.5), TimeSpan.FromSeconds(20), task =>
             {
-                // Seeping Fog appears only as "pairs", and only ONE pair at any given time!
+                // Seeping Fog appears only as "pairs", and only One pair at any given time!
                 // Despawntime is 2 minutes, so reschedule it for new cast after 2 minutes + a minor "random time" (30 seconds at max)
-                DoCast(me, SpellIds.SeepingFogLeft, new CastSpellExtraArgs(true));
-                DoCast(me, SpellIds.SeepingFogRight, new CastSpellExtraArgs(true));
+                DoCast(me, SpellIds.SeepingFogLeft, true);
+                DoCast(me, SpellIds.SeepingFogRight, true);
                 task.Repeat(TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(2.5));
             });
         }
@@ -118,7 +118,7 @@ namespace Scripts.World.EmeraldDragons
         // Target killed during encounter, mark them as suspectible for Aura Of Nature
         public override void KilledUnit(Unit who)
         {
-            if (who.IsTypeId(TypeId.Player))
+            if (who.IsPlayer())
                 who.CastSpell(who, SpellIds.MarkOfNature, true);
         }
 
@@ -127,13 +127,13 @@ namespace Scripts.World.EmeraldDragons
             if (!UpdateVictim())
                 return;
 
+            _scheduler.Update(diff);
+
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            _scheduler.Update(diff);
-
             Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 0, -50.0f, true);
-            if (target)
+            if (target != null)
                 DoCast(target, SpellIds.SummonPlayer);
 
             DoMeleeAttackIfReady();
@@ -143,8 +143,6 @@ namespace Scripts.World.EmeraldDragons
     [Script]
     class npc_dream_fog : ScriptedAI
     {
-        uint _roamTimer;
-
         public npc_dream_fog(Creature creature) : base(creature)
         {
             Initialize();
@@ -152,7 +150,26 @@ namespace Scripts.World.EmeraldDragons
 
         void Initialize()
         {
-            _roamTimer = 0;
+            _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
+            {
+                // Chase target, but don't attack - otherwise just roam around
+                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+                if (target != null)
+                {
+                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
+                    me.GetMotionMaster().Clear();
+                    me.GetMotionMaster().MoveChase(target, 0.2f);
+                }
+                else
+                {
+                    task.Repeat(TimeSpan.FromSeconds(2.5));
+                    me.GetMotionMaster().Clear();
+                    me.GetMotionMaster().MoveRandom(25.0f);
+                }
+                // Seeping fog movement is slow enough for a player to be able to walk backwards and still outpace it
+                me.SetWalk(true);
+                me.SetSpeedRate(UnitMoveType.Walk, 0.75f);
+            });
         }
 
         public override void Reset()
@@ -165,33 +182,12 @@ namespace Scripts.World.EmeraldDragons
             if (!UpdateVictim())
                 return;
 
-            if (_roamTimer == 0)
-            {
-                // Chase target, but don't attack - otherwise just roam around
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
-                {
-                    _roamTimer = RandomHelper.URand(15000, 30000);
-                    me.GetMotionMaster().Clear();
-                    me.GetMotionMaster().MoveChase(target, 0.2f);
-                }
-                else
-                {
-                    _roamTimer = 2500;
-                    me.GetMotionMaster().Clear();
-                    me.GetMotionMaster().MoveRandom(25.0f);
-                }
-                // Seeping fog movement is slow enough for a player to be able to walk backwards and still outpace it
-                me.SetWalk(true);
-                me.SetSpeedRate(UnitMoveType.Walk, 0.75f);
-            }
-            else
-                _roamTimer -= diff;
+            _scheduler.Update(diff);
         }
     }
 
     [Script]
-    class boss_ysondre : emerald_dragonAI
+    class boss_ysondre : emerald_dragon
     {
         byte _stage;
 
@@ -231,14 +227,14 @@ namespace Scripts.World.EmeraldDragons
                 Talk(TextIds.SayYsondreSummonDruids);
 
                 for (byte i = 0; i < 10; ++i)
-                    DoCast(me, SpellIds.SummonDruidSpirits, new CastSpellExtraArgs(true));
+                    DoCast(me, SpellIds.SummonDruidSpirits, true);
                 ++_stage;
             }
         }
     }
 
     [Script]
-    class boss_lethon : emerald_dragonAI
+    class boss_lethon : emerald_dragon
     {
         byte _stage;
 
@@ -256,10 +252,9 @@ namespace Scripts.World.EmeraldDragons
         {
             Initialize();
             base.Reset();
-
             _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
             {
-                me.CastSpell((Unit)null, SpellIds.ShadowBoltWhirl, false);
+                me.CastSpell(null, SpellIds.ShadowBoltWhirl, false);
                 task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
             });
         }
@@ -297,28 +292,28 @@ namespace Scripts.World.EmeraldDragons
 
         public npc_spirit_shade(Creature creature) : base(creature) { }
 
-        public override void IsSummonedBy(WorldObject summoner)
+        public override void IsSummonedBy(WorldObject summonerWO)
         {
-            Unit unitSummoner = summoner.ToUnit();
-            if (unitSummoner == null)
+            Unit summoner = summonerWO.ToUnit();
+            if (summoner == null)
                 return;
 
             _summonerGuid = summoner.GetGUID();
-            me.GetMotionMaster().MoveFollow(unitSummoner, 0.0f, 0.0f);
+            me.GetMotionMaster().MoveFollow(summoner, 0.0f, 0.0f);
         }
 
         public override void MovementInform(MovementGeneratorType moveType, uint data)
         {
             if (moveType == MovementGeneratorType.Follow && data == _summonerGuid.GetCounter())
             {
-                me.CastSpell((Unit)null, SpellIds.DarkOffering, false);
+                me.CastSpell(null, SpellIds.DarkOffering, false);
                 me.DespawnOrUnsummon(TimeSpan.FromSeconds(1));
             }
         }
     }
 
     [Script]
-    class boss_emeriss : emerald_dragonAI
+    class boss_emeriss : emerald_dragon
     {
         byte _stage;
 
@@ -346,8 +341,9 @@ namespace Scripts.World.EmeraldDragons
 
         public override void KilledUnit(Unit who)
         {
-            if (who.IsTypeId(TypeId.Player))
-                DoCast(who, SpellIds.PutridMushroom, new CastSpellExtraArgs(true));
+            if (who.IsPlayer())
+                DoCast(who, SpellIds.PutridMushroom, true);
+
             base.KilledUnit(who);
         }
 
@@ -357,19 +353,19 @@ namespace Scripts.World.EmeraldDragons
             base.JustEngagedWith(who);
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null) 
+        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthAbovePct(100 - 25 * _stage))
             {
                 Talk(TextIds.SayEmerissCastCorruption);
-                DoCast(me, SpellIds.CorruptionOfEarth, new CastSpellExtraArgs(true));
+                DoCast(me, SpellIds.CorruptionOfEarth, true);
                 ++_stage;
             }
         }
     }
 
     [Script]
-    class boss_taerar : emerald_dragonAI
+    class boss_taerar : emerald_dragon
     {
         bool _banished;                              // used for shades activation testing
         uint _banishedTimer;                         // counter for banishment timeout
@@ -394,6 +390,7 @@ namespace Scripts.World.EmeraldDragons
             me.RemoveAurasDueToSpell(SpellIds.Shade);
 
             Initialize();
+
             base.Reset();
 
             _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
@@ -401,7 +398,6 @@ namespace Scripts.World.EmeraldDragons
                 DoCast(SpellIds.ArcaneBlast);
                 task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(12));
             });
-
             _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
             {
                 DoCast(SpellIds.BellowingRoar);
@@ -435,11 +431,13 @@ namespace Scripts.World.EmeraldDragons
                 Talk(TextIds.SayTaerarSummonShades);
 
                 foreach (var spell in SpellIds.TaerarShadeSpells)
-                    DoCastVictim(spell, new CastSpellExtraArgs(true));
+                    DoCastVictim(spell, true);
+
                 _shades += (byte)SpellIds.TaerarShadeSpells.Length;
 
                 DoCast(SpellIds.Shade);
-                me.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.NonAttackable);
+                me.SetUnitFlag(UnitFlags.NonAttackable);
+                me.SetUninteractible(true);
                 me.SetReactState(ReactStates.Passive);
 
                 ++_stage;
@@ -453,12 +451,13 @@ namespace Scripts.World.EmeraldDragons
 
             if (_banished)
             {
-                // If all three shades are dead, Or it has taken too long, end the current event and get Taerar back into business
+                // If all three shades are dead, Or it has taken too long, end the current event and get Taerar back into buMath.Siness
                 if (_banishedTimer <= diff || _shades == 0)
                 {
                     _banished = false;
 
-                    me.RemoveUnitFlag(UnitFlags.Uninteractible | UnitFlags.NonAttackable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable);
+                    me.SetUninteractible(false);
                     me.RemoveAurasDueToSpell(SpellIds.Shade);
                     me.SetReactState(ReactStates.Aggressive);
                 }
@@ -466,7 +465,7 @@ namespace Scripts.World.EmeraldDragons
                 else
                     _banishedTimer -= diff;
 
-                // Update the _scheduler before we return (handled under emerald_dragonAI.UpdateAI(diff); if we're not inside this check)
+                // Update the events before we return (handled under emerald_dragonAI.UpdateAI(diff); if we're not inside this check)
                 _scheduler.Update(diff);
 
                 return;
@@ -484,7 +483,7 @@ namespace Scripts.World.EmeraldDragons
             targets.RemoveAll(obj =>
             {
                 Unit unit = obj.ToUnit();
-                if (unit)
+                if (unit != null)
                     return unit.HasAura(SpellIds.Sleep);
                 return true;
             });
@@ -492,7 +491,7 @@ namespace Scripts.World.EmeraldDragons
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
+            OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEnemy));
         }
     }
 
@@ -510,9 +509,8 @@ namespace Scripts.World.EmeraldDragons
             {
                 // return those not tagged or already under the influence of Aura of Nature
                 Unit unit = obj.ToUnit();
-                if (unit)
+                if (unit != null)
                     return !(unit.HasAura(SpellIds.MarkOfNature) && !unit.HasAura(SpellIds.AuraOfNature));
-
                 return true;
             });
         }
@@ -525,8 +523,8 @@ namespace Scripts.World.EmeraldDragons
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.ApplyAura));
+            OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            OnEffectHitTarget.Add(new(HandleEffect, 0, SpellEffectName.ApplyAura));
         }
     }
 }

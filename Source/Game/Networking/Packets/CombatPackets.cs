@@ -61,7 +61,7 @@ namespace Game.Networking.Packets
         public SAttackStop(Unit attacker, Unit victim) : base(ServerOpcodes.AttackStop, ConnectionType.Instance)
         {
             Attacker = attacker.GetGUID();
-            if (victim)
+            if (victim != null)
             {
                 Victim = victim.GetGUID();
                 NowDead = !victim.IsAlive(); // using isAlive instead of isDead to catch JUST_DIED death states as well
@@ -178,6 +178,21 @@ namespace Game.Networking.Packets
         public List<PowerUpdatePower> Powers;
     }
 
+    class InterruptPowerRegen : ServerPacket
+    {
+        public InterruptPowerRegen(PowerType powerType) : base(ServerOpcodes.InterruptPowerRegen, ConnectionType.Instance)
+        {
+            PowerType = powerType;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32((int)PowerType);
+        }
+        
+        public PowerType PowerType;
+    }
+    
     public class SetSheathed : ClientPacket
     {
         public SetSheathed(WorldPacket packet) : base(packet) { }
@@ -239,13 +254,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(OriginalHonor);
             _worldPacket.WriteInt32(Honor);
             _worldPacket.WritePackedGuid(Target);
-            _worldPacket.WriteUInt32(Rank);
+            _worldPacket.WriteInt32(Rank);
         }
 
         public int OriginalHonor;
         public int Honor;
         public ObjectGuid Target;
-        public uint Rank;
+        public int Rank;
     }
 
     class BreakTarget : ServerPacket

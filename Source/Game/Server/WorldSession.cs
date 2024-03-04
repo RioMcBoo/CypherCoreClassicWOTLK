@@ -53,7 +53,7 @@ namespace Game
         public void Dispose()
         {
             // unload player if not unloaded
-            if (_player)
+            if (_player != null)
                 LogoutPlayer(true);
 
             // - If have unclosed socket, close it
@@ -78,13 +78,13 @@ namespace Game
                 return;
 
             // finish pending transfers before starting the logout
-            while (_player && _player.IsBeingTeleportedFar())
+            while (_player != null && _player.IsBeingTeleportedFar())
                 HandleMoveWorldportAck();
 
             m_playerLogout = true;
             m_playerSave = save;
 
-            if (_player)
+            if (_player != null)
             {
                 if (!_player.GetLootGUID().IsEmpty())
                     DoLootReleaseAll();
@@ -113,7 +113,7 @@ namespace Game
 
                 //drop a flag if player is carrying it
                 Battleground bg = GetPlayer().GetBattleground();
-                if (bg)
+                if (bg != null)
                     bg.EventPlayerLoggedOut(GetPlayer());
 
                 // Teleport to home if the player is in an invalid instance
@@ -140,7 +140,7 @@ namespace Game
 
                 // If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
                 Guild guild = Global.GuildMgr.GetGuildById(_player.GetGuildId());
-                if (guild)
+                if (guild != null)
                     guild.HandleMemberLogout(this);
 
                 // Remove pet
@@ -152,6 +152,8 @@ namespace Game
 
                 // Clear whisper whitelist
                 _player.ClearWhisperWhiteList();
+
+                _player.FailQuestsWithFlag(QuestFlags.FailOnLogout);
 
                 // empty buyback items and save the player in the database
                 // some save parts only correctly work in case player present in map/player_lists (pets, etc)
@@ -248,7 +250,7 @@ namespace Game
                     switch (handler.sessionStatus)
                     {
                         case SessionStatus.Loggedin:
-                            if (!_player)
+                            if (_player == null)
                             {
                                 if (!m_playerRecentlyLogout)
                                 {
@@ -264,13 +266,13 @@ namespace Game
                                 handler.Invoke(this, packet);
                             break;
                         case SessionStatus.LoggedinOrRecentlyLogout:
-                            if (!_player && !m_playerRecentlyLogout && !m_playerLogout)
+                            if (_player == null && !m_playerRecentlyLogout && !m_playerLogout)
                                 LogUnexpectedOpcode(packet, handler.sessionStatus, "the player has not logged in yet and not recently logout");
                             else if (AntiDOS.EvaluateOpcode(packet, currentTime))
                                 handler.Invoke(this, packet);
                             break;
                         case SessionStatus.Transfer:
-                            if (!_player)
+                            if (_player == null)
                                 LogUnexpectedOpcode(packet, handler.sessionStatus, "the player has not logged in yet");
                             else if (_player.IsInWorld)
                                 LogUnexpectedOpcode(packet, handler.sessionStatus, "the player is still in world");
@@ -343,7 +345,7 @@ namespace Game
                         _warden.Update(diff);
 
                     expireTime -= expireTime > diff ? diff : expireTime;
-                    if (expireTime < diff || forceExit || !GetPlayer())
+                    if (expireTime < diff || forceExit || GetPlayer() == null)
                     {
                         if (m_Socket[(int)ConnectionType.Realm] != null)
                         {
@@ -406,7 +408,7 @@ namespace Game
 
         public void KickPlayer(string reason)
         {
-            Log.outInfo(LogFilter.Network, $"Account: {GetAccountId()} Character: '{(_player ? _player.GetName() : "<none>")}' {(_player ? _player.GetGUID() : "")} kicked with reason: {reason}");
+            Log.outInfo(LogFilter.Network, $"Account: {GetAccountId()} Character: '{(_player != null ? _player.GetName() : "<none>")}' {(_player != null ? _player.GetGUID() : "")} kicked with reason: {reason}");
 
             for (byte i = 0; i < 2; ++i)
             {
@@ -488,12 +490,12 @@ namespace Game
 
             if (instanceAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             {
-                connectTo.Payload.Where.IPv4 = instanceAddress.Address.GetAddressBytes();
+                connectTo.Payload.Where.IPv4 = instanceAddress.GetAddressBytes();
                 connectTo.Payload.Where.Type = ConnectTo.AddressType.IPv4;
             }
             else
             {
-                connectTo.Payload.Where.IPv6 = instanceAddress.Address.GetAddressBytes();
+                connectTo.Payload.Where.IPv6 = instanceAddress.GetAddressBytes();
                 connectTo.Payload.Where.Type = ConnectTo.AddressType.IPv6;
             }
 
@@ -619,7 +621,7 @@ namespace Game
         {
             _player = pl;
 
-            if (_player)
+            if (_player != null)
                 m_GUIDLow = _player.GetGUID().GetCounter();
         }
 
@@ -634,7 +636,7 @@ namespace Game
             ss.Append("[Player: ");
             if (!m_playerLoading.IsEmpty())
                 ss.AppendFormat("Logging in: {0}, ", m_playerLoading.ToString());
-            else if (_player)
+            else if (_player != null)
                 ss.AppendFormat("{0} {1}, ", _player.GetName(), _player.GetGUID().ToString());
 
             ss.AppendFormat("Account: {0}]", GetAccountId());
@@ -660,7 +662,7 @@ namespace Game
         }
 
         public AccountTypes GetSecurity() { return _security; }
-        public uint GetAccountId() { return _accountId; }
+        public int GetAccountId() { return _accountId; }
         public ObjectGuid GetAccountGUID() { return ObjectGuid.Create(HighGuid.WowAccount, GetAccountId()); }
         public string GetAccountName() { return _accountName; }
         public uint GetBattlenetAccountId() { return _battlenetAccountId; }
@@ -700,7 +702,7 @@ namespace Game
             _queryHolderProcessor.ProcessReadyCallbacks();
         }
 
-        TransactionCallback AddTransactionCallback(TransactionCallback callback)
+        public TransactionCallback AddTransactionCallback(TransactionCallback callback)
         {
             return _transactionCallbacks.AddCallback(callback);
         }
@@ -898,7 +900,7 @@ namespace Game
         public void SetLatency(uint latency) { m_latency = latency; }
         public void ResetTimeOutTime(bool onlyActive)
         {
-            if (GetPlayer())
+            if (GetPlayer() != null)
                 m_timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
             else if (!onlyActive)
                 m_timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
@@ -924,11 +926,6 @@ namespace Game
         void SetRealmListSecret(Array<byte> secret) { _realmListSecret = secret; }
         public Dictionary<uint, byte> GetRealmCharacterCounts() { return _realmCharacterCounts; }
 
-        public static implicit operator bool(WorldSession session)
-        {
-            return session != null;
-        }
-
         #region Fields
         List<ObjectGuid> _legitCharacters = new();
         ulong m_GUIDLow;
@@ -937,7 +934,7 @@ namespace Game
         string m_Address;
 
         AccountTypes _security;
-        uint _accountId;
+        int _accountId;
         string _accountName;
         uint _battlenetAccountId;
         Expansion m_accountExpansion;
@@ -1003,20 +1000,20 @@ namespace Game
 
     public struct ConnectToKey
     {
-        public ulong Raw
+        public long Raw
         {
-            get { return ((ulong)AccountId | ((ulong)connectionType << 32) | (Key << 33)); }
+            get { return (AccountId | ((int)connectionType << 32) | (Key << 33)); }
             set
             {
-                AccountId = (uint)(value & 0xFFFFFFFF);
+                AccountId = (int)value;
                 connectionType = (ConnectionType)((value >> 32) & 1);
-                Key = (value >> 33);
+                Key = (long)((ulong)value >> 33);
             }
         }
 
-        public uint AccountId;
+        public int AccountId;
         public ConnectionType connectionType;
-        public ulong Key;
+        public long Key;
     }
 
     public class DosProtection

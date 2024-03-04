@@ -40,7 +40,7 @@ namespace Game.Entities
             if (_unit.IsTypeId(TypeId.Unit))
             {
                 Creature creature = _unit.ToCreature();
-                if (creature)
+                if (creature != null)
                     creature.SetReactState(_oldReactState);
             }
         }
@@ -360,7 +360,7 @@ namespace Game.Entities
         public CommandStates GetCommandState() { return _CommandState; }
         public bool HasCommandState(CommandStates state) { return (_CommandState == state); }
 
-        public void SetActionBar(byte index, uint spellOrAction, ActiveStates type)
+        public void SetActionBar(byte index, int spellOrAction, ActiveStates type)
         {
             PetActionBar[index].SetActionAndType(spellOrAction, type);
         }
@@ -390,12 +390,12 @@ namespace Game.Entities
     {
         public UnitActionBarEntry()
         {
-            packedData = (uint)ActiveStates.Disabled << 24;
+            packedData = (int)ActiveStates.Disabled << 24;
         }
 
         public ActiveStates GetActiveState() { return (ActiveStates)UNIT_ACTION_BUTTON_TYPE(packedData); }
 
-        public uint GetAction() { return UNIT_ACTION_BUTTON_ACTION(packedData); }
+        public int GetAction() { return UNIT_ACTION_BUTTON_ACTION(packedData); }
 
         public bool IsActionBarForSpell()
         {
@@ -403,34 +403,44 @@ namespace Game.Entities
             return Type == ActiveStates.Disabled || Type == ActiveStates.Enabled || Type == ActiveStates.Passive;
         }
 
-        public void SetActionAndType(uint action, ActiveStates type)
+        public void SetActionAndType(int action, ActiveStates type)
         {
-            packedData = MAKE_UNIT_ACTION_BUTTON(action, (uint)type);
+            int newData = MAKE_UNIT_ACTION_BUTTON(action, (byte)type);
+
+            if(newData != packedData || uState == ActionButtonUpdateState.Deleted)
+            {
+                packedData = newData;
+                if (uState != ActionButtonUpdateState.New)
+                    uState = ActionButtonUpdateState.Changed;
+            }
         }
 
         public void SetType(ActiveStates type)
         {
-            packedData = MAKE_UNIT_ACTION_BUTTON(UNIT_ACTION_BUTTON_ACTION(packedData), (uint)type);
+            packedData = MAKE_UNIT_ACTION_BUTTON(UNIT_ACTION_BUTTON_ACTION(packedData), (byte)type);
         }
 
-        public void SetAction(uint action)
+        public void SetAction(int action)
         {
-            packedData = (packedData & 0xFF000000) | UNIT_ACTION_BUTTON_ACTION(action);
+            packedData = (int)((uint)packedData & 0xFF000000) | UNIT_ACTION_BUTTON_ACTION(action);
         }
 
-        public uint packedData;
+        public int packedData;
+        ActionButtonUpdateState uState;
 
-        public static uint MAKE_UNIT_ACTION_BUTTON(uint action, uint type)
+        public static int MAKE_UNIT_ACTION_BUTTON(int action, byte type)
         {
             return (action | (type << 24));
         }
-        public static uint UNIT_ACTION_BUTTON_ACTION(uint packedData)
+
+        public static int UNIT_ACTION_BUTTON_ACTION(int packedData)
         {
             return (packedData & 0x00FFFFFF);
         }
-        public static uint UNIT_ACTION_BUTTON_TYPE(uint packedData)
+
+        public static byte UNIT_ACTION_BUTTON_TYPE(int packedData)
         {
-            return ((packedData & 0xFF000000) >> 24);
+            return (byte)(((uint)packedData & 0xFF000000) >> 24);
         }
     }
 

@@ -9,163 +9,77 @@ using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public class ItemEnchantmentManager
-    {
+    public static class ItemEnchantmentManager
+    { 
         public static void LoadRandomEnchantmentsTable()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            RandomItemEnch[ItemRandomEnchantmentType.Property]?.Clear();
-            RandomItemEnch[ItemRandomEnchantmentType.Suffix]?.Clear();
+            RandomEnchantmentData.Clear();
 
-            //                                          0      1    2      3
-            using var result = DB.World.Query("SELECT entry, Type, Id, Chance FROM item_enchantment_template");
+            //                                         0              1      2
+            using var result = DB.World.Query("SELECT Id, EnchantmentId, Chance FROM item_random_enchantment_template");
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.Player, "Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
+                Log.outInfo(LogFilter.Player, "Loaded 0 Random item bonus list definitions. DB table `item_random_enchantment_template` is empty.");
                 return;
             }
             uint count = 0;
 
             do
             {
-                uint entry = result.Read<uint>(0);
-                ItemRandomEnchantmentType type = (ItemRandomEnchantmentType)result.Read<byte>(1);
-                uint ench = result.Read<uint>(2);
-                float chance = result.Read<float>(3);
+                int id = result.Read<int>(0);
+                int enchantmentId = result.Read<int>(1);
+                float chance = result.Read<float>(2);
 
-                switch (type)
+                if (CliDB.ItemRandomPropertiesStorage.LookupByKey(enchantmentId) != null && CliDB.ItemRandomSuffixStorage.LookupByKey(enchantmentId) != null)
                 {
-                    case ItemRandomEnchantmentType.Property:
-                        if (CliDB.ItemRandomPropertiesStorage.LookupByKey(ench) == null)
-                        {
-                            Log.outError(LogFilter.Sql, $"Property {ench} used in `item_enchantment_template` by entry {entry} doesn't have exist in ItemRandomProperties.db2");
-                            continue;
-                        }
-                        break;
-                    case ItemRandomEnchantmentType.Suffix:
-                        if (CliDB.ItemRandomSuffixStorage.LookupByKey(ench) == null)
-                        {
-                            Log.outError(LogFilter.Sql, $"Suffix {ench} used in `item_enchantment_template` by entry {entry} doesn't have exist in ItemRandomSuffix.db2");
-                            continue;
-                        }
-                        break;
-                    case ItemRandomEnchantmentType.BonusList:
-                        if (Global.DB2Mgr.GetItemBonusList(ench) == null)
-                        {
-                            Log.outError(LogFilter.Sql, $"Bonus list {ench} used in `item_enchantment_template` by entry {entry} doesn't have exist in ItemBonus.db2");
-                            continue;
-                        }
-                        break;
-                    default:
-                        Log.outError(LogFilter.Sql, $"Invalid random enchantment Type specified in `item_enchantment_template` table for `entry` {entry} `Id` {ench}");
-                        break;
+                    Log.outError(LogFilter.Sql, $"ItemRandomProperties / ItemRandomSuffix Id {enchantmentId} used in `item_random_enchantment_template` by id {id} " +
+                        "doesn't have exist in its corresponding db2 file.");
+                    continue;
                 }
 
                 if (chance < 0.000001f || chance > 100.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Random item enchantment for entry {entry} Type {type} Id {ench} has invalid Chance {chance}");
+                    Log.outError(LogFilter.Sql, $"Enchantment Id {enchantmentId} used in `item_random_enchantment_template` by id {id} has invalid chance {chance}");
                     continue;
                 }
 
-                switch (type)
-                {
-                    case ItemRandomEnchantmentType.Property:
-                        RandomItemEnch[ItemRandomEnchantmentType.Property][entry].Add(new EnchStoreItem(type, ench, chance));
-                        break;
-                    case ItemRandomEnchantmentType.Suffix:
-                    case ItemRandomEnchantmentType.BonusList: // random bonus lists use RandomSuffix field in Item-sparse.db2
-                        RandomItemEnch[ItemRandomEnchantmentType.Suffix][entry].Add(new EnchStoreItem(type, ench, chance));
-                        break;
-                    default:
-                        break;
-                }
+                if (!RandomEnchantmentData.ContainsKey(id))
+                    RandomEnchantmentData[id] = new();
+
+                RandomEnchantmentData[id].Add((enchantmentId, chance));
 
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Item Enchantment definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.Player, $"Loaded {count} Random item enchantment definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public static ItemRandomEnchantmentId GetItemEnchantMod(int entry, ItemRandomEnchantmentType type)
+        public static int GetRandomPropertyPoints(int itemLevel, ItemQuality quality, InventoryType inventoryType)
         {
-            if (entry <= 0) 
-                return new ItemRandomEnchantmentId();
-
-            List<EnchStoreItem> tab = RandomItemEnch[type].LookupByKey(entry);
-            if (tab == null)
-            {
-                Log.outError(LogFilter.Sql, $"Item RandomProperty / RandomSuffix id #{entry} used in ItemSparse.db2 but it does not have records in `item_enchantment_template` table.");
-                return new ItemRandomEnchantmentId();
-            }
-
-            var selectedItr = tab.SelectRandomElementByWeight(x => x.Chance);
-
-
-            return selectedItr.itemRandomEnchantmentId;
-        }
-
-        public static ItemRandomEnchantmentId GenerateItemRandomPropertyId(uint item_id)
-        {
-            ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
-            if (itemProto == null)
-                return new ItemRandomEnchantmentId();
-
-            // item can have not null only one from field values
-            if (itemProto.GetRandomProperty() != 0 && itemProto.GetRandomSuffix() != 0)
-            {
-                Log.outError(LogFilter.Sql, $"Item template {itemProto.GetId()} have RandomProperty == {itemProto.GetRandomProperty()} and RandomSuffix == {itemProto.GetRandomSuffix()}, but must have one from field =0");
-                return new ItemRandomEnchantmentId();
-            }
-
-            // RandomProperty case
-            if (itemProto.GetRandomProperty() != 0)
-                return GetItemEnchantMod((int)itemProto.GetRandomProperty(), ItemRandomEnchantmentType.Property);
-            // RandomSuffix case
-            else
-                return GetItemEnchantMod((int)itemProto.GetRandomSuffix(), ItemRandomEnchantmentType.Suffix);
-        }
-
-        public static uint GenerateEnchSuffixFactor(uint item_id)
-        {
-            ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
-
-            if (itemProto == null)
-                return 0;
-
-            if (itemProto.GetRandomSuffix() == 0)
-                return 0;
-
-            return GetRandomPropertyPoints(itemProto.GetBaseItemLevel(), itemProto.GetQuality(), itemProto.GetInventoryType(), itemProto.GetSubClass());
-        }
-
-        public static uint GetRandomPropertyPoints(uint itemLevel, ItemQuality quality, InventoryType inventoryType, uint subClass)
-        {
-            uint propIndex;
+            int propIndex;
 
             switch (inventoryType)
             {
+                // Items of that type don`t have points
+                case InventoryType.NonEquip:
+                case InventoryType.Bag:
+                case InventoryType.Tabard:
+                case InventoryType.Ammo:
+                case InventoryType.Quiver:
+                case InventoryType.Relic:
+                    return 0;
+
+                // Select point coefficient
                 case InventoryType.Head:
                 case InventoryType.Body:
                 case InventoryType.Chest:
                 case InventoryType.Legs:
-                case InventoryType.Ranged:
                 case InventoryType.Weapon2Hand:
                 case InventoryType.Robe:
-                case InventoryType.Thrown:
                     propIndex = 0;
-                    break;
-                case InventoryType.RangedRight:
-                    if ((ItemSubClassWeapon)subClass == ItemSubClassWeapon.Wand)
-                        propIndex = 3;
-                    else
-                        propIndex = 0;
-                    break;
-                case InventoryType.Weapon:
-                case InventoryType.WeaponMainhand:
-                case InventoryType.WeaponOffhand:
-                    propIndex = 3;
                     break;
                 case InventoryType.Shoulders:
                 case InventoryType.Waist:
@@ -182,7 +96,14 @@ namespace Game.Entities
                 case InventoryType.Holdable:
                     propIndex = 2;
                     break;
-                case InventoryType.Relic:
+                case InventoryType.Weapon:
+                case InventoryType.WeaponMainhand:
+                case InventoryType.WeaponOffhand:
+                    propIndex = 3;
+                    break;
+                case InventoryType.Ranged:
+                case InventoryType.Thrown:
+                case InventoryType.RangedRight:
                     propIndex = 4;
                     break;
                 default:
@@ -209,7 +130,27 @@ namespace Game.Entities
             return 0;
         }
 
-        static EnchantmentStore RandomItemEnch = new();
+        public static Dictionary<int, List<(int EnchantmentID, float Chance)>> RandomEnchantmentData;
+    }
+
+    public static ItemRandomProperties GenerateRandomProperties(int item_id)
+    {
+        ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
+        if (itemProto == null)
+            return 0;
+
+        // item must have one from this field values not null if it can have random enchantments
+        if (itemProto.RandomBonusListTemplateId == 0)
+            return 0;
+
+        var tab = _storage.LookupByKey(itemProto.RandomBonusListTemplateId);
+        if (tab == null)
+        {
+            Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
+            return 0;
+        }
+        //todo fix me this is ulgy
+        return tab.BonusListIDs.SelectRandomElementByWeight(x => (float)tab.Chances[tab.BonusListIDs.IndexOf(x)]);
     }
 
     public struct EnchStoreItem
@@ -245,7 +186,7 @@ namespace Game.Entities
 
     class EnchantmentStore
     {
-        private Dictionary<ItemRandomEnchantmentType, Dictionary<uint,List<EnchStoreItem>>> _data;
+        private Dictionary<ItemRandomEnchantmentType, Dictionary<uint, List<EnchStoreItem>>> _data;
         private ItemRandomEnchantmentType Check(ItemRandomEnchantmentType type)
         {
             // random bonus lists use RandomSuffix field in Item-sparse.db2
@@ -277,5 +218,17 @@ namespace Game.Entities
         Property = 0,
         Suffix = 1,
         BonusList = 2
-    };
+    }
+
+    public struct ItemRandomProperties
+    {
+        public ItemRandomProperties(int randomPropertiesId = 0, int randomPropertiesSeed = 0)
+        {
+            RandomPropertiesID = randomPropertiesId;
+            RandomPropertiesSeed = randomPropertiesSeed;
+        }
+
+        public int RandomPropertiesID;
+        public int RandomPropertiesSeed;
+    }
 }

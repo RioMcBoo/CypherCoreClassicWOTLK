@@ -162,7 +162,11 @@ namespace Game.Entities
             if (petInfo.Type == PetType.Hunter)
             {
                 CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(petInfo.CreatureId);
-                if (creatureInfo == null || !creatureInfo.IsTameable(owner.CanTameExoticPets()))
+                if (creatureInfo == null)
+                    return false;
+
+                CreatureDifficulty creatureDifficulty = creatureInfo.GetDifficulty(Difficulty.None);
+                if (creatureDifficulty == null || !creatureInfo.IsTameable(owner.CanTameExoticPets(), creatureDifficulty))
                     return false;
             }
 
@@ -171,6 +175,8 @@ namespace Game.Entities
                 owner.SetTemporaryUnsummonedPetNumber(petInfo.PetNumber);
                 return false;
             }
+
+            owner.SetTemporaryUnsummonedPetNumber(0);
 
             Map map = owner.GetMap();
             ulong guid = map.GenerateLowGuid(HighGuid.Pet);
@@ -203,8 +209,7 @@ namespace Game.Entities
 
             GetCharmInfo().SetPetNumber(petInfo.PetNumber, IsPermanentPetFor(owner));
 
-            SetDisplayId(petInfo.DisplayId);
-            SetNativeDisplayId(petInfo.DisplayId);
+            SetDisplayId(petInfo.DisplayId, true);
             uint petlevel = petInfo.Level;
             ReplaceAllNpcFlags(NPCFlags.None);
             ReplaceAllNpcFlags2(NPCFlags2.None);
@@ -283,12 +288,9 @@ namespace Game.Entities
             }
             else if (PetSaveMode.FirstActiveSlot <= slot && slot <= PetSaveMode.LastActiveSlot)
             {
-                var activePetIndex = Array.FindIndex(petStable.ActivePets, pet => pet?.PetNumber == petnumber);
+                var activePetIndex = Array.FindIndex(petStable.ActivePets, pet => pet?.PetNumber == petInfo.PetNumber);
 
                 Cypher.Assert(activePetIndex != -1);
-
-                // Check that we either have no pet (unsummoned by player) or it matches temporarily unsummoned pet by server (for example on flying mount)
-                Cypher.Assert(!petStable.CurrentPetIndex.HasValue || petStable.CurrentPetIndex == activePetIndex);
 
                 petStable.SetCurrentActivePetIndex((uint)activePetIndex);
             }
@@ -381,6 +383,9 @@ namespace Game.Entities
                         }
                     }
 
+                    if (owner.IsMounted())
+                        owner.DisablePetControlsOnMount(ReactStates.Passive, CommandStates.Follow);
+
                     // must be after SetMinion (owner guid check)
                     LoadTemplateImmunities();
                     m_loading = false;
@@ -455,7 +460,7 @@ namespace Game.Entities
                 string actionBar = GenerateActionBarData();
 
                 Cypher.Assert(owner.GetPetStable().GetCurrentPet() != null && owner.GetPetStable().GetCurrentPet().PetNumber == GetCharmInfo().GetPetNumber());
-                FillPetInfo(owner.GetPetStable().GetCurrentPet());
+                FillPetInfo(owner.GetPetStable().GetCurrentPet(), owner.GetTemporaryPetReactState());
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET);
                 stmt.AddValue(0, GetCharmInfo().GetPetNumber());
@@ -464,7 +469,7 @@ namespace Game.Entities
                 stmt.AddValue(3, GetNativeDisplayId());
                 stmt.AddValue(4, GetLevel());
                 stmt.AddValue(5, m_unitData.PetExperience);
-                stmt.AddValue(6, (byte)GetReactState());
+                stmt.AddValue(6, (byte)owner.GetTemporaryPetReactState().GetValueOrDefault(GetReactState()));
                 stmt.AddValue(7, (owner.GetPetStable().GetCurrentActivePetIndex().HasValue ? (short)owner.GetPetStable().GetCurrentActivePetIndex().Value : (short)PetSaveMode.NotInSlot));
                 stmt.AddValue(8, GetName());
                 stmt.AddValue(9, HasPetFlag(UnitPetFlags.CanBeRenamed) ? 0 : 1);
@@ -489,14 +494,14 @@ namespace Game.Entities
             }
         }
 
-        public void FillPetInfo(PetStable.PetInfo petInfo)
+        public void FillPetInfo(PetStable.PetInfo petInfo, ReactStates? forcedReactState = null)
         {
             petInfo.PetNumber = GetCharmInfo().GetPetNumber();
             petInfo.CreatureId = GetEntry();
             petInfo.DisplayId = GetNativeDisplayId();
             petInfo.Level = (byte)GetLevel();
             petInfo.Experience = m_unitData.PetExperience;
-            petInfo.ReactState = GetReactState();
+            petInfo.ReactState = forcedReactState.GetValueOrDefault(GetReactState());
             petInfo.Name = GetName();
             petInfo.WasRenamed = !HasPetFlag(UnitPetFlags.CanBeRenamed);
             petInfo.Health = (uint)GetHealth();
@@ -704,7 +709,7 @@ namespace Game.Entities
 
         public bool CreateBaseAtCreature(Creature creature)
         {
-            Cypher.Assert(creature);
+            Cypher.Assert(creature != null);
 
             if (!CreateBaseAtTamed(creature.GetCreatureTemplate(), creature.GetMap()))
                 return false;
@@ -1246,7 +1251,7 @@ namespace Game.Entities
                 {
                     // need update action bar for last removed rank
                     Unit owner = GetOwner();
-                    if (owner)
+                    if (owner != null)
                         if (owner.IsTypeId(TypeId.Player))
                             owner.ToPlayer().PetSpellInitialize();
                 }
@@ -1351,7 +1356,7 @@ namespace Game.Entities
 
         public bool Create(ulong guidlow, Map map, uint entry, uint petNumber)
         {
-            Cypher.Assert(map);
+            Cypher.Assert(map != null);
             SetMap(map);
 
             // TODO: counter should be constructed as (summon_count << 32) | petNumber
@@ -1372,7 +1377,7 @@ namespace Game.Entities
             return true;
         }
 
-        public override bool HasSpell(uint spell)
+        public override bool HasSpell(int spell)
         {
             var petSpell = m_spells.LookupByKey(spell);
             return petSpell != null && petSpell.state != PetSpellState.Removed;
@@ -1453,7 +1458,7 @@ namespace Game.Entities
         public void SynchronizeLevelWithOwner()
         {
             Unit owner = GetOwner();
-            if (!owner || !owner.IsTypeId(TypeId.Player))
+            if (owner == null || !owner.IsTypeId(TypeId.Player))
                 return;
 
             switch (GetPetType())
@@ -1475,7 +1480,7 @@ namespace Game.Entities
 
         public override float GetNativeObjectScale()
         {
-            var creatureFamily = CliDB.CreatureFamilyStorage.LookupByKey(GetCreatureTemplate().Family);
+            var creatureFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)GetCreatureTemplate().Family);
             if (creatureFamily != null && creatureFamily.MinScale > 0.0f && GetPetType() == PetType.Hunter)
             {
                 float scale;
@@ -1492,9 +1497,9 @@ namespace Game.Entities
             return base.GetNativeObjectScale();
         }
 
-        public override void SetDisplayId(uint modelId, float displayScale = 1f)
+        public override void SetDisplayId(int modelId, bool setNative = false)
         {
-            base.SetDisplayId(modelId, displayScale);
+            base.SetDisplayId(modelId, setNative);
 
             if (!IsControlled())
                 return;
@@ -1510,7 +1515,7 @@ namespace Game.Entities
         public override bool IsLoading() { return m_loading; }
 
         public override byte GetPetAutoSpellSize() { return (byte)m_autospells.Count; }
-        public override uint GetPetAutoSpellOnPos(byte pos)
+        public override int GetPetAutoSpellOnPos(byte pos)
         {
             if (pos >= m_autospells.Count)
                 return 0;
@@ -1521,15 +1526,15 @@ namespace Game.Entities
         public void SetDuration(uint dur) { m_duration = (int)dur; }
         public int GetDuration() { return m_duration; }
 
-        public void SetPetExperience(uint xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetExperience), xp); }
-        public void SetPetNextLevelExperience(uint xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNextLevelExperience), xp); }
+        public void SetPetExperience(int xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetExperience), xp); }
+        public void SetPetNextLevelExperience(int xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNextLevelExperience), xp); }
 
         public ushort GetSpecialization() { return m_petSpecialization; }
 
         public GroupUpdatePetFlags GetGroupUpdateFlag() { return m_groupUpdateMask; }
         public void SetGroupUpdateFlag(GroupUpdatePetFlags flag)
         {
-            if (GetOwner().GetGroup())
+            if (GetOwner().GetGroup() != null)
             {
                 m_groupUpdateMask |= flag;
                 GetOwner().SetGroupUpdateFlag(GroupUpdateFlags.Pet);
@@ -1538,7 +1543,7 @@ namespace Game.Entities
         public void ResetGroupUpdateFlag()
         {
             m_groupUpdateMask = GroupUpdatePetFlags.None;
-            if (GetOwner().GetGroup())
+            if (GetOwner().GetGroup() != null)
                 GetOwner().RemoveGroupUpdateFlag(GroupUpdateFlags.Pet);
         }
 
@@ -1639,8 +1644,8 @@ namespace Game.Entities
 
         public DeclinedName GetDeclinedNames() { return _declinedname; }
 
-        public new Dictionary<uint, PetSpell> m_spells = new();
-        List<uint> m_autospells = new();
+        public new Dictionary<int, PetSpell> m_spells = new();
+        List<int> m_autospells = new();
         public bool m_removed;
 
         PetType m_petType;
@@ -1709,7 +1714,7 @@ namespace Game.Entities
         public void SetCurrentUnslottedPetIndex(uint index) { CurrentPetIndex = index | UnslottedPetIndexMask; }
     }
     
-    public enum ActiveStates
+    public enum ActiveStates : byte
     {
         Passive = 0x01,                                    // 0x01 - passive
         Disabled = 0x81,                                    // 0x80 - castable

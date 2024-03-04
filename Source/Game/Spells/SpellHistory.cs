@@ -177,7 +177,7 @@ namespace Game.Spells
 
         public void HandleCooldowns(SpellInfo spellInfo, Item item, Spell spell = null)
         {
-            HandleCooldowns(spellInfo, item ? item.GetEntry() : 0u, spell);
+            HandleCooldowns(spellInfo, item != null ? item.GetEntry() : 0u, spell);
         }
 
         public void HandleCooldowns(SpellInfo spellInfo, uint itemId, Spell spell = null)
@@ -189,7 +189,7 @@ namespace Game.Spells
                 return;
 
             Player player = _owner.ToPlayer();
-            if (player)
+            if (player != null)
             {
                 // potions start cooldown until exiting combat
                 ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
@@ -353,7 +353,7 @@ namespace Game.Spells
                 {
                     // Now we have cooldown data (if found any), time to apply mods
                     Player modOwner = _owner.GetSpellModOwner();
-                    if (modOwner)
+                    if (modOwner != null)
                     {
                         void applySpellMod(ref TimeSpan value)
                         {
@@ -386,7 +386,7 @@ namespace Game.Spells
                     {
                         // Apply SPELL_AURA_MOD_COOLDOWN only to own spells
                         Player playerOwner = GetPlayerOwner();
-                        if (!playerOwner || playerOwner.HasSpell(spellInfo.Id))
+                        if (playerOwner == null || playerOwner.HasSpell(spellInfo.Id))
                         {
                             needsCooldownPacket = true;
                             cooldown += TimeSpan.FromMilliseconds(cooldownMod);   // SPELL_AURA_MOD_COOLDOWN does not affect category cooldows, verified with shaman shocks
@@ -438,7 +438,7 @@ namespace Game.Spells
                 if (needsCooldownPacket)
                 {
                     Player playerOwner = GetPlayerOwner();
-                    if (playerOwner)
+                    if (playerOwner != null)
                     {
                         SpellCooldownPkt spellCooldown = new();
                         spellCooldown.Caster = _owner.GetGUID();
@@ -453,7 +453,7 @@ namespace Game.Spells
         public void SendCooldownEvent(SpellInfo spellInfo, uint itemId = 0, Spell spell = null, bool startCooldown = true)
         {
             Player player = GetPlayerOwner();
-            if (player)
+            if (player != null)
             {
                 uint category = spellInfo.GetCategory();
                 GetCooldownDurations(spellInfo, itemId, ref category);
@@ -500,20 +500,25 @@ namespace Game.Spells
             }
         }
 
-        public void ModifySpellCooldown(uint spellId, TimeSpan offset, bool withoutCategoryCooldown = false)
+        public void ModifySpellCooldown(uint spellId, TimeSpan cooldownMod, bool withoutCategoryCooldown)
         {
             var cooldownEntry = _spellCooldowns.LookupByKey(spellId);
-            if (offset.TotalMilliseconds == 0 || cooldownEntry == null)
+            if (cooldownMod.TotalMilliseconds == 0 || cooldownEntry == null)
                 return;
 
+            ModifySpellCooldown(cooldownEntry, cooldownMod, withoutCategoryCooldown);
+        }
+
+        void ModifySpellCooldown(CooldownEntry cooldownEntry, TimeSpan cooldownMod, bool withoutCategoryCooldown)
+        {
             DateTime now = GameTime.GetSystemTime();
 
-            cooldownEntry.CooldownEnd += offset;
+            cooldownEntry.CooldownEnd += cooldownMod;
 
             if (cooldownEntry.CategoryId != 0)
             {
                 if (!withoutCategoryCooldown)
-                    cooldownEntry.CategoryEnd += offset;
+                    cooldownEntry.CategoryEnd += cooldownMod;
 
                 // Because category cooldown existence is tied to regular cooldown, we cannot allow a situation where regular cooldown is shorter than category
                 if (cooldownEntry.CooldownEnd < cooldownEntry.CategoryEnd)
@@ -521,12 +526,12 @@ namespace Game.Spells
             }
 
             Player playerOwner = GetPlayerOwner();
-            if (playerOwner)
+            if (playerOwner != null)
             {
                 ModifyCooldown modifyCooldown = new();
                 modifyCooldown.IsPet = _owner != playerOwner;
-                modifyCooldown.SpellID = spellId;
-                modifyCooldown.DeltaTime = (int)offset.TotalMilliseconds;
+                modifyCooldown.SpellID = cooldownEntry.SpellId;
+                modifyCooldown.DeltaTime = (int)cooldownMod.TotalMilliseconds;
                 modifyCooldown.WithoutCategoryCooldown = withoutCategoryCooldown;
                 playerOwner.SendPacket(modifyCooldown);
             }
@@ -555,7 +560,16 @@ namespace Game.Spells
             else
                 ModifySpellCooldown(spellInfo.Id, cooldownMod, withoutCategoryCooldown);
         }
-        
+
+        public void ModifyCoooldowns(Func<CooldownEntry, bool> predicate, TimeSpan cooldownMod, bool withoutCategoryCooldown = false)
+        {
+            foreach (var cooldownEntry in _spellCooldowns.Values.ToList())
+            {
+                if (predicate(cooldownEntry))
+                    ModifySpellCooldown(cooldownEntry, cooldownMod, withoutCategoryCooldown);
+            }
+        }
+
         public void ResetCooldown(uint spellId, bool update = false)
         {
             var entry = _spellCooldowns.LookupByKey(spellId);
@@ -565,7 +579,7 @@ namespace Game.Spells
             if (update)
             {
                 Player playerOwner = GetPlayerOwner();
-                if (playerOwner)
+                if (playerOwner != null)
                 {
                     ClearCooldown clearCooldown = new();
                     clearCooldown.IsPet = _owner != playerOwner;
@@ -598,7 +612,7 @@ namespace Game.Spells
         public void ResetAllCooldowns()
         {
             Player playerOwner = GetPlayerOwner();
-            if (playerOwner)
+            if (playerOwner != null)
             {
                 List<uint> cooldowns = new();
                 foreach (var id in _spellCooldowns.Keys)
@@ -618,7 +632,13 @@ namespace Game.Spells
 
         public bool HasCooldown(SpellInfo spellInfo, uint itemId = 0)
         {
+            if (_owner.HasAuraTypeWithAffectMask(AuraType.IgnoreSpellCooldown, spellInfo))
+                return false;
+
             if (_spellCooldowns.ContainsKey(spellInfo.Id))
+                return true;
+
+            if (spellInfo.CooldownAuraSpellId != 0 && _owner.HasAura(spellInfo.CooldownAuraSpellId))
                 return true;
 
             uint category = 0;
@@ -688,7 +708,7 @@ namespace Game.Spells
 
             List<uint> knownSpells = new();
             Player plrOwner = _owner.ToPlayer();
-            if (plrOwner)
+            if (plrOwner != null)
             {
                 foreach (var p in plrOwner.GetSpellMap())
                     if (p.Value.State != PlayerSpellState.Removed)
@@ -732,7 +752,7 @@ namespace Game.Spells
             }
 
             Player player = GetPlayerOwner();
-            if (player)
+            if (player != null)
                 if (!spellCooldown.SpellCooldowns.Empty())
                     player.SendPacket(spellCooldown);
         }
@@ -817,7 +837,7 @@ namespace Game.Spells
                 _categoryCharges.Remove(chargeCategoryId);
 
                 Player player = GetPlayerOwner();
-                if (player)
+                if (player != null)
                 {
                     ClearSpellCharges clearSpellCharges = new();
                     clearSpellCharges.IsPet = _owner != player;
@@ -832,7 +852,7 @@ namespace Game.Spells
             _categoryCharges.Clear();
 
             Player player = GetPlayerOwner();
-            if (player)
+            if (player != null)
             {
                 ClearAllSpellCharges clearAllSpellCharges = new();
                 clearAllSpellCharges.IsPet = _owner != player;
@@ -909,7 +929,7 @@ namespace Game.Spells
         public void SendClearCooldowns(List<uint> cooldowns)
         {
             Player playerOwner = GetPlayerOwner();
-            if (playerOwner)
+            if (playerOwner != null)
             {
                 ClearCooldowns clearCooldowns = new();
                 clearCooldowns.IsPet = _owner != playerOwner;
@@ -985,7 +1005,7 @@ namespace Game.Spells
         public void RestoreCooldownStateAfterDuel()
         {
             Player player = _owner.ToPlayer();
-            if (player)
+            if (player != null)
             {
                 // add all profession CDs created while in duel (if any)
                 foreach (var c in _spellCooldowns)

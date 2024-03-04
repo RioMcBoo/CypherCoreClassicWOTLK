@@ -39,7 +39,7 @@ namespace Game.Entities
         protected float[][] m_weaponDamage = new float[(int)WeaponAttackType.Max][];
 
         uint[] m_baseAttackSpeed = new uint[(int)WeaponAttackType.Max];
-        internal float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
+        public float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
         protected uint[] m_attackTimer = new uint[(int)WeaponAttackType.Max];
         bool _isCombatDisallowed;
 
@@ -69,15 +69,16 @@ namespace Game.Entities
         protected bool m_ControlledByPlayer;
         public ObjectGuid LastCharmerGUID { get; set; }
 
-        uint _oldFactionId;         // faction before charm
+        int _oldFactionId;         // faction before charm
         bool _isWalkingBeforeCharm; // Are we walking before we were charmed?
 
         //Spells 
         protected Dictionary<CurrentSpellTypes, Spell> m_currentSpells = new((int)CurrentSpellTypes.Max);
-        MultiMap<uint, uint>[] m_spellImmune = new MultiMap<uint, uint>[(int)SpellImmunity.Max];
+        MultiMap<int, int>[] m_spellImmune = new MultiMap<int, int>[(int)SpellImmunity.Max];
         SpellAuraInterruptFlags m_interruptMask;
         SpellAuraInterruptFlags2 m_interruptMask2;
-        protected int m_procDeep;
+        int m_procDeep;               // tracked for proc system correctness (what spells should proc what)
+        int m_procChainLength;        // tracked to protect against infinite proc loops (hard limit, will disallow procs even if they should happen)
         SpellHistory _spellHistory;
 
         //Auras
@@ -87,8 +88,8 @@ namespace Game.Entities
         MultiMap<AuraStateType, AuraApplication> m_auraStateAuras = new();        // Used for improve performance of aura state checks on aura apply/remove
         SortedSet<AuraApplication> m_visibleAuras = new(new VisibleAuraSlotCompare());
         SortedSet<AuraApplication> m_visibleAurasToUpdate = new(new VisibleAuraSlotCompare());
-        MultiMap<uint, AuraApplication> m_appliedAuras = new();
-        MultiMap<uint, Aura> m_ownedAuras = new();
+        MultiMap<int, AuraApplication> m_appliedAuras = new();
+        MultiMap<int, Aura> m_ownedAuras = new();
         List<Aura> m_scAuras = new();
         protected float[][] m_auraFlatModifiersGroup = new float[(int)UnitMods.End][];
         protected float[][] m_auraPctModifiersGroup = new float[(int)UnitMods.End][];
@@ -115,7 +116,7 @@ namespace Game.Entities
         public Vehicle VehicleKit { get; set; }
         bool canModifyStats;
         public uint LastSanctuaryTime { get; set; }
-        uint m_transformSpell;
+        int m_transformSpell;
         bool m_cleanupDone; // lock made to not add stuff after cleanup before delete
         bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
         bool _instantCast;
@@ -198,7 +199,7 @@ namespace Game.Entities
 
         public SpellInfo GetSpellInfo()
         {
-            if (_spell)
+            if (_spell != null)
                 return _spell.GetSpellInfo();
             if (_damageInfo != null)
                 return _damageInfo.GetSpellInfo();
@@ -209,7 +210,7 @@ namespace Game.Entities
         }
         public SpellSchoolMask GetSchoolMask()
         {
-            if (_spell)
+            if (_spell != null)
                 return _spell.GetSpellInfo().GetSchoolMask();
             if (_damageInfo != null)
                 return _damageInfo.GetSchoolMask();
@@ -443,7 +444,7 @@ namespace Game.Entities
     {
         public Unit Attacker { get; set; }             // Attacker
         public Unit Target { get; set; }               // Target for damage
-        public uint DamageSchoolMask { get; set; }
+        public SpellSchoolMask DamageSchoolMask { get; set; }
         public uint Damage;
         public uint OriginalDamage { get; set; }
         public uint Absorb;

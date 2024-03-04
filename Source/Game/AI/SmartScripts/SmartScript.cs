@@ -20,11 +20,11 @@ namespace Game.AI
     public class SmartScript
     {
         // Max number of nested ProcessEventsFor() calls to avoid infinite loops
-        const uint MaxNestedEvents = 10;
+        const int MaxNestedEvents = 10;
 
         public ObjectGuid LastInvoker;
 
-        Dictionary<uint, uint> _counterList = new();
+        Dictionary<int, int> _counterList = new();
 
         List<SmartScriptHolder> _events = new();
         List<SmartScriptHolder> _installEvents = new();
@@ -39,17 +39,18 @@ namespace Game.AI
         AreaTrigger _areaTrigger;
         SceneTemplate _sceneTemplate;
         Quest _quest;
+        int _eventId;
         SmartScriptType _scriptType;
-        uint _eventPhase;
+        int _eventPhase;
 
-        uint _pathId;
+        int _pathId;
         List<SmartScriptHolder> _storedEvents = new();
-        List<uint> _remIDs = new();
+        List<int> _remIDs = new();
 
         uint _textTimer;
-        uint _lastTextID;
+        int _lastTextID;
         ObjectGuid _textGUID;
-        uint _talkerEntry;
+        int _talkerEntry;
         bool _useTextTimer;
         uint _currentPriority;
         bool _eventSortingRequired;
@@ -98,7 +99,7 @@ namespace Game.AI
             LastInvoker.Clear();
         }
 
-        public void ProcessEventsFor(SmartEvents e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
+        public void ProcessEventsFor(SmartEvents e, Unit unit = null, int var0 = 0, int var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
         {
             _nestedEventsCounter++;
 
@@ -282,7 +283,7 @@ namespace Game.AI
                                 if (ci != null)
                                 {
                                     CreatureModel model = ObjectManager.ChooseDisplayId(ci);
-                                    target.ToCreature().SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
+                                    target.ToCreature().SetDisplayId(model.CreatureDisplayID);
                                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_MORPH_TO_ENTRY_OR_MODEL: Creature entry {0}, GuidLow {1} set displayid to {2}",
                                         target.GetEntry(), target.GetGUID().ToString(), model.CreatureDisplayID);
                                 }
@@ -322,17 +323,17 @@ namespace Game.AI
                     foreach (var target in targets)
                     {
                         Player player = target.ToPlayer();
-                        if (player)
+                        if (player != null)
                         {
                             Quest quest = Global.ObjectMgr.GetQuestTemplate(e.Action.questOffer.questId);
                             if (quest != null)
                             {
-                                if (_me && e.Action.questOffer.directAdd == 0)
+                                if (_me != null && e.Action.questOffer.directAdd == 0)
                                 {
                                     if (player.CanTakeQuest(quest, true))
                                     {
                                         WorldSession session = player.GetSession();
-                                        if (session)
+                                        if (session != null)
                                         {
                                             PlayerMenu menu = new(session);
                                             menu.SendQuestGiverQuestDetails(quest, _me.GetGUID(), true, false);
@@ -463,7 +464,7 @@ namespace Game.AI
                                     triggerFlag = TriggerCastFlags.FullMask;
                             }
 
-                            if (_me)
+                            if (_me != null)
                             {
                                 if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
                                     _me.InterruptNonMeleeSpells(false);
@@ -479,7 +480,7 @@ namespace Game.AI
                                 else
                                     successfulSpellCast = true;
                             }
-                            else if (_go)
+                            else if (_go != null)
                                 _go.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
                         }
                         else
@@ -615,10 +616,7 @@ namespace Game.AI
                 }
                 case SmartActions.AutoAttack:
                 {
-                    if (!IsSmart())
-                        break;
-
-                    ((SmartAI)_me.GetAI()).SetAutoAttack(e.Action.autoAttack.attack != 0);
+                    _me.SetCanMelee(e.Action.autoAttack.attack != 0);
                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_AUTO_ATTACK: Creature: {0} bool on = {1}",
                         _me.GetGUID().ToString(), e.Action.autoAttack.attack);
                     break;
@@ -673,7 +671,7 @@ namespace Game.AI
                 }
                 case SmartActions.FleeForAssist:
                 {
-                    if (!_me)
+                    if (_me == null)
                         break;
 
                     _me.DoFleeToGetAssistance();
@@ -692,7 +690,7 @@ namespace Game.AI
 
                     // If invoker was pet or charm
                     Player playerCharmed = unit.GetCharmerOrOwnerPlayerOrPlayerItself();
-                    if (playerCharmed && GetBaseObject() != null)
+                    if (playerCharmed != null && GetBaseObject() != null)
                     {
                         playerCharmed.GroupEventHappens(e.Action.quest.questId, GetBaseObject());
                         Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction: SMART_ACTION_CALL_GROUPEVENTHAPPENS: Player {0}, group credit for quest {1}",
@@ -714,7 +712,7 @@ namespace Game.AI
                 }
                 case SmartActions.CombatStop:
                 {
-                    if (!_me)
+                    if (_me == null)
                         break;
 
                     _me.CombatStop(true);
@@ -1176,7 +1174,7 @@ namespace Game.AI
                 case SmartActions.SummonGo:
                 {
                     WorldObject summoner = GetBaseObjectOrUnitInvoker(unit);
-                    if (!summoner)
+                    if (summoner == null)
                         break;
 
                     foreach (var target in targets)
@@ -1292,7 +1290,6 @@ namespace Game.AI
                     if (!IsSmart())
                         break;
 
-                    bool run = e.Action.wpStart.run != 0;
                     uint entry = e.Action.wpStart.pathID;
                     bool repeat = e.Action.wpStart.repeat != 0;
 
@@ -1305,7 +1302,7 @@ namespace Game.AI
                         }
                     }
 
-                    _me.GetAI<SmartAI>().StartPath(run, entry, repeat, unit);
+                    _me.GetAI<SmartAI>().StartPath(entry, repeat, unit);
 
                     uint quest = e.Action.wpStart.quest;
                     uint DespawnTime = e.Action.wpStart.despawnTime;
@@ -1593,7 +1590,7 @@ namespace Game.AI
                     if (targets.Empty())
                         break;
 
-                    List<WorldObject> casters = GetTargets(CreateSmartEvent(SmartEvents.UpdateIc, 0, 0, 0, 0, 0, 0, SmartActions.None, 0, 0, 0, 0, 0, 0, (SmartTargets)e.Action.crossCast.targetType, e.Action.crossCast.targetParam1, e.Action.crossCast.targetParam2, e.Action.crossCast.targetParam3, 0, 0), unit);
+                    List<WorldObject> casters = GetTargets(CreateSmartEvent(SmartEvents.UpdateIc, 0, 0, 0, 0, 0, 0, SmartActions.None, 0, 0, 0, 0, 0, 0, 0, (SmartTargets)e.Action.crossCast.targetType, e.Action.crossCast.targetParam1, e.Action.crossCast.targetParam2, e.Action.crossCast.targetParam3, 0, 0), unit);
                     foreach (var caster in casters)
                     {
                         if (!IsUnit(caster))
@@ -1817,7 +1814,7 @@ namespace Game.AI
                         target = targets.SelectRandom();
 
                     Position pos = new(e.Target.x, e.Target.y, e.Target.z);
-                    if (target)
+                    if (target != null)
                     {
                         float x, y, z;
                         target.GetPosition(out x, out y, out z);
@@ -1892,9 +1889,9 @@ namespace Game.AI
                         e.Action.sendGossipMenu.gossipMenuId, e.Action.sendGossipMenu.gossipNpcTextId);
 
                     // override default gossip
-                    if (_me)
+                    if (_me != null)
                         ((SmartAI)_me.GetAI()).SetGossipReturn(true);
-                    else if (_go)
+                    else if (_go != null)
                         ((SmartGameObjectAI)_go.GetAI()).SetGossipReturn(true);
 
                     foreach (var target in targets)
@@ -2029,7 +2026,7 @@ namespace Game.AI
                             {
                                 foreach (uint pathId in waypoints)
                                 {
-                                    WaypointPath path = Global.SmartAIMgr.GetPath(pathId);
+                                    WaypointPath path = Global.WaypointMgr.GetPath(pathId);
                                     if (path == null || path.nodes.Empty())
                                         continue;
 
@@ -2046,7 +2043,7 @@ namespace Game.AI
                                 }
 
                                 if (closestPathId != 0)
-                                    ((SmartAI)creature.GetAI()).StartPath(false, closestPathId, true, null, closestWaypointId);
+                                    ((SmartAI)creature.GetAI()).StartPath(closestPathId, true, null, closestWaypointId);
                             }
                         }
                     }
@@ -2220,7 +2217,7 @@ namespace Game.AI
                     else if (!targets.Empty())
                         map = targets.First().GetMap();
 
-                    if (map)
+                    if (map != null)
                         map.Respawn((SpawnObjectType)e.Action.respawnData.spawnType, e.Action.respawnData.spawnId);
                     else
                         Log.outError(LogFilter.Sql, $"SmartScript.ProcessAction: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()}, Event {e.EventId} - tries to respawn by spawnId but does not provide a map");
@@ -2267,7 +2264,7 @@ namespace Game.AI
                     foreach (var target in targets)
                     {
                         Player playerTarget = target.ToPlayer();
-                        if (playerTarget)
+                        if (playerTarget != null)
                             playerTarget.GetSceneMgr().PlayScene(e.Action.scene.sceneId);
                     }
 
@@ -2278,7 +2275,7 @@ namespace Game.AI
                     foreach (var target in targets)
                     {
                         Player playerTarget = target.ToPlayer();
-                        if (playerTarget)
+                        if (playerTarget != null)
                             playerTarget.GetSceneMgr().CancelSceneBySceneId(e.Action.scene.sceneId);
                     }
 
@@ -2373,7 +2370,7 @@ namespace Game.AI
                         {
                             Conversation conversation = Conversation.CreateConversation(e.Action.conversation.id, playerTarget,
                                 playerTarget, playerTarget.GetGUID(), null);
-                            if (!conversation)
+                            if (conversation == null)
                                 Log.outWarn(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CREATE_CONVERSATION: id {e.Action.conversation.id}, baseObject {baseObject?.GetName()}, target {playerTarget.GetName()} - failed to create");
                         }
                     }
@@ -2411,15 +2408,8 @@ namespace Game.AI
                 case SmartActions.SetUninteractible:
                 {
                     foreach (var target in targets)
-                    {
                         if (IsUnit(target))
-                        {
-                            if (e.Action.setUninteractible.uninteractible != 0)
-                                target.ToUnit().SetUnitFlag(UnitFlags.Uninteractible);
-                            else
-                                target.ToUnit().RemoveUnitFlag(UnitFlags.Uninteractible);
-                        }
-                    }
+                            target.ToUnit().SetUninteractible(e.Action.setUninteractible.uninteractible != 0);
                     break;
                 }
                 case SmartActions.ActivateGameobject:
@@ -2534,7 +2524,7 @@ namespace Game.AI
         }
 
         SmartScriptHolder CreateSmartEvent(SmartEvents e, SmartEventFlags event_flags, uint event_param1, uint event_param2, uint event_param3, uint event_param4, uint event_param5,
-            SmartActions action, uint action_param1, uint action_param2, uint action_param3, uint action_param4, uint action_param5, uint action_param6,
+            SmartActions action, uint action_param1, uint action_param2, uint action_param3, uint action_param4, uint action_param5, uint action_param6, uint action_param7,
             SmartTargets t, uint target_param1, uint target_param2, uint target_param3, uint target_param4, uint phaseMask)
         {
             SmartScriptHolder script = new();
@@ -2555,6 +2545,7 @@ namespace Game.AI
             script.Action.raw.param4 = action_param4;
             script.Action.raw.param5 = action_param5;
             script.Action.raw.param6 = action_param6;
+            script.Action.raw.param7 = action_param7;
 
             script.Target.type = t;
             script.Target.raw.param1 = target_param1;
@@ -2661,7 +2652,7 @@ namespace Game.AI
                     }
                     break;
                 case SmartTargets.Farthest:
-                    if (_me)
+                    if (_me != null)
                     {
                         Unit u = _me.GetAI().SelectTarget(SelectTargetMethod.MaxDistance, 0, new FarthestTargetSelector(_me, (float)e.Target.farthest.maxDist, e.Target.farthest.playerOnly != 0, e.Target.farthest.isInLos != 0));
                         if (u != null)
@@ -2683,12 +2674,12 @@ namespace Game.AI
                         if (player != null)
                         {
                             Group group = player.GetGroup();
-                            if (group)
+                            if (group != null)
                             {
                                 for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                                 {
                                     Player member = groupRef.GetSource();
-                                    if (member)
+                                    if (member != null)
                                         if (member.IsInMap(player))
                                             targets.Add(member);
                                 }
@@ -2806,7 +2797,7 @@ namespace Game.AI
                     }
 
                     Creature target = FindCreatureNear(scriptTrigger != null ? scriptTrigger : baseObject, e.Target.unitGUID.dbGuid);
-                    if (target)
+                    if (target != null)
                         if (target != null && (e.Target.unitGUID.entry == 0 || target.GetEntry() == e.Target.unitGUID.entry))
                             targets.Add(target);
                     break;
@@ -2820,7 +2811,7 @@ namespace Game.AI
                     }
 
                     GameObject target = FindGameObjectNear(scriptTrigger != null ? scriptTrigger : baseObject, e.Target.goGUID.dbGuid);
-                    if (target)
+                    if (target != null)
                         if (target != null && (e.Target.goGUID.entry == 0 || target.GetEntry() == e.Target.goGUID.entry))
                             targets.Add(target);
                     break;
@@ -2874,7 +2865,7 @@ namespace Game.AI
                     }
 
                     Creature target = refObj.FindNearestCreature(e.Target.unitClosest.entry, e.Target.unitClosest.dist != 0 ? e.Target.unitClosest.dist : 100, e.Target.unitClosest.dead == 0);
-                    if (target)
+                    if (target != null)
                         targets.Add(target);
                     break;
                 }
@@ -2891,7 +2882,7 @@ namespace Game.AI
                     }
 
                     GameObject target = refObj.FindNearestGameObject(e.Target.goClosest.entry, e.Target.goClosest.dist != 0 ? e.Target.goClosest.dist : 100);
-                    if (target)
+                    if (target != null)
                         targets.Add(target);
                     break;
                 }
@@ -2908,7 +2899,7 @@ namespace Game.AI
                     }
 
                     Player target = refObj.SelectNearestPlayer(e.Target.playerDistance.dist);
-                    if (target)
+                    if (target != null)
                         targets.Add(target);
                     break;
                 }
@@ -2920,10 +2911,10 @@ namespace Game.AI
                         if (charmerOrOwnerGuid.IsEmpty())
                         {
                             TempSummon tempSummon = _me.ToTempSummon();
-                            if (tempSummon)
+                            if (tempSummon != null)
                             {
                                 WorldObject summoner = tempSummon.GetSummoner();
-                                if (summoner)
+                                if (summoner != null)
                                     charmerOrOwnerGuid = summoner.GetGUID();
                             }
                         }
@@ -2938,7 +2929,7 @@ namespace Game.AI
                     else if (_go != null)
                     {
                         Unit owner = Global.ObjAccessor.GetUnit(_go, _go.GetOwnerGUID());
-                        if (owner)
+                        if (owner != null)
                             targets.Add(owner);
                     }
 
@@ -2987,7 +2978,7 @@ namespace Game.AI
                 }
                 case SmartTargets.LootRecipients:
                 {
-                    if (_me)
+                    if (_me != null)
                     {
                         foreach (ObjectGuid tapperGuid in _me.GetTapList())
                         {
@@ -3000,7 +2991,7 @@ namespace Game.AI
                 }
                 case SmartTargets.VehiclePassenger:
                 {
-                    if (_me && _me.IsVehicle())
+                    if (_me != null && _me.IsVehicle())
                     {
                         foreach (var pair in _me.GetVehicleKit().Seats)
                         {
@@ -3206,6 +3197,7 @@ namespace Game.AI
                 case SmartEvents.FollowCompleted:
                 case SmartEvents.OnSpellclick:
                 case SmartEvents.OnDespawn:
+                case SmartEvents.SendEventTrigger:
                     ProcessAction(e, unit, var0, var1, bvar, spell, gob);
                     break;
                 case SmartEvents.GossipHello:
@@ -3377,7 +3369,7 @@ namespace Game.AI
                 case SmartEvents.WaypointStopped:
                 case SmartEvents.WaypointEnded:
                 {
-                    if (_me == null || (e.Event.waypoint.pointID != 0 && var0 != e.Event.waypoint.pointID) || (e.Event.waypoint.pathID != 0 && var1 != e.Event.waypoint.pathID))
+                    if (_me == null || (e.Event.waypoint.pointID != 0xFFFFFFFF && var0 != e.Event.waypoint.pointID) || (e.Event.waypoint.pathID != 0 && var1 != e.Event.waypoint.pathID))
                         return;
                     ProcessAction(e, unit);
                     break;
@@ -3535,7 +3527,7 @@ namespace Game.AI
                 }
                 case SmartEvents.DistanceCreature:
                 {
-                    if (!_me)
+                    if (_me == null)
                         return;
 
                     Creature creature = null;
@@ -3544,7 +3536,7 @@ namespace Game.AI
                     {
                         creature = FindCreatureNear(_me, e.Event.distance.guid);
 
-                        if (!creature)
+                        if (creature == null)
                             return;
 
                         if (!_me.IsInRange(creature, 0, e.Event.distance.dist))
@@ -3558,14 +3550,14 @@ namespace Game.AI
                             creature = list.FirstOrDefault();
                     }
 
-                    if (creature)
+                    if (creature != null)
                         ProcessTimedAction(e, e.Event.distance.repeat, e.Event.distance.repeat, creature);
 
                     break;
                 }
                 case SmartEvents.DistanceGameobject:
                 {
-                    if (!_me)
+                    if (_me == null)
                         return;
 
                     GameObject gameobject = null;
@@ -3574,7 +3566,7 @@ namespace Game.AI
                     {
                         gameobject = FindGameObjectNear(_me, e.Event.distance.guid);
 
-                        if (!gameobject)
+                        if (gameobject == null)
                             return;
 
                         if (!_me.IsInRange(gameobject, 0, e.Event.distance.dist))
@@ -3588,7 +3580,7 @@ namespace Game.AI
                             gameobject = list.FirstOrDefault();
                     }
 
-                    if (gameobject)
+                    if (gameobject != null)
                         ProcessTimedAction(e, e.Event.distance.repeat, e.Event.distance.repeat, null, 0, 0, false, null, gameobject);
 
                     break;
@@ -3683,7 +3675,7 @@ namespace Game.AI
                 // Delay flee for assist event if stunned or rooted
                 if (e.GetActionType() == SmartActions.FleeForAssist)
                 {
-                    if (_me && _me.HasUnitState(UnitState.Root | UnitState.LostControl))
+                    if (_me != null && _me.HasUnitState(UnitState.Root | UnitState.LostControl))
                     {
                         e.Timer = 1;
                         return;
@@ -3774,7 +3766,7 @@ namespace Game.AI
         {
             if ((_scriptType == SmartScriptType.Creature || _scriptType == SmartScriptType.GameObject
                 || _scriptType == SmartScriptType.AreaTriggerEntity || _scriptType == SmartScriptType.AreaTriggerEntityServerside)
-                && !GetBaseObject())
+                && GetBaseObject() == null)
                 return;
 
             if (_me != null && _me.IsInEvadeMode())
@@ -3840,9 +3832,9 @@ namespace Game.AI
             {
                 if (_textTimer < diff)
                 {
-                    uint textID = _lastTextID;
+                    int textID = _lastTextID;
                     _lastTextID = 0;
-                    uint entry = _talkerEntry;
+                    int entry = _talkerEntry;
                     _talkerEntry = 0;
                     _textTimer = 0;
                     _useTextTimer = false;
@@ -3879,7 +3871,7 @@ namespace Game.AI
             e.RunOnce = false;
         }
 
-        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Quest quest)
+        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Quest quest, int eventId = 0)
         {
             if (e.Empty())
             {
@@ -3891,6 +3883,8 @@ namespace Game.AI
                     Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for SceneId {scene.SceneId} is empty but is using SmartScript.");
                 if (quest != null)
                     Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for Quest {quest.Id} is empty but is using SmartScript.");
+                if (eventId != 0)
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for Event {eventId} is empty but is using SmartScript.");
                 return;
             }
             foreach (var holder in e)
@@ -3937,43 +3931,48 @@ namespace Game.AI
         void GetScript()
         {
             List<SmartScriptHolder> e;
-            if (_me != null)
+            // We must use script type to avoid ambiguities
+            switch (_scriptType)
             {
-                e = Global.SmartAIMgr.GetScript(-((int)_me.GetSpawnId()), _scriptType);
-                if (e.Empty())
-                    e = Global.SmartAIMgr.GetScript((int)_me.GetEntry(), _scriptType);
-                FillScript(e, _me, null, null, null);
-            }
-            else if (_go != null)
-            {
-                e = Global.SmartAIMgr.GetScript(-((int)_go.GetSpawnId()), _scriptType);
-                if (e.Empty())
-                    e = Global.SmartAIMgr.GetScript((int)_go.GetEntry(), _scriptType);
-                FillScript(e, _go, null, null, null);
-            }
-            else if (_trigger != null)
-            {
-                e = Global.SmartAIMgr.GetScript((int)_trigger.Id, _scriptType);
-                FillScript(e, null, _trigger, null, null);
-            }
-            else if (_areaTrigger != null)
-            {
-                e = Global.SmartAIMgr.GetScript((int)_areaTrigger.GetEntry(), _scriptType);
-                FillScript(e, _areaTrigger, null, null, null);
-            }
-            else if (_sceneTemplate != null)
-            {
-                e = Global.SmartAIMgr.GetScript((int)_sceneTemplate.SceneId, _scriptType);
-                FillScript(e, null, null, _sceneTemplate, null);
-            }
-            else if (_quest != null)
-            {
-                e = Global.SmartAIMgr.GetScript((int)_quest.Id, _scriptType);
-                FillScript(e, null, null, null, _quest);
+                case SmartScriptType.Creature:
+                    e = Global.SmartAIMgr.GetScript(-(int)_me.GetSpawnId(), _scriptType);
+                    if (e.Empty())
+                        e = Global.SmartAIMgr.GetScript((int)_me.GetEntry(), _scriptType);
+                    FillScript(e, _me, null, null, null, 0);
+                    break;
+                case SmartScriptType.GameObject:
+                    e = Global.SmartAIMgr.GetScript(-(int)_go.GetSpawnId(), _scriptType);
+                    if (e.Empty())
+                        e = Global.SmartAIMgr.GetScript((int)_go.GetEntry(), _scriptType);
+                    FillScript(e, _go, null, null, null, 0);
+                    break;
+                case SmartScriptType.AreaTriggerEntity:
+                case SmartScriptType.AreaTriggerEntityServerside:
+                    e = Global.SmartAIMgr.GetScript((int)_areaTrigger.GetEntry(), _scriptType);
+                    FillScript(e, _areaTrigger, null, null, null, 0);
+                    break;
+                case SmartScriptType.AreaTrigger:
+                    e = Global.SmartAIMgr.GetScript((int)_trigger.Id, _scriptType);
+                    FillScript(e, null, _trigger, null, null, 0);
+                    break;
+                case SmartScriptType.Scene:
+                    e = Global.SmartAIMgr.GetScript((int)_sceneTemplate.SceneId, _scriptType);
+                    FillScript(e, null, null, _sceneTemplate, null, 0);
+                    break;
+                case SmartScriptType.Quest:
+                    e = Global.SmartAIMgr.GetScript((int)_quest.Id, _scriptType);
+                    FillScript(e, null, null, null, _quest, 0);
+                    break;
+                case SmartScriptType.Event:
+                    e = Global.SmartAIMgr.GetScript((int)_eventId, _scriptType);
+                    FillScript(e, null, null, null, null, _eventId);
+                    break;
+                default:
+                    break;
             }
         }
 
-        public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null, Quest qst = null)
+        public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null, Quest qst = null, int eventId = 0)
         {
             if (at != null)
             {
@@ -4016,6 +4015,32 @@ namespace Game.AI
                 }
 
                 Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Quest with id {qst.Id}, triggered by player {_player.GetGUID()}");
+            }
+            else if (eventId != 0)
+            {
+                _scriptType = SmartScriptType.Event;
+                _eventId = eventId;
+
+                if (obj.IsPlayer())
+                {
+                    _player = obj.ToPlayer();
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Event {_eventId}, triggered by player {_player.GetGUID()}");
+                }
+                else if (obj.IsCreature())
+                {
+                    _me = obj.ToCreature();
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Event {_eventId}, triggered by creature {_me.GetEntry()}");
+                }
+                else if (obj.IsGameObject())
+                {
+                    _go = obj.ToGameObject();
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Event {_eventId}, triggered by gameobject {_go.GetEntry()}");
+                }
+                else
+                {
+                    Log.outError(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Event {_eventId}, missing trigger WorldObject");
+                    return;
+                }
             }
             else if (obj != null) // Handle object based scripts
             {
@@ -4068,7 +4093,7 @@ namespace Game.AI
 
         Unit DoSelectLowestHpFriendly(float range, uint MinHPDiff)
         {
-            if (!_me)
+            if (_me == null)
                 return null;
 
             var u_check = new MostHPMissingInRange<Unit>(_me, range, MinHPDiff);
@@ -4119,7 +4144,7 @@ namespace Game.AI
 
         Unit DoFindClosestFriendlyInRange(float range)
         {
-            if (!_me)
+            if (_me == null)
                 return null;
 
             var u_check = new AnyFriendlyUnitInObjectRangeCheck(_me, _me, range);
@@ -4171,9 +4196,9 @@ namespace Game.AI
             return null;
         }
 
-        public void SetPathId(uint id) { _pathId = id; }
+        public void SetPathId(int id) { _pathId = id; }
 
-        public uint GetPathId() { return _pathId; }
+        public int GetPathId() { return _pathId; }
 
         WorldObject GetBaseObject()
         {
@@ -4205,11 +4230,11 @@ namespace Game.AI
 
         public bool IsCharmedCreature(WorldObject obj)
         {
-            if (!obj)
+            if (obj == null)
                 return false;
 
             Creature creatureObj = obj.ToCreature();
-            if (creatureObj)
+            if (creatureObj != null)
                 return creatureObj.IsCharmed();
 
             return false;
@@ -4282,7 +4307,7 @@ namespace Game.AI
             return null;
         }
 
-        void StoreCounter(uint id, uint value, uint reset)
+        void StoreCounter(int id, int value, uint reset)
         {
             if (_counterList.ContainsKey(id))
             {
@@ -4297,7 +4322,7 @@ namespace Game.AI
             ProcessEventsFor(SmartEvents.CounterSet, null, id);
         }
 
-        uint GetCounterValue(uint id)
+        int GetCounterValue(int id)
         {
             if (_counterList.ContainsKey(id))
                 return _counterList[id];
@@ -4327,10 +4352,10 @@ namespace Game.AI
         void ResetBaseObject()
         {
             WorldObject lookupRoot = _me;
-            if (!lookupRoot)
+            if (lookupRoot == null)
                 lookupRoot = _go;
 
-            if (lookupRoot)
+            if (lookupRoot != null)
             {
                 if (!_meOrigGUID.IsEmpty())
                 {
@@ -4340,6 +4365,7 @@ namespace Game.AI
                         _me = m;
                         _go = null;
                         _areaTrigger = null;
+                        _player = null;
                     }
                 }
 
@@ -4351,6 +4377,7 @@ namespace Game.AI
                         _me = null;
                         _go = o;
                         _areaTrigger = null;
+                        _player = null;
                     }
                 }
             }
@@ -4358,20 +4385,20 @@ namespace Game.AI
             _meOrigGUID.Clear();
         }
 
-        void IncPhase(uint p)
+        void IncPhase(int p)
         {
             // protect phase from overflowing
-            SetPhase(Math.Min((uint)SmartPhase.Phase12, _eventPhase + p));
+            SetPhase(Math.Min((int)SmartPhase.Phase12, _eventPhase + p));
         }
 
-        void DecPhase(uint p)
+        void DecPhase(int p)
         {
             if (p >= _eventPhase)
                 SetPhase(0);
             else
                 SetPhase(_eventPhase - p);
         }
-        void SetPhase(uint p)
+        void SetPhase(int p)
         {
             _eventPhase = p;
         }
@@ -4380,10 +4407,10 @@ namespace Game.AI
             if (_eventPhase == 0)
                 return false;
 
-            return ((1 << (int)(_eventPhase - 1)) & p) != 0;
+            return ((1 << (_eventPhase - 1)) & p) != 0;
         }
 
-        void RemoveStoredEvent(uint id)
+        void RemoveStoredEvent(int id)
         {
             if (!_storedEvents.Empty())
             {

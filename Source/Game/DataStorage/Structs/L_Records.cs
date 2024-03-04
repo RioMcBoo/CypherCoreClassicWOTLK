@@ -18,28 +18,29 @@ namespace Game.DataStorage
     public sealed class LanguagesRecord
     {
         public LocalizedString Name;
-        public uint Id;        
+        public uint Id;
         public int Flags;
         public int UiTextureKitID;
         public int UiTextureKitElementCount;
+        public int LearningCurveID;
     }
 
     public sealed class LFGDungeonsRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
-        public string Description;
+        public LocalizedString Description;
         public byte MinLevel;
         public ushort MaxLevel;
-        public LfgType TypeID;
-        public sbyte Subtype;
+        private byte _typeID;
+        public byte Subtype;
         public sbyte Faction;
         public int IconTextureFileID;
         public int RewardsBgTextureFileID;
         public int PopupBgTextureFileID;
-        public byte ExpansionLevel;
+        private byte _expansionLevel;
         public short MapID;
-        public Difficulty DifficultyID;
+        private byte _difficultyID;
         public float MinGear;
         public byte GroupID;
         public byte OrderIndex;
@@ -59,15 +60,33 @@ namespace Game.DataStorage
         public ushort BonusReputationAmount;
         public ushort MentorItemLevel;
         public byte MentorCharLevel;
-        public LfgFlags[] Flags = new LfgFlags[2];
+        private int[] _flags = new int[2];
 
-        // Helpers
-        public uint Entry() { return (uint)(Id + ((int)TypeID << 24)); }
+        #region Properties
+        public LfgType TypeID => (LfgType)_typeID;
+        public Expansion ExpansionLevel => (Expansion)_expansionLevel;
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        public LfgFlags Flags => (LfgFlags)_flags[0];
+        #endregion
+
+        #region Helpers
+        public bool HasFlag(LfgFlags flag)
+        {
+            return _flags[0].HasFlag((int)flag);
+        }
+
+        public bool HasAnyFlag(LfgFlags flag)
+        {
+            return _flags[0].HasAnyFlag((int)flag);
+        }
+
+        public uint Entry => (uint)(Id + ((int)TypeID << 24));
+        #endregion
     }
 
     public sealed class LightRecord
     {
-        public uint Id;
+        public int Id;
         public Vector3 GameCoords;
         public float GameFalloffStart;
         public float GameFalloffEnd;
@@ -77,13 +96,16 @@ namespace Game.DataStorage
 
     public sealed class LiquidTypeRecord
     {
-        public uint Id;
+        public int Id;
         public string Name;
         public string[] Texture = new string[6];
         public ushort Flags;
-        public byte SoundBank;                                                // used to be "Type", maybe needs fixing (works well for now)
-        public uint SoundID;
-        public uint SpellID;
+        /// <summary>
+        /// used to be "Type", maybe needs fixing (works well for now)
+        /// </summary>
+        public byte SoundBank;
+        public int SoundID;
+        public int SpellID;
         public float MaxDarkenDepth;
         public float FogDarkenIntensity;
         public float AmbDarkenIntensity;
@@ -103,10 +125,10 @@ namespace Game.DataStorage
 
     public sealed class LockRecord
     {
-        public uint Id;
+        public int Id;
         public int[] Index = new int[SharedConst.MaxLockCase];
         public ushort[] Skill = new ushort[SharedConst.MaxLockCase];
-        public byte[] LockType = new byte[SharedConst.MaxLockCase];
+        public byte[] Type = new byte[SharedConst.MaxLockCase];
         public byte[] Action = new byte[SharedConst.MaxLockCase];
     }
 }

@@ -18,14 +18,15 @@ using Game.Loots;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
+using Game.Miscellaneous;
 using Game.Networking;
 using Game.Networking.Packets;
-using Game.PvP;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Game.AI.SmartTarget;
+
+using static Global;
 
 namespace Game.Entities
 {
@@ -39,11 +40,17 @@ namespace Game.Entities
             m_playerData = new PlayerData();
             m_activePlayerData = new ActivePlayerData();
 
-            Session = session;
+            _session = session;
+
+            ModMeleeHitChance = 7.5f;
+            ModRangedHitChance = 7.5f;
+            ModSpellHitChance = 15.0f;
 
             // players always accept
             if (!GetSession().HasPermission(RBACPermissions.CanFilterWhispers))
                 SetAcceptWhispers(true);
+
+            m_regenInterruptTimestamp = GameTime.Now();
 
             m_zoneUpdateId = 0xffffffff;
             m_nextSave = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
@@ -92,7 +99,7 @@ namespace Game.Entities
             m_isActive = true;
             m_ControlledByPlayer = true;
 
-            Global.WorldMgr.IncreasePlayerCount();
+            WorldMgr.IncreasePlayerCount();
 
             _cinematicMgr = new CinematicManager(this);
 
@@ -101,8 +108,8 @@ namespace Game.Entities
             m_questObjectiveCriteriaMgr = new QuestObjectiveCriteriaManager(this);
             m_sceneMgr = new SceneMgr(this);
 
-            m_bgBattlegroundQueueID[0] = new BgBattlegroundQueueID_Rec();
-            m_bgBattlegroundQueueID[1] = new BgBattlegroundQueueID_Rec();
+            for (var i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+                m_bgBattlegroundQueueID[i] = new BgBattlegroundQueueID_Rec();
 
             m_bgData = new BGData();
 
@@ -142,19 +149,19 @@ namespace Game.Entities
 
             ClearResurrectRequestData();
 
-            Global.WorldMgr.DecreasePlayerCount();
+            WorldMgr.DecreasePlayerCount();
 
             base.Dispose();
         }
 
         //Core
-        public bool Create(ulong guidlow, CharacterCreateInfo createInfo)
+        public bool Create(long guidlow, CharacterCreateInfo createInfo)
         {
             _Create(ObjectGuid.Create(HighGuid.Player, guidlow));
 
             SetName(createInfo.Name);
 
-            PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(createInfo.RaceId, createInfo.ClassId);
+            PlayerInfo info = ObjectMgr.GetPlayerInfo(createInfo.RaceId, createInfo.ClassId);
             if (info == null)
             {
                 Log.outError(LogFilter.Player, "PlayerCreate: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid race/class pair ({2}/{3}) - refusing to do so.",
@@ -162,7 +169,7 @@ namespace Game.Entities
                 return false;
             }
 
-            var cEntry = CliDB.ChrClassesStorage.LookupByKey(createInfo.ClassId);
+            var cEntry = CliDB.ChrClassesStorage.LookupByKey((int)createInfo.ClassId);
             if (cEntry == null)
             {
                 Log.outError(LogFilter.Player, "PlayerCreate: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid character class ({2}) - refusing to do so (wrong DBC-files?)",
@@ -184,7 +191,7 @@ namespace Game.Entities
 
             Relocate(position.Loc);
 
-            SetMap(Global.MapMgr.CreateMap(position.Loc.GetMapId(), this));
+            SetMap(MapMgr.CreateMap(position.Loc.GetMapId(), this));
 
             if (position.TransportGuid.HasValue)
             {
@@ -227,13 +234,12 @@ namespace Game.Entities
             }
 
             SetUnitFlag2(UnitFlags2.RegeneratePower);
-            SetHoverHeight(1.0f);            // default for players in 3.0.3
 
             SetWatchedFactionIndex(0xFFFFFFFF);
 
             SetCustomizations(createInfo.Customizations);
-            SetRestState(RestTypes.XP, ((GetSession().IsARecruiter() || GetSession().GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.NotRAFLinked));
-            SetRestState(RestTypes.Honor, PlayerRestState.NotRAFLinked);
+            SetRestState(RestTypes.XP, ((GetSession().IsARecruiter() || GetSession().GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.Normal));
+            SetRestState(RestTypes.Honor, PlayerRestState.Normal);
             SetNativeGender(createInfo.Sex);
             SetInventorySlotCount(InventorySlots.DefaultSize);
 
@@ -243,8 +249,6 @@ namespace Game.Entities
             InitRunes();
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), (ulong)WorldConfig.GetIntValue(WorldCfg.StartPlayerMoney));
-            SetCreateCurrency(CurrencyTypes.ApexisCrystals, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartApexisCrystals));
-            SetCreateCurrency(CurrencyTypes.JusticePoints, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartJusticePoints));
 
             // Played time
             m_Last_tick = GameTime.GetGameTime();
@@ -283,7 +287,7 @@ namespace Game.Entities
 
             // original items
             foreach (PlayerCreateInfoItem initialItem in info.item)
-                StoreNewItemInBestSlots(initialItem.item_id, initialItem.item_amount);
+                StoreNewItemInBestSlots(initialItem.item_id, initialItem.item_amount, info.itemContext);
 
             // bags and main-hand weapon must equipped at this moment
             // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
@@ -293,7 +297,7 @@ namespace Game.Entities
                 Item pItem = GetItemByPos(i);
                 if (pItem != null)
                 {
-                    List<ItemPosCount> destList;
+                    List<(ItemPos item, int count)> destList;
                     // equip offhand weapon/shield if it attempt equipped before main-hand weapon
                     InventoryResult msg = CanEquipItem(ItemSlot.Null, out destList, pItem, false);
                     if (msg == InventoryResult.Ok)
@@ -315,7 +319,7 @@ namespace Game.Entities
             }
             // all item positions resolved
 
-            ChrSpecializationRecord defaultSpec = Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
+            ChrSpecializationRecord defaultSpec = DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
             if (defaultSpec != null)
             {
                 SetActiveTalentGroup((byte)defaultSpec.OrderIndex);
@@ -412,7 +416,7 @@ namespace Game.Entities
                 }
             }
 
-            m_achievementSys.UpdateTimedCriteria(diff);
+            m_achievementSys.UpdateTimedCriteria(TimeSpan.FromMilliseconds(diff));
 
             if (HasUnitState(UnitState.MeleeAttacking) && !HasUnitState(UnitState.Casting | UnitState.Charging))
             {
@@ -534,7 +538,7 @@ namespace Game.Entities
                 if (diff >= m_nextSave)
                 {
                     // m_nextSave reset in SaveToDB call
-                    Global.ScriptMgr.OnPlayerSave(this);
+                    ScriptMgr.OnPlayerSave(this);
                     SaveToDB();
                     Log.outDebug(LogFilter.Player, "Player '{0}' (GUID: {1}) saved", GetName(), GetGUID().ToString());
                 }
@@ -641,8 +645,8 @@ namespace Game.Entities
 
                 // drunken state is cleared on death
                 SetDrunkValue(0);
-                // lost combo points at any target (targeted combo points clear in Unit::setDeathState)
-                ClearComboPoints();
+
+                SetPower(PowerType.ComboPoints, 0);
 
                 ClearResurrectRequestData();
 
@@ -651,12 +655,14 @@ namespace Game.Entities
 
                 InitializeSelfResurrectionSpells();
 
+                FailQuestsWithFlag(QuestFlags.CompletionNoDeath);
+
                 UpdateCriteria(CriteriaType.DieOnMap, 1);
                 UpdateCriteria(CriteriaType.DieAnywhere, 1);
                 UpdateCriteria(CriteriaType.DieInInstance, 1);
 
                 // reset all death criterias
-                ResetCriteria(CriteriaFailEvent.Death, 0);
+                FailCriteria(CriteriaFailEvent.Death, 0);
             }
 
             base.SetDeathState(s);
@@ -672,7 +678,7 @@ namespace Game.Entities
 
             if (target == this)
             {
-                for (byte i = 0; i < EquipmentSlot.End; ++i)
+                for (byte i = EquipmentSlot.Start; i < InventorySlots.BankBagEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
@@ -680,23 +686,7 @@ namespace Game.Entities
                     m_items[i].DestroyForPlayer(target);
                 }
 
-                for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].DestroyForPlayer(target);
-                }
-
-                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].DestroyForPlayer(target);
-                }
-
-                for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
+                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.ChildEquipmentEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
@@ -705,6 +695,7 @@ namespace Game.Entities
                 }
             }
         }
+
         public override void CleanupsBeforeDelete(bool finalCleanup = true)
         {
             TradeCancel(false);
@@ -733,11 +724,11 @@ namespace Game.Entities
                 StopCastingCharm();
                 StopCastingBindSight();
                 UnsummonPetTemporaryIfAny();
-                ClearComboPoints();
+                SetPower(PowerType.ComboPoints, 0);
                 GetSession().DoLootReleaseAll();
                 m_lootRolls.Clear();
-                Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
-                Global.BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+                OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+                BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
             }
 
             // Remove items from world before self - player must be found in Item.RemoveFromObjectUpdate
@@ -823,7 +814,7 @@ namespace Game.Entities
         //Network
         public void SendPacket(ServerPacket data)
         {
-            Session.SendPacket(data);
+            _session.SendPacket(data);
         }
 
         public DeclinedName GetDeclinedNames() { return _declinedname; }
@@ -856,15 +847,252 @@ namespace Game.Entities
             return m_petStable;
         }
 
+        public void AddPetToUpdateFields(PetStable.PetInfo pet, PetSaveMode slot, PetStableFlags flags)
+        {
+            StableInfo ufStable = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
+            StablePetInfo ufPet = new();
+            ufPet.ModifyValue(ufPet.PetSlot).SetValue((uint)slot);
+            ufPet.ModifyValue(ufPet.PetNumber).SetValue(pet.PetNumber);
+            ufPet.ModifyValue(ufPet.CreatureID).SetValue(pet.CreatureId);
+            ufPet.ModifyValue(ufPet.DisplayID).SetValue(pet.DisplayId);
+            ufPet.ModifyValue(ufPet.ExperienceLevel).SetValue(pet.Level);
+            ufPet.ModifyValue(ufPet.PetFlags).SetValue((byte)flags);
+            ufPet.ModifyValue(ufPet.Name).SetValue(pet.Name);
+            AddDynamicUpdateFieldValue(ufStable.ModifyValue(ufStable.Pets), ufPet);
+        }
+
+        public void SetPetSlot(uint petNumber, PetSaveMode dstPetSlot)
+        {
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
+
+            WorldSession sess = GetSession();
+            PetStable petStable = GetPetStable();
+            if (petStable == null)
+            {
+                sess.SendPetStableResult(StableResult.InternalError);
+                return;
+            }
+
+            var (srcPet, srcPetSlot) = Pet.GetLoadPetInfo(petStable, 0, petNumber, null);
+            PetStable.PetInfo dstPet = Pet.GetLoadPetInfo(petStable, 0, 0, dstPetSlot).Item1;
+
+            if (srcPet == null || srcPet.Type != PetType.Hunter)
+            {
+                sess.SendPetStableResult(StableResult.InternalError);
+                return;
+            }
+
+            if (dstPet != null && dstPet.Type != PetType.Hunter)
+            {
+                sess.SendPetStableResult(StableResult.InternalError);
+                return;
+            }
+
+            PetStable.PetInfo src = null;
+            PetStable.PetInfo dst = null;
+            uint? newActivePetIndex = null;
+
+            if (SharedConst.IsActivePetSlot(srcPetSlot) && SharedConst.IsActivePetSlot(dstPetSlot))
+            {
+                // active<.active: only swap ActivePets and CurrentPetIndex (do not despawn pets)
+                src = petStable.ActivePets[srcPetSlot - PetSaveMode.FirstActiveSlot];
+                dst = petStable.ActivePets[dstPetSlot - PetSaveMode.FirstActiveSlot];
+
+                if (petStable.GetCurrentActivePetIndex() == (uint)srcPetSlot)
+                    newActivePetIndex = (uint)dstPetSlot;
+                else if (petStable.GetCurrentActivePetIndex() == (uint)dstPetSlot)
+                    newActivePetIndex = (uint)srcPetSlot;
+            }
+            else if (SharedConst.IsStabledPetSlot(srcPetSlot) && SharedConst.IsStabledPetSlot(dstPetSlot))
+            {
+                // stabled<.stabled: only swap StabledPets
+                src = petStable.StabledPets[srcPetSlot - PetSaveMode.FirstStableSlot];
+                dst = petStable.StabledPets[dstPetSlot - PetSaveMode.FirstStableSlot];
+            }
+            else if (SharedConst.IsActivePetSlot(srcPetSlot) && SharedConst.IsStabledPetSlot(dstPetSlot))
+            {
+                // active<.stabled: swap petStable contents and despawn active pet if it is involved in swap
+                if (petStable.CurrentPetIndex == (uint)srcPetSlot)
+                {
+                    Pet oldPet = GetPet();
+                    if (oldPet != null && !oldPet.IsAlive())
+                    {
+                        sess.SendPetStableResult(StableResult.InternalError);
+                        return;
+                    }
+
+                    RemovePet(oldPet, PetSaveMode.NotInSlot);
+                }
+
+                if (dstPet != null)
+                {
+                    CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(dstPet.CreatureId);
+                    if (creatureInfo == null || !creatureInfo.IsTameable(CanTameExoticPets(), creatureInfo.GetDifficulty(Difficulty.None)))
+                    {
+                        sess.SendPetStableResult(StableResult.CantControlExotic);
+                        return;
+                    }
+                }
+
+                src = petStable.ActivePets[srcPetSlot - PetSaveMode.FirstActiveSlot];
+                dst = petStable.StabledPets[dstPetSlot - PetSaveMode.FirstStableSlot];
+            }
+            else if (SharedConst.IsStabledPetSlot(srcPetSlot) && SharedConst.IsActivePetSlot(dstPetSlot))
+            {
+                // stabled<.active: swap petStable contents and despawn active pet if it is involved in swap
+                if (petStable.CurrentPetIndex == (uint)dstPetSlot)
+                {
+                    Pet oldPet = GetPet();
+                    if (oldPet != null && !oldPet.IsAlive())
+                    {
+                        sess.SendPetStableResult(StableResult.InternalError);
+                        return;
+                    }
+
+                    RemovePet(oldPet, PetSaveMode.NotInSlot);
+                }
+
+                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(srcPet.CreatureId);
+                if (creatureInfo == null || !creatureInfo.IsTameable(CanTameExoticPets(), creatureInfo.GetDifficulty(Difficulty.None)))
+                {
+                    sess.SendPetStableResult(StableResult.CantControlExotic);
+                    return;
+                }
+
+                src = petStable.StabledPets[srcPetSlot - PetSaveMode.FirstStableSlot];
+                dst = petStable.ActivePets[dstPetSlot - PetSaveMode.FirstActiveSlot];
+            }
+
+            SQLTransaction trans = new SQLTransaction();
+
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
+            stmt.AddValue(0, (short)dstPetSlot);
+            stmt.AddValue(1, GetGUID().GetCounter());
+            stmt.AddValue(2, srcPet.PetNumber);
+            trans.Append(stmt);
+
+            if (dstPet != null)
+            {
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
+                stmt.AddValue(0, (short)srcPetSlot);
+                stmt.AddValue(1, GetGUID().GetCounter());
+                stmt.AddValue(2, dstPet.PetNumber);
+                trans.Append(stmt);
+            }
+
+
+            GetSession().AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
+            {
+                if (sess.GetPlayer() == this)
+                {
+                    if (success)
+                    {
+                        Extensions.Swap(ref src, ref dst);
+                        if (newActivePetIndex.HasValue)
+                            sess.GetPlayer().GetPetStable().SetCurrentActivePetIndex(newActivePetIndex.Value);
+
+                        int srcPetIndex = m_activePlayerData.PetStable.GetValue().Pets.FindIndexIf(p => p.PetSlot == (uint)srcPetSlot);
+                        int dstPetIndex = m_activePlayerData.PetStable.GetValue().Pets.FindIndexIf(p => p.PetSlot == (uint)dstPetSlot);
+
+                        if (srcPetIndex >= 0)
+                        {
+                            StableInfo stableInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
+                            StablePetInfo stablePetInfo = stableInfo.ModifyValue(stableInfo.Pets, srcPetIndex);
+                            SetUpdateFieldValue(stablePetInfo.ModifyValue(stablePetInfo.PetSlot), (uint)dstPetSlot);
+                        }
+
+                        if (dstPetIndex >= 0)
+                        {
+                            StableInfo stableInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
+                            StablePetInfo stablePetInfo = stableInfo.ModifyValue(stableInfo.Pets, dstPetIndex);
+                            SetUpdateFieldValue(stablePetInfo.ModifyValue(stablePetInfo.PetSlot), (uint)srcPetSlot);
+                        }
+
+                        sess.SendPetStableResult(StableResult.StableSuccess);
+                    }
+                    else
+                    {
+                        sess.SendPetStableResult(StableResult.InternalError);
+                    }
+                }
+            });
+        }
+
+        public ObjectGuid GetStableMaster()
+        {
+            if (!m_activePlayerData.PetStable.HasValue())
+                return ObjectGuid.Empty;
+
+            return m_activePlayerData.PetStable.GetValue().StableMaster;              
+        }
+
+        public void SetStableMaster(ObjectGuid stableMaster)
+        {
+            if (!m_activePlayerData.PetStable.HasValue())
+                return;
+
+            StableInfo stableInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
+            SetUpdateFieldValue(stableInfo.ModifyValue(stableInfo.StableMaster), stableMaster);
+        }
+        
         // last used pet number (for BG's)
         public uint GetLastPetNumber() { return m_lastpetnumber; }
         public void SetLastPetNumber(uint petnumber) { m_lastpetnumber = petnumber; }
         public uint GetTemporaryUnsummonedPetNumber() { return m_temporaryUnsummonedPetNumber; }
         public void SetTemporaryUnsummonedPetNumber(uint petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
+
+        public ReactStates? GetTemporaryPetReactState() { return m_temporaryPetReactState; }
+        
+        public void DisablePetControlsOnMount(ReactStates reactState, CommandStates commandState)
+        {
+            Pet pet = GetPet();
+            if (pet == null)
+                return;
+
+            m_temporaryPetReactState = pet.GetReactState();
+            pet.SetReactState(reactState);
+            CharmInfo charmInfo = pet.GetCharmInfo();
+            if (charmInfo != null)
+                charmInfo.SetCommandState(commandState);
+
+            pet.GetMotionMaster().MoveFollow(this, SharedConst.PetFollowDist, pet.GetFollowAngle());
+
+            PetMode petMode = new();
+            petMode.PetGUID = pet.GetGUID();
+            petMode.ReactState = reactState;
+            petMode.CommandState = commandState;
+            petMode.Flag = 0;
+            SendPacket(petMode);
+        }
+
+        public void EnablePetControlsOnDismount()
+        {
+            Pet pet = GetPet();
+            if (pet != null)
+            {
+                PetMode petMode = new();
+                petMode.PetGUID = pet.GetGUID();
+                if (m_temporaryPetReactState.HasValue)
+                {
+                    petMode.ReactState = m_temporaryPetReactState.Value;
+                    pet.SetReactState(m_temporaryPetReactState.Value);
+                }
+
+                CharmInfo charmInfo = pet.GetCharmInfo();
+                if (charmInfo != null)
+                    petMode.CommandState = charmInfo.GetCommandState();
+
+                petMode.Flag = 0;
+                SendPacket(petMode);
+            }
+
+            m_temporaryPetReactState = null;
+        }
+
         public void UnsummonPetTemporaryIfAny()
         {
             Pet pet = GetPet();
-            if (!pet)
+            if (pet == null)
                 return;
 
             if (m_temporaryUnsummonedPetNumber == 0 && pet.IsControlled() && !pet.IsTemporarySummoned())
@@ -895,7 +1123,7 @@ namespace Game.Entities
 
         public bool IsPetNeedBeTemporaryUnsummoned()
         {
-            return !IsInWorld || !IsAlive() || IsMounted();
+            return !IsInWorld || !IsAlive() || HasUnitMovementFlag(MovementFlag.Flying) || HasExtraUnitMovementFlag2(MovementFlags3.AdvFlying);
         }
 
         public void SendRemoveControlBar()
@@ -907,11 +1135,13 @@ namespace Game.Entities
         {
             if (pet != null)
             {
+                SetSummonedBattlePetGUID(pet.PacketInfo.Guid);
                 SetCurrentBattlePetBreedQuality(pet.PacketInfo.Quality);
                 SetWildBattlePetLevel(pet.PacketInfo.Level);
             }
             else
             {
+                SetSummonedBattlePetGUID(ObjectGuid.Empty);
                 SetCurrentBattlePetBreedQuality((byte)BattlePetBreedQuality.Poor);
                 SetWildBattlePetLevel(0);
             }
@@ -920,7 +1150,7 @@ namespace Game.Entities
         public void StopCastingCharm()
         {
             Unit charm = GetCharmed();
-            if (!charm)
+            if (charm == null)
                 return;
 
             if (charm.IsTypeId(TypeId.Unit))
@@ -960,7 +1190,7 @@ namespace Game.Entities
         public void CharmSpellInitialize()
         {
             Unit charm = GetFirstControlled();
-            if (!charm)
+            if (charm == null)
                 return;
 
             CharmInfo charmInfo = charm.GetCharmInfo();
@@ -998,7 +1228,7 @@ namespace Game.Entities
         public void PossessSpellInitialize()
         {
             Unit charm = GetCharmed();
-            if (!charm)
+            if (charm == null)
                 return;
 
             CharmInfo charmInfo = charm.GetCharmInfo();
@@ -1019,35 +1249,36 @@ namespace Game.Entities
 
             SendPacket(petSpellsPacket);
         }
+
         public void VehicleSpellInitialize()
         {
             Creature vehicle = GetVehicleCreatureBase();
-            if (!vehicle)
+            if (vehicle == null)
                 return;
 
             PetSpells petSpells = new();
             petSpells.PetGUID = vehicle.GetGUID();
             petSpells.CreatureFamily = 0;                          // Pet Family (0 for all vehicles)
             petSpells.Specialization = 0;
-            petSpells.TimeLimit = vehicle.IsSummon() ? vehicle.ToTempSummon().GetTimer() : 0;
+            petSpells.TimeLimit = (uint)(vehicle.IsSummon() ? vehicle.ToTempSummon().GetTimer().TotalMilliseconds : 0);
             petSpells.ReactState = vehicle.GetReactState();
             petSpells.CommandState = CommandStates.Follow;
             petSpells.Flag = 0x8;
 
-            for (uint i = 0; i < SharedConst.MaxSpellControlBar; ++i)
-                petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(0, i + 8);
+            for (int i = 0; i < SharedConst.MaxSpellControlBar; ++i)
+                petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(0, (byte)(i + 8));
 
-            for (uint i = 0; i < SharedConst.MaxCreatureSpells; ++i)
+            for (int i = 0; i < SharedConst.MaxCreatureSpells; ++i)
             {
-                uint spellId = vehicle.m_spells[i];
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
+                int spellId = vehicle.m_spells[i];
+                SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
                 if (spellInfo == null)
                     continue;
 
                 if (spellInfo.HasAttribute(SpellAttr5.NotAvailableWhileCharmed))
                     continue;
 
-                if (!Global.ConditionMgr.IsObjectMeetingVehicleSpellConditions(vehicle.GetEntry(), spellId, this, vehicle))
+                if (!ConditionMgr.IsObjectMeetingVehicleSpellConditions(vehicle.GetEntry(), spellId, this, vehicle))
                 {
                     Log.outDebug(LogFilter.Condition, "VehicleSpellInitialize: conditions not met for Vehicle entry {0} spell {1}", vehicle.ToCreature().GetEntry(), spellId);
                     continue;
@@ -1056,7 +1287,7 @@ namespace Game.Entities
                 if (spellInfo.IsPassive())
                     vehicle.CastSpell(vehicle, spellInfo.Id, true);
 
-                petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(spellId, i + 8);
+                petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(spellId, (byte)(i + 8));
             }
 
             // Cooldowns
@@ -1065,22 +1296,216 @@ namespace Game.Entities
             SendPacket(petSpells);
         }
 
-        //Currency - Money
-        void SetCreateCurrency(CurrencyTypes id, uint count, bool printLog = true)
+        //Currency
+        void SetCreateCurrency(CurrencyTypes id, int amount)
         {
+            SetCreateCurrency((int)id, amount);
+        }
+
+        void SetCreateCurrency(int id, int amount)
+        {
+            if (!_currencyStorage.ContainsKey(id))
+            {
+                PlayerCurrency playerCurrency = new();
+                playerCurrency.state = PlayerCurrencyState.New;
+                playerCurrency.Quantity = amount;
+                _currencyStorage.Add(id, playerCurrency);
+            }
+        }
+
+        public void ModifyCurrency(int id, int amount, CurrencyGainSource gainSource = CurrencyGainSource.Cheat, CurrencyDestroyReason destroyReason = CurrencyDestroyReason.Cheat)
+        {
+            if (amount == 0)
+                return;
+
+            CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(id);
+            Cypher.Assert(currency != null);
+
+            // Check faction
+            if ((currency.IsAlliance && GetTeam() != Team.Alliance) ||
+                (currency.IsHorde && GetTeam() != Team.Horde))
+                return;
+
+            // Check award condition
+            if (currency.AwardConditionID != 0)
+            {
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(currency.AwardConditionID);
+                if (playerCondition != null && !ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                    return;
+            }
+
+            bool isGainOnRefund = false;
+
+            if (gainSource == CurrencyGainSource.ItemRefund ||
+                gainSource == CurrencyGainSource.GarrisonBuildingRefund ||
+                gainSource == CurrencyGainSource.PlayerTraitRefund)
+                isGainOnRefund = true;
+
+            bool ignoreCaps = isGainOnRefund || gainSource == CurrencyGainSource.QuestRewardIgnoreCaps || gainSource == CurrencyGainSource.WorldQuestRewardIgnoreCaps;
+
+            if (amount > 0 && !isGainOnRefund && gainSource != CurrencyGainSource.Vendor)
+            {
+                amount = (int)(amount * GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyGain, (int)id));
+                amount = (int)(amount * GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyCategoryGainPct, currency.CategoryID));
+            }
+
+            int scaler = currency.Scaler();
+
+            // Currency that is immediately converted into reputation with that faction instead
+            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(currency.FactionID);
+            if (factionEntry != null)
+            {
+                amount /= scaler;
+                GetReputationMgr().ModifyReputation(factionEntry, amount, false, true);
+                return;
+            }
+
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
             {
-                PlayerCurrency cur = new();
-                cur.state = PlayerCurrencyState.New;
-                cur.Quantity = count;
-                cur.WeeklyQuantity = 0;
-                cur.TrackedQuantity = 0;
-                cur.Flags = 0;
-                _currencyStorage[(uint)id] = cur;
+                playerCurrency = new();
+                playerCurrency.state = PlayerCurrencyState.New;
+                _currencyStorage.Add(id, playerCurrency);
             }
+
+            uint weeklyCap = GetCurrencyWeeklyCap(currency);
+            if (!ignoreCaps) // Ignore weekly cap for refund
+            {
+                // Weekly cap
+                if (weeklyCap != 0 && amount > 0 && (playerCurrency.WeeklyQuantity + amount) > weeklyCap)
+                    amount = (int)(weeklyCap - playerCurrency.WeeklyQuantity);
+
+                // Max cap
+                uint maxCap = GetCurrencyMaxQuantity(currency, false, gainSource == CurrencyGainSource.UpdatingVersion);
+                if (maxCap != 0 && amount > 0 && (playerCurrency.Quantity + amount) > maxCap)
+                    amount = (int)(maxCap - playerCurrency.Quantity);
+            }
+
+            // Underflow protection
+            if (amount < 0 && Math.Abs(amount) > playerCurrency.Quantity)
+                amount = (int)(playerCurrency.Quantity * -1);
+
+            if (amount == 0)
+                return;
+
+            if (playerCurrency.state != PlayerCurrencyState.New)
+                playerCurrency.state = PlayerCurrencyState.Changed;
+
+            playerCurrency.Quantity += (uint)amount;
+
+            if (amount > 0 && !ignoreCaps) // Ignore total values update for refund
+            {
+                if (weeklyCap != 0)
+                    playerCurrency.WeeklyQuantity += (uint)amount;
+
+                if (currency.IsTrackingQuantity())
+                    playerCurrency.TrackedQuantity += (uint)amount;
+
+                if (currency.HasTotalEarned())
+                    playerCurrency.EarnedQuantity += (uint)amount;
+
+                if (!isGainOnRefund)
+                    UpdateCriteria(CriteriaType.CurrencyGained, id, (ulong)amount);
+            }
+
+            CurrencyChanged(id, amount);
+
+            SetCurrency packet = new();
+            packet.Type = currency.Id;
+            packet.Quantity = (int)playerCurrency.Quantity;
+            packet.Flags = CurrencyGainFlags.None; // TODO: Check when flags are applied
+
+            if ((playerCurrency.WeeklyQuantity / currency.Scaler()) > 0)
+                packet.WeeklyQuantity = (int)playerCurrency.WeeklyQuantity;
+
+            if (currency.HasMaxQuantity(false, gainSource == CurrencyGainSource.UpdatingVersion))
+                packet.MaxQuantity = (int)GetCurrencyMaxQuantity(currency);
+
+            if (currency.HasTotalEarned())
+                packet.TotalEarned = (int)playerCurrency.EarnedQuantity;
+
+            packet.SuppressChatLog = currency.IsSuppressingChatLog(gainSource == CurrencyGainSource.UpdatingVersion);
+            packet.QuantityChange = amount;
+
+            if (amount > 0)
+                packet.QuantityGainSource = gainSource;
+            else
+                packet.QuantityLostSource = destroyReason;
+
+            // TODO: FirstCraftOperationID, LastSpendTime & Toasts
+            SendPacket(packet);
         }
-        public uint GetCurrency(uint id)
+
+        public void AddCurrency(uint id, uint amount, CurrencyGainSource gainSource = CurrencyGainSource.Cheat)
+        {
+            ModifyCurrency(id, (int)amount, gainSource);
+        }
+
+        public void RemoveCurrency(uint id, int amount, CurrencyDestroyReason destroyReason = CurrencyDestroyReason.Cheat)
+        {
+            ModifyCurrency(id, -amount, default, destroyReason);
+        }
+
+        public void IncreaseCurrencyCap(uint id, uint amount)
+        {
+            if (amount == 0)
+                return;
+
+            CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(id);
+            Cypher.Assert(currency != null);
+
+            // Check faction
+            if ((currency.IsAlliance() && GetTeam() != Team.Alliance) ||
+                (currency.IsHorde() && GetTeam() != Team.Horde))
+                return;
+
+            // Check dynamic maximum flag
+            if (!currency.GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum))
+                return;
+
+            // Ancient mana maximum cap
+            if (id == (uint)CurrencyTypes.AncientMana)
+            {
+                uint maxQuantity = GetCurrencyMaxQuantity(currency);
+
+                if ((maxQuantity + amount) > PlayerConst.CurrencyMaxCapAncientMana)
+                    amount = PlayerConst.CurrencyMaxCapAncientMana - maxQuantity;
+            }
+
+            var playerCurrency = _currencyStorage.LookupByKey(id);
+            if (playerCurrency == null)
+            {
+                playerCurrency = new();
+                playerCurrency.state = PlayerCurrencyState.New;
+                playerCurrency.IncreasedCapQuantity = amount;
+                _currencyStorage[id] = playerCurrency;
+            }
+            else
+            {
+                playerCurrency.IncreasedCapQuantity += amount;
+            }
+
+            if (playerCurrency.state != PlayerCurrencyState.New)
+                playerCurrency.state = PlayerCurrencyState.Changed;
+
+            SetCurrency packet = new();
+            packet.Type = currency.Id;
+            packet.Quantity = (int)playerCurrency.Quantity;
+            packet.Flags = CurrencyGainFlags.None;
+
+            if ((playerCurrency.WeeklyQuantity / currency.Scaler()) > 0)
+                packet.WeeklyQuantity = (int)playerCurrency.WeeklyQuantity;
+
+            if (currency.IsTrackingQuantity())
+                packet.TrackedQuantity = (int)playerCurrency.TrackedQuantity;
+
+            packet.MaxQuantity = (int)GetCurrencyMaxQuantity(currency);
+            packet.SuppressChatLog = currency.IsSuppressingChatLog();
+
+            SendPacket(packet);
+        }
+
+        public int GetCurrencyQuantity(int id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1088,157 +1513,8 @@ namespace Game.Entities
 
             return playerCurrency.Quantity;
         }
-        public void ModifyCurrency(CurrencyTypes id, int count, bool printLog = true, bool ignoreMultipliers = false)
-        {
-            if (count == 0)
-                return;
 
-            CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(id);
-            Cypher.Assert(currency != null);
-
-            if (!ignoreMultipliers)
-                count *= (int)GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyGain, (int)id);
-
-            // Currency that is immediately converted into reputation with that faction instead
-            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(currency.FactionID);
-            if (factionEntry != null)
-            {
-                if (currency.Flags[0].HasAnyFlag((int)CurrencyFlags.HighPrecision))
-                    count /= 100;
-                GetReputationMgr().ModifyReputation(factionEntry, count, false, true);
-                return;
-            }
-
-            uint oldTotalCount = 0;
-            uint oldWeekCount = 0;
-            uint oldTrackedCount = 0;
-
-            var playerCurrency = _currencyStorage.LookupByKey(id);
-            if (playerCurrency == null)
-            {
-                PlayerCurrency cur = new();
-                cur.state = PlayerCurrencyState.New;
-                cur.Quantity = 0;
-                cur.WeeklyQuantity = 0;
-                cur.TrackedQuantity = 0;
-                cur.Flags = 0;
-                _currencyStorage[(uint)id] = cur;
-                playerCurrency = _currencyStorage.LookupByKey(id);
-            }
-            else
-            {
-                oldTotalCount = playerCurrency.Quantity;
-                oldWeekCount = playerCurrency.WeeklyQuantity;
-                oldTrackedCount = playerCurrency.TrackedQuantity;
-            }
-
-            // count can't be more then weekCap if used (weekCap > 0)
-            uint weekCap = GetCurrencyWeekCap(currency);
-            if (weekCap != 0 && count > weekCap)
-                count = (int)weekCap;
-
-            // count can't be more then totalCap if used (totalCap > 0)
-            uint totalCap = GetCurrencyTotalCap(currency);
-            if (totalCap != 0 && count > totalCap)
-                count = (int)totalCap;
-
-            int newTrackedCount = (int)(oldTrackedCount) + (count > 0 ? count : 0);
-            if (newTrackedCount < 0)
-                newTrackedCount = 0;
-
-            int newTotalCount = (int)oldTotalCount + count;
-            if (newTotalCount < 0)
-                newTotalCount = 0;
-
-            int newWeekCount = (int)oldWeekCount + (count > 0 ? count : 0);
-            if (newWeekCount < 0)
-                newWeekCount = 0;
-
-            // if we get more then weekCap just set to limit
-            if (weekCap != 0 && weekCap < newWeekCount)
-            {
-                newWeekCount = (int)weekCap;
-                // weekCap - oldWeekCount always >= 0 as we set limit before!
-                newTotalCount = (int)(oldTotalCount + (weekCap - oldWeekCount));
-            }
-
-            // if we get more then totalCap set to maximum;
-            if (totalCap != 0 && totalCap < newTotalCount)
-            {
-                newTotalCount = (int)totalCap;
-                newWeekCount = (int)weekCap;
-            }
-
-            if (newTotalCount != oldTotalCount)
-            {
-                if (playerCurrency.state != PlayerCurrencyState.New)
-                    playerCurrency.state = PlayerCurrencyState.Changed;
-
-                CurrencyChanged((uint)id, count);
-
-                playerCurrency.Quantity = (uint)newTotalCount;
-                playerCurrency.WeeklyQuantity = (uint)newWeekCount;
-                playerCurrency.TrackedQuantity = (uint)newTrackedCount;
-
-                if (count > 0)
-                    UpdateCriteria(CriteriaType.CurrencyGained, (uint)id, (uint)count);
-
-                _currencyStorage[(uint)id] = playerCurrency;
-
-                SetCurrency packet = new();
-                packet.Type = (uint)id;
-                packet.Quantity = newTotalCount;
-                packet.SuppressChatLog = !printLog;
-                packet.WeeklyQuantity = newWeekCount;
-                packet.TrackedQuantity = newTrackedCount;
-                packet.Flags = playerCurrency.Flags;
-                packet.QuantityChange = count;
-
-                SendPacket(packet);
-            }
-        }
-        public bool HasCurrency(uint id, uint count)
-        {
-            var playerCurrency = _currencyStorage.LookupByKey(id);
-            return playerCurrency != null && playerCurrency.Quantity >= count;
-        }
-        public uint GetCurrencyWeekCap(CurrencyTypes id)
-        {
-            CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey((uint)id);
-            if (entry == null)
-                return 0;
-
-            return GetCurrencyWeekCap(entry);
-        }
-        public uint GetCurrencyWeekCap(CurrencyTypesRecord currency)
-        {
-            return currency.MaxEarnablePerWeek;
-        }
-        uint GetCurrencyTotalCap(CurrencyTypesRecord currency)
-        {
-            uint cap = currency.MaxQty;
-
-            switch ((CurrencyTypes)currency.Id)
-            {
-                case CurrencyTypes.ApexisCrystals:
-                {
-                    uint apexiscap = WorldConfig.GetUIntValue(WorldCfg.CurrencyMaxApexisCrystals);
-                    if (apexiscap > 0)
-                        cap = apexiscap;
-                    break;
-                }
-                case CurrencyTypes.JusticePoints:
-                {
-                    uint justicecap = WorldConfig.GetUIntValue(WorldCfg.CurrencyMaxJusticePoints);
-                    if (justicecap > 0)
-                        cap = justicecap;
-                    break;
-                }
-            }
-
-            return cap;
-        }
-        uint GetCurrencyOnWeek(CurrencyTypes id)
+        public int GetCurrencyWeeklyQuantity(int id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1246,12 +1522,58 @@ namespace Game.Entities
 
             return playerCurrency.WeeklyQuantity;
         }
-        public uint GetTrackedCurrencyCount(uint id)
+
+        public int GetCurrencyTrackedQuantity(int id)
         {
-            if (!_currencyStorage.ContainsKey(id))
+            var playerCurrency = _currencyStorage.LookupByKey(id);
+            if (playerCurrency == null)
                 return 0;
 
-            return _currencyStorage[id].TrackedQuantity;
+            return playerCurrency.TrackedQuantity;
+        }
+
+        uint GetCurrencyIncreasedCapQuantity(uint id)
+        {
+            var playerCurrency = _currencyStorage.LookupByKey(id);
+            if (playerCurrency == null)
+                return 0;
+
+            return playerCurrency.IncreasedCapQuantity;
+        }
+
+        public uint GetCurrencyMaxQuantity(CurrencyTypesRecord currency, bool onLoad = false, bool onUpdateVersion = false)
+        {
+            if (!currency.HasMaxQuantity(onLoad, onUpdateVersion))
+                return 0;
+
+            uint maxQuantity = currency.MaxQty;
+            uint increasedCap = 0;
+
+            if (currency.HasFlag(CurrencyTypesFlags.DynamicMaximum))
+                increasedCap = GetCurrencyIncreasedCapQuantity(currency.Id);
+
+            return maxQuantity + increasedCap;
+        }
+
+        uint GetCurrencyWeeklyCap(uint id)
+        {
+            CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(id);
+            if (currency == null)
+                return 0;
+
+            return GetCurrencyWeeklyCap(currency);
+        }
+
+        uint GetCurrencyWeeklyCap(CurrencyTypesRecord currency)
+        {
+            // TODO: CurrencyTypeFlags::ComputedWeeklyMaximum
+            return currency.MaxEarnablePerWeek;
+        }
+
+        public bool HasCurrency(uint id, uint amount)
+        {
+            var playerCurrency = _currencyStorage.LookupByKey(id);
+            return playerCurrency != null && playerCurrency.Quantity >= amount;
         }
 
         //Action Buttons - CUF Profile
@@ -1262,7 +1584,7 @@ namespace Game.Entities
             return (byte)_CUFProfiles.Count(p => p != null);
         }
 
-        bool IsActionButtonDataValid(byte button, ulong action, uint type)
+        bool IsActionButtonDataValid(byte button, int action, ActionButtonType type)
         {
             if (button >= PlayerConst.MaxActionButtons)
             {
@@ -1276,23 +1598,17 @@ namespace Game.Entities
                 return false;
             }
 
-            switch ((ActionButtonType)type)
+            switch (type)
             {
                 case ActionButtonType.Spell:
-                    if (!Global.SpellMgr.HasSpellInfo((uint)action, Difficulty.None))
+                    if (!SpellMgr.HasSpellInfo(action, Difficulty.None))
                     {
                         Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Spell action {action} not added into button {button} for player {GetName()} ({GetGUID()}): spell not exist");
                         return false;
                     }
-
-                    if (!HasSpell((uint)action))
-                    {
-                        Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Spell action {action} not added into button {button} for player {GetName()} ({GetGUID()}): player don't known this spell");
-                        return false;
-                    }
                     break;
                 case ActionButtonType.Item:
-                    if (Global.ObjectMgr.GetItemTemplate((uint)action) == null)
+                    if (ObjectMgr.GetItemTemplate(action) == null)
                     {
                         Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Item action {action} not added into button {button} for player {GetName()} ({GetGUID()}): item not exist");
                         return false;
@@ -1336,7 +1652,7 @@ namespace Game.Entities
 
         public void SetMultiActionBars(byte mask) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MultiActionBars), mask); }
 
-        public ActionButton AddActionButton(byte button, uint action, uint type)
+        public ActionButton AddActionButton(byte button, int action, ActionButtonType type)
         {
             if (!IsActionButtonDataValid(button, action, type))
                 return null;
@@ -1348,11 +1664,12 @@ namespace Game.Entities
             var ab = m_actionButtons[button];
 
             // set data and update to CHANGED if not NEW
-            ab.SetActionAndType(action, (ActionButtonType)type);
+            ab.SetActionAndType(action, type);
 
             Log.outDebug(LogFilter.Player, $"Player::AddActionButton: Player '{GetName()}' ({GetGUID()}) added action '{action}' (Type {type}) to button '{button}'");
             return ab;
         }
+
         public void RemoveActionButton(byte _button)
         {
             var button = m_actionButtons.LookupByKey(_button);
@@ -1366,6 +1683,7 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Player, "Action Button '{0}' Removed from Player '{1}'", button, GetGUID().ToString());
         }
+
         public ActionButton GetActionButton(byte _button)
         {
             var button = m_actionButtons.LookupByKey(_button);
@@ -1374,7 +1692,9 @@ namespace Game.Entities
 
             return button;
         }
+
         void SendInitialActionButtons() { SendActionButtons(0); }
+
         void SendActionButtons(uint state)
         {
             UpdateActionButtons packet = new();
@@ -1428,7 +1748,7 @@ namespace Game.Entities
                 return 0;
 
             // Multiply result with the faction specific rate
-            RepRewardRate repData = Global.ObjectMgr.GetRepRewardRate((uint)faction);
+            RepRewardRate repData = ObjectMgr.GetRepRewardRate((uint)faction);
             if (repData != null)
             {
                 float repRate = 0.0f;
@@ -1472,13 +1792,13 @@ namespace Game.Entities
         // Calculates how many reputation points player gains in victim's enemy factions
         public void RewardReputation(Unit victim, float rate)
         {
-            if (!victim || victim.IsTypeId(TypeId.Player))
+            if (victim == null || victim.IsTypeId(TypeId.Player))
                 return;
 
             if (victim.ToCreature().IsReputationGainDisabled())
                 return;
 
-            ReputationOnKillEntry Rep = Global.ObjectMgr.GetReputationOnKilEntry(victim.ToCreature().GetCreatureTemplate().Entry);
+            ReputationOnKillEntry Rep = ObjectMgr.GetReputationOnKilEntry(victim.ToCreature().GetCreatureTemplate().Entry);
             if (Rep == null)
                 return;
 
@@ -1490,11 +1810,11 @@ namespace Game.Entities
                 Map map = GetMap();
                 if (map.IsNonRaidDungeon())
                 {
-                    LFGDungeonsRecord dungeon = Global.DB2Mgr.GetLfgDungeon(map.GetId(), map.GetDifficultyID());
+                    LFGDungeonsRecord dungeon = DB2Mgr.GetLfgDungeon(map.GetId(), map.GetDifficultyID());
                     if (dungeon != null)
-                    {                        
-                        if (dungeon.TargetLevel == 80)
-                            ChampioningFaction = GetChampioningFaction();
+                    {
+                        if (dungeon.TargetLevel == ObjectMgr.GetMaxLevelForExpansion(Expansion.WrathOfTheLichKing))
+                                ChampioningFaction = GetChampioningFaction();
                     }
                 }
             }
@@ -1581,11 +1901,11 @@ namespace Game.Entities
         void SetCanDelayTeleport(bool setting) { m_bCanDelayTeleport = setting; }
         bool IsHasDelayedTeleport() { return m_bHasDelayedTeleport; }
         void SetDelayedTeleportFlag(bool setting) { m_bHasDelayedTeleport = setting; }
-        public bool TeleportTo(WorldLocation loc, TeleportToOptions options = 0, uint? instanceId = null)
+        public bool TeleportTo(WorldLocation loc, TeleportToOptions options = 0, int? instanceId = null)
         {
             return TeleportTo(loc.GetMapId(), loc.posX, loc.posY, loc.posZ, loc.Orientation, options, instanceId);
         }
-        public bool TeleportTo(uint mapid, float x, float y, float z, float orientation, TeleportToOptions options = 0, uint? instanceId = null)
+        public bool TeleportTo(int mapid, float x, float y, float z, float orientation, TeleportToOptions options = 0, uint? instanceId = null)
         {
             if (!GridDefines.IsValidMapCoord(mapid, x, y, z, orientation))
             {
@@ -1594,7 +1914,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (!GetSession().HasPermission(RBACPermissions.SkipCheckDisableMap) && Global.DisableMgr.IsDisabledFor(DisableType.Map, mapid, this))
+            if (!GetSession().HasPermission(RBACPermissions.SkipCheckDisableMap) && DisableMgr.IsDisabledFor(DisableType.Map, mapid, this))
             {
                 Log.outError(LogFilter.Maps, "Player (GUID: {0}, name: {1}) tried to enter a forbidden map {2}", GetGUID().ToString(), GetName(), mapid);
                 SendTransferAborted(mapid, TransferAbortReason.MapNotAllowed);
@@ -1648,7 +1968,7 @@ namespace Game.Entities
             // The player was ported to another map and loses the duel immediately.
             // We have to perform this check before the teleport, otherwise the
             // ObjectAccessor won't find the flag.
-            if (duel != null && GetMapId() != mapid && GetMap().GetGameObject(m_playerData.DuelArbiter))
+            if (duel != null && GetMapId() != mapid && GetMap().GetGameObject(m_playerData.DuelArbiter) != null)
                 DuelComplete(DuelCompleteType.Fled);
 
             if (GetMapId() == mapid && (!instanceId.HasValue || GetInstanceId() == instanceId))
@@ -1672,7 +1992,7 @@ namespace Game.Entities
                 if (!options.HasAnyFlag(TeleportToOptions.NotUnSummonPet))
                 {
                     //same map, only remove pet if out of range for new position
-                    if (pet && !pet.IsWithinDist3d(x, y, z, GetMap().GetVisibilityRange()))
+                    if (pet != null && !pet.IsWithinDist3d(x, y, z, GetMap().GetVisibilityRange()))
                         UnsummonPetTemporaryIfAny();
                 }
 
@@ -1717,7 +2037,7 @@ namespace Game.Entities
                 }
 
                 // Seamless teleport can happen only if cosmetic maps match
-                if (!oldmap || (oldmap.GetEntry().CosmeticParentMapID != mapid && GetMapId() != mEntry.CosmeticParentMapID &&
+                if (oldmap == null || (oldmap.GetEntry().CosmeticParentMapID != mapid && GetMapId() != mEntry.CosmeticParentMapID &&
                     !((oldmap.GetEntry().CosmeticParentMapID != -1) ^ (oldmap.GetEntry().CosmeticParentMapID != mEntry.CosmeticParentMapID))))
                     options &= ~TeleportToOptions.Seamless;
 
@@ -1745,7 +2065,7 @@ namespace Game.Entities
 
                 // remove player from Battlegroundon far teleport (when changing maps)
                 Battleground bg = GetBattleground();
-                if (bg)
+                if (bg != null)
                 {
                     // Note: at Battlegroundjoin Battlegroundid set before teleport
                     // and we already will found "current" Battleground
@@ -1759,17 +2079,17 @@ namespace Game.Entities
                 {
                     RemoveArenaSpellCooldowns(true);
                     RemoveArenaAuras();
-                    if (pet)
+                    if (pet != null)
                         pet.RemoveArenaAuras();
                 }
 
                 // remove pet on map change
-                if (pet)
+                if (pet != null)
                     UnsummonPetTemporaryIfAny();
 
                 // remove all dyn objects
                 RemoveAllDynObjects();
-                
+
                 // remove all areatriggers entities
                 RemoveAllAreaTriggers();
 
@@ -1853,6 +2173,8 @@ namespace Game.Entities
             }
             else if (playerClass == Class.DemonHunter)
                 startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartDemonHunterPlayerLevel), startLevel);
+            else if (playerClass == Class.Evoker)
+                startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartEvokerPlayerLevel), startLevel);
 
             if (characterTemplateId.HasValue)
             {
@@ -1884,7 +2206,7 @@ namespace Game.Entities
                 }
             });
 
-            if (!m_unitMovedByMe.GetVehicleBase() || !m_unitMovedByMe.GetVehicle().GetVehicleInfo().Flags.HasAnyFlag(VehicleFlags.FixedPosition))
+            if (m_unitMovedByMe.GetVehicleBase() == null || !m_unitMovedByMe.GetVehicle().GetVehicleInfo().Flags.HasAnyFlag(VehicleFlags.FixedPosition))
                 RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Root), MovementFlag.Root);
 
             /*! This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid
@@ -2007,7 +2329,7 @@ namespace Game.Entities
 
         public void SendSummonRequestFrom(Unit summoner)
         {
-            if (!summoner)
+            if (summoner == null)
                 return;
 
             // Player already has active summon request
@@ -2024,7 +2346,7 @@ namespace Game.Entities
 
             SummonRequest summonRequest = new();
             summonRequest.SummonerGUID = summoner.GetGUID();
-            summonRequest.SummonerVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+            summonRequest.SummonerVirtualRealmAddress = WorldMgr.GetVirtualRealmAddress();
             summonRequest.AreaID = (int)summoner.GetZoneId();
             SendPacket(summonRequest);
 
@@ -2100,7 +2422,7 @@ namespace Game.Entities
             // drop flag at summon
             // this code can be reached only when GM is summoning player who carries flag, because player should be immune to summoning spells when he carries flag
             Battleground bg = GetBattleground();
-            if (bg)
+            if (bg != null)
                 bg.EventPlayerDroppedFlag(this);
 
             m_summon_expire = 0;
@@ -2175,7 +2497,7 @@ namespace Game.Entities
                     pet.SetFaction(GetFaction());
 
                 // restore FFA PvP Server state
-                if (Global.WorldMgr.IsFFAPvPRealm())
+                if (WorldMgr.IsFFAPvPRealm())
                     SetPvpFlag(UnitPVPStateFlags.FFAPvp);
 
                 // restore FFA PvP area state, remove not allowed for GM mounts
@@ -2232,7 +2554,7 @@ namespace Game.Entities
 
             menu.GetGossipMenu().SetMenuId(menuId);
 
-            var menuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(menuId);
+            var menuItemBounds = ObjectMgr.GetGossipMenuItemsMapBounds(menuId);
 
             if (source.IsTypeId(TypeId.Unit))
             {
@@ -2245,17 +2567,17 @@ namespace Game.Entities
 
             foreach (var gossipMenuItem in menuItemBounds)
             {
-                if (!Global.ConditionMgr.IsObjectMeetToConditions(this, source, gossipMenuItem.Conditions))
+                if (!ConditionMgr.IsObjectMeetToConditions(this, source, gossipMenuItem.Conditions))
                     continue;
 
                 bool canTalk = true;
                 GameObject go = source.ToGameObject();
                 Creature creature = source.ToCreature();
-                if (creature)
+                if (creature != null)
                 {
                     switch (gossipMenuItem.OptionNpc)
                     {
-                        case GossipOptionNpc.TaxiNode:
+                        case GossipOptionNpc.Taxinode:
                             if (GetSession().SendLearnNewTaxiNode(creature))
                                 return;
                             break;
@@ -2263,17 +2585,17 @@ namespace Game.Entities
                             if (!IsDead())
                                 canTalk = false;
                             break;
-                        case GossipOptionNpc.BattleMaster:
-                            if (!creature.CanInteractWithBattleMaster(this, false))
+                        case GossipOptionNpc.Battlemaster:
+                            if (creature.CanInteractWithBattleMaster(this, false))
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.TalentMaster:
                         case GossipOptionNpc.SpecializationMaster:
                         case GossipOptionNpc.GlyphMaster:
-                            if (!creature.CanResetTalents(this))
+                            if (creature.CanResetTalents(this))
                                 canTalk = false;
                             break;
-                        case GossipOptionNpc.StableMaster:
+                        case GossipOptionNpc.Stablemaster:
                         case GossipOptionNpc.PetSpecializationMaster:
                             if (GetClass() != Class.Hunter)
                                 canTalk = false;
@@ -2304,7 +2626,7 @@ namespace Game.Entities
                         default:
                             if (gossipMenuItem.OptionNpc >= GossipOptionNpc.Max)
                             {
-                                Log.outError(LogFilter.Sql, $"Creature entry {creature.GetEntry()} has an unknown gossip option icon {gossipMenuItem.OptionNpc} for menu {gossipMenuItem.MenuId}.");
+                                Log.outError(LogFilter.Sql, $"Creature entry {creature.GetEntry()} has an unknown gossip option icon {gossipMenuItem.OptionNpc} for menu {gossipMenuItem.MenuID}.");
                                 canTalk = false;
                             }
                             break;                                         // NYI
@@ -2325,50 +2647,12 @@ namespace Game.Entities
                 }
 
                 if (canTalk)
-                {
-                    string strOptionText;
-                    string strBoxText;
-                    BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuItem.OptionBroadcastTextId);
-                    BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuItem.BoxBroadcastTextId);
-                    Locale locale = GetSession().GetSessionDbLocaleIndex();
-
-                    if (optionBroadcastText != null)
-                        strOptionText = Global.DB2Mgr.GetBroadcastTextValue(optionBroadcastText, locale, GetGender());
-                    else
-                        strOptionText = gossipMenuItem.OptionText;
-
-                    if (boxBroadcastText != null)
-                        strBoxText = Global.DB2Mgr.GetBroadcastTextValue(boxBroadcastText, locale, GetGender());
-                    else
-                        strBoxText = gossipMenuItem.BoxText;
-
-                    if (locale != Locale.enUS)
-                    {
-                        if (optionBroadcastText == null)
-                        {
-                            // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, gossipMenuItem.OptionId);
-                            if (gossipMenuLocale != null)
-                                ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, locale, ref strOptionText);
-                        }
-
-                        if (boxBroadcastText == null)
-                        {
-                            // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, gossipMenuItem.OptionId);
-                            if (gossipMenuLocale != null)
-                                ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, locale, ref strBoxText);
-                        }
-                    }
-
-                    menu.GetGossipMenu().AddMenuItem((int)gossipMenuItem.OptionId, gossipMenuItem.OptionNpc, strOptionText, 0, (uint)gossipMenuItem.OptionNpc, strBoxText, gossipMenuItem.BoxMoney, gossipMenuItem.BoxCoded);
-                    menu.GetGossipMenu().AddGossipMenuItemData(gossipMenuItem.OptionId, gossipMenuItem.ActionMenuId, gossipMenuItem.ActionPoiId);
-                }
+                    menu.GetGossipMenu().AddMenuItem(gossipMenuItem, gossipMenuItem.MenuID, gossipMenuItem.OrderIndex);
             }
         }
         public void SendPreparedGossip(WorldObject source)
         {
-            if (!source)
+            if (source == null)
                 return;
 
             if (source.IsTypeId(TypeId.Unit) || source.IsTypeId(TypeId.GameObject))
@@ -2390,7 +2674,7 @@ namespace Game.Entities
 
             PlayerTalkClass.SendGossipMenu(textId, source.GetGUID());
         }
-        public void OnGossipSelect(WorldObject source, uint gossipListId, uint menuId)
+        public void OnGossipSelect(WorldObject source, int gossipOptionId, uint menuId)
         {
             GossipMenu gossipMenu = PlayerTalkClass.GetGossipMenu();
 
@@ -2398,7 +2682,7 @@ namespace Game.Entities
             if (menuId != gossipMenu.GetMenuId())
                 return;
 
-            GossipMenuItem item = gossipMenu.GetItem(gossipListId);
+            GossipMenuItem item = gossipMenu.GetItem(gossipOptionId);
             if (item == null)
                 return;
 
@@ -2414,10 +2698,6 @@ namespace Game.Entities
                 }
             }
 
-            GossipMenuItemData menuItemData = gossipMenu.GetItemData(gossipListId);
-            if (menuItemData == null)
-                return;
-
             long cost = item.BoxMoney;
             if (!HasEnoughMoney(cost))
             {
@@ -2426,53 +2706,39 @@ namespace Game.Entities
                 return;
             }
 
+            if (item.ActionPoiID != 0)
+                PlayerTalkClass.SendPointOfInterest(item.ActionPoiID);
+
+            if (item.ActionMenuID != 0)
+            {
+                PrepareGossipMenu(source, item.ActionMenuID);
+                SendPreparedGossip(source);
+            }
+
+            // types that have their dedicated open opcode dont send WorldPackets::NPC::GossipOptionNPCInteraction
+            bool handled = true;
             switch (gossipOptionNpc)
             {
-                case GossipOptionNpc.None:
-                {
-                    if (menuItemData.GossipActionPoi != 0)
-                        PlayerTalkClass.SendPointOfInterest(menuItemData.GossipActionPoi);
-
-                    if (menuItemData.GossipActionMenuId != 0)
-                    {
-                        PrepareGossipMenu(source, menuItemData.GossipActionMenuId);
-                        SendPreparedGossip(source);
-                    }
-
-                    break;
-                }
                 case GossipOptionNpc.Vendor:
                     GetSession().SendListInventory(guid);
                     break;
-                case GossipOptionNpc.TaxiNode:
+                case GossipOptionNpc.Taxinode:
                     GetSession().SendTaxiMenu(source.ToCreature());
                     break;
                 case GossipOptionNpc.Trainer:
-                    GetSession().SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, gossipListId));
+                    GetSession().SendTrainerList(source.ToCreature(), ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, item.OrderIndex));
                     break;
                 case GossipOptionNpc.SpiritHealer:
-                    if (IsDead())
-                        source.ToCreature().CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                            .SetOriginalCaster(GetGUID()));
-                    break;
-                case GossipOptionNpc.Binder:
-                    PlayerTalkClass.SendCloseGossip();
-                    SetBindPoint(guid);
-                    break;
-                case GossipOptionNpc.Banker:
-                    GetSession().SendShowBank(guid);
+                    source.CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(GetGUID()));
+                    handled = false;
                     break;
                 case GossipOptionNpc.PetitionVendor:
                     PlayerTalkClass.SendCloseGossip();
                     GetSession().SendPetitionShowList(guid);
                     break;
-                case GossipOptionNpc.TabardVendor:
-                    PlayerTalkClass.SendCloseGossip();
-                    GetSession().SendTabardVendorActivate(guid);
-                    break;
-                case GossipOptionNpc.BattleMaster:
+                case GossipOptionNpc.Battlemaster:
                 {
-                    BattlegroundTypeId bgTypeId = Global.BattlegroundMgr.GetBattleMasterBG(source.GetEntry());
+                    BattlegroundTypeId bgTypeId = BattlegroundMgr.GetBattleMasterBG(source.GetEntry());
 
                     if (bgTypeId == BattlegroundTypeId.None)
                     {
@@ -2480,7 +2746,7 @@ namespace Game.Entities
                         return;
                     }
 
-                    Global.BattlegroundMgr.SendBattlegroundList(this, guid, bgTypeId);
+                    BattlegroundMgr.SendBattlegroundList(this, guid, bgTypeId);
                     break;
                 }
                 case GossipOptionNpc.Auctioneer:
@@ -2490,12 +2756,25 @@ namespace Game.Entities
                     PlayerTalkClass.SendCloseGossip();
                     SendRespecWipeConfirm(guid, WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost) ? 0 : GetNextResetTalentsCost(), SpecResetType.Talents);
                     break;
-                case GossipOptionNpc.StableMaster:
-                    GetSession().SendStablePet(guid);
+                case GossipOptionNpc.Stablemaster:
+                    SetStableMaster(guid);
+                    handled = false;
                     break;
                 case GossipOptionNpc.PetSpecializationMaster:
                     PlayerTalkClass.SendCloseGossip();
                     SendRespecWipeConfirm(guid, WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost) ? 0 : GetNextResetTalentsCost(), SpecResetType.PetTalents);
+                    break;
+                case GossipOptionNpc.GuildBanker:
+                    Guild guild = GetGuild();
+                    if (guild != null)
+                        guild.SendBankList(GetSession(), 0, true);
+                    else
+                        Guild.SendCommandResult(GetSession(), GuildCommandType.ViewTab, GuildCommandError.PlayerNotInGuild);
+                    break;
+                case GossipOptionNpc.Spellclick:
+                    Unit sourceUnit = source.ToUnit();
+                    if (sourceUnit != null)
+                        sourceUnit.HandleSpellClick(this);
                     break;
                 case GossipOptionNpc.DisableXPGain:
                     PlayerTalkClass.SendCloseGossip();
@@ -2507,9 +2786,6 @@ namespace Game.Entities
                     RemoveAurasDueToSpell(PlayerConst.SpellExperienceEliminated);
                     RemovePlayerFlag(PlayerFlags.NoXPGain);
                     break;
-                case GossipOptionNpc.Mailbox:
-                    GetSession().SendShowMailBox(guid);
-                    break;
                 case GossipOptionNpc.SpecializationMaster:
                     PlayerTalkClass.SendCloseGossip();
                     SendRespecWipeConfirm(guid, 0, SpecResetType.Specialization);
@@ -2518,15 +2794,74 @@ namespace Game.Entities
                     PlayerTalkClass.SendCloseGossip();
                     SendRespecWipeConfirm(guid, 0, SpecResetType.Glyphs);
                     break;
-                case GossipOptionNpc.GarrisonTalent:
-                {
+                case GossipOptionNpc.GarrisonTradeskillNpc: // NYI
                     break;
-                }
-                //case GossipOptionNpc.Transmogrify:
-                //    GetSession().SendOpenTransmogrifier(guid);
-                //    break;
+                case GossipOptionNpc.GarrisonRecruitment: // NYI
+                    break;
+                case GossipOptionNpc.ChromieTimeNpc: // NYI
+                    break;
+                case GossipOptionNpc.RuneforgeLegendaryCrafting: // NYI
+                    break;
+                case GossipOptionNpc.RuneforgeLegendaryUpgrade: // NYI
+                    break;
+                case GossipOptionNpc.ProfessionsCraftingOrder: // NYI
+                    break;
+                case GossipOptionNpc.ProfessionsCustomerOrder: // NYI
+                    break;
+                case GossipOptionNpc.BarbersChoice: // NYI - unknown if needs sending
                 default:
+                    handled = false;
                     break;
+            }
+
+            if (!handled)
+            {
+                if (item.GossipNpcOptionID.HasValue)
+                {
+                    GossipMenuAddon addon = ObjectMgr.GetGossipMenuAddon(menuId);
+
+                    GossipOptionNPCInteraction npcInteraction = new();
+                    npcInteraction.GossipGUID = source.GetGUID();
+                    npcInteraction.GossipNpcOptionID = item.GossipNpcOptionID.Value;
+                    if (addon != null && addon.FriendshipFactionID != 0)
+                        npcInteraction.FriendshipFactionID = addon.FriendshipFactionID;
+
+                    SendPacket(npcInteraction);
+                }
+                else
+                {
+                    PlayerInteractionType[] GossipOptionNpcToInteractionType =
+                    {
+                        PlayerInteractionType.None, PlayerInteractionType.Vendor, PlayerInteractionType.TaxiNode,
+                        PlayerInteractionType.Trainer, PlayerInteractionType.SpiritHealer, PlayerInteractionType.Binder,
+                        PlayerInteractionType.Banker, PlayerInteractionType.PetitionVendor, PlayerInteractionType.GuildTabardVendor,
+                        PlayerInteractionType.BattleMaster, PlayerInteractionType.Auctioneer, PlayerInteractionType.TalentMaster,
+                        PlayerInteractionType.StableMaster, PlayerInteractionType.None, PlayerInteractionType.GuildBanker,
+                        PlayerInteractionType.None, PlayerInteractionType.None, PlayerInteractionType.None,
+                        PlayerInteractionType.MailInfo, PlayerInteractionType.None, PlayerInteractionType.LFGDungeon,
+                        PlayerInteractionType.ArtifactForge, PlayerInteractionType.None, PlayerInteractionType.SpecializationMaster,
+                        PlayerInteractionType.None, PlayerInteractionType.None, PlayerInteractionType.GarrArchitect,
+                        PlayerInteractionType.GarrMission, PlayerInteractionType.ShipmentCrafter, PlayerInteractionType.GarrTradeskill,
+                        PlayerInteractionType.GarrRecruitment, PlayerInteractionType.AdventureMap, PlayerInteractionType.GarrTalent,
+                        PlayerInteractionType.ContributionCollector, PlayerInteractionType.Transmogrifier, PlayerInteractionType.AzeriteRespec,
+                        PlayerInteractionType.IslandQueue, PlayerInteractionType.ItemInteraction, PlayerInteractionType.WorldMap,
+                        PlayerInteractionType.Soulbind, PlayerInteractionType.ChromieTime, PlayerInteractionType.CovenantPreview,
+                        PlayerInteractionType.LegendaryCrafting, PlayerInteractionType.NewPlayerGuide, PlayerInteractionType.LegendaryCrafting,
+                        PlayerInteractionType.Renown, PlayerInteractionType.BlackMarketAuctioneer, PlayerInteractionType.PerksProgramVendor,
+                        PlayerInteractionType.ProfessionsCraftingOrder, PlayerInteractionType.Professions, PlayerInteractionType.ProfessionsCustomerOrder,
+                        PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown
+                    };
+
+                    PlayerInteractionType interactionType = GossipOptionNpcToInteractionType[(int)gossipOptionNpc];
+                    if (interactionType != PlayerInteractionType.None)
+                    {
+                        NPCInteractionOpenResult npcInteraction = new();
+                        npcInteraction.Npc = source.GetGUID();
+                        npcInteraction.InteractionType = interactionType;
+                        npcInteraction.Success = true;
+                        SendPacket(npcInteraction);
+                    }
+                }
             }
 
             ModifyMoney(-cost);
@@ -2537,7 +2872,7 @@ namespace Game.Entities
             if (source == null)
                 return SharedConst.DefaultGossipMessage;
 
-            return GetGossipTextId(GetDefaultGossipMenuForSource(source), source);
+            return GetGossipTextId(GetGossipMenuForSource(source), source);
         }
 
         public uint GetGossipTextId(uint menuId, WorldObject source)
@@ -2547,22 +2882,48 @@ namespace Game.Entities
             if (menuId == 0)
                 return textId;
 
-            var menuBounds = Global.ObjectMgr.GetGossipMenusMapBounds(menuId);
+            var menuBounds = ObjectMgr.GetGossipMenusMapBounds(menuId);
 
             foreach (var menu in menuBounds)
             {
-                if (Global.ConditionMgr.IsObjectMeetToConditions(this, source, menu.Conditions))
+                // continue if only checks menuid instead of text
+                if (menu.TextId == 0)
+                    continue;
+
+                if (ConditionMgr.IsObjectMeetToConditions(this, source, menu.Conditions))
                     textId = menu.TextId;
             }
 
             return textId;
         }
-        public static uint GetDefaultGossipMenuForSource(WorldObject source)
+
+        public uint GetGossipMenuForSource(WorldObject source)
         {
             switch (source.GetTypeId())
             {
                 case TypeId.Unit:
-                    return source.ToCreature().GetGossipMenuId();
+                {
+                    uint menuIdToShow = source.ToCreature().GetGossipMenuId();
+
+                    // if menu id is set by script
+                    if (menuIdToShow != 0)
+                        return menuIdToShow;
+
+                    // otherwise pick from db based on conditions
+                    foreach (uint menuId in source.ToCreature().GetCreatureTemplate().GossipMenuIds)
+                    {
+                        var menuBounds = ObjectMgr.GetGossipMenusMapBounds(menuId);
+
+                        foreach (var itr in menuBounds)
+                        {
+                            if (!ConditionMgr.IsObjectMeetToConditions(this, source, itr.Conditions))
+                                continue;
+
+                            menuIdToShow = menuId;
+                        }
+                    }
+                    return menuIdToShow;
+                }
                 case TypeId.GameObject:
                     return source.ToGameObject().GetGoInfo().GetGossipMenuId();
                 default:
@@ -2574,10 +2935,10 @@ namespace Game.Entities
 
         public bool CanJoinConstantChannelInZone(ChatChannelsRecord channel, AreaTableRecord zone)
         {
-            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.ZoneDep) && zone.HasFlag(AreaFlags.ArenaInstance))
+            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.ZoneDep) && zone.GetFlags().HasFlag(AreaFlags.NoChatChannels))
                 return false;
 
-            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly) && !zone.HasFlag(AreaFlags.Capital))
+            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly) && !zone.GetFlags().HasFlag(AreaFlags.AllowTradeChannel))
                 return false;
 
             if (channel.Flags.HasAnyFlag(ChannelDBCFlags.GuildReq) && GetGuildId() != 0)
@@ -2686,7 +3047,8 @@ namespace Game.Entities
 
         //Mail
         public void AddMail(Mail mail) { m_mail.Insert(0, mail); }
-        public void RemoveMail(uint id)
+
+        public void RemoveMail(ulong id)
         {
             foreach (var mail in m_mail)
             {
@@ -2698,27 +3060,30 @@ namespace Game.Entities
                 }
             }
         }
-        public void SendMailResult(uint mailId, MailResponseType mailAction, MailResponseResult mailError, InventoryResult equipError = 0, uint item_guid = 0, uint item_count = 0)
+
+        public void SendMailResult(ulong mailId, MailResponseType mailAction, MailResponseResult mailError, InventoryResult equipError = 0, ulong itemGuid = 0, uint itemCount = 0)
         {
             MailCommandResult result = new();
             result.MailID = mailId;
-            result.Command = (uint)mailAction;
-            result.ErrorCode = (uint)mailError;
+            result.Command = (int)mailAction;
+            result.ErrorCode = (int)mailError;
 
             if (mailError == MailResponseResult.EquipError)
-                result.BagResult = (uint)equipError;
+                result.BagResult = (int)equipError;
             else if (mailAction == MailResponseType.ItemTaken)
             {
-                result.AttachID = item_guid;
-                result.QtyInInventory = item_count;
+                result.AttachID = itemGuid;
+                result.QtyInInventory = (int)itemCount;
             }
 
             SendPacket(result);
         }
+
         void SendNewMail()
         {
             SendPacket(new NotifyReceivedMail());
         }
+
         public void UpdateNextMailTimeAndUnreads()
         {
             // calculate next delivery time (min. from non-delivered mails
@@ -2733,10 +3098,11 @@ namespace Game.Entities
                     if (m_nextMailDelivereTime == 0 || m_nextMailDelivereTime > mail.deliver_time)
                         m_nextMailDelivereTime = mail.deliver_time;
                 }
-                else if ((mail.checkMask & MailCheckMask.Read) == 0)
+                else if ((mail.checkMask & MailCheckFlags.Read) == 0)
                     ++unReadMails;
             }
         }
+
         public void AddNewMailDeliverTime(long deliver_time)
         {
             if (deliver_time <= GameTime.GetGameTime())                          // ready now
@@ -2750,16 +3116,19 @@ namespace Game.Entities
                     m_nextMailDelivereTime = deliver_time;
             }
         }
+
         public void AddMItem(Item it)
         {
             mMitems[it.GetGUID().GetCounter()] = it;
         }
+
         public bool RemoveMItem(ulong id)
         {
             return mMitems.Remove(id);
         }
+
         public Item GetMItem(ulong id) { return mMitems.LookupByKey(id); }
-        public Mail GetMail(uint id) { return m_mail.Find(p => p.messageID == id); }
+        public Mail GetMail(ulong id) { return m_mail.Find(p => p.messageID == id); }
         public List<Mail> GetMails() { return m_mail; }
         public uint GetMailSize() { return (uint)m_mail.Count; }
 
@@ -2813,8 +3182,11 @@ namespace Game.Entities
         }
         public void SetBindPoint(ObjectGuid guid)
         {
-            BinderConfirm packet = new(guid);
-            SendPacket(packet);
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.Binder;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
         }
         public void SendBindPointUpdate()
         {
@@ -2837,16 +3209,16 @@ namespace Game.Entities
 
         public CinematicManager GetCinematicMgr() { return _cinematicMgr; }
 
-        public void SendUpdateWorldState(WorldStates variable, uint value, bool hidden = false)
+        public void SendUpdateWorldState(WorldStates variable, int value, bool hidden = false)
         {
-            SendUpdateWorldState((uint)variable, value, hidden);
+            SendUpdateWorldState((int)variable, value, hidden);
         }
 
-        public void SendUpdateWorldState(uint variable, uint value, bool hidden = false)
+        public void SendUpdateWorldState(int variable, int value, bool hidden = false)
         {
             UpdateWorldState worldstate = new();
             worldstate.VariableID = variable;
-            worldstate.Value = (int)value;
+            worldstate.Value = value;
             worldstate.Hidden = hidden;
             SendPacket(worldstate);
         }
@@ -2854,14 +3226,14 @@ namespace Game.Entities
         void SendInitWorldStates(uint zoneId, uint areaId)
         {
             // data depends on zoneid/mapid...
-            uint mapid = GetMapId();
+            int mapid = GetMapId();
 
             InitWorldStates packet = new();
             packet.MapID = mapid;
             packet.AreaID = zoneId;
             packet.SubareaID = areaId;
 
-            Global.WorldStateMgr.FillInitialWorldStates(packet, GetMap(), areaId);
+            WorldStateMgr.FillInitialWorldStates(packet, GetMap(), areaId);
 
             SendPacket(packet);
         }
@@ -2995,7 +3367,7 @@ namespace Game.Entities
                 {
                     Creature creature = GetMap().GetCreature(guid);
                     // Update fields of triggers, transformed units or unselectable units (values dependent on GM state)
-                    if (creature == null || (!creature.IsTrigger() && !creature.HasAuraType(AuraType.Transform) && !creature.HasUnitFlag(UnitFlags.Uninteractible)))
+                    if (creature == null || (!creature.IsTrigger() && !creature.HasAuraType(AuraType.Transform) && !creature.IsUninteractible()))
                         continue;
 
                     creature.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID);
@@ -3025,7 +3397,7 @@ namespace Game.Entities
 
         public bool IsAllowedToLoot(Creature creature)
         {
-            if (!creature.IsDead())
+            if (creature.IsDead())
                 return false;
 
             if (HasPendingBind())
@@ -3162,7 +3534,7 @@ namespace Game.Entities
             int curValue = GetPower(power);
 
             // TODO: updating haste should update UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER for certain power types
-            PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeEntry(power);
+            PowerTypeRecord powerType = DB2Mgr.GetPowerTypeEntry(power);
             if (powerType == null)
                 return;
 
@@ -3170,7 +3542,7 @@ namespace Game.Entities
 
             if (!IsInCombat())
             {
-                if (powerType.RegenInterruptTimeMS != 0 && Time.GetMSTimeDiffToNow(m_combatExitTime) < powerType.RegenInterruptTimeMS)
+                if (powerType.GetFlags().HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) < GameTime.Now())
                     return;
 
                 addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
@@ -3197,6 +3569,13 @@ namespace Game.Entities
                 WorldCfg.RatePowerArcaneCharges,
                 WorldCfg.RatePowerFury,
                 WorldCfg.RatePowerPain,
+                WorldCfg.RatePowerEssence,
+                0, // runes
+                0, // runes
+                0, // runes
+                0, // alternate
+                0, // alternate
+                0, // alternate
             };
 
             if (RatesForPower[(int)power] != 0)
@@ -3290,6 +3669,17 @@ namespace Game.Entities
             }
         }
 
+        public void InterruptPowerRegen(PowerType power)
+        {
+            uint powerIndex = GetPowerIndex(power);
+            if (powerIndex == (uint)PowerType.Max || powerIndex >= (uint)PowerType.MaxPerClass)
+                return;
+
+            m_regenInterruptTimestamp = GameTime.Now();
+            m_powerFraction[powerIndex] = 0.0f;
+            SendPacket(new InterruptPowerRegen(power));
+        }
+
         void RegenerateHealth()
         {
             uint curValue = (uint)GetHealth();
@@ -3360,7 +3750,7 @@ namespace Game.Entities
         {
             ObjectGuid selectionGUID = GetTarget();
             if (!selectionGUID.IsEmpty())
-                return Global.ObjAccessor.GetUnit(this, selectionGUID);
+                return ObjAccessor.GetUnit(this, selectionGUID);
             return null;
         }
 
@@ -3368,13 +3758,13 @@ namespace Game.Entities
         {
             ObjectGuid selectionGUID = GetTarget();
             if (!selectionGUID.IsEmpty())
-                return Global.ObjAccessor.GetPlayer(this, selectionGUID);
+                return ObjAccessor.GetPlayer(this, selectionGUID);
             return null;
         }
 
         public static bool IsValidGender(Gender _gender) { return _gender <= Gender.Female; }
         public static bool IsValidClass(Class _class) { return Convert.ToBoolean((1 << ((int)_class - 1)) & (int)Class.ClassMaskAllPlayable); }
-        public static bool IsValidRace(Race _race) { return Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(_race) & SharedConst.RaceMaskAllPlayable); }
+        public static bool IsValidRace(Race _race) { return RaceMask.Playable.HasRace(_race); }
 
         void LeaveLFGChannel()
         {
@@ -3497,9 +3887,9 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool IsNeverVisibleFor(WorldObject seer)
+        public override bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects = false)
         {
-            if (base.IsNeverVisibleFor(seer))
+            if (base.IsNeverVisibleFor(seer, allowServersideObjects))
                 return true;
 
             if (GetSession().PlayerLogout() || GetSession().PlayerLoading())
@@ -3563,7 +3953,7 @@ namespace Game.Entities
             StopMirrorTimers();                                     //disable timers(bars)
 
             // OnPlayerRepop hook
-            Global.ScriptMgr.OnPlayerRepop(this);
+            ScriptMgr.OnPlayerRepop(this);
         }
 
         public void StopMirrorTimers()
@@ -3761,6 +4151,8 @@ namespace Game.Entities
 
         public void ResurrectPlayer(float restore_percent, bool applySickness = false)
         {
+            SetAreaSpiritHealer(null);
+
             DeathReleaseLoc packet = new();
             packet.MapID = -1;
             SendPacket(packet);
@@ -3802,12 +4194,12 @@ namespace Game.Entities
             uint newzone, newarea;
             GetZoneAndAreaId(out newzone, out newarea);
             UpdateZone(newzone, newarea);
-            Global.OutdoorPvPMgr.HandlePlayerResurrects(this, newzone);
+            OutdoorPvPMgr.HandlePlayerResurrects(this, newzone);
 
             if (InBattleground())
             {
                 Battleground bg = GetBattleground();
-                if (bg)
+                if (bg != null)
                     bg.HandlePlayerResurrect(this);
             }
 
@@ -3844,6 +4236,44 @@ namespace Game.Entities
             }
         }
 
+        ObjectGuid GetSpiritHealerGUID() { return _areaSpiritHealerGUID; }
+        
+        public bool CanAcceptAreaSpiritHealFrom(Unit spiritHealer) { return spiritHealer.GetGUID() == _areaSpiritHealerGUID; }
+        
+        public void SetAreaSpiritHealer(Creature creature)
+        {
+            if (creature == null)
+            {
+                _areaSpiritHealerGUID = ObjectGuid.Empty;
+                RemoveAurasDueToSpell(BattlegroundConst.SpellWaitingForResurrect);
+                return;
+            }
+
+            if (creature.IsAreaSpiritHealer())
+                return;
+
+            _areaSpiritHealerGUID = creature.GetGUID();
+            CastSpell(null, BattlegroundConst.SpellWaitingForResurrect);
+        }
+
+        public void SendAreaSpiritHealerTime(Unit spiritHealer)
+        {
+            int timeLeft = 0;
+            Spell spell = spiritHealer.GetCurrentSpell(CurrentSpellTypes.Channeled);
+            if (spell != null)
+                timeLeft = spell.GetTimer();
+
+            SendAreaSpiritHealerTime(spiritHealer.GetGUID(), timeLeft);
+        }
+
+        public void SendAreaSpiritHealerTime(ObjectGuid spiritHealerGUID, int timeLeft)
+        {
+            AreaSpiritHealerTime areaSpiritHealerTime = new();
+            areaSpiritHealerTime.HealerGuid = spiritHealerGUID;
+            areaSpiritHealerTime.TimeLeft = (uint)timeLeft;
+            SendPacket(areaSpiritHealerTime);
+        }
+        
         public void KillPlayer()
         {
             if (IsFlying() && GetTransport() == null)
@@ -3915,7 +4345,7 @@ namespace Game.Entities
             corpse.SetDisplayId(GetNativeDisplayId());
             corpse.SetFactionTemplate(CliDB.ChrRacesStorage.LookupByKey(GetRace()).FactionID);
 
-            for (byte i = 0; i < EquipmentSlot.End; i++)
+            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; i++)
             {
                 if (m_items[i] != null)
                 {
@@ -3947,7 +4377,7 @@ namespace Game.Entities
         public void SpawnCorpseBones(bool triggerSave = true)
         {
             _corpseLocation = new WorldLocation();
-            if (GetMap().ConvertCorpseToBones(GetGUID()))
+            if (GetMap().ConvertCorpseToBones(GetGUID()) != null)
                 if (triggerSave && !GetSession().PlayerLogoutWithSave())   // at logout we will already store the player
                     SaveToDB();                                             // prevent loading as ghost without corpse
         }
@@ -3963,40 +4393,47 @@ namespace Game.Entities
 
             bool shouldResurrect = false;
             // Such zones are considered unreachable as a ghost and the player must be automatically revived
-            if ((!IsAlive() && zone != null && zone.HasFlag(AreaFlags.NeedFly)) || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
+            if ((!IsAlive() && zone != null && zone.GetFlags().HasFlag(AreaFlags.NoGhostOnRelease)) || GetMap().IsNonRaidDungeon() || GetMap().IsRaid() || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
             {
                 shouldResurrect = true;
                 SpawnCorpseBones();
             }
 
-            WorldSafeLocsEntry ClosestGrave;
+            WorldSafeLocsEntry closestGrave = null;
 
             // Special handle for Battlegroundmaps
             Battleground bg = GetBattleground();
-            if (bg)
-                ClosestGrave = bg.GetClosestGraveYard(this);
+            if (bg != null)
+                closestGrave = bg.GetClosestGraveyard(this);
             else
             {
-                BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetMap(), GetZoneId());
+                var bf = BattleFieldMgr.GetBattlefieldToZoneId(GetMap(), GetZoneId());
                 if (bf != null)
-                    ClosestGrave = bf.GetClosestGraveYard(this);
+                    closestGrave = bf.GetClosestGraveyard(this);
                 else
-                    ClosestGrave = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
+                {
+                    InstanceScript instance = GetInstanceScript();
+                    if (instance != null)
+                        closestGrave = ObjectMgr.GetWorldSafeLoc(instance.GetEntranceLocation());
+                }
             }
+
+            if (closestGrave == null)
+                closestGrave = ObjectMgr.GetClosestGraveyard(this, GetTeam(), this);
 
             // stop countdown until repop
             m_deathTimer = 0;
 
             // if no grave found, stay at the current location
             // and don't show spirit healer location
-            if (ClosestGrave != null)
+            if (closestGrave != null)
             {
-                TeleportTo(ClosestGrave.Loc, shouldResurrect ? TeleportToOptions.ReviveAtTeleport : 0);
+                TeleportTo(closestGrave.Loc, shouldResurrect ? TeleportToOptions.ReviveAtTeleport : 0);
                 if (IsDead())                                        // not send if alive, because it used in TeleportTo()
                 {
                     DeathReleaseLoc packet = new();
-                    packet.MapID = (int)ClosestGrave.Loc.GetMapId();
-                    packet.Loc = ClosestGrave.Loc;
+                    packet.MapID = (int)closestGrave.Loc.GetMapId();
+                    packet.Loc = closestGrave.Loc;
                     SendPacket(packet);
                 }
             }
@@ -4051,10 +4488,10 @@ namespace Game.Entities
         int CalculateCorpseReclaimDelay(bool load = false)
         {
             Corpse corpse = GetCorpse();
-            if (load && !corpse)
+            if (load && corpse == null)
                 return -1;
 
-            bool pvp = corpse ? corpse.GetCorpseType() == CorpseType.ResurrectablePVP : (m_ExtraFlags & PlayerExtraFlags.PVPDeath) != 0;
+            bool pvp = corpse != null ? corpse.GetCorpseType() == CorpseType.ResurrectablePVP : (m_ExtraFlags & PlayerExtraFlags.PVPDeath) != 0;
 
             uint delay;
             if (load)
@@ -4149,7 +4586,7 @@ namespace Game.Entities
             }
 
             Map map = GetMap();
-            uint petNumber = Global.ObjectMgr.GeneratePetNumber();
+            uint petNumber = ObjectMgr.GeneratePetNumber();
             if (!pet.Create(map.GenerateLowGuid(HighGuid.Pet), map, entry, petNumber))
             {
                 Log.outError(LogFilter.Server, "no such creature entry {0}", entry);
@@ -4202,10 +4639,10 @@ namespace Game.Entities
 
         public void RemovePet(Pet pet, PetSaveMode mode, bool returnreagent = false)
         {
-            if (!pet)
+            if (pet == null)
                 pet = GetPet();
 
-            if (pet)
+            if (pet != null)
             {
                 Log.outDebug(LogFilter.Pet, "RemovePet {0}, {1}, {2}", pet.GetEntry(), mode, returnreagent);
 
@@ -4213,11 +4650,11 @@ namespace Game.Entities
                     return;
             }
 
-            if (returnreagent && (pet || m_temporaryUnsummonedPetNumber != 0) && !InBattleground())
+            if (returnreagent && (pet != null || m_temporaryUnsummonedPetNumber != 0) && !InBattleground())
             {
                 //returning of reagents only for players, so best done here
-                uint spellId = pet ? (uint)pet.m_unitData.CreatedBySpell.GetValue() : m_oldpetspell;
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
+                uint spellId = pet != null ? pet.m_unitData.CreatedBySpell : m_oldpetspell;
+                SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
 
                 if (spellInfo != null)
                 {
@@ -4226,7 +4663,7 @@ namespace Game.Entities
                         if (spellInfo.Reagent[i] > 0)
                         {
                             //for succubus, voidwalker, felhunter and felguard credit soulshard when despawn reason other than death (out of range, logout)
-                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<ItemPosCount> dest, (uint)spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
+                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, (uint)spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
                             if (msg == InventoryResult.Ok)
                             {
                                 Item item = StoreNewItem(dest, (uint)spellInfo.Reagent[i], true, new ItemRandomEnchantmentId());
@@ -4255,8 +4692,26 @@ namespace Game.Entities
 
             PetStable.PetInfo currentPet = m_petStable.GetCurrentPet();
             Cypher.Assert(currentPet != null && currentPet.PetNumber == pet.GetCharmInfo().GetPetNumber());
-            if (mode == PetSaveMode.NotInSlot || mode == PetSaveMode.AsDeleted)
+            if (mode == PetSaveMode.NotInSlot)
                 m_petStable.CurrentPetIndex = null;
+            else if (mode == PetSaveMode.AsDeleted)
+            {
+                if (m_activePlayerData.PetStable.HasValue())
+                {
+                    int ufIndex = m_activePlayerData.PetStable.GetValue().Pets.FindIndexIf(p => p.PetNumber == currentPet.PetNumber);
+                    if (ufIndex >= 0)
+                    {
+                        StableInfo stableInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
+                        RemoveDynamicUpdateFieldValue(stableInfo.ModifyValue(stableInfo.Pets), ufIndex);
+                    }
+                }
+
+                var petIndex = m_petStable.GetCurrentActivePetIndex();
+                if (petIndex.HasValue)
+                    m_petStable.ActivePets[petIndex.Value] = null;
+
+                m_petStable.CurrentPetIndex = null;
+            }
             // else if (stable slots) handled in opcode handlers due to required swaps
             // else (current pet) doesnt need to do anything
 
@@ -4269,7 +4724,7 @@ namespace Game.Entities
             {
                 SendPacket(new PetSpells());
 
-                if (GetGroup())
+                if (GetGroup() != null)
                     SetGroupUpdateFlag(GroupUpdateFlags.Pet);
             }
         }
@@ -4302,7 +4757,7 @@ namespace Game.Entities
         public bool InArena()
         {
             Battleground bg = GetBattleground();
-            if (!bg || !bg.IsArena())
+            if (bg == null || !bg.IsArena())
                 return false;
 
             return true;
@@ -4334,12 +4789,12 @@ namespace Game.Entities
 
         public void SendPlayerChoice(ObjectGuid sender, int choiceId)
         {
-            PlayerChoice playerChoice = Global.ObjectMgr.GetPlayerChoice(choiceId);
+            PlayerChoice playerChoice = ObjectMgr.GetPlayerChoice(choiceId);
             if (playerChoice == null)
                 return;
 
             Locale locale = GetSession().GetSessionDbLocaleIndex();
-            PlayerChoiceLocale playerChoiceLocale = locale != Locale.enUS ? Global.ObjectMgr.GetPlayerChoiceLocale(choiceId) : null;
+            PlayerChoiceLocale playerChoiceLocale = locale != Locale.enUS ? ObjectMgr.GetPlayerChoiceLocale(choiceId) : null;
 
             PlayerTalkClass.GetInteractionData().Reset();
             PlayerTalkClass.GetInteractionData().SourceGuid = sender;
@@ -4550,7 +5005,7 @@ namespace Game.Entities
 
             do
             {
-                if ((area.Flags[1] & (uint)AreaFlags2.CanEnableWarMode) != 0)
+                if (area.GetFlags2().HasFlag(AreaFlags2.AllowWarModeToggle))
                     return true;
 
                 area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
@@ -4571,6 +5026,7 @@ namespace Game.Entities
                     RemovePlayerFlag(PlayerFlags.WarModeActive);
                     CastSpell(this, auraInside, true);
                     RemoveAurasDueToSpell(auraOutside);
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.WarModeLeave);
                 }
                 else
                 {
@@ -4588,6 +5044,7 @@ namespace Game.Entities
                 RemoveAurasDueToSpell(auraInside);
                 RemovePlayerFlag(PlayerFlags.WarModeActive);
                 RemovePvpFlag(UnitPVPStateFlags.PvP);
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.WarModeLeave);
             }
         }
 
@@ -4646,23 +5103,24 @@ namespace Game.Entities
         public int GetEffectiveTeamId() { return GetEffectiveTeam() == Team.Alliance ? TeamId.Alliance : TeamId.Horde; }
 
         //Money
-        public ulong GetMoney() { return m_activePlayerData.Coinage; }
-        public bool HasEnoughMoney(ulong amount) { return GetMoney() >= amount; }
+        public long GetMoney() { return m_activePlayerData.Coinage; }
+
         public bool HasEnoughMoney(long amount)
         {
             if (amount > 0)
-                return (GetMoney() >= (ulong)amount);
+                return (GetMoney() >= amount);
             return true;
         }
+
         public bool ModifyMoney(long amount, bool sendError = true)
         {
             if (amount == 0)
                 return true;
 
-            Global.ScriptMgr.OnPlayerMoneyChanged(this, amount);
+            ScriptMgr.OnPlayerMoneyChanged(this, amount);
 
             if (amount < 0)
-                SetMoney((ulong)(GetMoney() > (ulong)-amount ? (long)GetMoney() + amount : 0));
+                SetMoney((GetMoney() > (ulong)-amount ? GetMoney() + amount : 0));
             else
             {
                 if (GetMoney() <= (PlayerConst.MaxMoneyAmount - (ulong)amount))
@@ -4676,12 +5134,12 @@ namespace Game.Entities
             }
             return true;
         }
-        public void SetMoney(ulong value)
+        public void SetMoney(long value)
         {
             bool loading = GetSession().PlayerLoading();
 
             if (!loading)
-                MoneyChanged((uint)value);
+                MoneyChanged(value);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), value);
 
@@ -4728,23 +5186,26 @@ namespace Game.Entities
                 RemovePlayerFlag(PlayerFlags.GuildLevelEnabled);
             }
 
-            Global.CharacterCacheStorage.UpdateCharacterGuildId(GetGUID(), guildId);
+            CharacterCacheStorage.UpdateCharacterGuildId(GetGUID(), guildId);
         }
         public void SetGuildRank(byte rankId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildRankID), rankId); }
         public uint GetGuildRank() { return m_playerData.GuildRankID; }
         public void SetGuildLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildLevel), (int)level); }
         public uint GetGuildLevel() { return (uint)m_playerData.GuildLevel.GetValue(); }
         public void SetGuildIdInvited(ulong GuildId) { m_GuildIdInvited = GuildId; }
-        public ulong GetGuildId() { return ((ObjectGuid)m_unitData.GuildGUID).GetCounter(); }
+        public long GetGuildId() { return ((ObjectGuid)m_unitData.GuildGUID).GetCounter(); }
+
         public Guild GetGuild()
         {
-            ulong guildId = GetGuildId();
-            return guildId != 0 ? Global.GuildMgr.GetGuildById(guildId) : null;
+            long guildId = GetGuildId();
+            return guildId != 0 ? GuildMgr.GetGuildById(guildId) : null;
         }
-        public ulong GetGuildIdInvited() { return m_GuildIdInvited; }
+
+        public long GetGuildIdInvited() { return m_GuildIdInvited; }
+
         public string GetGuildName()
         {
-            return GetGuildId() != 0 ? Global.GuildMgr.GetGuildById(GetGuildId()).GetName() : "";
+            return GetGuildId() != 0 ? GuildMgr.GetGuildById(GetGuildId()).GetName() : "";
         }
 
         public void SetFreePrimaryProfessions(uint profs)
@@ -4762,9 +5223,9 @@ namespace Game.Entities
             if (guild != null)
                 guild.UpdateMemberData(this, GuildMemberData.Level, level);
 
-            PlayerLevelInfo info = Global.ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), level);
+            PlayerLevelInfo info = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), level);
 
-            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), level, out uint basemana);
+            ObjectMgr.GetPlayerClassLevelInfo(GetClass(), level, out uint basemana);
 
             LevelUpInfo packet = new();
             packet.Level = level;
@@ -4782,12 +5243,12 @@ namespace Game.Entities
             for (Stats i = Stats.Strength; i < Stats.Max; ++i)
                 packet.StatDelta[(int)i] = info.stats[(int)i] - (int)GetCreateStat(i);
 
-            packet.NumNewTalents = (int)(GetNumTalentsAtLevel(level) - GetNumTalentsAtLevel(oldLevel));
-            packet.NumNewPvpTalentSlots = Global.DB2Mgr.GetPvpTalentNumSlotsAtLevel(level, GetClass()) - Global.DB2Mgr.GetPvpTalentNumSlotsAtLevel(oldLevel, GetClass());
+            packet.NumNewTalents = (int)(DB2Mgr.GetNumTalentsAtLevel(level, GetClass()) - DB2Mgr.GetNumTalentsAtLevel(oldLevel, GetClass()));
+            packet.NumNewPvpTalentSlots = DB2Mgr.GetPvpTalentNumSlotsAtLevel(level, GetClass()) - DB2Mgr.GetPvpTalentNumSlotsAtLevel(oldLevel, GetClass());
 
             SendPacket(packet);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), (int)Global.ObjectMgr.GetXPForLevel(level));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), ObjectMgr.GetXPForLevel(level));
 
             //update level, max level of skills
             m_PlayedTimeLevel = 0;                   // Level Played Time reset
@@ -4824,14 +5285,16 @@ namespace Game.Entities
 
             // Only health and mana are set to maximum.
             SetFullHealth();
-            SetFullPower(PowerType.Mana);
+            foreach (PowerTypeRecord powerType in CliDB.PowerTypeStorage.Values)
+                if (powerType.GetFlags().HasFlag(PowerTypeFlags.SetToMaxOnLevelUp))
+                    SetFullPower(powerType.PowerTypeEnum);
 
             // update level to hunter/summon pet
             Pet pet = GetPet();
-            if (pet)
+            if (pet != null)
                 pet.SynchronizeLevelWithOwner();
 
-            MailLevelReward mailReward = Global.ObjectMgr.GetMailLevelReward(level, (uint)SharedConst.GetMaskForRace(GetRace()));
+            MailLevelReward mailReward = ObjectMgr.GetMailLevelReward(level, GetRace());
             if (mailReward != null)
             {
                 //- TODO: Poor design of mail system
@@ -4840,18 +5303,20 @@ namespace Game.Entities
                 DB.Characters.CommitTransaction(trans);
             }
 
+            StartCriteria(CriteriaStartEvent.ReachLevel, level);
             UpdateCriteria(CriteriaType.ReachLevel);
             UpdateCriteria(CriteriaType.ActivelyReachLevel, level);
 
             PushQuests();
 
-            Global.ScriptMgr.OnPlayerLevelChanged(this, (byte)oldLevel);
+            ScriptMgr.OnPlayerLevelChanged(this, (byte)oldLevel);
         }
 
         public bool CanParry()
         {
             return m_canParry;
         }
+
         public bool CanBlock()
         {
             return m_canBlock;
@@ -4868,6 +5333,7 @@ namespace Game.Entities
             if (!IsGameMaster() && IsAFK() && InBattleground() && !InArena())
                 LeaveBattleground();
         }
+
         public void ToggleDND()
         {
             if (IsDND())
@@ -4875,6 +5341,7 @@ namespace Game.Entities
             else
                 SetPlayerFlag(PlayerFlags.DND);
         }
+
         public bool IsAFK() { return HasPlayerFlag(PlayerFlags.AFK); }
         public bool IsDND() { return HasPlayerFlag(PlayerFlags.DND); }
 
@@ -4901,16 +5368,15 @@ namespace Game.Entities
 
         public void InitDisplayIds()
         {
-            ChrModelRecord model = Global.DB2Mgr.GetChrModel(GetRace(), GetNativeGender());
+            ChrModelRecord model = DB2Mgr.GetChrModel(GetRace(), GetNativeGender());
             if (model == null)
             {
                 Log.outError(LogFilter.Player, $"Player {GetGUID()} has incorrect race/gender pair. Can't init display ids.");
                 return;
             }
 
-            SetDisplayId(model.DisplayID);
-            SetNativeDisplayId(model.DisplayID);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
+            SetDisplayId(model.DisplayID, true);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), DB2Mgr.GetEmptyAnimStateID());
         }
 
         //Creature
@@ -4932,11 +5398,11 @@ namespace Game.Entities
                 return null;
 
             // Deathstate checks
-            if (!IsAlive() && !Convert.ToBoolean(creature.GetCreatureTemplate().TypeFlags & CreatureTypeFlags.VisibleToGhosts))
+            if (!IsAlive() && !creature.GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.VisibleToGhosts))
                 return null;
 
             // alive or spirit healer
-            if (!creature.IsAlive() && !Convert.ToBoolean(creature.GetCreatureTemplate().TypeFlags & CreatureTypeFlags.InteractWhileDead))
+            if (creature.IsAlive() && !creature.GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.InteractWhileDead))
                 return null;
 
             // appropriate npc Type
@@ -4955,7 +5421,7 @@ namespace Game.Entities
                 return null;
 
             // not allow interaction under control, but allow with own pets
-            if (!creature.GetCharmerGUID().IsEmpty())
+            if (creature.GetCharmerGUID().IsEmpty())
                 return null;
 
             // not unfriendly/hostile
@@ -4963,7 +5429,7 @@ namespace Game.Entities
                 return null;
 
             // not too far, taken from CGGameUI::SetInteractTarget
-            if (!creature.IsWithinDistInMap(this, creature.GetCombatReach() + 4.0f))
+            if (creature.IsWithinDistInMap(this, creature.GetCombatReach() + 4.0f))
                 return null;
 
             return creature;
@@ -4998,7 +5464,7 @@ namespace Game.Entities
         public GameObject GetGameObjectIfCanInteractWith(ObjectGuid guid, GameObjectTypes type)
         {
             GameObject go = GetGameObjectIfCanInteractWith(guid);
-            if (!go)
+            if (go == null)
                 return null;
 
             if (go.GetGoType() != type)
@@ -5048,7 +5514,7 @@ namespace Game.Entities
             ActiveGlyphs activeGlyphs = new();
             foreach (uint glyphId in GetGlyphs(GetActiveTalentGroup()))
             {
-                List<uint> bindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
+                List<uint> bindableSpells = DB2Mgr.GetGlyphBindableSpells(glyphId);
                 foreach (uint bindableSpell in bindableSpells)
                     if (HasSpell(bindableSpell) && !m_overrideSpells.ContainsKey(bindableSpell))
                         activeGlyphs.Glyphs.Add(new GlyphBinding(bindableSpell, (ushort)glyphId));
@@ -5151,12 +5617,12 @@ namespace Game.Entities
                     auraList.First().HandleEffect(this, AuraEffectHandleModes.SendForClient, true);
             }
 
-            if (HasAuraType(AuraType.ModStun))
+            if (HasAuraType(AuraType.ModStun) || HasAuraType(AuraType.ModStunDisableGravity))
                 SetRooted(true);
 
             MoveSetCompoundState setCompoundState = new();
             // manual send package (have code in HandleEffect(this, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT, true); that must not be re-applied.
-            if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2))
+            if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity))
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveRoot, m_movementCounter++));
 
             if (HasAuraType(AuraType.FeatherFall))
@@ -5167,6 +5633,9 @@ namespace Game.Entities
 
             if (HasAuraType(AuraType.Hover))
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveSetHovering, m_movementCounter++));
+
+            if (HasAuraType(AuraType.ModRootDisableGravity) || HasAuraType(AuraType.ModStunDisableGravity))
+                setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveDisableGravity, m_movementCounter++));
 
             if (HasAuraType(AuraType.CanTurnWhileFalling))
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveSetCanTurnWhileFalling, m_movementCounter++));
@@ -5206,7 +5675,7 @@ namespace Game.Entities
 
             if (!GetPlayerSharingQuest().IsEmpty())
             {
-                Quest quest = Global.ObjectMgr.GetQuestTemplate(GetSharedQuestID());
+                Quest quest = ObjectMgr.GetQuestTemplate(GetSharedQuestID());
                 if (quest != null)
                     PlayerTalkClass.SendQuestGiverQuestDetails(quest, GetGUID(), true, false);
                 else
@@ -5216,9 +5685,46 @@ namespace Game.Entities
             GetSceneMgr().TriggerDelayedScenes();
         }
 
+        public void AddSpellCategoryCooldownMod(int spellCategoryId, int mod)
+        {
+            int categoryIndex = m_activePlayerData.CategoryCooldownMods.FindIndexIf(mod => mod.SpellCategoryID == spellCategoryId);
+
+            if (categoryIndex < 0)
+            {
+                CategoryCooldownMod newMod = new();
+                newMod.SpellCategoryID = spellCategoryId;
+                newMod.ModCooldown = -mod;
+
+                AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CategoryCooldownMods), newMod);
+            }
+            else
+            {
+                CategoryCooldownMod g = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CategoryCooldownMods, categoryIndex);
+                SetUpdateFieldValue(ref g.ModCooldown, m_activePlayerData.CategoryCooldownMods[categoryIndex].ModCooldown - mod);
+            }
+        }
+
+        public void RemoveSpellCategoryCooldownMod(int spellCategoryId, int mod)
+        {
+            int categoryIndex = m_activePlayerData.CategoryCooldownMods.FindIndexIf(mod => mod.SpellCategoryID == spellCategoryId);
+
+            if (categoryIndex < 0)
+                return;
+
+            if (m_activePlayerData.CategoryCooldownMods[categoryIndex].ModCooldown + mod == 0)
+            {
+                RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CategoryCooldownMods), categoryIndex);
+            }
+            else
+            {
+                CategoryCooldownMod g = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CategoryCooldownMods, categoryIndex);
+                SetUpdateFieldValue(ref g.ModCooldown, m_activePlayerData.CategoryCooldownMods[categoryIndex].ModCooldown + mod);
+            }
+        }
+
         public void RemoveSocial()
         {
-            Global.SocialMgr.RemovePlayerSocial(GetGUID());
+            SocialMgr.RemovePlayerSocial(GetGUID());
             m_social = null;
         }
 
@@ -5260,17 +5766,17 @@ namespace Game.Entities
                 _RemoveAllStatBonuses();
 
             uint basemana;
-            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out basemana);
+            ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out basemana);
 
-            PlayerLevelInfo info = Global.ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
+            PlayerLevelInfo info = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
 
-            int exp_max_lvl = (int)Global.ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
+            int exp_max_lvl = (int)ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
             int conf_max_lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
-            if (exp_max_lvl == SharedConst.DefaultMaxLevel || exp_max_lvl >= conf_max_lvl)
+            if (exp_max_lvl == SharedConst.DefaultMaxPlayerLevel || exp_max_lvl >= conf_max_lvl)
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), conf_max_lvl);
             else
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), exp_max_lvl);
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), (int)Global.ObjectMgr.GetXPForLevel(GetLevel()));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), ObjectMgr.GetXPForLevel(GetLevel()));
             if (m_activePlayerData.XP >= m_activePlayerData.NextLevelXP)
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.XP), m_activePlayerData.NextLevelXP - 1);
 
@@ -5390,7 +5896,7 @@ namespace Game.Entities
             // cleanup unit flags (will be re-applied if need at aura load).
             RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.RemoveClientControl | UnitFlags.NotAttackable1 |
             UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc | UnitFlags.Looting |
-            UnitFlags.PetInCombat | UnitFlags.Silenced | UnitFlags.Pacified |
+            UnitFlags.PetInCombat | UnitFlags.Pacified |
             UnitFlags.Stunned | UnitFlags.InCombat | UnitFlags.Disarmed |
             UnitFlags.Confused | UnitFlags.Fleeing | UnitFlags.Uninteractible |
             UnitFlags.Skinnable | UnitFlags.Mount | UnitFlags.OnTaxi);
@@ -5422,9 +5928,10 @@ namespace Game.Entities
 
             // update level to hunter/summon pet
             Pet pet = GetPet();
-            if (pet)
+            if (pet != null)
                 pet.SynchronizeLevelWithOwner();
         }
+
         public void InitDataForForm(bool reapplyMods = false)
         {
             ShapeShiftForm form = GetShapeshiftForm();
@@ -5449,11 +5956,12 @@ namespace Game.Entities
             UpdateAttackPowerAndDamage(true);
         }
 
-        public ReputationRank GetReputationRank(uint faction)
+        public ReputationRank GetReputationRank(int faction)
         {
             var factionEntry = CliDB.FactionStorage.LookupByKey(faction);
             return GetReputationMgr().GetRank(factionEntry);
         }
+
         public ReputationMgr GetReputationMgr()
         {
             return reputationMgr;
@@ -5688,10 +6196,10 @@ namespace Game.Entities
                 return false;
 
             // group update
-            if (GetGroup())
+            if (GetGroup() != null)
                 SetGroupUpdateFlag(GroupUpdateFlags.Position);
 
-            if (GetTrader() && !IsWithinDistInMap(GetTrader(), SharedConst.InteractionDistance))
+            if (GetTrader() != null && !IsWithinDistInMap(GetTrader(), SharedConst.InteractionDistance))
                 GetSession().SendCancelTrade();
 
             CheckAreaExploreAndOutdoor();
@@ -5699,49 +6207,50 @@ namespace Game.Entities
             return true;
         }
 
-        void SendNewCurrency(uint id)
-        {
-            var Curr = _currencyStorage.LookupByKey(id);
-            if (Curr == null)
-                return;
-
-            CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(id);
-            if (entry == null) // should never happen
-                return;
-
-            SetupCurrency packet = new();
-            SetupCurrency.Record record = new();
-            record.Type = entry.Id;
-            record.Quantity = Curr.Quantity;
-            record.WeeklyQuantity = Curr.WeeklyQuantity;
-            record.MaxWeeklyQuantity = GetCurrencyWeekCap(entry);
-            record.TrackedQuantity = Curr.TrackedQuantity;
-            record.Flags = Curr.Flags;
-
-            packet.Data.Add(record);
-
-            SendPacket(packet);
-        }
-
         void SendCurrencies()
         {
             SetupCurrency packet = new();
 
-            foreach (var pair in _currencyStorage)
+            foreach (var (id, currency) in _currencyStorage)
             {
-                CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(pair.Key);
-
-                // not send init meta currencies.
-                if (entry == null || entry.CategoryID == 89) //CURRENCY_CATEGORY_META_CONQUEST
+                CurrencyTypesRecord currencyRecord = CliDB.CurrencyTypesStorage.LookupByKey(id);
+                if (currencyRecord == null)
                     continue;
 
+                // Check faction
+                if ((currencyRecord.IsAlliance && GetTeam() != Team.Alliance) ||
+                    (currencyRecord.IsHorde && GetTeam() != Team.Horde))
+                    continue;
+
+                // Check award condition
+                if (currencyRecord.AwardConditionID != 0)
+                {
+                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(currencyRecord.AwardConditionID);
+                    if (playerCondition != null && !ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                        continue;
+                }
+
                 SetupCurrency.Record record = new();
-                record.Type = entry.Id;
-                record.Quantity = pair.Value.Quantity;
-                record.WeeklyQuantity = pair.Value.WeeklyQuantity;
-                record.MaxWeeklyQuantity = GetCurrencyWeekCap(entry);
-                record.TrackedQuantity = pair.Value.TrackedQuantity;
-                record.Flags = pair.Value.Flags;
+                record.Type = currencyRecord.Id;
+                record.Quantity = currency.Quantity;
+
+                if ((currency.WeeklyQuantity / currencyRecord.Scaler) > 0)
+                    record.WeeklyQuantity = currency.WeeklyQuantity;
+
+                if (currencyRecord.HasMaxEarnablePerWeek)
+                    record.MaxWeeklyQuantity = GetCurrencyWeeklyCap(currencyRecord);
+
+                if (currencyRecord.IsTrackingQuantity)
+                    record.TrackedQuantity = currency.TrackedQuantity;
+
+                if (currencyRecord.HasTotalEarned)
+                    record.TotalEarned = (int)currency.EarnedQuantity;
+
+                if (currencyRecord.HasMaxQuantity(true))
+                    record.MaxQuantity = (int)GetCurrencyMaxQuantity(currencyRecord, true);
+
+                record.Flags = (byte)currency.Flags;
+                record.Flags = (byte)(record.Flags & ~(int)CurrencyDbFlags.UnusedFlags);
 
                 packet.Data.Add(record);
             }
@@ -5756,7 +6265,7 @@ namespace Game.Entities
                 uint arenaTeamId = GetArenaTeamId(arenaSlot);
                 if (arenaTeamId != 0)
                 {
-                    ArenaTeam arenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(arenaTeamId);
+                    ArenaTeam arenaTeam = ArenaTeamMgr.GetArenaTeamById(arenaTeamId);
                     arenaTeam.FinishWeek();                              // set played this week etc values to 0 in memory, too
                     arenaTeam.SaveToDB();                                // save changes
                     arenaTeam.NotifyStatsChanged();                      // notify the players of the changes
@@ -5775,7 +6284,7 @@ namespace Game.Entities
 
         public void AddExploredZones(uint pos, ulong mask) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)pos), mask); }
         public void RemoveExploredZones(uint pos, ulong mask) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)pos), mask); }
-        
+
         void CheckAreaExploreAndOutdoor()
         {
             if (!IsAlive())
@@ -5816,46 +6325,49 @@ namespace Game.Entities
 
                 UpdateCriteria(CriteriaType.RevealWorldMapOverlay, GetAreaId());
 
-                if (IsMaxLevel())
+                var areaLevels = DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                if (areaLevels.HasValue)
                 {
-                    SendExplorationExperience(areaId, 0);
-                }
-                else
-                {
-                    //ushort areaLevel = (ushort)Math.Min(Math.Max((ushort)GetLevel(), areaLevels.Value.MinLevel), areaLevels.Value.MaxLevel);
-                    uint areaLevel = GetLevel();
-                    int diff = (int)GetLevel() - (int)areaLevel;
-                    uint XP;
-                    if (diff < -5)
+                    if (IsMaxLevel())
                     {
-                        XP = (uint)(Global.ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
-                    }
-                    else if (diff > 5)
-                    {
-                        int exploration_percent = 100 - ((diff - 5) * 5);
-                        if (exploration_percent < 0)
-                            exploration_percent = 0;
-
-                        XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                        SendExplorationExperience(areaId, 0);
                     }
                     else
                     {
-                        XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
-                    }
+                        ushort areaLevel = (ushort)Math.Min(Math.Max((ushort)GetLevel(), areaLevels.Value.MinLevel), areaLevels.Value.MaxLevel);
+                        int diff = (int)GetLevel() - areaLevel;
+                        uint XP;
+                        if (diff < -5)
+                        {
+                            XP = (uint)(ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                        }
+                        else if (diff > 5)
+                        {
+                            int exploration_percent = 100 - ((diff - 5) * 5);
+                            if (exploration_percent < 0)
+                                exploration_percent = 0;
 
-                    if (WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) != 0)
-                    {
-                        uint minScaledXP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
-                        XP = Math.Max(minScaledXP, XP);
-                    }
+                            XP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                        }
+                        else
+                        {
+                            XP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                        }
 
-                    GiveXP(XP, null);
-                    SendExplorationExperience(areaId, XP);
+                        if (WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) != 0)
+                        {
+                            uint minScaledXP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
+                            XP = Math.Max(minScaledXP, XP);
+                        }
+
+                        GiveXP(XP, null);
+                        SendExplorationExperience(areaId, XP);
+                    }
+                    Log.outInfo(LogFilter.Player, $"Player {GetGUID()} discovered a new area: {areaId}.");
                 }
-                Log.outInfo(LogFilter.Player, "Player {0} discovered a new area: {1}", GetGUID().ToString(), areaId);
-
             }
         }
+
         void SendExplorationExperience(uint Area, uint Experience)
         {
             SendPacket(new ExplorationExperience(Experience, Area));
@@ -5863,7 +6375,7 @@ namespace Game.Entities
 
         public void SendSysMessage(CypherStrings str, params object[] args)
         {
-            string input = Global.ObjectMgr.GetCypherString(str);
+            string input = ObjectMgr.GetCypherString(str);
             string pattern = @"%(\d+(\.\d+)?)?(d|f|s|u)";
 
             int count = 0;
@@ -5876,12 +6388,12 @@ namespace Game.Entities
         }
         public void SendSysMessage(string str, params object[] args)
         {
-            new CommandHandler(Session).SendSysMessage(string.Format(str, args));
+            new CommandHandler(_session).SendSysMessage(string.Format(str, args));
         }
         public void SendBuyError(BuyResult msg, Creature creature, uint item)
         {
             BuyFailed packet = new();
-            packet.VendorGUID = creature ? creature.GetGUID() : ObjectGuid.Empty;
+            packet.VendorGUID = creature != null ? creature.GetGUID() : ObjectGuid.Empty;
             packet.Muid = item;
             packet.Reason = msg;
             SendPacket(packet);
@@ -5889,8 +6401,8 @@ namespace Game.Entities
         public void SendSellError(SellResult msg, Creature creature, ObjectGuid guid)
         {
             SellResponse sellResponse = new();
-            sellResponse.VendorGUID = (creature ? creature.GetGUID() : ObjectGuid.Empty);
-            sellResponse.ItemGUID = guid;
+            sellResponse.VendorGUID = creature != null ? creature.GetGUID() : ObjectGuid.Empty;
+            sellResponse.ItemGUIDs.Add(guid);
             sellResponse.Reason = msg;
             SendPacket(sellResponse);
         }
@@ -5899,7 +6411,7 @@ namespace Game.Entities
         #region Chat
         public override void Say(string text, Language language, WorldObject obj = null)
         {
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Say, language, text);
+            ScriptMgr.OnPlayerChat(this, ChatMsg.Say, language, text);
 
             SendChatMessageToSetInRange(ChatMsg.Say, language, text, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay));
         }
@@ -5923,7 +6435,7 @@ namespace Game.Entities
         }
         public override void Yell(string text, Language language, WorldObject obj = null)
         {
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Yell, language, text);
+            ScriptMgr.OnPlayerChat(this, ChatMsg.Yell, language, text);
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Yell, language, this, this, text);
@@ -5935,7 +6447,7 @@ namespace Game.Entities
         }
         public override void TextEmote(string text, WorldObject obj = null, bool something = false)
         {
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Emote, Language.Universal, text);
+            ScriptMgr.OnPlayerChat(this, ChatMsg.Emote, Language.Universal, text);
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Emote, Language.Universal, this, this, text);
@@ -5947,7 +6459,7 @@ namespace Game.Entities
         }
         public void WhisperAddon(string text, string prefix, bool isLogged, Player receiver)
         {
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, text, receiver);
+            ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, text, receiver);
 
             if (!receiver.GetSession().IsAddonRegistered(prefix))
                 return;
@@ -5965,7 +6477,7 @@ namespace Game.Entities
 
             //Player rPlayer = Global.ObjAccessor.FindPlayer(receiver);
 
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, language, text, target);
+            ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, language, text, target);
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Whisper, language, this, this, text);
@@ -5993,7 +6505,7 @@ namespace Game.Entities
 
         public override void Whisper(uint textId, Player target, bool isBossWhisper = false)
         {
-            if (!target)
+            if (target == null)
                 return;
 
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textId);
@@ -6005,7 +6517,7 @@ namespace Game.Entities
 
             Locale locale = target.GetSession().GetSessionDbLocaleIndex();
             ChatPkt packet = new();
-            packet.Initialize(ChatMsg.Whisper, Language.Universal, this, target, Global.DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()));
+            packet.Initialize(ChatMsg.Whisper, Language.Universal, this, target, DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()));
             target.SendPacket(packet);
         }
         public bool CanUnderstandLanguage(Language language)
@@ -6013,7 +6525,7 @@ namespace Game.Entities
             if (IsGameMaster())
                 return true;
 
-            foreach (var languageDesc in Global.LanguageMgr.GetLanguageDescById(language))
+            foreach (var languageDesc in LanguageMgr.GetLanguageDescById(language))
                 if (languageDesc.SkillId != 0 && HasSkill((SkillType)languageDesc.SkillId))
                     return true;
 
@@ -6109,7 +6621,7 @@ namespace Game.Entities
 
             uint level = GetLevel();
 
-            Global.ScriptMgr.OnGivePlayerXP(this, xp, victim);
+            ScriptMgr.OnGivePlayerXP(this, ref xp, victim);
 
             // XP to money conversion processed in Player.RewardQuest
             if (IsMaxLevel())
@@ -6125,12 +6637,11 @@ namespace Game.Entities
                 bonus_xp = victim != null ? _restMgr.GetRestBonusFor(RestTypes.XP, xp) : 0; // XP resting bonus
 
             LogXPGain packet = new();
-            packet.Victim = victim ? victim.GetGUID() : ObjectGuid.Empty;
+            packet.Victim = victim != null ? victim.GetGUID() : ObjectGuid.Empty;
             packet.Original = (int)(xp + bonus_xp);
-            packet.Reason = victim ? PlayerLogXPReason.Kill : PlayerLogXPReason.NoKill;
+            packet.Reason = victim != null ? PlayerLogXPReason.Kill : PlayerLogXPReason.NoKill;
             packet.Amount = (int)xp;
             packet.GroupBonus = group_rate;
-            packet.ReferAFriendBonusType = (byte)(recruitAFriend ? 1 : 0);
             SendPacket(packet);
 
             uint nextLvlXP = GetXPForNextLevel();
@@ -6438,7 +6949,7 @@ namespace Game.Entities
                 uint path, cost;
 
                 lastnode = nodes[i];
-                Global.ObjectMgr.GetTaxiPath(prevnode, lastnode, out path, out cost);
+                ObjectMgr.GetTaxiPath(prevnode, lastnode, out path, out cost);
 
                 if (path == 0)
                 {
@@ -6465,10 +6976,10 @@ namespace Game.Entities
             // change but I couldn't find a suitable alternative. OK to use class because only DK
             // can use this taxi.
             uint mount_display_id;
-            if (node.Flags.HasAnyFlag(TaxiNodeFlags.UseFavoriteMount) && preferredMountDisplay != 0)
+            if (node.Flags.HasAnyFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
                 mount_display_id = preferredMountDisplay;
             else
-                mount_display_id = Global.ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));
+                mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));
 
             // in spell case allow 0 model
             if ((mount_display_id == 0 && spellid == 0) || sourcepath == 0)
@@ -6556,7 +7067,7 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Unit, "WORLD: Restart character {0} taxi flight", GetGUID().ToString());
 
-            uint mountDisplayId = Global.ObjectMgr.GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
+            uint mountDisplayId = ObjectMgr.GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
             if (mountDisplayId == 0)
                 return;
 
@@ -6604,12 +7115,12 @@ namespace Game.Entities
             if (GetLevel() <= WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel) || !forXP)
             {
                 Group group = GetGroup();
-                if (group)
+                if (group != null)
                 {
                     for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player player = refe.GetSource();
-                        if (!player)
+                        if (player == null)
                             continue;
 
                         if (!player.IsAtRecruitAFriendDistance(this))
@@ -6642,11 +7153,11 @@ namespace Game.Entities
 
         bool IsAtRecruitAFriendDistance(WorldObject pOther)
         {
-            if (!pOther || !IsInMap(pOther))
+            if (pOther == null || !IsInMap(pOther))
                 return false;
 
             WorldObject player = GetCorpse();
-            if (!player || IsAlive())
+            if (player == null || IsAlive())
                 player = this;
 
             return pOther.GetDistance(player) <= WorldConfig.GetFloatValue(WorldCfg.MaxRecruitAFriendDistance);
@@ -6675,7 +7186,7 @@ namespace Game.Entities
             randomRoll.RollerWowAccount = GetSession().GetAccountGUID();
 
             Group group = GetGroup();
-            if (group)
+            if (group != null)
                 group.BroadcastPacket(randomRoll, false);
             else
                 SendPacket(randomRoll);
@@ -6697,7 +7208,7 @@ namespace Game.Entities
                 return true;
 
             // GMs are visible for higher gms (or players are visible for gms)
-            if (!Global.AccountMgr.IsPlayerAccount(u.GetSession().GetSecurity()))
+            if (!AccountMgr.IsPlayerAccount(u.GetSession().GetSecurity()))
                 return GetSession().GetSecurity() <= u.GetSession().GetSecurity();
 
             // non faction visibility non-breakable for non-GMs
@@ -6720,12 +7231,11 @@ namespace Game.Entities
 
             return 1.0f - 0.05f * (rank - ReputationRank.Neutral);
         }
-        public bool IsSpellFitByClassAndRace(uint spell_id)
+        public bool IsSpellFitByClassAndRace(int spell_id)
         {
-            long racemask = SharedConst.GetMaskForRace(GetRace());
-            uint classmask = GetClassMask();
+            Class class_ = GetClass();
 
-            var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spell_id);
+            var bounds = SpellMgr.GetSkillLineAbilityMapBounds(spell_id);
 
             if (bounds.Empty())
                 return true;
@@ -6733,7 +7243,8 @@ namespace Game.Entities
             foreach (var _spell_idx in bounds)
             {
                 // skip wrong race skills
-                if (_spell_idx.RaceMask != 0 && (_spell_idx.RaceMask & racemask) == 0)
+                var raceMask = _spell_idx.RaceMask;
+                if (!raceMask.IsEmpty() && !raceMask.HasRace(GetRace()))
                     continue;
 
                 // skip wrong class skills
@@ -6741,7 +7252,7 @@ namespace Game.Entities
                     continue;
 
                 // skip wrong class and race skill saved in SkillRaceClassInfo.dbc
-                if (Global.DB2Mgr.GetSkillRaceClassInfo((SkillType)_spell_idx.SkillLine, GetRace(), GetClass()) == null)
+                if (DB2Mgr.GetSkillRaceClassInfo(_spell_idx.SkillLine, GetRace(), GetClass()) == null)
                     continue;
 
                 return true;
@@ -6750,7 +7261,9 @@ namespace Game.Entities
             return false;
         }
 
-        //New shit
+
+        void SetActiveCombatTraitConfigID(int traitConfigId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ActiveCombatTraitConfigID), (uint)traitConfigId); }
+
         void InitPrimaryProfessions()
         {
             SetFreePrimaryProfessions(WorldConfig.GetUIntValue(WorldCfg.MaxPrimaryTradeSkill));
@@ -6846,7 +7359,7 @@ namespace Game.Entities
         {
             ObjectGuid guid = m_activePlayerData.FarsightObject;
             if (!guid.IsEmpty())
-                return Global.ObjAccessor.GetObjectByTypeMask(this, guid, TypeMask.Seer);
+                return ObjAccessor.GetObjectByTypeMask(this, guid, TypeMask.Seer);
 
             return null;
         }
@@ -6854,7 +7367,7 @@ namespace Game.Entities
         public void SetClientControl(Unit target, bool allowMove)
         {
             // a player can never client control nothing
-            Cypher.Assert(target);
+            Cypher.Assert(target != null);
 
             // don't allow possession to be overridden
             if (target.HasUnitState(UnitState.Charmed) && (GetGUID() != target.GetCharmerGUID()))
@@ -6953,7 +7466,7 @@ namespace Game.Entities
             if (!force && (CanTitanGrip() || (offtemplate.GetInventoryType() != InventoryType.Weapon2Hand && !IsTwoHandUsed())))
                 return;
 
-            List<ItemPosCount> off_dest;
+            List<(ItemPos item, int count)> off_dest;
             InventoryResult off_msg = CanStoreItem(ItemPos.Undefined, out off_dest, offItem);
             if (off_msg == InventoryResult.Ok)
             {
@@ -6967,8 +7480,8 @@ namespace Game.Entities
                 offItem.DeleteFromInventoryDB(trans);                   // deletes item from character's inventory
                 offItem.SaveToDB(trans);                                // recursive and not have transaction guard into self, item not in inventory and can be save standalone
 
-                string subject = Global.ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem);
-                new MailDraft(subject, "There were problems with equipping one or several items").AddItem(offItem).SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied);
+                string subject = ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem);
+                new MailDraft(subject, "There were problems with equipping one or several items").AddItem(offItem).SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckFlags.Copied);
 
                 DB.Characters.CommitTransaction(trans);
             }
@@ -7005,15 +7518,15 @@ namespace Game.Entities
             SetUpdateFieldValue(restInfo.ModifyValue(restInfo.Threshold), threshold);
         }
 
-        public bool HasPlayerFlag(PlayerFlags flags) { return (m_playerData.PlayerFlags & (uint)flags) != 0; }
-        public void SetPlayerFlag(PlayerFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), (uint)flags); }
-        public void RemovePlayerFlag(PlayerFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), (uint)flags); }
-        public void ReplaceAllPlayerFlags(PlayerFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), (uint)flags); }
+        public bool HasPlayerFlag(PlayerFlags flags) { return m_playerData.PlayerFlags.GetValue().HasAnyFlag(flags); }
+        public void SetPlayerFlag(PlayerFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), flags); }
+        public void RemovePlayerFlag(PlayerFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), flags); }
+        public void ReplaceAllPlayerFlags(PlayerFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlags), flags); }
 
-        public bool HasPlayerFlagEx(PlayerFlagsEx flags) { return (m_playerData.PlayerFlagsEx & (uint)flags) != 0; }
-        public void SetPlayerFlagEx(PlayerFlagsEx flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
-        public void RemovePlayerFlagEx(PlayerFlagsEx flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
-        public void ReplaceAllPlayerFlagsEx(PlayerFlagsEx flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
+        public bool HasPlayerFlagEx(PlayerFlagsEx flags) { return m_playerData.PlayerFlagsEx.GetValue().HasAnyFlag(flags); }
+        public void SetPlayerFlagEx(PlayerFlagsEx flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), flags); }
+        public void RemovePlayerFlagEx(PlayerFlagsEx flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), flags); }
+        public void ReplaceAllPlayerFlagsEx(PlayerFlagsEx flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), flags); }
 
         public void SetAverageItemLevelTotal(float newItemLevel) { SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.AvgItemLevel, 0), newItemLevel); }
         public void SetAverageItemLevelEquipped(float newItemLevel) { SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.AvgItemLevel, 1), newItemLevel); }
@@ -7062,9 +7575,9 @@ namespace Game.Entities
         public void SetHeirloom(int slot, uint itemId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms, slot), (int)itemId); }
         public void SetHeirloomFlags(int slot, uint flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HeirloomFlags, slot), flags); }
 
-        public void AddToy(uint itemId, uint flags)
+        public void AddToy(int itemId, uint flags)
         {
-            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Toys), (int)itemId);
+            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Toys), itemId);
         }
 
         public void AddTransmogBlock(uint blockValue) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Transmog), blockValue); }
@@ -7110,7 +7623,7 @@ namespace Game.Entities
         public void RemoveAuraVision(PlayerFieldByte2Flags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
 
         public void SetTransportServerTime(int transportServerTime) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransportServerTime), transportServerTime); }
-
+        
         public bool CanTameExoticPets() { return IsGameMaster() || HasAuraType(AuraType.AllowTamePetType); }
 
         void SendAttackSwingCantAttack() { SendPacket(new AttackSwingError(AttackSwingErr.CantAttack)); }
@@ -7129,7 +7642,7 @@ namespace Game.Entities
         {
             if (target == this)
             {
-                for (byte i = 0; i < EquipmentSlot.End; ++i)
+                for (byte i = EquipmentSlot.Start; i < InventorySlots.BankBagEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
@@ -7137,29 +7650,13 @@ namespace Game.Entities
                     m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
                 }
 
-                for (byte i = InventorySlots.BagStart; i < InventorySlots.BankBagEnd; ++i)
+                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.ChildEquipmentEnd; ++i)
                 {
                     if (m_items[i] == null)
                         continue;
 
                     m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
-                }
-
-                for (byte i = InventorySlots.KeyringStart; i < InventorySlots.KeyringEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
-                }
-
-                for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
-                }
+                }                
             }
 
             base.BuildCreateUpdateBlockForPlayer(data, target);
@@ -7283,9 +7780,18 @@ namespace Game.Entities
         }
 
         //Helpers
-        public void AddGossipItem(GossipOptionNpc icon, string message, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, "", 0); }
-        public void AddGossipItem(uint menuId, uint menuItemId, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(menuId, menuItemId, sender, action); }
-        public void ADD_GOSSIP_ITEM_EXTENDED(GossipOptionNpc icon, string message, uint sender, uint action, string boxmessage, uint boxmoney, bool coded) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, boxmessage, boxmoney, coded); }
+        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action)
+        {
+            PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, false, 0, "", null, null, sender, action);
+        }
+        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded)
+        {
+            PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, coded, popupMoney, popupText, null, null, sender, action);
+        }
+        public void AddGossipItem(uint gossipMenuID, uint gossipMenuItemID, uint sender, uint action)
+        {
+            PlayerTalkClass.GetGossipMenu().AddMenuItem(gossipMenuID, gossipMenuItemID, sender, action);
+        }
 
         // This fuction Sends the current menu to show to client, a - NPCTEXTID(uint32), b - npc guid(uint64)
         public void SendGossipMenu(uint titleId, ObjectGuid objGUID) { PlayerTalkClass.SendGossipMenu(titleId, objGUID); }

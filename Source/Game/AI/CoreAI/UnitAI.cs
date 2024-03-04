@@ -13,7 +13,7 @@ namespace Game.AI
 {
     public class UnitAI
     {
-        static Dictionary<(uint id, Difficulty difficulty), AISpellInfoType> _aiSpellInfo = new();
+        static Dictionary<(int id, Difficulty difficulty), AISpellInfoType> _aiSpellInfo = new();
 
         protected Unit me { get; private set; }
 
@@ -54,12 +54,23 @@ namespace Game.AI
 
         public void DoMeleeAttackIfReady()
         {
-            if (me.HasUnitState(UnitState.Casting))
+            if (me.IsCreature() && !me.ToCreature().CanMelee())
                 return;
+
+            if (me.HasUnitState(UnitState.Casting))
+            {
+                Spell channeledSpell = me.GetCurrentSpell(CurrentSpellTypes.Channeled);
+                if (channeledSpell == null || !channeledSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
+                    return;
+            }
 
             Unit victim = me.GetVictim();
 
             if (!me.IsWithinMeleeRange(victim))
+                return;
+
+            // Check that the victim is in front of the unit
+            if (!me.HasInArc(2 * MathF.PI / 3, victim))
                 return;
 
             //Make sure our attack is ready and we aren't currently casting before checking distance
@@ -76,7 +87,7 @@ namespace Game.AI
             }
         }
 
-        public bool DoSpellAttackIfReady(uint spellId)
+        public bool DoSpellAttackIfReady(int spellId)
         {
             if (me.HasUnitState(UnitState.Casting) || !me.IsAttackReady())
                 return true;
@@ -233,7 +244,7 @@ namespace Game.AI
             return targetList;
         }
 
-        public SpellCastResult DoCast(uint spellId)
+        public SpellCastResult DoCast(int spellId)
         {
             Unit target = null;
             AITarget aiTargetType = AITarget.Self;
@@ -318,7 +329,7 @@ namespace Game.AI
             return SpellCastResult.BadTargets;
         }
 
-        public SpellCastResult DoCast(Unit victim, uint spellId, CastSpellExtraArgs args = null)
+        public SpellCastResult DoCast(Unit victim, int spellId, CastSpellExtraArgs args = null)
         {
             args = args ?? new CastSpellExtraArgs();
 
@@ -328,9 +339,9 @@ namespace Game.AI
             return me.CastSpell(victim, spellId, args);
         }
 
-        public SpellCastResult DoCastSelf(uint spellId, CastSpellExtraArgs args = null) { return DoCast(me, spellId, args); }
+        public SpellCastResult DoCastSelf(int spellId, CastSpellExtraArgs args = null) { return DoCast(me, spellId, args); }
 
-        public SpellCastResult DoCastVictim(uint spellId, CastSpellExtraArgs args = null)
+        public SpellCastResult DoCastVictim(int spellId, CastSpellExtraArgs args = null)
         {
             Unit victim = me.GetVictim();
             if (victim != null)
@@ -339,7 +350,7 @@ namespace Game.AI
             return SpellCastResult.BadTargets;
         }
 
-        public SpellCastResult DoCastAOE(uint spellId, CastSpellExtraArgs args = null) { return DoCast(null, spellId, args); }
+        public SpellCastResult DoCastAOE(int spellId, CastSpellExtraArgs args = null) { return DoCast(null, spellId, args); }
 
         public static void FillAISpellInfo()
         {
@@ -490,11 +501,9 @@ namespace Game.AI
                 me.ScheduleAIChange();
         }
 
-        public virtual bool ShouldSparWith(Unit target) { return false; }
-
         public virtual void DoAction(int action) { }
-        public virtual uint GetData(uint id = 0) { return 0; }
-        public virtual void SetData(uint id, uint value) { }
+        public virtual int GetData(int id = 0) { return 0; }
+        public virtual void SetData(int id, int value) { }
         public virtual void SetGUID(ObjectGuid guid, int id = 0) { }
         public virtual ObjectGuid GetGUID(int id = 0) { return ObjectGuid.Empty; }
 
@@ -509,11 +518,11 @@ namespace Game.AI
         public virtual void OnDespawn() { }
 
         // Called at any Damage to any victim (before damage apply)
-        public virtual void DamageDealt(Unit victim, ref uint damage, DamageEffectType damageType) { }
-        public virtual void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null) { }
-        public virtual void HealReceived(Unit by, uint addhealth) { }
-        public virtual void HealDone(Unit to, uint addhealth) { }
-        public virtual void SpellInterrupted(uint spellId, uint unTimeMs) { }
+        public virtual void DamageDealt(Unit victim, ref int damage, DamageEffectType damageType) { }
+        public virtual void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null) { }
+        public virtual void HealReceived(Unit by, int addhealth) { }
+        public virtual void HealDone(Unit to, int addhealth) { }
+        public virtual void SpellInterrupted(int spellId, uint unTimeMs) { }
 
         /// <summary>
         /// Called when a game event starts or ends
@@ -525,7 +534,7 @@ namespace Game.AI
             return $"Me: {(me != null ? me.GetDebugInfo() : "NULL")}";
         }
 
-        public static AISpellInfoType GetAISpellInfo(uint spellId, Difficulty difficulty)
+        public static AISpellInfoType GetAISpellInfo(int spellId, Difficulty difficulty)
         {
             return _aiSpellInfo.LookupByKey((spellId, difficulty));
         }

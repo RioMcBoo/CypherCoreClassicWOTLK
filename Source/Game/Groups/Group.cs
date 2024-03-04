@@ -67,7 +67,7 @@ namespace Game.Groups
             }
 
             // If there aren't assistants in raid, or if the group is not a raid, pick the first available member
-            if (!newLeader)
+            if (newLeader == null)
             {
                 foreach (var memberSlot in m_memberSlots)
                 {
@@ -80,7 +80,7 @@ namespace Game.Groups
                 }
             }
 
-            if (newLeader)
+            if (newLeader != null)
             {
                 ChangeLeader(newLeader.GetGUID());
                 SendUpdate();
@@ -141,7 +141,7 @@ namespace Game.Groups
                 stmt.AddValue(index++, m_targetIcons[5].GetRawValue());
                 stmt.AddValue(index++, m_targetIcons[6].GetRawValue());
                 stmt.AddValue(index++, m_targetIcons[7].GetRawValue());
-                stmt.AddValue(index++, (byte)m_groupFlags);
+                stmt.AddValue(index++, (ushort)m_groupFlags);
                 stmt.AddValue(index++, (byte)m_dungeonDifficulty);
                 stmt.AddValue(index++, (byte)m_raidDifficulty);
                 stmt.AddValue(index++, (byte)m_legacyRaidDifficulty);
@@ -181,7 +181,7 @@ namespace Game.Groups
             for (byte i = 0; i < MapConst.TargetIconsCount; ++i)
                 m_targetIcons[i].SetRawValue(field.Read<byte[]>(4 + i));
 
-            m_groupFlags = (GroupFlags)field.Read<byte>(12);
+            m_groupFlags = (GroupFlags)field.Read<ushort>(12);
             if (m_groupFlags.HasAnyFlag(GroupFlags.Raid))
                 _initRaidSubGroupsCounter();
 
@@ -210,6 +210,9 @@ namespace Game.Groups
                 return;
             }
 
+            if (m_groupFlags.HasFlag(GroupFlags.EveryoneAssistant))
+                memberFlags |= (byte)GroupMemberFlags.Assistant;
+
             member.name = character.Name;
             member.race = character.RaceId;
             member._class = (byte)character.ClassId;
@@ -234,7 +237,7 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (byte)m_groupFlags);
+                stmt.AddValue(0, (ushort)m_groupFlags);
                 stmt.AddValue(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
@@ -253,7 +256,7 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (byte)m_groupFlags);
+                stmt.AddValue(0, (ushort)m_groupFlags);
                 stmt.AddValue(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
@@ -275,7 +278,7 @@ namespace Game.Groups
             if (m_memberSlots.Count > 5)
                 return; // What message error should we send?
 
-            m_groupFlags = GroupFlags.None;
+            m_groupFlags &= ~GroupFlags.Raid;
 
             m_subGroupsCounts = null;
 
@@ -283,7 +286,7 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (byte)m_groupFlags);
+                stmt.AddValue(0, (ushort)m_groupFlags);
                 stmt.AddValue(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
@@ -302,12 +305,12 @@ namespace Game.Groups
 
         public bool AddInvite(Player player)
         {
-            if (player == null || player.GetGroupInvite())
+            if (player == null || player.GetGroupInvite() != null)
                 return false;
             Group group = player.GetGroup();
-            if (group && (group.IsBGGroup() || group.IsBFGroup()))
+            if (group != null && (group.IsBGGroup() || group.IsBFGroup()))
                 group = player.GetOriginalGroup();
-            if (group)
+            if (group != null)
                 return false;
 
             RemoveInvite(player);
@@ -464,7 +467,7 @@ namespace Game.Groups
             }
             player.SetGroupUpdateFlag(GroupUpdateFlags.Full);
             Pet pet = player.GetPet();
-            if (pet)
+            if (pet != null)
                 pet.SetGroupUpdateFlag(GroupUpdatePetFlags.Full);
 
             UpdatePlayerOutOfRange(player);
@@ -472,6 +475,8 @@ namespace Game.Groups
             // quest related GO state dependent from raid membership
             if (IsRaidGroup())
                 player.UpdateVisibleGameobjectsOrSpellClicks();
+
+            player.FailCriteria(CriteriaFailEvent.ModifyPartyStatus, 0);
 
             {
                 // Broadcast new player group member fields to rest of the group
@@ -521,12 +526,12 @@ namespace Game.Groups
             Global.ScriptMgr.OnGroupRemoveMember(this, guid, method, kicker, reason);
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(guid);
-            if (player)
+            if (player != null)
             {
                 for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player groupMember = refe.GetSource();
-                    if (groupMember)
+                    if (groupMember != null)
                     {
                         if (groupMember.GetGUID() == guid)
                             continue;
@@ -541,10 +546,13 @@ namespace Game.Groups
             if (IsLFGGroup() && method == RemoveMethod.Kick)
                 return m_memberSlots.Count != 0;
 
+            if (player != null)
+                player.FailCriteria(CriteriaFailEvent.ModifyPartyStatus, 0);
+
             // remove member and change leader (if need) only if strong more 2 members _before_ member remove (BG/BF allow 1 member group)
             if (GetMembersCount() > ((IsBGGroup() || IsLFGGroup() || IsBFGroup()) ? 1 : 2))
             {
-                if (player)
+                if (player != null)
                 {
                     // Battlegroundgroup handling
                     if (IsBGGroup() || IsBFGroup())
@@ -615,7 +623,7 @@ namespace Game.Groups
 
                 if (m_memberMgr.GetSize() < ((IsLFGGroup() || IsBGGroup()) ? 1 : 2))
                     Disband();
-                else if (player)
+                else if (player != null)
                 {
                     // send update to removed player too so party frames are destroyed clientside
                     SendUpdateDestroyGroupToPlayer(player);
@@ -631,7 +639,7 @@ namespace Game.Groups
             }
         }
 
-        public void ChangeLeader(ObjectGuid newLeaderGuid, sbyte partyIndex = 0)
+        public void ChangeLeader(ObjectGuid newLeaderGuid)
         {
             var slot = _getMemberSlot(newLeaderGuid);
             if (slot == null)
@@ -662,7 +670,7 @@ namespace Game.Groups
             }
 
             Player oldLeader = Global.ObjAccessor.FindConnectedPlayer(m_leaderGuid);
-            if (oldLeader)
+            if (oldLeader != null)
                 oldLeader.RemovePlayerFlag(PlayerFlags.GroupLeader);
 
             newLeader.SetPlayerFlag(PlayerFlags.GroupLeader);
@@ -673,7 +681,7 @@ namespace Game.Groups
 
             GroupNewLeader groupNewLeader = new();
             groupNewLeader.Name = m_leaderName;
-            groupNewLeader.PartyIndex = partyIndex;
+            groupNewLeader.PartyIndex = (sbyte)GetGroupCategory();
             BroadcastPacket(groupNewLeader, true);
         }
 
@@ -743,7 +751,7 @@ namespace Game.Groups
             Global.GroupMgr.RemoveGroup(this);
         }
 
-        public void SetTargetIcon(byte symbol, ObjectGuid target, ObjectGuid changedBy, sbyte partyIndex)
+        public void SetTargetIcon(byte symbol, ObjectGuid target, ObjectGuid changedBy)
         {
             if (symbol >= MapConst.TargetIconsCount)
                 return;
@@ -752,25 +760,25 @@ namespace Game.Groups
             if (!target.IsEmpty())
                 for (byte i = 0; i < MapConst.TargetIconsCount; ++i)
                     if (m_targetIcons[i] == target)
-                        SetTargetIcon(i, ObjectGuid.Empty, changedBy, partyIndex);
+                        SetTargetIcon(i, ObjectGuid.Empty, changedBy);
 
             m_targetIcons[symbol] = target;
 
             SendRaidTargetUpdateSingle updateSingle = new();
-            updateSingle.PartyIndex = partyIndex;
+            updateSingle.PartyIndex = (sbyte)GetGroupCategory();
             updateSingle.Target = target;
             updateSingle.ChangedBy = changedBy;
             updateSingle.Symbol = (sbyte)symbol;
             BroadcastPacket(updateSingle, true);
         }
 
-        public void SendTargetIconList(WorldSession session, sbyte partyIndex)
+        public void SendTargetIconList(WorldSession session)
         {
             if (session == null)
                 return;
 
             SendRaidTargetUpdateAll updateAll = new();
-            updateAll.PartyIndex = partyIndex;
+            updateAll.PartyIndex = (sbyte)GetGroupCategory();
             for (byte i = 0; i < MapConst.TargetIconsCount; i++)
                 updateAll.TargetIcons.Add(i, m_targetIcons[i]);
 
@@ -906,7 +914,7 @@ namespace Game.Groups
 
         public void UpdatePlayerOutOfRange(Player player)
         {
-            if (!player || !player.IsInWorld)
+            if (player == null || !player.IsInWorld)
                 return;
 
             PartyMemberFullState packet = new();
@@ -915,7 +923,7 @@ namespace Game.Groups
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player member = refe.GetSource();
-                if (member && member != player && (!member.IsInMap(player) || !member.IsWithinDist(player, member.GetSightRange(), false)))
+                if (member != null && member != player && (!member.IsInMap(player) || !member.IsWithinDist(player, member.GetSightRange(), false)))
                     member.SendPacket(packet);
             }
         }
@@ -939,7 +947,7 @@ namespace Game.Groups
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player player = refe.GetSource();
-                if (!player || (!ignore.IsEmpty() && player.GetGUID() == ignore) || (ignorePlayersInBGRaid && player.GetGroup() != this))
+                if (player == null || (!ignore.IsEmpty() && player.GetGUID() == ignore) || (ignorePlayersInBGRaid && player.GetGroup() != this))
                     continue;
 
                 if (player.GetSession() != null && (group == -1 || refe.GetSubGroup() == group))
@@ -972,7 +980,7 @@ namespace Game.Groups
 
         public bool SameSubGroup(Player member1, Player member2)
         {
-            if (!member1 || !member2)
+            if (member1 == null || member2 == null)
                 return false;
 
             if (member1.GetGroup() != this || member2.GetGroup() != this)
@@ -1019,7 +1027,7 @@ namespace Game.Groups
 
             // In case the moved player is online, update the player object with the new sub group references
             Player player = Global.ObjAccessor.FindPlayer(guid);
-            if (player)
+            if (player != null)
             {
                 if (player.GetGroup() == this)
                     player.GetGroupRef().SetSubGroup(group);
@@ -1066,7 +1074,7 @@ namespace Game.Groups
                 }
 
                 Player player = Global.ObjAccessor.FindConnectedPlayer(slots[i].guid);
-                if (player)
+                if (player != null)
                 {
                     if (player.GetGroup() == this)
                         player.GetGroupRef().SetSubGroup(slots[i].group);
@@ -1100,7 +1108,7 @@ namespace Game.Groups
                 {
                     // not update if only update if need and ok
                     Player looter = Global.ObjAccessor.FindPlayer(memberSlot.guid);
-                    if (looter && looter.IsAtGroupRewardDistance(pLootedObject))
+                    if (looter != null && looter.IsAtGroupRewardDistance(pLootedObject))
                         return;
                 }
             }
@@ -1113,7 +1121,7 @@ namespace Game.Groups
                     continue;
 
                 Player player = Global.ObjAccessor.FindPlayer(member.guid);
-                if (player)
+                if (player != null)
                     if (player.IsAtGroupRewardDistance(pLootedObject))
                     {
                         pNewLooter = player;
@@ -1121,13 +1129,13 @@ namespace Game.Groups
                     }
             }
 
-            if (!pNewLooter)
+            if (pNewLooter == null)
             {
                 // search from start
                 foreach (var member in m_memberSlots)
                 {
                     Player player = Global.ObjAccessor.FindPlayer(member.guid);
-                    if (player)
+                    if (player != null)
                         if (player.IsAtGroupRewardDistance(pLootedObject))
                         {
                             pNewLooter = player;
@@ -1136,7 +1144,7 @@ namespace Game.Groups
                 }
             }
 
-            if (pNewLooter)
+            if (pNewLooter != null)
             {
                 if (oldLooterGUID != pNewLooter.GetGUID())
                 {
@@ -1151,14 +1159,14 @@ namespace Game.Groups
             }
         }
 
-        public GroupJoinBattlegroundResult CanJoinBattlegroundQueue(Battleground bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint MinPlayerCount, uint MaxPlayerCount, bool isRated, uint arenaSlot, out ObjectGuid errorGuid)
+        public GroupJoinBattlegroundResult CanJoinBattlegroundQueue(BattlegroundTemplate bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint MinPlayerCount, uint MaxPlayerCount, bool isRated, uint arenaSlot, out ObjectGuid errorGuid)
         {
             errorGuid = new ObjectGuid();
             // check if this group is LFG group
             if (IsLFGGroup())
                 return GroupJoinBattlegroundResult.LfgCantUseBattleground;
 
-            BattlemasterListRecord bgEntry = CliDB.BattlemasterListStorage.LookupByKey(bgOrTemplate.GetTypeID());
+            BattlemasterListRecord bgEntry = CliDB.BattlemasterListStorage.LookupByKey(bgOrTemplate.Id);
             if (bgEntry == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;            // shouldn't happen
 
@@ -1171,10 +1179,10 @@ namespace Game.Groups
             // get a player as reference, to compare other players' stats to (arena team id, queue id based on level, etc.)
             Player reference = GetFirstMember().GetSource();
             // no reference found, can't join this way
-            if (!reference)
+            if (reference == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.GetLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgOrTemplate.BattlemasterEntry.MapId[0], reference.GetLevel());
             if (bracketEntry == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
@@ -1188,7 +1196,7 @@ namespace Game.Groups
             {
                 Player member = refe.GetSource();
                 // offline member? don't let join
-                if (!member)
+                if (member == null)
                     return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
                 // rbac permissions
                 if (!member.CanJoinToBattleground(bgOrTemplate))
@@ -1212,13 +1220,13 @@ namespace Game.Groups
                 // don't let join if someone from the group is in bg queue random
                 bool isInRandomBgQueue = member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RB, BattlegroundQueueIdType.Battleground, false, 0))
                     || member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RandomEpic, BattlegroundQueueIdType.Battleground, false, 0));
-                if (bgOrTemplate.GetTypeID() != BattlegroundTypeId.AA && isInRandomBgQueue)
+                if (bgOrTemplate.Id != BattlegroundTypeId.AA && isInRandomBgQueue)
                     return GroupJoinBattlegroundResult.InRandomBg;
                 // don't let join to bg queue random if someone from the group is already in bg queue
-                if ((bgOrTemplate.GetTypeID() == BattlegroundTypeId.RB || bgOrTemplate.GetTypeID() == BattlegroundTypeId.RandomEpic) && member.InBattlegroundQueue(true) && !isInRandomBgQueue)
+                if (Global.BattlegroundMgr.IsRandomBattleground(bgOrTemplate.Id) && member.InBattlegroundQueue(true) && !isInRandomBgQueue)
                     return GroupJoinBattlegroundResult.InNonRandomBg;
                 // check for deserter debuff in case not arena queue
-                if (bgOrTemplate.GetTypeID() != BattlegroundTypeId.AA && member.IsDeserter())
+                if (bgOrTemplate.Id != BattlegroundTypeId.AA && member.IsDeserter())
                     return GroupJoinBattlegroundResult.Deserters;
                 // check if member can join any more Battleground queues
                 if (!member.HasFreeBattlegroundQueueId())
@@ -1365,7 +1373,7 @@ namespace Game.Groups
 
         void _homebindIfInstance(Player player)
         {
-            if (player && !player.IsGameMaster() && CliDB.MapStorage.LookupByKey(player.GetMapId()).IsDungeon())
+            if (player != null && !player.IsGameMaster() && CliDB.MapStorage.LookupByKey(player.GetMapId()).IsDungeon)
                 player.m_InstanceValid = false;
         }
 
@@ -1375,13 +1383,13 @@ namespace Game.Groups
             // -- not very efficient but safe
             foreach (var member in m_memberSlots)
             {
-                Player pp = Global.ObjAccessor.FindPlayer(member.guid);
-                if (pp && pp.IsInWorld)
+                Player player = Global.ObjAccessor.FindPlayer(member.guid);
+                if (player != null && player.IsInWorld)
                 {
-                    pp.m_values.ModifyValue(pp.m_unitData).ModifyValue(pp.m_unitData.PvpFlags);
-                    pp.m_values.ModifyValue(pp.m_unitData).ModifyValue(pp.m_unitData.FactionTemplate);
-                    pp.ForceUpdateFieldChange();
-                    Log.outDebug(LogFilter.Server, "-- Forced group value update for '{0}'", pp.GetName());
+                    player.m_values.ModifyValue(player.m_unitData).ModifyValue(player.m_unitData.PvpFlags);
+                    player.m_values.ModifyValue(player.m_unitData).ModifyValue(player.m_unitData.FactionTemplate);
+                    player.ForceUpdateFieldChange();
+                    Log.outDebug(LogFilter.Server, "-- Forced group value update for '{0}'", player.GetName());
                 }
             }
         }
@@ -1435,7 +1443,7 @@ namespace Game.Groups
                 EndReadyCheck();
         }
 
-        public void StartReadyCheck(ObjectGuid starterGuid, sbyte partyIndex, TimeSpan duration)
+        public void StartReadyCheck(ObjectGuid starterGuid, TimeSpan duration)
         {
             if (m_readyCheckStarted)
                 return;
@@ -1453,7 +1461,7 @@ namespace Game.Groups
 
             ReadyCheckStarted readyCheckStarted = new();
             readyCheckStarted.PartyGUID = m_guid;
-            readyCheckStarted.PartyIndex = partyIndex;
+            readyCheckStarted.PartyIndex = (sbyte)GetGroupCategory();
             readyCheckStarted.InitiatorGUID = starterGuid;
             readyCheckStarted.Duration = (uint)duration.TotalMilliseconds;
             BroadcastPacket(readyCheckStarted, false);
@@ -1509,7 +1517,7 @@ namespace Game.Groups
             foreach (MemberSlot member in m_memberSlots)
             {
                 Player player = Global.ObjAccessor.FindConnectedPlayer(member.guid);
-                if (!player || !player.GetSession())
+                if (player == null || player.GetSession() == null)
                     SetMemberReadyCheck(member, false);
             }
         }
@@ -1527,7 +1535,7 @@ namespace Game.Groups
                 member.readyChecked = false;
         }
 
-        public void AddRaidMarker(byte markerId, uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
+        public void AddRaidMarker(byte markerId, int mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
         {
             if (markerId >= MapConst.RaidMarkersCount || m_markers[markerId] != null)
                 return;
@@ -1554,11 +1562,11 @@ namespace Game.Groups
             SendRaidMarkersChanged();
         }
 
-        public void SendRaidMarkersChanged(WorldSession session = null, sbyte partyIndex = 0)
+        public void SendRaidMarkersChanged(WorldSession session = null)
         {
             RaidMarkersChanged packet = new();
 
-            packet.PartyIndex = partyIndex;
+            packet.PartyIndex = (sbyte)GetGroupCategory();
             packet.ActiveMarkers = m_activeMarkers;
 
             for (byte i = 0; i < MapConst.RaidMarkersCount; i++)
@@ -1567,7 +1575,7 @@ namespace Game.Groups
                     packet.RaidMarkers.Add(m_markers[i]);
             }
 
-            if (session)
+            if (session != null)
                 session.SendPacket(packet);
             else
                 BroadcastPacket(packet, false);
@@ -1617,7 +1625,7 @@ namespace Game.Groups
             return m_guid.GetCounter();
         }
 
-        string GetLeaderName()
+        public string GetLeaderName()
         {
             return m_leaderName;
         }
@@ -1843,6 +1851,41 @@ namespace Game.Groups
             foreach (MemberSlot member in m_memberSlots)
                 ToggleGroupMemberFlag(member, GroupMemberFlags.Assistant, apply);
 
+            if (!IsBGGroup() && !IsBFGroup())
+            {
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
+
+                stmt.AddValue(0, (ushort)m_groupFlags);
+                stmt.AddValue(1, m_dbStoreId);
+
+                DB.Characters.Execute(stmt);
+            }
+
+            SendUpdate();
+        }
+
+        public bool IsRestrictPingsToAssistants()
+        {
+            return m_groupFlags.HasFlag(GroupFlags.RestrictPings);
+        }
+
+        public void SetRestrictPingsToAssistants(bool restrictPingsToAssistants)
+        {
+            if (restrictPingsToAssistants)
+                m_groupFlags |= GroupFlags.RestrictPings;
+            else
+                m_groupFlags &= ~GroupFlags.RestrictPings;
+
+            if (!IsBGGroup() && !IsBFGroup())
+            {
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
+
+                stmt.AddValue(0, (ushort)m_groupFlags);
+                stmt.AddValue(1, m_dbStoreId);
+
+                DB.Characters.Execute(stmt);
+            }
+
             SendUpdate();
         }
 
@@ -1863,7 +1906,7 @@ namespace Game.Groups
                 worker(refe.GetSource());
         }
 
-        public ObjectGuid GetRecentInstanceOwner(uint mapId)
+        public ObjectGuid GetRecentInstanceOwner(int mapId)
         {
 
             if (m_recentInstances.TryGetValue(mapId, out Tuple<ObjectGuid, uint> value))
@@ -1872,7 +1915,7 @@ namespace Game.Groups
             return m_leaderGuid;
         }
 
-        public uint GetRecentInstanceId(uint mapId)
+        public uint GetRecentInstanceId(int mapId)
         {
             if (m_recentInstances.TryGetValue(mapId, out Tuple<ObjectGuid, uint> value))
                 return value.Item2;
@@ -1880,7 +1923,7 @@ namespace Game.Groups
             return 0;
         }
 
-        public void SetRecentInstance(uint mapId, ObjectGuid instanceOwner, uint instanceId)
+        public void SetRecentInstance(int mapId, ObjectGuid instanceOwner, uint instanceId)
         {
             m_recentInstances[mapId] = Tuple.Create(instanceOwner, instanceId);
         }
@@ -1903,7 +1946,7 @@ namespace Game.Groups
         ItemQuality m_lootThreshold;
         ObjectGuid m_looterGuid;
         ObjectGuid m_masterLooterGuid;
-        Dictionary<uint, Tuple<ObjectGuid, uint>> m_recentInstances = new();
+        Dictionary<int, Tuple<ObjectGuid, uint>> m_recentInstances = new();
         GroupInstanceRefManager m_ownedInstancesMgr = new();
         byte[] m_subGroupsCounts;
         ObjectGuid m_guid;
@@ -1918,11 +1961,6 @@ namespace Game.Groups
         // Raid markers
         RaidMarker[] m_markers = new RaidMarker[MapConst.RaidMarkersCount];
         uint m_activeMarkers;
-
-        public static implicit operator bool(Group group)
-        {
-            return group != null;
-        }
     }
 
     public class MemberSlot
@@ -1939,7 +1977,7 @@ namespace Game.Groups
 
     public class RaidMarker
     {
-        public RaidMarker(uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
+        public RaidMarker(int mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
         {
             Location = new WorldLocation(mapId, positionX, positionY, positionZ);
             TransportGUID = transportGuid;

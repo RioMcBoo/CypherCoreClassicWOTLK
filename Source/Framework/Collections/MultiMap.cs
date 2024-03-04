@@ -109,15 +109,6 @@ namespace System.Collections.Generic
             return new List<TValue>();
         }
 
-        public List<TValue> LookupByKey(object key)
-        {
-            TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
-            if (_interalStorage.ContainsKey(newkey))
-                return _interalStorage[newkey];
-
-            return new List<TValue>();
-        }
-
         bool IDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
         {
             if (!_interalStorage.ContainsKey(key))

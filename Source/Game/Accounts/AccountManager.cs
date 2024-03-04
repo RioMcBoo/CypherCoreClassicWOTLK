@@ -18,8 +18,8 @@ namespace Game
         const int MaxAccountLength = 16;
         const int MaxEmailLength = 64;
 
-        readonly Dictionary<uint, RBACPermission> _permissions = new();
-        readonly MultiMap<byte, uint> _defaultPermissions = new();
+        readonly Dictionary<RBACPermissions, RBACPermission> _permissions = new();
+        readonly MultiMap<byte, RBACPermissions> _defaultPermissions = new();
 
         AccountManager() { }
 
@@ -81,16 +81,16 @@ namespace Game
                 {
                     do
                     {
-                        ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
+                        ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result.Read<long>(0));
 
-                        // Kick if player is online
-                        Player p = Global.ObjAccessor.FindPlayer(guid);
-                        if (p)
-                        {
-                            WorldSession s = p.GetSession();
-                            s.KickPlayer("AccountMgr::DeleteAccount Deleting the account");                            // mark session to remove at next session list update
-                            s.LogoutPlayer(false);                     // logout player without waiting next session list update
-                        }
+                    // Kick if player is online
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    if (player != null)
+                    {
+                        WorldSession s = player.GetSession();
+                        s.KickPlayer("AccountMgr::DeleteAccount Deleting the account");                            // mark session to remove at next session list update
+                        s.LogoutPlayer(false);                     // logout player without waiting next session list update
+                    }
 
                         Player.DeleteFromDB(guid, accountId, false);       // no need to update realm characters
                     } while (result.NextRow());
@@ -167,15 +167,21 @@ namespace Game
             return AccountOpResult.Ok;
         }
 
-        public AccountOpResult ChangePassword(uint accountId, string newPassword)
+        public AccountOpResult ChangePassword(int accountId, string newPassword)
         {
             string username;
 
             if (!GetName(accountId, out username))
+            {
+                Global.ScriptMgr.OnFailedPasswordChange(accountId);
                 return AccountOpResult.NameNotExist;                          // account doesn't exist
+            }
 
             if (newPassword.Length > MaxAccountLength)
+            {
+                Global.ScriptMgr.OnFailedPasswordChange(accountId);
                 return AccountOpResult.PassTooLong;
+            }
 
             (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(username, newPassword);
 
@@ -185,38 +191,53 @@ namespace Game
             stmt.AddValue(2, accountId);
             DB.Login.Execute(stmt);
 
+            Global.ScriptMgr.OnPasswordChange(accountId);
             return AccountOpResult.Ok;
         }
 
-        public AccountOpResult ChangeEmail(uint accountId, string newEmail)
+        public AccountOpResult ChangeEmail(int accountId, string newEmail)
         {
             if (!GetName(accountId, out _))
+            {
+                Global.ScriptMgr.OnFailedEmailChange(accountId);
                 return AccountOpResult.NameNotExist;                          // account doesn't exist
+            }
 
             if (newEmail.Length > MaxEmailLength)
+            {
+                Global.ScriptMgr.OnFailedEmailChange(accountId);
                 return AccountOpResult.EmailTooLong;
+            }
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_EMAIL);
             stmt.AddValue(0, newEmail);
             stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
 
+            Global.ScriptMgr.OnEmailChange(accountId);
             return AccountOpResult.Ok;
         }
 
-        public AccountOpResult ChangeRegEmail(uint accountId, string newEmail)
+        public AccountOpResult ChangeRegEmail(int accountId, string newEmail)
         {
             if (!GetName(accountId, out _))
+            {
+                Global.ScriptMgr.OnFailedEmailChange(accountId);
                 return AccountOpResult.NameNotExist;                          // account doesn't exist
+            }
 
             if (newEmail.Length > MaxEmailLength)
+            {
+                Global.ScriptMgr.OnFailedEmailChange(accountId);
                 return AccountOpResult.EmailTooLong;
+            }
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_REG_EMAIL);
             stmt.AddValue(0, newEmail);
             stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
 
+            Global.ScriptMgr.OnEmailChange(accountId);
             return AccountOpResult.Ok;
         }
 
@@ -228,27 +249,27 @@ namespace Game
             return !result.IsEmpty() ? result.Read<uint>(0) : 0;
         }
 
-        public AccountTypes GetSecurity(uint accountId, int realmId)
+        public AccountTypes GetSecurity(int accountId, int realmId)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_GMLEVEL_BY_REALMID);
             stmt.AddValue(0, accountId);
             stmt.AddValue(1, realmId);
             using var result = DB.Login.Query(stmt);
-            return !result.IsEmpty() ? (AccountTypes)result.Read<uint>(0) : AccountTypes.Player;
+            return !result.IsEmpty() ? (AccountTypes)result.Read<int>(0) : AccountTypes.Player;
         }
 
-        public QueryCallback GetSecurityAsync(uint accountId, int realmId, Action<uint> callback)
+        public QueryCallback GetSecurityAsync(int accountId, int realmId, Action<int> callback)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_GMLEVEL_BY_REALMID);
             stmt.AddValue(0, accountId);
             stmt.AddValue(1, realmId);
             return DB.Login.AsyncQuery(stmt).WithCallback(result =>
             {
-                callback(!result.IsEmpty() ? result.Read<byte>(0) : (uint)AccountTypes.Player);
+                callback(!result.IsEmpty() ? result.Read<byte>(0) : (int)AccountTypes.Player);
             });
         }
 
-        public bool GetName(uint accountId, out string name)
+        public bool GetName(int accountId, out string name)
         {
             name = "";
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_USERNAME_BY_ID);
@@ -278,7 +299,7 @@ namespace Game
             return false;
         }
 
-        public bool CheckPassword(uint accountId, string password)
+        public bool CheckPassword(int accountId, string password)
         {
             string username;
 
@@ -367,7 +388,7 @@ namespace Game
 
                 do
                 {
-                    uint id = result.Read<uint>(0);
+                    RBACPermissions id = (RBACPermissions)result.Read<int>(0);
                     _permissions[id] = new RBACPermission(id, result.Read<string>(1));
                     ++count1;
                 }
@@ -383,19 +404,19 @@ namespace Game
                     return;
                 }
 
-                uint permissionId = 0;
+                RBACPermissions permissionId = 0;
                 RBACPermission permission = null;
 
                 do
                 {
-                    uint newId = result.Read<uint>(0);
+                    RBACPermissions newId = (RBACPermissions)result.Read<int>(0);
                     if (permissionId != newId)
                     {
                         permissionId = newId;
                         permission = _permissions[newId];
                     }
 
-                    uint linkedPermissionId = result.Read<uint>(1);
+                    RBACPermissions linkedPermissionId = (RBACPermissions)result.Read<int>(1);
                     if (linkedPermissionId == permissionId)
                     {
                         Log.outError(LogFilter.Sql, "RBAC Permission {0} has itself as linked permission. Ignored", permissionId);
@@ -423,7 +444,7 @@ namespace Game
                     if (secId != newId)
                         secId = newId;
 
-                    _defaultPermissions.Add((byte)secId, result.Read<uint>(1));
+                    _defaultPermissions.Add((byte)secId, (RBACPermissions)result.Read<int>(1));
                     ++count3;
                 }
                 while (result.NextRow());
@@ -467,13 +488,13 @@ namespace Game
             DB.Login.CommitTransaction(trans);
         }
 
-        public RBACPermission GetRBACPermission(uint permissionId)
+        public RBACPermission GetRBACPermission(RBACPermissions permissionId)
         {
             Log.outDebug(LogFilter.Rbac, "AccountMgr:GetRBACPermission: {0}", permissionId);
             return _permissions.LookupByKey(permissionId);
         }
 
-        public bool HasPermission(uint accountId, RBACPermissions permissionId, uint realmId)
+        public bool HasPermission(int accountId, RBACPermissions permissionId, int realmId)
         {
             if (accountId == 0)
             {
@@ -490,12 +511,12 @@ namespace Game
             return hasPermission;
         }
 
-        public List<uint> GetRBACDefaultPermissions(byte secLevel)
+        public List<RBACPermissions> GetRBACDefaultPermissions(byte secLevel)
         {
             return _defaultPermissions[secLevel];
         }
 
-        public Dictionary<uint, RBACPermission> GetRBACPermissionList() { return _permissions; }
+        public Dictionary<RBACPermissions, RBACPermission> GetRBACPermissionList() { return _permissions; }
     }
 
     public enum AccountOpResult

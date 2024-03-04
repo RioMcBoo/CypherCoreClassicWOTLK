@@ -107,7 +107,7 @@ namespace Game.Entities
             {
                 TaxiNodesRecord from = CliDB.TaxiNodesStorage.LookupByKey(path.FromTaxiNode);
                 TaxiNodesRecord to = CliDB.TaxiNodesStorage.LookupByKey(path.ToTaxiNode);
-                if (from != null && to != null && from.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde) && to.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde))
+                if (from != null && to != null && from.Flags.HasAnyFlag(TaxiNodeFlags.ShowOnAllianceMap | TaxiNodeFlags.ShowOnHordeMap) && to.Flags.HasAnyFlag(TaxiNodeFlags.ShowOnAllianceMap | TaxiNodeFlags.ShowOnHordeMap))
                     AddVerticeAndEdgeFromNodeInfo(from, to, path.Id, edges);
             }
 
@@ -150,7 +150,7 @@ namespace Game.Entities
                 {
                     //todo  test me No clue about this....
                     var To = m_nodesByVertex[(int)edge.To];
-                    TaxiNodeFlags requireFlag = (player.GetTeam() == Team.Alliance) ? TaxiNodeFlags.Alliance : TaxiNodeFlags.Horde;
+                    TaxiNodeFlags requireFlag = (player.GetTeam() == Team.Alliance) ? TaxiNodeFlags.ShowOnAllianceMap : TaxiNodeFlags.ShowOnHordeMap;
                     if (!To.Flags.HasAnyFlag(requireFlag))
                         continue;
 

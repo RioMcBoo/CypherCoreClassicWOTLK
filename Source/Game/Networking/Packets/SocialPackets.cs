@@ -93,7 +93,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             uint nameLength = _worldPacket.ReadBits<uint>(9);
-            uint noteslength = _worldPacket.ReadBits<uint>(10);
+            uint noteslength = _worldPacket.ReadBits<uint>(9);
             Name = _worldPacket.ReadString(nameLength);
             Notes = _worldPacket.ReadString(noteslength);
         }
@@ -164,8 +164,6 @@ namespace Game.Networking.Packets
 
     class SocialContractRequestResponse : ServerPacket
     {
-        public bool ShowSocialContract;
-
         public SocialContractRequestResponse() : base(ServerOpcodes.SocialContractRequestResponse) { }
 
         public override void Write()
@@ -173,6 +171,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ShowSocialContract);
             _worldPacket.FlushBits();
         }
+        
+        public bool ShowSocialContract;
     }
     
     //Structs

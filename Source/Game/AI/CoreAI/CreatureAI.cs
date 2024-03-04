@@ -33,7 +33,7 @@ namespace Game.AI
             _moveInLOSLocked = false;
         }
 
-        public void Talk(uint id, WorldObject whisperTarget = null)
+        public void Talk(int id, WorldObject whisperTarget = null)
         {
             Global.CreatureTextMgr.SendChat(me, (byte)id, whisperTarget);
         }
@@ -119,7 +119,7 @@ namespace Game.AI
         public void TriggerAlert(Unit who)
         {
             // If there's no target, or target isn't a player do nothing
-            if (!who || !who.IsTypeId(TypeId.Player))
+            if (who == null || !who.IsTypeId(TypeId.Player))
                 return;
 
             // If this unit isn't an NPC, is already distracted, is fighting, is confused, stunned or fleeing, do nothing
@@ -151,7 +151,7 @@ namespace Game.AI
                 case SummonCategory.Wild:
                 case SummonCategory.Ally:
                 case SummonCategory.Unk:
-                    if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup))
+                    if (properties.HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup))
                         return true;
                     switch (properties.Title)
                     {
@@ -178,7 +178,7 @@ namespace Game.AI
                 if (summon != null)
                 {
                     // Only apply this to specific types of summons
-                    if (!summon.GetVehicle() && ShouldFollowOnSpawn(summon.m_Properties) && summon.CanFollowOwner())
+                    if (summon.GetVehicle() == null && ShouldFollowOnSpawn(summon.m_Properties) && summon.CanFollowOwner())
                     {
                         Unit owner = summon.GetCharmerOrOwner();
                         if (owner != null)
@@ -294,7 +294,10 @@ namespace Game.AI
 
             // sometimes bosses stuck in combat?
             me.CombatStop(true);
-            me.SetTappedBy(null);
+
+            if (!me.IsTapListNotClearedOnEvade())
+                me.SetTappedBy(null);
+            
             me.ResetPlayerDamageReq();
             me.SetLastDamagedTime(0);
             me.SetCannotReachTarget(false);
@@ -308,7 +311,7 @@ namespace Game.AI
 
         public CypherStrings VisualizeBoundary(TimeSpan duration, Unit owner = null, bool fill = false)
         {
-            if (!owner)
+            if (owner == null)
                 return 0;
 
             if (_boundary.Empty())
@@ -365,13 +368,13 @@ namespace Game.AI
                 {
                     var pos = new Position(startPosition.GetPositionX() + front.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + front.Value * SharedConst.BoundaryVisualizeStepSize, spawnZ);
                     TempSummon point = owner.SummonCreature(SharedConst.BoundaryVisualizeCreature, pos, TempSummonType.TimedDespawn, duration);
-                    if (point)
+                    if (point != null)
                     {
                         point.SetObjectScale(SharedConst.BoundaryVisualizeCreatureScale);
                         point.SetUnitFlag(UnitFlags.Stunned);
                         point.SetImmuneToAll(true);
                         if (!hasOutOfBoundsNeighbor)
-                            point.SetUnitFlag(UnitFlags.Uninteractible);
+                            point.SetUninteractible(true);
                     }
                     Q.Remove(front);
                 }
@@ -401,18 +404,18 @@ namespace Game.AI
             }
         }
 
-        public Creature DoSummon(uint entry, Position pos, TimeSpan despawnTime, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
+        public Creature DoSummon(int entry, Position pos, TimeSpan despawnTime, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
         {
             return me.SummonCreature(entry, pos, summonType, despawnTime);
         }
 
-        public Creature DoSummon(uint entry, WorldObject obj, float radius = 5.0f, TimeSpan despawnTime = default, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
+        public Creature DoSummon(int entry, WorldObject obj, float radius = 5.0f, TimeSpan despawnTime = default, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
         {
             Position pos = obj.GetRandomNearPosition(radius);
             return me.SummonCreature(entry, pos, summonType, despawnTime);
         }
 
-        public Creature DoSummonFlyer(uint entry, WorldObject obj, float flightZ, float radius = 5.0f, TimeSpan despawnTime = default, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
+        public Creature DoSummonFlyer(int entry, WorldObject obj, float flightZ, float radius = 5.0f, TimeSpan despawnTime = default, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
         {
             Position pos = obj.GetRandomNearPosition(radius);
             pos.posZ += flightZ;
@@ -444,6 +447,9 @@ namespace Game.AI
 
         // Called for reaction when initially engaged - this will always happen _after_ JustEnteredCombat
         public virtual void JustEngagedWith(Unit who) { }
+
+        // Called when the creature reaches 0 health (or 1 if unkillable).
+        public virtual void OnHealthDepleted(Unit attacker, bool isKill) { }
 
         // Called when the creature is killed
         public virtual void JustDied(Unit killer) { }
@@ -491,7 +497,7 @@ namespace Game.AI
         // Should return true if the NPC is currently being escorted
         public virtual bool IsEscorted() { return false; }
 
-        public virtual void MovementInform(MovementGeneratorType type, uint id) { }
+        public virtual void MovementInform(MovementGeneratorType type, int id) { }
 
         // Called at reaching home after evade
         public virtual void JustReachedHome() { }
@@ -520,10 +526,10 @@ namespace Game.AI
         public virtual bool OnGossipHello(Player player) { return false; }
 
         // Called when a player selects a gossip item in the creature's gossip menu.
-        public virtual bool OnGossipSelect(Player player, uint menuId, uint gossipListId) { return false; }
+        public virtual bool OnGossipSelect(Player player, int menuId, int gossipListId) { return false; }
 
         // Called when a player selects a gossip with a code in the creature's gossip menu.
-        public virtual bool OnGossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
+        public virtual bool OnGossipSelectCode(Player player, int menuId, int gossipListId, string code)
         {
             return false;
         }
@@ -532,15 +538,15 @@ namespace Game.AI
         public virtual void OnQuestAccept(Player player, Quest quest) { }
 
         // Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
-        public virtual void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
+        public virtual void OnQuestReward(Player player, Quest quest, LootItemType type, int opt) { }
 
         /// == Waypoints system =============================
         /// 
-        public virtual void WaypointStarted(uint nodeId, uint pathId) { }
+        public virtual void WaypointStarted(int nodeId, int pathId) { }
 
-        public virtual void WaypointReached(uint nodeId, uint pathId) { }
+        public virtual void WaypointReached(int nodeId, int pathId) { }
 
-        public virtual void WaypointPathEnded(uint nodeId, uint pathId) { }
+        public virtual void WaypointPathEnded(int nodeId, int pathId) { }
 
         public virtual void PassengerBoarded(Unit passenger, sbyte seatId, bool apply) { }
 

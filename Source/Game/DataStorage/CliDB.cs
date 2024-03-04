@@ -34,7 +34,13 @@ namespace Game.DataStorage
             DB6Storage<T> ReadDB2<T>(string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale = 0) where T : new()
             {
                 DB6Storage<T> storage = new();
-                storage.LoadData($"{db2Path}/{defaultLocale}/{fileName}");
+                if (!storage.LoadData($"{db2Path}/{defaultLocale}/{fileName}"))
+                {
+                    Log.outError(LogFilter.ServerLoading, "Error loading DB2 files");
+                    Environment.Exit(1);
+                    return null;
+                }
+
                 storage.LoadHotfixData(availableDb2Locales, preparedStatement, preparedStatementLocale);
 
                 Global.DB2Mgr.AddDB2(storage.GetTableHash(), storage);
@@ -52,15 +58,15 @@ namespace Game.DataStorage
             AreaTableStorage = ReadDB2<AreaTableRecord>("AreaTable.db2", HotfixStatements.SEL_AREA_TABLE, HotfixStatements.SEL_AREA_TABLE_LOCALE);
             AreaTriggerStorage = ReadDB2<AreaTriggerRecord>("AreaTrigger.db2", HotfixStatements.SEL_AREA_TRIGGER);
             ArmorLocationStorage = ReadDB2<ArmorLocationRecord>("ArmorLocation.db2", HotfixStatements.SEL_ARMOR_LOCATION);
-            ArtifactStorage = ReadDB2<ArtifactRecord>("Artifact.db2", HotfixStatements.SEL_ARTIFACT, HotfixStatements.SEL_ARTIFACT_APPEARANCE_LOCALE);
+            ArtifactStorage = ReadDB2<ArtifactRecord>("Artifact.db2", HotfixStatements.SEL_ARTIFACT, HotfixStatements.SEL_ARTIFACT_LOCALE);
             ArtifactAppearanceStorage = ReadDB2<ArtifactAppearanceRecord>("ArtifactAppearance.db2", HotfixStatements.SEL_ARTIFACT_APPEARANCE, HotfixStatements.SEL_ARTIFACT_APPEARANCE_LOCALE);
             ArtifactAppearanceSetStorage = ReadDB2<ArtifactAppearanceSetRecord>("ArtifactAppearanceSet.db2", HotfixStatements.SEL_ARTIFACT_APPEARANCE_SET, HotfixStatements.SEL_ARTIFACT_APPEARANCE_SET_LOCALE);
-            //ArtifactCategoryStorage = ReadDB2<ArtifactCategoryRecord>("ArtifactCategory.db2", HotfixStatements.SEL_ARTIFACT_CATEGORY);
+            ArtifactCategoryStorage = ReadDB2<ArtifactCategoryRecord>("ArtifactCategory.db2", HotfixStatements.SEL_ARTIFACT_CATEGORY);
             ArtifactPowerStorage = ReadDB2<ArtifactPowerRecord>("ArtifactPower.db2", HotfixStatements.SEL_ARTIFACT_POWER);
             ArtifactPowerLinkStorage = ReadDB2<ArtifactPowerLinkRecord>("ArtifactPowerLink.db2", HotfixStatements.SEL_ARTIFACT_POWER_LINK);
             ArtifactPowerPickerStorage = ReadDB2<ArtifactPowerPickerRecord>("ArtifactPowerPicker.db2", HotfixStatements.SEL_ARTIFACT_POWER_PICKER);
             ArtifactPowerRankStorage = ReadDB2<ArtifactPowerRankRecord>("ArtifactPowerRank.db2", HotfixStatements.SEL_ARTIFACT_POWER_RANK);
-            //ArtifactQuestXPStorage = ReadDB2<ArtifactQuestXPRecord>("ArtifactQuestXP.db2", HotfixStatements.SEL_ARTIFACT_QUEST_XP);
+            ArtifactQuestXPStorage = ReadDB2<ArtifactQuestXPRecord>("ArtifactQuestXP.db2", HotfixStatements.SEL_ARTIFACT_QUEST_XP);
             ArtifactTierStorage = ReadDB2<ArtifactTierRecord>("ArtifactTier.db2", HotfixStatements.SEL_ARTIFACT_TIER);
             ArtifactUnlockStorage = ReadDB2<ArtifactUnlockRecord>("ArtifactUnlock.db2", HotfixStatements.SEL_ARTIFACT_UNLOCK);
             AuctionHouseStorage = ReadDB2<AuctionHouseRecord>("AuctionHouse.db2", HotfixStatements.SEL_AUCTION_HOUSE, HotfixStatements.SEL_AUCTION_HOUSE_LOCALE);
@@ -84,6 +90,7 @@ namespace Game.DataStorage
             BattlePetSpeciesStateStorage = ReadDB2<BattlePetSpeciesStateRecord>("BattlePetSpeciesState.db2", HotfixStatements.SEL_BATTLE_PET_SPECIES_STATE);
             BattlemasterListStorage = ReadDB2<BattlemasterListRecord>("BattlemasterList.db2", HotfixStatements.SEL_BATTLEMASTER_LIST, HotfixStatements.SEL_BATTLEMASTER_LIST_LOCALE);
             BroadcastTextStorage = ReadDB2<BroadcastTextRecord>("BroadcastText.db2", HotfixStatements.SEL_BROADCAST_TEXT, HotfixStatements.SEL_BROADCAST_TEXT_LOCALE);
+            CfgCategoriesStorage = ReadDB2<Cfg_CategoriesRecord>("Cfg_Categories.db2", HotfixStatements.SEL_CFG_CATEGORIES, HotfixStatements.SEL_CFG_CATEGORIES_LOCALE);
             CfgRegionsStorage = ReadDB2<Cfg_RegionsRecord>("Cfg_Regions.db2", HotfixStatements.SEL_CFG_REGIONS);
             CharTitlesStorage = ReadDB2<CharTitlesRecord>("CharTitles.db2", HotfixStatements.SEL_CHAR_TITLES, HotfixStatements.SEL_CHAR_TITLES_LOCALE);
             CharacterLoadoutStorage = ReadDB2<CharacterLoadoutRecord>("CharacterLoadout.db2", HotfixStatements.SEL_CHARACTER_LOADOUT);
@@ -104,6 +111,8 @@ namespace Game.DataStorage
             ChrSpecializationStorage = ReadDB2<ChrSpecializationRecord>("ChrSpecialization.db2", HotfixStatements.SEL_CHR_SPECIALIZATION, HotfixStatements.SEL_CHR_SPECIALIZATION_LOCALE);
             CinematicCameraStorage = ReadDB2<CinematicCameraRecord>("CinematicCamera.db2", HotfixStatements.SEL_CINEMATIC_CAMERA);
             CinematicSequencesStorage = ReadDB2<CinematicSequencesRecord>("CinematicSequences.db2", HotfixStatements.SEL_CINEMATIC_SEQUENCES);
+            ConditionalChrModelStorage = ReadDB2<ConditionalChrModelRecord>("ConditionalChrModel.db2", HotfixStatements.SEL_CONDITIONAL_CHR_MODEL);
+            ConditionalContentTuningStorage = ReadDB2<ConditionalContentTuningRecord>("ConditionalContentTuning.db2", HotfixStatements.SEL_CONDITIONAL_CONTENT_TUNING);
             ContentTuningStorage = ReadDB2<ContentTuningRecord>("ContentTuning.db2", HotfixStatements.SEL_CONTENT_TUNING);
             ConversationLineStorage = ReadDB2<ConversationLineRecord>("ConversationLine.db2", HotfixStatements.SEL_CONVERSATION_LINE);
             CreatureDisplayInfoStorage = ReadDB2<CreatureDisplayInfoRecord>("CreatureDisplayInfo.db2", HotfixStatements.SEL_CREATURE_DISPLAY_INFO);
@@ -150,8 +159,10 @@ namespace Game.DataStorage
             GemPropertiesStorage = ReadDB2<GemPropertiesRecord>("GemProperties.db2", HotfixStatements.SEL_GEM_PROPERTIES);
             GlyphBindableSpellStorage = ReadDB2<GlyphBindableSpellRecord>("GlyphBindableSpell.db2", HotfixStatements.SEL_GLYPH_BINDABLE_SPELL);
             GlyphPropertiesStorage = ReadDB2<GlyphPropertiesRecord>("GlyphProperties.db2", HotfixStatements.SEL_GLYPH_PROPERTIES);
-            GlyphRequiredSpecStorage = ReadDB2<GlyphRequiredSpecRecord>("GlyphRequiredSpec.db2", HotfixStatements.SEL_GLYPH_REQUIRED_SPEC);
             GlyphSlotStorage = ReadDB2<GlyphSlotRecord>("GlyphSlot.db2", HotfixStatements.SEL_GLYPH_SLOT);
+            GlyphPropertiesStorage = ReadDB2<GlyphPropertiesRecord>("GlyphProperties.db2", HotfixStatements.SEL_GLYPH_PROPERTIES);
+            GlyphRequiredSpecStorage = ReadDB2<GlyphRequiredSpecRecord>("GlyphRequiredSpec.db2", HotfixStatements.SEL_GLYPH_REQUIRED_SPEC);            
+            GossipNPCOptionStorage = ReadDB2<GossipNPCOptionRecord>("GossipNPCOption.db2", HotfixStatements.SEL_GOSSIP_NPC_OPTION);
             GuildColorBackgroundStorage = ReadDB2<GuildColorBackgroundRecord>("GuildColorBackground.db2", HotfixStatements.SEL_GUILD_COLOR_BACKGROUND);
             GuildColorBorderStorage = ReadDB2<GuildColorBorderRecord>("GuildColorBorder.db2", HotfixStatements.SEL_GUILD_COLOR_BORDER);
             GuildColorEmblemStorage = ReadDB2<GuildColorEmblemRecord>("GuildColorEmblem.db2", HotfixStatements.SEL_GUILD_COLOR_EMBLEM);
@@ -166,12 +177,13 @@ namespace Game.DataStorage
             ItemArmorQualityStorage = ReadDB2<ItemArmorQualityRecord>("ItemArmorQuality.db2", HotfixStatements.SEL_ITEM_ARMOR_QUALITY);
             ItemArmorShieldStorage = ReadDB2<ItemArmorShieldRecord>("ItemArmorShield.db2", HotfixStatements.SEL_ITEM_ARMOR_SHIELD);
             ItemArmorTotalStorage = ReadDB2<ItemArmorTotalRecord>("ItemArmorTotal.db2", HotfixStatements.SEL_ITEM_ARMOR_TOTAL);
-            //ItemBagFamilyStorage = ReadDB2<ItemBagFamilyRecord>("ItemBagFamily.db2", HotfixStatements.SEL_ITEM_BAG_FAMILY, HotfixStatements.SEL_ITEM_BAG_FAMILY_LOCALE);
+            ItemBagFamilyStorage = ReadDB2<ItemBagFamilyRecord>("ItemBagFamily.db2", HotfixStatements.SEL_ITEM_BAG_FAMILY, HotfixStatements.SEL_ITEM_BAG_FAMILY_LOCALE);
             ItemBonusStorage = ReadDB2<ItemBonusRecord>("ItemBonus.db2", HotfixStatements.SEL_ITEM_BONUS);
             ItemBonusListLevelDeltaStorage = ReadDB2<ItemBonusListLevelDeltaRecord>("ItemBonusListLevelDelta.db2", HotfixStatements.SEL_ITEM_BONUS_LIST_LEVEL_DELTA);
             ItemBonusTreeNodeStorage = ReadDB2<ItemBonusTreeNodeRecord>("ItemBonusTreeNode.db2", HotfixStatements.SEL_ITEM_BONUS_TREE_NODE);
             ItemChildEquipmentStorage = ReadDB2<ItemChildEquipmentRecord>("ItemChildEquipment.db2", HotfixStatements.SEL_ITEM_CHILD_EQUIPMENT);
             ItemClassStorage = ReadDB2<ItemClassRecord>("ItemClass.db2", HotfixStatements.SEL_ITEM_CLASS, HotfixStatements.SEL_ITEM_CLASS_LOCALE);
+            ItemContextPickerEntryStorage = ReadDB2<ItemContextPickerEntryRecord>("ItemContextPickerEntry.db2", HotfixStatements.SEL_ITEM_CONTEXT_PICKER_ENTRY);
             ItemCurrencyCostStorage = ReadDB2<ItemCurrencyCostRecord>("ItemCurrencyCost.db2", HotfixStatements.SEL_ITEM_CURRENCY_COST);
             ItemDamageAmmoStorage = ReadDB2<ItemDamageRecord>("ItemDamageAmmo.db2", HotfixStatements.SEL_ITEM_DAMAGE_AMMO);
             ItemDamageOneHandStorage = ReadDB2<ItemDamageRecord>("ItemDamageOneHand.db2", HotfixStatements.SEL_ITEM_DAMAGE_ONE_HAND);
@@ -191,8 +203,9 @@ namespace Game.DataStorage
             ItemModifiedAppearanceExtraStorage = ReadDB2<ItemModifiedAppearanceExtraRecord>("ItemModifiedAppearanceExtra.db2", HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE_EXTRA);
             ItemNameDescriptionStorage = ReadDB2<ItemNameDescriptionRecord>("ItemNameDescription.db2", HotfixStatements.SEL_ITEM_NAME_DESCRIPTION, HotfixStatements.SEL_ITEM_NAME_DESCRIPTION_LOCALE);
             ItemPriceBaseStorage = ReadDB2<ItemPriceBaseRecord>("ItemPriceBase.db2", HotfixStatements.SEL_ITEM_PRICE_BASE);
-            ItemRandomPropertiesStorage = ReadDB2<ItemRandomPropertiesRecord> ("ItemRandomProperties.db2", HotfixStatements.SEL_ITEM_RANDOM_PROPERTIES);
-            ItemRandomSuffixStorage = ReadDB2<ItemRandomSuffixRecord> ("ItemRandomSuffix.db2", HotfixStatements.SEL_ITEM_RANDOM_SUFFIX);
+            ItemRandomPropertiesStorage = ReadDB2<ItemRandomPropertiesRecord>("ItemRandomProperties.db2", HotfixStatements.SEL_ITEM_RANDOM_PROPERTIES);
+            ItemRandomSuffixStorage = ReadDB2<ItemRandomSuffixRecord>("ItemRandomSuffix.db2", HotfixStatements.SEL_ITEM_RANDOM_SUFFIX);
+            ItemSearchNameStorage = ReadDB2<ItemSearchNameRecord>("ItemSearchName.db2", HotfixStatements.SEL_ITEM_SEARCH_NAME, HotfixStatements.SEL_ITEM_SEARCH_NAME_LOCALE);
             ItemSetStorage = ReadDB2<ItemSetRecord>("ItemSet.db2", HotfixStatements.SEL_ITEM_SET, HotfixStatements.SEL_ITEM_SET_LOCALE);
             ItemSetSpellStorage = ReadDB2<ItemSetSpellRecord>("ItemSetSpell.db2", HotfixStatements.SEL_ITEM_SET_SPELL);
             ItemSparseStorage = ReadDB2<ItemSparseRecord>("ItemSparse.db2", HotfixStatements.SEL_ITEM_SPARSE, HotfixStatements.SEL_ITEM_SPARSE_LOCALE);
@@ -203,7 +216,7 @@ namespace Game.DataStorage
             JournalEncounterSectionStorage = ReadDB2<JournalEncounterSectionRecord>("JournalEncounterSection.db2", HotfixStatements.SEL_JOURNAL_ENCOUNTER_SECTION, HotfixStatements.SEL_JOURNAL_ENCOUNTER_SECTION_LOCALE);
             JournalInstanceStorage = ReadDB2<JournalInstanceRecord>("JournalInstance.db2", HotfixStatements.SEL_JOURNAL_INSTANCE, HotfixStatements.SEL_JOURNAL_INSTANCE_LOCALE);
             JournalTierStorage = ReadDB2<JournalTierRecord>("JournalTier.db2", HotfixStatements.SEL_JOURNAL_TIER, HotfixStatements.SEL_JOURNAL_TIER_LOCALE);
-            //KeyChainStorage = ReadDB2<KeyChainRecord>("KeyChain.db2", HotfixStatements.SEL_KEYCHAIN);
+            KeyChainStorage = ReadDB2<KeyChainRecord>("KeyChain.db2", HotfixStatements.SEL_KEYCHAIN);
             KeystoneAffixStorage = ReadDB2<KeystoneAffixRecord>("KeystoneAffix.db2", HotfixStatements.SEL_KEYSTONE_AFFIX, HotfixStatements.SEL_KEYSTONE_AFFIX_LOCALE);
             LanguageWordsStorage = ReadDB2<LanguageWordsRecord>("LanguageWords.db2", HotfixStatements.SEL_LANGUAGE_WORDS);
             LanguagesStorage = ReadDB2<LanguagesRecord>("Languages.db2", HotfixStatements.SEL_LANGUAGES, HotfixStatements.SEL_LANGUAGES_LOCALE);
@@ -222,6 +235,7 @@ namespace Game.DataStorage
             MountTypeXCapabilityStorage = ReadDB2<MountTypeXCapabilityRecord>("MountTypeXCapability.db2", HotfixStatements.SEL_MOUNT_TYPE_X_CAPABILITY);
             MountXDisplayStorage = ReadDB2<MountXDisplayRecord>("MountXDisplay.db2", HotfixStatements.SEL_MOUNT_X_DISPLAY);
             MovieStorage = ReadDB2<MovieRecord>("Movie.db2", HotfixStatements.SEL_MOVIE);
+            MythicPlusSeasonStorage = ReadDB2<MythicPlusSeasonRecord>("MythicPlusSeason.db2", HotfixStatements.SEL_MYTHIC_PLUS_SEASON);
             NameGenStorage = ReadDB2<NameGenRecord>("NameGen.db2", HotfixStatements.SEL_NAME_GEN);
             NamesProfanityStorage = ReadDB2<NamesProfanityRecord>("NamesProfanity.db2", HotfixStatements.SEL_NAMES_PROFANITY);
             NamesReservedStorage = ReadDB2<NamesReservedRecord>("NamesReserved.db2", HotfixStatements.SEL_NAMES_RESERVED, HotfixStatements.SEL_NAMES_RESERVED_LOCALE);
@@ -237,6 +251,7 @@ namespace Game.DataStorage
             PrestigeLevelInfoStorage = ReadDB2<PrestigeLevelInfoRecord>("PrestigeLevelInfo.db2", HotfixStatements.SEL_PRESTIGE_LEVEL_INFO, HotfixStatements.SEL_PRESTIGE_LEVEL_INFO_LOCALE);
             PvpDifficultyStorage = ReadDB2<PvpDifficultyRecord>("PVPDifficulty.db2", HotfixStatements.SEL_PVP_DIFFICULTY);
             PvpItemStorage = ReadDB2<PvpItemRecord>("PVPItem.db2", HotfixStatements.SEL_PVP_ITEM);
+            PvpSeasonStorage = ReadDB2<PvpSeasonRecord>("PvpSeason.db2", HotfixStatements.SEL_PVP_SEASON);
             PvpTalentStorage = ReadDB2<PvpTalentRecord>("PvpTalent.db2", HotfixStatements.SEL_PVP_TALENT, HotfixStatements.SEL_PVP_TALENT_LOCALE);
             PvpTalentCategoryStorage = ReadDB2<PvpTalentCategoryRecord>("PvpTalentCategory.db2", HotfixStatements.SEL_PVP_TALENT_CATEGORY);
             PvpTalentSlotUnlockStorage = ReadDB2<PvpTalentSlotUnlockRecord>("PvpTalentSlotUnlock.db2", HotfixStatements.SEL_PVP_TALENT_SLOT_UNLOCK);
@@ -253,19 +268,22 @@ namespace Game.DataStorage
             RewardPackStorage = ReadDB2<RewardPackRecord>("RewardPack.db2", HotfixStatements.SEL_REWARD_PACK);
             RewardPackXCurrencyTypeStorage = ReadDB2<RewardPackXCurrencyTypeRecord>("RewardPackXCurrencyType.db2", HotfixStatements.SEL_REWARD_PACK_X_CURRENCY_TYPE);
             RewardPackXItemStorage = ReadDB2<RewardPackXItemRecord>("RewardPackXItem.db2", HotfixStatements.SEL_REWARD_PACK_X_ITEM);
+            ScalingStatDistributionStorage = ReadDB2<ScalingStatDistributionRecord>("ScalingStatDistribution.db2", HotfixStatements.SEL_SCALING_STAT_DISTRIBUTION);
+            ScalingStatValuesStorage = ReadDB2<ScalingStatValuesRecord>("ScalingStatValues.db2", HotfixStatements.SEL_SCALING_STAT_VALUES);
             ScenarioStorage = ReadDB2<ScenarioRecord>("Scenario.db2", HotfixStatements.SEL_SCENARIO, HotfixStatements.SEL_SCENARIO_LOCALE);
             ScenarioStepStorage = ReadDB2<ScenarioStepRecord>("ScenarioStep.db2", HotfixStatements.SEL_SCENARIO_STEP, HotfixStatements.SEL_SCENARIO_STEP_LOCALE);
             SceneScriptStorage = ReadDB2<SceneScriptRecord>("SceneScript.db2", HotfixStatements.SEL_SCENE_SCRIPT);
             SceneScriptGlobalTextStorage = ReadDB2<SceneScriptGlobalTextRecord>("SceneScriptGlobalText.db2", HotfixStatements.SEL_SCENE_SCRIPT_GLOBAL_TEXT);
             SceneScriptPackageStorage = ReadDB2<SceneScriptPackageRecord>("SceneScriptPackage.db2", HotfixStatements.SEL_SCENE_SCRIPT_PACKAGE);
             SceneScriptTextStorage = ReadDB2<SceneScriptTextRecord>("SceneScriptText.db2", HotfixStatements.SEL_SCENE_SCRIPT_TEXT);
+            ServerMessagesStorage = ReadDB2<ServerMessagesRecord>("ServerMessages.db2", HotfixStatements.SEL_SERVER_MESSAGES, HotfixStatements.SEL_SERVER_MESSAGES_LOCALE);
             SkillLineStorage = ReadDB2<SkillLineRecord>("SkillLine.db2", HotfixStatements.SEL_SKILL_LINE, HotfixStatements.SEL_SKILL_LINE_LOCALE);
             SkillLineAbilityStorage = ReadDB2<SkillLineAbilityRecord>("SkillLineAbility.db2", HotfixStatements.SEL_SKILL_LINE_ABILITY);
+            SkillLineXTraitTreeStorage = ReadDB2<SkillLineXTraitTreeRecord>("SkillLineXTraitTree.db2", HotfixStatements.SEL_SKILL_LINE_X_TRAIT_TREE);
             SkillRaceClassInfoStorage = ReadDB2<SkillRaceClassInfoRecord>("SkillRaceClassInfo.db2", HotfixStatements.SEL_SKILL_RACE_CLASS_INFO);
             SoundKitStorage = ReadDB2<SoundKitRecord>("SoundKit.db2", HotfixStatements.SEL_SOUND_KIT);
             SpecializationSpellsStorage = ReadDB2<SpecializationSpellsRecord>("SpecializationSpells.db2", HotfixStatements.SEL_SPECIALIZATION_SPELLS, HotfixStatements.SEL_SPECIALIZATION_SPELLS_LOCALE);
             SpecSetMemberStorage = ReadDB2<SpecSetMemberRecord>("SpecSetMember.db2", HotfixStatements.SEL_SPEC_SET_MEMBER);
-            SpellNameStorage = ReadDB2<SpellNameRecord>("SpellName.db2", HotfixStatements.SEL_SPELL_NAME, HotfixStatements.SEL_SPELL_NAME_LOCALE);
             SpellAuraOptionsStorage = ReadDB2<SpellAuraOptionsRecord>("SpellAuraOptions.db2", HotfixStatements.SEL_SPELL_AURA_OPTIONS);
             SpellAuraRestrictionsStorage = ReadDB2<SpellAuraRestrictionsRecord>("SpellAuraRestrictions.db2", HotfixStatements.SEL_SPELL_AURA_RESTRICTIONS);
             SpellCastTimesStorage = ReadDB2<SpellCastTimesRecord>("SpellCastTimes.db2", HotfixStatements.SEL_SPELL_CAST_TIMES);
@@ -281,10 +299,12 @@ namespace Game.DataStorage
             SpellInterruptsStorage = ReadDB2<SpellInterruptsRecord>("SpellInterrupts.db2", HotfixStatements.SEL_SPELL_INTERRUPTS);
             SpellItemEnchantmentStorage = ReadDB2<SpellItemEnchantmentRecord>("SpellItemEnchantment.db2", HotfixStatements.SEL_SPELL_ITEM_ENCHANTMENT, HotfixStatements.SEL_SPELL_ITEM_ENCHANTMENT_LOCALE);
             SpellItemEnchantmentConditionStorage = ReadDB2<SpellItemEnchantmentConditionRecord>("SpellItemEnchantmentCondition.db2", HotfixStatements.SEL_SPELL_ITEM_ENCHANTMENT_CONDITION);
+            SpellKeyboundOverrideStorage = ReadDB2<SpellKeyboundOverrideRecord>("SpellKeyboundOverride.db2", HotfixStatements.SEL_SPELL_KEYBOUND_OVERRIDE);
             SpellLabelStorage = ReadDB2<SpellLabelRecord>("SpellLabel.db2", HotfixStatements.SEL_SPELL_LABEL);
             SpellLearnSpellStorage = ReadDB2<SpellLearnSpellRecord>("SpellLearnSpell.db2", HotfixStatements.SEL_SPELL_LEARN_SPELL);
             SpellLevelsStorage = ReadDB2<SpellLevelsRecord>("SpellLevels.db2", HotfixStatements.SEL_SPELL_LEVELS);
             SpellMiscStorage = ReadDB2<SpellMiscRecord>("SpellMisc.db2", HotfixStatements.SEL_SPELL_MISC);
+            SpellNameStorage = ReadDB2<SpellNameRecord>("SpellName.db2", HotfixStatements.SEL_SPELL_NAME, HotfixStatements.SEL_SPELL_NAME_LOCALE);
             SpellPowerStorage = ReadDB2<SpellPowerRecord>("SpellPower.db2", HotfixStatements.SEL_SPELL_POWER);
             SpellPowerDifficultyStorage = ReadDB2<SpellPowerDifficultyRecord>("SpellPowerDifficulty.db2", HotfixStatements.SEL_SPELL_POWER_DIFFICULTY);
             SpellProcsPerMinuteStorage = ReadDB2<SpellProcsPerMinuteRecord>("SpellProcsPerMinute.db2", HotfixStatements.SEL_SPELL_PROCS_PER_MINUTE);
@@ -312,6 +332,29 @@ namespace Game.DataStorage
             TaxiPathNodeStorage = ReadDB2<TaxiPathNodeRecord>("TaxiPathNode.db2", HotfixStatements.SEL_TAXI_PATH_NODE);
             TotemCategoryStorage = ReadDB2<TotemCategoryRecord>("TotemCategory.db2", HotfixStatements.SEL_TOTEM_CATEGORY, HotfixStatements.SEL_TOTEM_CATEGORY_LOCALE);
             ToyStorage = ReadDB2<ToyRecord>("Toy.db2", HotfixStatements.SEL_TOY, HotfixStatements.SEL_TOY_LOCALE);
+            TraitCondStorage = ReadDB2<TraitCondRecord>("TraitCond.db2", HotfixStatements.SEL_TRAIT_COND);
+            TraitCostStorage = ReadDB2<TraitCostRecord>("TraitCost.db2", HotfixStatements.SEL_TRAIT_COST);
+            TraitCurrencyStorage = ReadDB2<TraitCurrencyRecord>("TraitCurrency.db2", HotfixStatements.SEL_TRAIT_CURRENCY);
+            TraitCurrencySourceStorage = ReadDB2<TraitCurrencySourceRecord>("TraitCurrencySource.db2", HotfixStatements.SEL_TRAIT_CURRENCY_SOURCE, HotfixStatements.SEL_TRAIT_CURRENCY_SOURCE_LOCALE);
+            TraitDefinitionStorage = ReadDB2<TraitDefinitionRecord>("TraitDefinition.db2", HotfixStatements.SEL_TRAIT_DEFINITION, HotfixStatements.SEL_TRAIT_DEFINITION_LOCALE);
+            TraitDefinitionEffectPointsStorage = ReadDB2<TraitDefinitionEffectPointsRecord>("TraitDefinitionEffectPoints.db2", HotfixStatements.SEL_TRAIT_DEFINITION_EFFECT_POINTS);
+            TraitEdgeStorage = ReadDB2<TraitEdgeRecord>("TraitEdge.db2", HotfixStatements.SEL_TRAIT_EDGE);
+            TraitNodeStorage = ReadDB2<TraitNodeRecord>("TraitNode.db2", HotfixStatements.SEL_TRAIT_NODE);
+            TraitNodeEntryStorage = ReadDB2<TraitNodeEntryRecord>("TraitNodeEntry.db2", HotfixStatements.SEL_TRAIT_NODE_ENTRY);
+            TraitNodeEntryXTraitCondStorage = ReadDB2<TraitNodeEntryXTraitCondRecord>("TraitNodeEntryXTraitCond.db2", HotfixStatements.SEL_TRAIT_NODE_ENTRY_X_TRAIT_COND);
+            TraitNodeEntryXTraitCostStorage = ReadDB2<TraitNodeEntryXTraitCostRecord>("TraitNodeEntryXTraitCost.db2", HotfixStatements.SEL_TRAIT_NODE_ENTRY_X_TRAIT_COST);
+            TraitNodeGroupStorage = ReadDB2<TraitNodeGroupRecord>("TraitNodeGroup.db2", HotfixStatements.SEL_TRAIT_NODE_GROUP);
+            TraitNodeGroupXTraitCondStorage = ReadDB2<TraitNodeGroupXTraitCondRecord>("TraitNodeGroupXTraitCond.db2", HotfixStatements.SEL_TRAIT_NODE_GROUP_X_TRAIT_COND);
+            TraitNodeGroupXTraitCostStorage = ReadDB2<TraitNodeGroupXTraitCostRecord>("TraitNodeGroupXTraitCost.db2", HotfixStatements.SEL_TRAIT_NODE_GROUP_X_TRAIT_COST);
+            TraitNodeGroupXTraitNodeStorage = ReadDB2<TraitNodeGroupXTraitNodeRecord>("TraitNodeGroupXTraitNode.db2", HotfixStatements.SEL_TRAIT_NODE_GROUP_X_TRAIT_NODE);
+            TraitNodeXTraitCondStorage = ReadDB2<TraitNodeXTraitCondRecord>("TraitNodeXTraitCond.db2", HotfixStatements.SEL_TRAIT_NODE_X_TRAIT_COND);
+            TraitNodeXTraitCostStorage = ReadDB2<TraitNodeXTraitCostRecord>("TraitNodeXTraitCost.db2", HotfixStatements.SEL_TRAIT_NODE_X_TRAIT_COST);
+            TraitNodeXTraitNodeEntryStorage = ReadDB2<TraitNodeXTraitNodeEntryRecord>("TraitNodeXTraitNodeEntry.db2", HotfixStatements.SEL_TRAIT_NODE_X_TRAIT_NODE_ENTRY);
+            TraitTreeStorage = ReadDB2<TraitTreeRecord>("TraitTree.db2", HotfixStatements.SEL_TRAIT_TREE);
+            TraitTreeLoadoutStorage = ReadDB2<TraitTreeLoadoutRecord>("TraitTreeLoadout.db2", HotfixStatements.SEL_TRAIT_TREE_LOADOUT);
+            TraitTreeLoadoutEntryStorage = ReadDB2<TraitTreeLoadoutEntryRecord>("TraitTreeLoadoutEntry.db2", HotfixStatements.SEL_TRAIT_TREE_LOADOUT_ENTRY);
+            TraitTreeXTraitCostStorage = ReadDB2<TraitTreeXTraitCostRecord>("TraitTreeXTraitCost.db2", HotfixStatements.SEL_TRAIT_TREE_X_TRAIT_COST);
+            TraitTreeXTraitCurrencyStorage = ReadDB2<TraitTreeXTraitCurrencyRecord>("TraitTreeXTraitCurrency.db2", HotfixStatements.SEL_TRAIT_TREE_X_TRAIT_CURRENCY);
             TransmogHolidayStorage = ReadDB2<TransmogHolidayRecord>("TransmogHoliday.db2", HotfixStatements.SEL_TRANSMOG_HOLIDAY);
             TransmogSetStorage = ReadDB2<TransmogSetRecord>("TransmogSet.db2", HotfixStatements.SEL_TRANSMOG_SET, HotfixStatements.SEL_TRANSMOG_SET_LOCALE);
             TransmogSetGroupStorage = ReadDB2<TransmogSetGroupRecord>("TransmogSetGroup.db2", HotfixStatements.SEL_TRANSMOG_SET_GROUP, HotfixStatements.SEL_TRANSMOG_SET_GROUP_LOCALE);
@@ -340,7 +383,7 @@ namespace Game.DataStorage
                 TaxiPathSetBySource[entry.FromTaxiNode][entry.ToTaxiNode] = new TaxiPathBySourceAndDestination(entry.Id, entry.Cost);
             }
 
-            uint pathCount = TaxiPathStorage.GetNumRows();
+            int pathCount = TaxiPathStorage.GetNumRows();
 
             // Calculate path nodes count
             uint[] pathLength = new uint[pathCount];                           // 0 and some other indexes not used
@@ -356,7 +399,7 @@ namespace Game.DataStorage
             foreach (var entry in TaxiPathNodeStorage.Values)
                 TaxiPathNodesByPath[entry.PathID][entry.NodeIndex] = entry;
 
-            var taxiMaskSize = ((TaxiNodesStorage.GetNumRows() - 1) / 8) + 1;
+            var taxiMaskSize = ((TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8;
             TaxiNodesMask = new byte[taxiMaskSize];
             OldContinentsNodesMask = new byte[taxiMaskSize];
             HordeTaxiNodesMask = new byte[taxiMaskSize];
@@ -364,7 +407,7 @@ namespace Game.DataStorage
 
             foreach (var node in TaxiNodesStorage.Values)
             {
-                if (!node.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde))
+                if (!node.HasAnyFlag(TaxiNodeFlags.ShowOnAllianceMap | TaxiNodeFlags.ShowOnHordeMap))
                     continue;
 
                 // valid taxi network node
@@ -372,9 +415,9 @@ namespace Game.DataStorage
                 byte submask = (byte)(1 << (int)((node.Id - 1) % 8));
 
                 TaxiNodesMask[field] |= submask;
-                if (node.Flags.HasAnyFlag(TaxiNodeFlags.Horde))
+                if (node.HasAnyFlag(TaxiNodeFlags.ShowOnHordeMap))
                     HordeTaxiNodesMask[field] |= submask;
-                if (node.Flags.HasAnyFlag(TaxiNodeFlags.Alliance))
+                if (node.HasAnyFlag(TaxiNodeFlags.ShowOnAllianceMap))
                     AllianceTaxiNodesMask[field] |= submask;
 
                 int uiMapId;
@@ -386,19 +429,19 @@ namespace Game.DataStorage
             }
 
             //// Check loaded DB2 files proper version
-            //if (!AreaTableStorage.ContainsKey(14083) ||               // last area added in 9.2.7 (45114)
-            //    !CharTitlesStorage.ContainsKey(727) ||                // last char title added in 9.2.7 (45114)
-            //    !GemPropertiesStorage.ContainsKey(3922) ||            // last gem property added in 9.2.7 (45114)
-            //    !ItemStorage.ContainsKey(199202) ||                   // last item added in 9.2.7 (45114)
-            //    !ItemExtendedCostStorage.ContainsKey(7316) ||         // last item extended cost added in 9.2.7 (45114)
-            //    !MapStorage.ContainsKey(2559) ||                      // last map added in 9.2.7 (45114)
-            //    !SpellNameStorage.ContainsKey(387936))                // last spell added in 9.2.7 (45114)
-            //{
-            //    Log.outError(LogFilter.Misc, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
-            //    Environment.Exit(1);
-            //}            
+            if (!AreaTableStorage.ContainsKey(14483) ||               // last area added in 3.4.3 (51943)
+                !CharTitlesStorage.ContainsKey(757) ||                // last char title added in 3.4.3 (51943)
+                !GemPropertiesStorage.ContainsKey(1629) ||            // last gem property added in 3.4.3 (51943)
+                !ItemStorage.ContainsKey(211851) ||                   // last item added in 3.4.3 (51943)
+                !ItemExtendedCostStorage.ContainsKey(8328) ||         // last item extended cost added in 3.4.3 (51943)
+                !MapStorage.ContainsKey(2567) ||                      // last map added in 3.4.3 (51943)
+                !SpellNameStorage.ContainsKey(429548))                // last spell added in 3.4.3 (51943)
+            {
+                Log.outError(LogFilter.Misc, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
+                Environment.Exit(1);
+            }
 
-            Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DB2 data storages in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Initialized {loadedFileCount} DB2 data storages in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 
             return availableDb2Locales;
         }
@@ -421,16 +464,19 @@ namespace Game.DataStorage
             BaseMPGameTable = ReadGameTable<GtBaseMPRecord>("BaseMp.txt");
             BattlePetXPGameTable = ReadGameTable<GtBattlePetXPRecord>("BattlePetXP.txt");
             CombatRatingsGameTable = ReadGameTable<GtCombatRatingsRecord>("CombatRatings.txt");
-            CombatRatingsMultByILvlGameTable = ReadGameTable<GtGenericMultByILvlRecord>("CombatRatingsMultByILvl.txt");
+            CombatRatingsMultByILvlGameTable = ReadGameTable<GtCombatRatingsMultByILvlRecord>("CombatRatingsMultByILvl.txt");
             ItemSocketCostPerLevelGameTable = ReadGameTable<GtItemSocketCostPerLevelRecord>("ItemSocketCostPerLevel.txt");
             HpPerStaGameTable = ReadGameTable<GtHpPerStaRecord>("HpPerSta.txt");
             NpcManaCostScalerGameTable = ReadGameTable<GtNpcManaCostScalerRecord>("NPCManaCostScaler.txt");
             OCTRegenHPGameTable = ReadGameTable<GtOCTRegenHPRecord>("OCTRegenHP.txt");
+            OCTRegenMPGameTable = ReadGameTable<GtOCTRegenMPRecord>("OCTRegenMP.txt");
             RegenHPPerSptGameTable = ReadGameTable<GtRegenHPPerSptRecord>("RegenHPPerSpt.txt");
             RegenMPPerSptGameTable = ReadGameTable<GtRegenMPPerSptRecord>("RegenMPPerSpt.txt");
+            ShieldBlockRegularGameTable = ReadGameTable<GtShieldBlockRegularRecord>("ShieldBlockRegular.txt");
             SpellScalingGameTable = ReadGameTable<GtSpellScalingRecord>("SpellScaling.txt");
+            XpGameTable = ReadGameTable<GtXpRecord>("Xp.txt");
 
-            Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DBC GameTables data stores in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Initialized {loadedFileCount} DBC GameTables data stores in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         #region Main Collections
@@ -452,7 +498,7 @@ namespace Game.DataStorage
         public static DB6Storage<ArtifactPowerLinkRecord> ArtifactPowerLinkStorage;
         public static DB6Storage<ArtifactPowerPickerRecord> ArtifactPowerPickerStorage;
         public static DB6Storage<ArtifactPowerRankRecord> ArtifactPowerRankStorage;
-        //public static DB6Storage<ArtifactQuestXPRecord> ArtifactQuestXPStorage;
+        public static DB6Storage<ArtifactQuestXPRecord> ArtifactQuestXPStorage;
         public static DB6Storage<ArtifactTierRecord> ArtifactTierStorage;
         public static DB6Storage<ArtifactUnlockRecord> ArtifactUnlockStorage;
         public static DB6Storage<AuctionHouseRecord> AuctionHouseStorage;
@@ -470,12 +516,14 @@ namespace Game.DataStorage
         public static DB6Storage<BankBagSlotPricesRecord> BankBagSlotPricesStorage;
         public static DB6Storage<BannedAddonsRecord> BannedAddOnsStorage;
         public static DB6Storage<BarberShopStyleRecord> BarberShopStyleStorage;
+        public static DB6Storage<BattlePetAbilityRecord> BarberBattlePetAbilityStorage;
         public static DB6Storage<BattlePetBreedQualityRecord> BattlePetBreedQualityStorage;
         public static DB6Storage<BattlePetBreedStateRecord> BattlePetBreedStateStorage;
         public static DB6Storage<BattlePetSpeciesRecord> BattlePetSpeciesStorage;
         public static DB6Storage<BattlePetSpeciesStateRecord> BattlePetSpeciesStateStorage;
         public static DB6Storage<BattlemasterListRecord> BattlemasterListStorage;
         public static DB6Storage<BroadcastTextRecord> BroadcastTextStorage;
+        public static DB6Storage<Cfg_CategoriesRecord> CfgCategoriesStorage;
         public static DB6Storage<Cfg_RegionsRecord> CfgRegionsStorage;
         public static DB6Storage<CharTitlesRecord> CharTitlesStorage;
         public static DB6Storage<CharacterLoadoutRecord> CharacterLoadoutStorage;
@@ -487,15 +535,17 @@ namespace Game.DataStorage
         public static DB6Storage<ChrCustomizationChoiceRecord> ChrCustomizationChoiceStorage;
         public static DB6Storage<ChrCustomizationDisplayInfoRecord> ChrCustomizationDisplayInfoStorage;
         public static DB6Storage<ChrCustomizationElementRecord> ChrCustomizationElementStorage;
+        public static DB6Storage<ChrCustomizationOptionRecord> ChrCustomizationOptionStorage;
         public static DB6Storage<ChrCustomizationReqRecord> ChrCustomizationReqStorage;
         public static DB6Storage<ChrCustomizationReqChoiceRecord> ChrCustomizationReqChoiceStorage;
         public static DB6Storage<ChrModelRecord> ChrModelStorage;
         public static DB6Storage<ChrRaceXChrModelRecord> ChrRaceXChrModelStorage;
-        public static DB6Storage<ChrCustomizationOptionRecord> ChrCustomizationOptionStorage;
         public static DB6Storage<ChrRacesRecord> ChrRacesStorage;
         public static DB6Storage<ChrSpecializationRecord> ChrSpecializationStorage;
         public static DB6Storage<CinematicCameraRecord> CinematicCameraStorage;
         public static DB6Storage<CinematicSequencesRecord> CinematicSequencesStorage;
+        public static DB6Storage<ConditionalChrModelRecord> ConditionalChrModelStorage;
+        public static DB6Storage<ConditionalContentTuningRecord> ConditionalContentTuningStorage;
         public static DB6Storage<ContentTuningRecord> ContentTuningStorage;
         public static DB6Storage<ConversationLineRecord> ConversationLineStorage;
         public static DB6Storage<CreatureDisplayInfoRecord> CreatureDisplayInfoStorage;
@@ -533,17 +583,18 @@ namespace Game.DataStorage
         public static DB6Storage<GarrFollowerRecord> GarrFollowerStorage;
         public static DB6Storage<GarrFollowerXAbilityRecord> GarrFollowerXAbilityStorage;
         public static DB6Storage<GarrMissionRecord> GarrMissionStorage;
-        public static DB6Storage<GarrPlotBuildingRecord> GarrPlotBuildingStorage;
         public static DB6Storage<GarrPlotRecord> GarrPlotStorage;
+        public static DB6Storage<GarrPlotBuildingRecord> GarrPlotBuildingStorage;        
         public static DB6Storage<GarrPlotInstanceRecord> GarrPlotInstanceStorage;
         public static DB6Storage<GarrSiteLevelRecord> GarrSiteLevelStorage;
         public static DB6Storage<GarrSiteLevelPlotInstRecord> GarrSiteLevelPlotInstStorage;
         public static DB6Storage<GarrTalentTreeRecord> GarrTalentTreeStorage;
         public static DB6Storage<GemPropertiesRecord> GemPropertiesStorage;
         public static DB6Storage<GlyphBindableSpellRecord> GlyphBindableSpellStorage;
-        public static DB6Storage<GlyphPropertiesRecord> GlyphPropertiesStorage;
         public static DB6Storage<GlyphSlotRecord> GlyphSlotStorage;
-        public static DB6Storage<GlyphRequiredSpecRecord> GlyphRequiredSpecStorage;        
+        public static DB6Storage<GlyphPropertiesRecord> GlyphPropertiesStorage;        
+        public static DB6Storage<GlyphRequiredSpecRecord> GlyphRequiredSpecStorage;
+        public static DB6Storage<GossipNPCOptionRecord> GossipNPCOptionStorage;
         public static DB6Storage<GuildColorBackgroundRecord> GuildColorBackgroundStorage;
         public static DB6Storage<GuildColorBorderRecord> GuildColorBorderStorage;
         public static DB6Storage<GuildColorEmblemRecord> GuildColorEmblemStorage;
@@ -558,12 +609,13 @@ namespace Game.DataStorage
         public static DB6Storage<ItemArmorQualityRecord> ItemArmorQualityStorage;
         public static DB6Storage<ItemArmorShieldRecord> ItemArmorShieldStorage;
         public static DB6Storage<ItemArmorTotalRecord> ItemArmorTotalStorage;
-        //public static DB6Storage<ItemBagFamilyRecord> ItemBagFamilyStorage;
+        public static DB6Storage<ItemBagFamilyRecord> ItemBagFamilyStorage;
         public static DB6Storage<ItemBonusRecord> ItemBonusStorage;
         public static DB6Storage<ItemBonusListLevelDeltaRecord> ItemBonusListLevelDeltaStorage;
         public static DB6Storage<ItemBonusTreeNodeRecord> ItemBonusTreeNodeStorage;
-        public static DB6Storage<ItemClassRecord> ItemClassStorage;
         public static DB6Storage<ItemChildEquipmentRecord> ItemChildEquipmentStorage;
+        public static DB6Storage<ItemClassRecord> ItemClassStorage;
+        public static DB6Storage<ItemContextPickerEntryRecord> ItemContextPickerEntryStorage; 
         public static DB6Storage<ItemCurrencyCostRecord> ItemCurrencyCostStorage;
         public static DB6Storage<ItemDamageRecord> ItemDamageAmmoStorage;
         public static DB6Storage<ItemDamageRecord> ItemDamageOneHandStorage;
@@ -585,6 +637,7 @@ namespace Game.DataStorage
         public static DB6Storage<ItemPriceBaseRecord> ItemPriceBaseStorage;
         public static DB6Storage<ItemRandomPropertiesRecord> ItemRandomPropertiesStorage;
         public static DB6Storage<ItemRandomSuffixRecord> ItemRandomSuffixStorage;
+        public static DB6Storage<ItemSearchNameRecord> ItemSearchNameStorage;
         public static DB6Storage<ItemSetRecord> ItemSetStorage;
         public static DB6Storage<ItemSetSpellRecord> ItemSetSpellStorage;
         public static DB6Storage<ItemSparseRecord> ItemSparseStorage;
@@ -595,7 +648,7 @@ namespace Game.DataStorage
         public static DB6Storage<JournalEncounterSectionRecord> JournalEncounterSectionStorage;
         public static DB6Storage<JournalInstanceRecord> JournalInstanceStorage;
         public static DB6Storage<JournalTierRecord> JournalTierStorage;
-        //public static DB6Storage<KeyChainRecord> KeyChainStorage;
+        public static DB6Storage<KeyChainRecord> KeyChainStorage;
         public static DB6Storage<KeystoneAffixRecord> KeystoneAffixStorage;
         public static DB6Storage<LanguageWordsRecord> LanguageWordsStorage;
         public static DB6Storage<LanguagesRecord> LanguagesStorage;
@@ -612,8 +665,9 @@ namespace Game.DataStorage
         public static DB6Storage<MountCapabilityRecord> MountCapabilityStorage;
         public static DB6Storage<MountRecord> MountStorage;
         public static DB6Storage<MountTypeXCapabilityRecord> MountTypeXCapabilityStorage;
-        public static DB6Storage<MountXDisplayRecord> MountXDisplayStorage;        
+        public static DB6Storage<MountXDisplayRecord> MountXDisplayStorage;
         public static DB6Storage<MovieRecord> MovieStorage;
+        public static DB6Storage<MythicPlusSeasonRecord> MythicPlusSeasonStorage;
         public static DB6Storage<NameGenRecord> NameGenStorage;
         public static DB6Storage<NamesProfanityRecord> NamesProfanityStorage;
         public static DB6Storage<NamesReservedRecord> NamesReservedStorage;
@@ -629,6 +683,7 @@ namespace Game.DataStorage
         public static DB6Storage<PrestigeLevelInfoRecord> PrestigeLevelInfoStorage;
         public static DB6Storage<PvpDifficultyRecord> PvpDifficultyStorage;
         public static DB6Storage<PvpItemRecord> PvpItemStorage;
+        public static DB6Storage<PvpSeasonRecord> PvpSeasonStorage;
         public static DB6Storage<PvpTalentRecord> PvpTalentStorage;
         public static DB6Storage<PvpTalentCategoryRecord> PvpTalentCategoryStorage;
         public static DB6Storage<PvpTalentSlotUnlockRecord> PvpTalentSlotUnlockStorage;
@@ -645,14 +700,18 @@ namespace Game.DataStorage
         public static DB6Storage<RewardPackRecord> RewardPackStorage;
         public static DB6Storage<RewardPackXCurrencyTypeRecord> RewardPackXCurrencyTypeStorage;
         public static DB6Storage<RewardPackXItemRecord> RewardPackXItemStorage;
+        public static DB6Storage<ScalingStatDistributionRecord> ScalingStatDistributionStorage;
+        public static DB6Storage<ScalingStatValuesRecord> ScalingStatValuesStorage;
         public static DB6Storage<ScenarioRecord> ScenarioStorage;
         public static DB6Storage<ScenarioStepRecord> ScenarioStepStorage;
         public static DB6Storage<SceneScriptRecord> SceneScriptStorage;
         public static DB6Storage<SceneScriptGlobalTextRecord> SceneScriptGlobalTextStorage;
         public static DB6Storage<SceneScriptPackageRecord> SceneScriptPackageStorage;
         public static DB6Storage<SceneScriptTextRecord> SceneScriptTextStorage;
+        public static DB6Storage<ServerMessagesRecord> ServerMessagesStorage;
         public static DB6Storage<SkillLineRecord> SkillLineStorage;
         public static DB6Storage<SkillLineAbilityRecord> SkillLineAbilityStorage;
+        public static DB6Storage<SkillLineXTraitTreeRecord> SkillLineXTraitTreeStorage;
         public static DB6Storage<SkillRaceClassInfoRecord> SkillRaceClassInfoStorage;
         public static DB6Storage<SoundKitRecord> SoundKitStorage;
         public static DB6Storage<SpecializationSpellsRecord> SpecializationSpellsStorage;
@@ -672,6 +731,7 @@ namespace Game.DataStorage
         public static DB6Storage<SpellInterruptsRecord> SpellInterruptsStorage;
         public static DB6Storage<SpellItemEnchantmentRecord> SpellItemEnchantmentStorage;
         public static DB6Storage<SpellItemEnchantmentConditionRecord> SpellItemEnchantmentConditionStorage;
+        public static DB6Storage<SpellKeyboundOverrideRecord> SpellKeyboundOverrideStorage;
         public static DB6Storage<SpellLabelRecord> SpellLabelStorage;
         public static DB6Storage<SpellLearnSpellRecord> SpellLearnSpellStorage;
         public static DB6Storage<SpellLevelsRecord> SpellLevelsStorage;
@@ -704,6 +764,29 @@ namespace Game.DataStorage
         public static DB6Storage<TaxiPathNodeRecord> TaxiPathNodeStorage;
         public static DB6Storage<TotemCategoryRecord> TotemCategoryStorage;
         public static DB6Storage<ToyRecord> ToyStorage;
+        public static DB6Storage<TraitCondRecord> TraitCondStorage;
+        public static DB6Storage<TraitCostRecord> TraitCostStorage;
+        public static DB6Storage<TraitCurrencyRecord> TraitCurrencyStorage;
+        public static DB6Storage<TraitCurrencySourceRecord> TraitCurrencySourceStorage;
+        public static DB6Storage<TraitDefinitionRecord> TraitDefinitionStorage;
+        public static DB6Storage<TraitDefinitionEffectPointsRecord> TraitDefinitionEffectPointsStorage;
+        public static DB6Storage<TraitEdgeRecord> TraitEdgeStorage;
+        public static DB6Storage<TraitNodeRecord> TraitNodeStorage;
+        public static DB6Storage<TraitNodeEntryRecord> TraitNodeEntryStorage;
+        public static DB6Storage<TraitNodeEntryXTraitCondRecord> TraitNodeEntryXTraitCondStorage;
+        public static DB6Storage<TraitNodeEntryXTraitCostRecord> TraitNodeEntryXTraitCostStorage;
+        public static DB6Storage<TraitNodeGroupRecord> TraitNodeGroupStorage;
+        public static DB6Storage<TraitNodeGroupXTraitCondRecord> TraitNodeGroupXTraitCondStorage;
+        public static DB6Storage<TraitNodeGroupXTraitCostRecord> TraitNodeGroupXTraitCostStorage;
+        public static DB6Storage<TraitNodeGroupXTraitNodeRecord> TraitNodeGroupXTraitNodeStorage;
+        public static DB6Storage<TraitNodeXTraitCondRecord> TraitNodeXTraitCondStorage;
+        public static DB6Storage<TraitNodeXTraitCostRecord> TraitNodeXTraitCostStorage;
+        public static DB6Storage<TraitNodeXTraitNodeEntryRecord> TraitNodeXTraitNodeEntryStorage;
+        public static DB6Storage<TraitTreeRecord> TraitTreeStorage;
+        public static DB6Storage<TraitTreeLoadoutRecord> TraitTreeLoadoutStorage;
+        public static DB6Storage<TraitTreeLoadoutEntryRecord> TraitTreeLoadoutEntryStorage;
+        public static DB6Storage<TraitTreeXTraitCostRecord> TraitTreeXTraitCostStorage;
+        public static DB6Storage<TraitTreeXTraitCurrencyRecord> TraitTreeXTraitCurrencyStorage;
         public static DB6Storage<TransmogHolidayRecord> TransmogHolidayStorage;
         public static DB6Storage<TransmogSetRecord> TransmogSetStorage;
         public static DB6Storage<TransmogSetGroupRecord> TransmogSetGroupStorage;
@@ -731,28 +814,31 @@ namespace Game.DataStorage
         public static GameTable<GtBaseMPRecord> BaseMPGameTable;
         public static GameTable<GtBattlePetXPRecord> BattlePetXPGameTable;
         public static GameTable<GtCombatRatingsRecord> CombatRatingsGameTable;
-        public static GameTable<GtGenericMultByILvlRecord> CombatRatingsMultByILvlGameTable;
+        public static GameTable<GtCombatRatingsMultByILvlRecord> CombatRatingsMultByILvlGameTable;
         public static GameTable<GtHpPerStaRecord> HpPerStaGameTable;
         public static GameTable<GtItemSocketCostPerLevelRecord> ItemSocketCostPerLevelGameTable;
         public static GameTable<GtNpcManaCostScalerRecord> NpcManaCostScalerGameTable;
         public static GameTable<GtOCTRegenHPRecord> OCTRegenHPGameTable;
+        public static GameTable<GtOCTRegenMPRecord> OCTRegenMPGameTable;
         public static GameTable<GtRegenHPPerSptRecord> RegenHPPerSptGameTable;
-        public static GameTable<GtRegenMPPerSptRecord> RegenMPPerSptGameTable;        
+        public static GameTable<GtRegenMPPerSptRecord> RegenMPPerSptGameTable;
+        public static GameTable<GtShieldBlockRegularRecord> ShieldBlockRegularGameTable;
         public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;
+        public static GameTable<GtXpRecord> XpGameTable;
         #endregion
 
         #region Taxi Collections
         public static byte[] TaxiNodesMask;
         public static byte[] OldContinentsNodesMask;
         public static byte[] HordeTaxiNodesMask;
-        public static byte[] AllianceTaxiNodesMask;        
+        public static byte[] AllianceTaxiNodesMask;
         public static Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new();
         public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
         #endregion
 
         #region Talent Collections
-        public static Dictionary<uint, TalentSpellPos> TalentSpellPosMap = new();
-        public static HashSet<uint> PetTalentSpells = new();
+        public static Dictionary<int, TalentSpellPos> TalentSpellPosMap = new();
+        public static HashSet<int> PetTalentSpells = new();
         /// <summary>store absolute bit position for first rank for talent inspect</summary>        
         public static uint[][] TalentTabPages = new uint[(uint)Class.Max][];
         #endregion
@@ -780,64 +866,54 @@ namespace Game.DataStorage
                     return row.Mage;
                 case Class.Warlock:
                     return row.Warlock;
-                case Class.Monk:
-                    return 0.0f;
                 case Class.Druid:
                     return row.Druid;
-                case Class.DemonHunter:
-                    return 0.0f;
                 default:
                     break;
             }
-
             return 0.0f;
         }
 
-        public static float GetSpellScalingColumnForClass(GtSpellScalingRecord row, int class_)
+        public static float GetSpellScalingColumnForClass(GtSpellScalingRecord row, ScalingClass class_)
         {
             switch (class_)
             {
-                case (int)Class.Warrior:
+                case ScalingClass.Warrior:
                     return row.Warrior;
-                case (int)Class.Paladin:
+                case ScalingClass.Paladin:
                     return row.Paladin;
-                case (int)Class.Hunter:
+                case ScalingClass.Hunter:
                     return row.Hunter;
-                case (int)Class.Rogue:
+                case ScalingClass.Rogue:
                     return row.Rogue;
-                case (int)Class.Priest:
+                case ScalingClass.Priest:
                     return row.Priest;
-                case (int)Class.Deathknight:
+                case ScalingClass.Deathknight:
                     return row.DeathKnight;
-                case (int)Class.Shaman:
+                case ScalingClass.Shaman:
                     return row.Shaman;
-                case (int)Class.Mage:
+                case ScalingClass.Mage:
                     return row.Mage;
-                case (int)Class.Warlock:
+                case ScalingClass.Warlock:
                     return row.Warlock;
-                case (int)Class.Monk:
-                    return row.Monk;
-                case (int)Class.Druid:
+                case ScalingClass.Druid:
                     return row.Druid;
-                case (int)Class.DemonHunter:
-                    return row.DemonHunter;
-                case -1:
-                case -7:
+                case ScalingClass.Item1:
+                case ScalingClass.Item2:
                     return row.Item;
-                case -2:
+                case ScalingClass.Consumable:
                     return row.Consumable;
-                case -3:
+                case ScalingClass.Gem1:
                     return row.Gem1;
-                case -4:
+                case ScalingClass.Gem2:
                     return row.Gem2;
-                case -5:
+                case ScalingClass.Gem3:
                     return row.Gem3;
-                case -6:
+                case ScalingClass.Health:
                     return row.Health;
                 default:
                     break;
             }
-
             return 0.0f;
         }
 
@@ -845,28 +921,31 @@ namespace Game.DataStorage
         {
             return row.Wins * row.Xp;
         }
-        
-        public static float GetIlvlStatMultiplier(GtGenericMultByILvlRecord row, InventoryType invType)
+
+        public static float GetShieldBlockRegularColumnForQuality(GtShieldBlockRegularRecord row, ItemQuality quality)
         {
-            switch (invType)
+            switch (quality)
             {
-                case InventoryType.Neck:
-                case InventoryType.Finger:
-                    return row.JewelryMultiplier;
-                case InventoryType.Trinket:
-                    return row.TrinketMultiplier;
-                case InventoryType.Weapon:
-                case InventoryType.Shield:
-                case InventoryType.Ranged:
-                case InventoryType.Weapon2Hand:
-                case InventoryType.WeaponMainhand:
-                case InventoryType.WeaponOffhand:
-                case InventoryType.Holdable:
-                case InventoryType.RangedRight:
-                    return row.WeaponMultiplier;
+                case ItemQuality.Poor:
+                    return row.Poor;
+                case ItemQuality.Normal:
+                    return row.Standard;
+                case ItemQuality.Uncommon:
+                    return row.Good;
+                case ItemQuality.Rare:
+                    return row.Superior;
+                case ItemQuality.Epic:
+                    return row.Epic;
+                case ItemQuality.Legendary:
+                    return row.Legendary;
+                case ItemQuality.Artifact:
+                    return row.Artifact;
+                case ItemQuality.Heirloom:
+                    return row.ScalingStat;
                 default:
-                    return row.ArmorMultiplier;
+                    break;
             }
+            return 0.0f;
         }
         #endregion
     }

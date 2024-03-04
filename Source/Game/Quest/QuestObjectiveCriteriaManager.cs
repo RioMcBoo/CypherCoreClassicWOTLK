@@ -76,8 +76,8 @@ namespace Game
                 long now = GameTime.GetGameTime();
                 do
                 {
-                    uint criteriaId = criteriaResult.Read<uint>(0);
-                    ulong counter = criteriaResult.Read<ulong>(1);
+                    int criteriaId = criteriaResult.Read<int>(0);
+                    long counter = criteriaResult.Read<long>(1);
                     long date = criteriaResult.Read<long>(2);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(criteriaId);
@@ -150,36 +150,6 @@ namespace Game
             }
         }
 
-        public void ResetCriteria(CriteriaFailEvent failEvent, uint failAsset, bool evenIfCriteriaComplete)
-        {
-            Log.outDebug(LogFilter.Player, $"QuestObjectiveCriteriaMgr.ResetCriteria({failEvent}, {failAsset}, {evenIfCriteriaComplete})");
-
-            // disable for gamemasters with GM-mode enabled
-            if (_owner.IsGameMaster())
-                return;
-
-            var playerCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(failEvent, (int)failAsset);
-            foreach (Criteria playerCriteria in playerCriteriaList)
-            {
-                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(playerCriteria.Id);
-                bool allComplete = true;
-                foreach (CriteriaTree tree in trees)
-                {
-                    // don't update already completed criteria if not forced
-                    if (!(IsCompletedCriteriaTree(tree) && !evenIfCriteriaComplete))
-                    {
-                        allComplete = false;
-                        break;
-                    }
-                }
-
-                if (allComplete)
-                    continue;
-
-                RemoveCriteriaProgress(playerCriteria);
-            }
-        }
-
         public void ResetCriteriaTree(uint criteriaTreeId)
         {
             CriteriaTree tree = Global.CriteriaMgr.GetCriteriaTree(criteriaTreeId);
@@ -245,7 +215,7 @@ namespace Game
             SendPacket(criteriaUpdate);
         }
 
-        public override void SendCriteriaProgressRemoved(uint criteriaId)
+        public override void SendCriteriaProgressRemoved(int criteriaId)
         {
             CriteriaDeleted criteriaDeleted = new();
             criteriaDeleted.CriteriaID = criteriaId;
@@ -271,7 +241,7 @@ namespace Game
             }
 
             Quest quest = Global.ObjectMgr.GetQuestTemplate(objective.QuestID);
-            if (_owner.GetGroup() && _owner.GetGroup().IsRaidGroup() && !quest.IsAllowedInRaid(referencePlayer.GetMap().GetDifficultyID()))
+            if (_owner.GetGroup() != null && _owner.GetGroup().IsRaidGroup() && !quest.IsAllowedInRaid(referencePlayer.GetMap().GetDifficultyID()))
             {
                 Log.outTrace(LogFilter.Achievement, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Quest cannot be completed in raid group");
                 return false;
@@ -315,13 +285,13 @@ namespace Game
             return $"{_owner.GetGUID()} {_owner.GetName()}";
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
+        public override List<Criteria> GetCriteriaByType(CriteriaType type, int asset)
         {
             return Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(type);
         }
 
 
         Player _owner;
-        List<uint> _completedObjectives = new();
+        List<int> _completedObjectives = new();
     }
 }

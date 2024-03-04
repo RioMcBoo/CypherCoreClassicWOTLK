@@ -60,30 +60,34 @@ namespace Game.Movement
             owner.AddUnitState(UnitState.RoamingMove);
 
             MoveSplineInit init = new(owner);
-            if (_generatePath)
+
+            new Action(() =>
             {
-                PathGenerator path = new(owner);
-                bool result = path.CalculatePath(_destination.posX, _destination.posY, _destination.posZ, false);
-                if (result && !path.GetPathType().HasFlag(PathType.NoPath))
+                if (_generatePath)
                 {
-                    if (_closeEnoughDistance.HasValue)
-                        path.ShortenPathUntilDist(_destination, _closeEnoughDistance.Value);
+                    PathGenerator path = new(owner);
+                    bool result = path.CalculatePath(_destination.posX, _destination.posY, _destination.posZ, false);
+                    if (result && !path.GetPathType().HasFlag(PathType.NoPath))
+                    {
+                        if (_closeEnoughDistance.HasValue)
+                            path.ShortenPathUntilDist(_destination, _closeEnoughDistance.Value);
 
-                    init.MovebyPath(path.GetPath());
-                    return;
+                        init.MovebyPath(path.GetPath());
+                        return;
+                    }
                 }
-            }
 
-            Position dest = _destination;
-            if (_closeEnoughDistance.HasValue)
-                owner.MovePosition(dest, Math.Min(_closeEnoughDistance.Value, dest.GetExactDist(owner)), MathF.PI + owner.GetRelativeAngle(dest));
+                Position dest = _destination;
+                if (_closeEnoughDistance.HasValue)
+                    owner.MovePosition(dest, Math.Min(_closeEnoughDistance.Value, dest.GetExactDist(owner)), MathF.PI + owner.GetRelativeAngle(dest));
 
-            init.MoveTo(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
+                init.MoveTo(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
+            })();
 
             if (_speed.HasValue)
                 init.SetVelocity(_speed.Value);
 
-            if (_faceTarget)
+            if (_faceTarget != null)
                 init.SetFacing(_faceTarget);
 
             if (_spellEffectExtra != null)
@@ -188,7 +192,9 @@ namespace Game.Movement
 
         public void MovementInform(Unit owner)
         {
-            owner.ToCreature()?.GetAI()?.MovementInform(MovementGeneratorType.Point, _movementId);
+            // deliver EVENT_CHARGE to scripts, EVENT_CHARGE_PREPATH is just internal implementation detail of this movement generator
+            uint movementId = _movementId == EventId.ChargePrepath ? EventId.Charge : _movementId;
+            owner.ToCreature()?.GetAI()?.MovementInform(MovementGeneratorType.Point, movementId);
         }
 
         public override void UnitSpeedChanged()

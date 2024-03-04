@@ -9,24 +9,24 @@ namespace Game.Maps
 {
     public class SpawnGroupTemplateData
     {
-        public uint groupId;
+        public int groupId;
         public string name;
-        public uint mapId;
+        public int mapId;
         public SpawnGroupFlags flags;
     }
 
     public class SpawnData : SpawnMetadata
     {
-        public uint Id; // entry in respective _template table
+        public int Id; // entry in respective _template table
         public Position SpawnPoint;
         public PhaseUseFlagsValues PhaseUseFlags;
-        public uint PhaseId;
-        public uint PhaseGroup;
+        public int PhaseId;
+        public int PhaseGroup;
         public int terrainSwapMap;
-        public uint poolId;
+        public int poolId;
         public int spawntimesecs;
         public List<Difficulty> SpawnDifficulties;
-        public uint ScriptId;
+        public int ScriptId;
         public string StringId;
 
         public SpawnData(SpawnObjectType t) : base(t)
@@ -55,8 +55,8 @@ namespace Game.Maps
     public class SpawnMetadata
     {
         public SpawnObjectType type;
-        public ulong SpawnId;
-        public uint MapId = 0xFFFFFFFF;
+        public long SpawnId;
+        public int MapId = -1;
         public bool dbData = true;
         public SpawnGroupTemplateData spawnGroupData = null;
 

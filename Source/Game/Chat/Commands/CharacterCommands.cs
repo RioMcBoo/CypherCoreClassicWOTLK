@@ -141,7 +141,7 @@ namespace Game.Chat
                 if (session != null)
                 {
                     Player sessionPlayer = session.GetPlayer();
-                    if (sessionPlayer)
+                    if (sessionPlayer != null)
                         Log.outCommand(session.GetAccountId(), "GM {0} (Account: {1}) forced rename {2} to player {3} (Account: {4})", sessionPlayer.GetName(), session.GetAccountId(), newName, sessionPlayer.GetName(), Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(sessionPlayer.GetGUID()));
                 }
                 else
@@ -215,7 +215,7 @@ namespace Game.Chat
                 DB.Characters.Execute(stmt);
             }
 
-            if (!handler.GetSession() || (handler.GetSession().GetPlayer() != player.GetConnectedPlayer()))      // including chr == NULL
+            if (handler.GetSession() == null || (handler.GetSession().GetPlayer() != player.GetConnectedPlayer()))      // including chr == NULL
                 handler.SendSysMessage(CypherStrings.YouChangeLvl, handler.PlayerLink(player.GetName()), newlevel);
 
             return true;
@@ -603,7 +603,7 @@ namespace Game.Chat
                 {
                     string dateStr = Time.UnixTimeToDateTime(info.deleteDate).ToShortDateString();
 
-                    if (!handler.GetSession())
+                    if (handler.GetSession() == null)
                         handler.SendSysMessage(CypherStrings.CharacterDeletedListLineConsole,
                             info.guid.ToString(), info.name, info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
                             info.accountId, dateStr);
@@ -613,7 +613,7 @@ namespace Game.Chat
                             info.accountId, dateStr);
                 }
 
-                if (!handler.GetSession())
+                if (handler.GetSession() == null)
                     handler.SendSysMessage(CypherStrings.CharacterDeletedListBar);
             }
 

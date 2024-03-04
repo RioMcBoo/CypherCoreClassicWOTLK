@@ -10,9 +10,9 @@ namespace Game
 {
     class GameEvents
     {
-        public static void Trigger(uint gameEventId, WorldObject source, WorldObject target)
+        public static void Trigger(int gameEventId, WorldObject source, WorldObject target)
         {
-            Cypher.Assert(source || target, "At least one of [source] or [target] must be provided");
+            Cypher.Assert(source != null || target != null, "At least one of [source] or [target] must be provided");
 
             WorldObject refForMapAndZoneScript = source ?? target;
 
@@ -23,7 +23,8 @@ namespace Game
             if (zoneScript != null)
                 zoneScript.ProcessEvent(target, gameEventId, source);
 
-            Map map = refForMapAndZoneScript.GetMap();
+            Global.ScriptMgr.OnEventTrigger(target, source, gameEventId);
+
             GameObject goTarget = target?.ToGameObject();
             if (goTarget != null)
             {
@@ -36,25 +37,26 @@ namespace Game
             if (sourcePlayer != null)
                 TriggerForPlayer(gameEventId, sourcePlayer);
 
+            Map map = refForMapAndZoneScript.GetMap();
             TriggerForMap(gameEventId, map, source, target);
         }
 
-        public static void TriggerForPlayer(uint gameEventId, Player source)
+        public static void TriggerForPlayer(int gameEventId, Player source)
         {
             Map map = source.GetMap();
             if (map.Instanceable())
             {
-                source.StartCriteriaTimer(CriteriaStartEvent.SendEvent, gameEventId);
-                source.ResetCriteria(CriteriaFailEvent.SendEvent, gameEventId);
+                source.FailCriteria(CriteriaFailEvent.SendEvent, gameEventId);
+                source.StartCriteria(CriteriaStartEvent.SendEvent, gameEventId);
             }
 
-            source.UpdateCriteria(CriteriaType.PlayerTriggerGameEvent, gameEventId, 0, 0, source);
+            source.UpdateCriteria(CriteriaType.PlayerTriggerGameEvent, (ulong)gameEventId, 0, 0, source);
 
             if (map.IsScenario())
-                source.UpdateCriteria(CriteriaType.AnyoneTriggerGameEventScenario, gameEventId, 0, 0, source);
+                source.UpdateCriteria(CriteriaType.AnyoneTriggerGameEventScenario, (ulong)gameEventId, 0, 0, source);
         }
 
-        public static void TriggerForMap(uint gameEventId, Map map, WorldObject source = null, WorldObject target = null)
+        public static void TriggerForMap(int gameEventId, Map map, WorldObject source = null, WorldObject target = null)
         {
             map.ScriptsStart(ScriptsType.Event, gameEventId, source, target);
         }

@@ -30,12 +30,12 @@ namespace Game
             }
             else if (guid.IsGameObject())
             {
-                if (!GetPlayer().GetGameObjectIfCanInteractWith(guid, GameObjectTypes.Mailbox))
+                if (GetPlayer().GetGameObjectIfCanInteractWith(guid, GameObjectTypes.Mailbox) == null)
                     return false;
             }
             else if (guid.IsAnyTypeCreature())
             {
-                if (!GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Mailbox, NPCFlags2.None))
+                if (GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Mailbox, NPCFlags2.None) == null)
                     return false;
             }
             else
@@ -186,6 +186,13 @@ namespace Game
                         return;
                     }
 
+                    // handle empty bag before CanBeTraded, since that func already has that check
+                    if (item.IsNotEmptyBag())
+                    {
+                        player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.DestroyNonemptyBag);
+                        return;
+                    }
+
                     if (!item.CanBeTraded(true))
                     {
                         player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.MailBoundItem);
@@ -210,12 +217,6 @@ namespace Game
                     if (sendMail.Info.Cod != 0 && item.IsWrapped())
                     {
                         player.SendMailResult(0, MailResponseType.Send, MailResponseResult.CantSendWrappedCod);
-                        return;
-                    }
-
-                    if (item.IsNotEmptyBag())
-                    {
-                        player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.DestroyNonemptyBag);
                         return;
                     }
 
@@ -281,7 +282,7 @@ namespace Game
                 // will delete item or place to receiver mail list
                 draft.AddMoney((ulong)sendMail.Info.SendMoney)
                     .AddCOD((uint)sendMail.Info.Cod)
-                    .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(receiverGuid), receiverGuid.GetCounter()), new MailSender(player), sendMail.Info.Body.IsEmpty() ? MailCheckMask.Copied : MailCheckMask.HasBody, deliver_delay);
+                    .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(receiverGuid), receiverGuid.GetCounter()), new MailSender(player), sendMail.Info.Body.IsEmpty() ? MailCheckFlags.Copied : MailCheckFlags.HasBody, deliver_delay);
 
                 player.SaveInventoryAndGoldToDB(trans);
                 DB.Characters.CommitTransaction(trans);
@@ -323,7 +324,7 @@ namespace Game
             {
                 if (player.unReadMails != 0)
                     --player.unReadMails;
-                m.checkMask = m.checkMask | MailCheckMask.Read;
+                m.checkMask = m.checkMask | MailCheckFlags.Read;
                 player.m_mailsUpdated = true;
                 m.state = MailState.Changed;
             }
@@ -388,7 +389,7 @@ namespace Game
                     foreach (var itemInfo in m.items)
                     {
                         Item item = player.GetMItem(itemInfo.item_guid);
-                        if (item)
+                        if (item != null)
                             draft.AddItem(item);
                         player.RemoveMItem(itemInfo.item_guid);
                     }
@@ -405,7 +406,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MailTakeItem)]
         void HandleMailTakeItem(MailTakeItem takeItem)
         {
-            uint AttachID = takeItem.AttachID;
+            ulong AttachID = takeItem.AttachID;
 
             if (!CanOpenMailBox(takeItem.Mailbox))
                 return;
@@ -435,7 +436,7 @@ namespace Game
 
             Item it = player.GetMItem(takeItem.AttachID);
 
-            InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, it);
+            InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, it);
             if (msg == InventoryResult.Ok)
             {
                 SQLTransaction trans = new();
@@ -452,7 +453,7 @@ namespace Game
                     if (HasPermission(RBACPermissions.LogGmTrade))
                     {
                         string sender_name;
-                        if (receiver)
+                        if (receiver != null)
                         {
                             sender_accId = receiver.GetSession().GetAccountId();
                             sender_name = receiver.GetName();
@@ -468,15 +469,15 @@ namespace Game
                         Log.outCommand(GetAccountId(), $"GM {GetPlayerName()} (Account: {GetAccountId()}) receiver mail item: {it.GetTemplate().GetName()} " +
                             $"(Entry: {it.GetEntry()} Count: {it.GetCount()}) and send COD money: {m.COD} to player: {sender_name} (Account: {sender_accId})");
                     }
-                    else if (!receiver)
+                    else if (receiver == null)
                         sender_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(sender_guid);
 
                     // check player existence
-                    if (receiver || sender_accId != 0)
+                    if (receiver != null || sender_accId != 0)
                     {
                         new MailDraft(m.subject, "")
                             .AddMoney(m.COD)
-                            .SendMailTo(trans, new MailReceiver(receiver, m.sender), new MailSender( MailMessageType.Normal, m.receiver), MailCheckMask.CodPayment);
+                            .SendMailTo(trans, new MailReceiver(receiver, m.sender), new MailSender( MailMessageType.Normal, m.receiver), MailCheckFlags.CodPayment);
                     }
 
                     player.ModifyMoney(-(long)m.COD);
@@ -584,8 +585,8 @@ namespace Game
                 return;
             }
 
-            Item bodyItem = new();                              // This is not bag and then can be used new Item.
-            if (!bodyItem.Create(Global.ObjectMgr.GetGenerator(HighGuid.Item).Generate(), 8383, ItemContext.None, player))
+            Item bodyItem = Item.CreateItem(8383, 1, ItemContext.None, player);
+            if (bodyItem == null)
                 return;
 
             // in mail template case we need create new item text
@@ -610,10 +611,10 @@ namespace Game
 
             Log.outInfo(LogFilter.Network, $"HandleMailCreateTextItem mailid={createTextItem.MailID}");
 
-            InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<ItemPosCount> dest, bodyItem);
+            InventoryResult msg = GetPlayer().CanStoreItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, bodyItem);
             if (msg == InventoryResult.Ok)
             {
-                m.checkMask = m.checkMask | MailCheckMask.Copied;
+                m.checkMask = m.checkMask | MailCheckFlags.Copied;
                 m.state = MailState.Changed;
                 player.m_mailsUpdated = true;
 
@@ -638,7 +639,7 @@ namespace Game
 
                 foreach (Mail mail in GetPlayer().GetMails())
                 {
-                    if (mail.checkMask.HasAnyFlag(MailCheckMask.Read))
+                    if (mail.checkMask.HasAnyFlag(MailCheckFlags.Read))
                         continue;
 
                     // and already delivered
@@ -666,9 +667,11 @@ namespace Game
 
         public void SendShowMailBox(ObjectGuid guid)
         {
-            ShowMailbox packet = new();
-            packet.PostmasterGUID = guid;
-            SendPacket(packet);
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.MailInfo;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
         }
     }
 }

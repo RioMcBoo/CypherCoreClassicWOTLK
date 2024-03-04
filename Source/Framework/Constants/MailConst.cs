@@ -3,7 +3,7 @@
 
 namespace Framework.Constants
 {
-    public enum MailMessageType
+    public enum MailMessageType : byte
     {
         Normal = 0,
         Auction = 2,
@@ -11,10 +11,12 @@ namespace Framework.Constants
         Gameobject = 4,
         Calendar = 5,
         Blackmarket = 6,
-        CommerceAuction = 7
+        CommerceAuction = 7,
+        Auction2 = 8,
+        ArtisansConsortium = 9
     }
 
-    public enum MailCheckMask
+    public enum MailCheckFlags
     {
         None = 0x00,
         Read = 0x01,

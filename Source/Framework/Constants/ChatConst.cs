@@ -1,9 +1,11 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.﻿
 
+using System;
+
 namespace Framework.Constants
 {
-    public enum ChatNotify
+    public enum ChatNotify : byte
     {
         JoinedNotice = 0x00,           //+ "%S Joined Channel.";
         LeftNotice = 0x01,           //+ "%S Left Channel.";
@@ -65,23 +67,70 @@ namespace Framework.Constants
         // LookingForGroup          0x50 = 0x40 | 0x10
     }
 
-    public enum ChannelDBCFlags
+    public enum ChannelDBCFlags : int
     {
         None = 0x00000,
-        Initial = 0x00001,              // General, Trade, Localdefense, Lfg
-        ZoneDep = 0x00002,              // General, Trade, Localdefense, Guildrecruitment
-        Global = 0x00004,              // Worlddefense
-        Trade = 0x00008,              // Trade, Lfg
-        CityOnly = 0x00010,              // Trade, Guildrecruitment, Lfg
-        CityOnly2 = 0x00020,              // Trade, Guildrecruitment, Lfg
-        Defense = 0x10000,              // Localdefense, Worlddefense
-        GuildReq = 0x20000,              // Guildrecruitment
-        Lfg = 0x40000,              // Lfg
-        Unk1 = 0x80000,               // General
+        /// <summary>
+        /// AutoJoin (General, Trade, Localdefense, Lfg)
+        /// </summary>
+        Initial = 0x00001,
+        /// <summary>
+        /// ZoneBased (General, Trade, Localdefense, Guildrecruitment)
+        /// </summary>
+        ZoneDep = 0x00002,
+        /// <summary>
+        /// ReadOnly (Worlddefense)
+        /// </summary>
+        Global = 0x00004,
+        /// <summary>
+        /// AllowItemLinks (Trade, Lfg)
+        /// </summary>
+        Trade = 0x00008,
+        /// <summary>
+        /// OnlyInCities (Trade, Guildrecruitment, Lfg)
+        /// </summary>
+        CityOnly = 0x00010,
+        /// <summary>
+        /// LinkedChannel (Trade, Guildrecruitment, Lfg)
+        /// </summary>
+        CityOnly2 = 0x00020,
+        /// <summary>
+        /// ZoneAttackAlerts (Localdefense, Worlddefense)
+        /// </summary>
+        Defense = 0x10000,
+        /// <summary>
+        /// GuildRecruitment
+        /// </summary>
+        GuildReq = 0x20000,
+        /// <summary>
+        /// LookingForGroup
+        /// </summary>
+        Lfg = 0x40000,
+        /// <summary>
+        /// GlobalForTournament (General)
+        /// </summary>
+        GlobalForTournament = 0x80000,
+        DisableRaidIcons = 0x00100000,
+        /// <summary>
+        /// Regional
+        /// </summary>
         NoClientJoin = 0x200000
     }
 
-    public enum ChannelMemberFlags
+    public enum ChatChannelRuleset : int
+    {
+        None = 0,
+        Mentor = 1,
+        Disabled = 2,
+        ChromieTimeCataclysm = 3,
+        ChromieTimeBuringCrusade = 4,
+        ChromieTimeWrath = 5,
+        ChromieTimeMists = 6,
+        ChromieTimeWoD = 7,
+        ChromieTimeLegion = 8,
+    }
+
+    public enum ChannelMemberFlags : byte
     {
         None = 0x00,
         Owner = 0x01,
@@ -92,5 +141,13 @@ namespace Framework.Constants
         MicMuted = 0x20
         // 0x40
         // 0x80
+    }
+
+    public enum ChatWhisperTargetStatus
+    {
+        CanWhisper = 0,
+        CanWhisperGuild = 1,
+        Offline = 2,
+        WrongFaction = 3
     }
 }

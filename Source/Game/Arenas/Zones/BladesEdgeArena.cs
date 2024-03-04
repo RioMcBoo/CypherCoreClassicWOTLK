@@ -45,7 +45,7 @@ namespace Game.Arenas
                 SpawnBGObject(i, 60);
         }
 
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
+        public override void HandleAreaTrigger(Player player, int trigger, bool entered)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -99,11 +99,11 @@ namespace Game.Arenas
 
     struct BladeEfgeGameObjects
     {
-        public const uint Door1 = 183971;
-        public const uint Door2 = 183973;
-        public const uint Door3 = 183970;
-        public const uint Door4 = 183972;
-        public const uint Buff1 = 184663;
-        public const uint Buff2 = 184664;
+        public const int Door1 = 183971;
+        public const int Door2 = 183973;
+        public const int Door3 = 183970;
+        public const int Door4 = 183972;
+        public const int Buff1 = 184663;
+        public const int Buff2 = 184664;
     }
 }

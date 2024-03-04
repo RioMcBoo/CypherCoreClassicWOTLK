@@ -16,7 +16,7 @@ namespace Game
         void HandleBlackMarketOpen(BlackMarketOpen blackMarketOpen)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketOpen.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketHello - {0} not found or you can't interact with him.", blackMarketOpen.Guid.ToString());
                 return;
@@ -31,10 +31,11 @@ namespace Game
 
         void SendBlackMarketOpenResult(ObjectGuid guid, Creature auctioneer)
         {
-            BlackMarketOpenResult packet = new();
-            packet.Guid = guid;
-            packet.Enable = Global.BlackMarketMgr.IsEnabled();
-            SendPacket(packet);
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.BlackMarketAuctioneer;
+            npcInteraction.Success = Global.BlackMarketMgr.IsEnabled();
+            SendPacket(npcInteraction);
         }
 
         [WorldPacketHandler(ClientOpcodes.BlackMarketRequestItems)]
@@ -44,7 +45,7 @@ namespace Game
                 return;
 
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketRequestItems.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketRequestItems - {0} not found or you can't interact with him.", blackMarketRequestItems.Guid.ToString());
                 return;
@@ -63,7 +64,7 @@ namespace Game
 
             Player player = GetPlayer();
             Creature unit = player.GetNPCIfCanInteractWith(blackMarketBidOnItem.Guid, NPCFlags.BlackMarket, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} not found or you can't interact with him.", blackMarketBidOnItem.Guid.ToString());
                 return;

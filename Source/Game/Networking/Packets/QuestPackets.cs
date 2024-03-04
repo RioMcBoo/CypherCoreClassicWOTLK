@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using Game.Miscellaneous;
 using System;
 using System.Collections.Generic;
 
@@ -28,6 +29,21 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
+    class QuestGiverStatusTrackedQuery : ClientPacket
+    { 
+        public QuestGiverStatusTrackedQuery(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint guidCount = _worldPacket.ReadUInt32();
+
+            for (uint i = 0; i < guidCount; ++i)
+                QuestGiverGUIDs.Add(_worldPacket.ReadPackedGuid());
+        }
+        
+        public List<ObjectGuid> QuestGiverGUIDs = new();
+    }
+    
     public class QuestGiverStatusPkt : ServerPacket
     {
         public QuestGiverStatusPkt() : base(ServerOpcodes.QuestGiverStatus, ConnectionType.Instance)
@@ -38,7 +54,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(QuestGiver.Guid);
-            _worldPacket.WriteUInt32((uint)QuestGiver.Status);
+            _worldPacket.WriteUInt64((ulong)QuestGiver.Status);
         }
 
         public QuestGiverInfo QuestGiver;
@@ -54,7 +70,7 @@ namespace Game.Networking.Packets
             foreach (QuestGiverInfo questGiver in QuestGiver)
             {
                 _worldPacket.WritePackedGuid(questGiver.Guid);
-                _worldPacket.WriteUInt32((uint)questGiver.Status);
+                _worldPacket.WriteUInt64((ulong)questGiver.Status);
             }
         }
 
@@ -79,12 +95,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            QuestID = _worldPacket.ReadUInt32();
+            QuestID = _worldPacket.ReadInt32();
             QuestGiver = _worldPacket.ReadPackedGuid();
         }
 
         public ObjectGuid QuestGiver;
-        public uint QuestID;
+        public int QuestID;
     }
 
     public class QueryQuestInfoResponse : ServerPacket
@@ -93,97 +109,101 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
             _worldPacket.WriteBit(Allow);
             _worldPacket.FlushBits();
 
             if (Allow)
             {
-                _worldPacket.WriteUInt32(Info.QuestID);
-                _worldPacket.WriteInt32(Info.QuestType);
-                _worldPacket.WriteUInt32(Info.QuestPackageID);
+                _worldPacket.WriteInt32(Info.QuestID);
+                _worldPacket.WriteInt32((int)Info.QuestType);
                 _worldPacket.WriteInt32(Info.QuestLevel);
                 _worldPacket.WriteInt32(Info.QuestScalingFactionGroup);
                 _worldPacket.WriteInt32(Info.QuestMaxScalingLevel);
+                _worldPacket.WriteInt32(Info.QuestPackageID);
+                _worldPacket.WriteInt32(Info.QuestMinLevel);
                 _worldPacket.WriteInt32(Info.QuestSortID);
-                _worldPacket.WriteUInt32(Info.QuestInfoID);
-                _worldPacket.WriteUInt32(Info.SuggestedGroupNum);
-                _worldPacket.WriteUInt32(Info.RewardNextQuest);
-                _worldPacket.WriteUInt32(Info.RewardXPDifficulty);
+                _worldPacket.WriteInt32(Info.QuestInfoID);
+                _worldPacket.WriteInt32(Info.SuggestedGroupNum);
+                _worldPacket.WriteInt32(Info.RewardNextQuest);
+                _worldPacket.WriteInt32(Info.RewardXPDifficulty);
                 _worldPacket.WriteFloat(Info.RewardXPMultiplier);
                 _worldPacket.WriteInt32(Info.RewardMoney);
-                _worldPacket.WriteUInt32(Info.RewardMoneyDifficulty);
+                _worldPacket.WriteInt32(Info.RewardMoneyDifficulty);
                 _worldPacket.WriteFloat(Info.RewardMoneyMultiplier);
-                _worldPacket.WriteUInt32(Info.RewardBonusMoney);
+                _worldPacket.WriteInt32(Info.RewardBonusMoney);
                 foreach (var i in Info.RewardDisplaySpell)
                     _worldPacket.WriteInt32(i);
-                _worldPacket.WriteUInt32(Info.RewardSpell);
-                _worldPacket.WriteUInt32(Info.RewardHonor);
+                _worldPacket.WriteInt32(Info.RewardSpell);
+                _worldPacket.WriteInt32(Info.RewardHonor);
                 _worldPacket.WriteFloat(Info.RewardKillHonor);
                 _worldPacket.WriteInt32(Info.RewardArtifactXPDifficulty);
                 _worldPacket.WriteFloat(Info.RewardArtifactXPMultiplier);
                 _worldPacket.WriteInt32(Info.RewardArtifactCategoryID);
-                _worldPacket.WriteUInt32(Info.StartItem);
-                _worldPacket.WriteUInt32(Info.Flags);
-                _worldPacket.WriteUInt32(Info.FlagsEx);
-                _worldPacket.WriteUInt32(Info.FlagsEx2);
+                _worldPacket.WriteInt32(Info.StartItem);
+                _worldPacket.WriteInt32((int)Info.Flags);
+                _worldPacket.WriteInt32((int)Info.FlagsEx);
+                _worldPacket.WriteInt32((int)Info.FlagsEx2);
 
                 for (uint i = 0; i < SharedConst.QuestRewardItemCount; ++i)
                 {
-                    _worldPacket.WriteUInt32(Info.RewardItems[i]);
-                    _worldPacket.WriteUInt32(Info.RewardAmount[i]);
+                    _worldPacket.WriteInt32(Info.RewardItems[i]);
+                    _worldPacket.WriteInt32(Info.RewardAmount[i]);
                     _worldPacket.WriteInt32(Info.ItemDrop[i]);
                     _worldPacket.WriteInt32(Info.ItemDropQuantity[i]);
                 }
 
                 for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                 {
-                    _worldPacket.WriteUInt32(Info.UnfilteredChoiceItems[i].ItemID);
-                    _worldPacket.WriteUInt32(Info.UnfilteredChoiceItems[i].Quantity);
-                    _worldPacket.WriteUInt32(Info.UnfilteredChoiceItems[i].DisplayID);
+                    _worldPacket.WriteInt32(Info.UnfilteredChoiceItems[i].ItemID);
+                    _worldPacket.WriteInt32(Info.UnfilteredChoiceItems[i].Quantity);
+                    _worldPacket.WriteInt32(Info.UnfilteredChoiceItems[i].DisplayID);
                 }
 
-                _worldPacket.WriteUInt32(Info.POIContinent);
+                _worldPacket.WriteInt32(Info.POIContinent);
                 _worldPacket.WriteFloat(Info.POIx);
                 _worldPacket.WriteFloat(Info.POIy);
-                _worldPacket.WriteUInt32(Info.POIPriority);
+                _worldPacket.WriteInt32(Info.POIPriority);
 
-                _worldPacket.WriteUInt32(Info.RewardTitle);
+                _worldPacket.WriteInt32(Info.RewardTitle);
                 _worldPacket.WriteInt32(Info.RewardArenaPoints);
-                _worldPacket.WriteUInt32(Info.RewardSkillLineID);
-                _worldPacket.WriteUInt32(Info.RewardNumSkillUps);
+                _worldPacket.WriteInt32(Info.RewardSkillLineID);
+                _worldPacket.WriteInt32(Info.RewardNumSkillUps);
 
-                _worldPacket.WriteUInt32(Info.PortraitGiver);
-                _worldPacket.WriteUInt32(Info.PortraitGiverMount);
+                _worldPacket.WriteInt32(Info.PortraitGiver);
+                _worldPacket.WriteInt32(Info.PortraitGiverMount);
                 _worldPacket.WriteInt32(Info.PortraitGiverModelSceneID);
-                _worldPacket.WriteUInt32(Info.PortraitTurnIn);
+                _worldPacket.WriteInt32(Info.PortraitTurnIn);
 
                 for (uint i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
                 {
-                    _worldPacket.WriteUInt32(Info.RewardFactionID[i]);
+                    _worldPacket.WriteInt32(Info.RewardFactionID[i]);
                     _worldPacket.WriteInt32(Info.RewardFactionValue[i]);
                     _worldPacket.WriteInt32(Info.RewardFactionOverride[i]);
                     _worldPacket.WriteInt32(Info.RewardFactionCapIn[i]);
                 }
 
-                _worldPacket.WriteUInt32(Info.RewardFactionFlags);
+                _worldPacket.WriteInt32(Info.RewardFactionFlags);
 
                 for (uint i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
                 {
-                    _worldPacket.WriteUInt32(Info.RewardCurrencyID[i]);
-                    _worldPacket.WriteUInt32(Info.RewardCurrencyQty[i]);
+                    _worldPacket.WriteInt32(Info.RewardCurrencyID[i]);
+                    _worldPacket.WriteInt32(Info.RewardCurrencyQty[i]);
                 }
 
-                _worldPacket.WriteUInt32(Info.AcceptedSoundKitID);
-                _worldPacket.WriteUInt32(Info.CompleteSoundKitID);
+                _worldPacket.WriteInt32(Info.AcceptedSoundKitID);
+                _worldPacket.WriteInt32(Info.CompleteSoundKitID);
 
-                _worldPacket.WriteUInt32(Info.AreaGroupID);
-                _worldPacket.WriteUInt32(Info.TimeAllowed);
+                _worldPacket.WriteInt32(Info.AreaGroupID);
+                _worldPacket.WriteInt64(Info.TimeAllowed);
 
                 _worldPacket.WriteInt32(Info.Objectives.Count);
-                _worldPacket.WriteInt64(Info.AllowableRaces);
+                _worldPacket.WriteUInt64((ulong)Info.AllowableRaces);
                 _worldPacket.WriteInt32(Info.TreasurePickerID);
                 _worldPacket.WriteInt32(Info.Expansion);
+                _worldPacket.WriteInt32(Info.ManagedWorldStateID);
+                _worldPacket.WriteInt32(Info.QuestSessionBonus);
+                _worldPacket.WriteInt32(Info.QuestGiverCreatureID);
 
                 _worldPacket.WriteBits(Info.LogTitle.GetByteCount(), 9);
                 _worldPacket.WriteBits(Info.LogDescription.GetByteCount(), 12);
@@ -198,7 +218,7 @@ namespace Game.Networking.Packets
 
                 foreach (QuestObjective questObjective in Info.Objectives)
                 {
-                    _worldPacket.WriteUInt32(questObjective.Id);
+                    _worldPacket.WriteInt32(questObjective.Id);
                     _worldPacket.WriteUInt8((byte)questObjective.Type);
                     _worldPacket.WriteInt8(questObjective.StorageIndex);
                     _worldPacket.WriteInt32(questObjective.ObjectID);
@@ -231,7 +251,7 @@ namespace Game.Networking.Packets
 
         public bool Allow;
         public QuestInfo Info = new();
-        public uint QuestID;
+        public int QuestID;
     }
 
     public class QuestUpdateAddCredit : ServerPacket
@@ -241,7 +261,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(VictimGUID);
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
             _worldPacket.WriteInt32(ObjectID);
             _worldPacket.WriteUInt16(Count);
             _worldPacket.WriteUInt16(Required);
@@ -250,7 +270,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid VictimGUID;
         public int ObjectID;
-        public uint QuestID;
+        public int QuestID;
         public ushort Count;
         public ushort Required;
         public byte ObjectiveType;
@@ -262,12 +282,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
             _worldPacket.WriteInt32(ObjectID);
             _worldPacket.WriteUInt8((byte)ObjectiveType);
         }
 
-        public uint QuestID;
+        public int QuestID;
         public int ObjectID;
         public QuestObjectiveType ObjectiveType;
     }
@@ -278,11 +298,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
             _worldPacket.WriteUInt16(Count);
         }
 
-        public uint QuestID;
+        public int QuestID;
         public ushort Count;
     }
 
@@ -293,11 +313,13 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             QuestData.Write(_worldPacket);
-            _worldPacket.WriteUInt32(QuestPackageID);
-            _worldPacket.WriteUInt32(PortraitGiver);
-            _worldPacket.WriteUInt32(PortraitGiverMount);
+            _worldPacket.WriteInt32(QuestPackageID);
+            _worldPacket.WriteInt32(PortraitGiver);
+            _worldPacket.WriteInt32(PortraitGiverMount);
             _worldPacket.WriteInt32(PortraitGiverModelSceneID);
-            _worldPacket.WriteUInt32(PortraitTurnIn);
+            _worldPacket.WriteInt32(PortraitTurnIn);
+            _worldPacket.WriteInt32(QuestGiverCreatureID);
+            _worldPacket.WriteInt32(ConditionalRewardText.Count);
 
             _worldPacket.WriteBits(QuestTitle.GetByteCount(), 9);
             _worldPacket.WriteBits(RewardText.GetByteCount(), 12);
@@ -305,6 +327,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(PortraitGiverName.GetByteCount(), 8);
             _worldPacket.WriteBits(PortraitTurnInText.GetByteCount(), 10);
             _worldPacket.WriteBits(PortraitTurnInName.GetByteCount(), 8);
+            _worldPacket.FlushBits();
+
+            foreach (ConditionalQuestText conditionalQuestText in ConditionalRewardText)
+                conditionalQuestText.Write(_worldPacket);
 
             _worldPacket.WriteString(QuestTitle);
             _worldPacket.WriteString(RewardText);
@@ -314,18 +340,20 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(PortraitTurnInName);
         }
 
-        public uint PortraitTurnIn;
-        public uint PortraitGiver;
-        public uint PortraitGiverMount;
+        public int PortraitTurnIn;
+        public int PortraitGiver;
+        public int PortraitGiverMount;
         public int PortraitGiverModelSceneID;
-        public string QuestTitle = "";
-        public string RewardText = "";
-        public string PortraitGiverText = "";
-        public string PortraitGiverName = "";
-        public string PortraitTurnInText = "";
-        public string PortraitTurnInName = "";
+        public int QuestGiverCreatureID;
+        public string QuestTitle = string.Empty;
+        public string RewardText = string.Empty;
+        public string PortraitGiverText = string.Empty;
+        public string PortraitGiverName = string.Empty;
+        public string PortraitTurnInText = string.Empty;
+        public string PortraitTurnInName = string.Empty;
+        public List<ConditionalQuestText> ConditionalRewardText = new();
         public QuestGiverOfferReward QuestData;
-        public uint QuestPackageID;
+        public int QuestPackageID;
     }
 
     public class QuestGiverChooseReward : ClientPacket
@@ -335,12 +363,12 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             QuestGiverGUID = _worldPacket.ReadPackedGuid();
-            QuestID = _worldPacket.ReadUInt32();
+            QuestID = _worldPacket.ReadInt32();
             Choice.Read(_worldPacket);
         }
 
         public ObjectGuid QuestGiverGUID;
-        public uint QuestID;
+        public int QuestID;
         public QuestChoiceItem Choice;
     }
 
@@ -350,11 +378,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestID);
-            _worldPacket.WriteUInt32(XPReward);
+            _worldPacket.WriteInt32(QuestID);
+            _worldPacket.WriteInt32(XPReward);
             _worldPacket.WriteInt64(MoneyReward);
-            _worldPacket.WriteUInt32(SkillLineIDReward);
-            _worldPacket.WriteUInt32(NumSkillUpsReward);
+            _worldPacket.WriteInt32(SkillLineIDReward);
+            _worldPacket.WriteInt32(NumSkillUpsReward);
 
             _worldPacket.WriteBit(UseQuestReward);
             _worldPacket.WriteBit(LaunchGossip);
@@ -364,11 +392,11 @@ namespace Game.Networking.Packets
             ItemReward.Write(_worldPacket);
         }
 
-        public uint QuestID;
-        public uint XPReward;
+        public int QuestID;
+        public int XPReward;
         public long MoneyReward;
-        public uint SkillLineIDReward;
-        public uint NumSkillUpsReward;
+        public int SkillLineIDReward;
+        public int NumSkillUpsReward;
         public bool UseQuestReward;
         public bool LaunchGossip;
         public bool LaunchQuest;
@@ -383,12 +411,12 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             QuestGiverGUID = _worldPacket.ReadPackedGuid();
-            QuestID = _worldPacket.ReadUInt32();
+            QuestID = _worldPacket.ReadInt32();
             FromScript = _worldPacket.HasBit();
         }
 
         public ObjectGuid QuestGiverGUID; // NPC / GameObject guid for normal quest completion. Player guid for self-completed quests
-        public uint QuestID;
+        public int QuestID;
         public bool FromScript; // 0 - standart complete quest mode with npc, 1 - auto-complete mode
     }
 
@@ -412,23 +440,26 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(QuestGiverGUID);
             _worldPacket.WritePackedGuid(InformUnit);
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
             _worldPacket.WriteInt32(QuestPackageID);
-            _worldPacket.WriteUInt32(PortraitGiver);
-            _worldPacket.WriteUInt32(PortraitGiverMount);
+            _worldPacket.WriteInt32(PortraitGiver);
+            _worldPacket.WriteInt32(PortraitGiverMount);
             _worldPacket.WriteInt32(PortraitGiverModelSceneID);
-            _worldPacket.WriteUInt32(PortraitTurnIn);
+            _worldPacket.WriteInt32(PortraitTurnIn);
             _worldPacket.WriteUInt32(QuestFlags[0]); // Flags
             _worldPacket.WriteUInt32(QuestFlags[1]); // FlagsEx
-            _worldPacket.WriteUInt32(SuggestedPartyMembers);
+            _worldPacket.WriteUInt32(QuestFlags[2]); // FlagsEx
+            _worldPacket.WriteInt32(SuggestedPartyMembers);
             _worldPacket.WriteInt32(LearnSpells.Count);
             _worldPacket.WriteInt32(DescEmotes.Count);
             _worldPacket.WriteInt32(Objectives.Count);
             _worldPacket.WriteInt32(QuestStartItemID);
             _worldPacket.WriteInt32(QuestSessionBonus);
+            _worldPacket.WriteInt32(QuestGiverCreatureID);
+            _worldPacket.WriteInt32(ConditionalDescriptionText.Count);
 
-            foreach (uint spell in LearnSpells)
-                _worldPacket.WriteUInt32(spell);
+            foreach (int spell in LearnSpells)
+                _worldPacket.WriteInt32(spell);
 
             foreach (QuestDescEmote emote in DescEmotes)
             {
@@ -438,7 +469,7 @@ namespace Game.Networking.Packets
 
             foreach (QuestObjectiveSimple obj in Objectives)
             {
-                _worldPacket.WriteUInt32(obj.Id);
+                _worldPacket.WriteInt32(obj.Id);
                 _worldPacket.WriteInt32(obj.ObjectID);
                 _worldPacket.WriteInt32(obj.Amount);
                 _worldPacket.WriteUInt8(obj.Type);
@@ -466,31 +497,36 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(PortraitGiverName);
             _worldPacket.WriteString(PortraitTurnInText);
             _worldPacket.WriteString(PortraitTurnInName);
+
+            foreach (ConditionalQuestText conditionalQuestText in ConditionalDescriptionText)
+                conditionalQuestText.Write(_worldPacket);
         }
 
         public ObjectGuid QuestGiverGUID;
         public ObjectGuid InformUnit;
-        public uint QuestID;
+        public int QuestID;
         public int QuestPackageID;
-        public uint[] QuestFlags = new uint[2];
-        public uint SuggestedPartyMembers;
+        public uint[] QuestFlags = new uint[3];
+        public int SuggestedPartyMembers;
         public QuestRewards Rewards = new();
         public List<QuestObjectiveSimple> Objectives = new();
         public List<QuestDescEmote> DescEmotes = new();
-        public List<uint> LearnSpells = new();
-        public uint PortraitTurnIn;
-        public uint PortraitGiver;
-        public uint PortraitGiverMount;
+        public List<int> LearnSpells = new();
+        public int PortraitTurnIn;
+        public int PortraitGiver;
+        public int PortraitGiverMount;
         public int PortraitGiverModelSceneID;
         public int QuestStartItemID;
         public int QuestSessionBonus;
-        public string PortraitGiverText = "";
-        public string PortraitGiverName = "";
-        public string PortraitTurnInText = "";
-        public string PortraitTurnInName = "";
-        public string QuestTitle = "";
-        public string LogDescription = "";
-        public string DescriptionText = "";
+        public int QuestGiverCreatureID;
+        public string PortraitGiverText = string.Empty;
+        public string PortraitGiverName = string.Empty;
+        public string PortraitTurnInText = string.Empty;
+        public string PortraitTurnInName = string.Empty;
+        public string QuestTitle = string.Empty;
+        public string LogDescription = string.Empty;
+        public string DescriptionText = string.Empty;
+        public List<ConditionalQuestText> ConditionalDescriptionText = new();
         public bool DisplayPopup;
         public bool StartCheat;
         public bool AutoLaunched;
@@ -503,13 +539,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(QuestGiverGUID);
-            _worldPacket.WriteUInt32(QuestGiverCreatureID);
-            _worldPacket.WriteUInt32(QuestID);
-            _worldPacket.WriteUInt32(CompEmoteDelay);
-            _worldPacket.WriteUInt32(CompEmoteType);
+            _worldPacket.WriteInt32(QuestGiverCreatureID);
+            _worldPacket.WriteInt32(QuestID);
+            _worldPacket.WriteInt32(CompEmoteDelay);
+            _worldPacket.WriteInt32(CompEmoteType);
             _worldPacket.WriteUInt32(QuestFlags[0]);
             _worldPacket.WriteUInt32(QuestFlags[1]);
-            _worldPacket.WriteUInt32(SuggestPartyMembers);
+            _worldPacket.WriteUInt32(QuestFlags[2]);
+            _worldPacket.WriteInt32(SuggestPartyMembers);
             _worldPacket.WriteInt32(MoneyToGet);
             _worldPacket.WriteInt32(Collect.Count);
             _worldPacket.WriteInt32(Currency.Count);
@@ -517,40 +554,48 @@ namespace Game.Networking.Packets
 
             foreach (QuestObjectiveCollect obj in Collect)
             {
-                _worldPacket.WriteUInt32(obj.ObjectID);
+                _worldPacket.WriteInt32(obj.ObjectID);
                 _worldPacket.WriteInt32(obj.Amount);
                 _worldPacket.WriteUInt32(obj.Flags);
             }
             foreach (QuestCurrency cur in Currency)
             {
-                _worldPacket.WriteUInt32(cur.CurrencyID);
+                _worldPacket.WriteInt32(cur.CurrencyID);
                 _worldPacket.WriteInt32(cur.Amount);
             }
 
             _worldPacket.WriteBit(AutoLaunched);
             _worldPacket.FlushBits();
 
+            _worldPacket.WriteInt32(QuestGiverCreatureID);
+            _worldPacket.WriteInt32(ConditionalCompletionText.Count);
+
             _worldPacket.WriteBits(QuestTitle.GetByteCount(), 9);
             _worldPacket.WriteBits(CompletionText.GetByteCount(), 12);
+            _worldPacket.FlushBits();
+
+            foreach (ConditionalQuestText conditionalQuestText in ConditionalCompletionText)
+                conditionalQuestText.Write(_worldPacket);
 
             _worldPacket.WriteString(QuestTitle);
             _worldPacket.WriteString(CompletionText);
         }
 
         public ObjectGuid QuestGiverGUID;
-        public uint QuestGiverCreatureID;
-        public uint QuestID;
-        public uint CompEmoteDelay;
-        public uint CompEmoteType;
+        public int QuestGiverCreatureID;
+        public int QuestID;
+        public int CompEmoteDelay;
+        public int CompEmoteType;
         public bool AutoLaunched;
-        public uint SuggestPartyMembers;
+        public int SuggestPartyMembers;
         public int MoneyToGet;
         public List<QuestObjectiveCollect> Collect = new();
         public List<QuestCurrency> Currency = new();
         public int StatusFlags;
-        public uint[] QuestFlags = new uint[2];
-        public string QuestTitle = "";
-        public string CompletionText = "";
+        public uint[] QuestFlags = new uint[3];
+        public string QuestTitle = string.Empty;
+        public string CompletionText = string.Empty;
+        public List<ConditionalQuestText> ConditionalCompletionText = new();
     }
 
     public class QuestGiverRequestReward : ClientPacket
@@ -560,11 +605,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             QuestGiverGUID = _worldPacket.ReadPackedGuid();
-            QuestID = _worldPacket.ReadUInt32();
+            QuestID = _worldPacket.ReadInt32();
         }
 
         public ObjectGuid QuestGiverGUID;
-        public uint QuestID;
+        public int QuestID;
     }
 
     public class QuestGiverQueryQuest : ClientPacket
@@ -574,29 +619,29 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             QuestGiverGUID = _worldPacket.ReadPackedGuid();
-            QuestID = _worldPacket.ReadUInt32();
+            QuestID = _worldPacket.ReadInt32();
             RespondToGiver = _worldPacket.HasBit();
         }
 
         public ObjectGuid QuestGiverGUID;
-        public uint QuestID;
+        public int QuestID;
         public bool RespondToGiver;
     }
 
     public class QuestGiverAcceptQuest : ClientPacket
     {
-        public ObjectGuid QuestGiverGUID;
-        public uint QuestID;
-        public bool StartCheat;
-
         public QuestGiverAcceptQuest(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             QuestGiverGUID = _worldPacket.ReadPackedGuid();
-            QuestID = _worldPacket.ReadUInt32();
+            QuestID = _worldPacket.ReadInt32();
             StartCheat = _worldPacket.HasBit();
         }
+        
+        public ObjectGuid QuestGiverGUID;
+        public int QuestID;
+        public bool StartCheat;
     }
 
     public class QuestLogRemoveQuest : ClientPacket
@@ -634,7 +679,7 @@ namespace Game.Networking.Packets
         public uint GreetEmoteDelay;
         public uint GreetEmoteType;
         public List<ClientGossipText> QuestDataText = new();
-        public string Greeting = "";
+        public string Greeting = string.Empty;
     }
 
     class QuestUpdateComplete : ServerPacket
@@ -643,10 +688,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
         }
 
-        public uint QuestID;
+        public int QuestID;
     }
 
     class QuestConfirmAcceptResponse : ServerPacket
@@ -655,7 +700,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
             _worldPacket.WritePackedGuid(InitiatedBy);
 
             _worldPacket.WriteBits(QuestTitle.GetByteCount(), 10);
@@ -663,7 +708,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid InitiatedBy;
-        public uint QuestID;
+        public int QuestID;
         public string QuestTitle;
     }
 
@@ -673,10 +718,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            QuestID = _worldPacket.ReadUInt32();
+            QuestID = _worldPacket.ReadInt32();
         }
 
-        public uint QuestID;
+        public int QuestID;
     }
 
     class QuestPushResultResponse : ServerPacket
@@ -697,6 +742,13 @@ namespace Game.Networking.Packets
         public ObjectGuid SenderGUID;
         public QuestPushReason Result;
         public string QuestTitle;
+    }
+
+    class QuestLogFull : ServerPacket
+    {
+        public QuestLogFull() : base(ServerOpcodes.QuestLogFull) { }
+
+        public override void Write() { }
     }
 
     class QuestPushResult : ClientPacket
@@ -734,7 +786,7 @@ namespace Game.Networking.Packets
         public QuestFailedReasons Reason;
         public int ContributionRewardID;
         public bool SendErrorMessage;
-        public string ReasonText = "";
+        public string ReasonText = string.Empty;
     }
 
     class QuestUpdateFailedTimer : ServerPacket
@@ -755,11 +807,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
             _worldPacket.WriteUInt32((uint)Reason);
         }
 
-        public uint QuestID;
+        public int QuestID;
         public InventoryResult Reason;
     }
 
@@ -785,14 +837,7 @@ namespace Game.Networking.Packets
         }
 
         public int Count;
-    }
-
-    class QuestLogFull : ServerPacket
-    {
-        public QuestLogFull() : base(ServerOpcodes.QuestLogFull) { }
-
-        public override void Write() { }
-    }
+    }    
 
     class RequestWorldQuestUpdate : ClientPacket
     {
@@ -897,102 +942,129 @@ namespace Game.Networking.Packets
 
     public struct QuestInfoChoiceItem
     {
-        public uint ItemID;
-        public uint Quantity;
-        public uint DisplayID;
+        public int ItemID;
+        public int Quantity;
+        public int DisplayID;
+    }
+
+    public class ConditionalQuestText
+    {
+        public int PlayerConditionID;
+        public int QuestGiverCreatureID;
+        public string Text = string.Empty;
+
+        public ConditionalQuestText(int playerConditionID, int questGiverCreatureID, string text)
+        {
+            PlayerConditionID = playerConditionID;
+            QuestGiverCreatureID = questGiverCreatureID;
+            Text = text;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(PlayerConditionID);
+            data.WriteInt32(QuestGiverCreatureID);
+            data.WriteBits(Text.GetByteCount(), 12);
+            data.FlushBits();
+
+            data.WriteString(Text);
+        }
     }
 
     public class QuestInfo
     {
         public QuestInfo()
         {
-            LogTitle = "";
-            LogDescription = "";
-            QuestDescription = "";
-            AreaDescription = "";
-            PortraitGiverText = "";
-            PortraitGiverName = "";
-            PortraitTurnInText = "";
-            PortraitTurnInName = "";
-            QuestCompletionLog = "";
+            LogTitle = string.Empty;
+            LogDescription = string.Empty;
+            QuestDescription = string.Empty;
+            AreaDescription = string.Empty;
+            PortraitGiverText = string.Empty;
+            PortraitGiverName = string.Empty;
+            PortraitTurnInText = string.Empty;
+            PortraitTurnInName = string.Empty;
+            QuestCompletionLog = string.Empty;
         }
 
-        public uint QuestID;
-        public int QuestType; // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
+        public int QuestID;
+        public QuestType QuestType; // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
         public int QuestLevel; // may be -1, static data, in other cases must be used dynamic level: Player::GetQuestLevel (0 is not known, but assuming this is no longer valid for quest intended for client)
         public int QuestScalingFactionGroup;
-        public int QuestMaxScalingLevel = 255;
-        public uint QuestPackageID;
+        public int QuestMaxScalingLevel;
+        public int QuestPackageID;
         public int QuestMinLevel;
         public int QuestSortID; // zone or sort to display in quest log
-        public uint QuestInfoID;
-        public uint SuggestedGroupNum;
-        public uint RewardNextQuest; // client will request this quest from NPC, if not 0
-        public uint RewardXPDifficulty; // used for calculating rewarded experience
+        public int QuestInfoID;
+        public int SuggestedGroupNum;
+        public int RewardNextQuest; // client will request this quest from NPC, if not 0
+        public int RewardXPDifficulty; // used for calculating rewarded experience
         public float RewardXPMultiplier = 1.0f;
         public int RewardMoney; // reward money (below max lvl)
-        public uint RewardMoneyDifficulty;
+        public int RewardMoneyDifficulty;
         public float RewardMoneyMultiplier = 1.0f;
-        public uint RewardBonusMoney;
+        public int RewardBonusMoney;
         public int[] RewardDisplaySpell = new int[SharedConst.QuestRewardDisplaySpellCount]; // reward spell, this spell will be displayed (icon)
-        public uint RewardSpell;
-        public uint RewardHonor;
+        public int RewardSpell;
+        public int RewardHonor;
         public float RewardKillHonor;
         public int RewardArtifactXPDifficulty;
         public float RewardArtifactXPMultiplier;
         public int RewardArtifactCategoryID;
-        public uint StartItem;
-        public uint Flags;
-        public uint FlagsEx;
-        public uint FlagsEx2;
-        public uint POIContinent;
+        public int StartItem;
+        public QuestFlags Flags;
+        public QuestFlagsEx FlagsEx;
+        public QuestFlagsEx2 FlagsEx2;
+        public int POIContinent;
         public float POIx;
         public float POIy;
-        public uint POIPriority;
-        public long AllowableRaces = -1;
+        public int POIPriority;
+        public RaceMask AllowableRaces = RaceMask.Playable;
         public string LogTitle;
         public string LogDescription;
         public string QuestDescription;
         public string AreaDescription;
-        public uint RewardTitle; // new 2.4.0, player gets this title (id from CharTitles)
+        public int RewardTitle; // new 2.4.0, player gets this title (id from CharTitles)
         public int RewardArenaPoints;
-        public uint RewardSkillLineID; // reward skill id
-        public uint RewardNumSkillUps; // reward skill points
-        public uint PortraitGiver; // quest giver entry ?
-        public uint PortraitGiverMount;
+        public int RewardSkillLineID; // reward skill id
+        public int RewardNumSkillUps; // reward skill points
+        public int PortraitGiver; // quest giver entry ?
+        public int PortraitGiverMount;
         public int PortraitGiverModelSceneID;
-        public uint PortraitTurnIn; // quest turn in entry ?
+        public int PortraitTurnIn; // quest turn in entry ?
         public string PortraitGiverText;
         public string PortraitGiverName;
         public string PortraitTurnInText;
         public string PortraitTurnInName;
         public string QuestCompletionLog;
-        public uint RewardFactionFlags; // rep mask (unsure on what it does)
-        public uint AcceptedSoundKitID;
-        public uint CompleteSoundKitID;
-        public uint AreaGroupID;
-        public uint TimeAllowed;
+        public int RewardFactionFlags; // rep mask (unsure on what it does)
+        public int AcceptedSoundKitID;
+        public int CompleteSoundKitID;
+        public int AreaGroupID;
+        public long TimeAllowed;
         public int TreasurePickerID;
         public int Expansion;
+        public int ManagedWorldStateID;
+        public int QuestSessionBonus;
+        public int QuestGiverCreatureID; // used to select ConditionalQuestText
         public List<QuestObjective> Objectives = new();
-        public uint[] RewardItems = new uint[SharedConst.QuestRewardItemCount];
-        public uint[] RewardAmount = new uint[SharedConst.QuestRewardItemCount];
+        public int[] RewardItems = new int[SharedConst.QuestRewardItemCount];
+        public int[] RewardAmount = new int[SharedConst.QuestRewardItemCount];
         public int[] ItemDrop = new int[SharedConst.QuestItemDropCount];
         public int[] ItemDropQuantity = new int[SharedConst.QuestItemDropCount];
         public QuestInfoChoiceItem[] UnfilteredChoiceItems = new QuestInfoChoiceItem[SharedConst.QuestRewardChoicesCount];
-        public uint[] RewardFactionID = new uint[SharedConst.QuestRewardReputationsCount];
+        public int[] RewardFactionID = new int[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionValue = new int[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionOverride = new int[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionCapIn = new int[SharedConst.QuestRewardReputationsCount];
-        public uint[] RewardCurrencyID = new uint[SharedConst.QuestRewardCurrencyCount];
-        public uint[] RewardCurrencyQty = new uint[SharedConst.QuestRewardCurrencyCount];
+        public int[] RewardCurrencyID = new int[SharedConst.QuestRewardCurrencyCount];
+        public int[] RewardCurrencyQty = new int[SharedConst.QuestRewardCurrencyCount];
     }
 
     public struct QuestChoiceItem
     {
         public LootItemType LootItemType;
         public ItemInstance Item;
-        public uint Quantity;
+        public int Quantity;
 
         public void Read(WorldPacket data)
         {
@@ -1000,66 +1072,66 @@ namespace Game.Networking.Packets
             LootItemType = (LootItemType)data.ReadBits<byte>(2);
             Item = new ItemInstance();
             Item.Read(data);
-            Quantity = data.ReadUInt32();
+            Quantity = data.ReadInt32();
         }
 
         public void Write(WorldPacket data)
         {
             data.WriteBits((byte)LootItemType, 2);
             Item.Write(data);
-            data.WriteUInt32(Quantity);
+            data.WriteInt32(Quantity);
         }
     }
 
     public class QuestRewards
     {
-        public uint ChoiceItemCount;
-        public uint ItemCount;
-        public uint Money;
-        public uint XP;
-        public uint ArtifactXP;
-        public uint ArtifactCategoryID;
-        public uint Honor;
-        public uint Title;
-        public uint FactionFlags;
+        public int ChoiceItemCount;
+        public int ItemCount;
+        public int Money;
+        public int XP;
+        public int ArtifactXP;
+        public int ArtifactCategoryID;
+        public int Honor;
+        public int Title;
+        public int FactionFlags;
         public int[] SpellCompletionDisplayID = new int[SharedConst.QuestRewardDisplaySpellCount];
-        public uint SpellCompletionID;
-        public uint SkillLineID;
-        public uint NumSkillUps;
-        public uint TreasurePickerID;
+        public int SpellCompletionID;
+        public int SkillLineID;
+        public int NumSkillUps;
+        public int TreasurePickerID;
         public QuestChoiceItem[] ChoiceItems = new QuestChoiceItem[SharedConst.QuestRewardChoicesCount];
-        public uint[] ItemID = new uint[SharedConst.QuestRewardItemCount];
-        public uint[] ItemQty = new uint[SharedConst.QuestRewardItemCount];
-        public uint[] FactionID = new uint[SharedConst.QuestRewardReputationsCount];
+        public int[] ItemID = new int[SharedConst.QuestRewardItemCount];
+        public int[] ItemQty = new int[SharedConst.QuestRewardItemCount];
+        public int[] FactionID = new int[SharedConst.QuestRewardReputationsCount];
         public int[] FactionValue = new int[SharedConst.QuestRewardReputationsCount];
         public int[] FactionOverride = new int[SharedConst.QuestRewardReputationsCount];
         public int[] FactionCapIn = new int[SharedConst.QuestRewardReputationsCount];
-        public uint[] CurrencyID = new uint[SharedConst.QuestRewardCurrencyCount];
-        public uint[] CurrencyQty = new uint[SharedConst.QuestRewardCurrencyCount];
+        public int[] CurrencyID = new int[SharedConst.QuestRewardCurrencyCount];
+        public int[] CurrencyQty = new int[SharedConst.QuestRewardCurrencyCount];
         public bool IsBoostSpell;
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(ChoiceItemCount);
-            data.WriteUInt32(ItemCount);
+            data.WriteInt32(ChoiceItemCount);
+            data.WriteInt32(ItemCount);
 
             for (int i = 0; i < SharedConst.QuestRewardItemCount; ++i)
             {
-                data.WriteUInt32(ItemID[i]);
-                data.WriteUInt32(ItemQty[i]);
+                data.WriteInt32(ItemID[i]);
+                data.WriteInt32(ItemQty[i]);
             }
 
-            data.WriteUInt32(Money);
-            data.WriteUInt32(XP);
-            data.WriteUInt64(ArtifactXP);
-            data.WriteUInt32(ArtifactCategoryID);
-            data.WriteUInt32(Honor);
-            data.WriteUInt32(Title);
-            data.WriteUInt32(FactionFlags);
+            data.WriteInt32(Money);
+            data.WriteInt32(XP);
+            data.WriteInt64(ArtifactXP);
+            data.WriteInt32(ArtifactCategoryID);
+            data.WriteInt32(Honor);
+            data.WriteInt32(Title);
+            data.WriteInt32(FactionFlags);
 
             for (int i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
             {
-                data.WriteUInt32(FactionID[i]);
+                data.WriteInt32(FactionID[i]);
                 data.WriteInt32(FactionValue[i]);
                 data.WriteInt32(FactionOverride[i]);
                 data.WriteInt32(FactionCapIn[i]);
@@ -1068,17 +1140,17 @@ namespace Game.Networking.Packets
             foreach (var id in SpellCompletionDisplayID)
                 data.WriteInt32(id);
 
-            data.WriteUInt32(SpellCompletionID);
+            data.WriteInt32(SpellCompletionID);
 
             for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
-                data.WriteUInt32(CurrencyID[i]);
-                data.WriteUInt32(CurrencyQty[i]);
+                data.WriteInt32(CurrencyID[i]);
+                data.WriteInt32(CurrencyQty[i]);
             }
 
-            data.WriteUInt32(SkillLineID);
-            data.WriteUInt32(NumSkillUps);
-            data.WriteUInt32(TreasurePickerID);
+            data.WriteInt32(SkillLineID);
+            data.WriteInt32(NumSkillUps);
+            data.WriteInt32(TreasurePickerID);
 
             foreach (var choice in ChoiceItems)
                 choice.Write(data);
@@ -1105,11 +1177,12 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(QuestGiverGUID);
-            data.WriteUInt32(QuestGiverCreatureID);
-            data.WriteUInt32(QuestID);
-            data.WriteUInt32(QuestFlags[0]); // Flags
-            data.WriteUInt32(QuestFlags[1]); // FlagsEx
-            data.WriteUInt32(SuggestedPartyMembers);
+            data.WriteInt32(QuestGiverCreatureID);
+            data.WriteInt32(QuestID);
+            data.WriteInt32(QuestFlags[0]); // Flags
+            data.WriteInt32(QuestFlags[1]); // FlagsEx
+            data.WriteInt32(QuestFlags[2]); // FlagsEx2
+            data.WriteInt32(SuggestedPartyMembers);
 
             data.WriteInt32(Emotes.Count);
             foreach (QuestDescEmote emote in Emotes)
@@ -1126,18 +1199,18 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid QuestGiverGUID;
-        public uint QuestGiverCreatureID = 0;
-        public uint QuestID = 0;
+        public int QuestGiverCreatureID = 0;
+        public int QuestID = 0;
         public bool AutoLaunched = false;
-        public uint SuggestedPartyMembers = 0;
+        public int SuggestedPartyMembers = 0;
         public QuestRewards Rewards = new();
         public List<QuestDescEmote> Emotes = new();
-        public uint[] QuestFlags = new uint[2]; // Flags and FlagsEx
+        public int[] QuestFlags = new int[3]; // Flags and FlagsEx
     }
 
     public struct QuestObjectiveSimple
     {
-        public uint Id;
+        public int Id;
         public int ObjectID;
         public int Amount;
         public byte Type;
@@ -1145,27 +1218,27 @@ namespace Game.Networking.Packets
 
     public struct QuestObjectiveCollect
     {
-        public QuestObjectiveCollect(uint objectID = 0, int amount = 0, uint flags = 0)
+        public QuestObjectiveCollect(int objectID = 0, int amount = 0, uint flags = 0)
         {
             ObjectID = objectID;
             Amount = amount;
             Flags = flags;
         }
 
-        public uint ObjectID;
+        public int ObjectID;
         public int Amount;
         public uint Flags;
     }
 
     public struct QuestCurrency
     {
-        public QuestCurrency(uint currencyID = 0, int amount = 0)
+        public QuestCurrency(int currencyID = 0, int amount = 0)
         {
             CurrencyID = currencyID;
             Amount = amount;
         }
 
-        public uint CurrencyID;
+        public int CurrencyID;
         public int Amount;
     }
 

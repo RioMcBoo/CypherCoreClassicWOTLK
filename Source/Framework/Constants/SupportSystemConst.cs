@@ -54,7 +54,7 @@ namespace Framework.Constants
         Enabled = 1
     }
 
-    public enum SupportSpamType
+    public enum SupportSpamType : byte
     {
         Mail = 0,
         Chat = 1,

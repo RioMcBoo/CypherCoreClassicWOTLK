@@ -38,19 +38,19 @@ namespace Game.Entities
 
             // prepare data for near group iteration
             Group group = GetGroup();
-            if (group)
+            if (group != null)
             {
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player player = refe.GetSource();
-                    if (!player)
+                    if (player == null)
                         continue;
 
                     if (!player.IsAtGroupRewardDistance(pRewardSource))
                         continue;                               // member (alive or dead) or his corpse at req. distance
 
                     // quest objectives updated only for alive group member or dead but with not released body
-                    if (player.IsAlive() || !player.GetCorpse())
+                    if (player.IsAlive() || player.GetCorpse() == null)
                         player.KilledMonsterCredit(creature_id, creature_guid);
                 }
             }
@@ -84,12 +84,10 @@ namespace Game.Entities
 
             return 1.0f / value;
         }
+
         public float GetRatingBonusValue(CombatRating cr)
         {
-            float baseResult = ApplyRatingDiminishing(cr, m_activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr));
-            if (cr != CombatRating.ResiliencePlayerDamage)
-                return baseResult;
-            return (float)(1.0f - Math.Pow(0.99f, baseResult)) * 100.0f;
+            return m_activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr);
         }
 
         void GetDodgeFromAgility(float diminishing, float nondiminishing)
@@ -144,61 +142,7 @@ namespace Game.Entities
             diminishing = 100.0f * bonus_agility * dodgeRatio.Value * crit_to_dodge[(int)pclass - 1];
             nondiminishing = 100.0f * (dodge_base[(int)pclass - 1] + base_agility * dodgeRatio.Value * crit_to_dodge[pclass - 1]);
             */
-        }
-
-        float ApplyRatingDiminishing(CombatRating cr, float bonusValue)
-        {
-            uint diminishingCurveId = 0;
-            // TODO :  wotlk_classic combat ratings application
-            //switch (cr)
-            //{
-            //    case CombatRating.Dodge:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.DodgeDiminishing);
-            //        break;
-            //    case CombatRating.Parry:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.ParryDiminishing);
-            //        break;
-            //    case CombatRating.Block:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.BlockDiminishing);
-            //        break;
-            //    case CombatRating.CritMelee:
-            //    case CombatRating.CritRanged:
-            //    case CombatRating.CritSpell:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.CritDiminishing);
-            //        break;
-            //    case CombatRating.Speed:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.SpeedDiminishing);
-            //        break;
-            //    case CombatRating.Lifesteal:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.LifestealDiminishing);
-            //        break;
-            //    case CombatRating.HasteMelee:
-            //    case CombatRating.HasteRanged:
-            //    case CombatRating.HasteSpell:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.HasteDiminishing);
-            //        break;
-            //    case CombatRating.Avoidance:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.AvoidanceDiminishing);
-            //        break;
-            //    case CombatRating.Mastery:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.MasteryDiminishing);
-            //        break;
-            //    case CombatRating.VersatilityDamageDone:
-            //    case CombatRating.VersatilityHealingDone:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.VersatilityDoneDiminishing);
-            //        break;
-            //    case CombatRating.VersatilityDamageTaken:
-            //        diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.VersatilityTakenDiminishing);
-            //        break;
-            //    default:
-            //        break;
-            //}
-
-            if (diminishingCurveId != 0)
-                return Global.DB2Mgr.GetCurveValueAt(diminishingCurveId, bonusValue);
-
-            return bonusValue;
-        }
+        }       
         
         public float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType)
         {
@@ -248,7 +192,7 @@ namespace Game.Entities
         bool IsTwoHandUsed()
         {
             Item mainItem = GetItemByPos(EquipmentSlot.MainHand);
-            if (!mainItem)
+            if (mainItem == null)
                 return false;
 
             ItemTemplate itemTemplate = mainItem.GetTemplate();
@@ -260,14 +204,14 @@ namespace Game.Entities
         bool IsUsingTwoHandedWeaponInOneHand()
         {
             Item offItem = GetItemByPos(EquipmentSlot.OffHand);
-            if (offItem && offItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
+            if (offItem != null && offItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
                 return true;
 
             Item mainItem = GetItemByPos(EquipmentSlot.MainHand);
-            if (!mainItem || mainItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
+            if (mainItem == null || mainItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
                 return false;
 
-            if (!offItem)
+            if (offItem == null)
                 return false;
 
             return true;
@@ -316,13 +260,13 @@ namespace Game.Entities
         {
             base.AtExitCombat();
             UpdatePotionCooldown();
-            m_combatExitTime = Time.GetMSTime();
+            m_regenInterruptTimestamp = GameTime.Now();
         }
 
         public override float GetBlockPercent(uint attackerLevel)
         {
             float blockArmor = (float)m_activePlayerData.ShieldBlock;
-            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, Class.None);
+            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, Class.None, 0);
 
             if ((blockArmor + armorConstant) == 0)
                 return 0;
@@ -375,7 +319,7 @@ namespace Game.Entities
 
             ObjectGuid duelFlagGUID = m_playerData.DuelArbiter;
             GameObject obj = GetMap().GetGameObject(duelFlagGUID);
-            if (!obj)
+            if (obj == null)
                 return;
 
             if (duel.OutOfBoundsTime == 0)
@@ -479,7 +423,7 @@ namespace Game.Entities
 
             //Remove Duel Flag object
             GameObject obj = GetMap().GetGameObject(m_playerData.DuelArbiter);
-            if (obj)
+            if (obj != null)
                 duel.Initiator.RemoveGameObject(obj, true);
 
             //remove auras
@@ -499,9 +443,12 @@ namespace Game.Entities
                     RemoveAura(pair);
             }
 
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.DuelEnd);
+            opponent.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.DuelEnd);
+
             // cleanup combo points
-            ClearComboPoints();
-            opponent.ClearComboPoints();
+            SetPower(PowerType.ComboPoints, 0);
+            opponent.SetPower(PowerType.ComboPoints, 0);
 
             //cleanups
             SetDuelArbiter(ObjectGuid.Empty);

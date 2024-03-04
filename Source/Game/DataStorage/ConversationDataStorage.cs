@@ -18,7 +18,7 @@ namespace Game.DataStorage
             _conversationLineTemplateStorage.Clear();
             _conversationTemplateStorage.Clear();
 
-            Dictionary<uint, List<ConversationActorTemplate>> actorsByConversation = new();
+            Dictionary<int, List<ConversationActorTemplate>> actorsByConversation = new();
 
             {
                 using var lineTemplates = DB.World.Query("SELECT Id, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
@@ -28,7 +28,7 @@ namespace Game.DataStorage
 
                     do
                     {
-                        uint id = lineTemplates.Read<uint>(0);
+                        int id = lineTemplates.Read<int>(0);
 
                         if (!CliDB.ConversationLineStorage.ContainsKey(id))
                         {
@@ -36,11 +36,12 @@ namespace Game.DataStorage
                             continue;
                         }
 
-                        ConversationLineTemplate conversationLine = new();
-                        conversationLine.Id = id;
-                        conversationLine.UiCameraID = lineTemplates.Read<uint>(1);
-                        conversationLine.ActorIdx = lineTemplates.Read<byte>(2);
-                        conversationLine.Flags = lineTemplates.Read<byte>(3);
+                    ConversationLineTemplate conversationLine = new();
+                    conversationLine.Id = id;
+                    conversationLine.UiCameraID = lineTemplates.Read<int>(1);
+                    conversationLine.ActorIdx = lineTemplates.Read<byte>(2);
+                    conversationLine.Flags = lineTemplates.Read<byte>(3);
+                    conversationLine.ChatType = lineTemplates.Read<byte>(4);
 
                         _conversationLineTemplateStorage[id] = conversationLine;
                     }
@@ -66,12 +67,12 @@ namespace Game.DataStorage
                         ConversationActorDbRow data;
                         ConversationActorTemplate actor = new();
 
-                        data.ConversationId = actorResult.Read<uint>(0);
-                        data.ConversationId = actorResult.Read<uint>(1);
-                        data.SpawnId = actorResult.Read<ulong>(2);
+                        data.ConversationId = actorResult.Read<int>(0);
+                        data.ConversationId = actorResult.Read<int>(1);
+                        data.SpawnId = actorResult.Read<long>(2);
                         data.ActorIndex = actor.Index = actorResult.Read<ushort>(3);
-                        data.CreatureId = actorResult.Read<uint>(4);
-                        data.CreatureDisplayInfoId = actorResult.Read<uint>(5);
+                        data.CreatureId = actorResult.Read<int>(4);
+                        data.CreatureDisplayInfoId = actorResult.Read<int>(5);
                         bool noActorObject = actorResult.Read<byte>(6) == 1;
                         bool activePlayerObject = actorResult.Read<byte>(7) == 1;
 
@@ -104,14 +105,14 @@ namespace Game.DataStorage
             }
 
             // Validate FirstLineId
-            Dictionary<uint, uint> prevConversationLineIds = new();
+            Dictionary<int, int> prevConversationLineIds = new();
             foreach (var conversationLine in CliDB.ConversationLineStorage.Values)
                 if (conversationLine.NextConversationLineID != 0)
                     prevConversationLineIds[conversationLine.NextConversationLineID] = conversationLine.Id;
 
-            uint getFirstLineIdFromAnyLineId(uint lineId)
+            int getFirstLineIdFromAnyLineId(int lineId)
             {
-                uint prevLineId;
+                int prevLineId;
                 while ((prevLineId = prevConversationLineIds.LookupByKey(lineId)) != 0)
                     lineId = prevLineId;
 
@@ -127,14 +128,14 @@ namespace Game.DataStorage
                     do
                     {
                         ConversationTemplate conversationTemplate = new();
-                        conversationTemplate.Id = templateResult.Read<uint>(0);
-                        conversationTemplate.FirstLineId = templateResult.Read<uint>(1);
-                        conversationTemplate.TextureKitId = templateResult.Read<uint>(2);
+                        conversationTemplate.Id = templateResult.Read<int>(0);
+                        conversationTemplate.FirstLineId = templateResult.Read<int>(1);
+                        conversationTemplate.TextureKitId = templateResult.Read<int>(2);
                         conversationTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templateResult.Read<string>(3));
 
                         conversationTemplate.Actors = actorsByConversation.TryGetValue(conversationTemplate.Id, out var actors) ? actors.ToList() : new();
 
-                        uint correctedFirstLineId = getFirstLineIdFromAnyLineId(conversationTemplate.FirstLineId);
+                        int correctedFirstLineId = getFirstLineIdFromAnyLineId(conversationTemplate.FirstLineId);
                         if (conversationTemplate.FirstLineId != correctedFirstLineId)
                         {
                             Log.outError(LogFilter.Sql, $"Table `conversation_template` has incorrect FirstLineId {conversationTemplate.FirstLineId}, it should be {correctedFirstLineId} for Conversation {conversationTemplate.Id}, corrected");
@@ -172,40 +173,40 @@ namespace Game.DataStorage
             }
         }
 
-        public ConversationTemplate GetConversationTemplate(uint conversationId)
+        public ConversationTemplate GetConversationTemplate(int conversationId)
         {
             return _conversationTemplateStorage.LookupByKey(conversationId);
         }
 
-        public ConversationLineTemplate GetConversationLineTemplate(uint conversationLineId)
+        public ConversationLineTemplate GetConversationLineTemplate(int conversationLineId)
         {
             return _conversationLineTemplateStorage.LookupByKey(conversationLineId);
         }
 
-        Dictionary<uint, ConversationTemplate> _conversationTemplateStorage = new();
-        Dictionary<uint, ConversationLineTemplate> _conversationLineTemplateStorage = new();
+        Dictionary<int, ConversationTemplate> _conversationTemplateStorage = new();
+        Dictionary<int, ConversationLineTemplate> _conversationLineTemplateStorage = new();
 
         struct ConversationActorDbRow
         {
-            public uint ConversationId;
-            public uint ActorIndex;
+            public int ConversationId;
+            public int ActorIndex;
 
-            public ulong SpawnId;
-            public uint CreatureId;
-            public uint CreatureDisplayInfoId;
+            public long SpawnId;
+            public int CreatureId;
+            public int CreatureDisplayInfoId;
 
             public bool Invoke(ConversationActorTemplate template)
             {
-                if (template.WorldObjectTemplate == null)
+                if (template.WorldObjectTemplate != null)
                     return Invoke(template.WorldObjectTemplate);
 
-                if (template.NoObjectTemplate == null)
+                if (template.NoObjectTemplate != null)
                     return Invoke(template.NoObjectTemplate);
 
-                if (template.ActivePlayerTemplate == null)
+                if (template.ActivePlayerTemplate != null)
                     return Invoke(template.ActivePlayerTemplate);
 
-                if (template.TalkingHeadTemplate == null)
+                if (template.TalkingHeadTemplate != null)
                     return Invoke(template.TalkingHeadTemplate);
 
                 return false;
@@ -289,13 +290,13 @@ namespace Game.DataStorage
 
     public class ConversationActorWorldObjectTemplate
     {
-        public ulong SpawnId;
+        public long SpawnId;
     }
 
     public class ConversationActorNoObjectTemplate
     {
-        public uint CreatureId;
-        public uint CreatureDisplayInfoId;
+        public int CreatureId;
+        public int CreatureDisplayInfoId;
     }
 
     public class ConversationActorActivePlayerTemplate
@@ -304,14 +305,14 @@ namespace Game.DataStorage
 
     public class ConversationActorTalkingHeadTemplate
     {
-        public uint CreatureId;
-        public uint CreatureDisplayInfoId;
+        public int CreatureId;
+        public int CreatureDisplayInfoId;
     }
 
     public struct ConversationActorTemplate
     {
         public int Id;
-        public uint Index;
+        public int Index;
         public ConversationActorWorldObjectTemplate WorldObjectTemplate;
         public ConversationActorNoObjectTemplate NoObjectTemplate;
         public ConversationActorActivePlayerTemplate ActivePlayerTemplate;
@@ -320,18 +321,19 @@ namespace Game.DataStorage
 
     public class ConversationLineTemplate
     {
-        public uint Id;          // Link to ConversationLine.db2
-        public uint UiCameraID;  // Link to UiCamera.db2
+        public int Id;          // Link to ConversationLine.db2
+        public int UiCameraID;  // Link to UiCamera.db2
         public byte ActorIdx;    // Index from conversation_actors
         public byte Flags;
+        public byte ChatType;
     }
 
     public class ConversationTemplate
     {
-        public uint Id;
-        public uint FirstLineId;     // Link to ConversationLine.db2
-        public uint TextureKitId;    // Background texture
-        public uint ScriptId;
+        public int Id;
+        public int FirstLineId;     // Link to ConversationLine.db2
+        public int TextureKitId;    // Background texture
+        public int ScriptId;
 
         public List<ConversationActorTemplate> Actors = new();
         public List<ConversationLineTemplate> Lines = new();

@@ -14,12 +14,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(MoverGUID);
             _worldPacket.WriteUInt32(SequenceIndex);
-            _worldPacket.WriteUInt32(VehicleRecID);
+            _worldPacket.WriteInt32(VehicleRecID);
         }
 
         public ObjectGuid MoverGUID;
         public uint SequenceIndex;
-        public uint VehicleRecID;
+        public int VehicleRecID;
     }
 
     public class MoveSetVehicleRecIdAck : ClientPacket
@@ -43,11 +43,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(VehicleGUID);
-            _worldPacket.WriteUInt32(VehicleRecID);
+            _worldPacket.WriteInt32(VehicleRecID);
         }
 
         public ObjectGuid VehicleGUID;
-        public uint VehicleRecID;
+        public int VehicleRecID;
     }
 
     public class OnCancelExpectedRideVehicleAura : ServerPacket
@@ -63,7 +63,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Status = MovementExtensions.ReadMovementInfo(_worldPacket);
+            Status.Read(_worldPacket);
         }
 
         public MovementInfo Status;
@@ -89,7 +89,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Status = MovementExtensions.ReadMovementInfo(_worldPacket);
+            Status.Read(_worldPacket);
             DstVehicle = _worldPacket.ReadPackedGuid();
             DstSeatIndex = _worldPacket.ReadUInt8();
         }

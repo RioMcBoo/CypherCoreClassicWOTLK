@@ -835,39 +835,6 @@ namespace Game
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Battleground Holiday Data...");
-            {
-                count = 0;
-                oldMSTime = Time.GetMSTime();
-
-                //                                         0           1
-                using (var result = DB.World.Query("SELECT EventEntry, BattlegroundID FROM game_event_battleground_holiday"))
-                {
-                    if (result.IsEmpty())
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Battlegroundholidays in game events. DB table `game_event_battleground_holiday` is empty.");
-                    else
-                    {
-                        do
-                        {
-                            ushort eventId = result.Read<byte>(0);
-
-                            if (eventId >= mGameEvent.Length)
-                            {
-                                Log.outError(LogFilter.Sql, "`game_event_battleground_holiday` game event id ({0}) not exist in `game_event`", eventId);
-                                continue;
-                            }
-
-                            mGameEventBattlegroundHolidays[eventId] = result.Read<uint>(1);
-
-                            ++count;
-                        }
-                        while (result.NextRow());
-
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Battlegroundholidays in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-                    }
-                }
-            }
-
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Pool Data...");
             {
                 count = 0;
@@ -952,7 +919,6 @@ namespace Game
                 mGameEventCreatureQuests = new List<Tuple<uint, uint>>[maxEventId];
                 mGameEventGameObjectQuests = new List<Tuple<uint, uint>>[maxEventId];
                 mGameEventVendors = new Dictionary<uint, VendorItem>[maxEventId];
-                mGameEventBattlegroundHolidays = new uint[maxEventId];
                 mGameEventNPCFlags = new List<(ulong guid, ulong npcflag)>[maxEventId];
                 mGameEventModelEquip = new List<Tuple<ulong, ModelEquip>>[maxEventId];
                 for (var i = 0; i < maxEventId; ++i)
@@ -1090,8 +1056,6 @@ namespace Game
             UpdateEventNPCFlags(event_id);
             // remove vendor items
             UpdateEventNPCVendor(event_id, false);
-            // update bg holiday
-            UpdateBattlegroundSettings();
         }
 
         void ApplyNewEvent(ushort event_id)
@@ -1116,8 +1080,6 @@ namespace Game
             UpdateEventNPCFlags(event_id);
             // add vendor items
             UpdateEventNPCVendor(event_id, true);
-            // update bg holiday
-            UpdateBattlegroundSettings();
 
             //! Run SAI scripts with SMART_EVENT_GAME_EVENT_START
             RunSmartAIScripts(event_id, true);
@@ -1161,14 +1123,6 @@ namespace Game
                     }
                 });
             }
-        }
-
-        void UpdateBattlegroundSettings()
-        {
-            Global.BattlegroundMgr.ResetHolidays();
-
-            foreach (ushort activeEventId in m_ActiveEvents)
-                Global.BattlegroundMgr.SetHolidayActive(mGameEventBattlegroundHolidays[activeEventId]);
         }
 
         void UpdateEventNPCVendor(ushort eventId, bool activate)
@@ -1236,7 +1190,7 @@ namespace Game
                         {
                             GameObject go = GameObject.CreateGameObjectFromDB(guid, map, false);
                             // @todo find out when it is add to map
-                            if (go)
+                            if (go != null)
                             {
                                 // @todo find out when it is add to map
                                 if (go.IsSpawnedByDefault())
@@ -1371,22 +1325,14 @@ namespace Game
                             tuple.Item2.equipement_id_prev = creature.GetCurrentEquipmentId();
                             tuple.Item2.modelid_prev = creature.GetDisplayId();
                             creature.LoadEquipment(tuple.Item2.equipment_id, true);
-                            if (tuple.Item2.modelid > 0 && tuple.Item2.modelid_prev != tuple.Item2.modelid &&
-                                Global.ObjectMgr.GetCreatureModelInfo(tuple.Item2.modelid) != null)
-                            {
-                                creature.SetDisplayId(tuple.Item2.modelid);
-                                creature.SetNativeDisplayId(tuple.Item2.modelid);
-                            }
+                            if (tuple.Item2.modelid > 0 && tuple.Item2.modelid_prev != tuple.Item2.modelid && Global.ObjectMgr.GetCreatureModelInfo(tuple.Item2.modelid) != null)
+                                creature.SetDisplayId(tuple.Item2.modelid, true);
                         }
                         else
                         {
                             creature.LoadEquipment(tuple.Item2.equipement_id_prev, true);
-                            if (tuple.Item2.modelid_prev > 0 && tuple.Item2.modelid_prev != tuple.Item2.modelid &&
-                                Global.ObjectMgr.GetCreatureModelInfo(tuple.Item2.modelid_prev) != null)
-                            {
-                                creature.SetDisplayId(tuple.Item2.modelid_prev);
-                                creature.SetNativeDisplayId(tuple.Item2.modelid_prev);
-                            }
+                            if (tuple.Item2.modelid_prev > 0 && tuple.Item2.modelid_prev != tuple.Item2.modelid && Global.ObjectMgr.GetCreatureModelInfo(tuple.Item2.modelid_prev) != null)
+                                creature.SetDisplayId(tuple.Item2.modelid_prev, true);
                         }
                     }
                 });
@@ -1500,7 +1446,7 @@ namespace Game
                 BattlegroundTypeId bgTypeId = Global.BattlegroundMgr.WeekendHolidayIdToBGType(Event.holiday_id);
                 if (bgTypeId != BattlegroundTypeId.None)
                 {
-                    var bl = CliDB.BattlemasterListStorage.LookupByKey(Global.BattlegroundMgr.WeekendHolidayIdToBGType(Event.holiday_id));
+                    var bl = CliDB.BattlemasterListStorage.LookupByKey((int)Global.BattlegroundMgr.WeekendHolidayIdToBGType(Event.holiday_id));
                     if (bl != null)
                         if (bl.HolidayWorldState != 0)
                             Global.WorldStateMgr.SetValue(bl.HolidayWorldState, Activate ? 1 : 0, false, null);
@@ -1508,7 +1454,7 @@ namespace Game
             }
         }
 
-        public void HandleQuestComplete(uint quest_id)
+        public void HandleQuestComplete(int quest_id)
         {
             // translate the quest to event and condition
             var questToEvent = mQuestToEventConditions.LookupByKey(quest_id);
@@ -1624,7 +1570,7 @@ namespace Game
             if (gameEvent.holidayStage == 0) // Ignore holiday
                 return;
 
-            var holiday = CliDB.HolidaysStorage.LookupByKey(gameEvent.holiday_id);
+            var holiday = CliDB.HolidaysStorage.LookupByKey((int)gameEvent.holiday_id);
             if (holiday.Date[0] == 0 || holiday.Duration[0] == 0) // Invalid definitions
             {
                 Log.outError(LogFilter.Sql, $"Missing date or duration for holiday {gameEvent.holiday_id}.");
@@ -1737,34 +1683,33 @@ namespace Game
         void AddActiveEvent(ushort event_id) { m_ActiveEvents.Add(event_id); }
         void RemoveActiveEvent(ushort event_id) { m_ActiveEvents.Remove(event_id); }
 
-        List<Tuple<uint, uint>>[] mGameEventCreatureQuests;
-        List<Tuple<uint, uint>>[] mGameEventGameObjectQuests;
-        Dictionary<uint, VendorItem>[] mGameEventVendors;
-        List<Tuple<ulong, ModelEquip>>[] mGameEventModelEquip;
-        List<uint>[] mGameEventPoolIds;
+        List<(int, int)>[] mGameEventCreatureQuests;
+        List<(int, int)>[] mGameEventGameObjectQuests;
+        Dictionary<int, VendorItem>[] mGameEventVendors;
+        List<Tuple<long, ModelEquip>>[] mGameEventModelEquip;
+        List<int>[] mGameEventPoolIds;
         GameEventData[] mGameEvent;
-        uint[] mGameEventBattlegroundHolidays;
-        Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new();
-        List<(ulong guid, ulong npcflag)>[] mGameEventNPCFlags;
+        Dictionary<int, GameEventQuestToEventConditionNum> mQuestToEventConditions = new();
+        List<(long guid, long npcflag)>[] mGameEventNPCFlags;
         List<ushort> m_ActiveEvents = new();
         bool isSystemInit;
 
-        public List<ulong>[] mGameEventCreatureGuids;
-        public List<ulong>[] mGameEventGameobjectGuids;
+        public List<long>[] mGameEventCreatureGuids;
+        public List<long>[] mGameEventGameobjectGuids;
     }
 
     public class GameEventFinishCondition
     {
         public float reqNum;  // required number // use float, since some events use percent
         public float done;    // done number
-        public uint max_world_state;  // max resource count world state update id
-        public uint done_world_state; // done resource count world state update id
+        public int max_world_state;  // max resource count world state update id
+        public int done_world_state; // done resource count world state update id
     }
 
     public class GameEventQuestToEventConditionNum
     {
         public ushort event_id;
-        public uint condition;
+        public int condition;
         public float num;
     }
 
@@ -1783,7 +1728,7 @@ namespace Game
         public HolidayIds holiday_id;
         public byte holidayStage;
         public GameEventState state;   // state of the game event, these are saved into the game_event table on change!
-        public Dictionary<uint, GameEventFinishCondition> conditions = new();  // conditions to finish
+        public Dictionary<int, GameEventFinishCondition> conditions = new();  // conditions to finish
         public List<ushort> prerequisite_events = new();  // events that must be completed before starting this event
         public string description;
         public byte announce;         // if 0 dont announce, if 1 announce, if 2 take config value

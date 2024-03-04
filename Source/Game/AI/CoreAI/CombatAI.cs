@@ -75,7 +75,7 @@ namespace Game.AI
                 DoMeleeAttackIfReady();
         }
 
-        public override void SpellInterrupted(uint spellId, uint unTimeMs)
+        public override void SpellInterrupted(int spellId, uint unTimeMs)
         {
             _events.RescheduleEvent(spellId, TimeSpan.FromMilliseconds(unTimeMs));
         }
@@ -331,15 +331,15 @@ namespace Game.AI
             if (_conditionsTimer <= diff)
             {
                 Vehicle vehicleKit = me.GetVehicleKit();
-                if (vehicleKit)
+                if (vehicleKit != null)
                 {
                     foreach (var pair in vehicleKit.Seats)
                     {
                         Unit passenger = Global.ObjAccessor.GetUnit(me, pair.Value.Passenger.Guid);
-                        if (passenger)
+                        if (passenger != null)
                         {
                             Player player = passenger.ToPlayer();
-                            if (player)
+                            if (player != null)
                             {
                                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.CreatureTemplateVehicle, me.GetEntry(), player, me))
                                 {

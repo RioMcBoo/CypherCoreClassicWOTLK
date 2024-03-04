@@ -13,7 +13,7 @@ namespace Game.Entities
         Player GetNextRandomRaidMember(float radius)
         {
             Group group = GetGroup();
-            if (!group)
+            if (group == null)
                 return null;
 
             List<Player> nearMembers = new();
@@ -23,7 +23,7 @@ namespace Game.Entities
                 Player Target = refe.GetSource();
 
                 // IsHostileTo check duel and controlled by enemy
-                if (Target && Target != this && IsWithinDistInMap(Target, radius) &&
+                if (Target != null && Target != this && IsWithinDistInMap(Target, radius) &&
                     !Target.HasInvisibilityAura() && !IsHostileTo(Target))
                     nearMembers.Add(Target);
             }
@@ -35,10 +35,10 @@ namespace Game.Entities
             return nearMembers[randTarget];
         }
 
-        public PartyResult CanUninviteFromGroup(ObjectGuid guidMember = default)
+        public PartyResult CanUninviteFromGroup(ObjectGuid guidMember, byte? partyIndex)
         {
-            Group grp = GetGroup();
-            if (!grp)
+            Group grp = GetGroup(partyIndex);
+            if (grp == null)
                 return PartyResult.NotInGroup;
 
             if (grp.IsLFGGroup())
@@ -58,12 +58,12 @@ namespace Game.Entities
                     return PartyResult.PartyLfgBootDungeonComplete;
 
                 Player player = Global.ObjAccessor.FindConnectedPlayer(guidMember);
-                if (!player.m_lootRolls.Empty())
+                if (player != null && !player.m_lootRolls.Empty())
                     return PartyResult.PartyLfgBootLootRolls;
 
                 // @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
                 for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
-                    if (refe.GetSource() && refe.GetSource().IsInMap(this) && refe.GetSource().IsInCombat())
+                    if (refe.GetSource() != null && refe.GetSource().IsInMap(this) && refe.GetSource().IsInCombat())
                         return PartyResult.PartyLfgBootInCombat;
 
                 /* Missing support for these types
@@ -117,7 +117,7 @@ namespace Game.Entities
             //remove existing reference
             m_group.Unlink();
             Group group = GetOriginalGroup();
-            if (group)
+            if (group != null)
             {
                 m_group.Link(group, this);
                 m_group.SetSubGroup(GetOriginalSubGroup());
@@ -127,7 +127,7 @@ namespace Game.Entities
 
         public void SetOriginalGroup(Group group, byte subgroup = 0)
         {
-            if (!group)
+            if (group == null)
                 m_originalGroup.Unlink();
             else
             {
@@ -150,10 +150,27 @@ namespace Game.Entities
 
             return false;
         }
+
+        public Group GetGroup(byte? partyIndex)
+        {
+            Group group = GetGroup();
+            if (!partyIndex.HasValue)
+                return group;
+
+            GroupCategory category = (GroupCategory)partyIndex;
+            if (group != null && group.GetGroupCategory() == category)
+                return group;
+
+            Group originalGroup = GetOriginalGroup();
+            if (originalGroup != null && originalGroup.GetGroupCategory() == category)
+                return originalGroup;
+
+            return null;
+        }
         
         public void SetGroup(Group group, byte subgroup = 0)
         {
-            if (!group)
+            if (group == null)
                 m_group.Unlink();
             else
             {
@@ -167,10 +184,7 @@ namespace Game.Entities
         public void SetPartyType(GroupCategory category, GroupType type)
         {
             Cypher.Assert(category < GroupCategory.Max);
-            byte value = m_playerData.PartyType;
-            value &= (byte)~((byte)0xFF << ((byte)category * 4));
-            value |= (byte)((byte)type << ((byte)category * 4));
-            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PartyType), value);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PartyType, (int)category), (byte)type);
         }
 
         public void ResetGroupUpdateSequenceIfNeeded(Group group)
@@ -193,11 +207,11 @@ namespace Game.Entities
 
         public bool IsAtGroupRewardDistance(WorldObject pRewardSource)
         {
-            if (!pRewardSource || !IsInMap(pRewardSource))
+            if (pRewardSource == null || !IsInMap(pRewardSource))
                 return false;
 
             WorldObject player = GetCorpse();
-            if (!player || IsAlive())
+            if (player == null || IsAlive())
                 player = this;
 
             if (player.GetMap().IsDungeon())
@@ -207,12 +221,19 @@ namespace Game.Entities
         }
 
         public Group GetGroupInvite() { return m_groupInvite; }
+
         public void SetGroupInvite(Group group) { m_groupInvite = group; }
+
         public Group GetGroup() { return m_group.GetTarget(); }
+
         public GroupReference GetGroupRef() { return m_group; }
+
         public byte GetSubGroup() { return m_group.GetSubGroup(); }
+
         public GroupUpdateFlags GetGroupUpdateFlag() { return m_groupUpdateMask; }
+
         public void SetGroupUpdateFlag(GroupUpdateFlags flag) { m_groupUpdateMask |= flag; }
+
         public void RemoveGroupUpdateFlag(GroupUpdateFlags flag) { m_groupUpdateMask &= ~flag; }
 
         public Group GetOriginalGroup() { return m_originalGroup.GetTarget(); }
@@ -238,7 +259,7 @@ namespace Game.Entities
         }
         public bool IsInSameGroupWith(Player p)
         {
-            return p == this || (GetGroup() &&
+            return p == this || (GetGroup() != null &&
                 GetGroup() == p.GetGroup() && GetGroup().SameSubGroup(this, p));
         }
 
@@ -250,7 +271,7 @@ namespace Game.Entities
         public void UninviteFromGroup()
         {
             Group group = GetGroupInvite();
-            if (!group)
+            if (group == null)
                 return;
 
             group.RemoveInvite(this);
@@ -270,7 +291,7 @@ namespace Game.Entities
         public void RemoveFromGroup(RemoveMethod method = RemoveMethod.Default) { RemoveFromGroup(GetGroup(), GetGUID(), method); }
         public static void RemoveFromGroup(Group group, ObjectGuid guid, RemoveMethod method = RemoveMethod.Default, ObjectGuid kicker = default, string reason = null)
         {
-            if (!group)
+            if (group == null)
                 return;
 
             group.RemoveMember(guid, method, kicker, reason);
@@ -281,13 +302,13 @@ namespace Game.Entities
             if (m_groupUpdateMask == GroupUpdateFlags.None)
                 return;
             Group group = GetGroup();
-            if (group)
+            if (group != null)
                 group.UpdatePlayerOutOfRange(this);
 
             m_groupUpdateMask = GroupUpdateFlags.None;
 
             Pet pet = GetPet();
-            if (pet)
+            if (pet != null)
                 pet.ResetGroupUpdateFlag();
         }
     }

@@ -16,47 +16,60 @@ namespace Game.Misc
 {
     public class GossipMenu
     {
-        public uint AddMenuItem(int menuItemId, GossipOptionNpc optionNpc, string message, uint sender, uint action, string boxMessage, uint boxMoney, bool coded = false)
+        public uint AddMenuItem(int gossipOptionId, int orderIndex, GossipOptionNpc optionNpc, string optionText, uint language,
+            GossipOptionFlags flags, int? gossipNpcOptionId, uint actionMenuId, uint actionPoiId, bool boxCoded, uint boxMoney,
+            string boxText, int? spellId, int? overrideIconId, uint sender, uint action)
         {
             Cypher.Assert(_menuItems.Count <= SharedConst.MaxGossipMenuItems);
 
             // Find a free new id - script case
-            if (menuItemId == -1)
+            if (orderIndex == -1)
             {
-                menuItemId = 0;
+                orderIndex = 0;
                 if (_menuId != 0)
                 {
-                    // set baseline menuItemId as higher than whatever exists in db
+                    // set baseline orderIndex as higher than whatever exists in db
                     var bounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(_menuId);
-                    var itr = bounds.MaxBy(a => a.OptionId);
+                    var itr = bounds.MaxBy(a => a.OrderIndex);
                     if (itr != null)
-                        menuItemId = (int)(itr.OptionId + 1);
+                        orderIndex = (int)(itr.OrderIndex + 1);
                 }
 
                 if (!_menuItems.Empty())
                 {
-                    foreach (var item in _menuItems)
+                    foreach (var pair in _menuItems)
                     {
-                        if (item.Key > menuItemId)
+                        if (pair.Value.OrderIndex > orderIndex)
                             break;
 
-                        menuItemId = (int)item.Key + 1;
+                        orderIndex = (int)pair.Value.OrderIndex + 1;
                     }
                 }
             }
 
-            GossipMenuItem menuItem = new();
+            if (gossipOptionId == 0)
+                gossipOptionId = -((int)_menuId * 100 + orderIndex);
 
+            GossipMenuItem menuItem = new();
+            menuItem.GossipOptionID = gossipOptionId;
+            menuItem.OrderIndex = (uint)orderIndex;
             menuItem.OptionNpc = optionNpc;
-            menuItem.Message = message;
-            menuItem.IsCoded = coded;
+            menuItem.OptionText = optionText;
+            menuItem.Language = language;
+            menuItem.Flags = flags;
+            menuItem.GossipNpcOptionID = gossipNpcOptionId;
+            menuItem.BoxCoded = boxCoded;
+            menuItem.BoxMoney = boxMoney;
+            menuItem.BoxText = boxText;
+            menuItem.SpellID = spellId;
+            menuItem.OverrideIconID = overrideIconId;
+            menuItem.ActionMenuID = actionMenuId;
+            menuItem.ActionPoiID = actionPoiId;
             menuItem.Sender = sender;
             menuItem.Action = action;
-            menuItem.BoxMessage = boxMessage;
-            menuItem.BoxMoney = boxMoney;
 
-            _menuItems[(uint)menuItemId] = menuItem;
-            return (uint)menuItemId;
+            _menuItems.Add((uint)orderIndex, menuItem);
+            return (uint)orderIndex;
         }
 
         /// <summary>
@@ -75,79 +88,97 @@ namespace Game.Misc
                 return;
 
             /// Find the one with the given menu item id.
-            var gossipMenuItems = bounds.Find(menuItem => menuItem.OptionId == menuItemId);
+            var gossipMenuItems = bounds.Find(menuItem => menuItem.OrderIndex == menuItemId);
             if (gossipMenuItems == null)
                 return;
 
+            AddMenuItem(gossipMenuItems, sender, action);
+        }
+
+        public void AddMenuItem(GossipMenuItems menuItem, uint sender, uint action)
+        {
             // Store texts for localization.
             string strOptionText, strBoxText;
-            BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuItems.OptionBroadcastTextId);
-            BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(gossipMenuItems.BoxBroadcastTextId);
+            BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(menuItem.OptionBroadcastTextId);
+            BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(menuItem.BoxBroadcastTextId);
 
             // OptionText
             if (optionBroadcastText != null)
                 strOptionText = Global.DB2Mgr.GetBroadcastTextValue(optionBroadcastText, GetLocale());
             else
-                strOptionText = gossipMenuItems.OptionText;
+            {
+                strOptionText = menuItem.OptionText;
+
+                /// Find localizations from database.
+                if (GetLocale() != Locale.enUS)
+                {
+                    GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuItem.MenuID, menuItem.OrderIndex);
+                    if (gossipMenuLocale != null)
+                        ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, GetLocale(), ref strOptionText);
+                }
+            }
 
             // BoxText
             if (boxBroadcastText != null)
                 strBoxText = Global.DB2Mgr.GetBroadcastTextValue(boxBroadcastText, GetLocale());
             else
-                strBoxText = gossipMenuItems.BoxText;
-
-            // Check need of localization.
-            if (boxBroadcastText == null)
             {
+                strBoxText = menuItem.BoxText;
+
                 // Find localizations from database.
-                GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItemId);
-                if (gossipMenuLocale != null)
-                    ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, GetLocale(), ref strBoxText);
+                if (GetLocale() != Locale.enUS)
+                {
+                    GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuItem.MenuID, menuItem.OrderIndex);
+                    if (gossipMenuLocale != null)
+                        ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, GetLocale(), ref strBoxText);
+                }
             }
 
-            // Add menu item with existing method. Menu item id -1 is also used in ADD_GOSSIP_ITEM macro.
-            AddMenuItem((int)gossipMenuItems.OptionId, gossipMenuItems.OptionNpc, strOptionText, sender, action, strBoxText, gossipMenuItems.BoxMoney, gossipMenuItems.BoxCoded);
-            AddGossipMenuItemData(gossipMenuItems.OptionId, gossipMenuItems.ActionMenuId, gossipMenuItems.ActionPoiId);
+            AddMenuItem(menuItem.GossipOptionID, (int)menuItem.OrderIndex, menuItem.OptionNpc, strOptionText, menuItem.Language, menuItem.Flags,
+                menuItem.GossipNpcOptionID, menuItem.ActionMenuID, menuItem.ActionPoiID, menuItem.BoxCoded, menuItem.BoxMoney, strBoxText,
+                menuItem.SpellID, menuItem.OverrideIconID, sender, action);
         }
 
-        public void AddGossipMenuItemData(uint menuItemId, uint gossipActionMenuId, uint gossipActionPoi)
+        public GossipMenuItem GetItem(int gossipOptionId)
         {
-            GossipMenuItemData itemData = new();
-
-            itemData.GossipActionMenuId = gossipActionMenuId;
-            itemData.GossipActionPoi = gossipActionPoi;
-
-            _menuItemData[menuItemId] = itemData;
+            return _menuItems.Values.FirstOrDefault(item => item.GossipOptionID == gossipOptionId);
         }
 
-        public uint GetMenuItemSender(uint menuItemId)
+        GossipMenuItem GetItemByIndex(uint orderIndex)
         {
-            if (_menuItems.ContainsKey(menuItemId))
-                return _menuItems.LookupByKey(menuItemId).Sender;
-            else
-                return 0;
+            return _menuItems.LookupByKey(orderIndex);
         }
 
-        public uint GetMenuItemAction(uint menuItemId)
+        public uint GetMenuItemSender(uint orderIndex)
         {
-            if (_menuItems.ContainsKey(menuItemId))
-                return _menuItems.LookupByKey(menuItemId).Action;
-            else
-                return 0;
+            GossipMenuItem item = GetItemByIndex(orderIndex);
+            if (item != null)
+                return item.Sender;
+
+            return 0;
         }
 
-        public bool IsMenuItemCoded(uint menuItemId)
+        public uint GetMenuItemAction(uint orderIndex)
         {
-            if (_menuItems.ContainsKey(menuItemId))
-                return _menuItems.LookupByKey(menuItemId).IsCoded;
-            else
-                return false;
+            GossipMenuItem item = GetItemByIndex(orderIndex);
+            if (item != null)
+                return item.Action;
+
+            return 0;
+        }
+
+        public bool IsMenuItemCoded(uint orderIndex)
+        {
+            GossipMenuItem item = GetItemByIndex(orderIndex);
+            if (item != null)
+                return item.BoxCoded;
+
+            return false;
         }
 
         public void ClearMenu()
         {
             _menuItems.Clear();
-            _menuItemData.Clear();
         }
 
         public void SetMenuId(uint menu_id) { _menuId = menu_id; }
@@ -165,23 +196,12 @@ namespace Game.Misc
             return _menuItems.Empty();
         }
 
-        public GossipMenuItem GetItem(uint id)
-        {
-            return _menuItems.LookupByKey(id);
-        }
-
-        public GossipMenuItemData GetItemData(uint indexId)
-        {
-            return _menuItemData.LookupByKey(indexId);
-        }
-
-        public Dictionary<uint, GossipMenuItem> GetMenuItems()
+        public SortedDictionary<uint, GossipMenuItem> GetMenuItems()
         {
             return _menuItems;
         }
 
-        Dictionary<uint, GossipMenuItem> _menuItems = new();
-        Dictionary<uint, GossipMenuItemData> _menuItemData = new();
+        SortedDictionary<uint, GossipMenuItem> _menuItems = new();
         uint _menuId;
         Locale _locale;
     }
@@ -231,18 +251,21 @@ namespace Game.Misc
             if (text != null)
                 packet.TextID = (int)text.Data.SelectRandomElementByWeight(data => data.Probability).BroadcastTextID;
 
-            foreach (var pair in _gossipMenu.GetMenuItems())
+            foreach (var (index, item) in _gossipMenu.GetMenuItems())
             {
                 ClientGossipOptions opt = new();
-                GossipMenuItem item = pair.Value;
-                opt.ClientOption = (int)pair.Key;
+                opt.GossipOptionID = item.GossipOptionID;
                 opt.OptionNPC = item.OptionNpc;
-                opt.OptionFlags = (byte)(item.IsCoded ? 1 : 0);     // makes pop up box password
+                opt.OptionFlags = (byte)(item.BoxCoded ? 1 : 0);     // makes pop up box password
                 opt.OptionCost = (int)item.BoxMoney;     // money required to open menu, 2.0.3
                 opt.OptionLanguage = item.Language;
-                opt.Text = item.Message;            // text for gossip item
-                opt.Confirm = item.BoxMessage;      // accept text (related to money) pop up box, 2.0.3
+                opt.Flags = item.Flags;
+                opt.OrderIndex = (int)item.OrderIndex;
+                opt.Text = item.OptionText;            // text for gossip item
+                opt.Confirm = item.BoxText;      // accept text (related to money) pop up box, 2.0.3
                 opt.Status = GossipOptionStatus.Available;
+                opt.SpellID = item.SpellID;
+                opt.OverrideIconID = item.OverrideIconID;
                 packet.GossipOptions.Add(opt);
             }
 
@@ -255,12 +278,14 @@ namespace Game.Misc
                 {
                     ClientGossipText gossipText = new();
                     gossipText.QuestID = questID;
+                    gossipText.ContentTuningID = 0;
                     gossipText.QuestType = item.QuestIcon;
                     gossipText.QuestLevel = quest.Level;
                     gossipText.QuestMaxScalingLevel = quest.MaxScalingLevel;
                     gossipText.QuestFlags = (uint)quest.Flags;
                     gossipText.QuestFlagsEx = (uint)quest.FlagsEx;
-                    gossipText.Repeatable = quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
+                    gossipText.Repeatable = quest.IsTurnIn() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
+                    gossipText.Important = quest.IsImportant();
 
                     gossipText.QuestTitle = quest.LogTitle;
                     Locale locale = _session.GetSessionDbLocaleIndex();
@@ -348,12 +373,14 @@ namespace Game.Misc
                 {
                     ClientGossipText text = new();
                     text.QuestID = questID;
+                    text.ContentTuningID = 0;
                     text.QuestLevel = quest.Level;
                     text.QuestMaxScalingLevel = quest.MaxScalingLevel;
                     text.QuestType = questMenuItem.QuestIcon;
                     text.QuestFlags = (uint)quest.Flags;
                     text.QuestFlagsEx = (uint)quest.FlagsEx;
-                    text.Repeatable = quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
+                    text.Repeatable = quest.IsTurnIn() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
+                    text.Important = quest.IsImportant();
                     text.QuestTitle = quest.LogTitle;
 
                     if (localeConstant != Locale.enUS)
@@ -392,6 +419,14 @@ namespace Game.Misc
              packet.PortraitTurnInName = quest.PortraitTurnInName;
 
             Locale locale = _session.GetSessionDbLocaleIndex();
+
+            packet.ConditionalDescriptionText = quest.ConditionalQuestDescription.Select(text =>
+            {
+                string content = text.Text[(int)Locale.enUS];
+                ObjectManager.GetLocaleString(text.Text, locale, ref content);
+                return new ConditionalQuestText(text.PlayerConditionId, text.QuestgiverCreatureId, content);
+            }).ToList();
+
             if (locale != Locale.enUS)
             {
                 QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
@@ -420,7 +455,13 @@ namespace Game.Misc
             packet.DisplayPopup = displayPopup;
             packet.QuestFlags[0] = (uint)(quest.Flags & (WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) ? ~QuestFlags.AutoAccept : ~QuestFlags.None));
             packet.QuestFlags[1] = (uint)quest.FlagsEx;
+            packet.QuestFlags[2] = (uint)quest.FlagsEx2;
             packet.SuggestedPartyMembers = quest.SuggestedPlayers;
+
+            // Is there a better way? what about game objects?
+            Creature creature = ObjectAccessor.GetCreature(_session.GetPlayer(), npcGUID);
+            if (creature != null)
+                packet.QuestGiverCreatureID = (int)creature.GetCreatureTemplate().Entry;
 
             // RewardSpell can teach multiple spells in trigger spell effects. But not all effects must be SPELL_EFFECT_LEARN_SPELL. See example spell 33950
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell, Difficulty.None);
@@ -476,6 +517,14 @@ namespace Game.Misc
             packet.PortraitTurnInName = quest.PortraitTurnInName;
 
             Locale locale = _session.GetSessionDbLocaleIndex();
+
+            packet.ConditionalRewardText = quest.ConditionalOfferRewardText.Select(text =>
+            {
+                string content = text.Text[(int)Locale.enUS];
+                ObjectManager.GetLocaleString(text.Text, locale, ref content);
+                return new ConditionalQuestText(text.PlayerConditionId, text.QuestgiverCreatureId, content);
+            }).ToList();
+
             if (locale != Locale.enUS)
             {
                 QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
@@ -500,8 +549,11 @@ namespace Game.Misc
 
             // Is there a better way? what about game objects?
             Creature creature = ObjectAccessor.GetCreature(_session.GetPlayer(), npcGUID);
-            if (creature)
+            if (creature != null)
+            {
+                packet.QuestGiverCreatureID = creature.GetEntry();
                 offer.QuestGiverCreatureID = creature.GetCreatureTemplate().Entry;
+            }
 
             offer.QuestID = quest.Id;
             offer.AutoLaunched = autoLaunched;
@@ -512,6 +564,7 @@ namespace Game.Misc
 
             offer.QuestFlags[0] = (uint)quest.Flags;
             offer.QuestFlags[1] = (uint)quest.FlagsEx;
+            offer.QuestFlags[2] = (uint)quest.FlagsEx2;
 
             packet.PortraitTurnIn = quest.QuestTurnInPortrait;
             packet.PortraitGiver = quest.QuestGiverPortrait;
@@ -541,6 +594,13 @@ namespace Game.Misc
             packet.CompletionText = quest.RequestItemsText;
 
             Locale locale = _session.GetSessionDbLocaleIndex();
+            packet.ConditionalCompletionText = quest.ConditionalRequestItemsText.Select(text =>
+            {
+                string content = text.Text[(int)Locale.enUS];
+                ObjectManager.GetLocaleString(text.Text, locale, ref content);
+                return new ConditionalQuestText(text.PlayerConditionId, text.QuestgiverCreatureId, content);
+            }).ToList();
+
             if (locale != Locale.enUS)
             {
                 QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
@@ -556,7 +616,7 @@ namespace Game.Misc
 
             // Is there a better way? what about game objects?
             Creature creature = ObjectAccessor.GetCreature(_session.GetPlayer(), npcGUID);
-            if (creature)
+            if (creature != null)
                 packet.QuestGiverCreatureID = creature.GetCreatureTemplate().Entry;
 
             packet.QuestID = quest.Id;
@@ -574,6 +634,7 @@ namespace Game.Misc
 
             packet.QuestFlags[0] = (uint)quest.Flags;
             packet.QuestFlags[1] = (uint)quest.FlagsEx;
+            packet.QuestFlags[2] = (uint)quest.FlagsEx2;
             packet.SuggestPartyMembers = quest.SuggestedPlayers;
 
             // incomplete: FD
@@ -675,26 +736,32 @@ namespace Game.Misc
 
     public class GossipMenuItem
     {
+        public int GossipOptionID;
+        public uint OrderIndex;
         public GossipOptionNpc OptionNpc;
-        public bool IsCoded;
-        public string Message;
+        public string OptionText;
+        public uint Language;
+        public GossipOptionFlags Flags;
+        public int? GossipNpcOptionID;
+        public bool BoxCoded;
+        public uint BoxMoney;
+        public string BoxText;
+        public int? SpellID;
+        public int? OverrideIconID;
+
+        // action data
+        public uint ActionMenuID;
+        public uint ActionPoiID;
+
+        // additional scripting identifiers
         public uint Sender;
         public uint Action;
-        public string BoxMessage;
-        public uint BoxMoney;
-        public uint Language;
-    }
-
-    public class GossipMenuItemData
-    {
-        public uint GossipActionMenuId;  // MenuId of the gossip triggered by this action
-        public uint GossipActionPoi;
     }
 
     public struct NpcTextData
     {
         public float Probability;
-        public uint BroadcastTextID;
+        public int BroadcastTextID;
     }
 
     public class NpcText
@@ -709,18 +776,23 @@ namespace Game.Misc
 
     public class GossipMenuItems
     {
-        public uint MenuId;
-        public uint OptionId;
+        public int MenuID;
+        public int GossipOptionID;
+        public int OrderIndex;
         public GossipOptionNpc OptionNpc;
         public string OptionText;
-        public uint OptionBroadcastTextId;
-        public uint Language;
-        public uint ActionMenuId;
-        public uint ActionPoiId;
+        public int OptionBroadcastTextId;
+        public int Language;
+        public GossipOptionFlags Flags;
+        public int ActionMenuID;
+        public int ActionPoiID;
+        public int? GossipNpcOptionID;
         public bool BoxCoded;
         public uint BoxMoney;
         public string BoxText;
-        public uint BoxBroadcastTextId;
+        public int BoxBroadcastTextId;
+        public int? SpellID;
+        public int? OverrideIconID;
         public List<Condition> Conditions = new();
     }
 
@@ -729,14 +801,9 @@ namespace Game.Misc
         public int FriendshipFactionID;
     }
 
-    public class GossipMenuItemAddon
-    {
-        public int? GarrTalentTreeID;
-    }
-
     public class PointOfInterest
     {
-        public uint Id;
+        public int Id;
         public Vector3 Pos;
         public uint Icon;
         public uint Flags;
@@ -752,8 +819,8 @@ namespace Game.Misc
 
     public class GossipMenus
     {
-        public uint MenuId;
-        public uint TextId;
+        public int MenuId;
+        public int TextId;
         public List<Condition> Conditions = new();
     }
 }

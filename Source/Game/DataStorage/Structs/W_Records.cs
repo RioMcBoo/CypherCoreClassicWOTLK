@@ -7,17 +7,26 @@ namespace Game.DataStorage
 {
     public sealed class WMOAreaTableRecord
     {
-        public string AreaName;
-        public uint Id;
-        public ushort WmoID;                                                   //  used in root WMO
-        public byte NameSetID;                                                //  used in adt file
-        public int WmoGroupID;                                               //  used in group WMO
+        public LocalizedString AreaName;
+        public int Id;
+        /// <summary>
+        /// used in root WMO
+        /// </summary>
+        public ushort WmoID;
+        /// <summary>
+        /// used in adt file
+        /// </summary>
+        public byte NameSetID;
+        /// <summary>
+        /// used in group WMO
+        /// </summary>
+        public int WmoGroupID;
         public byte SoundProviderPref;
         public byte SoundProviderPrefUnderwater;
         public ushort AmbienceID;
         public ushort UwAmbience;
         public ushort ZoneMusic;
-        public uint UwZoneMusic;
+        public int UwZoneMusic;
         public ushort IntroSound;
         public ushort UwIntroSound;
         public ushort AreaTableID;
@@ -26,19 +35,19 @@ namespace Game.DataStorage
 
     public sealed class WorldEffectRecord
     {
-        public uint Id;
-        public uint QuestFeedbackEffectID;
+        public int Id;
+        public int QuestFeedbackEffectID;
         public byte WhenToDisplay;
         public byte TargetType;
         public int TargetAsset;
-        public uint PlayerConditionID;
+        public int PlayerConditionID;
         public ushort CombatConditionID;
     }
 
     public sealed class WorldMapOverlayRecord
     {
-        public uint Id;
-        public uint UiMapArtID;
+        public int Id;
+        public int UiMapArtID;
         public ushort TextureWidth;
         public ushort TextureHeight;
         public int OffsetX;
@@ -47,14 +56,14 @@ namespace Game.DataStorage
         public int HitRectBottom;
         public int HitRectLeft;
         public int HitRectRight;
-        public uint PlayerConditionID;
+        public int PlayerConditionID;
         public uint Flags;
-        public uint[] AreaID = new uint[SharedConst.MaxWorldMapOverlayArea];
+        public int[] AreaID = new int[SharedConst.MaxWorldMapOverlayArea];
     }
 
     public sealed class WorldStateExpressionRecord
     {
-        public uint Id;
+        public int Id;
         public string Expression;
     }
 }

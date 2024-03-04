@@ -165,7 +165,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(BattlePetID);
-            _worldPacket.WriteUInt32(CreatureID);
+            _worldPacket.WriteInt32(CreatureID);
             _worldPacket.WriteInt64(Timestamp);
 
             _worldPacket.WriteBit(Allow);
@@ -188,7 +188,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid BattlePetID;
-        public uint CreatureID;
+        public int CreatureID;
         public long Timestamp;
         public bool Allow;
 
@@ -216,12 +216,12 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             PetGuid = _worldPacket.ReadPackedGuid();
-            Flags = _worldPacket.ReadUInt32();
+            Flags = _worldPacket.ReadUInt16();
             ControlType = (FlagsControlType)_worldPacket.ReadBits<byte>(2);
         }
 
         public ObjectGuid PetGuid;
-        public uint Flags;
+        public ushort Flags;
         public FlagsControlType ControlType;
     }
 
@@ -267,12 +267,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Result, 4);
-            _worldPacket.WriteUInt32(CreatureID);
+            _worldPacket.WriteBits((byte)Result, 4);
+            _worldPacket.WriteInt32(CreatureID);
         }
 
         public BattlePetError Result;
-        public uint CreatureID;
+        public int CreatureID;
     }
 
     class BattlePetSummon : ClientPacket
@@ -304,7 +304,7 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data .WritePackedGuid( Guid);
+            data.WritePackedGuid(Guid);
             data.WriteUInt32(Species);
             data.WriteUInt32(CreatureID);
             data.WriteUInt32(DisplayID);
@@ -315,8 +315,8 @@ namespace Game.Networking.Packets
             data.WriteUInt32(Power);
             data.WriteUInt32(Health);
             data.WriteUInt32(MaxHealth);
-            data .WriteUInt32( Speed);
-            data .WriteUInt8( Quality);
+            data.WriteUInt32(Speed);
+            data.WriteUInt8(Quality);
             data.WriteBits(Name.GetByteCount(), 7);
             data.WriteBit(OwnerInfo.HasValue); // HasOwnerInfo
             data.WriteBit(false); // NoRename
@@ -340,17 +340,17 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Guid;
-        public uint Species;
-        public uint CreatureID;
-        public uint DisplayID;
+        public int Species;
+        public int CreatureID;
+        public int DisplayID;
         public ushort Breed;
         public ushort Level;
         public ushort Exp;
         public ushort Flags;
-        public uint Power;
-        public uint Health;
-        public uint MaxHealth;
-        public uint Speed;
+        public int Power;
+        public int Health;
+        public int MaxHealth;
+        public int Speed;
         public byte Quality;
         public BattlePetOwnerInfo? OwnerInfo;
         public string Name;

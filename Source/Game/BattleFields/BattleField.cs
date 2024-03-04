@@ -31,8 +31,6 @@ namespace Game.BattleFields
             m_uiKickDontAcceptTimer = 1000;
             m_uiKickAfkPlayersTimer = 1000;
 
-            m_LastResurectTimer = 30 * Time.InMilliseconds;
-
             m_Map = map;
             m_MapId = map.GetId();
 
@@ -76,7 +74,7 @@ namespace Game.BattleFields
         }
 
         // Called when a player leave the zone
-        public void HandlePlayerLeaveZone(Player player, uint zone)
+        public void HandlePlayerLeaveZone(Player player, int zone)
         {
             if (IsWarTime())
             {
@@ -85,7 +83,7 @@ namespace Game.BattleFields
                 {
                     m_PlayersInWar[player.GetTeamId()].Remove(player.GetGUID());
                     Group group = player.GetGroup();
-                    if (group) // Remove the player from the raid group
+                    if (group != null) // Remove the player from the raid group
                         group.RemoveMember(player.GetGUID());
 
                     OnPlayerLeaveWar(player);
@@ -99,7 +97,6 @@ namespace Game.BattleFields
             m_PlayersWillBeKick[player.GetTeamId()].Remove(player.GetGUID());
             m_players[player.GetTeamId()].Remove(player.GetGUID());
             SendRemoveWorldStates(player);
-            RemovePlayerFromResurrectQueue(player.GetGUID());
             OnPlayerLeaveZone(player);
         }
 
@@ -164,17 +161,6 @@ namespace Game.BattleFields
                         objective_changed = true;
             }
 
-
-            if (m_LastResurectTimer <= diff)
-            {
-                for (byte i = 0; i < m_GraveyardList.Count; i++)
-                    if (GetGraveyardById(i) != null)
-                        m_GraveyardList[i].Resurrect();
-                m_LastResurectTimer = BattlegroundConst.ResurrectionInterval;
-            }
-            else
-                m_LastResurectTimer -= diff;
-
             return objective_changed;
         }
 
@@ -185,7 +171,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_players[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         InvitePlayerToQueue(player);
                 }
             }
@@ -207,7 +193,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInQueue[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                     {
                         if (m_PlayersInWar[player.GetTeamId()].Count + m_InvitedPlayers[player.GetTeamId()].Count < m_MaxPlayer)
                             InvitePlayerToWar(player);
@@ -228,7 +214,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_players[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                     {
                         if (m_PlayersInWar[player.GetTeamId()].Contains(player.GetGUID()) || m_InvitedPlayers[player.GetTeamId()].ContainsKey(player.GetGUID()))
                             continue;
@@ -243,14 +229,14 @@ namespace Game.BattleFields
 
         void InvitePlayerToWar(Player player)
         {
-            if (!player)
+            if (player == null)
                 return;
 
             // todo needed ?
             if (player.IsInFlight())
                 return;
 
-            if (player.InArena() || player.GetBattleground())
+            if (player.InArena() || player.GetBattleground() != null)
             {
                 m_PlayersInQueue[player.GetTeamId()].Remove(player.GetGUID());
                 return;
@@ -276,7 +262,7 @@ namespace Game.BattleFields
         public void InitStalker(uint entry, Position pos)
         {
             Creature creature = SpawnCreature(entry, pos);
-            if (creature)
+            if (creature != null)
                 StalkerGuid = creature.GetGUID();
             else
                 Log.outError(LogFilter.Battlefield, "Battlefield.InitStalker: could not spawn Stalker (Creature entry {0}), zone messeges will be un-available", entry);
@@ -289,7 +275,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInWar[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         if (player.IsAFK())
                             KickPlayerFromBattlefield(guid);
                 }
@@ -299,7 +285,7 @@ namespace Game.BattleFields
         public void KickPlayerFromBattlefield(ObjectGuid guid)
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
-            if (player)
+            if (player != null)
                 if (player.GetZoneId() == GetZoneId())
                     player.TeleportTo(KickPosition);
         }
@@ -397,7 +383,7 @@ namespace Game.BattleFields
             foreach (var guid in m_PlayersInWar[teamIndex])
             {
                 Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                if (player != null)
                 {
                     if (spellId > 0)
                         player.CastSpell(player, (uint)spellId, true);
@@ -414,7 +400,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_players[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SendPacket(data);
                 }
             }
@@ -427,7 +413,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInQueue[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SendPacket(data);
                 }
             }
@@ -440,7 +426,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInWar[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SendPacket(data);
                 }
             }
@@ -449,7 +435,7 @@ namespace Game.BattleFields
         public void SendWarning(uint id, WorldObject target = null)
         {
             Creature stalker = GetCreature(StalkerGuid);
-            if (stalker)
+            if (stalker != null)
                 Global.CreatureTextMgr.SendChat(stalker, (byte)id, target);
         }
 
@@ -475,7 +461,8 @@ namespace Game.BattleFields
         {
             creature.CombatStop();
             creature.SetReactState(ReactStates.Passive);
-            creature.SetUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
+            creature.SetUnitFlag(UnitFlags.NonAttackable);
+            creature.SetUninteractible(true);
             creature.DisappearAndDie();
             creature.SetVisible(false);
         }
@@ -483,8 +470,9 @@ namespace Game.BattleFields
         public void ShowNpc(Creature creature, bool aggressive)
         {
             creature.SetVisible(true);
-            creature.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible);
-            if (!creature.IsAlive())
+            creature.RemoveUnitFlag(UnitFlags.NonAttackable);
+            creature.SetUninteractible(false);
+            if (creature.IsAlive())
                 creature.Respawn(true);
             if (aggressive)
                 creature.SetReactState(ReactStates.Aggressive);
@@ -503,7 +491,7 @@ namespace Game.BattleFields
             foreach (var guid in m_Groups[teamIndex])
             {
                 Group group = Global.GroupMgr.GetGroupByGUID(guid);
-                if (group)
+                if (group != null)
                     if (!group.IsFull())
                         return group;
             }
@@ -516,7 +504,7 @@ namespace Game.BattleFields
             foreach (var guid in m_Groups[teamIndex])
             {
                 Group group = Global.GroupMgr.GetGroupByGUID(guid);
-                if (group)
+                if (group != null)
                     if (group.IsMember(plguid))
                         return group;
             }
@@ -530,11 +518,11 @@ namespace Game.BattleFields
                 return false;
 
             Group oldgroup = player.GetGroup();
-            if (oldgroup)
+            if (oldgroup != null)
                 oldgroup.RemoveMember(player.GetGUID());
 
             Group group = GetFreeBfRaid(player.GetTeamId());
-            if (!group)
+            if (group == null)
             {
                 group = new Group();
                 group.SetBattlefieldGroup(this);
@@ -571,7 +559,7 @@ namespace Game.BattleFields
             return null;
         }
 
-        public WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
             BfGraveyard closestGY = null;
             float maxdist = -1;
@@ -597,45 +585,6 @@ namespace Game.BattleFields
             return null;
         }
 
-        public virtual void AddPlayerToResurrectQueue(ObjectGuid npcGuid, ObjectGuid playerGuid)
-        {
-            for (byte i = 0; i < m_GraveyardList.Count; i++)
-            {
-                if (m_GraveyardList[i] == null)
-                    continue;
-
-                if (m_GraveyardList[i].HasNpc(npcGuid))
-                {
-                    m_GraveyardList[i].AddPlayer(playerGuid);
-                    break;
-                }
-            }
-        }
-
-        public void RemovePlayerFromResurrectQueue(ObjectGuid playerGuid)
-        {
-            for (byte i = 0; i < m_GraveyardList.Count; i++)
-            {
-                if (m_GraveyardList[i] == null)
-                    continue;
-
-                if (m_GraveyardList[i].HasPlayer(playerGuid))
-                {
-                    m_GraveyardList[i].RemovePlayer(playerGuid);
-                    break;
-                }
-            }
-        }
-
-        public void SendAreaSpiritHealerQuery(Player player, ObjectGuid guid)
-        {
-            AreaSpiritHealerTime areaSpiritHealerTime = new();
-            areaSpiritHealerTime.HealerGuid = guid;
-            areaSpiritHealerTime.TimeLeft = m_LastResurectTimer;// resurrect every 30 seconds
-
-            player.SendPacket(areaSpiritHealerTime);
-        }
-
         public Creature SpawnCreature(uint entry, Position pos)
         {
             if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
@@ -645,7 +594,7 @@ namespace Game.BattleFields
             }
 
             Creature creature = Creature.CreateCreature(entry, m_Map, pos);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnCreature: Can't create creature entry: {0}", entry);
                 return null;
@@ -672,7 +621,7 @@ namespace Game.BattleFields
 
             // Create gameobject
             GameObject go = GameObject.CreateGameObject(entry, m_Map, pos, rotation, 255, GameObjectState.Ready);
-            if (!go)
+            if (go == null)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnGameObject: Cannot create gameobject template {1}! Battlefield not created!", entry);
                 return null;
@@ -688,14 +637,14 @@ namespace Game.BattleFields
 
         public Creature GetCreature(ObjectGuid guid)
         {
-            if (!m_Map)
+            if (m_Map == null)
                 return null;
             return m_Map.GetCreature(guid);
         }
 
         public GameObject GetGameObject(ObjectGuid guid)
         {
-            if (!m_Map)
+            if (m_Map == null)
                 return null;
             return m_Map.GetGameObject(guid);
         }
@@ -759,7 +708,7 @@ namespace Game.BattleFields
         // Called when a player enter in battlefield zone
         public virtual void OnPlayerEnterZone(Player player) { }
 
-        public uint GetBattleId() { return m_BattleId; }
+        public int GetBattleId() { return m_BattleId; }
 
         public virtual void DoCompleteOrIncrementAchievement(uint achievement, Player player, byte incrementNumber = 1) { }
 
@@ -791,14 +740,14 @@ namespace Game.BattleFields
         protected Dictionary<ObjectGuid, long>[] m_PlayersWillBeKick = new Dictionary<ObjectGuid, long>[2];
 
         // Variables that must exist for each battlefield
-        protected uint m_TypeId;                                        // See enum BattlefieldTypes
-        protected uint m_BattleId;                                      // BattleID (for packet)
-        protected uint m_ZoneId;                                        // ZoneID of Wintergrasp = 4197
-        protected uint m_MapId;                                         // MapId where is Battlefield
+        protected int m_TypeId;                                        // See enum BattlefieldTypes
+        protected int m_BattleId;                                      // BattleID (for packet)
+        protected int m_ZoneId;                                        // ZoneID of Wintergrasp = 4197
+        protected int m_MapId;                                         // MapId where is Battlefield
         protected Map m_Map;
-        protected uint m_MaxPlayer;                                     // Maximum number of player that participated to Battlefield
-        protected uint m_MinPlayer;                                     // Minimum number of player for Battlefield start
-        protected uint m_MinLevel;                                      // Required level to participate at Battlefield
+        protected int m_MaxPlayer;                                     // Maximum number of player that participated to Battlefield
+        protected int m_MinPlayer;                                     // Minimum number of player for Battlefield start
+        protected int m_MinLevel;                                      // Required level to participate at Battlefield
         protected uint m_BattleTime;                                    // Length of a battle
         protected uint m_NoWarBattleTime;                               // Time between two battles
         protected uint m_RestartAfterCrash;                             // Delay to restart Wintergrasp if the server crashed during a running battle.
@@ -810,7 +759,6 @@ namespace Game.BattleFields
 
         // Graveyard variables
         protected List<BfGraveyard> m_GraveyardList = new();                          // Vector witch contain the different GY of the battle
-        uint m_LastResurectTimer;                             // Timer for resurect player every 30 sec
 
         protected uint m_StartGroupingTimer;                            // Timer for invite players in area 15 minute before start battle
         protected bool m_StartGrouping;                                   // bool for know if all players in area has been invited
@@ -832,7 +780,7 @@ namespace Game.BattleFields
             m_SpiritGuide[1] = ObjectGuid.Empty;
         }
 
-        public void Initialize(uint startControl, uint graveyardId)
+        public void Initialize(int startControl, int graveyardId)
         {
             m_ControlTeam = startControl;
             m_GraveyardId = graveyardId;
@@ -840,7 +788,7 @@ namespace Game.BattleFields
 
         public void SetSpirit(Creature spirit, int teamIndex)
         {
-            if (!spirit)
+            if (spirit == null)
             {
                 Log.outError(LogFilter.Battlefield, "BfGraveyard:SetSpirit: Invalid Spirit.");
                 return;
@@ -856,60 +804,8 @@ namespace Game.BattleFields
             return player.GetDistance2d(safeLoc.Loc.GetPositionX(), safeLoc.Loc.GetPositionY());
         }
 
-        public void AddPlayer(ObjectGuid playerGuid)
-        {
-            if (!m_ResurrectQueue.Contains(playerGuid))
-            {
-                m_ResurrectQueue.Add(playerGuid);
-                Player player = Global.ObjAccessor.FindPlayer(playerGuid);
-                if (player)
-                    player.CastSpell(player, BattlegroundConst.SpellWaitingForResurrect, true);
-            }
-        }
-
-        public void RemovePlayer(ObjectGuid playerGuid)
-        {
-            m_ResurrectQueue.Remove(playerGuid);
-
-            Player player = Global.ObjAccessor.FindPlayer(playerGuid);
-            if (player)
-                player.RemoveAurasDueToSpell(BattlegroundConst.SpellWaitingForResurrect);
-        }
-
-        public void Resurrect()
-        {
-            if (m_ResurrectQueue.Empty())
-                return;
-
-            foreach (var guid in m_ResurrectQueue)
-            {
-                // Get player object from his guid
-                Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (!player)
-                    continue;
-
-                // Check  if the player is in world and on the good graveyard
-                if (player.IsInWorld)
-                {
-                    Creature spirit = m_Bf.GetCreature(m_SpiritGuide[m_ControlTeam]);
-                    if (spirit)
-                        spirit.CastSpell(spirit, BattlegroundConst.SpellSpiritHeal, true);
-                }
-
-                // Resurect player
-                player.CastSpell(player, BattlegroundConst.SpellResurrectionVisual, true);
-                player.ResurrectPlayer(1.0f);
-                player.CastSpell(player, 6962, true);
-                player.CastSpell(player, BattlegroundConst.SpellSpiritHealMana, true);
-
-                player.SpawnCorpseBones(false);
-            }
-
-            m_ResurrectQueue.Clear();
-        }
-
         // For changing graveyard control
-        public void GiveControlTo(uint team)
+        public void GiveControlTo(int team)
         {
             // Guide switching
             // Note: Visiblity changes are made by phasing
@@ -918,29 +814,11 @@ namespace Game.BattleFields
             if (m_SpiritGuide[team])
                 m_SpiritGuide[team].SetVisible(true);*/
 
+            Creature spiritHealer = m_Bf.GetCreature(m_SpiritGuide[team]);
+            if (spiritHealer != null)
+                spiritHealer.SummonGraveyardTeleporter();
+
             m_ControlTeam = team;
-            // Teleport to other graveyard, player witch were on this graveyard
-            RelocateDeadPlayers();
-        }
-
-        void RelocateDeadPlayers()
-        {
-            WorldSafeLocsEntry closestGrave = null;
-            foreach (var guid in m_ResurrectQueue)
-            {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (!player)
-                    continue;
-
-                if (closestGrave != null)
-                    player.TeleportTo(closestGrave.Loc);
-                else
-                {
-                    closestGrave = m_Bf.GetClosestGraveYard(player);
-                    if (closestGrave != null)
-                        player.TeleportTo(closestGrave.Loc);
-                }
-            }
         }
 
         public bool HasNpc(ObjectGuid guid)
@@ -948,25 +826,21 @@ namespace Game.BattleFields
             if (m_SpiritGuide[TeamId.Alliance].IsEmpty() || m_SpiritGuide[TeamId.Horde].IsEmpty())
                 return false;
 
-            if (!m_Bf.GetCreature(m_SpiritGuide[TeamId.Alliance]) ||
-                !m_Bf.GetCreature(m_SpiritGuide[TeamId.Horde]))
+            if (m_Bf.GetCreature(m_SpiritGuide[TeamId.Alliance]) == null ||
+                m_Bf.GetCreature(m_SpiritGuide[TeamId.Horde]) == null)
                 return false;
 
             return (m_SpiritGuide[TeamId.Alliance] == guid || m_SpiritGuide[TeamId.Horde] == guid);
         }
 
-        // Check if a player is in this graveyard's ressurect queue
-        public bool HasPlayer(ObjectGuid guid) { return m_ResurrectQueue.Contains(guid); }
-
         // Get the graveyard's ID.
-        public uint GetGraveyardId() { return m_GraveyardId; }
+        public int GetGraveyardId() { return m_GraveyardId; }
 
-        public uint GetControlTeamId() { return m_ControlTeam; }
+        public int GetControlTeamId() { return m_ControlTeam; }
 
-        uint m_ControlTeam;
-        uint m_GraveyardId;
+        int m_ControlTeam;
+        int m_GraveyardId;
         ObjectGuid[] m_SpiritGuide = new ObjectGuid[SharedConst.PvpTeamsCount];
-        List<ObjectGuid> m_ResurrectQueue = new();
         protected BattleField m_Bf;
     }
 
@@ -995,7 +869,7 @@ namespace Game.BattleFields
             if (!m_capturePointGUID.IsEmpty())
             {
                 GameObject capturePoint = m_Bf.GetGameObject(m_capturePointGUID);
-                if (capturePoint)
+                if (capturePoint != null)
                 {
                     player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldState1, 1);
                     player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldstate2, (uint)(Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f)));
@@ -1011,7 +885,7 @@ namespace Game.BattleFields
             if (!m_capturePointGUID.IsEmpty())
             {
                 GameObject capturePoint = m_Bf.GetGameObject(m_capturePointGUID);
-                if (capturePoint)
+                if (capturePoint != null)
                     player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldState1, 0);
             }
 
@@ -1024,7 +898,7 @@ namespace Game.BattleFields
                 return;
 
             GameObject capturePoint = m_Bf.GetGameObject(m_capturePointGUID);
-            if (capturePoint)
+            if (capturePoint != null)
             {
                 // send this too, sometimes the slider disappears, dunno why :(
                 SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldState1, 1);
@@ -1037,7 +911,7 @@ namespace Game.BattleFields
 
         public bool SetCapturePointData(GameObject capturePoint)
         {
-            Cypher.Assert(capturePoint);
+            Cypher.Assert(capturePoint != null);
 
             Log.outError(LogFilter.Battlefield, "Creating capture point {0}", capturePoint.GetEntry());
 
@@ -1082,7 +956,7 @@ namespace Game.BattleFields
             if (!m_capturePointGUID.IsEmpty())
             {
                 GameObject capturePoint = m_Bf.GetGameObject(m_capturePointGUID);
-                if (capturePoint)
+                if (capturePoint != null)
                 {
                     capturePoint.SetRespawnTime(0);                  // not save respawn time
                     capturePoint.Delete();
@@ -1100,7 +974,7 @@ namespace Game.BattleFields
                 return false;
 
             GameObject capturePoint = m_Bf.GetGameObject(m_capturePointGUID);
-            if (capturePoint)
+            if (capturePoint != null)
             {
                 float radius = capturePoint.GetGoInfo().ControlZone.radius;
 
@@ -1109,7 +983,7 @@ namespace Game.BattleFields
                     foreach (var guid in m_activePlayers[team])
                     {
                         Player player = Global.ObjAccessor.FindPlayer(guid);
-                        if (player)
+                        if (player != null)
                         {
                             if (!capturePoint.IsWithinDistInMap(player, radius) || !player.IsOutdoorPvPActive())
                                 HandlePlayerLeave(player);
@@ -1164,7 +1038,7 @@ namespace Game.BattleFields
             }
 
             float oldValue = m_value;
-            uint oldTeam = m_team;
+            int oldTeam = m_team;
 
             m_OldState = m_State;
 
@@ -1224,7 +1098,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_activePlayers[team])  // send to all players present in the area
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SendUpdateWorldState(field, value);
                 }
             }
@@ -1249,7 +1123,7 @@ namespace Game.BattleFields
             foreach (var _guid in m_activePlayers[team])
             {
                 Player player = Global.ObjAccessor.FindPlayer(_guid);
-                if (player)
+                if (player != null)
                     player.KilledMonsterCredit(id, guid);
             }
         }
@@ -1259,10 +1133,10 @@ namespace Game.BattleFields
             return m_activePlayers[player.GetTeamId()].Contains(player.GetGUID());
         }
 
-        public virtual void ChangeTeam(uint oldTeam) { }
+        public virtual void ChangeTeam(int oldTeam) { }
 
-        public uint GetCapturePointEntry() { return m_capturePointEntry; }
-        uint GetTeamId() { return m_team; }
+        public int GetCapturePointEntry() { return m_capturePointEntry; }
+        int GetTeamId() { return m_team; }
 
         // active Players in the area of the objective, 0 - alliance, 1 - horde
         HashSet<ObjectGuid>[] m_activePlayers = new HashSet<ObjectGuid>[SharedConst.PvpTeamsCount];
@@ -1276,7 +1150,7 @@ namespace Game.BattleFields
 
         // The status of the objective
         float m_value;
-        protected uint m_team;
+        protected int m_team;
 
         // Objective states
         BattleFieldObjectiveStates m_OldState;
@@ -1289,7 +1163,7 @@ namespace Game.BattleFields
         protected BattleField m_Bf;
 
         // Capture point entry
-        uint m_capturePointEntry;
+        int m_capturePointEntry;
 
         // Gameobject related to that capture point
         ObjectGuid m_capturePointGUID;

@@ -147,6 +147,7 @@ namespace Game.Scripting
                             case "TransportScript":
                             case "AchievementCriteriaScript":
                             case "PlayerScript":
+                            case "AccountScript":
                             case "GuildScript":
                             case "GroupScript":
                             case "AreaTriggerEntityScript":
@@ -156,6 +157,7 @@ namespace Game.Scripting
                             case "ConversationScript":
                             case "AchievementScript":
                             case "BattlefieldScript":
+                            case "EventScript":
                                 if (!attribute.Name.IsEmpty())
                                     name = attribute.Name;
 
@@ -180,73 +182,7 @@ namespace Game.Scripting
 
         public void LoadDatabase()
         {
-            LoadScriptWaypoints();
             LoadScriptSplineChains();
-        }
-
-        void LoadScriptWaypoints()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            // Drop Existing Waypoint list
-            _waypointStore.Clear();
-
-            ulong entryCount = 0;
-
-            // Load Waypoints
-            using (var result = DB.World.Query("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry"))
-            {
-                if (!result.IsEmpty())
-                    entryCount = result.Read<uint>(0);
-
-                Log.outInfo(LogFilter.ServerLoading, $"Loading Script Waypoints for {entryCount} creature(s)...");
-            }
-            
-            //                                0       1         2           3           4           5
-            using (var result = DB.World.Query("SELECT entry, pointid, location_x, location_y, location_z, waittime FROM script_waypoint ORDER BY pointid"))
-            {
-
-                if (result.IsEmpty())
-                {
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Script Waypoints. DB table `script_waypoint` is empty.");
-                    return;
-                }
-
-                uint count = 0;
-
-                do
-                {
-                    uint entry = result.Read<uint>(0);
-                    uint id = result.Read<uint>(1);
-                    float x = result.Read<float>(2);
-                    float y = result.Read<float>(3);
-                    float z = result.Read<float>(4);
-                    uint waitTime = result.Read<uint>(5);
-
-                    CreatureTemplate info = Global.ObjectMgr.GetCreatureTemplate(entry);
-                    if (info == null)
-                    {
-                        Log.outError(LogFilter.Sql, $"SystemMgr: DB table script_waypoint has waypoint for non-existant creature entry {entry}");
-                        continue;
-                    }
-
-                    if (info.ScriptID == 0)
-                        Log.outError(LogFilter.Sql, $"SystemMgr: DB table script_waypoint has waypoint for creature entry {entry}, but creature does not have ScriptName defined and then useless.");
-
-                    if (!_waypointStore.ContainsKey(entry))
-                        _waypointStore[entry] = new WaypointPath();
-
-                    WaypointPath path = _waypointStore[entry];
-                    path.id = entry;
-                    path.nodes.Add(new WaypointNode(id, x, y, z, null, waitTime));
-
-                    ++count;
-                }
-                while (result.NextRow());
-
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Script Waypoint nodes in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-            }
-
         }
 
         void LoadScriptSplineChains()
@@ -268,15 +204,15 @@ namespace Game.Scripting
                 uint chainCount = 0, splineCount = 0, wpCount = 0;
                 do
                 {
-                    uint entry = resultMeta.Read<uint>(0);
+                    int entry = resultMeta.Read<int>(0);
                     ushort chainId = resultMeta.Read<ushort>(1);
                     byte splineId = resultMeta.Read<byte>(2);
 
-                    var key = Tuple.Create(entry, chainId);
+                    var key = (entry, chainId);
                     if (!m_mSplineChainsMap.ContainsKey(key))
                         m_mSplineChainsMap[key] = new List<SplineChainLink>();
 
-                    var chain = m_mSplineChainsMap[Tuple.Create(entry, chainId)];
+                    var chain = m_mSplineChainsMap[(entry, chainId)];
                     if (splineId != chain.Count)
                     {
                         Log.outWarn(LogFilter.ServerLoading, "Creature #{0}: Chain {1} has orphaned spline {2}, skipped.", entry, chainId, splineId);
@@ -295,14 +231,14 @@ namespace Game.Scripting
 
                 do
                 {
-                    uint entry = resultWP.Read<uint>(0);
+                    int entry = resultWP.Read<int>(0);
                     ushort chainId = resultWP.Read<ushort>(1);
                     byte splineId = resultWP.Read<byte>(2);
                     byte wpId = resultWP.Read<byte>(3);
                     float posX = resultWP.Read<float>(4);
                     float posY = resultWP.Read<float>(5);
                     float posZ = resultWP.Read<float>(6);
-                    var chain = m_mSplineChainsMap.LookupByKey(Tuple.Create(entry, chainId));
+                    var chain = m_mSplineChainsMap.LookupByKey((entry, chainId));
                     if (chain == null)
                     {
                         Log.outWarn(LogFilter.ServerLoading, "Creature #{0} has waypoint data for spline chain {1}. No such chain exists - entry skipped.", entry, chainId);
@@ -333,31 +269,20 @@ namespace Game.Scripting
             UnitAI.FillAISpellInfo();
         }
 
-        public WaypointPath GetPath(uint creatureEntry)
-        {
-            return _waypointStore.LookupByKey(creatureEntry);
-        }
-        
         public List<SplineChainLink> GetSplineChain(Creature who, ushort chainId)
         {
             return GetSplineChain(who.GetEntry(), chainId);
         }
 
-        List<SplineChainLink> GetSplineChain(uint entry, ushort chainId)
+        List<SplineChainLink> GetSplineChain(int entry, ushort chainId)
         {
-            return m_mSplineChainsMap.LookupByKey(Tuple.Create(entry, chainId));
+            return m_mSplineChainsMap.LookupByKey((entry, chainId));
         }
 
         public string ScriptsVersion() { return "Integrated Cypher Scripts"; }
 
         public void IncrementScriptCount() { ++_ScriptCount; }
         public uint GetScriptCount() { return _ScriptCount; }
-
-        //Reloading
-        public void Reload()
-        {
-
-        }
 
         //Unloading
         public void Unload()
@@ -372,7 +297,7 @@ namespace Game.Scripting
         }
 
         //SpellScriptLoader
-        public List<SpellScript> CreateSpellScripts(uint spellId, Spell invoker)
+        public List<SpellScript> CreateSpellScripts(int spellId, Spell invoker)
         {
             var scriptList = new List<SpellScript>();
             var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
@@ -400,7 +325,7 @@ namespace Game.Scripting
 
             return scriptList;
         }
-        public List<AuraScript> CreateAuraScripts(uint spellId, Aura invoker)
+        public List<AuraScript> CreateAuraScripts(int spellId, Aura invoker)
         {
             var scriptList = new List<AuraScript>();
             var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
@@ -428,9 +353,9 @@ namespace Game.Scripting
 
             return scriptList;
         }
-        public Dictionary<SpellScriptLoader, uint> CreateSpellScriptLoaders(uint spellId)
+        public Dictionary<SpellScriptLoader, int> CreateSpellScriptLoaders(int spellId)
         {
-            var scriptDic = new Dictionary<SpellScriptLoader, uint>();
+            var scriptDic = new Dictionary<SpellScriptLoader, int>();
             var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
 
             var reg = GetScriptRegistry<SpellScriptLoader>();
@@ -448,9 +373,9 @@ namespace Game.Scripting
 
             return scriptDic;
         }
-        public Dictionary<AuraScriptLoader, uint> CreateAuraScriptLoaders(uint spellId)
+        public Dictionary<AuraScriptLoader, int> CreateAuraScriptLoaders(int spellId)
         {
-            var scriptDic = new Dictionary<AuraScriptLoader, uint>();
+            var scriptDic = new Dictionary<AuraScriptLoader, int>();
             var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
 
             var reg = GetScriptRegistry<AuraScriptLoader>();
@@ -496,34 +421,34 @@ namespace Game.Scripting
         }
 
         //FormulaScript
-        public void OnHonorCalculation(float honor, uint level, float multiplier)
+        public void OnHonorCalculation(float honor, int level, float multiplier)
         {
             ForEach<FormulaScript>(p => p.OnHonorCalculation(honor, level, multiplier));
         }
-        public void OnGrayLevelCalculation(uint grayLevel, uint playerLevel)
+        public void OnGrayLevelCalculation(int grayLevel, int playerLevel)
         {
             ForEach<FormulaScript>(p => p.OnGrayLevelCalculation(grayLevel, playerLevel));
         }
-        public void OnColorCodeCalculation(XPColorChar color, uint playerLevel, uint mobLevel)
+        public void OnColorCodeCalculation(XPColorChar color, int playerLevel, uint mobLevel)
         {
             ForEach<FormulaScript>(p => p.OnColorCodeCalculation(color, playerLevel, mobLevel));
         }
-        public void OnZeroDifferenceCalculation(uint diff, uint playerLevel)
+        public void OnZeroDifferenceCalculation(uint diff, int playerLevel)
         {
             ForEach<FormulaScript>(p => p.OnZeroDifferenceCalculation(diff, playerLevel));
         }
-        public void OnBaseGainCalculation(uint gain, uint playerLevel, uint mobLevel, ContentLevels content)
+        public void OnBaseGainCalculation(int gain, int playerLevel, int mobLevel, ContentLevels content)
         {
             ForEach<FormulaScript>(p => p.OnBaseGainCalculation(gain, playerLevel, mobLevel, content));
         }
-        public void OnGainCalculation(uint gain, Player player, Unit unit)
+        public void OnGainCalculation(int gain, Player player, Unit unit)
         {
             Cypher.Assert(player != null);
             Cypher.Assert(unit != null);
 
             ForEach<FormulaScript>(p => p.OnGainCalculation(gain, player, unit));
         }
-        public void OnGroupRateCalculation(float rate, uint count, bool isRaid)
+        public void OnGroupRateCalculation(float rate, int count, bool isRaid)
         {
             ForEach<FormulaScript>(p => p.OnGroupRateCalculation(rate, count, isRaid));
         }
@@ -534,13 +459,13 @@ namespace Game.Scripting
             Cypher.Assert(map != null);
             var record = map.GetEntry();
 
-            if (record != null && record.IsWorldMap())
+            if (record != null && record.IsWorldMap)
                 ForEach<WorldMapScript>(p => p.OnCreate(map));
 
-            if (record != null && record.IsDungeon())
+            if (record != null && record.IsDungeon)
                 ForEach<InstanceMapScript>(p => p.OnCreate(map.ToInstanceMap()));
 
-            if (record != null && record.IsBattleground())
+            if (record != null && record.IsBattleground)
                 ForEach<BattlegroundMapScript>(p => p.OnCreate(map.ToBattlegroundMap()));
         }
         public void OnDestroyMap(Map map)
@@ -548,13 +473,13 @@ namespace Game.Scripting
             Cypher.Assert(map != null);
             var record = map.GetEntry();
 
-            if (record != null && record.IsWorldMap())
+            if (record != null && record.IsWorldMap)
                 ForEach<WorldMapScript>(p => p.OnDestroy(map));
 
-            if (record != null && record.IsDungeon())
+            if (record != null && record.IsDungeon)
                 ForEach<InstanceMapScript>(p => p.OnDestroy(map.ToInstanceMap()));
 
-            if (record != null && record.IsBattleground())
+            if (record != null && record.IsBattleground)
                 ForEach<BattlegroundMapScript>(p => p.OnDestroy(map.ToBattlegroundMap()));
         }
         public void OnPlayerEnterMap(Map map, Player player)
@@ -566,13 +491,13 @@ namespace Game.Scripting
 
             var record = map.GetEntry();
 
-            if (record != null && record.IsWorldMap())
+            if (record != null && record.IsWorldMap)
                 ForEach<WorldMapScript>(p => p.OnPlayerEnter(map, player));
 
-            if (record != null && record.IsDungeon())
+            if (record != null && record.IsDungeon)
                 ForEach<InstanceMapScript>(p => p.OnPlayerEnter(map.ToInstanceMap(), player));
 
-            if (record != null && record.IsBattleground())
+            if (record != null && record.IsBattleground)
                 ForEach<BattlegroundMapScript>(p => p.OnPlayerEnter(map.ToBattlegroundMap(), player));
         }
         public void OnPlayerLeaveMap(Map map, Player player)
@@ -580,13 +505,13 @@ namespace Game.Scripting
             Cypher.Assert(map != null);
             var record = map.GetEntry();
 
-            if (record != null && record.IsWorldMap())
+            if (record != null && record.IsWorldMap)
                 ForEach<WorldMapScript>(p => p.OnPlayerLeave(map, player));
 
-            if (record != null && record.IsDungeon())
+            if (record != null && record.IsDungeon)
                 ForEach<InstanceMapScript>(p => p.OnPlayerLeave(map.ToInstanceMap(), player));
 
-            if (record != null && record.IsBattleground())
+            if (record != null && record.IsBattleground)
                 ForEach<BattlegroundMapScript>(p => p.OnPlayerLeave(map.ToBattlegroundMap(), player));
         }
         public void OnMapUpdate(Map map, uint diff)
@@ -594,13 +519,13 @@ namespace Game.Scripting
             Cypher.Assert(map != null);
             var record = map.GetEntry();
 
-            if (record != null && record.IsWorldMap())
+            if (record != null && record.IsWorldMap)
                 ForEach<WorldMapScript>(p => p.OnUpdate(map, diff));
 
-            if (record != null && record.IsDungeon())
+            if (record != null && record.IsDungeon)
                 ForEach<InstanceMapScript>(p => p.OnUpdate(map.ToInstanceMap(), diff));
 
-            if (record != null && record.IsBattleground())
+            if (record != null && record.IsBattleground)
                 ForEach<BattlegroundMapScript>(p => p.OnUpdate(map.ToBattlegroundMap(), diff));
         }
 
@@ -623,14 +548,14 @@ namespace Game.Scripting
         }
         public bool OnItemUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            Cypher.Assert(player);
-            Cypher.Assert(item);
+            Cypher.Assert(player != null);
+            Cypher.Assert(item != null);
 
             return RunScriptRet<ItemScript>(p => p.OnUse(player, item, targets, castId), item.GetScriptId());
         }
         public bool OnItemExpire(Player player, ItemTemplate proto)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(proto != null);
 
             return RunScriptRet<ItemScript>(p => p.OnExpire(player, proto), proto.ScriptId);
@@ -677,7 +602,7 @@ namespace Game.Scripting
         }
 
         //BattlefieldScript
-        public BattleField CreateBattlefield(uint scriptId, Map map)
+        public BattleField CreateBattlefield(int scriptId, Map map)
         {
             return RunScriptRet<BattlefieldScript, BattleField>(p => p.GetBattlefield(map), scriptId, null);
         }
@@ -691,7 +616,7 @@ namespace Game.Scripting
         }
 
         // OutdoorPvPScript
-        public OutdoorPvP CreateOutdoorPvP(uint scriptId, Map map)
+        public OutdoorPvP CreateOutdoorPvP(int scriptId, Map map)
         {
             return RunScriptRet<OutdoorPvPScript, OutdoorPvP>(p => p.GetOutdoorPvP(map), scriptId, null);
         }
@@ -825,7 +750,7 @@ namespace Game.Scripting
 
             RunScript<TransportScript>(p => p.OnUpdate(transport, diff), transport.GetScriptId());
         }
-        public void OnRelocate(Transport transport, uint mapId, float x, float y, float z)
+        public void OnRelocate(Transport transport, int mapId, float x, float y, float z)
         {
             RunScript<TransportScript>(p => p.OnRelocate(transport, mapId, x, y, z), transport.GetScriptId());
         }
@@ -838,9 +763,9 @@ namespace Game.Scripting
 
             RunScript<AchievementScript>(p => p.OnCompleted(player, achievement), Global.AchievementMgr.GetAchievementScriptId(achievement.Id));
         }
-        
+
         // AchievementCriteriaScript
-        public bool OnCriteriaCheck(uint ScriptId, Player source, Unit target)
+        public bool OnCriteriaCheck(int ScriptId, Player source, Unit target)
         {
             Cypher.Assert(source != null);
             // target can be NULL.
@@ -877,11 +802,13 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnMoneyChanged(player, amount));
         }
-        public void OnGivePlayerXP(Player player, uint amount, Unit victim)
+        public void OnGivePlayerXP(Player player, ref int amount, Unit victim)
         {
-            ForEach<PlayerScript>(p => p.OnGiveXP(player, amount, victim));
+            int tempAmount = amount;
+            ForEach<PlayerScript>(p => tempAmount = p.OnGiveXP(player, tempAmount, victim));
+            amount = tempAmount;
         }
-        public void OnPlayerReputationChange(Player player, uint factionID, int standing, bool incremental)
+        public void OnPlayerReputationChange(Player player, int factionID, int standing, bool incremental)
         {
             ForEach<PlayerScript>(p => p.OnReputationChange(player, factionID, standing, incremental));
         }
@@ -921,7 +848,7 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnClearEmote(player));
         }
-        public void OnPlayerTextEmote(Player player, uint textEmote, uint emoteNum, ObjectGuid guid)
+        public void OnPlayerTextEmote(Player player, int textEmote, int emoteNum, ObjectGuid guid)
         {
             ForEach<PlayerScript>(p => p.OnTextEmote(player, textEmote, emoteNum, guid));
         }
@@ -929,9 +856,9 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnSpellCast(player, spell, skipCheck));
         }
-        public void OnPlayerLogin(Player player)
+        public void OnPlayerLogin(Player player, bool firstLogin)
         {
-            ForEach<PlayerScript>(p => p.OnLogin(player));
+            ForEach<PlayerScript>(p => p.OnLogin(player, firstLogin));
         }
         public void OnPlayerLogout(Player player)
         {
@@ -941,11 +868,11 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnCreate(player));
         }
-        public void OnPlayerDelete(ObjectGuid guid, uint accountId)
+        public void OnPlayerDelete(ObjectGuid guid, int accountId)
         {
             ForEach<PlayerScript>(p => p.OnDelete(guid, accountId));
         }
-        public void OnPlayerFailedDelete(ObjectGuid guid, uint accountId)
+        public void OnPlayerFailedDelete(ObjectGuid guid, int accountId)
         {
             ForEach<PlayerScript>(p => p.OnFailedDelete(guid, accountId));
         }
@@ -953,11 +880,11 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnSave(player));
         }
-        public void OnPlayerBindToInstance(Player player, Difficulty difficulty, uint mapid, bool permanent, byte extendState)
+        public void OnPlayerBindToInstance(Player player, Difficulty difficulty, int mapid, bool permanent, byte extendState)
         {
             ForEach<PlayerScript>(p => p.OnBindToInstance(player, difficulty, mapid, permanent, extendState));
         }
-        public void OnPlayerUpdateZone(Player player, uint newZone, uint newArea)
+        public void OnPlayerUpdateZone(Player player, int newZone, int newArea)
         {
             ForEach<PlayerScript>(p => p.OnUpdateZone(player, newZone, newArea));
         }
@@ -965,17 +892,43 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnPlayerRepop(player));
         }
-        public void OnQuestStatusChange(Player player, uint questId)
+        public void OnQuestStatusChange(Player player, int questId)
         {
             ForEach<PlayerScript>(p => p.OnQuestStatusChange(player, questId));
         }
-        public void OnMovieComplete(Player player, uint movieId)
+        public void OnMovieComplete(Player player, int movieId)
         {
             ForEach<PlayerScript>(p => p.OnMovieComplete(player, movieId));
         }
-        public void OnPlayerChoiceResponse(Player player, uint choiceId, uint responseId)
+        public void OnPlayerChoiceResponse(Player player, int choiceId, int responseId)
         {
             ForEach<PlayerScript>(p => p.OnPlayerChoiceResponse(player, choiceId, responseId));
+        }
+
+        // Account
+        public void OnAccountLogin(int accountId)
+        {
+            ForEach<AccountScript>(script => script.OnAccountLogin(accountId));
+        }
+        public void OnFailedAccountLogin(int accountId)
+        {
+            ForEach<AccountScript>(script => script.OnFailedAccountLogin(accountId));
+        }
+        public void OnEmailChange(int accountId)
+        {
+            ForEach<AccountScript>(script => script.OnEmailChange(accountId));
+        }
+        public void OnFailedEmailChange(int accountId)
+        {
+            ForEach<AccountScript>(script => script.OnFailedEmailChange(accountId));
+        }
+        public void OnPasswordChange(int accountId)
+        {
+            ForEach<AccountScript>(script => script.OnPasswordChange(accountId));
+        }
+        public void OnFailedPasswordChange(int accountId)
+        {
+            ForEach<AccountScript>(script => script.OnFailedPasswordChange(accountId));
         }
 
         // GuildScript
@@ -1003,11 +956,11 @@ namespace Game.Scripting
         {
             ForEach<GuildScript>(p => p.OnDisband(guild));
         }
-        public void OnGuildMemberWitdrawMoney(Guild guild, Player player, ulong amount, bool isRepair)
+        public void OnGuildMemberWitdrawMoney(Guild guild, Player player, long amount, bool isRepair)
         {
             ForEach<GuildScript>(p => p.OnMemberWitdrawMoney(guild, player, amount, isRepair));
         }
-        public void OnGuildMemberDepositMoney(Guild guild, Player player, ulong amount)
+        public void OnGuildMemberDepositMoney(Guild guild, Player player, long amount)
         {
             ForEach<GuildScript>(p => p.OnMemberDepositMoney(guild, player, amount));
         }
@@ -1015,11 +968,11 @@ namespace Game.Scripting
         {
             ForEach<GuildScript>(p => p.OnItemMove(guild, player, pItem, isSrcBank, src, isDestBank, dest));
         }
-        public void OnGuildEvent(Guild guild, byte eventType, ulong playerGuid1, ulong playerGuid2, byte newRank)
+        public void OnGuildEvent(Guild guild, byte eventType, long playerGuid1, long playerGuid2, byte newRank)
         {
             ForEach<GuildScript>(p => p.OnEvent(guild, eventType, playerGuid1, playerGuid2, newRank));
         }
-        public void OnGuildBankEvent(Guild guild, byte eventType, byte tabId, ulong playerGuid, uint itemOrMoney, ushort itemStackCount, byte destTabId)
+        public void OnGuildBankEvent(Guild guild, byte eventType, byte tabId, long playerGuid, int itemOrMoney, ushort itemStackCount, byte destTabId)
         {
             ForEach<GuildScript>(p => p.OnBankEvent(guild, eventType, tabId, playerGuid, itemOrMoney, itemStackCount, destTabId));
         }
@@ -1027,27 +980,27 @@ namespace Game.Scripting
         // GroupScript
         public void OnGroupAddMember(Group group, ObjectGuid guid)
         {
-            Cypher.Assert(group);
+            Cypher.Assert(group != null);
             ForEach<GroupScript>(p => p.OnAddMember(group, guid));
         }
         public void OnGroupInviteMember(Group group, ObjectGuid guid)
         {
-            Cypher.Assert(group);
+            Cypher.Assert(group != null);
             ForEach<GroupScript>(p => p.OnInviteMember(group, guid));
         }
         public void OnGroupRemoveMember(Group group, ObjectGuid guid, RemoveMethod method, ObjectGuid kicker, string reason)
         {
-            Cypher.Assert(group);
+            Cypher.Assert(group != null);
             ForEach<GroupScript>(p => p.OnRemoveMember(group, guid, method, kicker, reason));
         }
         public void OnGroupChangeLeader(Group group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid)
         {
-            Cypher.Assert(group);
+            Cypher.Assert(group != null);
             ForEach<GroupScript>(p => p.OnChangeLeader(group, newLeaderGuid, oldLeaderGuid));
         }
         public void OnGroupDisband(Group group)
         {
-            Cypher.Assert(group);
+            Cypher.Assert(group != null);
             ForEach<GroupScript>(p => p.OnDisband(group));
         }
 
@@ -1086,7 +1039,7 @@ namespace Game.Scripting
         // AreaTriggerEntityScript
         public AreaTriggerAI GetAreaTriggerAI(AreaTrigger areaTrigger)
         {
-            Cypher.Assert(areaTrigger);
+            Cypher.Assert(areaTrigger != null);
 
             return RunScriptRet<AreaTriggerEntityScript, AreaTriggerAI>(p => p.GetAI(areaTrigger), areaTrigger.GetScriptId(), null);
         }
@@ -1099,6 +1052,13 @@ namespace Game.Scripting
             RunScript<ConversationScript>(script => script.OnConversationCreate(conversation, creator), conversation.GetScriptId());
         }
 
+        public void OnConversationStart(Conversation conversation)
+        {
+            Cypher.Assert(conversation != null);
+
+            RunScript<ConversationScript>(script => script.OnConversationStart(conversation), conversation.GetScriptId());
+        }
+
         public void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender)
         {
             Cypher.Assert(conversation != null);
@@ -1107,31 +1067,38 @@ namespace Game.Scripting
             RunScript<ConversationScript>(script => script.OnConversationLineStarted(conversation, lineId, sender), conversation.GetScriptId());
         }
 
+        public void OnConversationUpdate(Conversation conversation, uint diff)
+        {
+            Cypher.Assert(conversation != null);
+
+            RunScript<ConversationScript>(script => script.OnConversationUpdate(conversation, diff), conversation.GetScriptId());
+        }
+
         //SceneScript
         public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneStart(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
         }
         public void OnSceneTrigger(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneTriggerEvent(player, sceneInstanceID, sceneTemplate, triggerName), sceneTemplate.ScriptId);
         }
         public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneCancel(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
         }
-        public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneComplete(Player player, int sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneComplete(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
@@ -1140,21 +1107,21 @@ namespace Game.Scripting
         //QuestScript
         public void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(quest != null);
 
             RunScript<QuestScript>(script => script.OnQuestStatusChange(player, quest, oldStatus, newStatus), quest.ScriptId);
         }
         public void OnQuestAcknowledgeAutoAccept(Player player, Quest quest)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(quest != null);
 
             RunScript<QuestScript>(script => script.OnAcknowledgeAutoAccept(player, quest), quest.ScriptId);
         }
         public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(quest != null);
 
             RunScript<QuestScript>(script => script.OnQuestObjectiveChange(player, quest, objective, oldAmount, newAmount), quest.ScriptId);
@@ -1167,7 +1134,15 @@ namespace Game.Scripting
 
             RunScript<WorldStateScript>(script => script.OnValueChange(worldStateTemplate.Id, oldValue, newValue, map), worldStateTemplate.ScriptId);
         }
-        
+
+        // EventScript
+        public void OnEventTrigger(WorldObject obj, WorldObject invoker, int eventId)
+        {
+            Cypher.Assert(invoker != null);
+
+            RunScript<EventScript>(script => script.OnTrigger(obj, invoker, eventId), Global.ObjectMgr.GetEventScriptId(eventId));
+        }
+
         public void ForEach<T>(Action<T> a) where T : ScriptObject
         {
             var reg = GetScriptRegistry<T>();
@@ -1177,11 +1152,11 @@ namespace Game.Scripting
             foreach (var script in reg.GetStorage())
                 a.Invoke(script);
         }
-        public bool RunScriptRet<T>(Func<T, bool> func, uint id, bool ret = false) where T : ScriptObject
+        public bool RunScriptRet<T>(Func<T, bool> func, int id, bool ret = false) where T : ScriptObject
         {
             return RunScriptRet<T, bool>(func, id, ret);
         }
-        public U RunScriptRet<T, U>(Func<T, U> func, uint id, U ret = default) where T : ScriptObject
+        public U RunScriptRet<T, U>(Func<T, U> func, int id, U ret = default) where T : ScriptObject
         {
             var reg = GetScriptRegistry<T>();
             if (reg == null || reg.Empty())
@@ -1193,7 +1168,7 @@ namespace Game.Scripting
 
             return func.Invoke(script);
         }
-        public void RunScript<T>(Action<T> a, uint id) where T : ScriptObject
+        public void RunScript<T>(Action<T> a, int id) where T : ScriptObject
         {
             var reg = GetScriptRegistry<T>();
             if (reg == null || reg.Empty())
@@ -1222,13 +1197,11 @@ namespace Game.Scripting
         }
 
         uint _ScriptCount;
-        public Dictionary<uint, SpellSummary> spellSummaryStorage = new();
+        public Dictionary<int, SpellSummary> spellSummaryStorage = new();
         Hashtable ScriptStorage = new();
 
-        Dictionary<uint, WaypointPath> _waypointStore = new();
-        
         // creature entry + chain ID
-        MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new(); // spline chains
+        MultiMap<(int, ushort), SplineChainLink> m_mSplineChainsMap = new(); // spline chains
     }
 
     public interface IScriptRegistry
@@ -1252,7 +1225,7 @@ namespace Game.Scripting
 
             // Get an ID for the script. An ID only exists if it's a script that is assigned in the database
             // through a script name (or similar).
-            uint id = Global.ObjectMgr.GetScriptId(script.GetName());
+            int id = Global.ObjectMgr.GetScriptId(script.GetName());
             if (id != 0)
             {
                 // Try to find an existing script.
@@ -1289,7 +1262,7 @@ namespace Game.Scripting
         }
 
         // Gets a script by its ID (assigned by ObjectMgr).
-        public TValue GetScriptById(uint id)
+        public TValue GetScriptById(int id)
         {
             return ScriptMap.LookupByKey(id);
         }
@@ -1299,9 +1272,9 @@ namespace Game.Scripting
             return ScriptMap.Empty();
         }
 
-        public List<TValue> GetStorage()
+        public ICollection<TValue> GetStorage()
         {
-            return ScriptMap.Values.ToList();
+            return ScriptMap.Values;
         }
 
         public void Unload()
@@ -1310,8 +1283,8 @@ namespace Game.Scripting
         }
 
         // Counter used for code-only scripts.
-        uint _scriptIdCounter;
-        Dictionary<uint, TValue> ScriptMap = new();
+        int _scriptIdCounter;
+        Dictionary<int, TValue> ScriptMap = new();
     }
 
     public class SpellSummary

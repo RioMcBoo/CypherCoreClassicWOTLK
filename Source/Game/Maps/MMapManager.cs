@@ -16,18 +16,18 @@ namespace Game
         const string MAP_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}.mmap";
         const string TILE_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}{2:D2}{3:D2}.mmtile";
 
-        public void Initialize(MultiMap<uint, uint> mapData)
+        public void Initialize(MultiMap<int, int> mapData)
         {
             foreach (var pair in mapData)
                 parentMapData[pair.Value] = pair.Key;
         }
 
-        MMapData GetMMapData(uint mapId)
+        MMapData GetMMapData(int mapId)
         {
             return loadedMMaps.LookupByKey(mapId);
         }
 
-        bool LoadMapData(string basePath, uint mapId)
+        bool LoadMapData(string basePath, int mapId)
         {
             // we already have this map loaded?
             if (loadedMMaps.ContainsKey(mapId) && loadedMMaps[mapId] != null)
@@ -71,7 +71,7 @@ namespace Game
             return (uint)(x << 16 | y);
         }
 
-        public bool LoadMap(string basePath, uint mapId, int x, int y)
+        public bool LoadMap(string basePath, int mapId, int x, int y)
         {
             // make sure the mmap is loaded and ready to load tiles
             if (!LoadMapData(basePath, mapId))
@@ -132,29 +132,29 @@ namespace Game
             return false;
         }
 
-        public bool LoadMapInstance(string basePath, uint mapId, uint instanceId)
+        public bool LoadMapInstance(string basePath, int meshMapId, int instanceMapId, int instanceId)
         {
-            if (!LoadMapData(basePath, mapId))
+            if (!LoadMapData(basePath, meshMapId))
                 return false;
 
-            MMapData mmap = loadedMMaps[mapId];
-            if (mmap.navMeshQueries.ContainsKey(instanceId))
+            MMapData mmap = loadedMMaps[meshMapId];
+            if (mmap.navMeshQueries.ContainsKey((instanceMapId, instanceId)))
                 return true;
 
             // allocate mesh query
             Detour.dtNavMeshQuery query = new();
             if (Detour.dtStatusFailed(query.init(mmap.navMesh, 1024)))
             {
-                Log.outError(LogFilter.Maps, "MMAP.GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId {0:D4} instanceId {1}", mapId, instanceId);
+                Log.outError(LogFilter.Maps, $"MMAP.GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId {instanceMapId:D4} instanceId {instanceId}");
                 return false;
             }
 
-            Log.outDebug(LogFilter.Maps, "MMAP.GetNavMeshQuery: created dtNavMeshQuery for mapId {0:D4} instanceId {1}", mapId, instanceId);
-            mmap.navMeshQueries.Add(instanceId, query);
+            Log.outDebug(LogFilter.Maps, $"MMAP.GetNavMeshQuery: created dtNavMeshQuery for mapId {instanceMapId:D4} instanceId {instanceId}");
+            mmap.navMeshQueries.Add((instanceMapId, instanceId), query);
             return true;
         }
 
-        public bool UnloadMap(uint mapId, int x, int y)
+        public bool UnloadMap(int mapId, int x, int y)
         {
             // check if we have this map loaded
             MMapData mmap = GetMMapData(mapId);
@@ -196,7 +196,7 @@ namespace Game
             return false;
         }
 
-        public bool UnloadMap(uint mapId)
+        public bool UnloadMap(int mapId)
         {
             if (!loadedMMaps.ContainsKey(mapId))
             {
@@ -226,30 +226,30 @@ namespace Game
             return true;
         }
 
-        public bool UnloadMapInstance(uint mapId, uint instanceId)
+        public bool UnloadMapInstance(int meshMapId, int instanceMapId, int instanceId)
         {
             // check if we have this map loaded
-            MMapData mmap = GetMMapData(mapId);
+            MMapData mmap = GetMMapData(meshMapId);
             if (mmap == null)
             {
                 // file may not exist, therefore not loaded
-                Log.outDebug(LogFilter.Maps, "MMAP:unloadMapInstance: Asked to unload not loaded navmesh map {0}", mapId);
+                Log.outDebug(LogFilter.Maps, $"MMAP:unloadMapInstance: Asked to unload not loaded navmesh map {meshMapId}");
                 return false;
             }
 
-            if (!mmap.navMeshQueries.ContainsKey(instanceId))
+            if (!mmap.navMeshQueries.ContainsKey((instanceMapId, instanceId)))
             {
-                Log.outDebug(LogFilter.Maps, "MMAP:unloadMapInstance: Asked to unload not loaded dtNavMeshQuery mapId {0} instanceId {1}", mapId, instanceId);
+                Log.outDebug(LogFilter.Maps, $"MMAP:unloadMapInstance: Asked to unload not loaded dtNavMeshQuery mapId {instanceMapId} instanceId {instanceId}");
                 return false;
             }
 
-            mmap.navMeshQueries.Remove(instanceId);
-            Log.outInfo(LogFilter.Maps, "MMAP:unloadMapInstance: Unloaded mapId {0} instanceId {1}", mapId, instanceId);
+            mmap.navMeshQueries.Remove((instanceMapId, instanceId));
+            Log.outInfo(LogFilter.Maps, $"MMAP:unloadMapInstance: Unloaded mapId {instanceMapId} instanceId {instanceId}");
 
             return true;
         }
 
-        public Detour.dtNavMesh GetNavMesh(uint mapId)
+        public Detour.dtNavMesh GetNavMesh(int mapId)
         {
             MMapData mmap = GetMMapData(mapId);
             if (mmap == null)
@@ -258,22 +258,22 @@ namespace Game
             return mmap.navMesh;
         }
 
-        public Detour.dtNavMeshQuery GetNavMeshQuery(uint mapId, uint instanceId)
+        public Detour.dtNavMeshQuery GetNavMeshQuery(int meshMapId, int instanceMapId, int instanceId)
         {
-            MMapData mmap = GetMMapData(mapId);
+            MMapData mmap = GetMMapData(meshMapId);
             if (mmap == null)
                 return null;
 
-            return mmap.navMeshQueries.LookupByKey(instanceId);
+            return mmap.navMeshQueries.LookupByKey((instanceMapId, instanceId));
         }
 
         public uint GetLoadedTilesCount() { return loadedTiles; }
         public int GetLoadedMapsCount() { return loadedMMaps.Count; }
 
-        Dictionary<uint, MMapData> loadedMMaps = new();
+        Dictionary<int, MMapData> loadedMMaps = new();
         uint loadedTiles;
 
-        Dictionary<uint, uint> parentMapData = new();
+        Dictionary<int, int> parentMapData = new();
     }
 
     public class MMapData
@@ -283,7 +283,7 @@ namespace Game
             navMesh = mesh;
         }
 
-        public Dictionary<uint, Detour.dtNavMeshQuery> navMeshQueries = new();     // instanceId to query
+        public Dictionary<(int, int), Detour.dtNavMeshQuery> navMeshQueries = new();     // instanceId to query
 
         public Detour.dtNavMesh navMesh;
         public Dictionary<uint, ulong> loadedTileRefs = new(); // maps [map grid coords] to [dtTile]

@@ -16,11 +16,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ArtifactAddPower, Processing = PacketProcessing.Inplace)]
         void HandleArtifactAddPower(ArtifactAddPower artifactAddPower)
         {
-            if (!_player.GetGameObjectIfCanInteractWith(artifactAddPower.ForgeGUID, GameObjectTypes.ItemForge))
+            if (_player.GetGameObjectIfCanInteractWith(artifactAddPower.ForgeGUID, GameObjectTypes.ItemForge) == null)
                 return;
 
             Item artifact = _player.GetItemByGuid(artifactAddPower.ArtifactGUID);
-            if (!artifact || artifact.IsArtifactDisabled())
+            if (artifact == null || artifact.IsArtifactDisabled())
                 return;
 
             uint currentArtifactTier = artifact.GetModifier(ItemModifier.ArtifactTier);
@@ -95,8 +95,6 @@ namespace Game
 
             if (artifact.IsEquipped())
             {
-                _player.ApplyArtifactPowerRank(artifact, artifactPowerRank, true);
-
                 foreach (ArtifactPower power in artifact.m_itemData.ArtifactPowers)
                 {
                     ArtifactPowerRecord scaledArtifactPowerEntry = CliDB.ArtifactPowerStorage.LookupByKey(power.ArtifactPowerId);
@@ -108,9 +106,6 @@ namespace Game
                         continue;
 
                     artifact.SetArtifactPower((ushort)power.ArtifactPowerId, power.PurchasedRank, (byte)(power.CurrentRankWithBonus + 1));
-
-                    _player.ApplyArtifactPowerRank(artifact, scaledArtifactPowerRank, false);
-                    _player.ApplyArtifactPowerRank(artifact, scaledArtifactPowerRank, true);
                 }
             }
 
@@ -146,7 +141,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ArtifactSetAppearance, Processing = PacketProcessing.Inplace)]
         void HandleArtifactSetAppearance(ArtifactSetAppearance artifactSetAppearance)
         {
-            if (!_player.GetGameObjectIfCanInteractWith(artifactSetAppearance.ForgeGUID, GameObjectTypes.ItemForge))
+            if (_player.GetGameObjectIfCanInteractWith(artifactSetAppearance.ForgeGUID, GameObjectTypes.ItemForge) == null)
                 return;
 
             ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifactSetAppearance.ArtifactAppearanceID);
@@ -154,7 +149,7 @@ namespace Game
                 return;
 
             Item artifact = _player.GetItemByGuid(artifactSetAppearance.ArtifactGUID);
-            if (!artifact)
+            if (artifact == null)
                 return;
 
             ArtifactAppearanceSetRecord artifactAppearanceSet = CliDB.ArtifactAppearanceSetStorage.LookupByKey(artifactAppearance.ArtifactAppearanceSetID);
@@ -170,7 +165,7 @@ namespace Game
             artifact.SetModifier(ItemModifier.ArtifactAppearanceId, artifactAppearance.Id);
             artifact.SetState(ItemUpdateState.Changed, _player);
             Item childItem = _player.GetChildItemByGuid(artifact.GetChildItem());
-            if (childItem)
+            if (childItem != null)
             {
                 childItem.SetAppearanceModId(artifactAppearance.ItemAppearanceModifierID);
                 childItem.SetState(ItemUpdateState.Changed, _player);
@@ -180,7 +175,7 @@ namespace Game
             {
                 // change weapon appearance
                 _player.SetVisibleItemSlot(artifact.InventorySlot, artifact);
-                if (childItem)
+                if (childItem != null)
                     _player.SetVisibleItemSlot(childItem.InventorySlot, childItem);
 
                 // change druid form appearance
@@ -192,11 +187,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ConfirmArtifactRespec)]
         void HandleConfirmArtifactRespec(ConfirmArtifactRespec confirmArtifactRespec)
         {
-            if (!_player.GetNPCIfCanInteractWith(confirmArtifactRespec.NpcGUID, NPCFlags.ArtifactPowerRespec, NPCFlags2.None))
+            if (_player.GetNPCIfCanInteractWith(confirmArtifactRespec.NpcGUID, NPCFlags.ArtifactPowerRespec, NPCFlags2.None) == null)
                 return;
 
             Item artifact = _player.GetItemByGuid(confirmArtifactRespec.ArtifactGUID);
-            if (!artifact || artifact.IsArtifactDisabled())
+            if (artifact == null || artifact.IsArtifactDisabled())
                 return;
 
             ulong xpCost = 0;
@@ -222,13 +217,7 @@ namespace Game
                     continue;
 
                 artifact.SetArtifactPower((ushort)artifactPower.ArtifactPowerId, (byte)(artifactPower.PurchasedRank - oldPurchasedRank), (byte)(artifactPower.CurrentRankWithBonus - oldPurchasedRank));
-
-                if (artifact.IsEquipped())
-                {
-                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank((uint)artifactPower.ArtifactPowerId, 0);
-                    if (artifactPowerRank != null)
-                        _player.ApplyArtifactPowerRank(artifact, artifactPowerRank, false);
-                }
+                
             }
 
             foreach (ArtifactPower power in artifact.m_itemData.ArtifactPowers)
@@ -242,8 +231,6 @@ namespace Game
                     continue;
 
                 artifact.SetArtifactPower((ushort)power.ArtifactPowerId, power.PurchasedRank, 0);
-
-                _player.ApplyArtifactPowerRank(artifact, scaledArtifactPowerRank, false);
             }
 
             artifact.SetArtifactXP(newAmount);

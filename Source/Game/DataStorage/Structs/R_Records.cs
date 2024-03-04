@@ -15,9 +15,9 @@ namespace Game.DataStorage
     public sealed class RewardPackRecord
     {
         public uint Id;
-        public ushort CharTitleID;
+        public int CharTitleID;
         public uint Money;
-        public byte ArtifactXPDifficulty;
+        public sbyte ArtifactXPDifficulty;
         public float ArtifactXPMultiplier;
         public byte ArtifactXPCategoryID;
         public uint TreasurePickerID;
@@ -34,8 +34,8 @@ namespace Game.DataStorage
     public sealed class RewardPackXItemRecord
     {
         public uint Id;
-        public uint ItemID;
-        public uint ItemQuantity;
+        public int ItemID;
+        public int ItemQuantity;
         public uint RewardPackID;
     }
 }

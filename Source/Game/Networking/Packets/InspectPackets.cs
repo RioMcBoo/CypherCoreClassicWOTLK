@@ -33,7 +33,6 @@ namespace Game.Networking.Packets
             DisplayInfo.Write(_worldPacket);
             _worldPacket.WriteInt32(Glyphs.Count);
             _worldPacket.WriteInt32(Talents.Count);
-            _worldPacket.WriteInt32(PvpTalents.Count);
             _worldPacket.WriteInt32(ItemLevel);
             _worldPacket.WriteUInt8(LifetimeMaxRank);
             _worldPacket.WriteUInt16(TodayHK);
@@ -47,9 +46,6 @@ namespace Game.Networking.Packets
             for (int i = 0; i < Talents.Count; ++i)
                 _worldPacket.WriteUInt16(Talents[i]);
 
-            for (int i = 0; i < PvpTalents.Count; ++i)
-                _worldPacket.WriteUInt16(PvpTalents[i]);
-
             _worldPacket.WriteBit(GuildData.HasValue);
             _worldPacket.WriteBit(AzeriteLevel.HasValue);
             _worldPacket.FlushBits();
@@ -61,15 +57,16 @@ namespace Game.Networking.Packets
                 GuildData.Value.Write(_worldPacket);
 
             if (AzeriteLevel.HasValue)
-                _worldPacket.WriteUInt32((uint)AzeriteLevel);
+                _worldPacket.WriteUInt32(AzeriteLevel.Value);
+
+            TalentTraits.Write(_worldPacket);
         }
 
         public PlayerModelDisplayInfo DisplayInfo;
         public List<ushort> Glyphs = new();
         public List<ushort> Talents = new();
-        public Array<ushort> PvpTalents = new(PlayerConst.MaxPvpTalentSlots, 0);
         public InspectGuildData? GuildData;
-        public Array<PVPBracketData> Bracket = new(6, default);
+        public Array<PVPBracketData> Bracket = new(7, default);
         public uint? AzeriteLevel;
         public int ItemLevel;
         public uint LifetimeHK;
@@ -77,6 +74,7 @@ namespace Game.Networking.Packets
         public ushort TodayHK;
         public ushort YesterdayHK;
         public byte LifetimeMaxRank;
+        public TraitInspectInfo TalentTraits;
     }
 
     public class QueryInspectAchievements : ClientPacket
@@ -184,7 +182,7 @@ namespace Game.Networking.Packets
         public ObjectGuid GUID;
         public List<InspectItemData> Items = new();
         public string Name;
-        public uint SpecializationID;
+        public int SpecializationID;
         public byte GenderID;
         public byte Race;
         public byte ClassID;
@@ -193,7 +191,7 @@ namespace Game.Networking.Packets
         public void Initialize(Player player)
         {
             GUID = player.GetGUID();
-            SpecializationID = player.GetPrimarySpecialization();
+            SpecializationID = (int)player.GetPrimarySpecialization();
             Name = player.GetName();
             GenderID = (byte)player.GetNativeGender();
             Race = (byte)player.GetRace();
@@ -213,7 +211,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(GUID);
-            data.WriteUInt32(SpecializationID);
+            data.WriteInt32(SpecializationID);
             data.WriteInt32(Items.Count);
             data.WriteBits(Name.GetByteCount(), 6);
             data.WriteUInt8(GenderID);
@@ -223,10 +221,7 @@ namespace Game.Networking.Packets
             data.WriteString(Name);
 
             foreach (var customization in Customizations)
-            {
-                data.WriteUInt32(customization.ChrCustomizationOptionID);
-                data.WriteUInt32(customization.ChrCustomizationChoiceID);
-            }
+                customization.Write(data);
 
             foreach (InspectItemData item in Items)
                 item.Write(data);
@@ -252,6 +247,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Bracket);
+            data.WriteInt32(Unused3);
             data.WriteInt32(Rating);
             data.WriteInt32(Rank);
             data.WriteInt32(WeeklyPlayed);
@@ -264,6 +260,10 @@ namespace Game.Networking.Packets
             data.WriteInt32(WeeklyBestWinPvpTierID);
             data.WriteInt32(Unused1);
             data.WriteInt32(Unused2);
+            data.WriteInt32(RoundsSeasonPlayed);
+            data.WriteInt32(RoundsSeasonWon);
+            data.WriteInt32(RoundsWeeklyPlayed);
+            data.WriteInt32(RoundsWeeklyWon);
             data.WriteBit(Disqualified);
             data.FlushBits();
         }
@@ -280,8 +280,27 @@ namespace Game.Networking.Packets
         public int WeeklyBestWinPvpTierID;
         public int Unused1;
         public int Unused2;
+        public int Unused3;
+        public int RoundsSeasonPlayed;
+        public int RoundsSeasonWon;
+        public int RoundsWeeklyPlayed;
+        public int RoundsWeeklyWon;
         public byte Bracket;
         public bool Disqualified;
+    }
+
+    public struct TraitInspectInfo
+    {
+        public int Level;
+        public int ChrSpecializationID;
+        public TraitConfigPacket Config;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Level);
+            data.WriteInt32(ChrSpecializationID);
+            Config.Write(data);
+        }
     }
 
     public struct AzeriteEssenceData

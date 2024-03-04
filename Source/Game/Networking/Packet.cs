@@ -26,7 +26,8 @@ namespace Game.Networking
 
         public void LogPacket(WorldSession session)
         {
-            Log.outDebug(LogFilter.Network, "Received ClientOpcode: {0} From: {1}", GetOpcode(), session != null ? session.GetPlayerInfo() : "Unknown IP");
+            string sender = session != null ? session.GetPlayerInfo() : "Unknown IP";
+            Log.outDebug(LogFilter.Network, $"Received ClientOpcode: {GetOpcode()} From: {sender}");
         }
 
         protected WorldPacket _worldPacket;
@@ -64,7 +65,8 @@ namespace Game.Networking
 
         public void LogPacket(WorldSession session)
         {
-            Log.outDebug(LogFilter.Network, "Sent ServerOpcode: {0} To: {1}", GetOpcode(), session != null ? session.GetPlayerInfo() : "");
+            string receiver = session != null ? session.GetPlayerInfo() : string.Empty;
+            Log.outDebug(LogFilter.Network, $"Sent ServerOpcode: {GetOpcode()} To: {receiver}");
         }
 
         public abstract void Write();

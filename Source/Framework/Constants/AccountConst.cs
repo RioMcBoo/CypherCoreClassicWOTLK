@@ -3,7 +3,7 @@
 
 namespace Framework.Constants
 {
-    public enum AccountDataTypes
+    public enum AccountDataTypes : byte
     {
         GlobalConfigCache = 0x00,
         PerCharacterConfigCache = 0x01,
@@ -18,15 +18,20 @@ namespace Framework.Constants
         GlobalFlaggedCache = 10,
         PerCharacterFlaggedCache = 11,
         PerCharacterClickBindingsCache = 12,
+        GlobalEditModeCache = 13,
+        PerCharacterEditModeCache = 14,
 
-        Max = 13,
-
-        AllAccountDataCacheMask = 0x1FFF,
-        GlobalCacheMask = 0x515,
-        PerCharacterCacheMask = 0x1AEA
+        Max = 15,
     }
 
-    public enum TutorialAction
+    public enum AccountDataTypeMask
+    {
+        AllAccountDataCacheMask = 0x7FFF,
+        GlobalCacheMask = 0x2515,
+        PerCharacterCacheMask = 0x5AEA
+    }
+
+    public enum TutorialAction : byte
     {
         Update = 0,
         Clear = 1,
@@ -745,7 +750,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum MountStatusFlags
+    public enum MountStatusFlags : byte
     {
         None = 0x00,
         NeedsFanfare = 0x01,
