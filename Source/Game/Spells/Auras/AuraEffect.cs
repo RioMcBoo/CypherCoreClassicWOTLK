@@ -1684,6 +1684,12 @@ namespace Game.Spells
 
             if (apply)
             {
+                var isAffectedByFeignDeath = bool (Unit attacker) =>
+                {
+                    Creature attackerCreature = attacker.ToCreature();
+                    return attackerCreature == null || !attackerCreature.IsIgnoringFeignDeath();
+                };
+
                 List<Unit> targets = new();
                 var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(target, target, target.GetMap().GetVisibilityRange());
                 var searcher = new UnitListSearcher(target, targets, u_check);
@@ -1692,6 +1698,9 @@ namespace Game.Spells
                 foreach (var unit in targets)
                 {
                     if (!unit.HasUnitState(UnitState.Casting))
+                        continue;
+
+                    if (!isAffectedByFeignDeath(unit))
                         continue;
 
                     for (var i = CurrentSpellTypes.Generic; i < CurrentSpellTypes.Max; i++)
@@ -1704,8 +1713,9 @@ namespace Game.Spells
                     }
                 }
 
-                foreach (var pair in target.GetThreatManager().GetThreatenedByMeList())
-                    pair.Value.ScaleThreat(0.0f);
+                foreach (var (_, refe) in target.GetThreatManager().GetThreatenedByMeList())
+                    if (isAffectedByFeignDeath(refe.GetOwner()))
+                        refe.ScaleThreat(0.0f);
 
                 if (target.GetMap().IsDungeon()) // feign death does not remove combat in dungeons
                 {
@@ -1715,7 +1725,7 @@ namespace Game.Spells
                         targetPlayer.SendAttackSwingCancelAttack();
                 }
                 else
-                    target.CombatStop(false, false);
+                    target.CombatStop(false, false, isAffectedByFeignDeath);
 
                 // prevent interrupt message
                 if (GetCasterGUID() == target.GetGUID() && target.GetCurrentSpell(CurrentSpellTypes.Generic) != null)
