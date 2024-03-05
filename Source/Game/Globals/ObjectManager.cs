@@ -82,13 +82,25 @@ namespace Game
             return cinfo.GetFirstInvisibleModel();
         }
 
-        public static void ChooseCreatureFlags(CreatureTemplate cInfo, out NPCFlags1 npcFlag, out NPCFlags2 npcFlag2, out UnitFlags unitFlags, out UnitFlags2 unitFlags2, out UnitFlags3 unitFlags3, CreatureData data = null)
+        public static void ChooseCreatureFlags(CreatureTemplate cInfo, out NPCFlags1 npcFlag, out NPCFlags2 npcFlag2, out UnitFlags unitFlags, out UnitFlags2 unitFlags2, out UnitFlags3 unitFlags3, CreatureStaticFlagsHolder staticFlags, CreatureData data = null)
         {
             npcFlag = data != null && data.npcflag.HasValue ? data.npcflag.Value : cInfo.Npcflag;
             npcFlag2 = data != null && data.npcflag2.HasValue ? data.npcflag2.Value : cInfo.Npcflag2;
+
             unitFlags = data != null && data.unit_flags.HasValue ? data.unit_flags.Value : cInfo.UnitFlags;
+            if (staticFlags.HasFlag(CreatureStaticFlags.CanSwim))
+                unitFlags |= UnitFlags.CanSwim;
+
             unitFlags2 = data != null && data.unit_flags2.HasValue ? data.unit_flags2.Value : cInfo.UnitFlags2;
+            if (staticFlags.HasFlag(CreatureStaticFlags3.CannotTurn))
+                unitFlags2 |= UnitFlags2.CannotTurn;
+
+            if (staticFlags.HasFlag(CreatureStaticFlags5.InteractWhileHostile))
+                unitFlags2 |= UnitFlags2.InteractWhileHostile;
+
             unitFlags3 = data != null && data.unit_flags3.HasValue ? data.unit_flags3.Value : cInfo.UnitFlags3;
+            if (staticFlags.HasFlag(CreatureStaticFlags3.AllowInteractionWhileInCombat))
+                unitFlags3 |= UnitFlags3.AllowInteractionWhileInCombat;
         }
 
         public static ResponseCodes CheckPlayerName(string name, Locale locale, bool create = false)

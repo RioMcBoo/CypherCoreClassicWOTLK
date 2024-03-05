@@ -286,6 +286,8 @@ namespace Game.Entities
 
             // TODO: migrate these in DB
             _staticFlags.ApplyFlag(CreatureStaticFlags2.AllowMountedCombat, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.AllowMountedCombat));
+
+            SetInteractionAllowedInCombat(GetCreatureDifficulty().TypeFlags.HasAnyFlag(CreatureTypeFlags.AllowInteractionWhileInCombat));
             _staticFlags.ApplyFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit));
 
             return true;
@@ -305,8 +307,8 @@ namespace Game.Entities
                 SetSheath(SheathState.Melee);
 
             SetFaction(cInfo.Faction);
-
-            ObjectManager.ChooseCreatureFlags(cInfo, out var npcFlags1, out var npcFlags2, out var unitFlags1, out var unitFlags2, out var unitFlags3, data);
+            
+            ObjectManager.ChooseCreatureFlags(cInfo, out var npcFlags1, out var npcFlags2, out var unitFlags1, out var unitFlags2, out var unitFlags3, _staticFlags, data);
 
             if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
             {
@@ -1163,7 +1165,7 @@ namespace Game.Entities
             var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(GetEntry());
             // Set InteractSpellID if there is only one row in npc_spellclick_spells in db for this creature
             if (clickBounds.Count == 1)
-                SetInteractSpellId((int)clickBounds[0].spellId);
+                SetInteractSpellId(clickBounds[0].spellId);
             else
                 SetInteractSpellId(0);
         }
@@ -2059,7 +2061,7 @@ namespace Game.Entities
                     CreatureData creatureData = GetCreatureData();
                     CreatureTemplate cInfo = GetCreatureTemplate();
 
-                    ObjectManager.ChooseCreatureFlags(cInfo, out var npcFlags1, out var npcFlags2, out var unitFlags1, out var unitFlags2, out var unitFlags3, creatureData);
+                    ObjectManager.ChooseCreatureFlags(cInfo, out var npcFlags1, out var npcFlags2, out var unitFlags1, out var unitFlags2, out var unitFlags3, _staticFlags, creatureData);
 
                     if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
                     {
@@ -2818,6 +2820,94 @@ namespace Game.Entities
 
             m_respawnTime = Math.Max(m_corpseRemoveTime + m_respawnDelay, m_respawnTime);
         }        
+
+        public override void SetInteractionAllowedWhileHostile(bool interactionAllowed)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags5.InteractWhileHostile, interactionAllowed);
+            base.SetInteractionAllowedWhileHostile(interactionAllowed);
+        }
+
+        public override void SetInteractionAllowedInCombat(bool interactionAllowed)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags3.AllowInteractionWhileInCombat, interactionAllowed);
+            base.SetInteractionAllowedInCombat(interactionAllowed);
+        }
+
+        public override void UpdateNearbyPlayersInteractions()
+        {
+            base.UpdateNearbyPlayersInteractions();
+
+            // If as a result of npcflag updates we stop seeing UNIT_NPC_FLAG_QUESTGIVER then
+            // we must also send SMSG_QUEST_GIVER_STATUS_MULTIPLE because client will not request it automatically
+            if (IsQuestGiver())
+            {
+                var sender = (Player receiver) => receiver.PlayerTalkClass.SendQuestGiverStatus(receiver.GetQuestDialogStatus(this), GetGUID());
+
+                MessageDistDeliverer notifier = new(this, sender, GetVisibilityRange());
+                Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            }
+        }
+
+        public bool HasScalableLevels()
+        {
+            return m_unitData.ContentTuningID != 0;
+        }
+
+        long GetMaxHealthByLevel(int level)
+        {
+            CreatureTemplate cInfo = GetCreatureTemplate();
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), 0, cInfo.UnitClass);
+
+            return (long)Math.Max(baseHealth * creatureDifficulty.HealthModifier, 1.0f);
+        }
+
+        public override float GetHealthMultiplierForTarget(WorldObject target)
+        {
+            if (!HasScalableLevels())
+                return 1.0f;
+
+            int levelForTarget = GetLevelForTarget(target);
+            if (GetLevel() < levelForTarget)
+                return 1.0f;
+
+            return (float)GetMaxHealthByLevel(levelForTarget) / GetCreateHealth();
+        }
+
+        public float GetBaseDamageForLevel(int level)
+        {
+            CreatureTemplate cInfo = GetCreatureTemplate();
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, creatureDifficulty.GetHealthScalingExpansion(), 0, cInfo.UnitClass);
+        }
+
+        public override float GetDamageMultiplierForTarget(WorldObject target)
+        {
+            if (!HasScalableLevels())
+                return 1.0f;
+
+            int levelForTarget = GetLevelForTarget(target);
+
+            return GetBaseDamageForLevel(levelForTarget) / GetBaseDamageForLevel(GetLevel());
+        }
+
+        float GetBaseArmorForLevel(int level)
+        {
+            CreatureTemplate cInfo = GetCreatureTemplate();
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, creatureDifficulty.GetHealthScalingExpansion(), 0, cInfo.UnitClass);
+            return baseArmor * creatureDifficulty.ArmorModifier;
+        }
+
+        public override float GetArmorMultiplierForTarget(WorldObject target)
+        {
+            if (!HasScalableLevels())
+                return 1.0f;
+
+            int levelForTarget = GetLevelForTarget(target);
+
+            return GetBaseArmorForLevel(levelForTarget) / GetBaseArmorForLevel(GetLevel());
+        }
 
         public override int GetLevelForTarget(WorldObject target)
         {
