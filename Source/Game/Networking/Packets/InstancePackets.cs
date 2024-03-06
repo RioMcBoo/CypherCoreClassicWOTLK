@@ -47,10 +47,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteInt32(MapID);
         }
 
-        public uint MapID;
+        public int MapID;
     }
 
     class InstanceResetFailed : ServerPacket
@@ -140,7 +140,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt8((byte)Type);
-            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt32((uint)DifficultyID);
             _worldPacket.WriteBit(Locked);
             _worldPacket.WriteBit(Extended);
@@ -148,7 +148,7 @@ namespace Game.Networking.Packets
         }
 
         public InstanceResetWarningType Type;
-        public uint MapID;
+        public int MapID;
         public Difficulty DifficultyID;
         public bool Locked;
         public bool Extended;
@@ -260,9 +260,9 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(MapID);
-            data.WriteUInt32(DifficultyID);
-            data.WriteUInt64(InstanceID);
+            data.WriteInt32(MapID);
+            data.WriteUInt32((uint)DifficultyID);
+            data.WriteInt64(InstanceID);
             data.WriteInt32(TimeRemaining);
             data.WriteUInt32(CompletedMask);
 
@@ -271,9 +271,9 @@ namespace Game.Networking.Packets
             data.FlushBits();
         }
 
-        public ulong InstanceID;
-        public uint MapID;
-        public uint DifficultyID;
+        public long InstanceID;
+        public int MapID;
+        public Difficulty DifficultyID;
         public int TimeRemaining;
         public uint CompletedMask;
 

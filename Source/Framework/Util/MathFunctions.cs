@@ -130,14 +130,17 @@ public static class MathFunctions
     {
         return value += (long)CalculatePct(value, pct);
     }
+
     public static int AddPct(ref int value, float pct)
     {
         return value += CalculatePct(value, pct);
     }
+
     public static uint AddPct(ref uint value, float pct)
     {
         return value += CalculatePct(value, pct);
     }
+
     public static float AddPct(ref float value, float pct)
     {
         return value += CalculatePct(value, pct);
@@ -147,17 +150,25 @@ public static class MathFunctions
     {
         return (int)(value * Convert.ToSingle(pct) / 100.0f);
     }
+
     public static uint CalculatePct(uint value, float pct)
     {
         return (uint)(value * Convert.ToSingle(pct) / 100.0f);
     }
+
     public static float CalculatePct(float value, float pct)
     {
         return value * pct / 100.0f;
     }
+
     public static ulong CalculatePct(ulong value, float pct)
     {
         return (ulong)(value * pct / 100.0f);
+    }
+
+    public static long CalculatePct(long value, float pct)
+    {
+        return (long)(value * pct / 100.0f);
     }
 
     public static float GetPctOf(float value, float max)
@@ -169,10 +180,12 @@ public static class MathFunctions
     {
         return num = (int)Math.Min(Math.Max(num, floor), ceil);
     }
+
     public static uint RoundToInterval(ref uint num, dynamic floor, dynamic ceil)
     {
         return num = Math.Min(Math.Max(num, floor), ceil);
     }
+
     public static float RoundToInterval(ref float num, dynamic floor, dynamic ceil)
     {
         return num = Math.Min(Math.Max(num, floor), ceil);

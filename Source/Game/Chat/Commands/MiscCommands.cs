@@ -1893,7 +1893,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            uint accountId = target != null ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
+            var accountId = target != null ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
 
             // find only player from same account if any
             if (target == null)
@@ -1950,8 +1950,8 @@ namespace Game.Chat
         [CommandNonGroup("unstuck", RBACPermissions.CommandUnstuck, true)]
         static bool HandleUnstuckCommand(CommandHandler handler, StringArguments args)
         {
-            uint SPELL_UNSTUCK_ID = 7355;
-            uint SPELL_UNSTUCK_VISUAL = 2683;
+            int SPELL_UNSTUCK_ID = 7355;
+            int SPELL_UNSTUCK_VISUAL = 2683;
 
             // No args required for players
             if (handler.GetSession() != null && handler.GetSession().HasPermission(RBACPermissions.CommandsUseUnstuckWithArgs))
@@ -2000,7 +2000,7 @@ namespace Game.Chat
                 if (caster != null)
                 {
                     ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
-                    Spell.SendCastResult(caster, spellInfo, new Networking.Packets.SpellCastVisual(SPELL_UNSTUCK_VISUAL, 0), castId, SpellCastResult.CantDoThatRightNow);
+                    Spell.SendCastResult(caster, spellInfo, new SpellCastVisual(SPELL_UNSTUCK_VISUAL, 0), castId, SpellCastResult.CantDoThatRightNow);
                 }
 
                 return false;
@@ -2033,7 +2033,7 @@ namespace Game.Chat
             }
 
             Player player = handler.GetSession().GetPlayer();
-            uint zoneid = player.GetZoneId();
+            var zoneid = player.GetZoneId();
 
             Weather weather = player.GetMap().GetOrGenerateZoneDefaultWeather(zoneid);
             if (weather == null)
@@ -2056,7 +2056,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint itemId = 0;
+            int itemId = 0;
 
             if (args[0] == '[')                                        // [name] manual form
             {
@@ -2088,7 +2088,7 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(idStr))
                     return false;
 
-                if (!uint.TryParse(idStr, out itemId))
+                if (!int.TryParse(idStr, out itemId))
                     return false;
             }
 
@@ -2137,7 +2137,7 @@ namespace Game.Chat
             // Subtract
             if (count < 0)
             {
-                uint destroyedItemCount = playerTarget.DestroyItemCount(itemId, (uint)-count, true, false);
+                var destroyedItemCount = playerTarget.DestroyItemCount(itemId, -count, true, false);
 
                 if (destroyedItemCount > 0)
                 {
@@ -2191,10 +2191,10 @@ namespace Game.Chat
 
             if (count > 0 && item != null)
             {
-                player.SendNewItem(item, (uint)count, false, true);
+                player.SendNewItem(item, count, false, true);
                 handler.SendSysMessage(CypherStrings.Additem, itemId, count, handler.GetNameLink(playerTarget));
                 if (player != playerTarget)
-                    playerTarget.SendNewItem(item, (uint)count, true, false);
+                    playerTarget.SendNewItem(item, count, true, false);
             }
 
             if (noSpaceForCount > 0)
@@ -2257,7 +2257,6 @@ namespace Game.Chat
                     }
 
                     Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, new ItemRandomEnchantmentId(), null, itemContext, bonusListIDsForItem);
-                    Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, 0, null, itemContext, bonusListIDsForItem.Empty() ? null : bonusListIDsForItem);
 
                     // remove binding (let GM give it to another player later)
                     if (player == playerTarget)
@@ -2432,9 +2431,9 @@ namespace Game.Chat
 
             if (count > 0 && item != null)
             {
-                player.SendNewItem(item, (uint)count, false, true);
+                player.SendNewItem(item, count, false, true);
                 if (player != playerTarget)
-                    playerTarget.SendNewItem(item, (uint)count, true, false);
+                    playerTarget.SendNewItem(item, count, true, false);
             }
 
             if (noSpaceForCount > 0)

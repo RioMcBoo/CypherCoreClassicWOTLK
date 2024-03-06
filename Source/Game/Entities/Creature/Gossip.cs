@@ -16,9 +16,9 @@ namespace Game.Misc
 {
     public class GossipMenu
     {
-        public uint AddMenuItem(int gossipOptionId, int orderIndex, GossipOptionNpc optionNpc, string optionText, uint language,
-            GossipOptionFlags flags, int? gossipNpcOptionId, uint actionMenuId, uint actionPoiId, bool boxCoded, uint boxMoney,
-            string boxText, int? spellId, int? overrideIconId, uint sender, uint action)
+        public int AddMenuItem(int gossipOptionId, int orderIndex, GossipOptionNpc optionNpc, string optionText, int language,
+            GossipOptionFlags flags, int? gossipNpcOptionId, int actionMenuId, int actionPoiId, bool boxCoded, uint boxMoney,
+            string boxText, int? spellId, int? overrideIconId, int sender, int action)
         {
             Cypher.Assert(_menuItems.Count <= SharedConst.MaxGossipMenuItems);
 
@@ -32,7 +32,7 @@ namespace Game.Misc
                     var bounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(_menuId);
                     var itr = bounds.MaxBy(a => a.OrderIndex);
                     if (itr != null)
-                        orderIndex = (int)(itr.OrderIndex + 1);
+                        orderIndex = (itr.OrderIndex + 1);
                 }
 
                 if (!_menuItems.Empty())
@@ -42,17 +42,17 @@ namespace Game.Misc
                         if (pair.Value.OrderIndex > orderIndex)
                             break;
 
-                        orderIndex = (int)pair.Value.OrderIndex + 1;
+                        orderIndex = pair.Value.OrderIndex + 1;
                     }
                 }
             }
 
             if (gossipOptionId == 0)
-                gossipOptionId = -((int)_menuId * 100 + orderIndex);
+                gossipOptionId = -(_menuId * 100 + orderIndex);
 
             GossipMenuItem menuItem = new();
             menuItem.GossipOptionID = gossipOptionId;
-            menuItem.OrderIndex = (uint)orderIndex;
+            menuItem.OrderIndex = orderIndex;
             menuItem.OptionNpc = optionNpc;
             menuItem.OptionText = optionText;
             menuItem.Language = language;
@@ -68,8 +68,8 @@ namespace Game.Misc
             menuItem.Sender = sender;
             menuItem.Action = action;
 
-            _menuItems.Add((uint)orderIndex, menuItem);
-            return (uint)orderIndex;
+            _menuItems.Add(orderIndex, menuItem);
+            return orderIndex;
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Game.Misc
         /// <param name="menuItemId">menuItemId Gossip menu item id.</param>
         /// <param name="sender">sender Identifier of the current menu.</param>
         /// <param name="action">action Custom action given to OnGossipHello.</param>
-        public void AddMenuItem(uint menuId, uint menuItemId, uint sender, uint action)
+        public void AddMenuItem(int menuId, int menuItemId, int sender, int action)
         {
             // Find items for given menu id.
             var bounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(menuId);
@@ -95,7 +95,7 @@ namespace Game.Misc
             AddMenuItem(gossipMenuItems, sender, action);
         }
 
-        public void AddMenuItem(GossipMenuItems menuItem, uint sender, uint action)
+        public void AddMenuItem(GossipMenuItems menuItem, int sender, int action)
         {
             // Store texts for localization.
             string strOptionText, strBoxText;
@@ -134,7 +134,7 @@ namespace Game.Misc
                 }
             }
 
-            AddMenuItem(menuItem.GossipOptionID, (int)menuItem.OrderIndex, menuItem.OptionNpc, strOptionText, menuItem.Language, menuItem.Flags,
+            AddMenuItem(menuItem.GossipOptionID, menuItem.OrderIndex, menuItem.OptionNpc, strOptionText, menuItem.Language, menuItem.Flags,
                 menuItem.GossipNpcOptionID, menuItem.ActionMenuID, menuItem.ActionPoiID, menuItem.BoxCoded, menuItem.BoxMoney, strBoxText,
                 menuItem.SpellID, menuItem.OverrideIconID, sender, action);
         }
@@ -144,12 +144,12 @@ namespace Game.Misc
             return _menuItems.Values.FirstOrDefault(item => item.GossipOptionID == gossipOptionId);
         }
 
-        GossipMenuItem GetItemByIndex(uint orderIndex)
+        GossipMenuItem GetItemByIndex(int orderIndex)
         {
             return _menuItems.LookupByKey(orderIndex);
         }
 
-        public uint GetMenuItemSender(uint orderIndex)
+        public int GetMenuItemSender(int orderIndex)
         {
             GossipMenuItem item = GetItemByIndex(orderIndex);
             if (item != null)
@@ -158,7 +158,7 @@ namespace Game.Misc
             return 0;
         }
 
-        public uint GetMenuItemAction(uint orderIndex)
+        public int GetMenuItemAction(int orderIndex)
         {
             GossipMenuItem item = GetItemByIndex(orderIndex);
             if (item != null)
@@ -167,7 +167,7 @@ namespace Game.Misc
             return 0;
         }
 
-        public bool IsMenuItemCoded(uint orderIndex)
+        public bool IsMenuItemCoded(int orderIndex)
         {
             GossipMenuItem item = GetItemByIndex(orderIndex);
             if (item != null)
@@ -181,8 +181,8 @@ namespace Game.Misc
             _menuItems.Clear();
         }
 
-        public void SetMenuId(uint menu_id) { _menuId = menu_id; }
-        public uint GetMenuId() { return _menuId; }
+        public void SetMenuId(int menu_id) { _menuId = menu_id; }
+        public int GetMenuId() { return _menuId; }
         public void SetLocale(Locale locale) { _locale = locale; }
         Locale GetLocale() { return _locale; }
 
@@ -196,13 +196,13 @@ namespace Game.Misc
             return _menuItems.Empty();
         }
 
-        public SortedDictionary<uint, GossipMenuItem> GetMenuItems()
+        public SortedDictionary<int, GossipMenuItem> GetMenuItems()
         {
             return _menuItems;
         }
 
-        SortedDictionary<uint, GossipMenuItem> _menuItems = new();
-        uint _menuId;
+        SortedDictionary<int, GossipMenuItem> _menuItems = new();
+        int _menuId;
         Locale _locale;
     }
 
@@ -234,7 +234,7 @@ namespace Game.Misc
             _questMenu.ClearMenu();
         }
 
-        public void SendGossipMenu(uint titleTextId, ObjectGuid objectGUID)
+        public void SendGossipMenu(int titleTextId, ObjectGuid objectGUID)
         {
             _interactionData.Reset();
             _interactionData.SourceGuid = objectGUID;
@@ -249,7 +249,7 @@ namespace Game.Misc
 
             NpcText text = Global.ObjectMgr.GetNpcText(titleTextId);
             if (text != null)
-                packet.TextID = (int)text.Data.SelectRandomElementByWeight(data => data.Probability).BroadcastTextID;
+                packet.TextID = text.Data.SelectRandomElementByWeight(data => data.Probability).BroadcastTextID;
 
             foreach (var (index, item) in _gossipMenu.GetMenuItems())
             {
@@ -260,7 +260,7 @@ namespace Game.Misc
                 opt.OptionCost = (int)item.BoxMoney;     // money required to open menu, 2.0.3
                 opt.OptionLanguage = item.Language;
                 opt.Flags = item.Flags;
-                opt.OrderIndex = (int)item.OrderIndex;
+                opt.OrderIndex = item.OrderIndex;
                 opt.Text = item.OptionText;            // text for gossip item
                 opt.Confirm = item.BoxText;      // accept text (related to money) pop up box, 2.0.3
                 opt.Status = GossipOptionStatus.Available;
@@ -272,7 +272,7 @@ namespace Game.Misc
             for (byte i = 0; i < _questMenu.GetMenuItemCount(); ++i)
             {
                 QuestMenuItem item = _questMenu.GetItem(i);
-                uint questID = item.QuestId;
+                var questID = item.QuestId;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
                 if (quest != null)
                 {
@@ -282,8 +282,8 @@ namespace Game.Misc
                     gossipText.QuestType = item.QuestIcon;
                     gossipText.QuestLevel = quest.Level;
                     gossipText.QuestMaxScalingLevel = quest.MaxScalingLevel;
-                    gossipText.QuestFlags = (uint)quest.Flags;
-                    gossipText.QuestFlagsEx = (uint)quest.FlagsEx;
+                    gossipText.QuestFlags = quest.Flags;
+                    gossipText.QuestFlagsEx = quest.FlagsEx;
                     gossipText.Repeatable = quest.IsTurnIn() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
                     gossipText.Important = quest.IsImportant();
 
@@ -310,7 +310,7 @@ namespace Game.Misc
             _session.SendPacket(new GossipComplete());
         }
 
-        public void SendPointOfInterest(uint id)
+        public void SendPointOfInterest(int id)
         {
             PointOfInterest pointOfInterest = Global.ObjectMgr.GetPointOfInterest(id);
             if (pointOfInterest == null)
@@ -367,7 +367,7 @@ namespace Game.Misc
             {
                 QuestMenuItem questMenuItem = _questMenu.GetItem(i);
 
-                uint questID = questMenuItem.QuestId;
+                var questID = questMenuItem.QuestId;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
                 if (quest != null)
                 {
@@ -377,8 +377,8 @@ namespace Game.Misc
                     text.QuestLevel = quest.Level;
                     text.QuestMaxScalingLevel = quest.MaxScalingLevel;
                     text.QuestType = questMenuItem.QuestIcon;
-                    text.QuestFlags = (uint)quest.Flags;
-                    text.QuestFlagsEx = (uint)quest.FlagsEx;
+                    text.QuestFlags = quest.Flags;
+                    text.QuestFlagsEx = quest.FlagsEx;
                     text.Repeatable = quest.IsTurnIn() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
                     text.Important = quest.IsImportant();
                     text.QuestTitle = quest.LogTitle;
@@ -562,9 +562,9 @@ namespace Game.Misc
             for (uint i = 0; i < SharedConst.QuestEmoteCount && quest.OfferRewardEmote[i] != 0; ++i)
                 offer.Emotes.Add(new QuestDescEmote(quest.OfferRewardEmote[i], quest.OfferRewardEmoteDelay[i]));
 
-            offer.QuestFlags[0] = (uint)quest.Flags;
-            offer.QuestFlags[1] = (uint)quest.FlagsEx;
-            offer.QuestFlags[2] = (uint)quest.FlagsEx2;
+            offer.QuestFlags = quest.Flags;
+            offer.QuestFlagsEx = quest.FlagsEx;
+            offer.QuestFlagsEx2 = quest.FlagsEx2;
 
             packet.PortraitTurnIn = quest.QuestTurnInPortrait;
             packet.PortraitGiver = quest.QuestGiverPortrait;
@@ -632,9 +632,9 @@ namespace Game.Misc
                 packet.CompEmoteType = quest.EmoteOnIncomplete;
             }
 
-            packet.QuestFlags[0] = (uint)quest.Flags;
-            packet.QuestFlags[1] = (uint)quest.FlagsEx;
-            packet.QuestFlags[2] = (uint)quest.FlagsEx2;
+            packet.QuestFlags = quest.Flags;
+            packet.QuestFlagsEx = quest.FlagsEx;
+            packet.QuestFlagsEx2 = quest.FlagsEx2;
             packet.SuggestPartyMembers = quest.SuggestedPlayers;
 
             // incomplete: FD
@@ -647,10 +647,10 @@ namespace Game.Misc
                 switch (obj.Type)
                 {
                     case QuestObjectiveType.Item:
-                        packet.Collect.Add(new QuestObjectiveCollect((uint)obj.ObjectID, obj.Amount, (uint)obj.Flags));
+                        packet.Collect.Add(new QuestObjectiveCollect(obj.ObjectID, obj.Amount, (uint)obj.Flags));
                         break;
                     case QuestObjectiveType.Currency:
-                        packet.Currency.Add(new QuestCurrency((uint)obj.ObjectID, obj.Amount));
+                        packet.Currency.Add(new QuestCurrency(obj.ObjectID, obj.Amount));
                         break;
                     case QuestObjectiveType.Money:
                         packet.MoneyToGet += obj.Amount;
@@ -671,9 +671,9 @@ namespace Game.Misc
 
         bool IsEmpty() { return _gossipMenu.IsEmpty() && _questMenu.IsEmpty(); }
 
-        public uint GetGossipOptionSender(uint selection) { return _gossipMenu.GetMenuItemSender(selection); }
-        public uint GetGossipOptionAction(uint selection) { return _gossipMenu.GetMenuItemAction(selection); }
-        public bool IsGossipOptionCoded(uint selection) { return _gossipMenu.IsMenuItemCoded(selection); }
+        public int GetGossipOptionSender(int selection) { return _gossipMenu.GetMenuItemSender(selection); }
+        public int GetGossipOptionAction(int selection) { return _gossipMenu.GetMenuItemAction(selection); }
+        public bool IsGossipOptionCoded(int selection) { return _gossipMenu.IsMenuItemCoded(selection); }
 
         GossipMenu _gossipMenu = new();
         QuestMenu _questMenu = new();
@@ -683,7 +683,7 @@ namespace Game.Misc
 
     public class QuestMenu
     {
-        public void AddMenuItem(uint QuestId, byte Icon)
+        public void AddMenuItem(int QuestId, byte Icon)
         {
             if (Global.ObjectMgr.GetQuestTemplate(QuestId) == null)
                 return;
@@ -696,7 +696,7 @@ namespace Game.Misc
             _questMenuItems.Add(questMenuItem);
         }
 
-        bool HasItem(uint questId)
+        bool HasItem(int questId)
         {
             foreach (var item in _questMenuItems)
                 if (item.QuestId == questId)
@@ -730,17 +730,17 @@ namespace Game.Misc
 
     public struct QuestMenuItem
     {
-        public uint QuestId;
+        public int QuestId;
         public byte QuestIcon;
     }
 
     public class GossipMenuItem
     {
         public int GossipOptionID;
-        public uint OrderIndex;
+        public int OrderIndex;
         public GossipOptionNpc OptionNpc;
         public string OptionText;
-        public uint Language;
+        public int Language;
         public GossipOptionFlags Flags;
         public int? GossipNpcOptionID;
         public bool BoxCoded;
@@ -750,12 +750,12 @@ namespace Game.Misc
         public int? OverrideIconID;
 
         // action data
-        public uint ActionMenuID;
-        public uint ActionPoiID;
+        public int ActionMenuID;
+        public int ActionPoiID;
 
         // additional scripting identifiers
-        public uint Sender;
-        public uint Action;
+        public int Sender;
+        public int Action;
     }
 
     public struct NpcTextData
@@ -805,11 +805,11 @@ namespace Game.Misc
     {
         public int Id;
         public Vector3 Pos;
-        public uint Icon;
+        public int Icon;
         public uint Flags;
-        public uint Importance;
+        public int Importance;
         public string Name;
-        public uint WMOGroupID;
+        public int WMOGroupID;
     }
 
     public class PointOfInterestLocale

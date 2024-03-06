@@ -163,9 +163,9 @@ namespace Game.Groups
 
         public void LoadGroupFromDB(SQLFields field)
         {
-            m_dbStoreId = field.Read<uint>(17);
+            m_dbStoreId = field.Read<int>(17);
             m_guid = ObjectGuid.Create(HighGuid.Party, Global.GroupMgr.GenerateGroupId());
-            m_leaderGuid = ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(0));
+            m_leaderGuid = ObjectGuid.Create(HighGuid.Player, field.Read<long>(0));
 
             // group leader not exist
             var leader = Global.CharacterCacheStorage.GetCharacterCacheByGuid(m_leaderGuid);
@@ -175,7 +175,7 @@ namespace Game.Groups
             m_leaderFactionGroup = Player.GetFactionGroupForRace(leader.RaceId);
             m_leaderName = leader.Name;
             m_lootMethod = (LootMethod)field.Read<byte>(1);
-            m_looterGuid = ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(2));
+            m_looterGuid = ObjectGuid.Create(HighGuid.Player, field.Read<long>(2));
             m_lootThreshold = (ItemQuality)field.Read<byte>(3);
 
             for (byte i = 0; i < MapConst.TargetIconsCount; ++i)
@@ -189,13 +189,13 @@ namespace Game.Groups
             m_raidDifficulty = Player.CheckLoadedRaidDifficultyID((Difficulty)field.Read<byte>(14));
             m_legacyRaidDifficulty = Player.CheckLoadedLegacyRaidDifficultyID((Difficulty)field.Read<byte>(15));
 
-            m_masterLooterGuid = ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(16));
+            m_masterLooterGuid = ObjectGuid.Create(HighGuid.Player, field.Read<long>(16));
 
             if (m_groupFlags.HasAnyFlag(GroupFlags.Lfg))
                 Global.LFGMgr._LoadFromDB(field, GetGUID());
         }
 
-        public void LoadMemberFromDB(ulong guidLow, byte memberFlags, byte subgroup, LfgRoles roles)
+        public void LoadMemberFromDB(long guidLow, byte memberFlags, byte subgroup, LfgRoles roles)
         {
             MemberSlot member = new();
             member.guid = ObjectGuid.Create(HighGuid.Player, guidLow);
@@ -613,7 +613,7 @@ namespace Game.Groups
                 if (IsLFGGroup() && GetMembersCount() == 1)
                 {
                     Player leader = Global.ObjAccessor.FindPlayer(GetLeaderGUID());
-                    uint mapId = Global.LFGMgr.GetDungeonMapId(GetGUID());
+                    var mapId = Global.LFGMgr.GetDungeonMapId(GetGUID());
                     if (mapId == 0 || leader == null || (leader.IsAlive() && leader.GetMapId() != mapId))
                     {
                         Disband();
@@ -1159,19 +1159,19 @@ namespace Game.Groups
             }
         }
 
-        public GroupJoinBattlegroundResult CanJoinBattlegroundQueue(BattlegroundTemplate bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint MinPlayerCount, uint MaxPlayerCount, bool isRated, uint arenaSlot, out ObjectGuid errorGuid)
+        public GroupJoinBattlegroundResult CanJoinBattlegroundQueue(BattlegroundTemplate bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, int MinPlayerCount, int MaxPlayerCount, bool isRated, int arenaSlot, out ObjectGuid errorGuid)
         {
             errorGuid = new ObjectGuid();
             // check if this group is LFG group
             if (IsLFGGroup())
                 return GroupJoinBattlegroundResult.LfgCantUseBattleground;
 
-            BattlemasterListRecord bgEntry = CliDB.BattlemasterListStorage.LookupByKey(bgOrTemplate.Id);
+            BattlemasterListRecord bgEntry = CliDB.BattlemasterListStorage.LookupByKey((int)bgOrTemplate.Id);
             if (bgEntry == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;            // shouldn't happen
 
             // check for min / max count
-            uint memberscount = GetMembersCount();
+            var memberscount = GetMembersCount();
 
             if (memberscount > bgEntry.MaxGroupSize)                // no MinPlayerCount for Battlegrounds
                 return GroupJoinBattlegroundResult.None;                        // ERR_GROUP_JOIN_Battleground_TOO_MANY handled on client side
@@ -1182,11 +1182,11 @@ namespace Game.Groups
             if (reference == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgOrTemplate.BattlemasterEntry.MapId[0], reference.GetLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.BattlemasterEntry.MapId[0], reference.GetLevel());
             if (bracketEntry == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
-            uint arenaTeamId = reference.GetArenaTeamId((byte)arenaSlot);
+            var arenaTeamId = reference.GetArenaTeamId((byte)arenaSlot);
             Team team = reference.GetTeam();
             bool isMercenary = reference.HasAura(BattlegroundConst.SpellMercenaryContractHorde) || reference.HasAura(BattlegroundConst.SpellMercenaryContractAlliance);
 
@@ -1218,8 +1218,8 @@ namespace Game.Groups
                 if (member.InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeId))
                     return GroupJoinBattlegroundResult.BattlegroundJoinFailed;            // not blizz-like
                 // don't let join if someone from the group is in bg queue random
-                bool isInRandomBgQueue = member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RB, BattlegroundQueueIdType.Battleground, false, 0))
-                    || member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RandomEpic, BattlegroundQueueIdType.Battleground, false, 0));
+                bool isInRandomBgQueue = member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId(BattlegroundTypeId.RB, BattlegroundQueueIdType.Battleground, false, 0))
+                    || member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId(BattlegroundTypeId.RandomEpic, BattlegroundQueueIdType.Battleground, false, 0));
                 if (bgOrTemplate.Id != BattlegroundTypeId.AA && isInRandomBgQueue)
                     return GroupJoinBattlegroundResult.InRandomBg;
                 // don't let join to bg queue random if someone from the group is already in bg queue
@@ -1322,14 +1322,14 @@ namespace Game.Groups
 
         public Difficulty GetDifficultyID(MapRecord mapEntry)
         {
-            if (!mapEntry.IsRaid())
+            if (!mapEntry.IsRaid)
                 return m_dungeonDifficulty;
 
             MapDifficultyRecord defaultDifficulty = Global.DB2Mgr.GetDefaultMapDifficulty(mapEntry.Id);
             if (defaultDifficulty == null)
                 return m_legacyRaidDifficulty;
 
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(defaultDifficulty.DifficultyID);
+            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey((int)defaultDifficulty.DifficultyID);
             if (difficulty == null || difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy))
                 return m_legacyRaidDifficulty;
 
@@ -1620,7 +1620,7 @@ namespace Game.Groups
             return m_guid;
         }
 
-        public ulong GetLowGUID()
+        public long GetLowGUID()
         {
             return m_guid.GetCounter();
         }
@@ -1891,11 +1891,11 @@ namespace Game.Groups
 
         public GroupCategory GetGroupCategory() { return m_groupCategory; }
 
-        public uint GetDbStoreId() { return m_dbStoreId; }
+        public int GetDbStoreId() { return m_dbStoreId; }
         public List<MemberSlot> GetMemberSlots() { return m_memberSlots; }
-        public GroupReference GetFirstMember() { return (GroupReference)m_memberMgr.GetFirst(); }
-        public uint GetMembersCount() { return (uint)m_memberSlots.Count; }
-        public uint GetInviteeCount() { return (uint)m_invitees.Count; }
+        public GroupReference GetFirstMember() { return m_memberMgr.GetFirst(); }
+        public int GetMembersCount() { return m_memberSlots.Count; }
+        public int GetInviteeCount() { return m_invitees.Count; }
         public GroupFlags GetGroupFlags() { return m_groupFlags; }
 
         bool IsReadyCheckStarted() { return m_readyCheckStarted; }
@@ -1909,23 +1909,23 @@ namespace Game.Groups
         public ObjectGuid GetRecentInstanceOwner(int mapId)
         {
 
-            if (m_recentInstances.TryGetValue(mapId, out Tuple<ObjectGuid, uint> value))
+            if (m_recentInstances.TryGetValue(mapId, out (ObjectGuid, int) value))
                 return value.Item1;
 
             return m_leaderGuid;
         }
 
-        public uint GetRecentInstanceId(int mapId)
+        public int GetRecentInstanceId(int mapId)
         {
-            if (m_recentInstances.TryGetValue(mapId, out Tuple<ObjectGuid, uint> value))
+            if (m_recentInstances.TryGetValue(mapId, out (ObjectGuid, int) value))
                 return value.Item2;
 
             return 0;
         }
 
-        public void SetRecentInstance(int mapId, ObjectGuid instanceOwner, uint instanceId)
+        public void SetRecentInstance(int mapId, ObjectGuid instanceOwner, int instanceId)
         {
-            m_recentInstances[mapId] = Tuple.Create(instanceOwner, instanceId);
+            m_recentInstances[mapId] = (instanceOwner, instanceId);
         }
         
         List<MemberSlot> m_memberSlots = new();
@@ -1946,11 +1946,11 @@ namespace Game.Groups
         ItemQuality m_lootThreshold;
         ObjectGuid m_looterGuid;
         ObjectGuid m_masterLooterGuid;
-        Dictionary<int, Tuple<ObjectGuid, uint>> m_recentInstances = new();
+        Dictionary<int,(ObjectGuid, int)> m_recentInstances = new();
         GroupInstanceRefManager m_ownedInstancesMgr = new();
         byte[] m_subGroupsCounts;
         ObjectGuid m_guid;
-        uint m_dbStoreId;
+        int m_dbStoreId;
         bool _isLeaderOffline;
         TimeTracker _leaderOfflineTimer = new();
 

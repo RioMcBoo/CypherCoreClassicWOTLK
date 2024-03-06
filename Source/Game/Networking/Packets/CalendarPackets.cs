@@ -173,13 +173,13 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt8((byte)EventType);
             _worldPacket.WritePackedGuid(OwnerGuid);
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventID);
             _worldPacket.WriteUInt8((byte)GetEventType);
             _worldPacket.WriteInt32(TextureID);
             _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WritePackedTime32(Date);
             _worldPacket.WriteUInt32((uint)LockDate);
-            _worldPacket.WriteUInt64(EventClubID);
+            _worldPacket.WriteInt64(EventClubID);
             _worldPacket.WriteInt32(Invites.Count);
 
             _worldPacket.WriteBits(EventName.GetByteCount(), 8);
@@ -194,8 +194,8 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid OwnerGuid;
-        public ulong EventClubID;
-        public ulong EventID;
+        public long EventClubID;
+        public long EventID;
         public long Date;
         public long LockDate;
         public CalendarFlags Flags;
@@ -359,13 +359,13 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventID);
             _worldPacket.WritePackedTime32(Date);
             _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WriteUInt8((byte)Status);
         }
 
-        public ulong EventID;
+        public long EventID;
         public long Date;
         public CalendarFlags Flags;
         public CalendarInviteStatus Status;

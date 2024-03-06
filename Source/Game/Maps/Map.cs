@@ -525,7 +525,7 @@ namespace Game.Maps
             }
         }
 
-        public void UpdatePlayerZoneStats(uint oldZone, uint newZone)
+        public void UpdatePlayerZoneStats(int oldZone, int newZone)
         {
             // Nothing to do if no change
             if (oldZone == newZone)
@@ -1643,13 +1643,13 @@ namespace Game.Maps
             return result;
         }
 
-        public static TransferAbortParams PlayerCannotEnter(uint mapid, Player player)
+        public static TransferAbortParams PlayerCannotEnter(int mapid, Player player)
         {
             var entry = CliDB.MapStorage.LookupByKey(mapid);
             if (entry == null)
                 return new TransferAbortParams(TransferAbortReason.MapNotAllowed);
 
-            if (!entry.IsDungeon())
+            if (!entry.IsDungeon)
                 return null;
 
             Difficulty targetDifficulty = player.GetDifficultyID(entry);
@@ -1670,14 +1670,14 @@ namespace Game.Maps
             }
 
             Group group = player.GetGroup();
-            if (entry.IsRaid() && (int)entry.Expansion() >= WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
+            if (entry.IsRaid && (int)entry.Expansion >= WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
                 if ((group == null || !group.IsRaidGroup()) && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
                     return new TransferAbortParams(TransferAbortReason.NeedGroup);
 
-            if (entry.Instanceable())
+            if (entry.Instanceable)
             {
                 //Get instance where player's group is bound & its map
-                uint instanceIdToCheck = Global.MapMgr.FindInstanceIdForPlayer(mapid, player);
+                var instanceIdToCheck = Global.MapMgr.FindInstanceIdForPlayer(mapid, player);
                 Map boundMap = Global.MapMgr.FindMap(mapid, instanceIdToCheck);
                 if (boundMap != null)
                 {
@@ -1687,7 +1687,7 @@ namespace Game.Maps
                 }
 
                 // players are only allowed to enter 10 instances per hour
-                if (!entry.GetFlags2().HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon() && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
+                if (!entry.HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
                     return new TransferAbortParams(TransferAbortReason.TooManyInstances);
             }
 
@@ -2665,7 +2665,7 @@ namespace Game.Maps
             m_activeNonPlayers.Remove(obj);
         }
 
-        public void SaveRespawnTime(SpawnObjectType type, ulong spawnId, uint entry, long respawnTime, uint gridId = 0, SQLTransaction dbTrans = null, bool startup = false)
+        public void SaveRespawnTime(SpawnObjectType type, long spawnId, int entry, long respawnTime, int gridId = 0, SQLTransaction dbTrans = null, bool startup = false)
         {
             SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
             if (data == null)
@@ -2726,7 +2726,7 @@ namespace Game.Maps
                 do
                 {
                     SpawnObjectType type = (SpawnObjectType)result.Read<ushort>(0);
-                    var spawnId = result.Read<ulong>(1);
+                    var spawnId = result.Read<long>(1);
                     var respawnTime = result.Read<long>(2);
 
                     if (SpawnData.TypeHasData(type))
@@ -2806,8 +2806,8 @@ namespace Game.Maps
                     {
                         do
                         {
-                            ulong guid = phaseResult.Read<ulong>(0);
-                            uint phaseId = phaseResult.Read<uint>(1);
+                            var guid = phaseResult.Read<long>(0);
+                            var phaseId = phaseResult.Read<int>(1);
 
                             phases.Add(guid, phaseId);
 
@@ -2840,8 +2840,8 @@ namespace Game.Maps
 
                 do
                 {
-                    CorpseType type = (CorpseType)result.Read<byte>(13);
-                    ulong guid = result.Read<ulong>(15);
+                    var type = (CorpseType)result.Read<byte>(13);
+                    var guid = result.Read<long>(15);
                     if (type >= CorpseType.Max || type == CorpseType.Bones)
                     {
                         Log.outError(LogFilter.Maps, $"Corpse (guid: {guid}) have wrong corpse Type ({type}), not loading.");
@@ -3347,13 +3347,13 @@ namespace Game.Maps
 
         public Dictionary<ObjectGuid, WorldObject> GetObjectsStore() { return _objectsStore; }
 
-        public MultiMap<ulong, Creature> GetCreatureBySpawnIdStore() { return _creatureBySpawnIdStore; }
+        public MultiMap<long, Creature> GetCreatureBySpawnIdStore() { return _creatureBySpawnIdStore; }
 
-        public MultiMap<ulong, GameObject> GetGameObjectBySpawnIdStore() { return _gameobjectBySpawnIdStore; }
+        public MultiMap<long, GameObject> GetGameObjectBySpawnIdStore() { return _gameobjectBySpawnIdStore; }
 
-        public MultiMap<ulong, AreaTrigger> GetAreaTriggerBySpawnIdStore() { return _areaTriggerBySpawnIdStore; }
+        public MultiMap<long, AreaTrigger> GetAreaTriggerBySpawnIdStore() { return _areaTriggerBySpawnIdStore; }
 
-        public List<Corpse> GetCorpsesInCell(uint cellId)
+        public List<Corpse> GetCorpsesInCell(int cellId)
         {
             return _corpsesByCell.LookupByKey(cellId);
         }
@@ -3397,7 +3397,7 @@ namespace Game.Maps
             return 0;
         }
 
-        public long GetRespawnTime(SpawnObjectType type, ulong spawnId)
+        public long GetRespawnTime(SpawnObjectType type, long spawnId)
         {
             var map = GetRespawnMapForType(type);
             if (map != null)
@@ -3408,16 +3408,16 @@ namespace Game.Maps
             return 0;
         }
 
-        public long GetCreatureRespawnTime(ulong spawnId) { return GetRespawnTime(SpawnObjectType.Creature, spawnId); }
+        public long GetCreatureRespawnTime(long spawnId) { return GetRespawnTime(SpawnObjectType.Creature, spawnId); }
 
-        public long GetGORespawnTime(ulong spawnId) { return GetRespawnTime(SpawnObjectType.GameObject, spawnId); }
+        public long GetGORespawnTime(long spawnId) { return GetRespawnTime(SpawnObjectType.GameObject, spawnId); }
 
         void SetTimer(uint t)
         {
             i_gridExpiry = t < MapConst.MinGridDelay ? MapConst.MinGridDelay : t;
         }
 
-        private Grid GetGrid(uint x, uint y)
+        private Grid GetGrid(int x, int y)
         {
             if (x > MapConst.MaxGrids || y > MapConst.MaxGrids)
                 return null;
@@ -3425,12 +3425,12 @@ namespace Game.Maps
             return i_grids[x][y];
         }
 
-        private bool IsGridObjectDataLoaded(uint x, uint y)
+        private bool IsGridObjectDataLoaded(int x, int y)
         {
             return GetGrid(x, y).IsGridObjectDataLoaded();
         }
 
-        void SetGridObjectDataLoaded(bool pLoaded, uint x, uint y)
+        void SetGridObjectDataLoaded(bool pLoaded, int x, int y)
         {
             GetGrid(x, y).SetGridObjectDataLoaded(pLoaded);
         }
@@ -3507,7 +3507,7 @@ namespace Game.Maps
             return go != null ? go.ToTransport() : null;
         }
 
-        public Creature GetCreatureBySpawnId(ulong spawnId)
+        public Creature GetCreatureBySpawnId(long spawnId)
         {
             var bounds = GetCreatureBySpawnIdStore().LookupByKey(spawnId);
             if (bounds.Empty())
@@ -3518,7 +3518,7 @@ namespace Game.Maps
             return foundCreature != null ? foundCreature : bounds[0];
         }
 
-        public GameObject GetGameObjectBySpawnId(ulong spawnId)
+        public GameObject GetGameObjectBySpawnId(long spawnId)
         {
             var bounds = GetGameObjectBySpawnIdStore().LookupByKey(spawnId);
             if (bounds.Empty())
@@ -3529,7 +3529,7 @@ namespace Game.Maps
             return foundGameObject != null ? foundGameObject : bounds[0];
         }
 
-        public AreaTrigger GetAreaTriggerBySpawnId(ulong spawnId)
+        public AreaTrigger GetAreaTriggerBySpawnId(long spawnId)
         {
             var bounds = GetAreaTriggerBySpawnIdStore().LookupByKey(spawnId);
             if (bounds.Empty())
@@ -3538,7 +3538,7 @@ namespace Game.Maps
             return bounds.FirstOrDefault();
         }
 
-        public WorldObject GetWorldObjectBySpawnId(SpawnObjectType type, ulong spawnId)
+        public WorldObject GetWorldObjectBySpawnId(SpawnObjectType type, long spawnId)
         {
             switch (type)
             {
@@ -3567,7 +3567,7 @@ namespace Game.Maps
             }
         }
 
-        public TempSummon SummonCreature(int entry, Position pos, SummonPropertiesRecord properties = null, TimeSpan duration = default, WorldObject summoner = null, int spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
+        public TempSummon SummonCreature(int entry, Position pos, SummonPropertiesRecord properties = null, TimeSpan duration = default, WorldObject summoner = null, int spellId = 0, int vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
         {
             var mask = UnitTypeMask.Summon;
             if (properties != null)
@@ -4687,7 +4687,7 @@ namespace Game.Maps
         MultiMap<long, Creature> _creatureBySpawnIdStore = new();
         MultiMap<long, GameObject> _gameobjectBySpawnIdStore = new();
         MultiMap<long, AreaTrigger> _areaTriggerBySpawnIdStore = new();
-        MultiMap<uint, Corpse> _corpsesByCell = new();
+        MultiMap<int, Corpse> _corpsesByCell = new();
         Dictionary<ObjectGuid, Corpse> _corpsesByPlayer = new();
         List<Corpse> _corpseBones = new();
 
@@ -4704,7 +4704,7 @@ namespace Game.Maps
 
     public class InstanceMap : Map
     {
-        public InstanceMap(int id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
+        public InstanceMap(int id, long expiry, int InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
         {
             i_instanceLock = instanceLock;
 
@@ -4752,7 +4752,7 @@ namespace Game.Maps
                 return base.CannotEnter(player);
 
             // cannot enter if the instance is full (player cap), GMs don't count
-            uint maxPlayers = GetMaxPlayers();
+            var maxPlayers = GetMaxPlayers();
             if (GetPlayersCountExceptGMs() >= maxPlayers)
             {
                 Log.outInfo(LogFilter.Maps, "MAP: Instance '{0}' of map '{1}' cannot have more than '{2}' players. Player '{3}' rejected", GetInstanceId(), GetMapName(), maxPlayers, player.GetName());
@@ -4780,9 +4780,9 @@ namespace Game.Maps
             player.AddInstanceEnterTime(GetInstanceId(), GameTime.GetGameTime());
 
             MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-            if (entries.MapDifficulty.HasResetSchedule() && i_instanceLock != null && !i_instanceLock.IsNew())
+            if (entries.MapDifficulty.HasResetSchedule && i_instanceLock != null && !i_instanceLock.IsNew())
             {
-                if (!entries.MapDifficulty.IsUsingEncounterLocks())
+                if (!entries.MapDifficulty.IsUsingEncounterLocks)
                 {
                     InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
                     if (playerLock == null || (playerLock.IsExpired() && playerLock.IsExtended()) ||
@@ -4792,9 +4792,9 @@ namespace Game.Maps
                         pendingRaidLock.TimeUntilLock = 60000;
                         pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
                         pendingRaidLock.Extending = playerLock != null && playerLock.IsExtended();
-                        pendingRaidLock.WarningOnly = entries.Map.IsFlexLocking(); // events it triggers:  1 : INSTANCE_LOCK_WARNING   0 : INSTANCE_LOCK_STOP / INSTANCE_LOCK_START
+                        pendingRaidLock.WarningOnly = entries.Map.IsFlexLocking; // events it triggers:  1 : INSTANCE_LOCK_WARNING   0 : INSTANCE_LOCK_STOP / INSTANCE_LOCK_START
                         player.GetSession().SendPacket(pendingRaidLock);
-                        if (!entries.Map.IsFlexLocking())
+                        if (!entries.Map.IsFlexLocking)
                             player.SetPendingBind(GetInstanceId(), 60000);
                     }
                 }
@@ -4932,7 +4932,7 @@ namespace Game.Maps
                         pendingRaidLock.TimeUntilLock = 60000;
                         pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
                         pendingRaidLock.Extending = true;
-                        pendingRaidLock.WarningOnly = GetEntry().IsFlexLocking();
+                        pendingRaidLock.WarningOnly = GetEntry().IsFlexLocking;
                         pendingRaidLock.Write();
 
                         foreach (Player player in GetPlayers())
@@ -5130,7 +5130,7 @@ namespace Game.Maps
 
     public class BattlegroundMap : Map
     {
-        public BattlegroundMap(int id, int expiry, int InstanceId, Difficulty spawnMode)
+        public BattlegroundMap(int id, uint expiry, int InstanceId, Difficulty spawnMode)
             : base(id, expiry, InstanceId, spawnMode)
         {
             InitVisibilityDistance();
@@ -5194,9 +5194,9 @@ namespace Game.Maps
     {
         public TransferAbortReason Reason;
         public byte Arg;
-        public uint MapDifficultyXConditionId;
+        public int MapDifficultyXConditionId;
 
-        public TransferAbortParams(TransferAbortReason reason = TransferAbortReason.None, byte arg = 0, uint mapDifficultyXConditionId = 0)
+        public TransferAbortParams(TransferAbortReason reason = TransferAbortReason.None, byte arg = 0, int mapDifficultyXConditionId = 0)
         {
             Reason = reason;
             Arg = arg;
@@ -5260,10 +5260,10 @@ namespace Game.Maps
     public class RespawnInfo
     {
         public SpawnObjectType type;
-        public ulong spawnId;
-        public uint entry;
+        public long spawnId;
+        public int entry;
         public long respawnTime;
-        public uint gridId;
+        public int gridId;
 
         public RespawnInfo() { }
         public RespawnInfo(RespawnInfo info)

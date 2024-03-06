@@ -26,7 +26,7 @@ namespace Game.Entities
         List<AbstractFollower> m_followingMe = new();
         public MoveSpline MoveSpline { get; set; }
         MotionMaster i_motionMaster;
-        public uint m_movementCounter;       //< Incrementing counter used in movement packets
+        public int m_movementCounter;       //< Incrementing counter used in movement packets
         TimeTracker splineSyncTimer;
         MovementForces _movementForces;
         PositionUpdateInfo _positionUpdateInfo;
@@ -239,7 +239,7 @@ namespace Game.Entities
 
     public class DamageInfo
     {
-        public DamageInfo(Unit attacker, Unit victim, uint damage, SpellInfo spellInfo, SpellSchoolMask schoolMask, DamageEffectType damageType, WeaponAttackType attackType)
+        public DamageInfo(Unit attacker, Unit victim, int damage, SpellInfo spellInfo, SpellSchoolMask schoolMask, DamageEffectType damageType, WeaponAttackType attackType)
         {
             m_attacker = attacker;
             m_victim = victim;
@@ -335,17 +335,17 @@ namespace Game.Entities
 
         public void ModifyDamage(int amount)
         {
-            amount = Math.Max(amount, -((int)GetDamage()));
-            m_damage += (uint)amount;
+            amount = Math.Max(amount, -GetDamage());
+            m_damage += amount;
         }
-        public void AbsorbDamage(uint amount)
+        public void AbsorbDamage(int amount)
         {
             amount = Math.Min(amount, GetDamage());
             m_absorb += amount;
             m_damage -= amount;
             m_hitMask |= ProcFlagsHit.Absorb;
         }
-        public void ResistDamage(uint amount)
+        public void ResistDamage(int amount)
         {
             amount = Math.Min(amount, GetDamage());
             m_resist += amount;
@@ -356,7 +356,7 @@ namespace Game.Entities
                 m_hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
             }
         }
-        void BlockDamage(uint amount)
+        void BlockDamage(int amount)
         {
             amount = Math.Min(amount, GetDamage());
             m_block += amount;
@@ -375,30 +375,30 @@ namespace Game.Entities
         public SpellSchoolMask GetSchoolMask() { return m_schoolMask; }
         DamageEffectType GetDamageType() { return m_damageType; }
         public WeaponAttackType GetAttackType() { return m_attackType; }
-        public uint GetDamage() { return m_damage; }
-        public uint GetOriginalDamage() { return m_originalDamage; }
-        public uint GetAbsorb() { return m_absorb; }
-        public uint GetResist() { return m_resist; }
-        uint GetBlock() { return m_block; }
+        public int GetDamage() { return m_damage; }
+        public int GetOriginalDamage() { return m_originalDamage; }
+        public int GetAbsorb() { return m_absorb; }
+        public int GetResist() { return m_resist; }
+        int GetBlock() { return m_block; }
         public ProcFlagsHit GetHitMask() { return m_hitMask; }
 
         Unit m_attacker;
         Unit m_victim;
-        uint m_damage;
-        uint m_originalDamage;
+        int m_damage;
+        int m_originalDamage;
         SpellInfo m_spellInfo;
         SpellSchoolMask m_schoolMask;
         DamageEffectType m_damageType;
         WeaponAttackType m_attackType;
-        uint m_absorb;
-        uint m_resist;
-        uint m_block;
+        int m_absorb;
+        int m_resist;
+        int m_block;
         ProcFlagsHit m_hitMask;
     }
 
     public class HealInfo
     {
-        public HealInfo(Unit healer, Unit target, uint heal, SpellInfo spellInfo, SpellSchoolMask schoolMask)
+        public HealInfo(Unit healer, Unit target, int heal, SpellInfo spellInfo, SpellSchoolMask schoolMask)
         {
             _healer = healer;
             _target = target;
@@ -408,7 +408,7 @@ namespace Game.Entities
             _schoolMask = schoolMask;
         }
 
-        public void AbsorbHeal(uint amount)
+        public void AbsorbHeal(int amount)
         {
             amount = Math.Min(amount, GetHeal());
             _absorb += amount;
@@ -417,24 +417,24 @@ namespace Game.Entities
             _effectiveHeal -= amount;
             _hitMask |= ProcFlagsHit.Absorb;
         }
-        public void SetEffectiveHeal(uint amount) { _effectiveHeal = amount; }
+        public void SetEffectiveHeal(int amount) { _effectiveHeal = amount; }
 
         public Unit GetHealer() { return _healer; }
         public Unit GetTarget() { return _target; }
-        public uint GetHeal() { return _heal; }
-        public uint GetOriginalHeal() { return _originalHeal; }
-        public uint GetEffectiveHeal() { return _effectiveHeal; }
-        public uint GetAbsorb() { return _absorb; }
+        public int GetHeal() { return _heal; }
+        public int GetOriginalHeal() { return _originalHeal; }
+        public int GetEffectiveHeal() { return _effectiveHeal; }
+        public int GetAbsorb() { return _absorb; }
         public SpellInfo GetSpellInfo() { return _spellInfo; }
         public SpellSchoolMask GetSchoolMask() { return _schoolMask; }
         ProcFlagsHit GetHitMask() { return _hitMask; }
 
         Unit _healer;
         Unit _target;
-        uint _heal;
-        uint _originalHeal;
-        uint _effectiveHeal;
-        uint _absorb;
+        int _heal;
+        int _originalHeal;
+        int _effectiveHeal;
+        int _absorb;
         SpellInfo _spellInfo;
         SpellSchoolMask _schoolMask;
         ProcFlagsHit _hitMask;
@@ -445,11 +445,11 @@ namespace Game.Entities
         public Unit Attacker { get; set; }             // Attacker
         public Unit Target { get; set; }               // Target for damage
         public SpellSchoolMask DamageSchoolMask { get; set; }
-        public uint Damage;
-        public uint OriginalDamage { get; set; }
-        public uint Absorb;
-        public uint Resist { get; set; }
-        public uint Blocked { get; set; }
+        public int Damage;
+        public int OriginalDamage { get; set; }
+        public int Absorb;
+        public int Resist { get; set; }
+        public int Blocked { get; set; }
         public HitInfo HitInfo { get; set; }
         public VictimState TargetState { get; set; }
 
@@ -457,7 +457,7 @@ namespace Game.Entities
         public WeaponAttackType AttackType { get; set; }
         public ProcFlagsInit ProcAttacker { get; set; }
         public ProcFlagsInit ProcVictim { get; set; }
-        public uint CleanDamage { get; set; }        // Used only for rage calculation
+        public int CleanDamage { get; set; }        // Used only for rage calculation
         public MeleeHitOutcome HitOutCome { get; set; }  // TODO: remove this field (need use TargetState)
     }
 
@@ -471,7 +471,7 @@ namespace Game.Entities
             SpellVisual = spellVisual;
             schoolMask = _schoolMask;
             castId = _castId;
-            preHitHealth = (uint)_target.GetHealth();
+            preHitHealth = (int)_target.GetHealth();
         }
 
         public Unit target;
@@ -479,23 +479,23 @@ namespace Game.Entities
         public ObjectGuid castId;
         public SpellInfo Spell;
         public SpellCastVisual SpellVisual;
-        public uint damage;
-        public uint originalDamage;
+        public int damage;
+        public int originalDamage;
         public SpellSchoolMask schoolMask;
-        public uint absorb;
-        public uint resist;
+        public int absorb;
+        public int resist;
         public bool periodicLog;
-        public uint blocked;
+        public int blocked;
         public HitInfo HitInfo;
         // Used for help
         public uint cleanDamage;
         public bool fullBlock;
-        public uint preHitHealth;
+        public int preHitHealth;
     }
 
     public class CleanDamage
     {
-        public CleanDamage(uint mitigated, uint absorbed, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome)
+        public CleanDamage(int mitigated, int absorbed, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome)
         {
             absorbed_damage = absorbed;
             mitigated_damage = mitigated;
@@ -503,8 +503,8 @@ namespace Game.Entities
             hitOutCome = _hitOutCome;
         }
 
-        public uint absorbed_damage { get; }
-        public uint mitigated_damage { get; set; }
+        public int absorbed_damage { get; }
+        public int mitigated_damage { get; set; }
 
         public WeaponAttackType attackType { get; }
         public MeleeHitOutcome hitOutCome { get; }
@@ -534,7 +534,7 @@ namespace Game.Entities
 
     public class SpellPeriodicAuraLogInfo
     {
-        public SpellPeriodicAuraLogInfo(AuraEffect _auraEff, uint _damage, uint _originalDamage, uint _overDamage, uint _absorb, uint _resist, float _multiplier, bool _critical)
+        public SpellPeriodicAuraLogInfo(AuraEffect _auraEff, int _damage, int _originalDamage, int _overDamage, int _absorb, int _resist, float _multiplier, bool _critical)
         {
             auraEff = _auraEff;
             damage = _damage;
@@ -547,11 +547,11 @@ namespace Game.Entities
         }
 
         public AuraEffect auraEff;
-        public uint damage;
-        public uint originalDamage;
-        public uint overDamage;                                      // overkill/overheal
-        public uint absorb;
-        public uint resist;
+        public int damage;
+        public int originalDamage;
+        public int overDamage;                                      // overkill/overheal
+        public int absorb;
+        public int resist;
         public float multiplier;
         public bool critical;
     }

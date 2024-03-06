@@ -1851,7 +1851,7 @@ namespace Game.Maps
     #region Checks
     public class MostHPMissingInRange<T> : ICheck<T> where T : Unit
     {
-        public MostHPMissingInRange(Unit obj, float range, uint hp)
+        public MostHPMissingInRange(Unit obj, float range, int hp)
         {
             i_obj = obj;
             i_range = range;
@@ -1862,7 +1862,7 @@ namespace Game.Maps
         {
             if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) && u.GetMaxHealth() - u.GetHealth() > i_hp)
             {
-                i_hp = (uint)(u.GetMaxHealth() - u.GetHealth());
+                i_hp = u.GetMaxHealth() - u.GetHealth();
                 return true;
             }
             return false;
@@ -1870,7 +1870,7 @@ namespace Game.Maps
 
         Unit i_obj;
         float i_range;
-        ulong i_hp;
+        long i_hp;
     }
 
     class MostHPPercentMissingInRange : ICheck<Unit>
@@ -1881,7 +1881,7 @@ namespace Game.Maps
         float _maxHpPct;
         float _hpPct;
 
-        public MostHPPercentMissingInRange(Unit obj, float range, uint minHpPct, uint maxHpPct)
+        public MostHPPercentMissingInRange(Unit obj, float range, int minHpPct, int maxHpPct)
         {
             _obj = obj;
             _range = range;
@@ -1903,7 +1903,7 @@ namespace Game.Maps
 
     public class FriendlyBelowHpPctEntryInRange : ICheck<Unit>
     {
-        public FriendlyBelowHpPctEntryInRange(Unit obj, uint entry, float range, byte pct, bool excludeSelf)
+        public FriendlyBelowHpPctEntryInRange(Unit obj, int entry, float range, byte pct, bool excludeSelf)
         {
             i_obj = obj;
             i_entry = entry;
@@ -1922,7 +1922,7 @@ namespace Game.Maps
         }
 
         Unit i_obj;
-        uint i_entry;
+        int i_entry;
         float i_range;
         byte i_pct;
         bool i_excludeSelf;
@@ -1950,7 +1950,7 @@ namespace Game.Maps
 
     public class FriendlyMissingBuffInRange : ICheck<Creature>
     {
-        public FriendlyMissingBuffInRange(Unit obj, float range, uint spellid)
+        public FriendlyMissingBuffInRange(Unit obj, float range, int spellid)
         {
             i_obj = obj;
             i_range = range;
@@ -1960,7 +1960,7 @@ namespace Game.Maps
         public bool Invoke(Creature u)
         {
             if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) &&
-                !(u.HasAura(i_spell)))
+                !u.HasAura(i_spell))
             {
                 return true;
             }
@@ -1969,7 +1969,7 @@ namespace Game.Maps
 
         Unit i_obj;
         float i_range;
-        uint i_spell;
+        int i_spell;
     }
 
     public class AnyUnfriendlyUnitInObjectRangeCheck : ICheck<Unit>
@@ -2474,7 +2474,7 @@ namespace Game.Maps
             if (i_args.IgnoreNotOwnedPrivateObjects && !u.CheckPrivateObjectOwnerVisibility(i_obj))
                 return false;
 
-            if (i_args.AuraSpellId.HasValue && !u.HasAura((uint)i_args.AuraSpellId))
+            if (i_args.AuraSpellId.HasValue && !u.HasAura(i_args.AuraSpellId.Value))
                 return false;
 
             i_customizer.Update(u);
@@ -2624,7 +2624,7 @@ namespace Game.Maps
 
     class AllGameObjectsWithEntryInRange : ICheck<GameObject>
     {
-        public AllGameObjectsWithEntryInRange(WorldObject obj, uint entry, float maxRange)
+        public AllGameObjectsWithEntryInRange(WorldObject obj, int entry, float maxRange)
         {
             m_pObject = obj;
             m_uiEntry = entry;
@@ -2640,13 +2640,13 @@ namespace Game.Maps
         }
 
         WorldObject m_pObject;
-        uint m_uiEntry;
+        int m_uiEntry;
         float m_fRange;
     }
 
     public class AllCreaturesOfEntryInRange : ICheck<Creature>
     {
-        public AllCreaturesOfEntryInRange(WorldObject obj, uint entry, float maxRange = 0f)
+        public AllCreaturesOfEntryInRange(WorldObject obj, int entry, float maxRange = 0f)
         {
             m_pObject = obj;
             m_uiEntry = entry;
@@ -2672,7 +2672,7 @@ namespace Game.Maps
         }
 
         WorldObject m_pObject;
-        uint m_uiEntry;
+        int m_uiEntry;
         float m_fRange;
     }
 
@@ -2795,7 +2795,7 @@ namespace Game.Maps
 
     public class UnitAuraCheck : ICheck<WorldObject>
     {
-        public UnitAuraCheck(bool present, uint spellId, ObjectGuid casterGUID = default)
+        public UnitAuraCheck(bool present, int spellId, ObjectGuid casterGUID = default)
         {
             _present = present;
             _spellId = spellId;
@@ -2813,16 +2813,16 @@ namespace Game.Maps
         }
 
         bool _present;
-        uint _spellId;
+        int _spellId;
         ObjectGuid _casterGUID;
     }
 
     class ObjectEntryAndPrivateOwnerIfExistsCheck : ICheck<WorldObject>
     {
         ObjectGuid _ownerGUID;
-        uint _entry;
+        int _entry;
 
-        public ObjectEntryAndPrivateOwnerIfExistsCheck(ObjectGuid ownerGUID, uint entry)
+        public ObjectEntryAndPrivateOwnerIfExistsCheck(ObjectGuid ownerGUID, int entry)
         {
             _ownerGUID = ownerGUID;
             _entry = entry;
@@ -2836,7 +2836,7 @@ namespace Game.Maps
 
     class GameObjectFocusCheck : ICheck<GameObject>
     {
-        public GameObjectFocusCheck(WorldObject caster, uint focusId)
+        public GameObjectFocusCheck(WorldObject caster, int focusId)
         {
             _caster = caster;
             _focusId = focusId;
@@ -2855,7 +2855,7 @@ namespace Game.Maps
         }
 
         WorldObject _caster;
-        uint _focusId;
+        int _focusId;
     }
 
     // Find the nearest Fishing hole and return true only if source object is in range of hole

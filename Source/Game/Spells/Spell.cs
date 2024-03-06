@@ -40,7 +40,7 @@ namespace Game.Spells
                 // wand case
                 if (m_attackType == WeaponAttackType.RangedAttack)
                 {
-                    if ((playerCaster.GetClassMask() & (uint)Class.ClassMaskWandUsers) != 0)
+                    if (ClassMask.WandUsers.HasClass(playerCaster.GetClass()))
                     {
                         Item pItem = playerCaster.GetWeaponForAttack(WeaponAttackType.RangedAttack);
                         if (pItem != null)
@@ -2103,17 +2103,17 @@ namespace Game.Spells
             m_UniqueCorpseTargetInfo.Add(target);
         }
 
-        void AddDestTarget(SpellDestination dest, uint effIndex)
+        void AddDestTarget(SpellDestination dest, int effIndex)
         {
             m_destTargets[effIndex] = dest;
         }
 
-        int GetUnitTargetIndexForEffect(ObjectGuid target, uint effect)
+        int GetUnitTargetIndexForEffect(ObjectGuid target, int effect)
         {
             int index = 0;
             foreach (TargetInfo uniqueTargetInfo in m_UniqueTargetInfo)
             {
-                if (uniqueTargetInfo.MissCondition == SpellMissInfo.None && (uniqueTargetInfo.EffectMask & (1 << (int)effect)) != 0)
+                if (uniqueTargetInfo.MissCondition == SpellMissInfo.None && (uniqueTargetInfo.EffectMask & (1 << effect)) != 0)
                 {
                     if (uniqueTargetInfo.TargetGUID == target)
                         break;
@@ -2125,24 +2125,24 @@ namespace Game.Spells
             return index;
         }
 
-        public long GetUnitTargetCountForEffect(uint effect)
+        public long GetUnitTargetCountForEffect(int effect)
         {
-            return m_UniqueTargetInfo.Count(targetInfo => targetInfo.MissCondition == SpellMissInfo.None && (targetInfo.EffectMask & (1 << (int)effect)) != 0);
+            return m_UniqueTargetInfo.Count(targetInfo => targetInfo.MissCondition == SpellMissInfo.None && (targetInfo.EffectMask & (1 << effect)) != 0);
         }
 
-        public long GetGameObjectTargetCountForEffect(uint effect)
+        public long GetGameObjectTargetCountForEffect(int effect)
         {
-            return m_UniqueGOTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << (int)effect)) != 0);
+            return m_UniqueGOTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << effect)) != 0);
         }
 
-        public long GetItemTargetCountForEffect(uint effect)
+        public long GetItemTargetCountForEffect(int effect)
         {
-            return m_UniqueItemInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << (int)effect)) != 0);
+            return m_UniqueItemInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << effect)) != 0);
         }
 
-        public long GetCorpseTargetCountForEffect(uint effect)
+        public long GetCorpseTargetCountForEffect(int effect)
         {
-            return m_UniqueCorpseTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1u << (int)effect)) != 0);
+            return m_UniqueCorpseTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << effect)) != 0);
         }
 
         public SpellMissInfo PreprocessSpellHit(Unit unit, TargetInfo hitInfo)
@@ -6752,7 +6752,7 @@ namespace Game.Spells
                     }
                     case SpellEffectName.RechargeItem:
                     {
-                        uint itemId = spellEffectInfo.ItemType;
+                        var itemId = spellEffectInfo.ItemType;
 
                         ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemId);
                         if (proto == null)
@@ -7288,7 +7288,7 @@ namespace Game.Spells
             targetInfo.Healing += m_healing;
         }
 
-        SpellCastResult CanOpenLock(SpellEffectInfo effect, uint lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)
+        SpellCastResult CanOpenLock(SpellEffectInfo effect, int lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)
         {
             if (lockId == 0)                                             // possible case for GO and maybe for items.
                 return SpellCastResult.SpellCastOk;
@@ -7326,7 +7326,7 @@ namespace Game.Spells
 
                         skillId = SharedConst.SkillByLockType((LockType)lockInfo.Index[j]);
 
-                        if (skillId != SkillType.None || lockInfo.Index[j] == (uint)LockType.Lockpicking)
+                        if (skillId != SkillType.None || lockInfo.Index[j] == (int)LockType.Lockpicking)
                         {
                             reqSkillValue = lockInfo.Skill[j];
 
@@ -7334,8 +7334,8 @@ namespace Game.Spells
                             skillValue = 0;
                             if (m_CastItem == null && unitCaster.IsTypeId(TypeId.Player))
                                 skillValue = unitCaster.ToPlayer().GetSkillValue(skillId);
-                            else if (lockInfo.Index[j] == (uint)LockType.Lockpicking)
-                                skillValue = (int)unitCaster.GetLevel() * 5;
+                            else if (lockInfo.Index[j] == (int)LockType.Lockpicking)
+                                skillValue = unitCaster.GetLevel() * 5;
 
                             // skill bonus provided by casting spell (mostly item spells)
                             // add the effect base points modifier from the spell cast (cheat lock / skeleton key etc.)
@@ -7374,10 +7374,10 @@ namespace Game.Spells
             switch (mod)
             {
                 case SpellValueMod.RadiusMod:
-                    m_spellValue.RadiusMod = (float)value / 10000;
+                    m_spellValue.RadiusMod = value / 10000f;
                     break;
                 case SpellValueMod.MaxTargets:
-                    m_spellValue.MaxAffectedTargets = (uint)value;
+                    m_spellValue.MaxAffectedTargets = value;
                     break;
                 case SpellValueMod.AuraStack:
                     m_spellValue.AuraStackAmount = value;
@@ -7386,7 +7386,7 @@ namespace Game.Spells
                     m_spellValue.CriticalChance = value / 100.0f; // @todo ugly /100 remove when basepoints are double
                     break;
                 case SpellValueMod.DurationPct:
-                    m_spellValue.DurationMul = (float)value / 100.0f;
+                    m_spellValue.DurationMul = value / 100.0f;
                     break;
                 case SpellValueMod.Duration:
                     m_spellValue.Duration = value;
@@ -7499,7 +7499,7 @@ namespace Game.Spells
             return castTime;
         }
 
-        bool CallScriptEffectHandlers(uint effIndex, SpellEffectHandleMode mode)
+        bool CallScriptEffectHandlers(int effIndex, SpellEffectHandleMode mode)
         {
             // execute script effect handler hooks and check if effects was prevented
             bool preventDefault = false;
@@ -7548,7 +7548,7 @@ namespace Game.Spells
             return preventDefault;
         }
 
-        void CallScriptSuccessfulDispel(uint effIndex)
+        void CallScriptSuccessfulDispel(int effIndex)
         {
             foreach (var script in m_loadedScripts)
             {
@@ -7637,7 +7637,7 @@ namespace Game.Spells
             }
         }
         
-        void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, uint effIndex, SpellImplicitTargetInfo targetType)
+        void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, int effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in m_loadedScripts)
             {
@@ -7651,7 +7651,7 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptObjectTargetSelectHandlers(ref WorldObject target, uint effIndex, SpellImplicitTargetInfo targetType)
+        void CallScriptObjectTargetSelectHandlers(ref WorldObject target, int effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in m_loadedScripts)
             {
@@ -7665,7 +7665,7 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptDestinationTargetSelectHandlers(ref SpellDestination target, uint effIndex, SpellImplicitTargetInfo targetType)
+        void CallScriptDestinationTargetSelectHandlers(ref SpellDestination target, int effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in m_loadedScripts)
             {
@@ -7679,7 +7679,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptOnResistAbsorbCalculateHandlers(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
+        public void CallScriptOnResistAbsorbCalculateHandlers(DamageInfo damageInfo, ref int resistAmount, ref int absorbAmount)
         {
             foreach (var script in m_loadedScripts)
             {
@@ -7719,7 +7719,7 @@ namespace Game.Spells
             return source.IsWithinLOS(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), LineOfSightChecks.All, ignoreFlags);
         }
         
-        bool CheckScriptEffectImplicitTargets(uint effIndex, uint effIndexToCheck)
+        bool CheckScriptEffectImplicitTargets(int effIndex, int effIndexToCheck)
         {
             // Skip if there are not any script
             if (m_loadedScripts.Empty())
@@ -7917,7 +7917,7 @@ namespace Game.Spells
 
         int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target, out float variance)
         {
-            bool needRecalculateBasePoints = (m_spellValue.CustomBasePointsMask & (1 << (int)spellEffectInfo.EffectIndex)) == 0;
+            bool needRecalculateBasePoints = (m_spellValue.CustomBasePointsMask & (1 << spellEffectInfo.EffectIndex)) == 0;
             return m_caster.CalculateSpellDamage(out variance, target, spellEffectInfo, needRecalculateBasePoints ? null : m_spellValue.EffectBasePoints[spellEffectInfo.EffectIndex], m_castItemEntry, m_castItemLevel);
         }
 
@@ -7964,7 +7964,8 @@ namespace Game.Spells
         public bool IsTriggered() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.FullMask); }
         public bool IsTriggeredByAura(SpellInfo auraSpellInfo) { return (auraSpellInfo == m_triggeredByAuraSpell); }
         public bool IsIgnoringCooldowns() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSpellAndCategoryCD); }
-        public bool IsFocusDisabled() { return _triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreSetFacing) || (m_spellInfo.IsChanneled() && !m_spellInfo.HasAttribute(SpellAttr1.TrackTargetInChannel)); }
+        public bool IsFocusDisabled() { return _triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreSetFacing) || 
+                (m_spellInfo.IsChanneled() && !m_spellInfo.HasAttribute(SpellAttr1.TrackTargetInChannel)); }
         public bool IsProcDisabled() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DisallowProcEvents); }
         public bool IsChannelActive() { return m_caster.IsUnit() && m_caster.ToUnit().GetChannelSpellId() != 0; }
 
@@ -8034,7 +8035,7 @@ namespace Game.Spells
         public SpellInfo m_spellInfo;
         public Item m_CastItem;
         public ObjectGuid m_castItemGUID;
-        public uint m_castItemEntry;
+        public int m_castItemEntry;
         public int m_castItemLevel;
         public ObjectGuid m_castId;
         public ObjectGuid m_originalCastId;
@@ -8238,8 +8239,8 @@ namespace Game.Spells
 
     public class SpellLearnSpellNode
     {
-        public uint Spell;
-        public uint OverridesSpell;
+        public int Spell;
+        public int OverridesSpell;
         public bool Active;         // show in spellbook or not
         public bool AutoLearned;    // This marks the spell as automatically learned from another source that - will only be used for unlearning
     }
@@ -8253,7 +8254,7 @@ namespace Game.Spells
             TransportOffset = new Position();
         }
 
-        public SpellDestination(float x, float y, float z, float orientation = 0.0f, uint mapId = 0xFFFFFFFF) : this()
+        public SpellDestination(float x, float y, float z, float orientation = 0.0f, int mapId = -1) : this()
         {
             Position.Relocate(x, y, z, orientation);
             TransportGUID = ObjectGuid.Empty;
@@ -8449,10 +8450,10 @@ namespace Game.Spells
                         positive = false;
                     else if (spell.m_healing == 0)
                     {
-                        for (uint i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
+                        for (int i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
                         {
                             // in case of immunity, check all effects to choose correct procFlags, as none has technically hit
-                            if (EffectMask != 0 && (EffectMask & (1 << (int)i)) == 0)
+                            if (EffectMask != 0 && (EffectMask & (1 << i)) == 0)
                                 continue;
 
                             if (!spell.m_spellInfo.IsPositiveEffect(i))
@@ -8527,7 +8528,7 @@ namespace Game.Spells
                     else
                         hitMask |= ProcFlagsHit.Normal;
 
-                    healInfo = new(caster, spell.unitTarget, (uint)addhealth, spell.m_spellInfo, spell.m_spellInfo.GetSchoolMask());
+                    healInfo = new(caster, spell.unitTarget, addhealth, spell.m_spellInfo, spell.m_spellInfo.GetSchoolMask());
                     caster.HealBySpell(healInfo, IsCrit);
                     spell.unitTarget.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, spell.m_spellInfo);
                     spell.m_healing = (int)healInfo.GetEffectiveHeal();
@@ -8676,9 +8677,9 @@ namespace Game.Spells
                     {
                         // only apply unapplied effects (for reapply case)
                         uint effMask = EffectMask & aurApp.GetEffectsToApply();
-                        for (uint i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
-                            if ((effMask & (1 << (int)i)) != 0 && aurApp.HasEffect(i))
-                                effMask &= ~(1u << (int)i);
+                        for (int i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
+                            if ((effMask & (1 << i)) != 0 && aurApp.HasEffect(i))
+                                effMask &= ~(1u << i);
 
                         if (effMask != 0)
                             _spellHitTarget._ApplyAura(aurApp, effMask);
@@ -8779,7 +8780,7 @@ namespace Game.Spells
 
         public int[] EffectBasePoints = new int[SpellConst.MaxEffects];
         public uint CustomBasePointsMask;
-        public uint MaxAffectedTargets;
+        public int MaxAffectedTargets;
         public float RadiusMod;
         public int AuraStackAmount;
         public float DurationMul;

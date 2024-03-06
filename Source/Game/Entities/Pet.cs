@@ -82,37 +82,37 @@ namespace Game.Entities
             }
         }
 
-        public static Tuple<PetStable.PetInfo, PetSaveMode> GetLoadPetInfo(PetStable stable, uint petEntry, uint petnumber, PetSaveMode? slot)
+        public static (PetStable.PetInfo, PetSaveMode) GetLoadPetInfo(PetStable stable, int petEntry, int petnumber, PetSaveMode? slot)
         {
             if (petnumber != 0)
             {
                 // Known petnumber entry
                 for (var activeSlot = 0; activeSlot < stable.ActivePets.Length; ++activeSlot)
                     if (stable.ActivePets[activeSlot] != null && stable.ActivePets[activeSlot].PetNumber == petnumber)
-                        return Tuple.Create(stable.ActivePets[activeSlot], PetSaveMode.FirstActiveSlot + activeSlot);
+                        return (stable.ActivePets[activeSlot], PetSaveMode.FirstActiveSlot + activeSlot);
 
                 for (var stableSlot = 0; stableSlot < stable.StabledPets.Length; ++stableSlot)
                     if (stable.StabledPets[stableSlot] != null && stable.StabledPets[stableSlot].PetNumber == petnumber)
-                        return Tuple.Create(stable.StabledPets[stableSlot], PetSaveMode.FirstStableSlot + stableSlot);
+                        return (stable.StabledPets[stableSlot], PetSaveMode.FirstStableSlot + stableSlot);
 
                 foreach (var pet in stable.UnslottedPets)
                     if (pet.PetNumber == petnumber)
-                        return Tuple.Create(pet, PetSaveMode.NotInSlot);
+                        return (pet, PetSaveMode.NotInSlot);
             }
             else if (slot.HasValue)
             {
                 // Current pet
                 if (slot == PetSaveMode.AsCurrent)
                     if (stable.GetCurrentActivePetIndex().HasValue && stable.ActivePets[stable.GetCurrentActivePetIndex().Value] != null)
-                        return Tuple.Create(stable.ActivePets[stable.GetCurrentActivePetIndex().Value], (PetSaveMode)stable.GetCurrentActivePetIndex());
+                        return (stable.ActivePets[stable.GetCurrentActivePetIndex().Value], (PetSaveMode)stable.GetCurrentActivePetIndex());
 
                 if (slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot)
                     if (stable.ActivePets[(int)slot.Value] != null)
-                        return Tuple.Create(stable.ActivePets[(int)slot.Value], slot.Value);
+                        return (stable.ActivePets[(int)slot.Value], slot.Value);
 
                 if (slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot)
                     if (stable.StabledPets[(int)slot.Value] != null)
-                        return Tuple.Create(stable.StabledPets[(int)slot.Value], slot.Value);
+                        return (stable.StabledPets[(int)slot.Value], slot.Value);
             }
             else if (petEntry != 0)
             {
@@ -120,28 +120,28 @@ namespace Game.Entities
 
                 foreach (var pet in stable.UnslottedPets)
                     if (pet.CreatureId == petEntry)
-                        return Tuple.Create(pet, PetSaveMode.NotInSlot);
+                        return (pet, PetSaveMode.NotInSlot);
             }
             else
             {
                 // Any current or other non-stabled pet (for hunter "call pet")
                 if (stable.ActivePets[0] != null)
-                    return Tuple.Create(stable.ActivePets[0], PetSaveMode.FirstActiveSlot);
+                    return (stable.ActivePets[0], PetSaveMode.FirstActiveSlot);
 
                 if (!stable.UnslottedPets.Empty())
-                    return Tuple.Create(stable.UnslottedPets.First(), PetSaveMode.NotInSlot);
+                    return (stable.UnslottedPets.First(), PetSaveMode.NotInSlot);
             }
 
-            return Tuple.Create<PetStable.PetInfo, PetSaveMode>(null, PetSaveMode.AsDeleted);
+            return (PetStable.PetInfo, PetSaveMode>(null, PetSaveMode.AsDeleted);
         }
 
-        public bool LoadPetFromDB(Player owner, uint petEntry = 0, uint petnumber = 0, bool current = false, PetSaveMode? forcedSlot = null)
+        public bool LoadPetFromDB(Player owner, int petEntry = 0, int petnumber = 0, bool current = false, PetSaveMode? forcedSlot = null)
         {
             m_loading = true;
 
             PetStable petStable = owner.GetPetStable();
 
-            ulong ownerid = owner.GetGUID().GetCounter();
+            long ownerid = owner.GetGUID().GetCounter();
             (PetStable.PetInfo petInfo, PetSaveMode slot) = GetLoadPetInfo(petStable, petEntry, petnumber, forcedSlot);
             if (petInfo == null || (slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot))
             {
@@ -357,7 +357,7 @@ namespace Game.Entities
                     ushort specId = specializationId;
                     var petSpec = CliDB.ChrSpecializationStorage.LookupByKey(specId);
                     if (petSpec != null)
-                        specId = (ushort)Global.DB2Mgr.GetChrSpecializationByIndex(owner.HasAuraType(AuraType.OverridePetSpecs) ? Class.Max : 0, (uint)petSpec.OrderIndex).Id;
+                        specId = (ushort)Global.DB2Mgr.GetChrSpecializationByIndex(owner.HasAuraType(AuraType.OverridePetSpecs) ? Class.Max : 0, petSpec.OrderIndex).Id;
 
                     SetSpecialization(specId);
 
@@ -448,7 +448,7 @@ namespace Game.Entities
             // current/stable/not_in_slot
             if (mode != PetSaveMode.AsDeleted)
             {
-                ulong ownerLowGUID = GetOwnerGUID().GetCounter();
+                var ownerLowGUID = GetOwnerGUID().GetCounter();
                 trans = new SQLTransaction();
 
                 // remove current data
@@ -504,11 +504,11 @@ namespace Game.Entities
             petInfo.ReactState = forcedReactState.GetValueOrDefault(GetReactState());
             petInfo.Name = GetName();
             petInfo.WasRenamed = !HasPetFlag(UnitPetFlags.CanBeRenamed);
-            petInfo.Health = (uint)GetHealth();
-            petInfo.Mana = (uint)GetPower(PowerType.Mana);
+            petInfo.Health = (int)GetHealth();
+            petInfo.Mana = GetPower(PowerType.Mana);
             petInfo.ActionBar = GenerateActionBarData();
             petInfo.LastSaveTime = (uint)GameTime.GetGameTime();
-            petInfo.CreatedBySpellId = (uint)m_unitData.CreatedBySpell.GetValue();
+            petInfo.CreatedBySpellId = m_unitData.CreatedBySpell;
             petInfo.Type = GetPetType();
             petInfo.SpecializationId = GetSpecialization();
         }
@@ -655,7 +655,7 @@ namespace Game.Entities
             GetOwner().RemovePet(this, mode, returnreagent);
         }
 
-        public void GivePetXP(uint xp)
+        public void GivePetXP(int xp)
         {
             if (GetPetType() != PetType.Hunter)
                 return;
@@ -666,16 +666,16 @@ namespace Game.Entities
             if (!IsAlive())
                 return;
 
-            uint maxlevel = Math.Min(WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel), GetOwner().GetLevel());
-            uint petlevel = GetLevel();
+            var maxlevel = Math.Min(WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel), GetOwner().GetLevel());
+            var petlevel = GetLevel();
 
             // If pet is detected to be at, or above(?) the players level, don't hand out XP
             if (petlevel >= maxlevel)
                 return;
 
-            uint nextLvlXP = m_unitData.PetNextLevelExperience;
-            uint curXP = m_unitData.PetExperience;
-            uint newXP = curXP + xp;
+            var nextLvlXP = m_unitData.PetNextLevelExperience;
+            var curXP = m_unitData.PetExperience;
+            var newXP = curXP + xp;
 
             // Check how much XP the pet should receive, and hand off have any left from previous levelups
             while (newXP >= nextLvlXP && petlevel < maxlevel)
@@ -684,7 +684,7 @@ namespace Game.Entities
                 newXP -= nextLvlXP;
                 ++petlevel;
 
-                GivePetLevel((int)petlevel);
+                GivePetLevel(petlevel);
 
                 nextLvlXP = m_unitData.PetNextLevelExperience;
             }
@@ -700,10 +700,10 @@ namespace Game.Entities
             if (GetPetType() == PetType.Hunter)
             {
                 SetPetExperience(0);
-                SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel((uint)level) * PetXPFactor));
+                SetPetNextLevelExperience((int)(Global.ObjectMgr.GetXPForLevel(level) * PetXPFactor));
             }
 
-            InitStatsForLevel((uint)level);
+            InitStatsForLevel(level);
             InitLevelupSpellsForLevel();
         }
 
@@ -731,7 +731,7 @@ namespace Game.Entities
             }
 
             SetDisplayId(creature.GetDisplayId());
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
+            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)cinfo.Family);
             if (cFamily != null)
                 SetName(cFamily.Name[GetOwner().GetSession().GetSessionDbcLocale()]);
             else
@@ -745,7 +745,7 @@ namespace Game.Entities
             if (!CreateBaseAtTamed(cinfo, owner.GetMap()))
                 return false;
 
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
+            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)cinfo.Family);
             if (cFamily != null)
                 SetName(cFamily.Name[GetOwner().GetSession().GetSessionDbcLocale()]);
 
@@ -761,7 +761,7 @@ namespace Game.Entities
 
             SetPetNameTimestamp(0);
             SetPetExperience(0);
-            SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(GetLevel() + 1) * PetXPFactor));
+            SetPetNextLevelExperience((int)(Global.ObjectMgr.GetXPForLevel(GetLevel() + 1) * PetXPFactor));
             ReplaceAllNpcFlags(NPCFlags.None);
             ReplaceAllNpcFlags2(NPCFlags2.None);
 
@@ -786,7 +786,7 @@ namespace Game.Entities
             if (cInfo == null)
                 return false;
 
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cInfo.Family);
+            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)cInfo.Family);
             if (cFamily == null)
                 return false;
 
@@ -801,7 +801,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    AddSpell(result.Read<uint>(0), (ActiveStates)result.Read<byte>(1), PetSpellState.Unchanged);
+                    AddSpell(result.Read<int>(0), (ActiveStates)result.Read<byte>(1), PetSpellState.Unchanged);
                 }
                 while (result.NextRow());
             }
@@ -872,7 +872,7 @@ namespace Game.Entities
                         if (casterGuid.IsEmpty())
                             casterGuid = GetGUID();
 
-                        AuraKey key = new(casterGuid, itemGuid, effectResult.Read<uint>(1), effectResult.Read<uint>(2));
+                        AuraKey key = new(casterGuid, itemGuid, effectResult.Read<int>(1), effectResult.Read<uint>(2));
                         if (!effectInfo.ContainsKey(key))
                             effectInfo[key] = new AuraLoadEffectInfo();
 
@@ -892,7 +892,7 @@ namespace Game.Entities
                     if (casterGuid.IsEmpty())
                         casterGuid = GetGUID();
 
-                    AuraKey key = new(casterGuid, itemGuid, auraResult.Read<uint>(1), auraResult.Read<uint>(2));
+                    AuraKey key = new(casterGuid, itemGuid, auraResult.Read<int>(1), auraResult.Read<uint>(2));
                     uint recalculateMask = auraResult.Read<uint>(3);
                     Difficulty difficulty = (Difficulty)auraResult.Read<byte>(4);
                     byte stackCount = auraResult.Read<byte>(5);
@@ -907,7 +907,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey(difficulty))
+                    if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey((int)difficulty))
                     {
                         Log.outError(LogFilter.Pet, $"Pet._LoadAuras: Unknown difficulty {difficulty} (spellid {key.SpellId}), ignore.");
                         continue;
@@ -1014,7 +1014,7 @@ namespace Game.Entities
             }
         }
 
-        bool AddSpell(uint spellId, ActiveStates active = ActiveStates.Decide, PetSpellState state = PetSpellState.New, PetSpellType type = PetSpellType.Normal)
+        bool AddSpell(int spellId, ActiveStates active = ActiveStates.Decide, PetSpellState state = PetSpellState.New, PetSpellType type = PetSpellType.Normal)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
@@ -1118,7 +1118,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool LearnSpell(uint spellId)
+        public bool LearnSpell(int spellId)
         {
             // prevent duplicated entires in spell book
             if (!AddSpell(spellId))
@@ -1134,11 +1134,11 @@ namespace Game.Entities
             return true;
         }
 
-        void LearnSpells(List<uint> spellIds)
+        void LearnSpells(List<int> spellIds)
         {
             PetLearnedSpells packet = new();
 
-            foreach (uint spell in spellIds)
+            foreach (var spell in spellIds)
             {
                 if (!AddSpell(spell))
                     continue;
@@ -1152,7 +1152,7 @@ namespace Game.Entities
 
         void InitLevelupSpellsForLevel()
         {
-            uint level = GetLevel();
+            var level = GetLevel();
             var levelupSpells = GetCreatureTemplate().Family != 0 ? Global.SpellMgr.GetPetLevelupSpellList(GetCreatureTemplate().Family) : null;
             if (levelupSpells != null)
             {
@@ -1169,10 +1169,10 @@ namespace Game.Entities
             }
 
             // default spells (can be not learned if pet level (as owner level decrease result for example) less first possible in normal game)
-            PetDefaultSpellsEntry defSpells = Global.SpellMgr.GetPetDefaultSpellsEntry((int)GetEntry());
+            PetDefaultSpellsEntry defSpells = Global.SpellMgr.GetPetDefaultSpellsEntry(GetEntry());
             if (defSpells != null)
             {
-                foreach (uint spellId in defSpells.spellid)
+                foreach (var spellId in defSpells.spellid)
                 {
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
                     if (spellInfo == null)
@@ -1188,7 +1188,7 @@ namespace Game.Entities
             }
         }
 
-        bool UnlearnSpell(uint spellId, bool learnPrev, bool clearActionBar = true)
+        bool UnlearnSpell(int spellId, bool learnPrev, bool clearActionBar = true)
         {
             if (RemoveSpell(spellId, learnPrev, clearActionBar))
             {
@@ -1203,11 +1203,11 @@ namespace Game.Entities
             return false;
         }
 
-        void UnlearnSpells(List<uint> spellIds, bool learnPrev, bool clearActionBar)
+        void UnlearnSpells(List<int> spellIds, bool learnPrev, bool clearActionBar)
         {
             PetUnlearnedSpells packet = new();
 
-            foreach (uint spell in spellIds)
+            foreach (var spell in spellIds)
             {
                 if (!RemoveSpell(spell, learnPrev, clearActionBar))
                     continue;
@@ -1219,7 +1219,7 @@ namespace Game.Entities
                 GetOwner().SendPacket(packet);
         }
 
-        public bool RemoveSpell(uint spellId, bool learnPrev, bool clearActionBar = true)
+        public bool RemoveSpell(int spellId, bool learnPrev, bool clearActionBar = true)
         {
             var petSpell = m_spells.LookupByKey(spellId);
             if (petSpell == null)
@@ -1237,7 +1237,7 @@ namespace Game.Entities
 
             if (learnPrev)
             {
-                uint prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
+                var prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
                 if (prev_id != 0)
                     LearnSpell(prev_id);
                 else
@@ -1354,7 +1354,7 @@ namespace Game.Entities
             }
         }
 
-        public bool Create(ulong guidlow, Map map, uint entry, uint petNumber)
+        public bool Create(long guidlow, Map map, int entry, int petNumber)
         {
             Cypher.Assert(map != null);
             SetMap(map);
@@ -1569,7 +1569,7 @@ namespace Game.Entities
 
         void RemoveSpecializationSpells(bool clearActionBar)
         {
-            List<uint> unlearnedSpells = new();
+            List<int> unlearnedSpells = new();
 
             for (uint i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
@@ -1599,7 +1599,7 @@ namespace Game.Entities
             UnlearnSpells(unlearnedSpells, true, clearActionBar);
         }
 
-        public void SetSpecialization(uint spec)
+        public void SetSpecialization(int spec)
         {
             if (m_petSpecialization == spec)
                 return;
@@ -1666,20 +1666,20 @@ namespace Game.Entities
 
     public class PetStable
     {
-        static uint UnslottedPetIndexMask = 0x80000000;
+        static int UnslottedPetIndexMask = unchecked((int)0x80000000);
 
         public class PetInfo
         {
             public string Name;
             public string ActionBar;
-            public uint PetNumber;
-            public uint CreatureId;
-            public uint DisplayId;
-            public uint Experience;
-            public uint Health;
-            public uint Mana;
+            public int PetNumber;
+            public int CreatureId;
+            public int DisplayId;
+            public int Experience;
+            public int Health;
+            public int Mana;
             public uint LastSaveTime;
-            public uint CreatedBySpellId;
+            public int CreatedBySpellId;
             public ushort SpecializationId;
             public byte Level = 0;
             public ReactStates ReactState;
@@ -1687,7 +1687,7 @@ namespace Game.Entities
             public bool WasRenamed;
         }
 
-        public uint? CurrentPetIndex;                                   // index into ActivePets or UnslottedPets if highest bit is set
+        public int? CurrentPetIndex;                                   // index into ActivePets or UnslottedPets if highest bit is set
         public PetInfo[] ActivePets = new PetInfo[SharedConst.MaxActivePets];      // PET_SAVE_FIRST_ACTIVE_SLOT - PET_SAVE_LAST_ACTIVE_SLOT
         public PetInfo[] StabledPets = new PetInfo[SharedConst.MaxPetStables];     // PET_SAVE_FIRST_STABLE_SLOT - PET_SAVE_LAST_STABLE_SLOT
         public List<PetInfo> UnslottedPets = new();                             // PET_SAVE_NOT_IN_SLOT
@@ -1697,21 +1697,21 @@ namespace Game.Entities
             if (!CurrentPetIndex.HasValue)
                 return null;
 
-            uint? activePetIndex = GetCurrentActivePetIndex();
+            int? activePetIndex = GetCurrentActivePetIndex();
             if (activePetIndex.HasValue)
                 return ActivePets[activePetIndex.Value] != null ? ActivePets[activePetIndex.Value] : null;
 
-            uint? unslottedPetIndex = GetCurrentUnslottedPetIndex();
+            int? unslottedPetIndex = GetCurrentUnslottedPetIndex();
             if (unslottedPetIndex.HasValue)
                 return unslottedPetIndex < UnslottedPets.Count ? UnslottedPets[(int)unslottedPetIndex.Value] : null;
 
             return null;
         }
 
-        public uint? GetCurrentActivePetIndex() { return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) == 0) ? CurrentPetIndex : null; }
-        public void SetCurrentActivePetIndex(uint index) { CurrentPetIndex = index; }
-        uint? GetCurrentUnslottedPetIndex() { return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) != 0) ? (CurrentPetIndex & ~UnslottedPetIndexMask) : null; }
-        public void SetCurrentUnslottedPetIndex(uint index) { CurrentPetIndex = index | UnslottedPetIndexMask; }
+        public int? GetCurrentActivePetIndex() { return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) == 0) ? CurrentPetIndex : null; }
+        public void SetCurrentActivePetIndex(int index) { CurrentPetIndex = index; }
+        int? GetCurrentUnslottedPetIndex() { return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) != 0) ? (CurrentPetIndex.Value & ~UnslottedPetIndexMask) : null; }
+        public void SetCurrentUnslottedPetIndex(int index) { CurrentPetIndex = index | UnslottedPetIndexMask; }
     }
     
     public enum ActiveStates : byte

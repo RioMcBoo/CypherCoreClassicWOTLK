@@ -307,7 +307,7 @@ namespace Game.Entities
         public int GetRequiredSkillRank() { return ExtendedData.RequiredSkillRank; }
         public int GetRequiredSpell() { return ExtendedData.RequiredAbility; }
         public int GetRequiredReputationFaction() { return ExtendedData.MinFactionID; }
-        public int GetRequiredReputationRank() { return ExtendedData.MinReputation; }
+        public ReputationRank GetRequiredReputationRank() { return ExtendedData.MinReputation; }
         public int GetMaxCount() { return ExtendedData.MaxCount; }
         public byte GetContainerSlots() { return ExtendedData.ContainerSlots; }
         public ItemModType GetStatModifierBonusStat(int index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatModifierBonusStat(index); }

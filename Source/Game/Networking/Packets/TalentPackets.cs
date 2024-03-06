@@ -212,7 +212,7 @@ namespace Game.Networking.Packets
 
     struct GlyphBinding
     {
-        public GlyphBinding(uint spellId, ushort glyphId)
+        public GlyphBinding(int spellId, ushort glyphId)
         {
             SpellID = spellId;
             GlyphID = glyphId;
@@ -220,11 +220,11 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(SpellID);
+            data.WriteInt32(SpellID);
             data.WriteUInt16(GlyphID);
         }
 
-        uint SpellID;
+        int SpellID;
         ushort GlyphID;
     }
 

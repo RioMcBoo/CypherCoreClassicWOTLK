@@ -12,58 +12,53 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MapID);
-            _worldPacket.WriteUInt32(AreaID);
-            _worldPacket.WriteUInt32(SubareaID);
+            _worldPacket.WriteInt32(MapID);
+            _worldPacket.WriteInt32(AreaID);
+            _worldPacket.WriteInt32(SubareaID);
 
             _worldPacket.WriteInt32(Worldstates.Count);
             foreach (WorldStateInfo wsi in Worldstates)
             {
-                _worldPacket.WriteUInt32(wsi.VariableID);
+                _worldPacket.WriteInt32(wsi.VariableID);
                 _worldPacket.WriteInt32(wsi.Value);
             }
         }
 
-        public void AddState(WorldStates variableID, uint value)
+        public void AddState(WorldStates variableID, int value)
         {
-            AddState((uint)variableID, value);
-        }
-
-        public void AddState(uint variableID, uint value)
-        {
-            Worldstates.Add(new WorldStateInfo(variableID, (int)value));
+            AddState(variableID, value);
         }
 
         public void AddState(int variableID, int value)
         {
-            Worldstates.Add(new WorldStateInfo((uint)variableID, value));
+            Worldstates.Add(new WorldStateInfo(variableID, value));
         }
 
         public void AddState(WorldStates variableID, bool value)
         {
-            AddState((uint)variableID, value);
+            AddState(variableID, value);
         }
 
-        public void AddState(uint variableID, bool value)
+        public void AddState(int variableID, bool value)
         {
             Worldstates.Add(new WorldStateInfo(variableID, value ? 1 : 0));
         }
 
-        public uint AreaID;
-        public uint SubareaID;
-        public uint MapID;
+        public int AreaID;
+        public int SubareaID;
+        public int MapID;
 
         List<WorldStateInfo> Worldstates = new();
 
         struct WorldStateInfo
         {
-            public WorldStateInfo(uint variableID, int value)
+            public WorldStateInfo(int variableID, int value)
             {
                 VariableID = variableID;
                 Value = value;
             }
 
-            public uint VariableID;
+            public int VariableID;
             public int Value;
         }
     }

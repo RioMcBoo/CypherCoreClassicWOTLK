@@ -135,7 +135,7 @@ public class Log
         outMessage(type, LogLevel.Trace, text, args);
     }
 
-    public static void outCommand(uint accountId, string text, params object[] args)
+    public static void outCommand(int accountId, string text, params object[] args)
     {
         if (!ShouldLog(LogFilter.Commands, LogLevel.Info))
             return;
@@ -337,7 +337,7 @@ public class Log
         return true;
     }
 
-    public static void SetRealmId(uint id)
+    public static void SetRealmId(int id)
     {
         foreach (var appender in appenders.Values)
             appender.setRealmId(id);

@@ -145,7 +145,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32((int)Info.FlagsEx);
                 _worldPacket.WriteInt32((int)Info.FlagsEx2);
 
-                for (uint i = 0; i < SharedConst.QuestRewardItemCount; ++i)
+                for (int i = 0; i < SharedConst.QuestRewardItemCount; ++i)
                 {
                     _worldPacket.WriteInt32(Info.RewardItems[i]);
                     _worldPacket.WriteInt32(Info.RewardAmount[i]);
@@ -153,7 +153,7 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteInt32(Info.ItemDropQuantity[i]);
                 }
 
-                for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
+                for (int i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                 {
                     _worldPacket.WriteInt32(Info.UnfilteredChoiceItems[i].ItemID);
                     _worldPacket.WriteInt32(Info.UnfilteredChoiceItems[i].Quantity);
@@ -175,7 +175,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Info.PortraitGiverModelSceneID);
                 _worldPacket.WriteInt32(Info.PortraitTurnIn);
 
-                for (uint i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
+                for (int i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
                 {
                     _worldPacket.WriteInt32(Info.RewardFactionID[i]);
                     _worldPacket.WriteInt32(Info.RewardFactionValue[i]);
@@ -183,9 +183,9 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteInt32(Info.RewardFactionCapIn[i]);
                 }
 
-                _worldPacket.WriteInt32(Info.RewardFactionFlags);
+                _worldPacket.WriteUInt32(Info.RewardFactionFlags);
 
-                for (uint i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
+                for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
                 {
                     _worldPacket.WriteInt32(Info.RewardCurrencyID[i]);
                     _worldPacket.WriteInt32(Info.RewardCurrencyQty[i]);
@@ -220,7 +220,7 @@ namespace Game.Networking.Packets
                 {
                     _worldPacket.WriteInt32(questObjective.Id);
                     _worldPacket.WriteUInt8((byte)questObjective.Type);
-                    _worldPacket.WriteInt8(questObjective.StorageIndex);
+                    _worldPacket.WriteInt8((sbyte)questObjective.StorageIndex);
                     _worldPacket.WriteInt32(questObjective.ObjectID);
                     _worldPacket.WriteInt32(questObjective.Amount);
                     _worldPacket.WriteUInt32((uint)questObjective.Flags);
@@ -541,11 +541,11 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(QuestGiverGUID);
             _worldPacket.WriteInt32(QuestGiverCreatureID);
             _worldPacket.WriteInt32(QuestID);
-            _worldPacket.WriteInt32(CompEmoteDelay);
+            _worldPacket.WriteUInt32(CompEmoteDelay);
             _worldPacket.WriteInt32(CompEmoteType);
-            _worldPacket.WriteUInt32(QuestFlags[0]);
-            _worldPacket.WriteUInt32(QuestFlags[1]);
-            _worldPacket.WriteUInt32(QuestFlags[2]);
+            _worldPacket.WriteUInt32((uint)QuestFlags);
+            _worldPacket.WriteUInt32((uint)QuestFlagsEx);
+            _worldPacket.WriteUInt32((uint)QuestFlagsEx2);
             _worldPacket.WriteInt32(SuggestPartyMembers);
             _worldPacket.WriteInt32(MoneyToGet);
             _worldPacket.WriteInt32(Collect.Count);
@@ -584,7 +584,7 @@ namespace Game.Networking.Packets
         public ObjectGuid QuestGiverGUID;
         public int QuestGiverCreatureID;
         public int QuestID;
-        public int CompEmoteDelay;
+        public uint CompEmoteDelay;
         public int CompEmoteType;
         public bool AutoLaunched;
         public int SuggestPartyMembers;
@@ -592,7 +592,9 @@ namespace Game.Networking.Packets
         public List<QuestObjectiveCollect> Collect = new();
         public List<QuestCurrency> Currency = new();
         public int StatusFlags;
-        public uint[] QuestFlags = new uint[3];
+        public QuestFlags QuestFlags;
+        public QuestFlagsEx QuestFlagsEx;
+        public QuestFlagsEx2 QuestFlagsEx2;
         public string QuestTitle = string.Empty;
         public string CompletionText = string.Empty;
         public List<ConditionalQuestText> ConditionalCompletionText = new();
@@ -795,10 +797,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
         }
 
-        public uint QuestID;
+        public int QuestID;
     }
 
     class QuestGiverQuestFailed : ServerPacket
@@ -877,8 +879,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Responses.Count);
             _worldPacket.WritePackedGuid(SenderGUID);
             _worldPacket.WriteInt32(UiTextureKitID);
-            _worldPacket.WriteUInt32(SoundKitID);
-            _worldPacket.WriteUInt32(CloseUISoundKitID);
+            _worldPacket.WriteInt32(SoundKitID);
+            _worldPacket.WriteInt32(CloseUISoundKitID);
             _worldPacket.WriteUInt8(NumRerolls);
             _worldPacket.WriteInt64(Duration);
             _worldPacket.WriteBits(Question.GetByteCount(), 8);
@@ -898,8 +900,8 @@ namespace Game.Networking.Packets
         public ObjectGuid SenderGUID;
         public int ChoiceID;
         public int UiTextureKitID;
-        public uint SoundKitID;
-        public uint CloseUISoundKitID;
+        public int SoundKitID;
+        public int CloseUISoundKitID;
         public byte NumRerolls;
         public long Duration;
         public string Question;
@@ -1036,7 +1038,7 @@ namespace Game.Networking.Packets
         public string PortraitTurnInText;
         public string PortraitTurnInName;
         public string QuestCompletionLog;
-        public int RewardFactionFlags; // rep mask (unsure on what it does)
+        public uint RewardFactionFlags; // rep mask (unsure on what it does)
         public int AcceptedSoundKitID;
         public int CompleteSoundKitID;
         public int AreaGroupID;
@@ -1093,7 +1095,7 @@ namespace Game.Networking.Packets
         public int ArtifactCategoryID;
         public int Honor;
         public int Title;
-        public int FactionFlags;
+        public uint FactionFlags;
         public int[] SpellCompletionDisplayID = new int[SharedConst.QuestRewardDisplaySpellCount];
         public int SpellCompletionID;
         public int SkillLineID;
@@ -1127,7 +1129,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(ArtifactCategoryID);
             data.WriteInt32(Honor);
             data.WriteInt32(Title);
-            data.WriteInt32(FactionFlags);
+            data.WriteUInt32(FactionFlags);
 
             for (int i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
             {
@@ -1179,9 +1181,9 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(QuestGiverGUID);
             data.WriteInt32(QuestGiverCreatureID);
             data.WriteInt32(QuestID);
-            data.WriteInt32(QuestFlags[0]); // Flags
-            data.WriteInt32(QuestFlags[1]); // FlagsEx
-            data.WriteInt32(QuestFlags[2]); // FlagsEx2
+            data.WriteUInt32((uint)QuestFlags);
+            data.WriteUInt32((uint)QuestFlagsEx);
+            data.WriteUInt32((uint)QuestFlagsEx2);
             data.WriteInt32(SuggestedPartyMembers);
 
             data.WriteInt32(Emotes.Count);
@@ -1205,7 +1207,9 @@ namespace Game.Networking.Packets
         public int SuggestedPartyMembers = 0;
         public QuestRewards Rewards = new();
         public List<QuestDescEmote> Emotes = new();
-        public int[] QuestFlags = new int[3]; // Flags and FlagsEx
+        public QuestFlags QuestFlags;
+        public QuestFlagsEx QuestFlagsEx;
+        public QuestFlagsEx2 QuestFlagsEx2;
     }
 
     public struct QuestObjectiveSimple
@@ -1281,11 +1285,11 @@ namespace Game.Networking.Packets
             data.WriteInt32(TitleID);
             data.WriteInt32(PackageID);
             data.WriteInt32(SkillLineID);
-            data.WriteUInt32(SkillPointCount);
-            data.WriteUInt32(ArenaPointCount);
-            data.WriteUInt32(HonorPointCount);
-            data.WriteUInt64(Money);
-            data.WriteUInt32(Xp);
+            data.WriteInt32(SkillPointCount);
+            data.WriteInt32(ArenaPointCount);
+            data.WriteInt32(HonorPointCount);
+            data.WriteInt64(Money);
+            data.WriteInt32(Xp);
 
             data.WriteInt32(Items.Count);
             data.WriteInt32(Currencies.Count);
@@ -1308,11 +1312,11 @@ namespace Game.Networking.Packets
         public int TitleID;
         public int PackageID;
         public int SkillLineID;
-        public uint SkillPointCount;
-        public uint ArenaPointCount;
-        public uint HonorPointCount;
-        public ulong Money;
-        public uint Xp;
+        public int SkillPointCount;
+        public int ArenaPointCount;
+        public int HonorPointCount;
+        public long Money;
+        public int Xp;
         public List<PlayerChoiceResponseRewardEntry> Items = new();
         public List<PlayerChoiceResponseRewardEntry> Currencies = new();
         public List<PlayerChoiceResponseRewardEntry> Factions = new();
@@ -1351,12 +1355,12 @@ namespace Game.Networking.Packets
     class PlayerChoiceResponse
     {    
         public int ResponseID;
-        public ushort ResponseIdentifier;
+        public short ResponseIdentifier;
         public int ChoiceArtFileID;
         public int Flags;
-        public uint WidgetSetID;
-        public uint UiTextureAtlasElementID;
-        public uint SoundKitID;
+        public int WidgetSetID;
+        public int UiTextureAtlasElementID;
+        public int SoundKitID;
         public byte GroupID;
         public int UiTextureKitID;
         public string Answer;
@@ -1366,7 +1370,7 @@ namespace Game.Networking.Packets
         public string Description;
         public string Confirmation;
         public PlayerChoiceResponseReward Reward;
-        public uint? RewardQuestID;
+        public int? RewardQuestID;
         public PlayerChoiceResponseMawPower? MawPower;
 
         public void Write(WorldPacket data)
@@ -1375,9 +1379,9 @@ namespace Game.Networking.Packets
             data.WriteUInt16(ResponseIdentifier);
             data.WriteInt32(ChoiceArtFileID);
             data.WriteInt32(Flags);
-            data.WriteUInt32(WidgetSetID);
-            data.WriteUInt32(UiTextureAtlasElementID);
-            data.WriteUInt32(SoundKitID);
+            data.WriteInt32(WidgetSetID);
+            data.WriteInt32(UiTextureAtlasElementID);
+            data.WriteInt32(SoundKitID);
             data.WriteUInt8(GroupID);
             data.WriteInt32(UiTextureKitID);
 
@@ -1404,7 +1408,7 @@ namespace Game.Networking.Packets
             data.WriteString(Confirmation);
 
             if (RewardQuestID.HasValue)
-                data.WriteUInt32(RewardQuestID.Value);
+                data.WriteInt32(RewardQuestID.Value);
 
             if (MawPower.HasValue)
                 MawPower.Value.Write(data);

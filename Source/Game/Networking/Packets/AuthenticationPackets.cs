@@ -118,12 +118,12 @@ namespace Game.Networking.Packets
 
                 foreach (var raceClassAvailability in SuccessInfo.AvailableClasses)
                 {
-                    _worldPacket.WriteUInt8(raceClassAvailability.RaceID);
+                    _worldPacket.WriteUInt8((byte)raceClassAvailability.RaceID);
                     _worldPacket.WriteInt32(raceClassAvailability.Classes.Count);
 
                     foreach (var classAvailability in raceClassAvailability.Classes)
                     {
-                        _worldPacket.WriteUInt8(classAvailability.ClassID);
+                        _worldPacket.WriteUInt8((byte)classAvailability.ClassID);
                         _worldPacket.WriteUInt8(classAvailability.ActiveExpansionLevel);
                         _worldPacket.WriteUInt8(classAvailability.AccountExpansionLevel);
                         _worldPacket.WriteUInt8(classAvailability.MinActiveExpansionLevel);
@@ -296,10 +296,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt16(Payload.Port);
             _worldPacket.WriteUInt32((uint)Serial);
             _worldPacket.WriteUInt8(Con);
-            _worldPacket.WriteUInt64(Key);
+            _worldPacket.WriteInt64(Key);
         }
 
-        public ulong Key;
+        public long Key;
         public ConnectToSerial Serial;
         public ConnectPayload Payload;
         public byte Con;

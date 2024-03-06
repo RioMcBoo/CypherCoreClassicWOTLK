@@ -73,10 +73,10 @@ namespace Game
                 {
                     do
                     {
-                        ulong inviteId = result.Read<ulong>(0);
-                        ulong eventId = result.Read<ulong>(1);
-                        ObjectGuid invitee = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2));
-                        ObjectGuid senderGUID = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(3));
+                        long inviteId = result.Read<long>(0);
+                        long eventId = result.Read<long>(1);
+                        ObjectGuid invitee = ObjectGuid.Create(HighGuid.Player, result.Read<long>(2));
+                        ObjectGuid senderGUID = ObjectGuid.Create(HighGuid.Player, result.Read<long>(3));
                         CalendarInviteStatus status = (CalendarInviteStatus)result.Read<byte>(4);
                         long responseTime = result.Read<long>(5);
                         CalendarModerationRank rank = (CalendarModerationRank)result.Read<byte>(6);
@@ -95,11 +95,11 @@ namespace Game
                 Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar invites in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             }
 
-            for (ulong i = 1; i < _maxEventId; ++i)
+            for (long i = 1; i < _maxEventId; ++i)
                 if (GetEvent(i) == null)
                     _freeEventIds.Add(i);
 
-            for (ulong i = 1; i < _maxInviteId; ++i)
+            for (long i = 1; i < _maxInviteId; ++i)
                 if (GetInvite(i) == null)
                     _freeInviteIds.Add(i);
         }
@@ -126,7 +126,7 @@ namespace Game
             }
         }
 
-        public void RemoveEvent(ulong eventId, ObjectGuid remover)
+        public void RemoveEvent(long eventId, ObjectGuid remover)
         {
             CalendarEvent calendarEvent = GetEvent(eventId);
 
@@ -258,7 +258,7 @@ namespace Game
                 RemoveInvite(calendarInvite.InviteId, calendarInvite.EventId, guid);
         }
 
-        public void RemovePlayerGuildEventsAndSignups(ObjectGuid guid, ulong guildId)
+        public void RemovePlayerGuildEventsAndSignups(ObjectGuid guid, long guildId)
         {
             foreach (var calendarEvent in _events)
                 if (calendarEvent.OwnerGuid == guid && (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement()))
@@ -274,7 +274,7 @@ namespace Game
             }
         }
 
-        public CalendarEvent GetEvent(ulong eventId)
+        public CalendarEvent GetEvent(long eventId)
         {
             foreach (var calendarEvent in _events)
                 if (calendarEvent.EventId == eventId)
@@ -284,7 +284,7 @@ namespace Game
             return null;
         }
 
-        public CalendarInvite GetInvite(ulong inviteId)
+        public CalendarInvite GetInvite(long inviteId)
         {
             foreach (var calendarEvent in _invites.Values)
                 if (calendarEvent.InviteId == inviteId)
@@ -294,7 +294,7 @@ namespace Game
             return null;
         }
 
-        void FreeEventId(ulong id)
+        void FreeEventId(long id)
         {
             if (id == _maxEventId)
                 --_maxEventId;
@@ -302,17 +302,17 @@ namespace Game
                 _freeEventIds.Add(id);
         }
 
-        public ulong GetFreeEventId()
+        public long GetFreeEventId()
         {
             if (_freeEventIds.Empty())
                 return ++_maxEventId;
 
-            ulong eventId = _freeEventIds.FirstOrDefault();
+            long eventId = _freeEventIds.FirstOrDefault();
             _freeEventIds.RemoveAt(0);
             return eventId;
         }
 
-        public void FreeInviteId(ulong id)
+        public void FreeInviteId(long id)
         {
             if (id == _maxInviteId)
                 --_maxInviteId;
@@ -320,12 +320,12 @@ namespace Game
                 _freeInviteIds.Add(id);
         }
 
-        public ulong GetFreeInviteId()
+        public long GetFreeInviteId()
         {
             if (_freeInviteIds.Empty())
                 return ++_maxInviteId;
 
-            ulong inviteId = _freeInviteIds.FirstOrDefault();
+            long inviteId = _freeInviteIds.FirstOrDefault();
             _freeInviteIds.RemoveAt(0);
             return inviteId;
         }
@@ -580,6 +580,7 @@ namespace Game
 
             Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
             packet.EventClubID = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
+            ulong g = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
 
             foreach (var calendarInvite in eventInviteeList)
             {
@@ -671,18 +672,18 @@ namespace Game
         }
 
         List<CalendarEvent> _events;
-        MultiMap<ulong, CalendarInvite> _invites;
+        MultiMap<long, CalendarInvite> _invites;
 
-        List<ulong> _freeEventIds = new();
-        List<ulong> _freeInviteIds = new();
-        ulong _maxEventId;
-        ulong _maxInviteId;
+        List<long> _freeEventIds = new();
+        List<long> _freeInviteIds = new();
+        long _maxEventId;
+        long _maxInviteId;
     }
 
     public class CalendarInvite
     {
-        public ulong InviteId { get; set; }
-        public ulong EventId { get; set; }
+        public long InviteId { get; set; }
+        public long EventId { get; set; }
         public ObjectGuid InviteeGuid { get; set; }
         public ObjectGuid SenderGuid { get; set; }
         public long ResponseTime { get; set; }
@@ -698,7 +699,7 @@ namespace Game
             Rank = CalendarModerationRank.Player;
             Note = "";
         }
-        public CalendarInvite(CalendarInvite calendarInvite, ulong inviteId, ulong eventId)
+        public CalendarInvite(CalendarInvite calendarInvite, long inviteId, long eventId)
         {
             InviteId = inviteId;
             EventId = eventId;
@@ -709,7 +710,7 @@ namespace Game
             Rank = calendarInvite.Rank;
             Note = calendarInvite.Note;
         }
-        public CalendarInvite(ulong inviteId, ulong eventId, ObjectGuid invitee, ObjectGuid senderGUID, long responseTime, CalendarInviteStatus status, CalendarModerationRank rank, string note)
+        public CalendarInvite(long inviteId, long eventId, ObjectGuid invitee, ObjectGuid senderGUID, long responseTime, CalendarInviteStatus status, CalendarModerationRank rank, string note)
         {
             InviteId = inviteId;
             EventId = eventId;
@@ -731,9 +732,9 @@ namespace Game
 
     public class CalendarEvent
     {
-        public ulong EventId { get; set; }
+        public long EventId { get; set; }
         public ObjectGuid OwnerGuid { get; set; }
-        public ulong GuildId { get; set; }
+        public long GuildId { get; set; }
         public CalendarEventType EventType { get; set; }
         public int TextureId { get; set; }
         public long Date { get; set; }
@@ -742,7 +743,7 @@ namespace Game
         public string Description { get; set; }
         public long LockDate { get; set; }
 
-        public CalendarEvent(CalendarEvent calendarEvent, ulong eventId)
+        public CalendarEvent(CalendarEvent calendarEvent, long eventId)
         {
             EventId = eventId;
             OwnerGuid = calendarEvent.OwnerGuid;
@@ -756,7 +757,7 @@ namespace Game
             Description = calendarEvent.Description;
         }
 
-        public CalendarEvent(ulong eventId, ObjectGuid ownerGuid, ulong guildId, CalendarEventType type, int textureId, long date, CalendarFlags flags, string title, string description, long lockDate)
+        public CalendarEvent(long eventId, ObjectGuid ownerGuid, long guildId, CalendarEventType type, int textureId, long date, CalendarFlags flags, string title, string description, long lockDate)
         {
             EventId = eventId;
             OwnerGuid = ownerGuid;

@@ -379,7 +379,7 @@ namespace Game.Entities
 
     public class CreatureAddon
     {
-        public uint path_id;
+        public int path_id;
         public int mount;
         public UnitStandStateType standState;
         public AnimTier animTier;
@@ -420,25 +420,29 @@ namespace Game.Entities
     {
         List<VendorItem> m_items = new();
 
-        public VendorItem GetItem(uint slot)
+        public VendorItem GetItem(int slot)
         {
             if (slot >= m_items.Count)
                 return null;
 
             return m_items[(int)slot];
         }
+
         public bool Empty()
         {
             return m_items.Count == 0;
         }
+
         public int GetItemCount()
         {
             return m_items.Count;
         }
+
         public void AddItem(VendorItem vItem)
         {
             m_items.Add(vItem);
         }
+
         public bool RemoveItem(int item_id, ItemVendorType type)
         {
             int i = m_items.RemoveAll(p => p.item == item_id && p.Type == type);
@@ -447,10 +451,12 @@ namespace Game.Entities
             else
                 return true;
         }
+
         public VendorItem FindItemCostPair(int item_id, int extendedCost, ItemVendorType type)
         {
             return m_items.Find(p => p.item == item_id && p.ExtendedCost == extendedCost && p.Type == type);
         }
+
         public void Clear()
         {
             m_items.Clear();
@@ -469,11 +475,11 @@ namespace Game.Entities
         public int CreatureDifficultyID;
         public CreatureTypeFlags TypeFlags;
         public uint TypeFlags2;
-        public uint LootID;
-        public uint PickPocketLootID;
-        public uint SkinLootID;
-        public uint GoldMin;
-        public uint GoldMax;
+        public int LootID;
+        public int PickPocketLootID;
+        public int SkinLootID;
+        public int GoldMin;
+        public int GoldMax;
         public CreatureStaticFlagsHolder StaticFlags;
 
         public CreatureDifficulty()

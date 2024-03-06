@@ -29,12 +29,12 @@ namespace Game.PvP
             m_players[1] = new List<ObjectGuid>();
         }
 
-        public virtual void HandlePlayerEnterZone(Player player, uint zone)
+        public virtual void HandlePlayerEnterZone(Player player, int zone)
         {
             m_players[player.GetTeamId()].Add(player.GetGUID());
         }
 
-        public virtual void HandlePlayerLeaveZone(Player player, uint zone)
+        public virtual void HandlePlayerLeaveZone(Player player, int zone)
         {
             // inform the objectives of the leaving
             foreach (var pair in m_capturePoints)
@@ -46,7 +46,7 @@ namespace Game.PvP
             Log.outDebug(LogFilter.Outdoorpvp, "Player {0} left an outdoorpvp zone", player.GetName());
         }
 
-        public virtual void HandlePlayerResurrects(Player player, uint zone) { }
+        public virtual void HandlePlayerResurrects(Player player, int zone) { }
 
         public virtual bool Update(uint diff)
         {
@@ -108,7 +108,7 @@ namespace Game.PvP
             return false;
         }
 
-        public virtual bool HandleCustomSpell(Player player, uint spellId, GameObject go)
+        public virtual bool HandleCustomSpell(Player player, int spellId, GameObject go)
         {
             foreach (var pair in m_capturePoints)
                 if (pair.Value.HandleCustomSpell(player, spellId, go))
@@ -126,7 +126,7 @@ namespace Game.PvP
             return false;
         }
 
-        public virtual bool HandleDropFlag(Player player, uint id)
+        public virtual bool HandleDropFlag(Player player, int id)
         {
             foreach (var pair in m_capturePoints)
                 if (pair.Value.HandleDropFlag(player, id))
@@ -154,7 +154,7 @@ namespace Game.PvP
             }
         }
 
-        public void RegisterZone(uint zoneId)
+        public void RegisterZone(int zoneId)
         {
             Global.OutdoorPvPMgr.AddZone(zoneId, this);
         }
@@ -164,7 +164,7 @@ namespace Game.PvP
             return m_players[player.GetTeamId()].Contains(player.GetGUID());
         }
 
-        public void TeamCastSpell(uint teamIndex, int spellId)
+        public void TeamCastSpell(int teamIndex, int spellId)
         {
             foreach (var guid in m_players[teamIndex])
             {
@@ -172,17 +172,17 @@ namespace Game.PvP
                 if (player != null)
                 {
                     if (spellId > 0)
-                        player.CastSpell(player, (uint)spellId, true);
+                        player.CastSpell(player, spellId, true);
                     else
-                        player.RemoveAura((uint)-spellId); // by stack?
+                        player.RemoveAura(-spellId); // by stack?
                 }
             }
         }
 
-        public void TeamApplyBuff(uint teamIndex, uint spellId, uint spellId2)
+        public void TeamApplyBuff(int teamIndex, int spellId, int spellId2)
         {
             TeamCastSpell(teamIndex, (int)spellId);
-            TeamCastSpell((uint)(teamIndex == TeamId.Alliance ? TeamId.Horde : TeamId.Alliance), spellId2 != 0 ? -(int)spellId2 : -(int)spellId);
+            TeamCastSpell((teamIndex == TeamId.Alliance ? TeamId.Horde : TeamId.Alliance), spellId2 != 0 ? -spellId2 : -spellId);
         }
 
         public override void OnGameObjectCreate(GameObject go)
@@ -205,14 +205,14 @@ namespace Game.PvP
                 cp.m_capturePoint = null;
         }
 
-        public void SendDefenseMessage(uint zoneId, uint id)
+        public void SendDefenseMessage(int zoneId, int id)
         {
             DefenseMessageBuilder builder = new(zoneId, id);
             var localizer = new LocalizedDo(builder);
             BroadcastWorker(localizer, zoneId);
         }
 
-        void BroadcastWorker(IDoWork<Player> _worker, uint zoneId)
+        void BroadcastWorker(IDoWork<Player> _worker, int zoneId)
         {
             for (uint i = 0; i < SharedConst.PvpTeamsCount; ++i)
             {
@@ -246,7 +246,7 @@ namespace Game.PvP
             m_capturePoints[cp.m_capturePointSpawnId] = cp;
         }
 
-        OPvPCapturePoint GetCapturePoint(ulong lowguid)
+        OPvPCapturePoint GetCapturePoint(long lowguid)
         {
             return m_capturePoints.LookupByKey(lowguid);
         }
@@ -254,7 +254,7 @@ namespace Game.PvP
         public Map GetMap() { return m_map; }
 
         // the map of the objectives belonging to this outdoorpvp
-        public Dictionary<ulong, OPvPCapturePoint> m_capturePoints = new();
+        public Dictionary<long, OPvPCapturePoint> m_capturePoints = new();
         List<ObjectGuid>[] m_players = new List<ObjectGuid>[2];
         public OutdoorPvPTypes m_TypeId;
 
@@ -279,7 +279,7 @@ namespace Game.PvP
             if (m_capturePoint != null)
             {
                 player.SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldState1, 1);
-                player.SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldstate2, (uint)Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
+                player.SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldstate2, (int)Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
                 player.SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldstate3, m_neutralValuePct);
             }
             return m_activePlayers[player.GetTeamId()].Add(player.GetGUID());
@@ -300,12 +300,12 @@ namespace Game.PvP
             // send this too, sometimes the slider disappears, dunno why :(
             SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldState1, 1);
             // send these updates to only the ones in this objective
-            SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldstate2, (uint)Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
+            SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldstate2, (int)Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
             // send this too, sometimes it resets :S
             SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldstate3, m_neutralValuePct);
         }
 
-        public bool SetCapturePointData(uint entry)
+        public bool SetCapturePointData(int entry)
         {
             Log.outDebug(LogFilter.Outdoorpvp, "Creating capture point {0}", entry);
 
@@ -389,7 +389,7 @@ namespace Game.PvP
             }
 
             float oldValue = m_value;
-            uint oldTeam = m_team;
+            int oldTeam = m_team;
 
             OldState = State;
 
@@ -443,7 +443,7 @@ namespace Game.PvP
             return false;
         }
 
-        public void SendUpdateWorldState(uint field, uint value)
+        public void SendUpdateWorldState(int field, int value)
         {
             for (int team = 0; team < 2; ++team)
             {
@@ -457,7 +457,7 @@ namespace Game.PvP
             }
         }
 
-        public void SendObjectiveComplete(uint id, ObjectGuid guid)
+        public void SendObjectiveComplete(int id, ObjectGuid guid)
         {
             uint team;
             switch (State)
@@ -487,14 +487,14 @@ namespace Game.PvP
             return plSet.Contains(player.GetGUID());
         }
 
-        public virtual bool HandleCustomSpell(Player player, uint spellId, GameObject go)
+        public virtual bool HandleCustomSpell(Player player, int spellId, GameObject go)
         {
             if (!player.IsOutdoorPvPActive())
                 return false;
             return false;
         }
 
-        public virtual bool HandleDropFlag(Player player, uint id)
+        public virtual bool HandleDropFlag(Player player, int id)
         {
             return false;
         }
@@ -506,9 +506,9 @@ namespace Game.PvP
 
         public virtual void ChangeState() { }
 
-        public virtual void ChangeTeam(uint oldTeam) { }
+        public virtual void ChangeTeam(int oldTeam) { }
 
-        public ulong m_capturePointSpawnId;
+        public long m_capturePointSpawnId;
         public GameObject m_capturePoint;
         // active players in the area of the objective, 0 - alliance, 1 - horde
         public HashSet<ObjectGuid>[] m_activePlayers = new HashSet<ObjectGuid>[2];
@@ -519,19 +519,19 @@ namespace Game.PvP
         float m_maxSpeed;
         // the status of the objective
         public float m_value;
-        uint m_team;
+        int m_team;
         // objective states
         public ObjectiveStates OldState { get; set; }
         public ObjectiveStates State { get; set; }
         // neutral value on capture bar
-        public uint m_neutralValuePct;
+        public int m_neutralValuePct;
         // pointer to the OutdoorPvP this objective belongs to
         public OutdoorPvP PvP { get; set; }
     }
 
     class DefenseMessageBuilder : MessageBuilder
     {
-        public DefenseMessageBuilder(uint zoneId, uint id)
+        public DefenseMessageBuilder(int zoneId, int id)
         {
             _zoneId = zoneId;
             _id = id;
@@ -547,13 +547,13 @@ namespace Game.PvP
             return defenseMessage;
         }
 
-        uint _zoneId; // ZoneId
-        uint _id;     // BroadcastTextId
+        int _zoneId; // ZoneId
+        int _id;     // BroadcastTextId
     }
 
     public class go_type
     {
-        public go_type(uint _entry, uint _map, float _x, float _y, float _z, float _o, float _rot0, float _rot1, float _rot2, float _rot3)
+        public go_type(int _entry, int _map, float _x, float _y, float _z, float _o, float _rot0, float _rot1, float _rot2, float _rot3)
         {
             entry = _entry;
             map = _map;
@@ -561,8 +561,8 @@ namespace Game.PvP
             rot = new Quaternion(_rot0, _rot1, _rot2, _rot3);
         }
 
-        public uint entry;
-        public uint map;
+        public int entry;
+        public int map;
         public Position pos;
         public Quaternion rot;
     }

@@ -276,11 +276,11 @@ namespace Game.Networking.Packets
         {
             public void Write(WorldPacket data)
             {
-                data.WriteInt32(Effect);
+                data.WriteInt32((int)Effect);
                 data.WriteInt32(Amount);
                 data.WriteInt32(OriginalDamage);
                 data.WriteInt32(OverHealOrKill);
-                data.WriteInt32(SchoolMaskOrPower);
+                data.WriteInt32((int)SchoolMaskOrPower);
                 data.WriteInt32(AbsorbedOrAmplitude);
                 data.WriteInt32(Resisted);
                 data.WriteInt32(Supporters.Count);
@@ -303,11 +303,11 @@ namespace Game.Networking.Packets
                 }
             }
 
-            public int Effect;
+            public AuraType Effect;
             public int Amount;
             public int OriginalDamage;
             public int OverHealOrKill;
-            public int SchoolMaskOrPower;
+            public SpellSchoolMask SchoolMaskOrPower;
             public int AbsorbedOrAmplitude;
             public int Resisted;
             public bool Crit;
@@ -492,7 +492,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(TotalDamage);
             _worldPacket.WriteInt32(OriginalDamage);
             _worldPacket.WriteInt32(OverKill);
-            _worldPacket.WriteInt32(SchoolMask);
+            _worldPacket.WriteInt32((int)SchoolMask);
             _worldPacket.WriteInt32(LogAbsorbed);
 
             WriteLogDataBit();
@@ -506,7 +506,7 @@ namespace Game.Networking.Packets
         public int TotalDamage;
         public int OriginalDamage;
         public int OverKill;
-        public int SchoolMask;
+        public SpellSchoolMask SchoolMask;
         public int LogAbsorbed;
     }
 

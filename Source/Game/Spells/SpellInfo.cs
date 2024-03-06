@@ -27,13 +27,13 @@ namespace Game.Spells
                 if (spellEffect == null)
                     continue;
 
-                _effects.EnsureWritableListIndex((uint)spellEffect.EffectIndex, new SpellEffectInfo(this));
-                _effects[(int)spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
+                _effects.EnsureWritableListIndex(spellEffect.EffectIndex, new SpellEffectInfo(this));
+                _effects[spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
             }
 
             // Correct EffectIndex for blank effects
             for (int i = 0; i < _effects.Count; ++i)
-                _effects[i].EffectIndex = (uint)i;
+                _effects[i].EffectIndex = i;
 
             SpellName = spellName.Name;
 
@@ -60,10 +60,10 @@ namespace Game.Spells
                 Speed = _misc.Speed;
                 LaunchDelay = _misc.LaunchDelay;
                 SchoolMask = (SpellSchoolMask)_misc.SchoolMask;
-                IconFileDataId = (uint)_misc.SpellIconFileDataID;
-                ActiveIconFileDataId = (uint)_misc.ActiveIconFileDataID;
-                ContentTuningId = (uint)_misc.ContentTuningID;
-                ShowFutureSpellPlayerConditionID = (uint)_misc.ShowFutureSpellPlayerConditionID;
+                IconFileDataId = _misc.SpellIconFileDataID;
+                ActiveIconFileDataId = _misc.ActiveIconFileDataID;
+                ContentTuningId = _misc.ContentTuningID;
+                ShowFutureSpellPlayerConditionID = _misc.ShowFutureSpellPlayerConditionID;
             }
 
             // SpellScalingEntry
@@ -81,8 +81,8 @@ namespace Game.Spells
             {
                 ProcFlags = new ProcFlagsInit(_options.ProcTypeMask);
                 ProcChance = _options.ProcChance;
-                ProcCharges = (uint)_options.ProcCharges;
-                ProcCooldown = (uint)_options.ProcCategoryRecovery;
+                ProcCharges = _options.ProcCharges;
+                ProcCooldown = _options.ProcCategoryRecovery;
                 StackAmount = _options.CumulativeAura;
 
                 SpellProcsPerMinuteRecord _ppm = CliDB.SpellProcsPerMinuteStorage.LookupByKey(_options.SpellProcsPerMinuteID);
@@ -178,9 +178,9 @@ namespace Game.Spells
             SpellLevelsRecord _levels = data.Levels;
             if (_levels != null)
             {
-                MaxLevel = (uint)_levels.MaxLevel;
-                BaseLevel = (uint)_levels.BaseLevel;
-                SpellLevel = (uint)_levels.SpellLevel;
+                MaxLevel = _levels.MaxLevel;
+                BaseLevel = _levels.BaseLevel;
+                SpellLevel = _levels.SpellLevel;
             }
 
             // SpellPowerEntry
@@ -244,13 +244,13 @@ namespace Game.Spells
 
             foreach (SpellEffectRecord spellEffect in effects)
             {
-                _effects.EnsureWritableListIndex((uint)spellEffect.EffectIndex, new SpellEffectInfo(this));
-                _effects[(int)spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
+                _effects.EnsureWritableListIndex(spellEffect.EffectIndex, new SpellEffectInfo(this));
+                _effects[spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
             }
 
             // Correct EffectIndex for blank effects
             for (int i = 0; i < _effects.Count; ++i)
-                _effects[i].EffectIndex = (uint)i;
+                _effects[i].EffectIndex = i;
         }
 
         public bool HasEffect(SpellEffectName effect)
@@ -325,7 +325,7 @@ namespace Game.Spells
             {
                 if (effectInfo.IsEffect(SpellEffectName.Skill))
                 {
-                    uint skill = (uint)effectInfo.MiscValue;
+                    var skill = (SkillType)effectInfo.MiscValue;
 
                     if (Global.SpellMgr.IsProfessionSkill(skill))
                         return true;
@@ -337,7 +337,7 @@ namespace Game.Spells
         public bool IsPrimaryProfession()
         {
             foreach (var effectInfo in _effects)
-                if (effectInfo.IsEffect(SpellEffectName.Skill) && Global.SpellMgr.IsPrimaryProfessionSkill((uint)effectInfo.MiscValue))
+                if (effectInfo.IsEffect(SpellEffectName.Skill) && Global.SpellMgr.IsPrimaryProfessionSkill((SkillType)effectInfo.MiscValue))
                     return true;
 
             return false;
@@ -353,7 +353,7 @@ namespace Game.Spells
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(Id);
 
             foreach (var spell_idx in bounds)
-                if (spell_idx.SkillLine == (uint)skillType)
+                if (spell_idx.SkillLine == skillType)
                     return true;
 
             return false;
@@ -468,7 +468,7 @@ namespace Game.Spells
             if (HasAttribute(SpellAttr0.CooldownOnEvent))
                 return true;
 
-            SpellCategoryRecord category = CliDB.SpellCategoryStorage.LookupByKey(CategoryId);
+            SpellCategoryRecord category = CliDB.SpellCategoryStorage.LookupByKey((int)CategoryId);
             return category != null && category.Flags.HasAnyFlag(SpellCategoryFlags.CooldownStartsOnEvent);
         }
 
@@ -644,9 +644,9 @@ namespace Game.Spells
                     // TODO: investigate if the !familyName and !familyFlags conditions are even valid for all other (nonmod) uses of SpellInfo::IsAffected
                     return affectSpell.SpellFamilyName == SpellFamilyName && (mod as SpellModifierByClassMask).mask & SpellFamilyFlags;
                 case SpellModType.LabelFlat:
-                    return HasLabel((uint)(mod as SpellFlatModifierByLabel).value.LabelID);
+                    return HasLabel((mod as SpellFlatModifierByLabel).value.LabelID);
                 case SpellModType.LabelPct:
-                    return HasLabel((uint)(mod as SpellPctModifierByLabel).value.LabelID);
+                    return HasLabel((mod as SpellPctModifierByLabel).value.LabelID);
                 default:
                     break;
             }
@@ -771,7 +771,7 @@ namespace Game.Spells
             //if (HasAttribute(SPELL_ATTR13_ACTIVATES_REQUIRED_SHAPESHIFT))
             //    return SPELL_CAST_OK;
 
-            ulong stanceMask = (form != 0 ? 1ul << ((int)form - 1) : 0);
+            long stanceMask = (form != 0 ? 1L << ((int)form - 1) : 0);
 
             if (Convert.ToBoolean(stanceMask & StancesNot)) // can explicitly not be casted in this stance
                 return SpellCastResult.NotShapeshift;
@@ -898,7 +898,7 @@ namespace Game.Spells
                     if (mapEntry == null)
                         return SpellCastResult.IncorrectArea;
 
-                    return zone_id == (uint)AreaId.Wintergrasp || (mapEntry.IsBattleground() && player != null && player.InBattleground()) ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
+                    return zone_id == (int)AreaId.Wintergrasp || (mapEntry.IsBattleground && player != null && player.InBattleground()) ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
                 case 44521:         // Preparation
                 {
                     if (player == null)
@@ -907,7 +907,7 @@ namespace Game.Spells
                     if (mapEntry == null)
                         return SpellCastResult.IncorrectArea;
 
-                    if (!mapEntry.IsBattleground())
+                    if (!mapEntry.IsBattleground)
                         return SpellCastResult.RequiresArea;
 
                     Battleground bg = player.GetBattleground();
@@ -920,7 +920,7 @@ namespace Game.Spells
                     if (mapEntry == null)
                         return SpellCastResult.IncorrectArea;
 
-                    return mapEntry.IsBattleArena() && player != null && player.InBattleground() ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
+                    return mapEntry.IsBattleArena && player != null && player.InBattleground() ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
                 case 32727:        // Arena Preparation
                 {
                     if (player == null)
@@ -929,7 +929,7 @@ namespace Game.Spells
                     if (mapEntry == null)
                         return SpellCastResult.IncorrectArea;
 
-                    if (!mapEntry.IsBattleArena())
+                    if (!mapEntry.IsBattleArena)
                         return SpellCastResult.RequiresArea;
 
                     Battleground bg = player.GetBattleground();
@@ -952,7 +952,7 @@ namespace Game.Spells
                             SpellShapeshiftFormRecord spellShapeshiftForm = CliDB.SpellShapeshiftFormStorage.LookupByKey(effectInfo.MiscValue);
                             if (spellShapeshiftForm != null)
                             {
-                                uint mountType = spellShapeshiftForm.MountTypeID;
+                                var mountType = spellShapeshiftForm.MountTypeID;
                                 if (mountType != 0)
                                     if (player.GetMountCapability(mountType) == null)
                                         return SpellCastResult.NotHere;
@@ -961,7 +961,7 @@ namespace Game.Spells
                         }
                         case AuraType.Mounted:
                         {
-                            uint mountType = (uint)effectInfo.MiscValueB;
+                            var mountType = effectInfo.MiscValueB;
                             MountRecord mountEntry = Global.DB2Mgr.GetMount(Id);
                             if (mountEntry != null)
                                 mountType = mountEntry.MountTypeID;
@@ -1204,8 +1204,8 @@ namespace Game.Spells
                 {
                     if (effectInfo.IsAura(AuraType.ModShapeshift))
                     {
-                        var shapeShiftFromEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey((uint)effectInfo.MiscValue);
-                        if (shapeShiftFromEntry != null && !shapeShiftFromEntry.Flags.HasAnyFlag(SpellShapeshiftFormFlags.Stance))
+                        var shapeShiftFromEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey(effectInfo.MiscValue);
+                        if (shapeShiftFromEntry != null && !shapeShiftFromEntry.HasAnyFlag(SpellShapeshiftFormFlags.Stance))
                             checkMask |= VehicleSeatFlags.Uncontrolled;
                         break;
                     }
@@ -1219,7 +1219,7 @@ namespace Game.Spells
 
                 var vehicleSeat = vehicle.GetSeatForPassenger(caster);
                 if (!HasAttribute(SpellAttr6.AllowWhileRidingVehicle) && !HasAttribute(SpellAttr0.AllowWhileMounted)
-                    && (vehicleSeat.Flags & (int)checkMask) != (int)checkMask)
+                    && (vehicleSeat.Flags & checkMask) != checkMask)
                     return SpellCastResult.CantDoThatRightNow;
 
                 // Can only summon uncontrolled minions/guardians when on controlled vehicle
@@ -1243,7 +1243,7 @@ namespace Game.Spells
         public bool CheckTargetCreatureType(Unit target)
         {
             // Curse of Doom & Exorcism: not find another way to fix spell target check :/
-            if (SpellFamilyName == SpellFamilyNames.Warlock && GetCategory() == 1179)
+            if (SpellFamilyName == SpellFamilyNames.Warlock && GetCategory() == (SpellCategories)1179)
             {
                 // not allow cast at player
                 if (target.IsTypeId(TypeId.Player))
@@ -1279,7 +1279,7 @@ namespace Game.Spells
             return mask;
         }
 
-        public ulong GetEffectMechanicMask(uint effIndex)
+        public ulong GetEffectMechanicMask(int effIndex)
         {
             ulong mask = 0;
             if (Mechanic != 0)
@@ -1298,13 +1298,13 @@ namespace Game.Spells
                 mask |= 1ul << (int)Mechanic;
 
             foreach (var effectInfo in _effects)
-                if ((effectMask & (1 << (int)effectInfo.EffectIndex)) != 0 && effectInfo.Mechanic != 0)
+                if ((effectMask & (1 << effectInfo.EffectIndex)) != 0 && effectInfo.Mechanic != 0)
                     mask |= 1ul << (int)effectInfo.Mechanic;
 
             return mask;
         }
 
-        public Mechanics GetEffectMechanic(uint effIndex)
+        public Mechanics GetEffectMechanic(int effIndex)
         {
             if (GetEffect(effIndex).IsEffect() && GetEffect(effIndex).Mechanic != 0)
                 return GetEffect(effIndex).Mechanic;
@@ -1344,7 +1344,7 @@ namespace Game.Spells
             _auraState = AuraStateType.None;
 
             // Faerie Fire
-            if (GetCategory() == 1133)
+            if (GetCategory() == (SpellCategories)1133)
                 _auraState = AuraStateType.FaerieFire;
 
             // Swiftmend state on Regrowth, Rejuvenation, Wild Growth
@@ -2094,11 +2094,11 @@ namespace Game.Spells
         {
             foreach (SpellEffectInfo effect in _effects)
             {
-                uint schoolImmunityMask = 0;
+                SpellSchoolMask schoolImmunityMask = 0;
                 uint applyHarmfulAuraImmunityMask = 0;
                 ulong mechanicImmunityMask = 0;
-                uint dispelImmunity = 0;
-                uint damageImmunityMask = 0;
+                DispelType dispelImmunity = 0;
+                SpellSchoolMask damageImmunityMask = 0;
 
                 int miscVal = effect.MiscValue;
                 int amount = effect.CalcValue();
@@ -2318,7 +2318,7 @@ namespace Game.Spells
                     }
                     case AuraType.SchoolImmunity:
                     {
-                        schoolImmunityMask |= (uint)miscVal;
+                        schoolImmunityMask |= (SpellSchoolMask)miscVal;
                         break;
                     }
                     case AuraType.ModImmuneAuraApplySchool:
@@ -2328,12 +2328,12 @@ namespace Game.Spells
                     }
                     case AuraType.DamageImmunity:
                     {
-                        damageImmunityMask |= (uint)miscVal;
+                        damageImmunityMask |= (SpellSchoolMask)miscVal;
                         break;
                     }
                     case AuraType.DispelImmunity:
                     {
-                        dispelImmunity = (uint)miscVal;
+                        dispelImmunity = (DispelType)miscVal;
                         break;
                     }
                     default:
@@ -2387,7 +2387,7 @@ namespace Game.Spells
             }
         }
 
-        void _LoadSqrtTargetLimit(int maxTargets, int numNonDiminishedTargets, uint? maxTargetsEffectValueHolder, uint? numNonDiminishedTargetsEffectValueHolder)
+        void _LoadSqrtTargetLimit(int maxTargets, int numNonDiminishedTargets, int? maxTargetsEffectValueHolder, int? numNonDiminishedTargetsEffectValueHolder)
         {
             SqrtDamageAndHealingDiminishing.MaxTargets = maxTargets;
             SqrtDamageAndHealingDiminishing.NumNonDiminishedTargets = numNonDiminishedTargets;
@@ -2423,7 +2423,7 @@ namespace Game.Spells
         {
             ImmunityInfo immuneInfo = spellEffectInfo.GetImmunityInfo();
 
-            uint schoolImmunity = immuneInfo.SchoolImmuneMask;
+            var schoolImmunity = immuneInfo.SchoolImmuneMask;
             if (schoolImmunity != 0)
             {
                 target.ApplySpellImmune(Id, SpellImmunity.School, schoolImmunity, apply);
@@ -2433,7 +2433,7 @@ namespace Game.Spells
                     target.RemoveAppliedAuras(aurApp =>
                     {
                         SpellInfo auraSpellInfo = aurApp.GetBase().GetSpellInfo();
-                        return (((uint)auraSpellInfo.GetSchoolMask() & schoolImmunity) != 0 && // Check for school mask
+                        return (auraSpellInfo.GetSchoolMask().HasAnyFlag(schoolImmunity) && // Check for school mask
                             CanDispelAura(auraSpellInfo) &&
                             (IsPositive() != aurApp.IsPositive()) &&                     // Check spell vs aura possitivity
                             !auraSpellInfo.IsPassive() &&                                // Don't remove passive auras
@@ -2441,15 +2441,15 @@ namespace Game.Spells
                     });
                 }
 
-                if (apply && (schoolImmunity & (uint)SpellSchoolMask.Normal) != 0)
+                if (apply && schoolImmunity.HasAnyFlag(SpellSchoolMask.Normal))
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.InvulnerabilityBuff);
             }
 
             ulong mechanicImmunity = immuneInfo.MechanicImmuneMask;
             if (mechanicImmunity != 0)
             {
-                for (uint i = 0; i < (int)Mechanics.Max; ++i)
-                    if (Convert.ToBoolean(mechanicImmunity & (1ul << (int)i)))
+                for (int i = 0; i < (int)Mechanics.Max; ++i)
+                    if (Convert.ToBoolean(mechanicImmunity & (1ul << i)))
                         target.ApplySpellImmune(Id, SpellImmunity.Mechanic, i, apply);
 
                 if (HasAttribute(SpellAttr1.ImmunityPurgesEffect))
@@ -2476,7 +2476,7 @@ namespace Game.Spells
                 }
             }
 
-            uint dispelImmunity = immuneInfo.DispelImmune;
+            var dispelImmunity = immuneInfo.DispelImmune;
             if (dispelImmunity != 0)
             {
                 target.ApplySpellImmune(Id, SpellImmunity.Dispel, dispelImmunity, apply);
@@ -2486,7 +2486,7 @@ namespace Game.Spells
                     target.RemoveAppliedAuras(aurApp =>
                     {
                         SpellInfo spellInfo = aurApp.GetBase().GetSpellInfo();
-                        if ((uint)spellInfo.Dispel == dispelImmunity)
+                        if (spellInfo.Dispel == dispelImmunity)
                             return true;
 
                         return false;
@@ -2494,12 +2494,12 @@ namespace Game.Spells
                 }
             }
 
-            uint damageImmunity = immuneInfo.DamageSchoolMask;
+            var damageImmunity = immuneInfo.DamageSchoolMask;
             if (damageImmunity != 0)
             {
                 target.ApplySpellImmune(Id, SpellImmunity.Damage, damageImmunity, apply);
 
-                if (apply && (damageImmunity & (uint)SpellSchoolMask.Normal) != 0)
+                if (apply && damageImmunity.HasAnyFlag(SpellSchoolMask.Normal))
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.InvulnerabilityBuff);
             }
 
@@ -2534,9 +2534,9 @@ namespace Game.Spells
 
                 if (!auraSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && !auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                 {
-                    uint schoolImmunity = immuneInfo.SchoolImmuneMask;
+                    var schoolImmunity = immuneInfo.SchoolImmuneMask;
                     if (schoolImmunity != 0)
-                        if (((uint)auraSpellInfo.SchoolMask & schoolImmunity) != 0)
+                        if (auraSpellInfo.SchoolMask.HasAnyFlag(schoolImmunity))
                             return true;
                 }
 
@@ -2545,9 +2545,9 @@ namespace Game.Spells
                     if ((mechanicImmunity & (1ul << (int)auraSpellInfo.Mechanic)) != 0)
                         return true;
 
-                uint dispelImmunity = immuneInfo.DispelImmune;
+                var dispelImmunity = immuneInfo.DispelImmune;
                 if (dispelImmunity != 0)
-                    if ((uint)auraSpellInfo.Dispel == dispelImmunity)
+                    if (auraSpellInfo.Dispel == dispelImmunity)
                         return true;
 
                 bool immuneToAllEffects = true;
@@ -3079,8 +3079,8 @@ namespace Game.Spells
             if (itemLevel == mod.Param)
                 return 0.0f;
 
-            float itemLevelPoints = ItemEnchantmentManager.GetRandomPropertyPoints(itemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
-            float basePoints = ItemEnchantmentManager.GetRandomPropertyPoints(mod.Param, ItemQuality.Rare, InventoryType.Chest, 0);
+            float itemLevelPoints = ItemEnchantmentManager.GetRandomPropertyPoints(itemLevel, ItemQuality.Rare, InventoryType.Chest);
+            float basePoints = ItemEnchantmentManager.GetRandomPropertyPoints(mod.Param, ItemQuality.Rare, InventoryType.Chest);
             if (itemLevelPoints == basePoints)
                 return 0.0f;
 
@@ -3869,7 +3869,7 @@ namespace Game.Spells
             }
         }
 
-        public int GetCategory()
+        public SpellCategories GetCategory()
         {
             return CategoryId;
         }
@@ -3930,7 +3930,7 @@ namespace Game.Spells
         #region Fields
         public int Id { get; set; }
         public Difficulty Difficulty { get; set; }
-        public int CategoryId { get; set; }
+        public SpellCategories CategoryId { get; set; }
         public DispelType Dispel { get; set; }
         public Mechanics Mechanic { get; set; }
         public SpellAttr0 Attributes { get; set; }
@@ -3949,8 +3949,8 @@ namespace Game.Spells
         public SpellAttr13 AttributesEx13 { get; set; }
         public SpellCustomAttributes AttributesCu { get; set; }
         public BitSet NegativeEffects { get; set; } = new BitSet(SpellConst.MaxEffects);
-        public ulong Stances { get; set; }
-        public ulong StancesNot { get; set; }
+        public long Stances { get; set; }
+        public long StancesNot { get; set; }
         public SpellCastTargetFlags Targets { get; set; }
         public int TargetCreatureType { get; set; }
         public int RequiresSpellFocus { get; set; }
@@ -4008,15 +4008,15 @@ namespace Game.Spells
         public LocalizedString SpellName { get; set; }
         public float ConeAngle { get; set; }
         public float Width { get; set; }
-        public uint MaxTargetLevel { get; set; }
-        public uint MaxAffectedTargets { get; set; }
+        public int MaxTargetLevel { get; set; }
+        public int MaxAffectedTargets { get; set; }
         public SpellFamilyNames SpellFamilyName { get; set; }
         public FlagArray128 SpellFamilyFlags { get; set; }
         public SpellDmgClass DmgClass { get; set; }
         public SpellPreventionType PreventionType { get; set; }
         public int RequiredAreasID { get; set; }
         public SpellSchoolMask SchoolMask { get; set; }
-        public uint ChargeCategoryId;
+        public SpellCategories ChargeCategoryId;
         public List<int> Labels = new();
 
         // SpellScalingEntry
@@ -4240,7 +4240,7 @@ namespace Game.Spells
                             tempValue = randPropPoints.DamageReplaceStat;
                         }
                         else
-                            tempValue = ItemEnchantmentManager.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
+                            tempValue = ItemEnchantmentManager.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest);
                     }
                     else
                         tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), Scaling.Class);                    
@@ -5175,11 +5175,11 @@ namespace Game.Spells
 
     public class ImmunityInfo
     {
-        public uint SchoolImmuneMask;
+        public SpellSchoolMask SchoolImmuneMask;
         public uint ApplyHarmfulAuraImmuneMask;
         public ulong MechanicImmuneMask;
-        public uint DispelImmune;
-        public uint DamageSchoolMask;
+        public DispelType DispelImmune;
+        public SpellSchoolMask DamageSchoolMask;
 
         public List<AuraType> AuraTypeImmune = new();
         public List<SpellEffectName> SpellEffectImmune = new();

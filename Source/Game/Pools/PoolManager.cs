@@ -205,8 +205,8 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        uint child_pool_id = result.Read<uint>(0);
-                        uint mother_pool_id = result.Read<uint>(1);
+                        int child_pool_id = result.Read<int>(0);
+                        int mother_pool_id = result.Read<int>(1);
                         float chance = result.Read<float>(2);
 
                         if (!mPoolTemplate.ContainsKey(mother_pool_id))
@@ -317,8 +317,8 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        uint pool_entry = result.Read<uint>(0);
-                        uint pool_pool_id = result.Read<uint>(1);
+                        int pool_entry = result.Read<int>(0);
+                        int pool_pool_id = result.Read<int>(1);
 
                         if (IsEmpty(pool_entry))
                             continue;
@@ -337,7 +337,7 @@ namespace Game
                         // Don't spawn child pools, they are spawned recursively by their parent pools
                         if (pool_pool_id == 0)
                         {
-                            mAutoSpawnPoolsPerMap.Add((uint)mPoolTemplate[pool_entry].MapId, pool_entry);
+                            mAutoSpawnPoolsPerMap.Add(mPoolTemplate[pool_entry].MapId, pool_entry);
                             count++;
                         }
                     }
@@ -349,7 +349,7 @@ namespace Game
             }
         }
 
-        void SpawnPool<T>(SpawnedPoolData spawnedPoolData, uint pool_id, ulong db_guid)
+        void SpawnPool<T>(SpawnedPoolData spawnedPoolData, int pool_id, long db_guid)
         {
             switch (typeof(T).Name)
             {
@@ -368,14 +368,14 @@ namespace Game
             }
         }
 
-        public void SpawnPool(SpawnedPoolData spawnedPoolData, uint pool_id)
+        public void SpawnPool(SpawnedPoolData spawnedPoolData, int pool_id)
         {
             SpawnPool<Pool>(spawnedPoolData, pool_id, 0);
             SpawnPool<GameObject>(spawnedPoolData, pool_id, 0);
             SpawnPool<Creature>(spawnedPoolData, pool_id, 0);
         }
 
-        public void DespawnPool(SpawnedPoolData spawnedPoolData, uint pool_id, bool alwaysDeleteRespawnTime = false)
+        public void DespawnPool(SpawnedPoolData spawnedPoolData, int pool_id, bool alwaysDeleteRespawnTime = false)
         {
             if (mPoolCreatureGroups.ContainsKey(pool_id) && !mPoolCreatureGroups[pool_id].IsEmpty())
                 mPoolCreatureGroups[pool_id].DespawnObject(spawnedPoolData, 0, alwaysDeleteRespawnTime);
@@ -387,7 +387,7 @@ namespace Game
                 mPoolPoolGroups[pool_id].DespawnObject(spawnedPoolData, 0, alwaysDeleteRespawnTime);
         }
 
-        public bool IsEmpty(uint pool_id)
+        public bool IsEmpty(int pool_id)
         {
             if (mPoolGameobjectGroups.TryGetValue(pool_id, out PoolGroup<GameObject> gameobjectPool) && !gameobjectPool.IsEmptyDeepCheck())
                 return false;
@@ -401,7 +401,7 @@ namespace Game
             return true;
         }
 
-        public bool CheckPool(uint pool_id)
+        public bool CheckPool(int pool_id)
         {
             if (mPoolGameobjectGroups.ContainsKey(pool_id) && !mPoolGameobjectGroups[pool_id].CheckPool())
                 return false;
@@ -415,7 +415,7 @@ namespace Game
             return true;
         }
 
-        public void UpdatePool<T>(SpawnedPoolData spawnedPoolData, uint pool_id, ulong db_guid_or_pool_id)
+        public void UpdatePool<T>(SpawnedPoolData spawnedPoolData, int pool_id, long db_guid_or_pool_id)
         {
             uint motherpoolid = IsPartOfAPool<Pool>(pool_id);
             if (motherpoolid != 0)
@@ -424,7 +424,7 @@ namespace Game
                 SpawnPool<T>(spawnedPoolData, pool_id, db_guid_or_pool_id);
         }
 
-        public void UpdatePool(SpawnedPoolData spawnedPoolData, uint pool_id, SpawnObjectType type, ulong spawnId)
+        public void UpdatePool(SpawnedPoolData spawnedPoolData, int pool_id, SpawnObjectType type, long spawnId)
         {
             switch (type)
             {
@@ -448,12 +448,12 @@ namespace Game
             return spawnedPoolData;
         }
 
-        public PoolTemplateData GetPoolTemplate(uint pool_id)
+        public PoolTemplateData GetPoolTemplate(int pool_id)
         {
             return mPoolTemplate.LookupByKey(pool_id);
         }
         
-        public uint IsPartOfAPool<T>(ulong db_guid)
+        public uint IsPartOfAPool<T>(long db_guid)
         {
             switch (typeof(T).Name)
             {
@@ -491,7 +491,7 @@ namespace Game
             Weekly = 2
         }
 
-        public bool IsSpawnedObject<T>(ulong db_guid_or_pool_id)
+        public bool IsSpawnedObject<T>(long db_guid_or_pool_id)
         {
             switch (typeof(T).Name)
             {
@@ -505,18 +505,18 @@ namespace Game
             return false;
         }
 
-        public MultiMap<uint, uint> mQuestCreatureRelation = new();
-        public MultiMap<uint, uint> mQuestGORelation = new();
+        public MultiMap<int, int> mQuestCreatureRelation = new();
+        public MultiMap<int, int> mQuestGORelation = new();
 
-        Dictionary<uint, PoolTemplateData> mPoolTemplate = new();
-        Dictionary<uint, PoolGroup<Creature>> mPoolCreatureGroups = new();
-        Dictionary<uint, PoolGroup<GameObject>> mPoolGameobjectGroups = new();
-        Dictionary<uint, PoolGroup<Pool>> mPoolPoolGroups = new();
-        Dictionary<ulong, uint> mCreatureSearchMap = new();
-        Dictionary<ulong, uint> mGameobjectSearchMap = new();
-        Dictionary<ulong, uint> mPoolSearchMap = new();
+        Dictionary<int, PoolTemplateData> mPoolTemplate = new();
+        Dictionary<int, PoolGroup<Creature>> mPoolCreatureGroups = new();
+        Dictionary<int, PoolGroup<GameObject>> mPoolGameobjectGroups = new();
+        Dictionary<int, PoolGroup<Pool>> mPoolPoolGroups = new();
+        Dictionary<long, int> mCreatureSearchMap = new();
+        Dictionary<long, int> mGameobjectSearchMap = new();
+        Dictionary<long, int> mPoolSearchMap = new();
 
-        MultiMap<uint, uint> mAutoSpawnPoolsPerMap = new();
+        MultiMap<int, int> mAutoSpawnPoolsPerMap = new();
     }
 
     public class PoolGroup<T>
@@ -563,7 +563,7 @@ namespace Game
             return true;
         }
 
-        public void DespawnObject(SpawnedPoolData spawns, ulong guid = 0, bool alwaysDeleteRespawnTime = false)
+        public void DespawnObject(SpawnedPoolData spawns, long guid = 0, bool alwaysDeleteRespawnTime = false)
         {
             for (int i = 0; i < EqualChanced.Count; ++i)
             {
@@ -596,7 +596,7 @@ namespace Game
             }
         }
 
-        void Despawn1Object(SpawnedPoolData spawns, ulong guid, bool alwaysDeleteRespawnTime = false, bool saveRespawnTime = true)
+        void Despawn1Object(SpawnedPoolData spawns, long guid, bool alwaysDeleteRespawnTime = false, bool saveRespawnTime = true)
         {
             switch (typeof(T).Name)
             {
@@ -757,7 +757,7 @@ namespace Game
                 }
                 break;
                 case "Pool":
-                    Global.PoolMgr.SpawnPool(spawns, (uint)obj.guid);
+                    Global.PoolMgr.SpawnPool(spawns, obj.guid);
                     break;
             }
         }
@@ -774,7 +774,7 @@ namespace Game
             }
         }
 
-        void RemoveRespawnTimeFromDB(SpawnedPoolData spawns, ulong guid)
+        void RemoveRespawnTimeFromDB(SpawnedPoolData spawns, long guid)
         {
             switch (typeof(T).Name)
             {
@@ -787,13 +787,13 @@ namespace Game
             }
         }
 
-        public void SetPoolId(uint pool_id) { poolId = pool_id; }
+        public void SetPoolId(int pool_id) { poolId = pool_id; }
 
         public bool IsEmpty() { return ExplicitlyChanced.Empty() && EqualChanced.Empty(); }
 
-        public uint GetPoolId() { return poolId; }
+        public int GetPoolId() { return poolId; }
 
-        uint poolId;
+        int poolId;
         List<PoolObject> ExplicitlyChanced = new();
         List<PoolObject> EqualChanced = new();
     }
@@ -801,21 +801,21 @@ namespace Game
     public class SpawnedPoolData
     {
         Map mOwner;
-        List<ulong> mSpawnedCreatures = new();
-        List<ulong> mSpawnedGameobjects = new();
-        Dictionary<ulong, uint> mSpawnedPools = new();
+        List<long> mSpawnedCreatures = new();
+        List<long> mSpawnedGameobjects = new();
+        Dictionary<long, int> mSpawnedPools = new();
 
         public SpawnedPoolData(Map owner)
         {
             mOwner = owner;
         }
 
-        public uint GetSpawnedObjects(uint pool_id)
+        public int GetSpawnedObjects(int pool_id)
         {
             return mSpawnedPools.LookupByKey(pool_id);
         }
 
-        public bool IsSpawnedObject<T>(ulong db_guid)
+        public bool IsSpawnedObject<T>(long db_guid)
         {
             switch (typeof(T).Name)
             {
@@ -830,7 +830,7 @@ namespace Game
             }
         }
 
-        public bool IsSpawnedObject(SpawnObjectType type, ulong db_guid_or_pool_id)
+        public bool IsSpawnedObject(SpawnObjectType type, long db_guid_or_pool_id)
         {
             switch (type)
             {
@@ -844,7 +844,7 @@ namespace Game
             }
         }
 
-        public void AddSpawn<T>(ulong db_guid, uint pool_id)
+        public void AddSpawn<T>(long db_guid, int pool_id)
         {
             switch (typeof(T).Name)
             {
@@ -866,7 +866,7 @@ namespace Game
             ++mSpawnedPools[pool_id];
         }
 
-        public void RemoveSpawn<T>(ulong db_guid, uint pool_id)
+        public void RemoveSpawn<T>(long db_guid, int pool_id)
         {
             switch (typeof(T).Name)
             {
@@ -892,19 +892,19 @@ namespace Game
 
     public class PoolObject
     {
-        public PoolObject(ulong _guid, float _chance)
+        public PoolObject(long _guid, float _chance)
         {
             guid = _guid;
             chance = Math.Abs(_chance);
         }
 
-        public ulong guid;
+        public long guid;
         public float chance;
     }
 
     public class PoolTemplateData
     {
-        public uint MaxLimit;
+        public int MaxLimit;
         public int MapId;
     }
 

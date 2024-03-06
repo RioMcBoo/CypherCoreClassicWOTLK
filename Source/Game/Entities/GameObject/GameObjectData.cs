@@ -1207,10 +1207,10 @@ namespace Game.Entities
 
         public struct controlzone
         {
-            public uint radius;                                  // 0 radius, int, Min value: 0, Max value: 100, Default value: 10
-            public uint spell;                                   // 1 spell, References: Spell, NoValue = 0
-            public uint worldState1;                             // 2 worldState1, References: WorldState, NoValue = 0
-            public uint worldstate2;                             // 3 worldstate2, References: WorldState, NoValue = 0
+            public int radius;                                  // 0 radius, int, Min value: 0, Max value: 100, Default value: 10
+            public int spell;                                   // 1 spell, References: Spell, NoValue = 0
+            public int worldState1;                             // 2 worldState1, References: WorldState, NoValue = 0
+            public int worldstate2;                             // 3 worldstate2, References: WorldState, NoValue = 0
             public int CaptureEventHorde;                       // 4 Capture Event (Horde), References: GameEvents, NoValue = 0
             public int CaptureEventAlliance;                    // 5 Capture Event (Alliance), References: GameEvents, NoValue = 0
             public int ContestedEventHorde;                     // 6 Contested Event (Horde), References: GameEvents, NoValue = 0
@@ -1219,16 +1219,16 @@ namespace Game.Entities
             public int ProgressEventAlliance;                   // 9 Progress Event (Alliance), References: GameEvents, NoValue = 0
             public int NeutralEventHorde;                       // 10 Neutral Event (Horde), References: GameEvents, NoValue = 0
             public int NeutralEventAlliance;                    // 11 Neutral Event (Alliance), References: GameEvents, NoValue = 0
-            public uint neutralPercent;                          // 12 neutralPercent, int, Min value: 0, Max value: 100, Default value: 0
-            public uint worldstate3;                             // 13 worldstate3, References: WorldState, NoValue = 0
-            public uint minSuperiority;                          // 14 minSuperiority, int, Min value: 1, Max value: 65535, Default value: 1
-            public uint maxSuperiority;                          // 15 maxSuperiority, int, Min value: 1, Max value: 65535, Default value: 1
+            public int neutralPercent;                          // 12 neutralPercent, int, Min value: 0, Max value: 100, Default value: 0
+            public int worldstate3;                             // 13 worldstate3, References: WorldState, NoValue = 0
+            public int minSuperiority;                          // 14 minSuperiority, int, Min value: 1, Max value: 65535, Default value: 1
+            public int maxSuperiority;                          // 15 maxSuperiority, int, Min value: 1, Max value: 65535, Default value: 1
             public uint minTime;                                 // 16 minTime, int, Min value: 1, Max value: 65535, Default value: 1
             public uint maxTime;                                 // 17 maxTime, int, Min value: 1, Max value: 65535, Default value: 1
-            public uint GiganticAOI;                             // 18 Gigantic AOI, enum { false, true, }; Default: false
-            public uint highlight;                               // 19 highlight, enum { false, true, }; Default: true
-            public uint startingValue;                           // 20 startingValue, int, Min value: 0, Max value: 100, Default value: 50
-            public uint unidirectional;                          // 21 unidirectional, enum { false, true, }; Default: false
+            public int GiganticAOI;                             // 18 Gigantic AOI, enum { false, true, }; Default: false
+            public int highlight;                               // 19 highlight, enum { false, true, }; Default: true
+            public int startingValue;                           // 20 startingValue, int, Min value: 0, Max value: 100, Default value: 50
+            public int unidirectional;                          // 21 unidirectional, enum { false, true, }; Default: false
             public uint killbonustime;                           // 22 kill bonus time %, int, Min value: 0, Max value: 100, Default value: 0
             public uint speedWorldState1;                        // 23 speedWorldState1, References: WorldState, NoValue = 0
             public uint speedWorldState2;                        // 24 speedWorldState2, References: WorldState, NoValue = 0
@@ -1625,9 +1625,9 @@ namespace Game.Entities
     public class GameObjectData : SpawnData
     {
         public Quaternion rotation;
-        public uint animprogress;
+        public int animprogress;
         public GameObjectState goState;
-        public uint artKit;
+        public int artKit;
 
         public GameObjectData() : base(SpawnObjectType.GameObject) { }
     }

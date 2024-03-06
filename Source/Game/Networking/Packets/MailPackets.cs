@@ -115,19 +115,19 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(MailID);
+            _worldPacket.WriteInt64(MailID);
             _worldPacket.WriteInt32(Command);
             _worldPacket.WriteInt32(ErrorCode);
             _worldPacket.WriteInt32(BagResult);
-            _worldPacket.WriteUInt64(AttachID);
+            _worldPacket.WriteInt64(AttachID);
             _worldPacket.WriteInt32(QtyInInventory);
         }
 
-        public ulong MailID;
+        public long MailID;
         public int Command;
         public int ErrorCode;
         public int BagResult;
-        public ulong AttachID;
+        public long AttachID;
         public int QtyInInventory;
     }
 
@@ -322,11 +322,11 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Position);
-            data.WriteUInt64(AttachID);
-            data.WriteUInt32(Count);
+            data.WriteInt64(AttachID);
+            data.WriteInt32(Count);
             data.WriteInt32(Charges);
-            data.WriteUInt32(MaxDurability);
-            data.WriteUInt32(Durability);
+            data.WriteInt32(MaxDurability);
+            data.WriteInt32(Durability);
             Item.Write(data);
             data.WriteBits(Enchants.Count, 4);
             data.WriteBits(Gems.Count, 2);
@@ -341,12 +341,12 @@ namespace Game.Networking.Packets
         }
 
         public byte Position;
-        public ulong AttachID;
+        public long AttachID;
         public ItemInstance Item;
-        public uint Count;
+        public int Count;
         public int Charges;
-        public uint MaxDurability;
-        public uint Durability;
+        public int MaxDurability;
+        public int Durability;
         public bool Unlocked;
         List<ItemEnchantData> Enchants = new();
         List<ItemGemData> Gems= new();
@@ -372,7 +372,7 @@ namespace Game.Networking.Packets
                 case MailMessageType.CommerceAuction:
                 case MailMessageType.Auction2:
                 case MailMessageType.ArtisansConsortium:
-                    AltSenderID = (uint)mail.sender;
+                    AltSenderID = (int)mail.sender;
                     break;
             }
 
@@ -395,11 +395,11 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt64(MailID);
+            data.WriteInt64(MailID);
             data.WriteUInt32((uint)SenderType);
-            data.WriteUInt64(Cod);
+            data.WriteInt64(Cod);
             data.WriteInt32(StationeryID);
-            data.WriteUInt64(SentMoney);
+            data.WriteInt64(SentMoney);
             data.WriteInt32(Flags);
             data.WriteFloat(DaysLeft);
             data.WriteInt32(MailTemplateID);
@@ -418,7 +418,7 @@ namespace Game.Networking.Packets
                 case MailMessageType.CommerceAuction:
                 case MailMessageType.Auction2:
                 case MailMessageType.ArtisansConsortium:
-                    data.WriteUInt32(AltSenderID);
+                    data.WriteInt32(AltSenderID);
                     break;
                 default:
                     break;
@@ -435,13 +435,13 @@ namespace Game.Networking.Packets
             data.WriteString(Body);
         }
 
-        public ulong MailID;
+        public long MailID;
         public MailMessageType SenderType;
         public ObjectGuid SenderCharacter;
-        public uint AltSenderID;
-        public ulong Cod;
+        public int AltSenderID;
+        public long Cod;
         public int StationeryID;
-        public ulong SentMoney;
+        public long SentMoney;
         public int Flags;
         public float DaysLeft;
         public int MailTemplateID;

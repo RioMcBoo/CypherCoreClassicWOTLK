@@ -821,16 +821,16 @@ namespace Game.Entities
 
     public class UnitData : HasChangesMask
     {
-        public UpdateField<List<uint>> StateWorldEffectIDs = new(0, 1);
+        public UpdateField<List<int>> StateWorldEffectIDs = new(0, 1);
         public DynamicUpdateField<PassiveSpellHistory> PassiveSpells = new(0, 2);
         public DynamicUpdateField<int> WorldEffects = new(0, 3);
         public DynamicUpdateField<ObjectGuid> ChannelObjects = new(0, 4);
         public UpdateField<long> Health = new(0, 5);
         public UpdateField<long> MaxHealth = new(0, 6);
         public UpdateField<int> DisplayID = new(0, 7);
-        public UpdateField<uint> StateSpellVisualID = new(0, 8);
-        public UpdateField<uint> StateAnimID = new(0, 9);
-        public UpdateField<uint> StateAnimKitID = new(0, 10);
+        public UpdateField<int> StateSpellVisualID = new(0, 8);
+        public UpdateField<int> StateAnimID = new(0, 9);
+        public UpdateField<int> StateAnimKitID = new(0, 10);
         public UpdateField<ObjectGuid> Charm = new(0, 11);
         public UpdateField<ObjectGuid> Summon = new(0, 12);
         public UpdateField<ObjectGuid> Critter = new(0, 13);
@@ -958,12 +958,12 @@ namespace Game.Entities
             for (int i = 0; i < 2; ++i)
                 data.WriteUInt32(GetViewerDependentNpcFlags(this, i, owner, receiver));
 
-            data.WriteUInt32(StateSpellVisualID);
-            data.WriteUInt32(StateAnimID);
-            data.WriteUInt32(StateAnimKitID);
+            data.WriteInt32(StateSpellVisualID);
+            data.WriteInt32(StateAnimID);
+            data.WriteInt32(StateAnimKitID);
             data.WriteInt32(StateWorldEffectIDs.GetValue().Count);
             for (int i = 0; i < StateWorldEffectIDs.GetValue().Count; ++i)
-                data.WriteUInt32(StateWorldEffectIDs.GetValue()[i]);
+                data.WriteInt32(StateWorldEffectIDs.GetValue()[i]);
 
             data.WritePackedGuid(Charm);
             data.WritePackedGuid(Summon);
@@ -1179,7 +1179,7 @@ namespace Game.Entities
                     data.WriteBits(StateWorldEffectIDs.GetValue().Count, 32);
                     for (int i = 0; i < StateWorldEffectIDs.GetValue().Count; ++i)
                     {
-                        data.WriteUInt32(StateWorldEffectIDs.GetValue()[i]);
+                        data.WriteInt32(StateWorldEffectIDs.GetValue()[i]);
                     }
                 }
             }
@@ -1255,15 +1255,15 @@ namespace Game.Entities
                 }
                 if (changesMask[8])
                 {
-                    data.WriteUInt32(StateSpellVisualID);
+                    data.WriteInt32(StateSpellVisualID);
                 }
                 if (changesMask[9])
                 {
-                    data.WriteUInt32(StateAnimID);
+                    data.WriteInt32(StateAnimID);
                 }
                 if (changesMask[10])
                 {
-                    data.WriteUInt32(StateAnimKitID);
+                    data.WriteInt32(StateAnimKitID);
                 }
                 if (changesMask[11])
                 {
@@ -3325,11 +3325,11 @@ namespace Game.Entities
 
     public class StablePetInfo : HasChangesMask
     {
-        public UpdateField<uint> PetSlot = new(0, 1);
-        public UpdateField<uint> PetNumber = new(0, 2);
-        public UpdateField<uint> CreatureID = new(0, 3);
-        public UpdateField<uint> DisplayID = new(0, 4);
-        public UpdateField<uint> ExperienceLevel = new(0, 5);
+        public UpdateField<int> PetSlot = new(0, 1);
+        public UpdateField<int> PetNumber = new(0, 2);
+        public UpdateField<int> CreatureID = new(0, 3);
+        public UpdateField<int> DisplayID = new(0, 4);
+        public UpdateField<int> ExperienceLevel = new(0, 5);
         public UpdateFieldString Name = new(0, 6);
         public UpdateField<byte> PetFlags = new(0, 7);
         static int changeMaskLength = 8;
@@ -3338,11 +3338,11 @@ namespace Game.Entities
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
-            data.WriteUInt32(PetSlot);
-            data.WriteUInt32(PetNumber);
-            data.WriteUInt32(CreatureID);
-            data.WriteUInt32(DisplayID);
-            data.WriteUInt32(ExperienceLevel);
+            data.WriteInt32(PetSlot);
+            data.WriteInt32(PetNumber);
+            data.WriteInt32(CreatureID);
+            data.WriteInt32(DisplayID);
+            data.WriteInt32(ExperienceLevel);
             data.WriteUInt8(PetFlags);
             data.WriteBits(Name.GetValue().GetByteCount(), 8);
             data.WriteString(Name);
@@ -3362,23 +3362,23 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteUInt32(PetSlot);
+                    data.WriteInt32(PetSlot);
                 }
                 if (changesMask[2])
                 {
-                    data.WriteUInt32(PetNumber);
+                    data.WriteInt32(PetNumber);
                 }
                 if (changesMask[3])
                 {
-                    data.WriteUInt32(CreatureID);
+                    data.WriteInt32(CreatureID);
                 }
                 if (changesMask[4])
                 {
-                    data.WriteUInt32(DisplayID);
+                    data.WriteInt32(DisplayID);
                 }
                 if (changesMask[5])
                 {
-                    data.WriteUInt32(ExperienceLevel);
+                    data.WriteInt32(ExperienceLevel);
                 }
                 if (changesMask[7])
                 {
@@ -5069,8 +5069,8 @@ namespace Game.Entities
         public UpdateField<int> DisplayID = new(0, 4);
         public UpdateField<uint> SpellVisualID = new(0, 5);
         public UpdateField<uint> StateSpellVisualID = new(0, 6);
-        public UpdateField<uint> SpawnTrackingStateAnimID = new(0, 7);
-        public UpdateField<uint> SpawnTrackingStateAnimKitID = new(0, 8);
+        public UpdateField<int> SpawnTrackingStateAnimID = new(0, 7);
+        public UpdateField<int> SpawnTrackingStateAnimKitID = new(0, 8);
         public UpdateField<ObjectGuid> CreatedBy = new(0, 9);
         public UpdateField<ObjectGuid> GuildGUID = new(0, 10);
         public UpdateField<uint> Flags = new(0, 11);
@@ -5091,8 +5091,8 @@ namespace Game.Entities
             data.WriteInt32(DisplayID);
             data.WriteUInt32(SpellVisualID);
             data.WriteUInt32(StateSpellVisualID);
-            data.WriteUInt32(SpawnTrackingStateAnimID);
-            data.WriteUInt32(SpawnTrackingStateAnimKitID);
+            data.WriteInt32(SpawnTrackingStateAnimID);
+            data.WriteInt32(SpawnTrackingStateAnimKitID);
             data.WriteInt32(StateWorldEffectIDs.GetValue().Count);
             for (int i = 0; i < StateWorldEffectIDs.GetValue().Count; ++i)
             {
@@ -5197,11 +5197,11 @@ namespace Game.Entities
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt32(SpawnTrackingStateAnimID);
+                    data.WriteInt32(SpawnTrackingStateAnimID);
                 }
                 if (changesMask[8])
                 {
-                    data.WriteUInt32(SpawnTrackingStateAnimKitID);
+                    data.WriteInt32(SpawnTrackingStateAnimKitID);
                 }
                 if (changesMask[9])
                 {
@@ -5908,8 +5908,8 @@ namespace Game.Entities
     {
         public ConversationActorType Type;
         public int Id;        
-        public uint CreatureID;
-        public uint CreatureDisplayInfoID;
+        public int CreatureID;
+        public int CreatureDisplayInfoID;
         public ObjectGuid ActorGUID;
 
         public void WriteCreate(WorldPacket data, Conversation owner, Player receiver)
@@ -5918,8 +5918,8 @@ namespace Game.Entities
             data.WriteInt32(Id);
             if (Type == ConversationActorType.TalkingHead)
             {
-                data.WriteUInt32(CreatureID);
-                data.WriteUInt32(CreatureDisplayInfoID);
+                data.WriteInt32(CreatureID);
+                data.WriteInt32(CreatureDisplayInfoID);
             }
             if (Type == ConversationActorType.WorldObject)
             {
@@ -5934,8 +5934,8 @@ namespace Game.Entities
             data.WriteInt32(Id);
             if (Type == ConversationActorType.TalkingHead)
             {
-                data.WriteUInt32(CreatureID);
-                data.WriteUInt32(CreatureDisplayInfoID);
+                data.WriteInt32(CreatureID);
+                data.WriteInt32(CreatureDisplayInfoID);
             }
             if (Type == ConversationActorType.WorldObject)
             {

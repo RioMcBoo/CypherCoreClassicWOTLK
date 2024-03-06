@@ -387,11 +387,12 @@ namespace Game.Entities
             }
         }
 
-        public bool UpdateSkillPro(uint skillId, int chance, uint step)
+        public bool UpdateSkillPro(int skillId, int chance, int step)
         {
             return UpdateSkillPro((SkillType)skillId, chance, step);
         }
-        public bool UpdateSkillPro(SkillType skillId, int chance, uint step)
+
+        public bool UpdateSkillPro(SkillType skillId, int chance, int step)
         {
             // levels sync. with spell requirement for skill levels to learn
             // bonus abilities in sSkillLineAbilityStore
@@ -444,10 +445,11 @@ namespace Game.Entities
             }
 
             UpdateSkillEnchantments(skillId, value, new_value);
-            UpdateCriteria(CriteriaType.SkillRaised, (ulong)skillId);
+            UpdateCriteria(CriteriaType.SkillRaised, (long)skillId);
             Log.outDebug(LogFilter.Player, "Player:UpdateSkillPro Chance={0:F3}% taken", chance / 10.0f);
             return true;
         }
+
         void UpdateSkillEnchantments(SkillType skill_id, ushort curr_value, ushort new_value)
         {
             for (byte i = 0; i < InventorySlots.BagEnd; ++i)
@@ -1257,7 +1259,7 @@ namespace Game.Entities
                                 // Store item in bag
                                 List<(ItemPos item, int count)> professionItemDest = new();
 
-                                if (CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, professionItemDest, professionItem, false) != InventoryResult.Ok)
+                                if (CanStoreItem(ItemConst.NullBag, ItemSlot.Null, professionItemDest, professionItem, false) != InventoryResult.Ok)
                                 {
                                     SendPacket(new DisplayGameError(GameError.InvFull));
                                     return;
@@ -1737,8 +1739,8 @@ namespace Game.Entities
             }
         }
 
-        public uint GetLastPotionId() { return m_lastPotionId; }
-        public void SetLastPotionId(uint item_id) { m_lastPotionId = item_id; }
+        public int GetLastPotionId() { return m_lastPotionId; }
+        public void SetLastPotionId(int item_id) { m_lastPotionId = item_id; }
 
         public void LearnSkillRewardedSpells(SkillType skillId, uint skillValue, Race race)
         {

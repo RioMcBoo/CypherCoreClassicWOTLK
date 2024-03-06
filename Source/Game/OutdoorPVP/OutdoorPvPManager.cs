@@ -33,7 +33,7 @@ namespace Game.PvP
             {
                 OutdoorPvPTypes typeId = (OutdoorPvPTypes)result.Read<byte>(0);
 
-                if (Global.DisableMgr.IsDisabledFor(DisableType.OutdoorPVP, (uint)typeId, null))
+                if (Global.DisableMgr.IsDisabledFor(DisableType.OutdoorPVP, (int)typeId, null))
                     continue;
 
                 if (typeId >= OutdoorPvPTypes.Max)
@@ -86,12 +86,12 @@ namespace Game.PvP
             m_OutdoorPvPByMap.Remove(map);
         }
 
-        public void AddZone(uint zoneid, OutdoorPvP handle)
+        public void AddZone(int zoneid, OutdoorPvP handle)
         {
             m_OutdoorPvPMap[(handle.GetMap(), zoneid)] = handle;
         }
 
-        public void HandlePlayerEnterZone(Player player, uint zoneid)
+        public void HandlePlayerEnterZone(Player player, int zoneid)
         {
             var outdoor = GetOutdoorPvPToZoneId(player.GetMap(), zoneid);
             if (outdoor == null)
@@ -104,7 +104,7 @@ namespace Game.PvP
             Log.outDebug(LogFilter.Outdoorpvp, "Player {0} entered outdoorpvp id {1}", player.GetGUID().ToString(), outdoor.GetTypeId());
         }
 
-        public void HandlePlayerLeaveZone(Player player, uint zoneid)
+        public void HandlePlayerLeaveZone(Player player, int zoneid)
         {
             var outdoor = GetOutdoorPvPToZoneId(player.GetMap(), zoneid);
             if (outdoor == null)
@@ -134,7 +134,7 @@ namespace Game.PvP
             }
         }
 
-        public bool HandleCustomSpell(Player player, uint spellId, GameObject go)
+        public bool HandleCustomSpell(Player player, int spellId, GameObject go)
         {
             OutdoorPvP pvp = player.GetOutdoorPvP();
             if (pvp != null && pvp.HasPlayer(player))
@@ -152,21 +152,21 @@ namespace Game.PvP
             return false;
         }
 
-        public void HandleDropFlag(Player player, uint spellId)
+        public void HandleDropFlag(Player player, int spellId)
         {
             OutdoorPvP pvp = player.GetOutdoorPvP();
             if (pvp != null && pvp.HasPlayer(player))
                 pvp.HandleDropFlag(player, spellId);
         }
 
-        public void HandlePlayerResurrects(Player player, uint zoneid)
+        public void HandlePlayerResurrects(Player player, int zoneid)
         {
             OutdoorPvP pvp = player.GetOutdoorPvP();
             if (pvp != null && pvp.HasPlayer(player))
                 pvp.HandlePlayerResurrects(player, zoneid);
         }
 
-        public string GetDefenseMessage(uint zoneId, uint id, Locale locale)
+        public string GetDefenseMessage(int zoneId, int id, Locale locale)
         {
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(id);
             if (bct != null)
@@ -185,8 +185,8 @@ namespace Game.PvP
         Dictionary<(Map map, int zoneId), OutdoorPvP> m_OutdoorPvPMap = new();
 
         // Holds the outdoor PvP templates
-        uint[] m_OutdoorMapIds = { 0, 530, 530, 530, 530, 1 };
-        Dictionary<OutdoorPvPTypes, uint> m_OutdoorPvPDatas = new();
+        int[] m_OutdoorMapIds = { 0, 530, 530, 530, 530, 1 };
+        Dictionary<OutdoorPvPTypes, int> m_OutdoorPvPDatas = new();
 
         // update interval
         uint m_UpdateTimer;

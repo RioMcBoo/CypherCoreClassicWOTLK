@@ -6,6 +6,7 @@ using Framework.Dynamic;
 using Game.Miscellaneous;
 using System;
 using System.Threading.Tasks;
+using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
@@ -364,20 +365,24 @@ namespace Game.DataStorage
     public sealed class SpellAuraOptionsRecord
     {
         public int Id;
-        public byte DifficultyID;
-        public uint CumulativeAura;
-        public int ProcCategoryRecovery;
+        private byte _difficultyID;
+        public int CumulativeAura;
+        public uint ProcCategoryRecovery;
         public byte ProcChance;
         public int ProcCharges;
         public ushort SpellProcsPerMinuteID;
         public int[] ProcTypeMask = new int[2];
-        public uint SpellID;
+        public int SpellID;
+
+        #region Properties
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        #endregion
     }
 
     public sealed class SpellAuraRestrictionsRecord
     {
         public int Id;
-        public byte DifficultyID;
+        private byte _difficultyID;
         public byte CasterAuraState;
         public byte TargetAuraState;
         public byte ExcludeCasterAuraState;
@@ -386,7 +391,11 @@ namespace Game.DataStorage
         public int TargetAuraSpell;
         public int ExcludeCasterAuraSpell;
         public int ExcludeTargetAuraSpell;
-        public uint SpellID;
+        public int SpellID;
+
+        #region Properties
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        #endregion
     }
 
     public sealed class SpellCastTimesRecord
@@ -412,15 +421,21 @@ namespace Game.DataStorage
     public sealed class SpellCategoriesRecord
     {
         public int Id;
-        public byte DifficultyID;
-        public short Category;
+        private byte _difficultyID;
+        private short _category;
         public sbyte DefenseType;
         public sbyte DispelType;
         public sbyte Mechanic;
         public sbyte PreventionType;
         public short StartRecoveryCategory;
-        public short ChargeCategory;
-        public uint SpellID;
+        private short _chargeCategory;
+        public int SpellID;
+
+        #region Properties
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        public SpellCategories Category => (SpellCategories)_category;
+        public SpellCategories ChargeCategory => (SpellCategories)_chargeCategory;
+        #endregion
     }
 
     public sealed class SpellCategoryRecord
@@ -431,7 +446,7 @@ namespace Game.DataStorage
         public byte UsesPerWeek;
         public sbyte MaxCharges;
         public int ChargeRecoveryTime;
-        public int TypeMask;
+        public uint TypeMask;
 
         #region Properties
         public SpellCategoryFlags Flags => (SpellCategoryFlags)_flags;
@@ -466,11 +481,15 @@ namespace Game.DataStorage
     public sealed class SpellCooldownsRecord
     {
         public int Id;
-        public byte DifficultyID;
-        public int CategoryRecoveryTime;
-        public int RecoveryTime;
-        public int StartRecoveryTime;
+        private byte _difficultyID;
+        public uint CategoryRecoveryTime;
+        public uint RecoveryTime;
+        public uint StartRecoveryTime;
         public int SpellID;
+
+        #region Properties
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        #endregion
     }
 
     public sealed class SpellDurationRecord
@@ -484,9 +503,9 @@ namespace Game.DataStorage
     public sealed class SpellEffectRecord
     {
         public int Id;
-        public int DifficultyID;
+        private int _difficultyID;
         public int EffectIndex;
-        public uint Effect;
+        public int Effect;
         public float EffectAmplitude;
         private int _effectAttributes;
         public short EffectAura;
@@ -512,9 +531,10 @@ namespace Game.DataStorage
         public int[] EffectRadiusIndex = new int[2];
         public FlagArray128 EffectSpellClassMask;
         public short[] ImplicitTarget = new short[2];
-        public uint SpellID;
+        public int SpellID;
 
         #region Properties
+        public Difficulty DifficultyID { get => (Difficulty)_difficultyID; /*set => _difficultyID = (int)value; */}
         public SpellEffectAttributes EffectAttributes { get => (SpellEffectAttributes)_effectAttributes; set => _effectAttributes = (int)value; }
         #endregion
     }
@@ -539,11 +559,15 @@ namespace Game.DataStorage
         public static int MAX_SPELL_AURA_INTERRUPT_FLAGS = 2;
 
         public int Id;
-        public byte DifficultyID;
+        private byte _difficultyID;
         public short InterruptFlags;
         public int[] AuraInterruptFlags = new int[MAX_SPELL_AURA_INTERRUPT_FLAGS];
         public int[] ChannelInterruptFlags = new int[MAX_SPELL_AURA_INTERRUPT_FLAGS];
-        public uint SpellID;
+        public int SpellID;
+
+        #region Properties
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        #endregion
     }
 
     public sealed class SpellItemEnchantmentRecord
@@ -630,19 +654,23 @@ namespace Game.DataStorage
     public sealed class SpellLevelsRecord
     {
         public int Id;
-        public byte DifficultyID;
+        private byte _difficultyID;
         public short BaseLevel;
         public short MaxLevel;
         public short SpellLevel;
         public byte MaxPassiveAuraLevel;        
         public int SpellID;
+
+        #region Properties
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        #endregion
     }
 
     public sealed class SpellMiscRecord
     {
         public int Id;
         public int[] Attributes = new int[15];
-        public byte DifficultyID;
+        private byte _difficultyID;
         public ushort CastingTimeIndex;
         public ushort DurationIndex;
         public ushort RangeIndex;
@@ -654,7 +682,11 @@ namespace Game.DataStorage
         public int ActiveIconFileDataID;
         public int ContentTuningID;
         public int ShowFutureSpellPlayerConditionID;        
-        public int SpellID;        
+        public int SpellID;
+
+        #region Properties
+        public Difficulty DifficultyID => (Difficulty)_difficultyID;
+        #endregion
     }
 
     public sealed class SpellNameRecord
@@ -673,7 +705,7 @@ namespace Game.DataStorage
         public int ManaCost;
         public int ManaCostPerLevel;
         public int ManaPerSecond;
-        public uint PowerDisplayID;
+        public int PowerDisplayID;
         public int AltPowerBarID;
         public float PowerCostPct;
         public float PowerCostMaxPct;
@@ -685,7 +717,7 @@ namespace Game.DataStorage
         /// - affects tooltip parsing as multiplier on SpellEffectEntry::EffectPointsPerResource
         /// </summary>
         public uint OptionalCost;
-        public uint SpellID;
+        public int SpellID;
 
         #region Properties
         public PowerType PowerType => (PowerType)_powerType;
@@ -769,7 +801,7 @@ namespace Game.DataStorage
     public sealed class SpellReagentsCurrencyRecord
     {
         public int Id;
-        public uint SpellID;
+        public int SpellID;
         public ushort CurrencyTypesID;
         public ushort CurrencyCount;
     }
@@ -779,8 +811,8 @@ namespace Game.DataStorage
         public int Id;
         public int SpellID;
         public int Class;
-        public uint MinScalingLevel;
-        public uint MaxScalingLevel;
+        public int MinScalingLevel;
+        public int MaxScalingLevel;
         public short ScalesFromItemLevel;
     }
 
@@ -804,8 +836,8 @@ namespace Game.DataStorage
         public ushort CombatRoundTime;
         public float DamageVariance;
         public ushort MountTypeID;
-        public uint[] CreatureDisplayID = new uint[4];
-        public uint[] PresetSpellID = new uint[SpellConst.MaxShapeshift];
+        public int[] CreatureDisplayID = new int[4];
+        public int[] PresetSpellID = new int[SpellConst.MaxShapeshift];
 
         #region Properties
         public SpellShapeshiftFormFlags Flags => (SpellShapeshiftFormFlags)_flags;
@@ -830,7 +862,7 @@ namespace Game.DataStorage
         private byte _difficultyID;
         public float ConeDegrees;
         public byte MaxTargets;
-        public uint MaxTargetLevel;
+        public int MaxTargetLevel;
         public short TargetCreatureType;
         public int Targets;
         public float Width;

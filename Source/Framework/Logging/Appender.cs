@@ -192,7 +192,7 @@ abstract class Appender
 
     public abstract AppenderType GetAppenderType();
 
-    public virtual void setRealmId(uint realmId) { }
+    public virtual void setRealmId(int realmId) { }
 
     public void setLogLevel(LogLevel level)
     {

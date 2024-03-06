@@ -963,12 +963,12 @@ namespace Game.DataStorage
             return raceEntry.Name[Locale.enUS];
         }
 
-        public ChrSpecializationRecord GetChrSpecializationByIndex(Class class_, uint index)
+        public ChrSpecializationRecord GetChrSpecializationByIndex(Class class_, int index)
         {
             var classSet = _chrSpecializationsByIndex.LookupByIndex((int)class_);
             if (classSet != null)
             {
-                var specialization = classSet.LookupByIndex((int)index);
+                var specialization = classSet.LookupByIndex(index);
                 if (specialization != null)
                     return specialization;
             }
@@ -1382,14 +1382,14 @@ namespace Game.DataStorage
             return _itemSpecOverrides.LookupByKey(itemId);
         }
 
-        public JournalTierRecord GetJournalTier(uint index)
+        public JournalTierRecord GetJournalTier(int index)
         {
             if (index < _journalTiersByIndex.Count)
-                return _journalTiersByIndex[(int)index];
+                return _journalTiersByIndex[index];
             return null;
         }
 
-        public LFGDungeonsRecord GetLfgDungeon(uint mapId, Difficulty difficulty)
+        public LFGDungeonsRecord GetLfgDungeon(int mapId, Difficulty difficulty)
         {
             foreach (LFGDungeonsRecord dungeon in LFGDungeonsStorage.Values)
                 if (dungeon.MapID == mapId && dungeon.DifficultyID == difficulty)
@@ -1565,7 +1565,7 @@ namespace Game.DataStorage
             return _paragonReputations.LookupByKey(factionId);
         }
 
-        public PvpDifficultyRecord GetBattlegroundBracketByLevel(int mapid, uint level)
+        public PvpDifficultyRecord GetBattlegroundBracketByLevel(int mapid, int level)
         {
             PvpDifficultyRecord maxEntry = null;              // used for level > max listed level case
             foreach (var entry in PvpDifficultyStorage.Values)

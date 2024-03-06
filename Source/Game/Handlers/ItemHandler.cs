@@ -605,7 +605,7 @@ namespace Game
             GetPlayer().SendMessageToSet(packet, true);
         }
 
-        public void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, int slot, uint Duration)
+        public void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, EnchantmentSlot slot, uint Duration)
         {
             ItemEnchantTimeUpdate data = new();
             data.ItemGuid = Itemguid;
@@ -1033,7 +1033,7 @@ namespace Game
                 if (itemEffect.TriggerType != ItemSpelltriggerType.OnLearn)
                     continue;
 
-                var speciesEntry = BattlePetMgr.GetBattlePetSpeciesBySpell((uint)itemEffect.SpellID);
+                var speciesEntry = BattlePetMgr.GetBattlePetSpeciesBySpell(itemEffect.SpellID);
                 if (speciesEntry != null)
                     GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
             }

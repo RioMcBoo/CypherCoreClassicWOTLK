@@ -50,7 +50,7 @@ namespace Game.Entities
 
             // the first 3 SpellOrActions are attack, follow and stay
             for (byte i = 0; i < SharedConst.ActionBarIndexPetSpellStart - SharedConst.ActionBarIndexStart; ++i)
-                SetActionBar((byte)(SharedConst.ActionBarIndexStart + i), (uint)CommandStates.Attack - i, ActiveStates.Command);
+                SetActionBar((byte)(SharedConst.ActionBarIndexStart + i), (int)CommandStates.Attack - i, ActiveStates.Command);
 
             // middle 4 SpellOrActions are spells/special attacks/abilities
             for (byte i = 0; i < SharedConst.ActionBarIndexPetSpellEnd - SharedConst.ActionBarIndexPetSpellStart; ++i)
@@ -58,13 +58,13 @@ namespace Game.Entities
 
             // last 3 SpellOrActions are reactions
             for (byte i = 0; i < SharedConst.ActionBarIndexEnd - SharedConst.ActionBarIndexPetSpellEnd; ++i)
-                SetActionBar((byte)(SharedConst.ActionBarIndexPetSpellEnd + i), (uint)CommandStates.Attack - i, ActiveStates.Reaction);
+                SetActionBar((byte)(SharedConst.ActionBarIndexPetSpellEnd + i), (int)CommandStates.Attack - i, ActiveStates.Reaction);
         }
 
         public void InitEmptyActionBar(bool withAttack = true)
         {
             if (withAttack)
-                SetActionBar(SharedConst.ActionBarIndexStart, (uint)CommandStates.Attack, ActiveStates.Command);
+                SetActionBar(SharedConst.ActionBarIndexStart, (int)CommandStates.Attack, ActiveStates.Command);
             else
                 SetActionBar(SharedConst.ActionBarIndexStart, 0, ActiveStates.Passive);
             for (byte x = SharedConst.ActionBarIndexStart + 1; x < SharedConst.ActionBarIndexEnd; ++x)
@@ -92,7 +92,7 @@ namespace Game.Entities
 
                 for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 {
-                    uint spellId = _unit.ToCreature().m_spells[i];
+                    var spellId = _unit.ToCreature().m_spells[i];
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
@@ -120,9 +120,9 @@ namespace Game.Entities
 
             InitPetActionBar();
 
-            for (uint x = 0; x < SharedConst.MaxSpellCharm; ++x)
+            for (int x = 0; x < SharedConst.MaxSpellCharm; ++x)
             {
-                uint spellId = _unit.ToCreature().m_spells[x];
+                var spellId = _unit.ToCreature().m_spells[x];
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
 
                 if (spellInfo == null)
@@ -165,13 +165,13 @@ namespace Game.Entities
 
         public bool AddSpellToActionBar(SpellInfo spellInfo, ActiveStates newstate = ActiveStates.Decide, int preferredSlot = 0)
         {
-            uint spell_id = spellInfo.Id;
-            uint first_id = spellInfo.GetFirstRankSpell().Id;
+            var spell_id = spellInfo.Id;
+            var first_id = spellInfo.GetFirstRankSpell().Id;
 
             // new spell rank can be already listed
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
             {
-                uint action = PetActionBar[i].GetAction();
+                var action = PetActionBar[i].GetAction();
                 if (action != 0)
                 {
                     if (PetActionBar[i].IsActionBarForSpell() && Global.SpellMgr.GetFirstSpellInChain(action) == first_id)
@@ -195,13 +195,13 @@ namespace Game.Entities
             return false;
         }
 
-        public bool RemoveSpellFromActionBar(uint spell_id)
+        public bool RemoveSpellFromActionBar(int spell_id)
         {
-            uint first_id = Global.SpellMgr.GetFirstSpellInChain(spell_id);
+            var first_id = Global.SpellMgr.GetFirstSpellInChain(spell_id);
 
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
             {
-                uint action = PetActionBar[i].GetAction();
+                var action = PetActionBar[i].GetAction();
                 if (action != 0)
                 {
                     if (PetActionBar[i].IsActionBarForSpell() && Global.SpellMgr.GetFirstSpellInChain(action) == first_id)

@@ -59,15 +59,15 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(VendorGUID);
-            _worldPacket.WriteUInt32(Muid);
-            _worldPacket.WriteUInt32(NewQuantity);
-            _worldPacket.WriteUInt32(QuantityBought);
+            _worldPacket.WriteInt32(Muid);
+            _worldPacket.WriteInt32(NewQuantity);
+            _worldPacket.WriteInt32(QuantityBought);
         }
 
         public ObjectGuid VendorGUID;
-        public uint Muid;
-        public uint QuantityBought;
-        public uint NewQuantity;
+        public int Muid;
+        public int QuantityBought;
+        public int NewQuantity;
     }
 
     public class BuyFailed : ServerPacket
@@ -533,12 +533,12 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ItemGuid);
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteUInt32(Cooldown);
         }
 
         public ObjectGuid ItemGuid;
-        public uint SpellID;
+        public int SpellID;
         public uint Cooldown;
     }
 
@@ -572,14 +572,14 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(ItemGuid);
             _worldPacket.WriteUInt32(DurationLeft);
-            _worldPacket.WriteInt32(Slot);
+            _worldPacket.WriteInt32((int)Slot);
             _worldPacket.WritePackedGuid(OwnerGuid);
         }
 
         public ObjectGuid OwnerGuid;
         public ObjectGuid ItemGuid;
         public uint DurationLeft;
-        public int Slot;
+        public EnchantmentSlot Slot;
     }
 
     class UseCritterItem : ClientPacket

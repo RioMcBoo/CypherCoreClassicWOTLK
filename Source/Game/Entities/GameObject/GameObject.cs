@@ -151,7 +151,7 @@ namespace Game.Entities
             }
         }
 
-        public static GameObject CreateGameObject(int entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit = 0)
+        public static GameObject CreateGameObject(int entry, Map map, Position pos, Quaternion rotation, int animProgress, GameObjectState goState, int artKit = 0)
         {
             GameObjectTemplate goInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
             if (goInfo == null)
@@ -164,7 +164,7 @@ namespace Game.Entities
             return go;
         }
 
-        public static GameObject CreateGameObjectFromDB(ulong spawnId, Map map, bool addToMap = true)
+        public static GameObject CreateGameObjectFromDB(long spawnId, Map map, bool addToMap = true)
         {
             GameObject go = new();
             if (!go.LoadFromDB(spawnId, map, addToMap))
@@ -173,7 +173,7 @@ namespace Game.Entities
             return go;
         }
 
-        bool Create(int entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit, bool dynamic, ulong spawnid)
+        bool Create(int entry, Map map, Position pos, Quaternion rotation, int animProgress, GameObjectState goState, int artKit, bool dynamic, long spawnid)
         {
             Cypher.Assert(map != null);
             SetMap(map);
@@ -990,11 +990,11 @@ namespace Game.Entities
 
         public Loot GetFishLootJunk(Player lootOwner)
         {
-            uint defaultzone = 1;
+            var defaultzone = 1;
 
             Loot fishLoot = new(GetMap(), GetGUID(), LootType.FishingJunk, null);
 
-            uint areaId = GetAreaId();
+            var areaId = GetAreaId();
             ItemContext itemContext = ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), lootOwner);
             AreaTableRecord areaEntry;
             while ((areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId)) != null)
@@ -1023,16 +1023,16 @@ namespace Game.Entities
                 return;
             }
 
-            uint mapId = GetMapId();
+            var mapId = GetMapId();
             ITransport transport = GetTransport();
             if (transport != null)
                 if (transport.GetMapIdForSpawning() >= 0)
-                    mapId = (uint)transport.GetMapIdForSpawning();
+                    mapId = transport.GetMapIdForSpawning();
 
             SaveToDB(mapId, data.SpawnDifficulties);
         }
 
-        public void SaveToDB(uint mapid, List<Difficulty> spawnDifficulties)
+        public void SaveToDB(int mapid, List<Difficulty> spawnDifficulties)
         {
             GameObjectTemplate goI = GetGoInfo();
 
@@ -1061,8 +1061,8 @@ namespace Game.Entities
             if (data.spawnGroupData == null)
                 data.spawnGroupData = Global.ObjectMgr.GetDefaultSpawnGroup();
 
-            data.PhaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.PhaseId;
-            data.PhaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.PhaseGroup;
+            data.PhaseId = GetDBPhase() > 0 ? GetDBPhase() : data.PhaseId;
+            data.PhaseGroup = GetDBPhase() < 0 ? -GetDBPhase() : data.PhaseGroup;
 
             // Update in DB
             byte index = 0;
@@ -1091,7 +1091,7 @@ namespace Game.Entities
             DB.World.Execute(stmt);
         }
 
-        public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool unused = true)
+        public override bool LoadFromDB(long spawnId, Map map, bool addToMap, bool unused = true)
         {
             GameObjectData data = Global.ObjectMgr.GetGameObjectData(spawnId);
             if (data == null)
@@ -1100,11 +1100,11 @@ namespace Game.Entities
                 return false;
             }
 
-            uint entry = data.Id;
+            int entry = data.Id;
 
-            uint animprogress = data.animprogress;
+            int animprogress = data.animprogress;
             GameObjectState go_state = data.goState;
-            uint artKit = data.artKit;
+            int artKit = data.artKit;
 
             m_spawnId = spawnId;
             m_respawnCompatibilityMode = ((data.spawnGroupData.flags & SpawnGroupFlags.CompatibilityMode) != 0);
@@ -3609,7 +3609,7 @@ namespace Game.Entities
         public override ushort GetAIAnimKitId() { return _animKitId; }
 
         public uint GetWorldEffectID() { return _worldEffectID; }
-        public void SetWorldEffectID(uint worldEffectID) { _worldEffectID = worldEffectID; }
+        public void SetWorldEffectID(int worldEffectID) { _worldEffectID = worldEffectID; }
 
         public GameObjectTemplate GetGoInfo() { return m_goInfo; }
         public GameObjectTemplateAddon GetTemplateAddon() { return m_goTemplateAddon; }
@@ -3831,7 +3831,7 @@ namespace Game.Entities
         GameObjectAI m_AI;
         bool m_respawnCompatibilityMode;
         ushort _animKitId;
-        uint _worldEffectID;
+        int _worldEffectID;
 
         Dictionary<ObjectGuid, PerPlayerState> m_perPlayerState;
 

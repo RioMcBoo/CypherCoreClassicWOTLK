@@ -10,7 +10,7 @@ using System.Collections.Generic;
 namespace Game.Entities
 {
     public static class ItemEnchantmentManager
-    { 
+    {
         public static void LoadRandomEnchantmentsTable()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -131,27 +131,28 @@ namespace Game.Entities
         }
 
         public static Dictionary<int, List<(int EnchantmentID, float Chance)>> RandomEnchantmentData;
-    }
 
-    public static ItemRandomProperties GenerateRandomProperties(int item_id)
-    {
-        //ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
-        //if (itemProto == null)
-        //    return 0;
 
-        //// item must have one from this field values not null if it can have random enchantments
-        //if (itemProto.RandomBonusListTemplateId == 0)
-        //    return 0;
+        public static ItemRandomProperties GenerateRandomProperties(int item_id)
+        {
+            //ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
+            //if (itemProto == null)
+            //    return 0;
 
-        //var tab = _storage.LookupByKey(itemProto.RandomBonusListTemplateId);
-        //if (tab == null)
-        //{
-        //    Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
-        //    return 0;
-        //}
-        ////todo fix me this is ulgy
-        //return tab.BonusListIDs.SelectRandomElementByWeight(x => (float)tab.Chances[tab.BonusListIDs.IndexOf(x)]);
-        return new();
+            //// item must have one from this field values not null if it can have random enchantments
+            //if (itemProto.RandomBonusListTemplateId == 0)
+            //    return 0;
+
+            //var tab = _storage.LookupByKey(itemProto.RandomBonusListTemplateId);
+            //if (tab == null)
+            //{
+            //    Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
+            //    return 0;
+            //}
+            ////todo fix me this is ulgy
+            //return tab.BonusListIDs.SelectRandomElementByWeight(x => (float)tab.Chances[tab.BonusListIDs.IndexOf(x)]);
+            return new();
+        }
     }
 
     public struct EnchStoreItem

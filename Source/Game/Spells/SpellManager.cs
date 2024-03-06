@@ -289,9 +289,9 @@ namespace Game.Entities
             return false;
         }
 
-        public SpellTargetPosition GetSpellTargetPosition(uint spell_id, uint effIndex)
+        public SpellTargetPosition GetSpellTargetPosition(int spell_id, int effIndex)
         {
-            return mSpellTargetPositions.LookupByKey(new KeyValuePair<uint, uint>(spell_id, effIndex));
+            return mSpellTargetPositions.LookupByKey(new KeyValuePair<int, int>(spell_id, effIndex));
         }
 
         public List<SpellGroup> GetSpellSpellGroupMapBounds(int spell_id)
@@ -563,7 +563,7 @@ namespace Game.Entities
             return false;
         }
 
-        public List<int> GetSpellLinked(SpellLinkedType type, uint spellId)
+        public List<int> GetSpellLinked(SpellLinkedType type, int spellId)
         {
             return mSpellLinkedMap.LookupByKey((type, spellId));
         }
@@ -761,8 +761,8 @@ namespace Game.Entities
             uint count = 0;
             do
             {
-                uint spell_id = result.Read<uint>(0);
-                uint spell_req = result.Read<uint>(1);
+                int spell_id = result.Read<int>(0);
+                int spell_req = result.Read<int>(1);
 
                 // check if chain is made with valid first spell
                 SpellInfo spell = GetSpellInfo(spell_id, Difficulty.None);
@@ -859,10 +859,10 @@ namespace Game.Entities
             uint count = 0;
             do
             {
-                uint spell_id = result.Read<uint>(0);
+                int spell_id = result.Read<int>(0);
 
                 var node = new SpellLearnSpellNode();
-                node.Spell = result.Read<uint>(1);
+                node.Spell = result.Read<int>(1);
                 node.OverridesSpell = 0;
                 node.Active = result.Read<bool>(2);
                 node.AutoLearned = false;
@@ -1003,11 +1003,11 @@ namespace Game.Entities
             uint count = 0;
             do
             {
-                uint spellId = result.Read<uint>(0);
-                uint effIndex = result.Read<byte>(1);
+                int spellId = result.Read<int>(0);
+                int effIndex = result.Read<byte>(1);
 
                 SpellTargetPosition st = new();
-                st.target_mapId = result.Read<uint>(2);
+                st.target_mapId = result.Read<int>(2);
                 st.target_X = result.Read<float>(3);
                 st.target_Y = result.Read<float>(4);
                 st.target_Z = result.Read<float>(5);
@@ -1052,7 +1052,7 @@ namespace Game.Entities
 
                 if (hasTarget(Targets.DestDb) || hasTarget(Targets.DestNearbyEntryOrDB))
                 {
-                    var key = new KeyValuePair<uint, uint>(spellId, effIndex);
+                    var key = new KeyValuePair<int, int>(spellId, effIndex);
                     mSpellTargetPositions[key] = st;
                     ++count;
                 }
@@ -1083,12 +1083,12 @@ namespace Game.Entities
                 return;
             }
 
-            List<uint> groups = new();
+            List<int> groups = new();
             uint count = 0;
             do
             {
-                uint group_id = result.Read<uint>(0);
-                if (group_id <= 1000 && group_id >= (uint)SpellGroup.CoreRangeMax)
+                int group_id = result.Read<int>(0);
+                if (group_id <= 1000 && group_id >= (int)SpellGroup.CoreRangeMax)
                 {
                     Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group` is in core range, but is not defined in core!", group_id);
                     continue;
@@ -1104,7 +1104,7 @@ namespace Game.Entities
             {
                 if (group.Value < 0)
                 {
-                    if (!groups.Contains((uint)Math.Abs(group.Value)))
+                    if (!groups.Contains(Math.Abs(group.Value)))
                     {
                         Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group` does not exist", Math.Abs(group.Value));
                         mSpellGroupSpell.Remove(group.Key);
@@ -1112,7 +1112,7 @@ namespace Game.Entities
                 }
                 else
                 {
-                    SpellInfo spellInfo = GetSpellInfo((uint)group.Value, Difficulty.None);
+                    SpellInfo spellInfo = GetSpellInfo(group.Value, Difficulty.None);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_group` does not exist", group.Value);
@@ -1134,7 +1134,7 @@ namespace Game.Entities
                 foreach (var spell in spells)
                 {
                     ++count;
-                    mSpellSpellGroup.Add((uint)spell, (SpellGroup)group);
+                    mSpellSpellGroup.Add(spell, (SpellGroup)group);
                 }
             }
 
@@ -1209,7 +1209,7 @@ namespace Game.Entities
                         AuraType.ModRangedHaste
                     };
 
-                    foreach (uint spellId in spellIds)
+                    foreach (var spellId in spellIds)
                     {
                         SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
                         foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -1251,7 +1251,7 @@ namespace Game.Entities
                 }
 
                 // re-check spells against guessed group
-                foreach (uint spellId in spellIds)
+                foreach (var spellId in spellIds)
                 {
                     SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
 
@@ -1310,7 +1310,7 @@ namespace Game.Entities
                         spellId = -spellId;
                     }
 
-                    SpellInfo spellInfo = GetSpellInfo((uint)spellId, Difficulty.None);
+                    SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` does not exist", spellId);
@@ -1319,7 +1319,7 @@ namespace Game.Entities
 
                     if (allRanks)
                     {
-                        if (spellInfo.GetFirstRankSpell().Id != (uint)spellId)
+                        if (spellInfo.GetFirstRankSpell().Id != spellId)
                         {
                             Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` is not first rank of spell.", spellId);
                             continue;
@@ -1340,7 +1340,7 @@ namespace Game.Entities
                     baseProcEntry.ProcsPerMinute = result.Read<float>(14);
                     baseProcEntry.Chance = result.Read<float>(15);
                     baseProcEntry.Cooldown = result.Read<uint>(16);
-                    baseProcEntry.Charges = result.Read<uint>(17);
+                    baseProcEntry.Charges = result.Read<int>(17);
 
                     while (spellInfo != null)
                     {
@@ -1610,7 +1610,7 @@ namespace Game.Entities
             uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
+                int entry = result.Read<int>(0);
 
                 if (!HasSpellInfo(entry, Difficulty.None))
                 {
@@ -1659,10 +1659,10 @@ namespace Game.Entities
             uint count = 0;
             do
             {
-                uint spell = result.Read<uint>(0);
+                int spell = result.Read<int>(0);
                 byte eff = result.Read<byte>(1);
-                uint pet = result.Read<uint>(2);
-                uint aura = result.Read<uint>(3);
+                int pet = result.Read<int>(2);
+                int aura = result.Read<int>(3);
 
                 var petAura = mSpellPetAuraMap.LookupByKey((spell << 8) + eff);
                 if (petAura != null)
@@ -1720,7 +1720,7 @@ namespace Game.Entities
             uint count = 0;
             do
             {
-                uint enchantId = result.Read<uint>(0);
+                int enchantId = result.Read<int>(0);
 
                 var ench = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
                 if (ench == null)
@@ -1764,7 +1764,7 @@ namespace Game.Entities
                 int effect = result.Read<int>(1);
                 SpellLinkedType type = (SpellLinkedType)result.Read<byte>(2);
 
-                SpellInfo spellInfo = GetSpellInfo((uint)Math.Abs(trigger), Difficulty.None);
+                SpellInfo spellInfo = GetSpellInfo(Math.Abs(trigger), Difficulty.None);
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_linked_spell` does not exist", Math.Abs(trigger));
@@ -1780,7 +1780,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (!HasSpellInfo((uint)Math.Abs(effect), Difficulty.None))
+                if (!HasSpellInfo(Math.Abs(effect), Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_linked_spell` does not exist", Math.Abs(effect));
                     continue;
@@ -1825,17 +1825,17 @@ namespace Game.Entities
 
             mPetLevelupSpellMap.Clear();                                   // need for reload case
 
-            uint count = 0;
-            uint family_count = 0;
+            int count = 0;
+            int family_count = 0;
 
             foreach (var creatureFamily in CliDB.CreatureFamilyStorage.Values)
             {
                 for (byte j = 0; j < 2; ++j)
                 {
-                    if (creatureFamily.SkillLine[j] == 0)
+                    if (creatureFamily.SkillLine(j) == 0)
                         continue;
 
-                    var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill((SkillType)creatureFamily.SkillLine[j]);
+                    var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(creatureFamily.SkillLine(j));
                     if (skillLineAbilities == null)
                         continue;
 
@@ -1852,7 +1852,7 @@ namespace Game.Entities
                             continue;
 
                         if (!mPetLevelupSpellMap.ContainsKey(creatureFamily.Id))
-                            mPetLevelupSpellMap.Add(creatureFamily.Id, new MultiMap<uint, uint>());
+                            mPetLevelupSpellMap.Add(creatureFamily.Id, new MultiMap<int, int>());
 
                         var spellSet = mPetLevelupSpellMap.LookupByKey(creatureFamily.Id);
                         if (spellSet.Count == 0)
@@ -1888,12 +1888,12 @@ namespace Game.Entities
                     if (spellEffectInfo.Effect == SpellEffectName.Summon || spellEffectInfo.Effect == SpellEffectName.SummonPet)
                     {
                         int creature_id = spellEffectInfo.MiscValue;
-                        CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate((uint)creature_id);
+                        CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(creature_id);
                         if (cInfo == null)
                             continue;
 
                         // get default pet spells from creature_template
-                        uint petSpellsId = cInfo.Entry;
+                        var petSpellsId = cInfo.Entry;
                         if (mPetDefaultSpellsMap.LookupByKey(cInfo.Entry) != null)
                             continue;
 
@@ -1984,17 +1984,17 @@ namespace Game.Entities
             uint count = 0;
             do
             {
-                uint spell = result.Read<uint>(0);
+                int spell = result.Read<int>(0);
 
                 SpellArea spellArea = new();
                 spellArea.spellId = spell;
-                spellArea.areaId = result.Read<uint>(1);
-                spellArea.questStart = result.Read<uint>(2);
+                spellArea.areaId = result.Read<int>(1);
+                spellArea.questStart = result.Read<int>(2);
                 spellArea.questStartStatus = result.Read<uint>(3);
                 spellArea.questEndStatus = result.Read<uint>(4);
-                spellArea.questEnd = result.Read<uint>(5);
+                spellArea.questEnd = result.Read<int>(5);
                 spellArea.auraSpell = result.Read<int>(6);
-                spellArea.raceMask = new RaceMask<ulong>(result.Read<ulong>(7));
+                spellArea.raceMask = (RaceMask)result.Read<ulong>(7);
                 spellArea.gender = (Gender)result.Read<uint>(8);
                 spellArea.flags = (SpellAreaFlag)result.Read<byte>(9);
 
@@ -2023,7 +2023,7 @@ namespace Game.Entities
                             continue;
                         if (spellArea.auraSpell != bound.auraSpell)
                             continue;
-                        if ((spellArea.raceMask & bound.raceMask).IsEmpty())
+                        if (spellArea.raceMask.HasAnyFlag(bound.raceMask))
                             continue;
                         if (spellArea.gender != bound.gender)
                             continue;
@@ -2063,7 +2063,7 @@ namespace Game.Entities
 
                 if (spellArea.auraSpell != 0)
                 {
-                    SpellInfo info = GetSpellInfo((uint)Math.Abs(spellArea.auraSpell), Difficulty.None);
+                    SpellInfo info = GetSpellInfo(Math.Abs(spellArea.auraSpell), Difficulty.None);
                     if (info == null)
                     {
                         Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong aura spell ({1}) requirement", spell, Math.Abs(spellArea.auraSpell));
@@ -2096,7 +2096,7 @@ namespace Game.Entities
                             continue;
                         }
 
-                        var saBound2 = GetSpellAreaMapBounds((uint)spellArea.auraSpell);
+                        var saBound2 = GetSpellAreaMapBounds(spellArea.auraSpell);
                         foreach (var bound in saBound2)
                         {
                             if (bound.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && bound.auraSpell > 0)
@@ -2114,7 +2114,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (!spellArea.raceMask.IsEmpty() && (spellArea.raceMask & RaceMask.Playable).IsEmpty())
+                if (spellArea.raceMask != RaceMask.None && !spellArea.raceMask.HasAnyFlag(RaceMask.Playable))
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong race mask ({1}) requirement", spell, spellArea.raceMask);
                     continue;
@@ -2152,7 +2152,7 @@ namespace Game.Entities
 
                 // for search at aura apply
                 if (spellArea.auraSpell != 0)
-                    mSpellAreaForAuraMap.AddRange((uint)Math.Abs(spellArea.auraSpell), sa);
+                    mSpellAreaForAuraMap.AddRange(Math.Abs(spellArea.auraSpell), sa);
 
                 ++count;
             } while (result.NextRow());
@@ -2196,7 +2196,7 @@ namespace Game.Entities
                     var summonProperties = CliDB.SummonPropertiesStorage.LookupByKey(effect.EffectMiscValue[1]);
                     if (summonProperties != null)
                     {
-                        if (summonProperties.Slot == (int)SummonSlot.MiniPet && summonProperties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
+                        if (summonProperties.Slot == (int)SummonSlot.MiniPet && summonProperties.HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
                         {
                             var battlePetSpecies = battlePetSpeciesByCreature.LookupByKey(effect.EffectMiscValue[0]);
                             if (battlePetSpecies != null)
@@ -2257,7 +2257,7 @@ namespace Game.Entities
 
             foreach (SpellPowerRecord power in CliDB.SpellPowerStorage.Values)
             {
-                int difficulty = 0;
+                var difficulty = Difficulty.None;
                 byte index = power.OrderIndex;
 
                 SpellPowerDifficultyRecord powerDifficulty = CliDB.SpellPowerDifficultyStorage.LookupByKey(power.Id);
@@ -2427,11 +2427,11 @@ namespace Game.Entities
                         Difficulty difficulty = (Difficulty)effectsResult.Read<uint>(1);
                         SpellEffectRecord effect = new();
                         effect.EffectIndex = effectsResult.Read<int>(2);
-                        effect.Effect = effectsResult.Read<uint>(3);
+                        effect.Effect = effectsResult.Read<int>(3);
                         effect.EffectAmplitude = effectsResult.Read<float>(4);
                         effect.EffectAttributes = (SpellEffectAttributes)effectsResult.Read<int>(5);
                         effect.EffectAura = effectsResult.Read<short>(6);
-                        effect.EffectAuraPeriod = effectsResult.Read<int>(7);
+                        effect.EffectAuraPeriod = effectsResult.Read<uint>(7);
                         effect.EffectBasePoints = effectsResult.Read<int>(8);
                         effect.EffectBonusCoefficient = effectsResult.Read<float>(9);
                         effect.EffectChainAmplitude = effectsResult.Read<float>(10);
@@ -2551,7 +2551,7 @@ namespace Game.Entities
                         mServersideSpellNames.Add(new(spellId, spellsResult.Read<string>(62)));
 
                         SpellInfo spellInfo = new(mServersideSpellNames.Last().Name, difficulty, spellEffects[(spellId, difficulty)]);
-                        spellInfo.CategoryId = spellsResult.Read<uint>(2);
+                        spellInfo.CategoryId = (SpellCategories)spellsResult.Read<int>(2);
                         spellInfo.Dispel = (DispelType)spellsResult.Read<uint>(3);
                         spellInfo.Mechanic = (Mechanics)spellsResult.Read<uint>(4);
                         spellInfo.Attributes = (SpellAttr0)spellsResult.Read<uint>(5);
@@ -2568,24 +2568,24 @@ namespace Game.Entities
                         spellInfo.AttributesEx11 = (SpellAttr11)spellsResult.Read<uint>(16);
                         spellInfo.AttributesEx12 = (SpellAttr12)spellsResult.Read<uint>(17);
                         spellInfo.AttributesEx13 = (SpellAttr13)spellsResult.Read<uint>(18);
-                        spellInfo.Stances = spellsResult.Read<ulong>(19);
-                        spellInfo.StancesNot = spellsResult.Read<ulong>(20);
+                        spellInfo.Stances = spellsResult.Read<long>(19);
+                        spellInfo.StancesNot = spellsResult.Read<long>(20);
                         spellInfo.Targets = (SpellCastTargetFlags)spellsResult.Read<uint>(21);
-                        spellInfo.TargetCreatureType = spellsResult.Read<uint>(22);
-                        spellInfo.RequiresSpellFocus = spellsResult.Read<uint>(23);
+                        spellInfo.TargetCreatureType = spellsResult.Read<int>(22);
+                        spellInfo.RequiresSpellFocus = spellsResult.Read<int>(23);
                         spellInfo.FacingCasterFlags = spellsResult.Read<uint>(24);
                         spellInfo.CasterAuraState = (AuraStateType)spellsResult.Read<uint>(25);
                         spellInfo.TargetAuraState = (AuraStateType)spellsResult.Read<uint>(26);
                         spellInfo.ExcludeCasterAuraState = (AuraStateType)spellsResult.Read<uint>(27);
                         spellInfo.ExcludeTargetAuraState = (AuraStateType)spellsResult.Read<uint>(28);
-                        spellInfo.CasterAuraSpell = spellsResult.Read<uint>(29);
-                        spellInfo.TargetAuraSpell = spellsResult.Read<uint>(30);
-                        spellInfo.ExcludeCasterAuraSpell = spellsResult.Read<uint>(31);
-                        spellInfo.ExcludeTargetAuraSpell = spellsResult.Read<uint>(32);
+                        spellInfo.CasterAuraSpell = spellsResult.Read<int>(29);
+                        spellInfo.TargetAuraSpell = spellsResult.Read<int>(30);
+                        spellInfo.ExcludeCasterAuraSpell = spellsResult.Read<int>(31);
+                        spellInfo.ExcludeTargetAuraSpell = spellsResult.Read<int>(32);
                         spellInfo.CastTimeEntry = CliDB.SpellCastTimesStorage.LookupByKey(spellsResult.Read<int>(33));
                         spellInfo.RecoveryTime = spellsResult.Read<uint>(34);
                         spellInfo.CategoryRecoveryTime = spellsResult.Read<uint>(35);
-                        spellInfo.StartRecoveryCategory = spellsResult.Read<uint>(36);
+                        spellInfo.StartRecoveryCategory = spellsResult.Read<int>(36);
                         spellInfo.StartRecoveryTime = spellsResult.Read<uint>(37);
                         spellInfo.InterruptFlags = (SpellInterruptFlags)spellsResult.Read<uint>(38);
                         spellInfo.AuraInterruptFlags = (SpellAuraInterruptFlags)spellsResult.Read<uint>(39);
@@ -2593,8 +2593,8 @@ namespace Game.Entities
                         spellInfo.ChannelInterruptFlags = (SpellAuraInterruptFlags)spellsResult.Read<uint>(41);
                         spellInfo.ChannelInterruptFlags2 = (SpellAuraInterruptFlags2)spellsResult.Read<uint>(42);
                         spellInfo.ProcFlags = new ProcFlagsInit(spellsResult.Read<int>(43), spellsResult.Read<int>(44));
-                        spellInfo.ProcChance = spellsResult.Read<uint>(45);
-                        spellInfo.ProcCharges = spellsResult.Read<uint>(46);
+                        spellInfo.ProcChance = spellsResult.Read<int>(45);
+                        spellInfo.ProcCharges = spellsResult.Read<int>(46);
                         spellInfo.ProcCooldown = spellsResult.Read<uint>(47);
                         spellInfo.ProcBasePPM = spellsResult.Read<float>(48);
                         spellInfo.MaxLevel = spellsResult.Read<int>(49);
@@ -2604,23 +2604,23 @@ namespace Game.Entities
                         spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(spellsResult.Read<int>(53));
                         spellInfo.Speed = spellsResult.Read<float>(54);
                         spellInfo.LaunchDelay = spellsResult.Read<float>(55);
-                        spellInfo.StackAmount = spellsResult.Read<uint>(56);
+                        spellInfo.StackAmount = spellsResult.Read<int>(56);
                         spellInfo.EquippedItemClass = (ItemClass)spellsResult.Read<int>(57);
                         spellInfo.EquippedItemSubClassMask = spellsResult.Read<int>(58);
                         spellInfo.EquippedItemInventoryTypeMask = spellsResult.Read<int>(59);
-                        spellInfo.ContentTuningId = spellsResult.Read<uint>(60);
+                        spellInfo.ContentTuningId = spellsResult.Read<int>(60);
                         //spellInfo.SpellName (61)
                         spellInfo.ConeAngle = spellsResult.Read<float>(62);
                         spellInfo.Width = spellsResult.Read<float>(63);
-                        spellInfo.MaxTargetLevel = spellsResult.Read<uint>(64);
-                        spellInfo.MaxAffectedTargets = spellsResult.Read<uint>(65);
+                        spellInfo.MaxTargetLevel = spellsResult.Read<int>(64);
+                        spellInfo.MaxAffectedTargets = spellsResult.Read<int>(65);
                         spellInfo.SpellFamilyName = (SpellFamilyNames)spellsResult.Read<uint>(66);
                         spellInfo.SpellFamilyFlags = new FlagArray128(spellsResult.Read<uint>(67), spellsResult.Read<uint>(68), spellsResult.Read<uint>(69), spellsResult.Read<uint>(70));
                         spellInfo.DmgClass = (SpellDmgClass)spellsResult.Read<uint>(71);
                         spellInfo.PreventionType = (SpellPreventionType)spellsResult.Read<uint>(72);
                         spellInfo.RequiredAreasID = spellsResult.Read<int>(73);
                         spellInfo.SchoolMask = (SpellSchoolMask)spellsResult.Read<uint>(74);
-                        spellInfo.ChargeCategoryId = spellsResult.Read<uint>(75);
+                        spellInfo.ChargeCategoryId = (SpellCategories)spellsResult.Read<int>(75);
 
                         mSpellInfoMap.Add(spellId, spellInfo);
 
@@ -3025,7 +3025,7 @@ namespace Game.Entities
             }
         }
 
-        void ApplySpellEffectFix(SpellInfo spellInfo, uint effectIndex, Action<SpellEffectInfo> fix)
+        void ApplySpellEffectFix(SpellInfo spellInfo, int effectIndex, Action<SpellEffectInfo> fix)
         {
             if (spellInfo.GetEffects().Count <= effectIndex)
             {
@@ -4210,7 +4210,7 @@ namespace Game.Entities
             // Tree of Life (Passive)
             ApplySpellFix(new[] { 5420 }, spellInfo =>
             {
-                spellInfo.Stances = 1ul << ((int)ShapeShiftForm.TreeOfLife - 1);
+                spellInfo.Stances = 1L << ((int)ShapeShiftForm.TreeOfLife - 1);
             });
 
             // Gaze of Occu'thar
@@ -4798,7 +4798,7 @@ namespace Game.Entities
         MultiMap<int, int> mSpellReq = new();
         Dictionary<int, SpellLearnSkillNode> mSpellLearnSkills = new();
         MultiMap<int, SpellLearnSpellNode> mSpellLearnSpells = new();
-        Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition> mSpellTargetPositions = new();
+        Dictionary<KeyValuePair<int, int>, SpellTargetPosition> mSpellTargetPositions = new();
         MultiMap<int, SpellGroup> mSpellSpellGroup = new();
         MultiMap<SpellGroup, int> mSpellGroupSpell = new();
         Dictionary<SpellGroup, SpellGroupStackRule> mSpellGroupStack = new();
@@ -4807,13 +4807,13 @@ namespace Game.Entities
         Dictionary<(int id, Difficulty difficulty), SpellProcEntry> mSpellProcMap = new();
         Dictionary<int, SpellThreatEntry> mSpellThreatMap = new();
         Dictionary<int, PetAura> mSpellPetAuraMap = new();
-        MultiMap<(SpellLinkedType, uint), int> mSpellLinkedMap = new();
+        MultiMap<(SpellLinkedType, int), int> mSpellLinkedMap = new();
         Dictionary<int, SpellEnchantProcEntry> mSpellEnchantProcEventMap = new();
         MultiMap<int, SpellArea> mSpellAreaMap = new();
         MultiMap<int, SpellArea> mSpellAreaForQuestMap = new();
         MultiMap<int, SpellArea> mSpellAreaForQuestEndMap = new();
         MultiMap<int, SpellArea> mSpellAreaForAuraMap = new();
-        MultiMap<uint, SpellArea> mSpellAreaForAreaMap = new();
+        MultiMap<int, SpellArea> mSpellAreaForAreaMap = new();
         MultiMap<int, SkillLineAbilityRecord> mSkillLineAbilityMap = new();
         Dictionary<int, MultiMap<int, int>> mPetLevelupSpellMap = new();
         Dictionary<int, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new();           // only spells not listed in related mPetLevelupSpellMap entry
@@ -4896,7 +4896,7 @@ namespace Game.Entities
         public float ProcsPerMinute { get; set; }                              // if nonzero - Chance to proc is equal to value * aura caster's weapon speed / 60
         public float Chance { get; set; }                                     // if nonzero - owerwrite procChance field for given Spell.dbc entry, defines Chance of proc to occur, not used if ProcsPerMinute set
         public uint Cooldown { get; set; }                                   // if nonzero - cooldown in secs for aura proc, applied to aura
-        public uint Charges { get; set; }                                   // if nonzero - owerwrite procCharges field for given Spell.dbc entry, defines how many times proc can occur before aura remove, 0 - infinite
+        public int Charges { get; set; }                                   // if nonzero - owerwrite procCharges field for given Spell.dbc entry, defines how many times proc can occur before aura remove, 0 - infinite
     }
 
     struct ServersideSpellName
@@ -4917,7 +4917,7 @@ namespace Game.Entities
 
     public class PetDefaultSpellsEntry
     {
-        public uint[] spellid = new uint[4];
+        public int[] spellid = new int[4];
     }
 
     public class SpellArea
@@ -4934,7 +4934,7 @@ namespace Game.Entities
         public SpellAreaFlag flags;                                 // if SPELL_AREA_FLAG_AUTOCAST then auto applied at area enter, in other case just allowed to cast || if SPELL_AREA_FLAG_AUTOREMOVE then auto removed inside area (will allways be removed on leaved even without flag)
 
         // helpers
-        public bool IsFitToRequirements(Player player, uint newZone, uint newArea)
+        public bool IsFitToRequirements(Player player, int newZone, int newArea)
         {
             if (gender != Gender.None)                   // not in expected gender
                 if (player == null || gender != player.GetNativeGender())
@@ -5085,7 +5085,7 @@ namespace Game.Entities
 
     public class SpellTargetPosition
     {
-        public uint target_mapId;
+        public int target_mapId;
         public float target_X;
         public float target_Y;
         public float target_Z;

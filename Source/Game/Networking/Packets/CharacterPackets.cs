@@ -76,7 +76,7 @@ namespace Game.Networking.Packets
         {
             public CharacterInfo(SQLFields fields)
             {
-                Guid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(0));
+                Guid = ObjectGuid.Create(HighGuid.Player, fields.Read<long>(0));
                 Name = fields.Read<string>(1);
                 RaceId = fields.Read<byte>(2);
                 ClassId = (Class)fields.Read<byte>(3);
@@ -86,7 +86,7 @@ namespace Game.Networking.Packets
                 MapId = fields.Read<int>(7);
                 PreloadPos = new Vector3(fields.Read<float>(8), fields.Read<float>(9), fields.Read<float>(10));
 
-                ulong guildId = fields.Read<ulong>(11);
+                long guildId = fields.Read<long>(11);
                 if (guildId != 0)
                     GuildGuid = ObjectGuid.Create(HighGuid.Guild, guildId);
 
@@ -122,7 +122,7 @@ namespace Game.Networking.Packets
                 // show pet at selection character in character list only for non-ghost character
                 if (!playerFlags.HasAnyFlag(PlayerFlags.Ghost) && (ClassId == Class.Warlock || ClassId == Class.Hunter || ClassId == Class.Deathknight))
                 {
-                    CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(fields.Read<uint>(14));
+                    CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(fields.Read<int>(14));
                     if (creatureInfo != null)
                     {
                         PetCreatureDisplayId = fields.Read<uint>(15);
@@ -385,7 +385,7 @@ namespace Game.Networking.Packets
 
             CreateInfo.Name = _worldPacket.ReadString(nameLength);
             if (hasTemplateSet)
-                CreateInfo.TemplateSet = _worldPacket.ReadUInt32();
+                CreateInfo.TemplateSet = _worldPacket.ReadInt32();
 
             for (var i = 0; i < customizationCount; ++i)
                 CreateInfo.Customizations[i] = new(_worldPacket);
@@ -1119,7 +1119,7 @@ namespace Game.Networking.Packets
         public Class ClassId = Class.None;
         public Gender Sex = Gender.None;
         public Array<ChrCustomizationChoice> Customizations = new(250);
-        public uint? TemplateSet;
+        public int? TemplateSet;
         public bool IsTrialBoost;
         public bool UseNPE;
         public string Name;

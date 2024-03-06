@@ -16,14 +16,14 @@ namespace Game.DataStorage
             uint oldMSTime = Time.GetMSTime();
             _characterTemplateStore.Clear();
 
-            MultiMap<uint, CharacterTemplateClass> characterTemplateClasses = new();
+            MultiMap<int, CharacterTemplateClass> characterTemplateClasses = new();
             {
                 using var classesResult = DB.World.Query("SELECT TemplateId, FactionGroup, Class FROM character_template_class");
                 if (!classesResult.IsEmpty())
                 {
                     do
                     {
-                        uint templateId = classesResult.Read<uint>(0);
+                        int templateId = classesResult.Read<int>(0);
                         FactionMasks factionGroup = (FactionMasks)classesResult.Read<byte>(1);
                         byte classID = classesResult.Read<byte>(2);
 
@@ -60,7 +60,7 @@ namespace Game.DataStorage
                 do
                 {
                     CharacterTemplate templ = new();
-                    templ.TemplateSetId = templates.Read<uint>(0);
+                    templ.TemplateSetId = templates.Read<int>(0);
                     templ.Name = templates.Read<string>(1);
                     templ.Description = templates.Read<string>(2);
                     templ.Level = templates.Read<byte>(3);
@@ -80,17 +80,17 @@ namespace Game.DataStorage
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_characterTemplateStore.Count} character templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public Dictionary<uint, CharacterTemplate> GetCharacterTemplates()
+        public Dictionary<int, CharacterTemplate> GetCharacterTemplates()
         {
             return _characterTemplateStore;
         }
 
-        public CharacterTemplate GetCharacterTemplate(uint templateId)
+        public CharacterTemplate GetCharacterTemplate(int templateId)
         {
             return _characterTemplateStore.LookupByKey(templateId);
         }
 
-        Dictionary<uint, CharacterTemplate> _characterTemplateStore = new();
+        Dictionary<int, CharacterTemplate> _characterTemplateStore = new();
     }
 
     public struct CharacterTemplateClass
@@ -107,7 +107,7 @@ namespace Game.DataStorage
 
     public class CharacterTemplate
     {
-        public uint TemplateSetId;
+        public int TemplateSetId;
         public List<CharacterTemplateClass> Classes;
         public string Name;
         public string Description;

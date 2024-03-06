@@ -88,22 +88,22 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Cooldowns.Count);
             _worldPacket.WriteInt32(SpellHistory.Count);
 
-            foreach (uint action in Actions)
-                _worldPacket.WriteUInt32(action);
+            foreach (var action in Actions)
+                _worldPacket.WriteInt32(action);
 
             foreach (PetSpellCooldown cooldown in Cooldowns)
             {
                 _worldPacket.WriteInt32(cooldown.SpellID);
-                _worldPacket.WriteInt32(cooldown.Duration);
-                _worldPacket.WriteInt32(cooldown.CategoryDuration);
+                _worldPacket.WriteUInt32(cooldown.Duration);
+                _worldPacket.WriteUInt32(cooldown.CategoryDuration);
                 _worldPacket.WriteFloat(cooldown.ModRate);
                 _worldPacket.WriteUInt16(cooldown.Category);
             }
 
             foreach (PetSpellHistory history in SpellHistory)
             {
-                _worldPacket.WriteInt32(history.CategoryID);
-                _worldPacket.WriteInt32(history.RecoveryTime);
+                _worldPacket.WriteInt32((int)history.CategoryID);
+                _worldPacket.WriteUInt32(history.RecoveryTime);
                 _worldPacket.WriteFloat(history.ChargeModRate);
                 _worldPacket.WriteInt8(history.ConsumedCharges);
             }
@@ -119,7 +119,7 @@ namespace Game.Networking.Packets
 
         public int[] ActionButtons = new int[10];
 
-        public List<uint> Actions = new();
+        public List<int> Actions = new();
         public List<PetSpellCooldown> Cooldowns = new();
         public List<PetSpellHistory> SpellHistory = new();
     }
@@ -147,7 +147,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(spell);
         }
 
-        public List<uint> Spells = new();
+        public List<int> Spells = new();
     }
 
     class PetUnlearnedSpells : ServerPacket
@@ -333,16 +333,16 @@ namespace Game.Networking.Packets
     public class PetSpellCooldown
     {
         public int SpellID;
-        public int Duration;
-        public int CategoryDuration;
+        public uint Duration;
+        public uint CategoryDuration;
         public float ModRate = 1.0f;
         public ushort Category;
     }
 
     public class PetSpellHistory
     {
-        public int CategoryID;
-        public int RecoveryTime;
+        public SpellCategories CategoryID;
+        public uint RecoveryTime;
         public float ChargeModRate = 1.0f;
         public sbyte ConsumedCharges;
     }

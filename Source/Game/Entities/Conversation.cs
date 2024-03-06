@@ -71,13 +71,13 @@ namespace Game.Entities
             }
         }
 
-        public static Conversation CreateConversation(uint conversationEntry, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null, bool autoStart = true)
+        public static Conversation CreateConversation(int conversationEntry, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null, bool autoStart = true)
         {
             ConversationTemplate conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
             if (conversationTemplate == null)
                 return null;
 
-            ulong lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.Conversation);
+            var lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.Conversation);
 
             Conversation conversation = new();
             conversation.Create(lowGuid, conversationEntry, creator.GetMap(), creator, pos, privateObjectOwner, spellInfo);
@@ -87,7 +87,7 @@ namespace Game.Entities
             return conversation;
         }
 
-        void Create(ulong lowGuid, uint conversationEntry, Map map, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null)
+        void Create(long lowGuid, int conversationEntry, Map map, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null)
         {
             ConversationTemplate conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
             //ASSERT(conversationTemplate);
@@ -173,17 +173,17 @@ namespace Game.Entities
             return true;
         }
 
-        public void AddActor(int actorId, uint actorIdx, ObjectGuid actorGuid)
+        public void AddActor(int actorId, int actorIdx, ObjectGuid actorGuid)
         {
-            ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, (int)actorIdx);
-            SetUpdateFieldValue(ref actorField.CreatureID, 0u);
-            SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, 0u);
+            ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, actorIdx);
+            SetUpdateFieldValue(ref actorField.CreatureID, 0);
+            SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, 0);
             SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);
             SetUpdateFieldValue(ref actorField.Id, actorId);
             SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObject);
         }
 
-        public void AddActor(int actorId, uint actorIdx, ConversationActorType type, uint creatureId, uint creatureDisplayInfoId)
+        public void AddActor(int actorId, int actorIdx, ConversationActorType type, int creatureId, int creatureDisplayInfoId)
         {
             ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, (int)actorIdx);
             SetUpdateFieldValue(ref actorField.CreatureID, creatureId);
@@ -322,7 +322,7 @@ namespace Game.Entities
         }
 
         TimeSpan GetDuration() { return _duration; }
-        public uint GetTextureKitId() { return _textureKitId; }
+        public int GetTextureKitId() { return _textureKitId; }
 
         public ObjectGuid GetCreatorGuid() { return _creatorGuid; }
         public override ObjectGuid GetOwnerGUID() { return GetCreatorGuid(); }
@@ -339,9 +339,9 @@ namespace Game.Entities
         Position _stationaryPosition = new();
         ObjectGuid _creatorGuid;
         TimeSpan _duration;
-        uint _textureKitId;
+        int _textureKitId;
 
-        Dictionary<(Locale locale, uint lineId), TimeSpan> _lineStartTimes = new();
+        Dictionary<(Locale locale, int lineId), TimeSpan> _lineStartTimes = new();
         TimeSpan[] _lastLineEndTimes = new TimeSpan[(int)Locale.Total];
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
@@ -422,7 +422,7 @@ namespace Game.Entities
 
         public void Invoke(ConversationActorActivePlayerTemplate activePlayer)
         {
-            _conversation.AddActor(_actor.Id, _actor.Index, ObjectGuid.Create(HighGuid.Player, 0xFFFFFFFFFFFFFFFF));
+            _conversation.AddActor(_actor.Id, _actor.Index, ObjectGuid.Create(HighGuid.Player, -2L));
         }
 
         public void Invoke(ConversationActorTalkingHeadTemplate talkingHead)

@@ -38,7 +38,7 @@ namespace Game.Maps
 
             do
             {
-                uint entry = result.Read<uint>(0);
+                int entry = result.Read<int>(0);
                 GameObjectTemplate goInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
                 if (goInfo == null)
                 {
@@ -114,11 +114,11 @@ namespace Game.Maps
             {
                 do
                 {
-                    ulong guid = result.Read<ulong>(0);
-                    uint entry = result.Read<uint>(1);
+                    long guid = result.Read<long>(0);
+                    int entry = result.Read<int>(1);
                     PhaseUseFlagsValues phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(2);
-                    uint phaseId = result.Read<uint>(3);
-                    uint phaseGroupId = result.Read<uint>(4);
+                    int phaseId = result.Read<int>(3);
+                    int phaseGroupId = result.Read<int>(4);
 
                     TransportTemplate transportTemplate = GetTransportTemplate(entry);
                     if (transportTemplate == null)
@@ -170,7 +170,7 @@ namespace Game.Maps
                     spawn.PhaseId = phaseId;
                     spawn.PhaseGroup = phaseGroupId;
 
-                    foreach (uint mapId in transportTemplate.MapIds)
+                    foreach (var mapId in transportTemplate.MapIds)
                         _transportsByMap.Add(mapId, spawn);
 
                     _transportSpawns[guid] = spawn;
@@ -312,7 +312,7 @@ namespace Game.Maps
             if (pauseItr != 0)
                 splineTime = legTimeAccel(length);
             else
-                splineTime = (uint)(length / (double)goInfo.MoTransport.moveSpeed * 1000.0);
+                splineTime = (uint)(length / goInfo.MoTransport.moveSpeed * 1000.0);
 
             leg.StartTimestamp = totalTime;
             leg.Duration += splineTime + delaySum;
@@ -329,12 +329,12 @@ namespace Game.Maps
 
         bool GeneratePath(GameObjectTemplate goInfo, out TransportTemplate transport)
         {
-            uint pathId = goInfo.MoTransport.taxiPathID;
+            var pathId = goInfo.MoTransport.taxiPathID;
             TaxiPathNodeRecord[] path = CliDB.TaxiPathNodesByPath[pathId];
 
             transport = new();
-            transport.Speed = (double)goInfo.MoTransport.moveSpeed;
-            transport.AccelerationRate = (double)goInfo.MoTransport.accelRate;
+            transport.Speed = goInfo.MoTransport.moveSpeed;
+            transport.AccelerationRate = goInfo.MoTransport.accelRate;
             transport.AccelerationTime = transport.Speed / transport.AccelerationRate;
             transport.AccelerationDistance = 0.5 * transport.Speed * transport.Speed / transport.AccelerationRate;
 
@@ -379,8 +379,8 @@ namespace Game.Maps
 
             if (transport.MapIds.Count > 1)
             {
-                foreach (uint mapId in transport.MapIds)
-                    Cypher.Assert(!CliDB.MapStorage.LookupByKey(mapId).Instanceable());
+                foreach (var mapId in transport.MapIds)
+                    Cypher.Assert(!CliDB.MapStorage.LookupByKey(mapId).Instanceable);
             }
 
             transport.TotalPathTime = totalTime;
@@ -388,7 +388,7 @@ namespace Game.Maps
             return true;
         }
         
-        public void AddPathNodeToTransport(uint transportEntry, uint timeSeg, TransportAnimationRecord node)
+        public void AddPathNodeToTransport(int transportEntry, uint timeSeg, TransportAnimationRecord node)
         {
             if (!_transportAnimations.ContainsKey(transportEntry))
                 _transportAnimations[transportEntry] = new();
@@ -400,7 +400,7 @@ namespace Game.Maps
             animNode.Path[timeSeg] = node;
         }
 
-        public void AddPathRotationToTransport(uint transportEntry, uint timeSeg, TransportRotationRecord node)
+        public void AddPathRotationToTransport(int transportEntry, uint timeSeg, TransportRotationRecord node)
         {
             if (!_transportAnimations.ContainsKey(transportEntry))
                 _transportAnimations[transportEntry] = new();
@@ -412,7 +412,7 @@ namespace Game.Maps
                 animNode.TotalTime = timeSeg;
         }
 
-        public Transport CreateTransport(uint entry, Map map, ulong guid = 0, PhaseUseFlagsValues phaseUseFlags = 0, uint phaseId = 0, uint phaseGroupId = 0)
+        public Transport CreateTransport(int entry, Map map, long guid = 0, PhaseUseFlagsValues phaseUseFlags = 0, int phaseId = 0, int phaseGroupId = 0)
         {
             // SetZoneScript() is called after adding to map, so fetch the script using map
             InstanceMap instanceMap = map.ToInstanceMap();
@@ -456,7 +456,7 @@ namespace Game.Maps
             float o = startingPosition.GetOrientation();
 
             // initialize the gameobject base
-            ulong guidLow = guid != 0 ? guid : map.GenerateLowGuid(HighGuid.Transport);
+            long guidLow = guid != 0 ? guid : map.GenerateLowGuid(HighGuid.Transport);
             if (!trans.Create(guidLow, entry, x, y, z, o))
                 return null;
 
@@ -486,25 +486,25 @@ namespace Game.Maps
                 CreateTransport(transport.TransportGameObjectId, map, transport.SpawnId, transport.PhaseUseFlags, transport.PhaseId, transport.PhaseGroup);
         }
 
-        public TransportTemplate GetTransportTemplate(uint entry)
+        public TransportTemplate GetTransportTemplate(int entry)
         {
             return _transportTemplates.LookupByKey(entry);
         }
 
-        public TransportAnimation GetTransportAnimInfo(uint entry)
+        public TransportAnimation GetTransportAnimInfo(int entry)
         {
             return _transportAnimations.LookupByKey(entry);
         }
 
-        public TransportSpawn GetTransportSpawn(ulong spawnId)
+        public TransportSpawn GetTransportSpawn(long spawnId)
         {
             return _transportSpawns.LookupByKey(spawnId);
         }
 
-        Dictionary<uint, TransportTemplate> _transportTemplates = new();
-        MultiMap<uint, TransportSpawn> _transportsByMap = new();
-        Dictionary<uint, TransportAnimation> _transportAnimations = new();
-        Dictionary<ulong, TransportSpawn> _transportSpawns = new();
+        Dictionary<int, TransportTemplate> _transportTemplates = new();
+        MultiMap<int, TransportSpawn> _transportsByMap = new();
+        Dictionary<int, TransportAnimation> _transportAnimations = new();
+        Dictionary<long, TransportSpawn> _transportSpawns = new();
     }
 
     public class TransportPathSegment
@@ -517,12 +517,12 @@ namespace Game.Maps
     public struct TransportPathEvent
     {
         public uint Timestamp;
-        public uint EventId;
+        public int EventId;
     }
 
     public class TransportPathLeg
     {
-        public uint MapId;
+        public int MapId;
         public Spline<double> Spline;
         public uint StartTimestamp;
         public uint Duration;
@@ -539,7 +539,7 @@ namespace Game.Maps
         public List<TransportPathLeg> PathLegs = new();
         public List<TransportPathEvent> Events = new();
 
-        public HashSet<uint> MapIds = new();
+        public HashSet<int> MapIds = new();
 
         public Position ComputePosition(uint time, out TransportMovementState moveState, out int legIndex)
         {
@@ -758,10 +758,10 @@ namespace Game.Maps
 
     public class TransportSpawn
     {
-        public ulong SpawnId;
-        public uint TransportGameObjectId; // entry in respective _template table
+        public long SpawnId;
+        public int TransportGameObjectId; // entry in respective _template table
         public PhaseUseFlagsValues PhaseUseFlags;
-        public uint PhaseId;
-        public uint PhaseGroup;
+        public int PhaseId;
+        public int PhaseGroup;
     }
 }

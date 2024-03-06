@@ -25,7 +25,6 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using static Global;
 
 namespace Game.Entities
@@ -505,7 +504,7 @@ namespace Game.Entities
                             _restMgr.RemoveRestFlag(RestFlag.Tavern);
                     }
 
-                    uint newzone, newarea;
+                    int newzone, newarea;
                     GetZoneAndAreaId(out newzone, out newarea);
 
                     if (m_zoneUpdateId != newzone)
@@ -826,7 +825,7 @@ namespace Game.Entities
         public bool IsAdvancedCombatLoggingEnabled() { return _advancedCombatLoggingEnabled; }
         public void SetAdvancedCombatLogging(bool enabled) { _advancedCombatLoggingEnabled = enabled; }
 
-        public void SetInvSlot(uint slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.InvSlots, (int)slot), guid); }
+        public void SetInvSlot(int slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.InvSlots, slot), guid); }
 
         //Taxi
         public void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(GetRace(), GetClass(), GetLevel()); }
@@ -851,7 +850,7 @@ namespace Game.Entities
         {
             StableInfo ufStable = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
             StablePetInfo ufPet = new();
-            ufPet.ModifyValue(ufPet.PetSlot).SetValue((uint)slot);
+            ufPet.ModifyValue(ufPet.PetSlot).SetValue((int)slot);
             ufPet.ModifyValue(ufPet.PetNumber).SetValue(pet.PetNumber);
             ufPet.ModifyValue(ufPet.CreatureID).SetValue(pet.CreatureId);
             ufPet.ModifyValue(ufPet.DisplayID).SetValue(pet.DisplayId);
@@ -861,7 +860,7 @@ namespace Game.Entities
             AddDynamicUpdateFieldValue(ufStable.ModifyValue(ufStable.Pets), ufPet);
         }
 
-        public void SetPetSlot(uint petNumber, PetSaveMode dstPetSlot)
+        public void SetPetSlot(int petNumber, PetSaveMode dstPetSlot)
         {
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
 
@@ -890,7 +889,7 @@ namespace Game.Entities
 
             PetStable.PetInfo src = null;
             PetStable.PetInfo dst = null;
-            uint? newActivePetIndex = null;
+            int? newActivePetIndex = null;
 
             if (SharedConst.IsActivePetSlot(srcPetSlot) && SharedConst.IsActivePetSlot(dstPetSlot))
             {
@@ -899,9 +898,9 @@ namespace Game.Entities
                 dst = petStable.ActivePets[dstPetSlot - PetSaveMode.FirstActiveSlot];
 
                 if (petStable.GetCurrentActivePetIndex() == (uint)srcPetSlot)
-                    newActivePetIndex = (uint)dstPetSlot;
+                    newActivePetIndex = (int)dstPetSlot;
                 else if (petStable.GetCurrentActivePetIndex() == (uint)dstPetSlot)
-                    newActivePetIndex = (uint)srcPetSlot;
+                    newActivePetIndex = (int)srcPetSlot;
             }
             else if (SharedConst.IsStabledPetSlot(srcPetSlot) && SharedConst.IsStabledPetSlot(dstPetSlot))
             {
@@ -991,21 +990,21 @@ namespace Game.Entities
                         if (newActivePetIndex.HasValue)
                             sess.GetPlayer().GetPetStable().SetCurrentActivePetIndex(newActivePetIndex.Value);
 
-                        int srcPetIndex = m_activePlayerData.PetStable.GetValue().Pets.FindIndexIf(p => p.PetSlot == (uint)srcPetSlot);
-                        int dstPetIndex = m_activePlayerData.PetStable.GetValue().Pets.FindIndexIf(p => p.PetSlot == (uint)dstPetSlot);
+                        int srcPetIndex = m_activePlayerData.PetStable.GetValue().Pets.FindIndexIf(p => p.PetSlot == (int)srcPetSlot);
+                        int dstPetIndex = m_activePlayerData.PetStable.GetValue().Pets.FindIndexIf(p => p.PetSlot == (int)dstPetSlot);
 
                         if (srcPetIndex >= 0)
                         {
                             StableInfo stableInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
                             StablePetInfo stablePetInfo = stableInfo.ModifyValue(stableInfo.Pets, srcPetIndex);
-                            SetUpdateFieldValue(stablePetInfo.ModifyValue(stablePetInfo.PetSlot), (uint)dstPetSlot);
+                            SetUpdateFieldValue(stablePetInfo.ModifyValue(stablePetInfo.PetSlot), (int)dstPetSlot);
                         }
 
                         if (dstPetIndex >= 0)
                         {
                             StableInfo stableInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
                             StablePetInfo stablePetInfo = stableInfo.ModifyValue(stableInfo.Pets, dstPetIndex);
-                            SetUpdateFieldValue(stablePetInfo.ModifyValue(stablePetInfo.PetSlot), (uint)srcPetSlot);
+                            SetUpdateFieldValue(stablePetInfo.ModifyValue(stablePetInfo.PetSlot), (int)srcPetSlot);
                         }
 
                         sess.SendPetStableResult(StableResult.StableSuccess);
@@ -1036,10 +1035,10 @@ namespace Game.Entities
         }
         
         // last used pet number (for BG's)
-        public uint GetLastPetNumber() { return m_lastpetnumber; }
-        public void SetLastPetNumber(uint petnumber) { m_lastpetnumber = petnumber; }
-        public uint GetTemporaryUnsummonedPetNumber() { return m_temporaryUnsummonedPetNumber; }
-        public void SetTemporaryUnsummonedPetNumber(uint petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
+        public int GetLastPetNumber() { return m_lastpetnumber; }
+        public void SetLastPetNumber(int petnumber) { m_lastpetnumber = petnumber; }
+        public int GetTemporaryUnsummonedPetNumber() { return m_temporaryUnsummonedPetNumber; }
+        public void SetTemporaryUnsummonedPetNumber(int petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
 
         public ReactStates? GetTemporaryPetReactState() { return m_temporaryPetReactState; }
         
@@ -1098,7 +1097,7 @@ namespace Game.Entities
             if (m_temporaryUnsummonedPetNumber == 0 && pet.IsControlled() && !pet.IsTemporarySummoned())
             {
                 m_temporaryUnsummonedPetNumber = pet.GetCharmInfo().GetPetNumber();
-                m_oldpetspell = (uint)pet.m_unitData.CreatedBySpell.GetValue();
+                m_oldpetspell = pet.m_unitData.CreatedBySpell;
             }
 
             RemovePet(pet, PetSaveMode.AsCurrent);
@@ -1695,7 +1694,7 @@ namespace Game.Entities
 
         void SendInitialActionButtons() { SendActionButtons(0); }
 
-        void SendActionButtons(uint state)
+        void SendActionButtons(ActionsButtonsUpdateReason state)
         {
             UpdateActionButtons packet = new();
 
@@ -1705,12 +1704,12 @@ namespace Game.Entities
                     packet.ActionButtons[pair.Key] = pair.Value.packedData;
             }
 
-            packet.Reason = (byte)state;
+            packet.Reason = state;
             SendPacket(packet);
         }
 
         //Repitation
-        public int CalculateReputationGain(ReputationSource source, uint creatureOrQuestLevel, int rep, int faction, bool noQuestBonus = false)
+        public int CalculateReputationGain(ReputationSource source, int creatureOrQuestLevel, int rep, int faction, bool noQuestBonus = false)
         {
             float percent = 100.0f;
 
@@ -1748,7 +1747,7 @@ namespace Game.Entities
                 return 0;
 
             // Multiply result with the faction specific rate
-            RepRewardRate repData = ObjectMgr.GetRepRewardRate((uint)faction);
+            RepRewardRate repData = ObjectMgr.GetRepRewardRate(faction);
             if (repData != null)
             {
                 float repRate = 0.0f;
@@ -1802,7 +1801,7 @@ namespace Game.Entities
             if (Rep == null)
                 return;
 
-            uint ChampioningFaction = 0;
+            int ChampioningFaction = 0;
 
             if (GetChampioningFaction() != 0)
             {
@@ -1823,7 +1822,7 @@ namespace Game.Entities
 
             if (Rep.RepFaction1 != 0 && (!Rep.TeamDependent || team == Team.Alliance))
             {
-                int donerep1 = CalculateReputationGain(ReputationSource.Kill, victim.GetLevelForTarget(this), Rep.RepValue1, (int)(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction1));
+                int donerep1 = CalculateReputationGain(ReputationSource.Kill, victim.GetLevelForTarget(this), Rep.RepValue1, (ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction1));
                 donerep1 = (int)(donerep1 * rate);
 
                 FactionRecord factionEntry1 = CliDB.FactionStorage.LookupByKey(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction1);
@@ -1865,7 +1864,7 @@ namespace Game.Entities
                 }
                 else
                 {
-                    uint row = (uint)((quest.RewardFactionValue[i] < 0) ? 1 : 0) + 1;
+                    var row = (quest.RewardFactionValue[i] < 0 ? 1 : 0) + 1;
                     QuestFactionRewardRecord questFactionRewEntry = CliDB.QuestFactionRewardStorage.LookupByKey(row);
                     if (questFactionRewEntry != null)
                     {
@@ -1881,15 +1880,15 @@ namespace Game.Entities
                     continue;
 
                 if (quest.IsDaily())
-                    rep = CalculateReputationGain(ReputationSource.DailyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.DailyQuest, GetQuestLevel(quest), rep, quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsWeekly())
-                    rep = CalculateReputationGain(ReputationSource.WeeklyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.WeeklyQuest, GetQuestLevel(quest), rep, quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsMonthly())
-                    rep = CalculateReputationGain(ReputationSource.MonthlyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.MonthlyQuest, GetQuestLevel(quest), rep, quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsRepeatable())
-                    rep = CalculateReputationGain(ReputationSource.RepeatableQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.RepeatableQuest, GetQuestLevel(quest), rep, quest.RewardFactionId[i], noQuestBonus);
                 else
-                    rep = CalculateReputationGain(ReputationSource.Quest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.Quest, GetQuestLevel(quest), rep, quest.RewardFactionId[i], noQuestBonus);
 
                 bool noSpillover = Convert.ToBoolean(quest.RewardReputationMask & (1 << i));
                 GetReputationMgr().ModifyReputation(factionEntry, rep, false, noSpillover);
@@ -1905,7 +1904,7 @@ namespace Game.Entities
         {
             return TeleportTo(loc.GetMapId(), loc.posX, loc.posY, loc.posZ, loc.Orientation, options, instanceId);
         }
-        public bool TeleportTo(int mapid, float x, float y, float z, float orientation, TeleportToOptions options = 0, uint? instanceId = null)
+        public bool TeleportTo(int mapid, float x, float y, float z, float orientation, TeleportToOptions options = 0, int? instanceId = null)
         {
             if (!GridDefines.IsValidMapCoord(mapid, x, y, z, orientation))
             {
@@ -1928,11 +1927,11 @@ namespace Game.Entities
 
             // don't let enter Battlegrounds without assigned Battlegroundid (for example through areatrigger)...
             // don't let gm level > 1 either
-            if (!InBattleground() && mEntry.IsBattlegroundOrArena())
+            if (!InBattleground() && mEntry.IsBattlegroundOrArena)
                 return false;
 
             // client without expansion support
-            if (GetSession().GetExpansion() < mEntry.Expansion())
+            if (GetSession().GetExpansion() < mEntry.Expansion)
             {
                 Log.outDebug(LogFilter.Maps, "Player {0} using client without required expansion tried teleport to non accessible map {1}", GetName(), mapid);
 
@@ -1943,7 +1942,7 @@ namespace Game.Entities
                     RepopAtGraveyard();                             // teleport to near graveyard if on transport, looks blizz like :)
                 }
 
-                SendTransferAborted(mapid, TransferAbortReason.InsufExpanLvl, (byte)mEntry.Expansion());
+                SendTransferAborted(mapid, TransferAbortReason.InsufExpanLvl, (byte)mEntry.Expansion);
                 return false;                                       // normal client can't teleport to this map...
             }
             else
@@ -2075,7 +2074,7 @@ namespace Game.Entities
                 }
 
                 // remove arena spell coldowns/buffs now to also remove pet's cooldowns before it's temporarily unsummoned
-                if (mEntry.IsBattleArena() && !IsGameMaster())
+                if (mEntry.IsBattleArena && !IsGameMaster())
                 {
                     RemoveArenaSpellCooldowns(true);
                     RemoveArenaAuras();
@@ -2114,7 +2113,7 @@ namespace Game.Entities
                     {
                         TransferPending.ShipTransferPending shipTransferPending = new();
                         shipTransferPending.Id = transport1.GetEntry();
-                        shipTransferPending.OriginMapID = (int)GetMapId();
+                        shipTransferPending.OriginMapID = GetMapId();
                         transferPending.Ship = shipTransferPending;
                     }
 
@@ -2136,7 +2135,7 @@ namespace Game.Entities
                 {
                     SuspendToken suspendToken = new();
                     suspendToken.SequenceIndex = m_movementCounter; // not incrementing
-                    suspendToken.Reason = options.HasAnyFlag(TeleportToOptions.Seamless) ? 2 : 1u;
+                    suspendToken.Reason = options.HasAnyFlag(TeleportToOptions.Seamless) ? 2 : 1;
                     SendPacket(suspendToken);
                 }
 
@@ -2149,7 +2148,7 @@ namespace Game.Entities
         }
         public bool TeleportToBGEntryPoint()
         {
-            if (m_bgData.joinPos.GetMapId() == 0xFFFFFFFF)
+            if (m_bgData.joinPos.GetMapId() == -1)
                 return false;
 
             ScheduleDelayedOperation(PlayerDelayedOperations.BGMountRestore);
@@ -2158,10 +2157,10 @@ namespace Game.Entities
             return TeleportTo(m_bgData.joinPos);
         }
 
-        public uint GetStartLevel(Race race, Class playerClass, uint? characterTemplateId = null)
+        public uint GetStartLevel(Race race, Class playerClass, int? characterTemplateId = null)
         {
             uint startLevel = WorldConfig.GetUIntValue(WorldCfg.StartPlayerLevel);
-            if (CliDB.ChrRacesStorage.LookupByKey(race).GetFlags().HasAnyFlag(ChrRacesFlag.IsAlliedRace))
+            if (CliDB.ChrRacesStorage.LookupByKey((int)race).HasAnyFlag(ChrRacesFlag.IsAlliedRace))
                 startLevel = WorldConfig.GetUIntValue(WorldCfg.StartAlliedRaceLevel);
 
             if (playerClass == Class.Deathknight)
@@ -2897,20 +2896,20 @@ namespace Game.Entities
             return textId;
         }
 
-        public uint GetGossipMenuForSource(WorldObject source)
+        public int GetGossipMenuForSource(WorldObject source)
         {
             switch (source.GetTypeId())
             {
                 case TypeId.Unit:
                 {
-                    uint menuIdToShow = source.ToCreature().GetGossipMenuId();
+                    var menuIdToShow = source.ToCreature().GetGossipMenuId();
 
                     // if menu id is set by script
                     if (menuIdToShow != 0)
                         return menuIdToShow;
 
                     // otherwise pick from db based on conditions
-                    foreach (uint menuId in source.ToCreature().GetCreatureTemplate().GossipMenuIds)
+                    foreach (var menuId in source.ToCreature().GetCreatureTemplate().GossipMenuIds)
                     {
                         var menuBounds = ObjectMgr.GetGossipMenusMapBounds(menuId);
 
@@ -2949,14 +2948,17 @@ namespace Game.Entities
 
             return true;
         }
+
         public void JoinedChannel(Channel c)
         {
             m_channels.Add(c);
         }
+
         public void LeftChannel(Channel c)
         {
             m_channels.Remove(c);
         }
+
         public void CleanupChannels()
         {
             while (!m_channels.Empty())
@@ -2973,7 +2975,8 @@ namespace Game.Entities
             }
             Log.outDebug(LogFilter.ChatSystem, "Player {0}: channels cleaned up!", GetName());
         }
-        void UpdateLocalChannels(uint newZone)
+
+        void UpdateLocalChannels(int newZone)
         {
             if (GetSession().PlayerLoading() && !IsBeingTeleportedFar())
                 return;                                              // The client handles it automatically after loading, but not after teleporting
@@ -3048,7 +3051,7 @@ namespace Game.Entities
         //Mail
         public void AddMail(Mail mail) { m_mail.Insert(0, mail); }
 
-        public void RemoveMail(ulong id)
+        public void RemoveMail(long id)
         {
             foreach (var mail in m_mail)
             {
@@ -3061,7 +3064,7 @@ namespace Game.Entities
             }
         }
 
-        public void SendMailResult(ulong mailId, MailResponseType mailAction, MailResponseResult mailError, InventoryResult equipError = 0, ulong itemGuid = 0, uint itemCount = 0)
+        public void SendMailResult(long mailId, MailResponseType mailAction, MailResponseResult mailError, InventoryResult equipError = 0, long itemGuid = 0, int itemCount = 0)
         {
             MailCommandResult result = new();
             result.MailID = mailId;
@@ -3122,13 +3125,13 @@ namespace Game.Entities
             mMitems[it.GetGUID().GetCounter()] = it;
         }
 
-        public bool RemoveMItem(ulong id)
+        public bool RemoveMItem(long id)
         {
             return mMitems.Remove(id);
         }
 
-        public Item GetMItem(ulong id) { return mMitems.LookupByKey(id); }
-        public Mail GetMail(ulong id) { return m_mail.Find(p => p.messageID == id); }
+        public Item GetMItem(long id) { return mMitems.LookupByKey(id); }
+        public Mail GetMail(long id) { return m_mail.Find(p => p.messageID == id); }
         public List<Mail> GetMails() { return m_mail; }
         public uint GetMailSize() { return (uint)m_mail.Count; }
 
@@ -3164,7 +3167,7 @@ namespace Game.Entities
                 Log.outDebug(LogFilter.Maps, "PLAYER: Player '{0}' (GUID: {1}) will be teleported to homebind in 60 seconds", GetName(), GetGUID().ToString());
             }
         }
-        public void SetHomebind(WorldLocation loc, uint areaId)
+        public void SetHomebind(WorldLocation loc, int areaId)
         {
             homebind.WorldRelocate(loc);
             homebindAreaId = areaId;
@@ -3197,7 +3200,7 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public void SendPlayerBound(ObjectGuid binderGuid, uint areaId)
+        public void SendPlayerBound(ObjectGuid binderGuid, int areaId)
         {
             PlayerBound packet = new(binderGuid, areaId);
             SendPacket(packet);
@@ -3223,7 +3226,7 @@ namespace Game.Entities
             SendPacket(worldstate);
         }
 
-        void SendInitWorldStates(uint zoneId, uint areaId)
+        void SendInitWorldStates(int zoneId, int areaId)
         {
             // data depends on zoneid/mapid...
             int mapid = GetMapId();
@@ -3266,7 +3269,8 @@ namespace Game.Entities
             return cost;
         }
 
-        uint GetChampioningFaction() { return m_ChampioningFaction; }
+        int GetChampioningFaction() { return m_ChampioningFaction; }
+
         public void SetChampioningFaction(uint faction) { m_ChampioningFaction = faction; }
 
         public static byte GetFactionGroupForRace(Race race)
@@ -4556,7 +4560,7 @@ namespace Game.Entities
             return SummonPet(entry, slot, x, y, z, ang, duration, out _);
         }
 
-        public Pet SummonPet(uint entry, PetSaveMode? slot, float x, float y, float z, float ang, uint duration, out bool isNew)
+        public Pet SummonPet(int entry, PetSaveMode? slot, float x, float y, float z, float ang, uint duration, out bool isNew)
         {
             isNew = false;
 
@@ -4586,7 +4590,7 @@ namespace Game.Entities
             }
 
             Map map = GetMap();
-            uint petNumber = ObjectMgr.GeneratePetNumber();
+            var petNumber = ObjectMgr.GeneratePetNumber();
             if (!pet.Create(map.GenerateLowGuid(HighGuid.Pet), map, entry, petNumber))
             {
                 Log.outError(LogFilter.Server, "no such creature entry {0}", entry);
@@ -4653,7 +4657,7 @@ namespace Game.Entities
             if (returnreagent && (pet != null || m_temporaryUnsummonedPetNumber != 0) && !InBattleground())
             {
                 //returning of reagents only for players, so best done here
-                uint spellId = pet != null ? pet.m_unitData.CreatedBySpell : m_oldpetspell;
+                var spellId = pet != null ? pet.m_unitData.CreatedBySpell : m_oldpetspell;
                 SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
 
                 if (spellInfo != null)
@@ -4663,10 +4667,10 @@ namespace Game.Entities
                         if (spellInfo.Reagent[i] > 0)
                         {
                             //for succubus, voidwalker, felhunter and felguard credit soulshard when despawn reason other than death (out of range, logout)
-                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, (uint)spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
+                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
                             if (msg == InventoryResult.Ok)
                             {
-                                Item item = StoreNewItem(dest, (uint)spellInfo.Reagent[i], true, new ItemRandomEnchantmentId());
+                                Item item = StoreNewItem(dest, spellInfo.Reagent[i], true, new ItemRandomEnchantmentId());
                                 if (IsInWorld)
                                     SendNewItem(item, spellInfo.ReagentCount[i], true, false);
                             }
@@ -5005,7 +5009,7 @@ namespace Game.Entities
 
             do
             {
-                if (area.GetFlags2().HasFlag(AreaFlags2.AllowWarModeToggle))
+                if (area.HasFlag(AreaFlags2.AllowWarModeToggle))
                     return true;
 
                 area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
@@ -5016,8 +5020,8 @@ namespace Game.Entities
 
         void UpdateWarModeAuras()
         {
-            uint auraInside = 282559;
-            uint auraOutside = PlayerConst.WarmodeEnlistedSpellOutside;
+            var auraInside = 282559;
+            var auraOutside = PlayerConst.WarmodeEnlistedSpellOutside;
 
             if (IsWarModeDesired())
             {
@@ -5055,8 +5059,8 @@ namespace Game.Entities
         // Used in triggers for check "Only to targets that grant experience or honor" req
         public bool IsHonorOrXPTarget(Unit victim)
         {
-            uint v_level = victim.GetLevelForTarget(this);
-            uint k_grey = Formulas.GetGrayLevel(GetLevel());
+            var v_level = victim.GetLevelForTarget(this);
+            var k_grey = Formulas.GetGrayLevel(GetLevel());
 
             // Victim level less gray level
             if (v_level < k_grey && WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) == 0)
@@ -5087,15 +5091,16 @@ namespace Game.Entities
 
             return Team.Alliance;
         }
-        public static uint TeamIdForRace(Race race)
+        public static int TeamIdForRace(Race race)
         {
-            ChrRacesRecord rEntry = CliDB.ChrRacesStorage.LookupByKey((byte)race);
+            ChrRacesRecord rEntry = CliDB.ChrRacesStorage.LookupByKey((int)race);
             if (rEntry != null)
-                return (uint)rEntry.Alliance;
+                return rEntry.Alliance;
 
             Log.outError(LogFilter.Player, "Race ({0}) not found in DBC: wrong DBC files?", race);
             return TeamId.Neutral;
         }
+
         public Team GetTeam() { return m_team; }
         public int GetTeamId() { return m_team == Team.Alliance ? TeamId.Alliance : TeamId.Horde; }
 
@@ -5120,11 +5125,11 @@ namespace Game.Entities
             ScriptMgr.OnPlayerMoneyChanged(this, amount);
 
             if (amount < 0)
-                SetMoney((GetMoney() > (ulong)-amount ? GetMoney() + amount : 0));
+                SetMoney((GetMoney() > -amount ? GetMoney() + amount : 0));
             else
             {
-                if (GetMoney() <= (PlayerConst.MaxMoneyAmount - (ulong)amount))
-                    SetMoney((ulong)(GetMoney() + (ulong)amount));
+                if (GetMoney() <= (PlayerConst.MaxMoneyAmount - amount))
+                    SetMoney(GetMoney() + amount);
                 else
                 {
                     if (sendError)
@@ -5134,6 +5139,7 @@ namespace Game.Entities
             }
             return true;
         }
+
         public void SetMoney(long value)
         {
             bool loading = GetSession().PlayerLoading();
@@ -5173,7 +5179,7 @@ namespace Game.Entities
         }
 
         //Guild
-        public void SetInGuild(ulong guildId)
+        public void SetInGuild(long guildId)
         {
             if (guildId != 0)
             {
@@ -5192,7 +5198,7 @@ namespace Game.Entities
         public uint GetGuildRank() { return m_playerData.GuildRankID; }
         public void SetGuildLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildLevel), (int)level); }
         public uint GetGuildLevel() { return (uint)m_playerData.GuildLevel.GetValue(); }
-        public void SetGuildIdInvited(ulong GuildId) { m_GuildIdInvited = GuildId; }
+        public void SetGuildIdInvited(long GuildId) { m_GuildIdInvited = GuildId; }
         public long GetGuildId() { return ((ObjectGuid)m_unitData.GuildGUID).GetCounter(); }
 
         public Guild GetGuild()
@@ -5213,7 +5219,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), (int)profs);
         }
 
-        public void GiveLevel(uint level)
+        public void GiveLevel(int level)
         {
             var oldLevel = GetLevel();
             if (level == oldLevel)
@@ -5225,14 +5231,14 @@ namespace Game.Entities
 
             PlayerLevelInfo info = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), level);
 
-            ObjectMgr.GetPlayerClassLevelInfo(GetClass(), level, out uint basemana);
+            ObjectMgr.GetPlayerClassLevelInfo(GetClass(), level, out int basemana);
 
             LevelUpInfo packet = new();
             packet.Level = level;
             packet.HealthDelta = 0;
 
             // @todo find some better solution
-            packet.PowerDelta[0] = (int)basemana - (int)GetCreateMana();
+            packet.PowerDelta[0] = basemana - GetCreateMana();
             packet.PowerDelta[1] = 0;
             packet.PowerDelta[2] = 0;
             packet.PowerDelta[3] = 0;
@@ -5243,7 +5249,7 @@ namespace Game.Entities
             for (Stats i = Stats.Strength; i < Stats.Max; ++i)
                 packet.StatDelta[(int)i] = info.stats[(int)i] - (int)GetCreateStat(i);
 
-            packet.NumNewTalents = (int)(DB2Mgr.GetNumTalentsAtLevel(level, GetClass()) - DB2Mgr.GetNumTalentsAtLevel(oldLevel, GetClass()));
+            packet.NumNewTalents = DB2Mgr.GetNumTalentsAtLevel(level, GetClass()) - DB2Mgr.GetNumTalentsAtLevel(oldLevel, GetClass());
             packet.NumNewPvpTalentSlots = DB2Mgr.GetPvpTalentNumSlotsAtLevel(level, GetClass()) - DB2Mgr.GetPvpTalentNumSlotsAtLevel(oldLevel, GetClass());
 
             SendPacket(packet);
@@ -5286,7 +5292,7 @@ namespace Game.Entities
             // Only health and mana are set to maximum.
             SetFullHealth();
             foreach (PowerTypeRecord powerType in CliDB.PowerTypeStorage.Values)
-                if (powerType.GetFlags().HasFlag(PowerTypeFlags.SetToMaxOnLevelUp))
+                if (powerType.HasFlag(PowerTypeFlags.SetToMaxOnLevelUp))
                     SetFullPower(powerType.PowerTypeEnum);
 
             // update level to hunter/summon pet
@@ -5512,10 +5518,10 @@ namespace Game.Entities
             SendPacket(sendSpellCharges);
 
             ActiveGlyphs activeGlyphs = new();
-            foreach (uint glyphId in GetGlyphs(GetActiveTalentGroup()))
+            foreach (var glyphId in GetGlyphs(GetActiveTalentGroup()))
             {
-                List<uint> bindableSpells = DB2Mgr.GetGlyphBindableSpells(glyphId);
-                foreach (uint bindableSpell in bindableSpells)
+                List<int> bindableSpells = DB2Mgr.GetGlyphBindableSpells(glyphId);
+                foreach (var bindableSpell in bindableSpells)
                     if (HasSpell(bindableSpell) && !m_overrideSpells.ContainsKey(bindableSpell))
                         activeGlyphs.Glyphs.Add(new GlyphBinding(bindableSpell, (ushort)glyphId));
             }
@@ -5593,7 +5599,7 @@ namespace Game.Entities
             UpdateVisibilityForPlayer();
 
             // update zone
-            uint newzone, newarea;
+            int newzone, newarea;
             GetZoneAndAreaId(out newzone, out newarea);
             UpdateZone(newzone, newarea);                            // also call SendInitWorldStates();
 
@@ -5737,6 +5743,7 @@ namespace Game.Entities
         public void Recall() { TeleportTo(m_recall_location, 0, m_recall_instanceId); }
 
         public uint GetSaveTimer() { return m_nextSave; }
+
         void SetSaveTimer(uint timer) { m_nextSave = timer; }
 
         void SendAurasForTarget(Unit target)
@@ -5765,7 +5772,7 @@ namespace Game.Entities
             if (reapplyMods)                                        //reapply stats values only on .reset stats (level) command
                 _RemoveAllStatBonuses();
 
-            uint basemana;
+            int basemana;
             ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out basemana);
 
             PlayerLevelInfo info = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
@@ -5936,7 +5943,7 @@ namespace Game.Entities
         {
             ShapeShiftForm form = GetShapeshiftForm();
 
-            var ssEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey((uint)form);
+            var ssEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey((int)form);
             if (ssEntry != null && ssEntry.CombatRoundTime != 0)
             {
                 SetBaseAttackTime(WeaponAttackType.BaseAttack, ssEntry.CombatRoundTime);
@@ -5967,12 +5974,12 @@ namespace Game.Entities
             return reputationMgr;
         }
 
-        public void SetReputation(uint factionentry, int value)
+        public void SetReputation(int factionentry, int value)
         {
             GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(factionentry), value);
         }
 
-        public int GetReputation(uint factionentry)
+        public int GetReputation(int factionentry)
         {
             return GetReputationMgr().GetReputation(CliDB.FactionStorage.LookupByKey(factionentry));
         }
@@ -6296,7 +6303,7 @@ namespace Game.Entities
             if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck))
                 RemoveAurasWithAttribute(IsOutdoors() ? SpellAttr0.OnlyIndoors : SpellAttr0.OnlyOutdoors);
 
-            uint areaId = GetAreaId();
+            var areaId = GetAreaId();
             if (areaId == 0)
                 return;
 
@@ -6326,6 +6333,7 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaType.RevealWorldMapOverlay, GetAreaId());
 
                 var areaLevels = DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+
                 if (areaLevels.HasValue)
                 {
                     if (IsMaxLevel())
@@ -6336,10 +6344,10 @@ namespace Game.Entities
                     {
                         ushort areaLevel = (ushort)Math.Min(Math.Max((ushort)GetLevel(), areaLevels.Value.MinLevel), areaLevels.Value.MaxLevel);
                         int diff = (int)GetLevel() - areaLevel;
-                        uint XP;
+                        int XP;
                         if (diff < -5)
                         {
-                            XP = (uint)(ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (int)(ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
                         else if (diff > 5)
                         {
@@ -6347,16 +6355,16 @@ namespace Game.Entities
                             if (exploration_percent < 0)
                                 exploration_percent = 0;
 
-                            XP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (int)(ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
                         else
                         {
-                            XP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (int)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
 
                         if (WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) != 0)
                         {
-                            uint minScaledXP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
+                            var minScaledXP = (int)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
                             XP = Math.Max(minScaledXP, XP);
                         }
 
@@ -6368,7 +6376,7 @@ namespace Game.Entities
             }
         }
 
-        void SendExplorationExperience(uint Area, uint Experience)
+        void SendExplorationExperience(int Area, int Experience)
         {
             SendPacket(new ExplorationExperience(Experience, Area));
         }
@@ -6429,7 +6437,7 @@ namespace Game.Entities
             Cell.VisitWorldObjects(this, notifier, range);
         }
 
-        public override void Say(uint textId, WorldObject target = null)
+        public override void Say(int textId, WorldObject target = null)
         {
             Talk(textId, ChatMsg.Say, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), target);
         }
@@ -6441,7 +6449,7 @@ namespace Game.Entities
             data.Initialize(ChatMsg.Yell, language, this, this, text);
             SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeYell), true);
         }
-        public override void Yell(uint textId, WorldObject target = null)
+        public override void Yell(int textId, WorldObject target = null)
         {
             Talk(textId, ChatMsg.Yell, WorldConfig.GetFloatValue(WorldCfg.ListenRangeYell), target);
         }
@@ -6453,7 +6461,7 @@ namespace Game.Entities
             data.Initialize(ChatMsg.Emote, Language.Universal, this, this, text);
             SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), true, !GetSession().HasPermission(RBACPermissions.TwoSideInteractionChat), true);
         }
-        public override void TextEmote(uint textId, WorldObject target = null, bool isBossEmote = false)
+        public override void TextEmote(int textId, WorldObject target = null, bool isBossEmote = false)
         {
             Talk(textId, ChatMsg.Emote, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), target);
         }
@@ -6503,7 +6511,7 @@ namespace Game.Entities
                 SendSysMessage(CypherStrings.PlayerDnd, target.GetName(), target.autoReplyMsg);
         }
 
-        public override void Whisper(uint textId, Player target, bool isBossWhisper = false)
+        public override void Whisper(int textId, Player target, bool isBossWhisper = false)
         {
             if (target == null)
                 return;
@@ -6589,8 +6597,8 @@ namespace Game.Entities
         public bool HasLevelBoosted() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.LevelBoosted); }
         public void SetHasLevelBoosted() { m_ExtraFlags |= PlayerExtraFlags.LevelBoosted; }
 
-        public uint GetXP() { return (uint)m_activePlayerData.XP.GetValue(); }
-        public uint GetXPForNextLevel() { return  (uint)m_activePlayerData.NextLevelXP.GetValue(); }
+        public int GetXP() { return m_activePlayerData.XP; }
+        public int GetXPForNextLevel() { return  m_activePlayerData.NextLevelXP; }
 
         public void SetXP(int xp)
         {
@@ -6644,8 +6652,8 @@ namespace Game.Entities
             packet.GroupBonus = group_rate;
             SendPacket(packet);
 
-            uint nextLvlXP = GetXPForNextLevel();
-            uint newXP = GetXP() + xp + bonus_xp;
+            var nextLvlXP = GetXPForNextLevel();
+            var newXP = GetXP() + xp + bonus_xp;
 
             while (newXP >= nextLvlXP && !IsMaxLevel())
             {
@@ -6730,7 +6738,7 @@ namespace Game.Entities
 
                 for (byte i = 0; i < ItemConst.MaxItemEnchantmentEffects; ++i)
                 {
-                    switch (enchantmentEntry.Effect[i])
+                    switch (enchantmentEntry.Effect(i))
                     {
                         case ItemEnchantmentType.Damage:
                             amount += enchantmentEntry.EffectScalingPoints[i];
@@ -6794,14 +6802,15 @@ namespace Game.Entities
             return m_auraBaseFlatMod[(int)modGroup] * m_auraBasePctMod[(int)modGroup];
         }
 
-        public override uint GetShieldBlockValue()
+        public override int GetShieldBlockValue()
         {
-            float value = Math.Max(0.0f, (m_auraBaseFlatMod[(int)BaseModGroup.ShieldBlockValue] + GetStat(Stats.Strength) * 0.5f - 10) * m_auraBasePctMod[(int)BaseModGroup.ShieldBlockValue]);
-            return (uint)value;
+            var value = (int)Math.Max(0.0f, (m_auraBaseFlatMod[(int)BaseModGroup.ShieldBlockValue] + GetStat(Stats.Strength) * 0.5f - 10) * m_auraBasePctMod[(int)BaseModGroup.ShieldBlockValue]);
+            return value;
         }
 
         public byte GetDrunkValue() { return m_playerData.Inebriation; }
-        public void SetDrunkValue(byte newDrunkValue, uint itemId = 0)
+
+        public void SetDrunkValue(byte newDrunkValue, int itemId = 0)
         {
             bool isSobering = newDrunkValue < GetDrunkValue();
             DrunkenState oldDrunkenState = GetDrunkenstateByValue(GetDrunkValue());
@@ -6830,7 +6839,7 @@ namespace Game.Entities
 
             CrossedInebriationThreshold data = new();
             data.Guid = GetGUID();
-            data.Threshold = (uint)newDrunkenState;
+            data.Threshold = newDrunkenState;
             data.ItemID = itemId;
 
             SendMessageToSet(data, true);
@@ -6847,7 +6856,8 @@ namespace Game.Entities
         }
 
         public uint GetDeathTimer() { return m_deathTimer; }
-        public bool ActivateTaxiPathTo(List<uint> nodes, Creature npc = null, uint spellid = 0, uint preferredMountDisplay = 0)
+
+        public bool ActivateTaxiPathTo(List<int> nodes, Creature npc = null, int spellid = 0, int preferredMountDisplay = 0)
         {
             if (nodes.Count < 2)
             {
@@ -6908,7 +6918,7 @@ namespace Game.Entities
                         InterruptSpell(CurrentSpellTypes.Channeled, true);
             }
 
-            uint sourcenode = nodes[0];
+            var sourcenode = nodes[0];
 
             // starting node too far away (cheat?)
             var node = CliDB.TaxiNodesStorage.LookupByKey(sourcenode);
@@ -6937,16 +6947,17 @@ namespace Game.Entities
             m_taxi.AddTaxiDestination(sourcenode);
 
             // fill destinations path tail
-            uint sourcepath = 0;
+            int sourcepath = 0;
             uint totalcost = 0;
             uint firstcost = 0;
 
-            uint prevnode = sourcenode;
-            uint lastnode = 0;
+            var prevnode = sourcenode;
+            var lastnode = 0;
 
             for (int i = 1; i < nodes.Count; ++i)
             {
-                uint path, cost;
+                int path;
+                uint cost;
 
                 lastnode = nodes[i];
                 ObjectMgr.GetTaxiPath(prevnode, lastnode, out path, out cost);
@@ -6975,8 +6986,8 @@ namespace Game.Entities
             // only one mount ID for both sides. Probably not good to use 315 in case DBC nodes
             // change but I couldn't find a suitable alternative. OK to use class because only DK
             // can use this taxi.
-            uint mount_display_id;
-            if (node.Flags.HasAnyFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
+            int mount_display_id;
+            if (node.HasAnyFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
                 mount_display_id = preferredMountDisplay;
             else
                 mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));
@@ -6989,7 +7000,7 @@ namespace Game.Entities
                 return false;
             }
 
-            ulong money = GetMoney();
+            var money = GetMoney();
             if (npc != null)
             {
                 float discount = GetReputationPriceDiscount(npc);
@@ -7029,13 +7040,13 @@ namespace Game.Entities
             return true;
         }
 
-        public bool ActivateTaxiPathTo(uint taxi_path_id, uint spellid = 0)
+        public bool ActivateTaxiPathTo(int taxi_path_id, int spellid = 0)
         {
             var entry = CliDB.TaxiPathStorage.LookupByKey(taxi_path_id);
             if (entry == null)
                 return false;
 
-            List<uint> nodes = new();
+            List<int> nodes = new();
 
             nodes.Add(entry.FromTaxiNode);
             nodes.Add(entry.ToTaxiNode);
@@ -7074,7 +7085,7 @@ namespace Game.Entities
             int path = m_taxi.GetCurrentTaxiPath();
 
             // search appropriate start path node
-            uint startNode = 0;
+            int startNode = 0;
 
             var nodeList = CliDB.TaxiPathNodesByPath[path];
 
@@ -7101,7 +7112,7 @@ namespace Game.Entities
 
                 if (distNext + distPrev < distNodes)
                 {
-                    startNode = (uint)i;
+                    startNode = i;
                     break;
                 }
             }
@@ -7497,7 +7508,7 @@ namespace Game.Entities
             return teleportDest;
         }
 
-        public uint? GetTeleportDestInstanceId()
+        public int? GetTeleportDestInstanceId()
         {
             return m_teleport_instanceId;
         }
@@ -7580,7 +7591,7 @@ namespace Game.Entities
         public void SetHeirloom(int slot, uint itemId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms, slot), (int)itemId); }
         public void SetHeirloomFlags(int slot, uint flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HeirloomFlags, slot), flags); }
 
-        public void AddToy(int itemId, uint flags)
+        public void AddToy(int itemId, ToyFlags flags)
         {
             AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Toys), itemId);
         }
@@ -7785,26 +7796,26 @@ namespace Game.Entities
         }
 
         //Helpers
-        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action)
+        public void AddGossipItem(GossipOptionNpc optionNpc, string text, int sender, int action)
         {
             PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, false, 0, "", null, null, sender, action);
         }
-        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded)
+        public void AddGossipItem(GossipOptionNpc optionNpc, string text, int sender, int action, string popupText, uint popupMoney, bool coded)
         {
             PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, coded, popupMoney, popupText, null, null, sender, action);
         }
-        public void AddGossipItem(uint gossipMenuID, uint gossipMenuItemID, uint sender, uint action)
+        public void AddGossipItem(int gossipMenuID, int gossipMenuItemID, int sender, int action)
         {
             PlayerTalkClass.GetGossipMenu().AddMenuItem(gossipMenuID, gossipMenuItemID, sender, action);
         }
 
         // This fuction Sends the current menu to show to client, a - NPCTEXTID(uint32), b - npc guid(uint64)
-        public void SendGossipMenu(uint titleId, ObjectGuid objGUID) { PlayerTalkClass.SendGossipMenu(titleId, objGUID); }
+        public void SendGossipMenu(int titleId, ObjectGuid objGUID) { PlayerTalkClass.SendGossipMenu(titleId, objGUID); }
 
         // Closes the Menu
         public void CloseGossipMenu() { PlayerTalkClass.SendCloseGossip(); }
 
-        public void InitGossipMenu(uint menuId) { PlayerTalkClass.GetGossipMenu().SetMenuId(menuId); }
+        public void InitGossipMenu(int menuId) { PlayerTalkClass.GetGossipMenu().SetMenuId(menuId); }
 
         //Clears the Menu
         public void ClearGossipMenu() { PlayerTalkClass.ClearMenus(); }

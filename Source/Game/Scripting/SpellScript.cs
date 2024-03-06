@@ -492,9 +492,9 @@ namespace Game.Scripting
             m_hitPreventDefaultEffectMask = 0;
         }
 
-        public bool _IsEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventEffectMask & (1 << (int)effIndex)); }
+        public bool _IsEffectPrevented(int effIndex) { return Convert.ToBoolean(m_hitPreventEffectMask & (1 << effIndex)); }
 
-        public bool _IsDefaultEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventDefaultEffectMask & (1 << (int)effIndex)); }
+        public bool _IsDefaultEffectPrevented(int effIndex) { return Convert.ToBoolean(m_hitPreventDefaultEffectMask & (1 << effIndex)); }
 
         public void _PrepareScriptCall(SpellScriptHookType hookType)
         {
@@ -676,7 +676,7 @@ namespace Game.Scripting
         // returns: Item which was selected as an explicit spell target or null if there's no target
         public Item GetExplTargetItem() { return m_spell.m_targets.GetItemTarget(); }
 
-        public long GetUnitTargetCountForEffect(uint effect)
+        public long GetUnitTargetCountForEffect(int effect)
         {
             if (!IsAfterTargetSelectionPhase())
             {
@@ -686,7 +686,7 @@ namespace Game.Scripting
             return m_spell.GetUnitTargetCountForEffect(effect);
         }
 
-        public long GetGameObjectTargetCountForEffect(uint effect)
+        public long GetGameObjectTargetCountForEffect(int effect)
         {
             if (!IsAfterTargetSelectionPhase())
             {
@@ -696,7 +696,7 @@ namespace Game.Scripting
             return m_spell.GetGameObjectTargetCountForEffect(effect);
         }
 
-        public long GetItemTargetCountForEffect(uint effect)
+        public long GetItemTargetCountForEffect(int effect)
         {
             if (!IsAfterTargetSelectionPhase())
             {
@@ -706,7 +706,7 @@ namespace Game.Scripting
             return m_spell.GetItemTargetCountForEffect(effect);
         }
 
-        public long GetCorpseTargetCountForEffect(uint effect)
+        public long GetCorpseTargetCountForEffect(int effect)
         {
             if (!IsAfterTargetSelectionPhase())
             {
@@ -1104,9 +1104,9 @@ namespace Game.Scripting
         public delegate void AuraEffectCalcPeriodicDelegate(AuraEffect aura, ref bool isPeriodic, ref int amplitude);
         public delegate void AuraEffectCalcSpellModDelegate(AuraEffect aura, ref SpellModifier spellMod);
         public delegate void AuraEffectCalcCritChanceFnType(AuraEffect aura, Unit victim, ref float critChance);
-        public delegate void AuraEffectAbsorbDelegate(AuraEffect aura, DamageInfo damageInfo, ref uint absorbAmount);
-        public delegate void AuraEffectAbsorbHealDelegate(AuraEffect aura, HealInfo healInfo, ref uint absorbAmount);
-        public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, uint splitAmount);
+        public delegate void AuraEffectAbsorbDelegate(AuraEffect aura, DamageInfo damageInfo, ref int absorbAmount);
+        public delegate void AuraEffectAbsorbHealDelegate(AuraEffect aura, HealInfo healInfo, ref int absorbAmount);
+        public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, int splitAmount);
         public delegate bool AuraCheckProcDelegate(ProcEventInfo info);
         public delegate bool AuraCheckEffectProcDelegate(AuraEffect aura, ProcEventInfo info);
         public delegate void AuraProcDelegate(ProcEventInfo info);
@@ -1294,7 +1294,7 @@ namespace Game.Scripting
                 _callImpl = callImpl;
             }
 
-            public void Call(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+            public void Call(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
             {
                 _callImpl(aurEff, dmgInfo, ref absorbAmount);
             }
@@ -1309,7 +1309,7 @@ namespace Game.Scripting
                 _callImpl = callImpl;
             }
 
-            public void Call(AuraEffect aurEff, HealInfo healInfo, ref uint absorbAmount)
+            public void Call(AuraEffect aurEff, HealInfo healInfo, ref int absorbAmount)
             {
                 _callImpl(aurEff, healInfo, ref absorbAmount);
             }
@@ -1324,7 +1324,7 @@ namespace Game.Scripting
                 _callImpl = callImpl;
             }
 
-            public void Call(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+            public void Call(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
             {
                 _callImpl(aurEff, dmgInfo, ref absorbAmount);
             }
@@ -1339,7 +1339,7 @@ namespace Game.Scripting
                 _callImpl = callImpl;
             }
 
-            public void Call(AuraEffect aurEff, DamageInfo dmgInfo, uint splitAmount)
+            public void Call(AuraEffect aurEff, DamageInfo dmgInfo, int splitAmount)
             {
                 _callImpl(aurEff, dmgInfo, splitAmount);
             }

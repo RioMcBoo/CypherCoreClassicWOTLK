@@ -68,11 +68,15 @@ namespace Framework.Constants
         public const int Max = 16;
     }
 
-    public enum QuestSlotStateMask
+    [Flags]
+    public enum QuestSlotStateMask : uint
     {
         None = 0x00,
         Complete = 0x1,
-        Fail = 0x2
+        Fail = 0x2,
+
+        QuestSlotStart = 0x100,
+        QuestSlotEnd = QuestSlotStart << SharedConst.MaxQuestCounts,
     }
 
     public enum QuestType

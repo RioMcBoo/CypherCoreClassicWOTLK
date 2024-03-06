@@ -18,14 +18,14 @@ namespace Game.Maps
         object _lockObject = new();
         Dictionary<ObjectGuid, Dictionary<InstanceLockKey, InstanceLock>> _temporaryInstanceLocksByPlayer = new(); // locks stored here before any boss gets killed
         Dictionary<ObjectGuid, Dictionary<InstanceLockKey, InstanceLock>> _instanceLocksByPlayer = new();
-        Dictionary<uint, SharedInstanceLockData> _instanceLockDataById = new();
+        Dictionary<int, SharedInstanceLockData> _instanceLockDataById = new();
         bool _unloading;
 
         InstanceLockManager() { }
 
         public void Load()
         {
-            Dictionary<uint, SharedInstanceLockData> instanceLockDataById = new();
+            Dictionary<int, SharedInstanceLockData> instanceLockDataById = new();
 
             //                                              0           1     2
             using var result = DB.Characters.Query("SELECT instanceId, data, completedEncountersMask FROM instance");
@@ -33,7 +33,7 @@ namespace Game.Maps
             {
                 do
                 {
-                    uint instanceId = result.Read<uint>(0);
+                    int instanceId = result.Read<int>(0);
 
                     SharedInstanceLockData data = new();
                     data.Data = result.Read<string>(1);
@@ -101,7 +101,7 @@ namespace Game.Maps
             if (playerInstanceLock == null)
                 return TransferAbortReason.None;
 
-            if (entries.Map.IsFlexLocking())
+            if (entries.Map.IsFlexLocking)
             {
                 // compare completed encounters - if instance has any encounters unkilled in players lock then cannot enter
                 if ((playerInstanceLock.GetData().CompletedEncountersMask & ~instanceLock.GetData().CompletedEncountersMask) != 0)
@@ -110,7 +110,7 @@ namespace Game.Maps
                 return TransferAbortReason.None;
             }
 
-            if (!entries.MapDifficulty.IsUsingEncounterLocks() && playerInstanceLock.IsNew() && playerInstanceLock.GetInstanceId() != instanceLock.GetInstanceId())
+            if (!entries.MapDifficulty.IsUsingEncounterLocks && playerInstanceLock.IsNew() && playerInstanceLock.GetInstanceId() != instanceLock.GetInstanceId())
                 return TransferAbortReason.LockedToDifferentInstance;
 
             return TransferAbortReason.None;
@@ -133,7 +133,7 @@ namespace Game.Maps
 
         public InstanceLock FindActiveInstanceLock(ObjectGuid playerGuid, MapDb2Entries entries, bool ignoreTemporary, bool ignoreExpired)
         {
-            if (!entries.MapDifficulty.HasResetSchedule())
+            if (!entries.MapDifficulty.HasResetSchedule)
                 return null;
 
             InstanceLock instanceLock = FindInstanceLock(_instanceLocksByPlayer, playerGuid, entries);
@@ -156,9 +156,9 @@ namespace Game.Maps
             return new List<InstanceLock>();
         }
 
-        public InstanceLock CreateInstanceLockForNewInstance(ObjectGuid playerGuid, MapDb2Entries entries, uint instanceId)
+        public InstanceLock CreateInstanceLockForNewInstance(ObjectGuid playerGuid, MapDb2Entries entries, int instanceId)
         {
-            if (!entries.MapDifficulty.HasResetSchedule())
+            if (!entries.MapDifficulty.HasResetSchedule)
                 return null;
 
             InstanceLock instanceLock;
@@ -180,7 +180,7 @@ namespace Game.Maps
 
             _temporaryInstanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
             Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Created new temporary instance lock for {playerGuid} in instance {instanceId}");
+                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey((int)entries.MapDifficulty.DifficultyID).Name}] Created new temporary instance lock for {playerGuid} in instance {instanceId}");
             return instanceLock;
         }
 
@@ -208,7 +208,7 @@ namespace Game.Maps
                                 _temporaryInstanceLocksByPlayer.Remove(playerGuid);
 
                             Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Promoting temporary lock to permanent for {playerGuid} in instance {updateEvent.InstanceId}");
+                                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey((int)entries.MapDifficulty.DifficultyID).Name}] Promoting temporary lock to permanent for {playerGuid} in instance {updateEvent.InstanceId}");
                         }
                     }
                 }
@@ -221,19 +221,19 @@ namespace Game.Maps
                     var sharedDataItr = _instanceLockDataById.LookupByKey(updateEvent.InstanceId);
                     Cypher.Assert(sharedDataItr != null);
 
-                    instanceLock = new SharedInstanceLock((uint)entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
+                    instanceLock = new SharedInstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
                         GetNextResetTime(entries), updateEvent.InstanceId, sharedDataItr);
                     Cypher.Assert((instanceLock as SharedInstanceLock).GetSharedData().InstanceId == updateEvent.InstanceId);
                 }
                 else
-                    instanceLock = new InstanceLock((uint)entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
+                    instanceLock = new InstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
                         GetNextResetTime(entries), updateEvent.InstanceId);
 
                 lock(_lockObject)
                     _instanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
 
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Created new instance lock for {playerGuid} in instance {updateEvent.InstanceId}");
+                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey((int)entries.MapDifficulty.DifficultyID).Name}] Created new instance lock for {playerGuid} in instance {updateEvent.InstanceId}");
             }
             else
             {
@@ -254,12 +254,12 @@ namespace Game.Maps
             {
                 instanceLock.GetData().CompletedEncountersMask |= 1u << updateEvent.CompletedEncounter.Bit;
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] " +
+                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey((int)entries.MapDifficulty.DifficultyID).Name}] " +
                     $"Instance lock for {playerGuid} in instance {updateEvent.InstanceId} gains completed encounter [{updateEvent.CompletedEncounter.Id}-{updateEvent.CompletedEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]}]");
             }
 
             // Synchronize map completed encounters into players completed encounters for UI
-            if (!entries.MapDifficulty.IsUsingEncounterLocks())
+            if (!entries.MapDifficulty.IsUsingEncounterLocks)
                 instanceLock.GetData().CompletedEncountersMask |= updateEvent.InstanceCompletedEncountersMask;
 
             if (updateEvent.EntranceWorldSafeLocId.HasValue)
@@ -270,7 +270,7 @@ namespace Game.Maps
                 instanceLock.SetExpiryTime(GetNextResetTime(entries));
                 instanceLock.SetExtended(false);
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Expired instance lock for {playerGuid} in instance {updateEvent.InstanceId} is now active");
+                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey((int)entries.MapDifficulty.DifficultyID).Name}] Expired instance lock for {playerGuid} in instance {updateEvent.InstanceId} is now active");
             }
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK);
@@ -284,7 +284,7 @@ namespace Game.Maps
             stmt.AddValue(1, entries.MapDifficulty.MapID);
             stmt.AddValue(2, entries.MapDifficulty.LockID);
             stmt.AddValue(3, instanceLock.GetInstanceId());
-            stmt.AddValue(4, entries.MapDifficulty.DifficultyID);
+            stmt.AddValue(4, (byte)entries.MapDifficulty.DifficultyID);
             stmt.AddValue(5, instanceLock.GetData().Data);
             stmt.AddValue(6, instanceLock.GetData().CompletedEncountersMask);
             stmt.AddValue(7, instanceLock.GetData().EntranceWorldSafeLocId);
@@ -323,7 +323,7 @@ namespace Game.Maps
             trans.Append(stmt);
         }
 
-        public void OnSharedInstanceLockDataDelete(uint instanceId)
+        public void OnSharedInstanceLockDataDelete(int instanceId)
         {
             if (_unloading)
                 return;
@@ -338,7 +338,7 @@ namespace Game.Maps
             Log.outDebug(LogFilter.Instance, $"Deleting instance {instanceId} as it is no longer referenced by any player");
         }
 
-        public Tuple<DateTime, DateTime> UpdateInstanceLockExtensionForPlayer(ObjectGuid playerGuid, MapDb2Entries entries, bool extended)
+        public (DateTime, DateTime) UpdateInstanceLockExtensionForPlayer(ObjectGuid playerGuid, MapDb2Entries entries, bool extended)
         {
             InstanceLock instanceLock = FindActiveInstanceLock(playerGuid, entries, true, false);
             if (instanceLock != null)
@@ -352,11 +352,11 @@ namespace Game.Maps
                 stmt.AddValue(3, entries.MapDifficulty.LockID);
                 DB.Characters.Execute(stmt);
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Instance lock for {playerGuid} is {(extended ? "now" : "no longer")} extended");
-                return Tuple.Create(oldExpiryTime, instanceLock.GetEffectiveExpiryTime());
+                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey((int)entries.MapDifficulty.DifficultyID).Name}] Instance lock for {playerGuid} is {(extended ? "now" : "no longer")} extended");
+                return (oldExpiryTime, instanceLock.GetEffectiveExpiryTime());
             }
 
-            return Tuple.Create(DateTime.MinValue, DateTime.MinValue);
+            return (DateTime.MinValue, DateTime.MinValue);
         }
 
         /// <summary>
@@ -399,7 +399,7 @@ namespace Game.Maps
                 foreach (InstanceLock instanceLock in locksReset)
                 {
                     MapDb2Entries entries = new(instanceLock.GetMapId(), instanceLock.GetDifficultyId());
-                    DateTime newExpiryTime = GetNextResetTime(entries) - TimeSpan.FromSeconds(entries.MapDifficulty.RaidDuration());
+                    DateTime newExpiryTime = GetNextResetTime(entries) - TimeSpan.FromSeconds(entries.MapDifficulty.RaidDuration);
                     // set reset time to last reset time
                     instanceLock.SetExpiryTime(newExpiryTime);
                     instanceLock.SetExtended(false);
@@ -467,21 +467,21 @@ namespace Game.Maps
     {
         public string Data;
         public uint CompletedEncountersMask;
-        public uint EntranceWorldSafeLocId;
+        public int EntranceWorldSafeLocId;
     }
 
     public class InstanceLock
     {
-        uint _mapId;
+        int _mapId;
         Difficulty _difficultyId;
-        uint _instanceId;
+        int _instanceId;
         DateTime _expiryTime;
         bool _extended;
         InstanceLockData _data = new();
         bool _isInUse;
         bool _isNew;
 
-        public InstanceLock(uint mapId, Difficulty difficultyId, DateTime expiryTime, uint instanceId)
+        public InstanceLock(int mapId, Difficulty difficultyId, DateTime expiryTime, int instanceId)
         {
             _mapId = mapId;
             _difficultyId = difficultyId;
@@ -507,16 +507,16 @@ namespace Game.Maps
                 return Global.InstanceLockMgr.GetNextResetTime(entries);
 
             // if not expired, return expiration time + 1 reset period
-            return GetExpiryTime() + TimeSpan.FromSeconds(entries.MapDifficulty.RaidDuration());
+            return GetExpiryTime() + TimeSpan.FromSeconds(entries.MapDifficulty.RaidDuration);
         }
 
-        public uint GetMapId() { return _mapId; }
+        public int GetMapId() { return _mapId; }
 
         public Difficulty GetDifficultyId() { return _difficultyId; }
 
-        public uint GetInstanceId() { return _instanceId; }
+        public int GetInstanceId() { return _instanceId; }
 
-        public void SetInstanceId(uint instanceId) { _instanceId = instanceId; }
+        public void SetInstanceId(int instanceId) { _instanceId = instanceId; }
 
         public DateTime GetExpiryTime() { return _expiryTime; }
 
@@ -541,7 +541,7 @@ namespace Game.Maps
 
     class SharedInstanceLockData : InstanceLockData
     {
-        public uint InstanceId;
+        public int InstanceId;
 
         ~SharedInstanceLockData()
         {
@@ -560,7 +560,7 @@ namespace Game.Maps
         /// </summary>
         SharedInstanceLockData _sharedData;
 
-        public SharedInstanceLock(uint mapId, Difficulty difficultyId, DateTime expiryTime, uint instanceId, SharedInstanceLockData sharedData) : base(mapId, difficultyId, expiryTime, instanceId)
+        public SharedInstanceLock(int mapId, Difficulty difficultyId, DateTime expiryTime, int instanceId, SharedInstanceLockData sharedData) : base(mapId, difficultyId, expiryTime, instanceId)
         {
             _sharedData = sharedData;            
         }
@@ -594,19 +594,19 @@ namespace Game.Maps
 
         public bool IsInstanceIdBound()
         {
-            return !Map.IsFlexLocking() && !MapDifficulty.IsUsingEncounterLocks();
+            return !Map.IsFlexLocking && !MapDifficulty.IsUsingEncounterLocks;
         }
     }
 
     public struct InstanceLockUpdateEvent
     {
-        public uint InstanceId;
+        public int InstanceId;
         public string NewData;
         public uint InstanceCompletedEncountersMask;
         public DungeonEncounterRecord CompletedEncounter;
-        public uint? EntranceWorldSafeLocId;
+        public int? EntranceWorldSafeLocId;
 
-        public InstanceLockUpdateEvent(int instanceId, string newData, uint instanceCompletedEncountersMask, DungeonEncounterRecord completedEncounter, uint? entranceWorldSafeLocId)
+        public InstanceLockUpdateEvent(int instanceId, string newData, uint instanceCompletedEncountersMask, DungeonEncounterRecord completedEncounter, int? entranceWorldSafeLocId)
         {
             InstanceId = instanceId;
             NewData = newData;

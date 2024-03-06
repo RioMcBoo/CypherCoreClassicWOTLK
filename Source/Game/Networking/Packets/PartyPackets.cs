@@ -266,7 +266,7 @@ namespace Game.Networking.Packets
             MemberStats.MaxHealth = (int)player.GetMaxHealth();
 
             // Power
-            MemberStats.PowerType = (byte)player.GetPowerType();
+            MemberStats.PowerType = player.GetPowerType();
             MemberStats.PowerDisplayID = 0;
             MemberStats.CurrentPower = (ushort)player.GetPower(player.GetPowerType());
             MemberStats.MaxPower = (ushort)player.GetMaxPower(player.GetPowerType());
@@ -868,7 +868,7 @@ namespace Game.Networking.Packets
             foreach (RaidMarker raidMarker in RaidMarkers)
             {
                 _worldPacket.WritePackedGuid(raidMarker.TransportGUID);
-                _worldPacket.WriteUInt32(raidMarker.Location.GetMapId());
+                _worldPacket.WriteInt32(raidMarker.Location.GetMapId());
                 _worldPacket.WriteXYZ(raidMarker.Location);
             }
         }
@@ -1237,8 +1237,8 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(MyFlags);
-            data.WriteUInt32(Slot);
-            data.WriteUInt32(MyRandomSlot);
+            data.WriteInt32(Slot);
+            data.WriteInt32(MyRandomSlot);
             data.WriteUInt8(MyPartialClear);
             data.WriteFloat(MyGearDiff);
             data.WriteUInt8(MyStrangerCount);
@@ -1250,9 +1250,9 @@ namespace Game.Networking.Packets
         }
 
         public byte MyFlags;
-        public uint Slot;
+        public int Slot;
         public byte BootCount;
-        public uint MyRandomSlot;
+        public int MyRandomSlot;
         public bool Aborted;
         public byte MyPartialClear;
         public float MyGearDiff;

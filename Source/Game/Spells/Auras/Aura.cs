@@ -117,7 +117,7 @@ namespace Game.Spells
                 bool negativeFound = false;
                 foreach (var spellEffectInfo in GetBase().GetSpellInfo().GetEffects())
                 {
-                    if (((1 << (int)spellEffectInfo.EffectIndex) & effMask) != 0 && !GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
+                    if (((1 << spellEffectInfo.EffectIndex) & effMask) != 0 && !GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
                     {
                         negativeFound = true;
                         break;
@@ -132,7 +132,7 @@ namespace Game.Spells
                 bool positiveFound = false;
                 foreach (var spellEffectInfo in GetBase().GetSpellInfo().GetEffects())
                 {
-                    if (((1 << (int)spellEffectInfo.EffectIndex) & effMask) != 0 && GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
+                    if (((1 << spellEffectInfo.EffectIndex) & effMask) != 0 && GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
                     {
                         positiveFound = true;
                         break;
@@ -141,13 +141,13 @@ namespace Game.Spells
                 _flags |= positiveFound ? AuraFlags.Positive : AuraFlags.Negative;
             }
 
-            bool effectNeedsAmount(AuraEffect effect) => effect != null && (GetEffectsToApply() & (1 << (int)effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
+            bool effectNeedsAmount(AuraEffect effect) => effect != null && (GetEffectsToApply() & (1 << effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
 
             if (GetBase().GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) || GetBase().GetAuraEffects().Any(effectNeedsAmount))
                 _flags |= AuraFlags.Scalable;
         }
 
-        public void _HandleEffect(uint effIndex, bool apply)
+        public void _HandleEffect(int effIndex, bool apply)
         {
             AuraEffect aurEff = GetBase().GetEffect(effIndex);
             if (aurEff == null)
@@ -168,8 +168,8 @@ namespace Game.Spells
             }
             else
             {
-                Cypher.Assert(Convert.ToBoolean(_effectMask & (1 << (int)effIndex)));
-                _effectMask &= ~(uint)(1 << (int)effIndex);
+                Cypher.Assert(Convert.ToBoolean(_effectMask & (1 << effIndex)));
+                _effectMask &= ~(uint)(1 << effIndex);
                 aurEff.HandleEffect(this, AuraEffectHandleModes.Real, false);
             }
             SetNeedClientUpdate();
@@ -191,9 +191,9 @@ namespace Game.Spells
             }
 
             // update real effects only if they were applied already
-            for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+            for (int i = 0; i < SpellConst.MaxEffects; ++i)
             {
-                if (HasEffect(i) && (removeEffMask & (1 << (int)i)) != 0)
+                if (HasEffect(i) && (removeEffMask & (1 << i)) != 0)
                     _HandleEffect(i, false);
             }
 
@@ -201,9 +201,9 @@ namespace Game.Spells
 
             if (canHandleNewEffects)
             {
-                for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+                for (int i = 0; i < SpellConst.MaxEffects; ++i)
                 {
-                    if ((addEffMask & (1 << (int)i)) != 0)
+                    if ((addEffMask & (1 << i)) != 0)
                         _HandleEffect(i, true);
                 }
             }
@@ -232,7 +232,7 @@ namespace Game.Spells
 
             AuraDataInfo auraData = auraInfo.AuraData;
             auraData.CastID = aura.GetCastId();
-            auraData.SpellID = (int)aura.GetId();
+            auraData.SpellID = aura.GetId();
             auraData.Visual = aura.GetSpellVisual();
             auraData.Flags = GetFlags();
             if (aura.GetAuraType() != AuraObjectType.DynObj && aura.GetMaxDuration() > 0 && !aura.GetSpellInfo().HasAttribute(SpellAttr5.DoNotDisplayDuration))
@@ -628,7 +628,7 @@ namespace Game.Spells
         }
 
         // targets have to be registered and not have effect applied yet to use this function
-        public void _ApplyEffectForTargets(uint effIndex)
+        public void _ApplyEffectForTargets(int effIndex)
         {
             // prepare list of aura targets
             List<Unit> targetList = new();
@@ -905,9 +905,9 @@ namespace Game.Spells
             return m_spellInfo.StackAmount > 0 || m_stackAmount > 1;
         }
 
-        public uint CalcMaxStackAmount()
+        public int CalcMaxStackAmount()
         {
-            uint maxStackAmount = m_spellInfo.StackAmount;
+            var maxStackAmount = m_spellInfo.StackAmount;
             Unit caster = GetCaster();
             if (caster != null)
             {
@@ -921,7 +921,7 @@ namespace Game.Spells
         public bool ModStackAmount(int num, AuraRemoveMode removeMode = AuraRemoveMode.Default, bool resetPeriodicTimer = true)
         {
             int stackAmount = m_stackAmount + num;
-            uint maxStackAmount = CalcMaxStackAmount();
+            var maxStackAmount = CalcMaxStackAmount();
 
             // limit the stack amount (only on stack increase, stack amount may be changed manually)
             if ((num > 0) && (stackAmount > maxStackAmount))
@@ -1194,7 +1194,7 @@ namespace Game.Spells
             var saBounds = Global.SpellMgr.GetSpellAreaForAuraMapBounds(GetId());
             if (saBounds != null)
             {
-                uint zone, area;
+                int zone, area;
                 target.GetZoneAndAreaId(out zone, out area);
 
                 foreach (var spellArea in saBounds)
@@ -1223,9 +1223,9 @@ namespace Game.Spells
                         foreach (var spell in spellTriggered)
                         {
                             if (spell < 0)
-                                target.ApplySpellImmune(GetId(), SpellImmunity.Id, (uint)-spell, true);
+                                target.ApplySpellImmune(GetId(), SpellImmunity.Id, -spell, true);
                             else if (caster != null)
-                                caster.AddAura((uint)spell, target);
+                                caster.AddAura(spell, target);
                         }
                     }
                 }
@@ -1238,9 +1238,9 @@ namespace Game.Spells
                         foreach (var spell in spellTriggered)
                         {
                             if (spell < 0)
-                                target.RemoveAurasDueToSpell((uint)-spell);
+                                target.RemoveAurasDueToSpell(-spell);
                             else if (removeMode != AuraRemoveMode.Death)
-                                target.CastSpell(target, (uint)spell, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                                target.CastSpell(target, spell, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                                     .SetOriginalCaster(GetCasterGUID())
                                     .SetOriginalCastId(GetCastId()));
                         }
@@ -1251,9 +1251,9 @@ namespace Game.Spells
                         foreach (var id in spellTriggered)
                         {
                             if (id < 0)
-                                target.ApplySpellImmune(GetId(), SpellImmunity.Id, (uint)-id, false);
+                                target.ApplySpellImmune(GetId(), SpellImmunity.Id, -id, false);
                             else
-                                target.RemoveAura((uint)id, GetCasterGUID(), 0, removeMode);
+                                target.RemoveAura(id, GetCasterGUID(), 0, removeMode);
                         }
                     }
                 }
@@ -1268,7 +1268,7 @@ namespace Game.Spells
                     {
                         if (id > 0)
                         {
-                            Aura triggeredAura = target.GetAura((uint)id, GetCasterGUID());
+                            Aura triggeredAura = target.GetAura(id, GetCasterGUID());
                             if (triggeredAura != null)
                                 triggeredAura.ModStackAmount(GetStackAmount() - triggeredAura.GetStackAmount());
                         }
@@ -2129,7 +2129,7 @@ namespace Game.Spells
             }
         }
         
-        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount, ref bool defaultPrevented)
+        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref int absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in m_loadedScripts)
             {
@@ -2144,7 +2144,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount)
+        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref int absorbAmount)
         {
             foreach (var auraScript in m_loadedScripts)
             {
@@ -2158,7 +2158,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref uint absorbAmount, ref bool defaultPrevented)
+        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref int absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in m_loadedScripts)
             {
@@ -2172,7 +2172,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref uint absorbAmount)
+        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref int absorbAmount)
         {
             foreach (var auraScript in m_loadedScripts)
             {
@@ -2185,7 +2185,7 @@ namespace Game.Spells
             }
         }
         
-        public void CallScriptEffectManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount, ref bool defaultPrevented)
+        public void CallScriptEffectManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref int absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in m_loadedScripts)
             {
@@ -2199,7 +2199,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAfterManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount)
+        public void CallScriptEffectAfterManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref int absorbAmount)
         {
             foreach (var auraScript in m_loadedScripts)
             {
@@ -2213,7 +2213,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectSplitHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, uint splitAmount)
+        public void CallScriptEffectSplitHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, int splitAmount)
         {
             foreach (var auraScript in m_loadedScripts)
             {
@@ -2421,7 +2421,7 @@ namespace Game.Spells
 
         byte CalcMaxCharges(Unit caster)
         {
-            uint maxProcCharges = m_spellInfo.ProcCharges;
+            var maxProcCharges = m_spellInfo.ProcCharges;
             var procEntry = Global.SpellMgr.GetSpellProcEntry(GetSpellInfo());
             if (procEntry != null)
                 maxProcCharges = procEntry.Charges;
@@ -2918,7 +2918,7 @@ namespace Game.Spells
 
     public class AuraKey : IEquatable<AuraKey>
     {
-        public AuraKey(ObjectGuid caster, ObjectGuid item, uint spellId, uint effectMask)
+        public AuraKey(ObjectGuid caster, ObjectGuid item, int spellId, uint effectMask)
         {
             Caster = caster;
             Item = item;
@@ -2959,7 +2959,7 @@ namespace Game.Spells
 
         public ObjectGuid Caster;
         public ObjectGuid Item;
-        public uint SpellId;
+        public int SpellId;
         public uint EffectMask;
     }
 

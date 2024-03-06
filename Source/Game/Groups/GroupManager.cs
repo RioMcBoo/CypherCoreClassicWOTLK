@@ -18,12 +18,14 @@ namespace Game.Groups
             NextGroupDbStoreId = 1;
             NextGroupId = 1;
         }
-        public void SetGroupDbStoreSize(int newSize) { GroupDbStore.EnsureCapacity(newSize); }
-        public uint GenerateNewGroupDbStoreId()
-        {
-            uint newStorageId = NextGroupDbStoreId;
 
-            for (uint i = ++NextGroupDbStoreId; i < 0xFFFFFFFF; ++i)
+        public void SetGroupDbStoreSize(int newSize) { GroupDbStore.EnsureCapacity(newSize); }
+
+        public int GenerateNewGroupDbStoreId()
+        {
+            int newStorageId = NextGroupDbStoreId;
+
+            for (int i = ++NextGroupDbStoreId; i < int.MaxValue; ++i)
             {
                 if ((i < GroupDbStore.Count && GroupDbStore[i] == null) || i >= GroupDbStore.Count)
                 {
@@ -41,14 +43,14 @@ namespace Game.Groups
             return newStorageId;
         }
 
-        public void RegisterGroupDbStoreId(uint storageId, Group group)
+        public void RegisterGroupDbStoreId(int storageId, Group group)
         {
             GroupDbStore[storageId] = group;
         }
 
         public void FreeGroupDbStoreId(Group group)
         {
-            uint storageId = group.GetDbStoreId();
+            var storageId = group.GetDbStoreId();
 
             if (storageId < NextGroupDbStoreId)
                 NextGroupDbStoreId = storageId;
@@ -56,14 +58,14 @@ namespace Game.Groups
             GroupDbStore[storageId - 1] = null;
         }
 
-        public Group GetGroupByDbStoreId(uint storageId)
+        public Group GetGroupByDbStoreId(int storageId)
         {
             return GroupDbStore.LookupByKey(storageId);
         }
 
-        public ulong GenerateGroupId()
+        public long GenerateGroupId()
         {
-            if (NextGroupId >= 0xFFFFFFFE)
+            if (NextGroupId >= int.MaxValue - 1)
             {
                 Log.outError(LogFilter.Server, "Group guid overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
@@ -125,7 +127,7 @@ namespace Game.Groups
                         AddGroup(group);
 
                         // Get the ID used for storing the group in the database and register it in the pool.
-                        uint storageId = group.GetDbStoreId();
+                        int storageId = group.GetDbStoreId();
 
                         RegisterGroupDbStoreId(storageId, group);
 
@@ -157,7 +159,7 @@ namespace Game.Groups
 
                     do
                     {
-                        Group group = GetGroupByDbStoreId(result.Read<uint>(0));
+                        Group group = GetGroupByDbStoreId(result.Read<int>(0));
 
                     if (group != null)
                         group.LoadMemberFromDB(result.Read<uint>(1), result.Read<byte>(2), result.Read<byte>(3), (LfgRoles)result.Read<byte>(4));
@@ -173,9 +175,9 @@ namespace Game.Groups
             }
         }
 
-        Dictionary<ulong, Group> GroupStore = new();
-        Dictionary<uint, Group> GroupDbStore = new();
-        ulong NextGroupId;
-        uint NextGroupDbStoreId;
+        Dictionary<long, Group> GroupStore = new();
+        Dictionary<int, Group> GroupDbStore = new();
+        int NextGroupId;
+        int NextGroupDbStoreId;
     }
 }

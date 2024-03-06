@@ -149,6 +149,11 @@ namespace System
             return (mask & (ItemSubClassWeaponMask)(1 << (int)_weapon)) != 0;
         }
 
+        public static QuestSlotStateMask SetSlot(this QuestSlotStateMask mask, int slot)
+        {
+            return mask | (QuestSlotStateMask)((uint)QuestSlotStateMask.QuestSlotStart << slot);
+        }
+
         public static string ToHexString(this byte[] byteArray, bool reverse = false)
         {
             if (reverse)

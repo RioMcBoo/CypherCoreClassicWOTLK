@@ -43,7 +43,7 @@ namespace Game.Entities
             return i_maps.LookupByKey((mapId, instanceId));
         }
 
-        Map CreateWorldMap(uint mapId, uint instanceId)
+        Map CreateWorldMap(int mapId, int instanceId)
         {
             Map map = new Map(mapId, i_gridCleanUpDelay, instanceId, Difficulty.None);
             map.LoadRespawnTimes();
@@ -55,7 +55,7 @@ namespace Game.Entities
             return map;
         }
 
-        InstanceMap CreateInstance(int mapId, uint instanceId, InstanceLock instanceLock, Difficulty difficulty, int team, Group group)
+        InstanceMap CreateInstance(int mapId, int instanceId, InstanceLock instanceLock, Difficulty difficulty, int team, Group group)
         {
             // make sure we have a valid map id
             var entry = CliDB.MapStorage.LookupByKey(mapId);
@@ -119,7 +119,7 @@ namespace Game.Entities
             lock (_mapsLock)
             {
                 Map map = null;
-                uint newInstanceId = 0;                       // instanceId of the resulting map
+                int newInstanceId = 0;                       // instanceId of the resulting map
 
                 if (entry.IsBattlegroundOrArena)
                 {
@@ -142,7 +142,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                else if (entry.IsDungeon())
+                else if (entry.IsDungeon)
                 {
                     Group group = player.GetGroup();
                     Difficulty difficulty = group != null ? group.GetDifficultyID(entry) : player.GetDifficultyID(entry);
@@ -154,13 +154,13 @@ namespace Game.Entities
                         newInstanceId = instanceLock.GetInstanceId();
 
                         // Reset difficulty to the one used in instance lock
-                        if (!entries.Map.IsFlexLocking())
+                        if (!entries.Map.IsFlexLocking)
                             difficulty = instanceLock.GetDifficultyId();
                     }
                     else
                     {
                         // Try finding instance id for normal dungeon
-                        if (!entries.MapDifficulty.HasResetSchedule())
+                        if (!entries.MapDifficulty.HasResetSchedule)
                             newInstanceId = group != null ? group.GetRecentInstanceId(mapId) : player.GetRecentInstanceId(mapId);
 
                         // If not found or instance is not a normal dungeon, generate new one
@@ -192,8 +192,8 @@ namespace Game.Entities
                 else
                 {
                     newInstanceId = 0;
-                    if (entry.IsSplitByFaction())
-                        newInstanceId = (uint)player.GetTeamId();
+                    if (entry.IsSplitByFaction)
+                        newInstanceId = player.GetTeamId();
 
                     map = FindMap_i(mapId, newInstanceId);
                     if (map == null)
@@ -219,9 +219,9 @@ namespace Game.Entities
             if (entry == null)
                 return 0;
 
-            if (entry.IsBattlegroundOrArena())
+            if (entry.IsBattlegroundOrArena)
                 return player.GetBattlegroundId();
-            else if (entry.IsDungeon())
+            else if (entry.IsDungeon)
             {
                 Group group = player.GetGroup();
                 Difficulty difficulty = group != null ? group.GetDifficultyID(entry) : player.GetDifficultyID(entry);
@@ -229,10 +229,10 @@ namespace Game.Entities
 
                 ObjectGuid instanceOwnerGuid = group != null ? group.GetRecentInstanceOwner(mapId) : player.GetGUID();
                 InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(instanceOwnerGuid, entries);
-                uint newInstanceId = 0;
+                int newInstanceId = 0;
                 if (instanceLock != null)
                     newInstanceId = instanceLock.GetInstanceId();
-                else if (!entries.MapDifficulty.HasResetSchedule()) // Try finding instance id for normal dungeon
+                else if (!entries.MapDifficulty.HasResetSchedule) // Try finding instance id for normal dungeon
                     newInstanceId = group != null ? group.GetRecentInstanceId(mapId) : player.GetRecentInstanceId(mapId);
 
                 if (newInstanceId == 0)
@@ -247,11 +247,11 @@ namespace Game.Entities
                 return newInstanceId;
             }
             else if (entry.IsGarrison)
-                return (uint)player.GetGUID().GetCounter();
+                return (int)player.GetGUID().GetCounter();
             else
             {
                 if (entry.IsSplitByFaction)
-                    return (uint)player.GetTeamId();
+                    return player.GetTeamId();
 
                 return 0;
             }
@@ -444,7 +444,7 @@ namespace Game.Entities
             }
         }
 
-        public void DoForAllMapsWithMapId(uint mapId, Action<Map> worker)
+        public void DoForAllMapsWithMapId(int mapId, Action<Map> worker)
         {
             lock (_mapsLock)
             {
@@ -463,7 +463,7 @@ namespace Game.Entities
 
         public void IncreaseScheduledScriptsCount() { ++_scheduledScripts; }
         public void DecreaseScheduledScriptCount() { --_scheduledScripts; }
-        public void DecreaseScheduledScriptCount(uint count) { _scheduledScripts -= count; }
+        public void DecreaseScheduledScriptCount(int count) { _scheduledScripts -= count; }
         public bool IsScriptScheduled() { return _scheduledScripts > 0; }
 
         Dictionary<(int mapId, int instanceId), Map> i_maps = new();
@@ -473,7 +473,7 @@ namespace Game.Entities
         BitSet _freeInstanceIds = new(1);
         int _nextInstanceId;
         MapUpdater m_updater;
-        uint _scheduledScripts;
+        int _scheduledScripts;
     }
 
     // hack to allow conditions to access what faction owns the map (these worldstates should not be set on these maps)

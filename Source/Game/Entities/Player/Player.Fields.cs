@@ -32,7 +32,7 @@ namespace Game.Entities
         public string autoReplyMsg;
 
         //Inventory
-        Dictionary<ulong, EquipmentSetInfo> _equipmentSets = new();
+        Dictionary<long, EquipmentSetInfo> _equipmentSets = new();
         public List<ItemSetEffect> ItemSetEff = new();
         List<EnchantDuration> m_enchantDuration = new();
         List<Item> m_itemDuration = new();
@@ -65,9 +65,9 @@ namespace Game.Entities
         bool m_bPassOnGroupLoot;
         GroupUpdateCounter[] m_groupUpdateSequences = new GroupUpdateCounter[2];
 
-        Dictionary<uint, uint> m_recentInstances = new();
-        Dictionary<uint, long> _instanceResetTimes = new();
-        uint _pendingBindId;
+        Dictionary<int, int> m_recentInstances = new();
+        Dictionary<int, long> _instanceResetTimes = new();
+        int _pendingBindId;
         uint _pendingBindTimer;
         public bool m_InstanceValid;
 
@@ -82,7 +82,7 @@ namespace Game.Entities
         uint m_lastFallTime;
         float m_lastFallZ;
         WorldLocation teleportDest;
-        uint? m_teleport_instanceId;
+        int? m_teleport_instanceId;
         TeleportToOptions m_teleport_options;
         bool mSemaphoreTeleport_Near;
         bool mSemaphoreTeleport_Far;
@@ -120,9 +120,9 @@ namespace Game.Entities
         //Pets
         PetStable m_petStable;
         public List<PetAura> m_petAuras = new();
-        uint m_temporaryUnsummonedPetNumber;
+        int m_temporaryUnsummonedPetNumber;
         ReactStates? m_temporaryPetReactState;
-        uint m_lastpetnumber;
+        int m_lastpetnumber;
 
         // Player summoning
         long m_summon_expire;
@@ -152,13 +152,13 @@ namespace Game.Entities
         List<int> m_timedquests = new();
         List<int> m_weeklyquests = new();
         List<int> m_monthlyquests = new();
-        Dictionary<int, Dictionary<uint, long>> m_seasonalquests = new();
+        Dictionary<int, Dictionary<int, long>> m_seasonalquests = new();
         Dictionary<int, QuestStatusData> m_QuestStatus = new();
         MultiMap<(QuestObjectiveType Type, int ObjectID), QuestObjectiveStatusData> m_questObjectiveStatus = new();
         Dictionary<int, QuestSaveType> m_QuestStatusSave = new();
         List<int> m_DFQuests = new();
         List<int> m_RewardedQuests = new();
-        Dictionary<uint, QuestSaveType> m_RewardedQuestsSave = new();
+        Dictionary<int, QuestSaveType> m_RewardedQuestsSave = new();
 
         bool m_DailyQuestChanged;
         bool m_WeeklyQuestChanged;
@@ -204,18 +204,18 @@ namespace Game.Entities
         PlayerExtraFlags m_ExtraFlags;
 
         public bool IsDebugAreaTriggers { get; set; }
-        uint m_zoneUpdateId;
-        uint m_areaUpdateId;
+        int m_zoneUpdateId;
+        int m_areaUpdateId;
         uint m_zoneUpdateTimer;
 
-        uint m_ChampioningFaction;
+        int m_ChampioningFaction;
         byte m_fishingSteps;
 
         // Recall position
         WorldLocation m_recall_location;
-        uint m_recall_instanceId;
+        int m_recall_instanceId;
         WorldLocation homebind = new();
-        uint homebindAreaId;
+        int homebindAreaId;
         uint m_HomebindTimer;
 
         ResurrectionData _resurrectionData;
@@ -233,7 +233,7 @@ namespace Game.Entities
 
         TimeTracker m_groupUpdateTimer;
 
-        ulong m_GuildIdInvited;
+        long m_GuildIdInvited;
         DeclinedName _declinedname;
         Runes m_runes = new();
         uint m_hostileReferenceCheckTimer;
@@ -533,8 +533,8 @@ namespace Game.Entities
         public class EquipmentSetData
         {
             public EquipmentSetType Type;
-            public ulong Guid; // Set Identifier
-            public uint SetID; // Index
+            public long Guid; // Set Identifier
+            public int SetID; // Index
             public uint IgnoreMask ; // Mask of EquipmentSlot
             public int AssignedSpecIndex = -1; // Index of character specialization that this set is automatically equipped for
             public string SetName = "";

@@ -2,21 +2,19 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.Entities;
 using System;
-using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {
     public sealed class BankBagSlotPricesRecord
     {
-        public uint Id;
+        public int Id;
         public uint Cost;
     }
 
     public sealed class BannedAddonsRecord
     {
-        public uint Id;
+        public int Id;
         public string Name;
         public string Version;
         public byte Flags;
@@ -26,7 +24,7 @@ namespace Game.DataStorage
     {        
         public LocalizedString DisplayName;
         public LocalizedString Description;
-        public uint Id;
+        public int Id;
         /// <summary>
         /// value 0 . hair, value 2 . facialhair
         /// </summary>
@@ -42,7 +40,7 @@ namespace Game.DataStorage
 
     public sealed class BattlePetAbilityRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public LocalizedString Description;
         public int IconFileDataId;
@@ -54,24 +52,24 @@ namespace Game.DataStorage
 
     public sealed class BattlePetBreedQualityRecord
     {
-        public uint Id;
+        public int Id;
         public float StateMultiplier;
         public byte QualityEnum;
     }
 
     public sealed class BattlePetBreedStateRecord
     {
-        public uint Id;
+        public int Id;
         public byte BattlePetStateID;
         public ushort Value;
-        public uint BattlePetBreedID;
+        public int BattlePetBreedID;
     }
 
     public sealed class BattlePetSpeciesRecord
     {
         public LocalizedString Description;
         public LocalizedString SourceText;
-        public uint Id;
+        public int Id;
         public int CreatureID;
         public int SummonSpellID;
         public int IconFileDataID;
@@ -100,10 +98,10 @@ namespace Game.DataStorage
 
     public sealed class BattlePetSpeciesStateRecord
     {
-        public uint Id;
+        public int Id;
         public byte BattlePetStateID;
         public int Value;
-        public uint BattlePetSpeciesID;
+        public int BattlePetSpeciesID;
     }
 
     public sealed class BattlemasterListRecord

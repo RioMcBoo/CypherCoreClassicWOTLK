@@ -219,7 +219,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(TargetGUID);
             _worldPacket.WriteUInt32(TargetVirtualAddress);
             _worldPacket.WriteUInt32(SenderVirtualAddress);
-            _worldPacket.WriteUInt32(AchievementID);
+            _worldPacket.WriteInt32(AchievementID);
             _worldPacket.WriteFloat(DisplayTime);
             _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteBits(SenderName.GetByteCount(), 11);
@@ -260,7 +260,7 @@ namespace Game.Networking.Packets
         public string Prefix = string.Empty;
         public string Channel = string.Empty;
         public string ChatText = string.Empty;
-        public uint AchievementID;
+        public int AchievementID;
         public ChatFlags _ChatFlags;
         public float DisplayTime;
         public int SpellID;
@@ -277,7 +277,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteUInt32(EmoteID);
+            _worldPacket.WriteInt32((int)EmoteID);
             _worldPacket.WriteInt32(SpellVisualKitIDs.Count);
             _worldPacket.WriteInt32(SequenceVariation);
 
@@ -286,7 +286,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Guid;
-        public uint EmoteID;
+        public Emote EmoteID;
         public List<int> SpellVisualKitIDs = new();
         public int SequenceVariation;
     }

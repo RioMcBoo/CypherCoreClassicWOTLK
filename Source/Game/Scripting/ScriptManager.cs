@@ -1005,33 +1005,33 @@ namespace Game.Scripting
         }
 
         // UnitScript
-        public void OnHeal(Unit healer, Unit reciever, ref uint gain)
+        public void OnHeal(Unit healer, Unit reciever, ref int gain)
         {
-            uint dmg = gain;
+            var dmg = gain;
             ForEach<UnitScript>(p => p.OnHeal(healer, reciever, ref dmg));
             gain = dmg;
         }
-        public void OnDamage(Unit attacker, Unit victim, ref uint damage)
+        public void OnDamage(Unit attacker, Unit victim, ref int damage)
         {
-            uint dmg = damage;
+            var dmg = damage;
             ForEach<UnitScript>(p => p.OnDamage(attacker, victim, ref dmg));
             damage = dmg;
         }
-        public void ModifyPeriodicDamageAurasTick(Unit target, Unit attacker, ref uint damage)
+        public void ModifyPeriodicDamageAurasTick(Unit target, Unit attacker, ref int damage)
         {
-            uint dmg = damage;
+            var dmg = damage;
             ForEach<UnitScript>(p => p.ModifyPeriodicDamageAurasTick(target, attacker, ref dmg));
             damage = dmg;
         }
-        public void ModifyMeleeDamage(Unit target, Unit attacker, ref uint damage)
+        public void ModifyMeleeDamage(Unit target, Unit attacker, ref int damage)
         {
-            uint dmg = damage;
+            var dmg = damage;
             ForEach<UnitScript>(p => p.ModifyMeleeDamage(target, attacker, ref dmg));
             damage = dmg;
         }
         public void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo)
         {
-            int dmg = damage;
+            var dmg = damage;
             ForEach<UnitScript>(p => p.ModifySpellDamageTaken(target, attacker, ref dmg, spellInfo));
             damage = dmg;
         }

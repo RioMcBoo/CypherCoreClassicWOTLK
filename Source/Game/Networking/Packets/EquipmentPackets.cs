@@ -14,14 +14,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(GUID);
+            _worldPacket.WriteInt64(GUID);
             _worldPacket.WriteInt32(Type);
-            _worldPacket.WriteUInt32(SetID);
+            _worldPacket.WriteInt32(SetID);
         }
 
-        public ulong GUID; // Set Identifier
+        public long GUID; // Set Identifier
         public int Type;
-        public uint SetID; // Index
+        public int SetID; // Index
     }
 
     public class LoadEquipmentSet : ServerPacket

@@ -11,7 +11,7 @@ namespace Game.DataStorage
         public uint Id;
         private long _raceMask;
         public string EmoteSlashCommand;
-        public int AnimId;
+        private int _animId;
         public uint EmoteFlags;
         public byte EmoteSpecProc;
         public uint EmoteSpecProcParam;
@@ -21,6 +21,7 @@ namespace Game.DataStorage
 
         #region Properties
         public RaceMask RaceMask => (RaceMask)_raceMask;
+        public Anim AnimId => (Anim)_animId;
         #endregion
     }
 
@@ -28,7 +29,11 @@ namespace Game.DataStorage
     {
         public int Id;
         public string Name;
-        public ushort EmoteId;
+        private ushort _emoteId;
+
+        #region Properties
+        public Emote EmoteId => (Emote)_emoteId;
+        #endregion
     }
 
     public sealed class EmotesTextSoundRecord

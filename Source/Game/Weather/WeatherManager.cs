@@ -30,7 +30,7 @@ namespace Game
 
             do
             {
-                uint zone_id = result.Read<uint>(0);
+                var zone_id = result.Read<int>(0);
 
                 WeatherData wzc = new();
 
@@ -68,17 +68,17 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} weather definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public WeatherData GetWeatherData(uint zone_id)
+        public WeatherData GetWeatherData(int zone_id)
         {
             return _weatherData.LookupByKey(zone_id);
         }
 
-        Dictionary<uint, WeatherData> _weatherData = new();
+        Dictionary<int, WeatherData> _weatherData = new();
     }
 
     public class Weather
     {
-        public Weather(uint zoneId, WeatherData weatherChances)
+        public Weather(int zoneId, WeatherData weatherChances)
         {
             m_zone = zoneId;
             m_weatherChances = weatherChances;

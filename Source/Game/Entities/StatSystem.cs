@@ -480,13 +480,13 @@ namespace Game.Entities
         }
 
         //Health  
-        public uint GetCreateHealth() { return m_unitData.BaseHealth; }
+        public int GetCreateHealth() { return m_unitData.BaseHealth; }
 
         public void SetCreateHealth(int val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseHealth), val); }
 
         public long GetHealth() { return m_unitData.Health; }
 
-        public void SetHealth(ulong val)
+        public void SetHealth(long val)
         {
             if (GetDeathState() == DeathState.JustDied || GetDeathState() == DeathState.Corpse)
                 val = 0;
@@ -494,12 +494,12 @@ namespace Game.Entities
                 val = 1;
             else
             {
-                ulong maxHealth = GetMaxHealth();
+                var maxHealth = GetMaxHealth();
                 if (maxHealth < val)
                     val = maxHealth;
             }
 
-            ulong oldVal = GetHealth();
+            var oldVal = GetHealth();
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Health), (int)val);
 
             TriggerOnHealthChangeAuras(oldVal, val);
@@ -519,15 +519,15 @@ namespace Game.Entities
             }
         }
 
-        public ulong GetMaxHealth() { return m_unitData.MaxHealth; }
+        public long GetMaxHealth() { return m_unitData.MaxHealth; }
 
-        public void SetMaxHealth(ulong val)
+        public void SetMaxHealth(long val)
         {
             if (val == 0)
                 val = 1;
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxHealth), (long)val);
-            ulong health = GetHealth();
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxHealth), val);
+            var health = GetHealth();
 
             // group update
             if (IsTypeId(TypeId.Player))
@@ -554,15 +554,15 @@ namespace Game.Entities
 
         public bool HealthBelowPct(int pct) { return GetHealth() < CountPctFromMaxHealth(pct); }
 
-        public bool HealthBelowPctDamaged(int pct, uint damage) { return GetHealth() - damage < CountPctFromMaxHealth(pct); }
+        public bool HealthBelowPctDamaged(int pct, int damage) { return GetHealth() - damage < CountPctFromMaxHealth(pct); }
 
         public bool HealthAbovePct(int pct) { return GetHealth() > CountPctFromMaxHealth(pct); }
 
-        public bool HealthAbovePctHealed(int pct, uint heal) { return GetHealth() + heal > CountPctFromMaxHealth(pct); }
+        public bool HealthAbovePctHealed(int pct, int heal) { return GetHealth() + heal > CountPctFromMaxHealth(pct); }
 
-        public ulong CountPctFromMaxHealth(int pct) { return MathFunctions.CalculatePct(GetMaxHealth(), pct); }
+        public long CountPctFromMaxHealth(int pct) { return (long)MathFunctions.CalculatePct(GetMaxHealth(), pct); }
 
-        public ulong CountPctFromCurHealth(int pct) { return MathFunctions.CalculatePct(GetHealth(), pct); }
+        public long CountPctFromCurHealth(int pct) { return (long)MathFunctions.CalculatePct(GetHealth(), pct); }
 
         public virtual float GetHealthMultiplierForTarget(WorldObject target) { return 1.0f; }
 
@@ -1054,11 +1054,11 @@ namespace Game.Entities
             return Math.Max(chance, 0.0f);
         }
 
-        public abstract uint GetShieldBlockValue();        
+        public abstract int GetShieldBlockValue();        
 
-        public uint GetShieldBlockValue(uint soft_cap, uint hard_cap)
+        public int GetShieldBlockValue(int soft_cap, int hard_cap)
         {
-            uint value = GetShieldBlockValue();
+            var value = GetShieldBlockValue();
             if (value >= hard_cap)
             {
                 value = (soft_cap + hard_cap) / 2;
@@ -1076,7 +1076,7 @@ namespace Game.Entities
             if (GetTypeId() == TypeId.Player)
             {
                 // in PvP use full skill instead current skill value
-                ushort value = (target && target.GetTypeId() == TypeId.Player)
+                ushort value = (target != null && target.GetTypeId() == TypeId.Player)
                         ? ToPlayer().GetMaxSkillValue(SkillType.Defense)
                         : ToPlayer().GetSkillValue(SkillType.Defense);
                 value += (ushort)ToPlayer().GetRatingBonusValue(CombatRating.DefenseSkill);

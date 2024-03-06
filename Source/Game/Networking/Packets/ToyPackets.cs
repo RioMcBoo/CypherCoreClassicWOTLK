@@ -59,7 +59,7 @@ namespace Game.Networking.Packets
         }
 
         public bool IsFullUpdate = false;
-        public Dictionary<uint, ToyFlags> Toys = new();
+        public Dictionary<int, ToyFlags> Toys = new();
     }
 
     class ToyClearFanfare : ClientPacket

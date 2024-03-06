@@ -763,7 +763,7 @@ namespace Game.Entities
             {
                 Conversation self = ToConversation();
                 if (data.WriteBit(self.GetTextureKitId() != 0))
-                    data.WriteUInt32(self.GetTextureKitId());
+                    data.WriteInt32(self.GetTextureKitId());
                 data.FlushBits();
             }
         }
@@ -1552,7 +1552,7 @@ namespace Game.Entities
             return SummonCreature(entry, new Position(x, y, z, o), despawnType, despawnTime, 0, 0, privateObjectOwner);
         }
 
-        public TempSummon SummonCreature(int entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, uint vehId = 0, int spellId = 0, ObjectGuid privateObjectOwner = default)
+        public TempSummon SummonCreature(int entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, int vehId = 0, int spellId = 0, ObjectGuid privateObjectOwner = default)
         {
             Map map = GetMap();
             if (map != null)
@@ -1568,7 +1568,7 @@ namespace Game.Entities
             return null;
         }
 
-        public TempSummon SummonPersonalClone(Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, uint vehId = 0, int spellId = 0, Player privateObjectOwner = null)
+        public TempSummon SummonPersonalClone(Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, int vehId = 0, int spellId = 0, Player privateObjectOwner = null)
         {
             Map map = GetMap();
             if (map != null)
@@ -1819,13 +1819,13 @@ namespace Game.Entities
 
             return null;
         }
-        public int CalculateSpellDamage(Unit target, SpellEffectInfo spellEffectInfo, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
+        public int CalculateSpellDamage(Unit target, SpellEffectInfo spellEffectInfo, int? basePoints = null, int castItemId = 0, int itemLevel = -1)
         {
             return CalculateSpellDamage(out _, target, spellEffectInfo, basePoints, castItemId, itemLevel);
         }
 
         // function uses real base points (typically value - 1)
-        public int CalculateSpellDamage(out float variance, Unit target, SpellEffectInfo spellEffectInfo, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
+        public int CalculateSpellDamage(out float variance, Unit target, SpellEffectInfo spellEffectInfo, int? basePoints = null, int castItemId = 0, int itemLevel = -1)
         {
             variance = 0.0f;
 
@@ -2847,12 +2847,12 @@ namespace Game.Entities
             return victim;
         }
 
-        public virtual uint GetCastSpellXSpellVisualId(SpellInfo spellInfo)
+        public virtual int GetCastSpellXSpellVisualId(SpellInfo spellInfo)
         {
             return spellInfo.GetSpellXSpellVisualId(this);
         }
         
-        public List<GameObject> GetGameObjectListWithEntryInGrid(uint entry = 0, float maxSearchRange = 250.0f)
+        public List<GameObject> GetGameObjectListWithEntryInGrid(int entry = 0, float maxSearchRange = 250.0f)
         {
             List<GameObject> gameobjectList = new();
             var check = new AllGameObjectsWithEntryInRange(this, entry, maxSearchRange);
@@ -2873,7 +2873,7 @@ namespace Game.Entities
             Cell.VisitGridObjects(this, searcher, maxSearchRange);
         }
 
-        public List<Creature> GetCreatureListWithEntryInGrid(uint entry = 0, float maxSearchRange = 250.0f)
+        public List<Creature> GetCreatureListWithEntryInGrid(int entry = 0, float maxSearchRange = 250.0f)
         {
             List<Creature> creatureList = new();
             var check = new AllCreaturesOfEntryInRange(this, entry, maxSearchRange);
@@ -3133,7 +3133,7 @@ namespace Game.Entities
         public virtual bool IsInvisibleDueToDespawn(WorldObject seer) { return false; }
         public virtual bool IsAlwaysDetectableFor(WorldObject seer) { return false; }
 
-        public virtual bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate) { return true; }
+        public virtual bool LoadFromDB(long spawnId, Map map, bool addToMap, bool allowDuplicate) { return true; }
 
         public virtual ObjectGuid GetOwnerGUID() { return default; }
         public virtual ObjectGuid GetCharmerOrOwnerGUID() { return GetOwnerGUID(); }

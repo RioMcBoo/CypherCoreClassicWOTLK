@@ -49,7 +49,7 @@ namespace Game
             _warnShutdownTime = GameTime.GetGameTime();
         }
 
-        public Player FindPlayerInZone(uint zone)
+        public Player FindPlayerInZone(int zone)
         {
             foreach (var session in m_sessions)
             {
@@ -261,7 +261,7 @@ namespace Game
             }
         }
 
-        void ProcessLinkInstanceSocket(Tuple<WorldSocket, ulong> linkInfo)
+        void ProcessLinkInstanceSocket(Tuple<WorldSocket, long> linkInfo)
         {
             if (!linkInfo.Item1.IsOpen())
                 return;

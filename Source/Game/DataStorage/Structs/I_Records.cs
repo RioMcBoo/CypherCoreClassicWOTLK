@@ -236,7 +236,7 @@ namespace Game.DataStorage
         public byte ArenaBracket;
         public byte Flags;
         public byte MinFactionID;
-        public int MinReputation;
+        private int _minReputation;
         /// <summary>
         /// required personal arena rating
         /// </summary>
@@ -257,6 +257,10 @@ namespace Game.DataStorage
         /// required curency count
         /// </summary>
         public int[] CurrencyCount = new int[ItemConst.MaxItemExtCostCurrencies];
+
+        #region Properties
+        public ReputationRank MinReputation => (ReputationRank)_minReputation;
+        #endregion
     }
 
     public sealed class ItemLevelSelectorRecord
@@ -432,7 +436,7 @@ namespace Game.DataStorage
         public int[] StatPercentEditor = new int[ItemConst.MaxStats];
         public int Stackable;
         public int MaxCount;
-        public int MinReputation;
+        private int _minReputation;
         public int RequiredAbility;
         public uint SellPrice;
         public uint BuyPrice;
@@ -498,6 +502,7 @@ namespace Game.DataStorage
         public InventoryType InventoryType => (InventoryType)_inventoryType;
         public ItemQuality OverallQualityID => (ItemQuality)_overallQualityID;
         public Expansion ExpansionID => (Expansion)_expansionID;
+        public ReputationRank MinReputation => (ReputationRank)_minReputation;
         #endregion
     }
 

@@ -97,15 +97,25 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(FavoriteSpells.Count);
 
             foreach (var spellId in KnownSpells)
-                _worldPacket.WriteUInt32(spellId);
+                _worldPacket.WriteInt32(spellId);
 
             foreach (var spellId in FavoriteSpells)
-                _worldPacket.WriteUInt32(spellId);
+                _worldPacket.WriteInt32(spellId);
         }
 
         public bool InitialLogin;
-        public List<uint> KnownSpells = new();
-        public List<uint> FavoriteSpells = new(); // tradeskill recipes
+        public List<int> KnownSpells = new();
+        public List<int> FavoriteSpells = new(); // tradeskill recipes
+    }
+
+    public enum ActionsButtonsUpdateReason : byte
+    {
+        /// <summary>Sends initial action buttons, client does not validate if we have the spell or not</summary>            
+        Initialization = 0,
+        /// <summary>Used used after spec swaps, client validates if a spell is known</summary> 
+        AfterSpecSwap = 1,
+        /// <summary>Clears the action bars client sided. This is sent during spec swap before unlearning and before sending the new buttons</summary> 
+        SpecSwap = 2,
     }
 
     public class UpdateActionButtons : ServerPacket
@@ -115,23 +125,13 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             for (var i = 0; i < PlayerConst.MaxActionButtons; ++i)
-                _worldPacket.WriteUInt64(ActionButtons[i]);
+                _worldPacket.WriteInt64(ActionButtons[i]);
 
             _worldPacket.WriteUInt8((byte)Reason);
         }
 
-        public ulong[] ActionButtons = new ulong[PlayerConst.MaxActionButtons];
-        public ActionsButtonsUpdateReason Reason;
-
-        public enum ActionsButtonsUpdateReason : byte
-        {
-            /// <summary>Sends initial action buttons, client does not validate if we have the spell or not</summary>            
-            Initialization = 0,
-            /// <summary>Used used after spec swaps, client validates if a spell is known</summary> 
-            AfterSpecSwap = 1,
-            /// <summary>Clears the action bars client sided. This is sent during spec swap before unlearning and before sending the new buttons</summary> 
-            SpecSwap = 2,
-        }
+        public long[] ActionButtons = new long[PlayerConst.MaxActionButtons];
+        public ActionsButtonsUpdateReason Reason;        
     }
 
     public class SetActionButton : ClientPacket
@@ -558,13 +558,13 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(Category);
+            _worldPacket.WriteInt32((int)Category);
             _worldPacket.WriteBit(IsPet);
             _worldPacket.FlushBits();
         }
 
         public bool IsPet;
-        public int Category;
+        public SpellCategories Category;
     }
 
     public class SetSpellCharges : ServerPacket
@@ -573,7 +573,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(Category);
+            _worldPacket.WriteInt32((int)Category);
             _worldPacket.WriteUInt32(NextRecoveryTime);
             _worldPacket.WriteUInt8(ConsumedCharges);
             _worldPacket.WriteFloat(ChargeModRate);
@@ -582,7 +582,7 @@ namespace Game.Networking.Packets
         }
 
         public bool IsPet;
-        public int Category;
+        public SpellCategories Category;
         public uint NextRecoveryTime;
         public byte ConsumedCharges;
         public float ChargeModRate = 1.0f;
@@ -1414,10 +1414,10 @@ namespace Game.Networking.Packets
 
     public struct SpellCastVisual
     {
-        public SpellCastVisual(uint spellXSpellVisualID, uint scriptVisualID)
+        public SpellCastVisual(int spellXSpellVisualID, int scriptVisualID)
         {
-            SpellXSpellVisualID = (int)spellXSpellVisualID;
-            ScriptVisualID = (int)scriptVisualID;
+            SpellXSpellVisualID = spellXSpellVisualID;
+            ScriptVisualID = scriptVisualID;
         }
 
         public void Read(WorldPacket data)
@@ -1937,7 +1937,7 @@ namespace Game.Networking.Packets
 
     public class SpellCooldownStruct
     {
-        public SpellCooldownStruct(uint spellId, uint forcedCooldown)
+        public SpellCooldownStruct(int spellId, uint forcedCooldown)
         {
             SrecID = spellId;
             ForcedCooldown = forcedCooldown;
@@ -1945,12 +1945,12 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(SrecID);
+            data.WriteInt32(SrecID);
             data.WriteUInt32(ForcedCooldown);
             data.WriteFloat(ModRate);
         }
 
-        public uint SrecID;
+        public int SrecID;
         public uint ForcedCooldown;
         public float ModRate = 1.0f;
     }
@@ -1959,9 +1959,9 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(SpellID);
-            data.WriteUInt32(ItemID);
-            data.WriteUInt32(Category);
+            data.WriteInt32(SpellID);
+            data.WriteInt32(ItemID);
+            data.WriteInt32((int)Category);
             data.WriteInt32(RecoveryTime);
             data.WriteInt32(CategoryRecoveryTime);
             data.WriteFloat(ModRate);
@@ -1976,9 +1976,9 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(unused622_2.Value);
         }
 
-        public uint SpellID;
-        public uint ItemID;
-        public uint Category;
+        public int SpellID;
+        public int ItemID;
+        public SpellCategories Category;
         public int RecoveryTime;
         public int CategoryRecoveryTime;
         public float ModRate = 1.0f;
@@ -1991,13 +1991,13 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Category);
+            data.WriteInt32((int)Category);
             data.WriteUInt32(NextRecoveryTime);
             data.WriteFloat(ChargeModRate);
             data.WriteUInt8(ConsumedCharges);
         }
 
-        public uint Category;
+        public SpellCategories Category;
         public uint NextRecoveryTime;
         public float ChargeModRate = 1.0f;
         public byte ConsumedCharges;

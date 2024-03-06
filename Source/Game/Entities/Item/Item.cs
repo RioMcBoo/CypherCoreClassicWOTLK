@@ -154,7 +154,7 @@ namespace Game.Entities
                     for (EnchantmentSlot slot = 0; slot < EnchantmentSlot.Max; ++slot)
                     {
                         var enchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(slot));
-                        if (enchantment != null && !enchantment.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotSaveToDB))
+                        if (enchantment != null && !enchantment.HasFlag(SpellItemEnchantmentFlags.DoNotSaveToDB))
                             ss.Append($"{GetEnchantmentId(slot)} {GetEnchantmentDuration(slot)} {GetEnchantmentCharges(slot)} ");
                         else
                             ss.Append("0 0 0 ");
@@ -163,8 +163,8 @@ namespace Game.Entities
                     stmt.AddValue(++index, ss.ToString());
                     stmt.AddValue(++index, (byte)GetItemRandomEnchantmentId().Type);
                     stmt.AddValue(++index, GetItemRandomEnchantmentId().Id);
-                    stmt.AddValue(++index, (uint)m_itemData.Durability);
-                    stmt.AddValue(++index, (uint)m_itemData.CreatePlayedTime);
+                    stmt.AddValue(++index, m_itemData.Durability);
+                    stmt.AddValue(++index, m_itemData.CreatePlayedTime);
                     stmt.AddValue(++index, m_text);
                     stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetSpeciesId));
                     stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetBreedData));
@@ -687,7 +687,7 @@ namespace Game.Entities
                 Global.LootItemStorage.RemoveStoredLootForContainer(GetGUID().GetCounter());
         }
 
-        public static void DeleteFromInventoryDB(SQLTransaction trans, ulong itemGuid)
+        public static void DeleteFromInventoryDB(SQLTransaction trans, long itemGuid)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY_BY_ITEM);
             stmt.AddValue(0, itemGuid);

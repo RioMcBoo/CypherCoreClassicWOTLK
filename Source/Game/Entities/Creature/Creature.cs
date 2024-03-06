@@ -30,7 +30,7 @@ namespace Game.Entities
             reactState = ReactStates.Aggressive;
             DefaultMovementType = MovementGeneratorType.Idle;
             _regenerateHealth = true;
-            m_meleeDamageSchool = SpellSchoolMask.Normal;
+            m_meleeDamageSchool = SpellSchools.Normal;
             triggerJustAppeared = true;
 
             RegenTimer = SharedConst.CreatureRegenInterval;
@@ -289,7 +289,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool UpdateEntry(uint entry, CreatureData data = null, bool updateLevel = true)
+        public bool UpdateEntry(int entry, CreatureData data = null, bool updateLevel = true)
         {
             if (!InitEntry(entry, data))
                 return false;
@@ -304,7 +304,7 @@ namespace Game.Entities
 
             SetFaction(cInfo.Faction);
 
-            ObjectManager.ChooseCreatureFlags(cInfo, out ulong npcFlags, out uint unitFlags, out uint unitFlags2, out uint unitFlags3, data);
+            ObjectManager.ChooseCreatureFlags(cInfo, out NPCFlags npcFlags, out UnitFlags unitFlags, out UnitFlags2 unitFlags2, out UnitFlags3 unitFlags3, data);
 
             if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
                 npcFlags |= Global.GameEventMgr.GetNPCFlag(this);
@@ -662,8 +662,8 @@ namespace Game.Entities
             if (!CanRegenerateHealth())
                 return;
 
-            ulong curValue = GetHealth();
-            ulong maxValue = GetMaxHealth();
+            var curValue = GetHealth();
+            var maxValue = GetMaxHealth();
 
             if (curValue >= maxValue)
                 return;
@@ -774,7 +774,7 @@ namespace Game.Entities
             return creature;
         }
 
-        public static Creature CreateCreatureFromDB(ulong spawnId, Map map, bool addToMap = true, bool allowDuplicate = false)
+        public static Creature CreateCreatureFromDB(long spawnId, Map map, bool addToMap = true, bool allowDuplicate = false)
         {
             Creature creature = new();
             if (creature.LoadFromDB(spawnId, map, addToMap, allowDuplicate))
@@ -783,7 +783,7 @@ namespace Game.Entities
             return creature;
         }
 
-        public bool Create(long guidlow, Map map, int entry, Position pos, CreatureData data = null, uint vehId = 0, bool dynamic = false)
+        public bool Create(long guidlow, Map map, int entry, Position pos, CreatureData data = null, int vehId = 0, bool dynamic = false)
         {
             SetMap(map);
 
@@ -1135,7 +1135,7 @@ namespace Game.Entities
             if (!IsAreaSpiritHealer())
                 return;
 
-            uint npcEntry = GetFaction() == (uint)FactionTemplates.AllianceGeneric ? 26350 : 26351u;
+            var npcEntry = GetFaction() == (int)FactionTemplates.AllianceGeneric ? 26350 : 26351;
 
             // maybe NPC is summoned with these spells:
             // ID - 24237 Summon Alliance Graveyard Teleporter (SERVERSIDE)
@@ -1152,17 +1152,17 @@ namespace Game.Entities
         public bool HasFlag(CreatureStaticFlags7 flag)  { return _staticFlags.HasFlag(flag); }
         public bool HasFlag(CreatureStaticFlags8 flag)  { return _staticFlags.HasFlag(flag); }
 
-        public uint GetGossipMenuId()
+        public int GetGossipMenuId()
         {
             return _gossipMenuId;
         }
 
-        public void SetGossipMenuId(uint gossipMenuId)
+        public void SetGossipMenuId(int gossipMenuId)
         {
             _gossipMenuId = gossipMenuId;
         }
         
-        public uint GetTrainerId()
+        public int GetTrainerId()
         {
             if (_trainerId.HasValue)
                 return _trainerId.Value;
@@ -1170,7 +1170,7 @@ namespace Game.Entities
             return Global.ObjectMgr.GetCreatureDefaultTrainer(GetEntry());
         }
 
-        public void SetTrainerId(uint? trainerId)
+        public void SetTrainerId(int? trainerId)
         {
             _trainerId = trainerId;
         }
@@ -1192,7 +1192,7 @@ namespace Game.Entities
 
         public bool CanGeneratePickPocketLoot() { return _pickpocketLootRestore <= GameTime.GetGameTime(); }
 
-        public uint GetLootId()
+        public int GetLootId()
         {
             if (_lootId.HasValue)
                 return _lootId.Value;
@@ -1200,7 +1200,7 @@ namespace Game.Entities
             return GetCreatureDifficulty().LootID;
         }
 
-        public void SetLootId(uint? lootId)
+        public void SetLootId(int? lootId)
         {
             _lootId = lootId;
         }
@@ -1545,7 +1545,7 @@ namespace Game.Entities
             }
         }
 
-        public void LowerPlayerDamageReq(ulong unDamage)
+        public void LowerPlayerDamageReq(long unDamage)
         {
             if (m_PlayerDamageReq != 0)
             {
@@ -1601,7 +1601,7 @@ namespace Game.Entities
             _sparringHealthPct = healthPct.SelectRandom();
         }
 
-        public uint CalculateDamageForSparring(Unit attacker, uint damage)
+        public int CalculateDamageForSparring(Unit attacker, int damage)
         {
             if (GetSparringHealthPct() == 0)
                 return damage;
@@ -1615,12 +1615,12 @@ namespace Game.Entities
             if (GetHealthPct() <= GetSparringHealthPct())
                 return 0;
 
-            uint sparringHealth = (uint)(GetMaxHealth() * GetSparringHealthPct() / 100);
+            var sparringHealth = (int)(GetMaxHealth() * GetSparringHealthPct() / 100);
             if (GetHealth() - damage <= sparringHealth)
-                return (uint)(GetHealth() - sparringHealth);
+                return (int)(GetHealth() - sparringHealth);
 
             if (damage >= GetHealth())
-                return (uint)(GetHealth() - 1);
+                return (int)(GetHealth() - 1);
 
             return damage;
         }
@@ -1645,7 +1645,7 @@ namespace Game.Entities
             return true;
         }
         
-        bool CreateFromProto(ulong guidlow, uint entry, CreatureData data = null, uint vehId = 0)
+        bool CreateFromProto(long guidlow, int entry, CreatureData data = null, int vehId = 0)
         {
             SetZoneScript();
             if (m_zoneScript != null && data != null)
@@ -1723,7 +1723,7 @@ namespace Game.Entities
             if (_staticFlags.HasFlag(CreatureStaticFlags5.NoHealthRegen))
                 return;
 
-            ulong curhealth;
+            long curhealth;
             if (m_creatureData != null && !_regenerateHealth)
             {
                 curhealth = m_creatureData.curhealth;
@@ -2781,7 +2781,7 @@ namespace Game.Entities
             return Global.ObjectMgr.GetNpcVendorItemList(GetEntry());
         }
 
-        public uint GetVendorItemCurrentCount(VendorItem vItem)
+        public int GetVendorItemCurrentCount(VendorItem vItem)
         {
             if (vItem.maxcount == 0)
                 return vItem.maxcount;
@@ -2803,7 +2803,7 @@ namespace Game.Entities
             {
                 ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(vItem.item);
 
-                uint diff = (uint)((ptime - vCount.lastIncrementTime) / vItem.incrtime);
+                int diff = (int)((ptime - vCount.lastIncrementTime) / vItem.incrtime);
                 if ((vCount.count + diff * pProto.GetBuyCount()) >= vItem.maxcount)
                 {
                     m_vendorItemCounts.Remove(vCount);
@@ -2817,7 +2817,7 @@ namespace Game.Entities
             return vCount.count;
         }
 
-        public uint UpdateVendorItemCurrentCount(VendorItem vItem, uint used_count)
+        public int UpdateVendorItemCurrentCount(VendorItem vItem, int used_count)
         {
             if (vItem.maxcount == 0)
                 return 0;
@@ -2832,7 +2832,7 @@ namespace Game.Entities
 
             if (vCount == null)
             {
-                uint new_count = vItem.maxcount > used_count ? vItem.maxcount - used_count : 0;
+                var new_count = vItem.maxcount > used_count ? vItem.maxcount - used_count : 0;
                 m_vendorItemCounts.Add(new VendorItemCount(vItem.item, new_count));
                 return new_count;
             }
@@ -2843,7 +2843,7 @@ namespace Game.Entities
             {
                 ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(vItem.item);
 
-                uint diff = (uint)((ptime - vCount.lastIncrementTime) / vItem.incrtime);
+                int diff = (int)((ptime - vCount.lastIncrementTime) / vItem.incrtime);
                 if ((vCount.count + diff * pProto.GetBuyCount()) < vItem.maxcount)
                     vCount.count += diff * pProto.GetBuyCount();
                 else
@@ -3142,7 +3142,7 @@ namespace Game.Entities
             _spellFocusInfo.Spell = null;
         }
 
-        public ulong GetSpawnId() { return m_spawnId; }
+        public long GetSpawnId() { return m_spawnId; }
 
         public void SetCorpseDelay(uint delay, bool ignoreCorpseDecayRatio = false)
         {
@@ -3207,9 +3207,9 @@ namespace Game.Entities
         public override SpellSchools GetMeleeDamageSchool(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return m_meleeDamageSchool; }
         public void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchool = school; }
         /// <summary>don't know the value of the mob block</summary>
-        public override uint GetShieldBlockValue()
+        public override int GetShieldBlockValue()
         {
-            return GetLevel() / 2 + (uint)(GetStat(Stats.Strength) / 20);
+            return GetLevel() / 2 + (int)(GetStat(Stats.Strength) / 20);
         }
 
         public bool CanMelee() { return !_staticFlags.HasFlag(CreatureStaticFlags.NoMelee); }
@@ -3226,7 +3226,7 @@ namespace Game.Entities
         public CreatureData GetCreatureData() { return m_creatureData; }
         public CreatureDifficulty GetCreatureDifficulty() { return m_creatureDifficulty; }
         
-        public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
+        public override bool LoadFromDB(long spawnId, Map map, bool addToMap, bool allowDuplicate)
         {
             if (!allowDuplicate)
             {
@@ -3390,11 +3390,11 @@ namespace Game.Entities
         public void GetTransportHomePosition(out float x, out float y, out float z, out float ori) { m_transportHomePosition.GetPosition(out x, out y, out z, out ori); }
         public Position GetTransportHomePosition() { return m_transportHomePosition; }
 
-        public uint GetWaypointPath() { return _waypointPathId; }
-        public void LoadPath(uint pathid) { _waypointPathId = pathid; }
+        public int GetWaypointPath() { return _waypointPathId; }
+        public void LoadPath(int pathid) { _waypointPathId = pathid; }
 
-        public (uint nodeId, uint pathId) GetCurrentWaypointInfo() { return _currentWaypointNodeInfo; }
-        public void UpdateCurrentWaypointInfo(uint nodeId, uint pathId) { _currentWaypointNodeInfo = (nodeId, pathId); }
+        public (int nodeId, int pathId) GetCurrentWaypointInfo() { return _currentWaypointNodeInfo; }
+        public void UpdateCurrentWaypointInfo(int nodeId, int pathId) { _currentWaypointNodeInfo = (nodeId, pathId); }
 
         public CreatureGroup GetFormation() { return m_formation; }
         public void SetFormation(CreatureGroup formation) { m_formation = formation; }
@@ -3408,11 +3408,12 @@ namespace Game.Entities
 
         public void ResetPlayerDamageReq() { m_PlayerDamageReq = (uint)(GetHealth() / 2); }
 
-        public uint GetOriginalEntry()
+        public int GetOriginalEntry()
         {
             return m_originalEntry;
         }
-        void SetOriginalEntry(uint entry)
+
+        void SetOriginalEntry(int entry)
         {
             m_originalEntry = entry;
         }
@@ -3424,14 +3425,14 @@ namespace Game.Entities
 
     public class VendorItemCount
     {
-        public VendorItemCount(uint _item, uint _count)
+        public VendorItemCount(int _item, int _count)
         {
             itemId = _item;
             count = _count;
             lastIncrementTime = GameTime.GetGameTime();
         }
-        public uint itemId;
-        public uint count;
+        public int itemId;
+        public int count;
         public long lastIncrementTime;
     }
 

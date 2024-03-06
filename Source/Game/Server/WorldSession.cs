@@ -25,7 +25,7 @@ namespace Game
 {
     public partial class WorldSession : IDisposable
     {
-        public WorldSession(uint id, string name, uint battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, Locale locale, uint recruiter, bool isARecruiter)
+        public WorldSession(int id, string name, int battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, Locale locale, int recruiter, bool isARecruiter)
         {
             m_muteTime = mute_time;
             AntiDOS = new DosProtection(this);
@@ -159,9 +159,9 @@ namespace Game
                 // some save parts only correctly work in case player present in map/player_lists (pets, etc)
                 if (save)
                 {
-                    for (uint j = InventorySlots.BuyBackStart; j < InventorySlots.BuyBackEnd; ++j)
+                    for (int j = InventorySlots.BuyBackStart; j < InventorySlots.BuyBackEnd; ++j)
                     {
-                        uint eslot = j - InventorySlots.BuyBackStart;
+                        int eslot = j - InventorySlots.BuyBackStart;
                         _player.SetInvSlot(j, ObjectGuid.Empty);
                         _player.SetBuybackPrice(eslot, 0);
                         _player.SetBuybackTimestamp(eslot, 0);
@@ -665,7 +665,7 @@ namespace Game
         public int GetAccountId() { return _accountId; }
         public ObjectGuid GetAccountGUID() { return ObjectGuid.Create(HighGuid.WowAccount, GetAccountId()); }
         public string GetAccountName() { return _accountName; }
-        public uint GetBattlenetAccountId() { return _battlenetAccountId; }
+        public int GetBattlenetAccountId() { return _battlenetAccountId; }
         public ObjectGuid GetBattlenetAccountGUID() { return ObjectGuid.Create(HighGuid.BNetAccount, GetBattlenetAccountId()); }
 
         public Player GetPlayer() { return _player; }
@@ -681,7 +681,7 @@ namespace Game
 
         public bool IsLogingOut() { return _logoutTime != 0 || m_playerLogout; }
 
-        public ulong GetConnectToInstanceKey() { return _instanceConnectKey.Raw; }
+        public long GetConnectToInstanceKey() { return _instanceConnectKey.Raw; }
 
         public AsyncCallbackProcessor<QueryCallback> GetQueryProcessor() { return _queryProcessor; }
 
@@ -736,25 +736,25 @@ namespace Game
 
         public void LoadPermissions()
         {
-            uint id = GetAccountId();
+            var id = GetAccountId();
             AccountTypes secLevel = GetSecurity();
 
             Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
                 id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
 
-            _RBACData = new RBACData(id, _accountName, (int)Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
+            _RBACData = new RBACData(id, _accountName, Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
             _RBACData.LoadFromDB();
         }
 
         public QueryCallback LoadPermissionsAsync()
         {
-            uint id = GetAccountId();
+            var id = GetAccountId();
             AccountTypes secLevel = GetSecurity();
 
             Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
                 id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
 
-            _RBACData = new RBACData(id, _accountName, (int)Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
+            _RBACData = new RBACData(id, _accountName, Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
             return _RBACData.LoadFromDBAsync();
         }
 
@@ -813,7 +813,7 @@ namespace Game
             {
                 do
                 {
-                    _realmCharacterCounts[new RealmId(result.Read<byte>(3), result.Read<byte>(4), result.Read<uint>(2)).GetAddress()] = result.Read<byte>(1);
+                    _realmCharacterCounts[new RealmId(result.Read<byte>(3), result.Read<byte>(4), result.Read<int>(2)).GetAddress()] = result.Read<byte>(1);
 
                 } while (result.NextRow());
             }
@@ -910,7 +910,7 @@ namespace Game
             return m_timeOutTime < GameTime.GetGameTime() && !m_inQueue;
         }
 
-        public uint GetRecruiterId() { return recruiterId; }
+        public int GetRecruiterId() { return recruiterId; }
         public bool IsARecruiter() { return isRecruiter; }
 
         // Packets cooldown
@@ -928,7 +928,7 @@ namespace Game
 
         #region Fields
         List<ObjectGuid> _legitCharacters = new();
-        ulong m_GUIDLow;
+        long m_GUIDLow;
         Player _player;
         WorldSocket[] m_Socket = new WorldSocket[(int)ConnectionType.Max];
         string m_Address;
@@ -936,7 +936,7 @@ namespace Game
         AccountTypes _security;
         int _accountId;
         string _accountName;
-        uint _battlenetAccountId;
+        int _battlenetAccountId;
         Expansion m_accountExpansion;
         Expansion m_expansion;
         string _os;
@@ -967,7 +967,7 @@ namespace Game
 
         List<string> _registeredAddonPrefixes = new();
         bool _filterAddonMessages;
-        uint recruiterId;
+        int recruiterId;
         bool isRecruiter;
 
         public long m_muteTime;
@@ -1103,7 +1103,7 @@ namespace Game
 
     class AccountInfoQueryHolderPerRealm : SQLQueryHolder<AccountInfoQueryLoad>
     {
-        public void Initialize(uint accountId, uint battlenetAccountId)
+        public void Initialize(int accountId, int battlenetAccountId)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ACCOUNT_DATA);
             stmt.AddValue(0, accountId);
@@ -1117,7 +1117,7 @@ namespace Game
 
     class AccountInfoQueryHolder : SQLQueryHolder<AccountInfoQueryLoad>
     {
-        public void Initialize(uint accountId, uint battlenetAccountId)
+        public void Initialize(int accountId, int battlenetAccountId)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOYS);
             stmt.AddValue(0, battlenetAccountId);

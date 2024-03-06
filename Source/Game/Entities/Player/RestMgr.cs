@@ -6,7 +6,7 @@ namespace Game.Entities
     {
         Player _player;
         long _restTime;
-        uint _innAreaTriggerId;
+        int _innAreaTriggerId;
         float[] _restBonus = new float[(int)RestTypes.Max];
         RestFlag _restFlagMask;
 
@@ -64,7 +64,7 @@ namespace Game.Entities
                 return;
 
             // update data for client
-            _player.SetRestThreshold(restType, (uint)_restBonus[(int)restType]);
+            _player.SetRestThreshold(restType, (int)_restBonus[(int)restType]);
             _player.SetRestState(restType, newRestState);
         }
 
@@ -78,7 +78,7 @@ namespace Game.Entities
             SetRestBonus(restType, totalRestBonus);
         }
 
-        public void SetRestFlag(RestFlag restFlag, uint triggerId = 0)
+        public void SetRestFlag(RestFlag restFlag, int triggerId = 0)
         {
             RestFlag oldRestMask = _restFlagMask;
             _restFlagMask |= restFlag;
@@ -160,6 +160,6 @@ namespace Game.Entities
 
         public float GetRestBonus(RestTypes restType) { return _restBonus[(int)restType]; }
         public bool HasRestFlag(RestFlag restFlag) { return (_restFlagMask & restFlag) != 0; }
-        public uint GetInnTriggerId() { return _innAreaTriggerId; }
+        public int GetInnTriggerId() { return _innAreaTriggerId; }
     }
 }

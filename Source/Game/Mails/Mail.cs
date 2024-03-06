@@ -42,11 +42,11 @@ namespace Game.Mails
         public string subject;
         public string body;
         public List<MailItemInfo> items = new();
-        public List<ulong> removedItems = new();
+        public List<long> removedItems = new();
         public long expire_time;
         public long deliver_time;
-        public ulong money;
-        public ulong COD;
+        public long money;
+        public long COD;
         public MailCheckFlags checkMask;
         public MailState state;
     }
@@ -156,7 +156,7 @@ namespace Game.Mails
             m_senderId = sender.GetGUID().GetCounter();
         }
 
-        public MailSender(uint senderEntry)
+        public MailSender(int senderEntry)
         {
             m_messageType = MailMessageType.Creature;
             m_senderId = senderEntry;

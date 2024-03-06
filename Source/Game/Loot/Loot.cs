@@ -593,8 +593,8 @@ namespace Game.Loots
                 return null;
 
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(m_lootItem.itemid);
-            uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, 1, 0, 0, 0, 0, false);
-            return Item.GetDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
+            var itemLevel = Item.GetItemLevel(itemTemplate, bonusData, 1, 0, 0, 0, 0, false);
+            return Item.GetDisenchantLoot(itemTemplate, bonusData.Quality, itemLevel);
         }
 
         // terminate the roll
@@ -665,15 +665,15 @@ namespace Game.Loots
             if (proto == null)
                 return;
 
-            uint count = RandomHelper.URand(item.mincount, item.maxcount);
-            uint stacks = (uint)(count / proto.GetMaxStackSize() + (Convert.ToBoolean(count % proto.GetMaxStackSize()) ? 1 : 0));
+            var count = RandomHelper.IRand(item.mincount, item.maxcount);
+            var stacks = count / proto.GetMaxStackSize() + (Convert.ToBoolean(count % proto.GetMaxStackSize()) ? 1 : 0);
 
-            for (uint i = 0; i < stacks && items.Count < SharedConst.MaxNRLootItems; ++i)
+            for (int i = 0; i < stacks && items.Count < SharedConst.MaxNRLootItems; ++i)
             {
                 LootItem generatedLoot = new(item);
                 generatedLoot.context = _itemContext;
                 generatedLoot.count = (byte)Math.Min(count, proto.GetMaxStackSize());
-                generatedLoot.LootListId = (uint)items.Count;
+                generatedLoot.LootListId = items.Count;
                 generatedLoot.BonusListIDs = ItemBonusMgr.GetBonusListsForItem(generatedLoot.itemid, new(_itemContext));
 
                 items.Add(generatedLoot);
@@ -1114,7 +1114,7 @@ namespace Game.Loots
 
     public class AELootResult
     {
-        public void Add(Item item, byte count, LootType lootType, uint dungeonEncounterId)
+        public void Add(Item item, byte count, LootType lootType, int dungeonEncounterId)
         {
             var id = _byItem.LookupByKey(item);
             if (id != 0)
@@ -1147,7 +1147,7 @@ namespace Game.Loots
             public Item item;
             public byte count;
             public LootType lootType;
-            public uint dungeonEncounterId;
+            public int dungeonEncounterId;
         }
     }
 }

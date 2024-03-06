@@ -14,15 +14,15 @@ namespace Game.Entities
 {
     public class CollectionMgr
     {
-        static Dictionary<uint, uint> FactionSpecificMounts = new();
+        static Dictionary<int, int> FactionSpecificMounts = new();
 
         WorldSession _owner;
-        Dictionary<uint, ToyFlags> _toys = new();
-        Dictionary<uint, HeirloomData> _heirlooms = new();
-        Dictionary<uint, MountStatusFlags> _mounts = new();
+        Dictionary<int, ToyFlags> _toys = new();
+        Dictionary<int, HeirloomData> _heirlooms = new();
+        Dictionary<int, MountStatusFlags> _mounts = new();
         BitSet _appearances;
-        MultiMap<uint, ObjectGuid> _temporaryAppearances = new();
-        Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new();
+        MultiMap<int, ObjectGuid> _temporaryAppearances = new();
+        Dictionary<int, FavoriteAppearanceState> _favoriteAppearances = new();
 
         public static void LoadMountDefinitions()
         {
@@ -37,8 +37,8 @@ namespace Game.Entities
 
             do
             {
-                uint spellId = result.Read<uint>(0);
-                uint otherFactionSpellId = result.Read<uint>(1);
+                int spellId = result.Read<int>(0);
+                int otherFactionSpellId = result.Read<int>(1);
 
                 if (Global.DB2Mgr.GetMount(spellId) == null)
                 {
@@ -67,10 +67,10 @@ namespace Game.Entities
         public void LoadToys()
         {
             foreach (var pair in _toys)
-                _owner.GetPlayer().AddToy(pair.Key, (uint)pair.Value);
+                _owner.GetPlayer().AddToy(pair.Key, pair.Value);
         }
 
-        public bool AddToy(uint itemId, bool isFavourite, bool hasFanfare)
+        public bool AddToy(int itemId, bool isFavourite, bool hasFanfare)
         {
             if (UpdateAccountToys(itemId, isFavourite, hasFanfare))
             {
@@ -810,10 +810,10 @@ namespace Game.Entities
             return !knownPieces.Contains(0);
         }        
         
-        public bool HasToy(uint itemId) { return _toys.ContainsKey(itemId); }
-        public Dictionary<uint, ToyFlags> GetAccountToys() { return _toys; }
-        public Dictionary<uint, HeirloomData> GetAccountHeirlooms() { return _heirlooms; }
-        public Dictionary<uint, MountStatusFlags> GetAccountMounts() { return _mounts; }
+        public bool HasToy(int itemId) { return _toys.ContainsKey(itemId); }
+        public Dictionary<int, ToyFlags> GetAccountToys() { return _toys; }
+        public Dictionary<int, HeirloomData> GetAccountHeirlooms() { return _heirlooms; }
+        public Dictionary<int, MountStatusFlags> GetAccountMounts() { return _mounts; }
     }
 
     enum FavoriteAppearanceState

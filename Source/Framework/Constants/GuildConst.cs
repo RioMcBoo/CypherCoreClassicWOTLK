@@ -11,7 +11,7 @@ namespace Framework.Constants
         public const int MaxBankSlots = 98;
         public const int BankMoneyLogsTab = 100;
 
-        public const ulong MoneyLimit = 100000000000;
+        public const long MoneyLimit = 100000000000;
         public const int WithdrawMoneyUnlimited = -1;
         public const int WithdrawSlotUnlimited = -1;
         public const int EventLogGuidUndefined = -1;

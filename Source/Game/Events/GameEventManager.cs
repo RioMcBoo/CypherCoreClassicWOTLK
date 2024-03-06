@@ -850,7 +850,7 @@ namespace Game
                     {
                         do
                         {
-                            uint entry = result.Read<uint>(0);
+                            int entry = result.Read<int>(0);
                             short event_id = result.Read<sbyte>(1);
                             int internal_event_id = mGameEvent.Length + event_id - 1;
 
@@ -879,10 +879,10 @@ namespace Game
             }
         }
 
-        public ulong GetNPCFlag(Creature cr)
+        public NPCFlags GetNPCFlag(Creature cr)
         {
-            ulong mask = 0;
-            ulong guid = cr.GetSpawnId();
+            NPCFlags mask = 0;
+            var guid = cr.GetSpawnId();
 
             foreach (var id in m_ActiveEvents)
             {
@@ -906,29 +906,29 @@ namespace Game
                 maxEventId++;
 
                 mGameEvent = new GameEventData[maxEventId];
-                mGameEventCreatureGuids = new List<ulong>[maxEventId * 2 - 1];
-                mGameEventGameobjectGuids = new List<ulong>[maxEventId * 2 - 1];
-                mGameEventPoolIds = new List<uint>[maxEventId * 2 - 1];
+                mGameEventCreatureGuids = new List<long>[maxEventId * 2 - 1];
+                mGameEventGameobjectGuids = new List<long>[maxEventId * 2 - 1];
+                mGameEventPoolIds = new List<int>[maxEventId * 2 - 1];
                 for (var i = 0; i < maxEventId * 2 - 1; ++i)
                 {
-                    mGameEventCreatureGuids[i] = new List<ulong>();
-                    mGameEventGameobjectGuids[i] = new List<ulong>();
-                    mGameEventPoolIds[i] = new List<uint>();
+                    mGameEventCreatureGuids[i] = new List<long>();
+                    mGameEventGameobjectGuids[i] = new List<long>();
+                    mGameEventPoolIds[i] = new List<int>();
                 }
 
-                mGameEventCreatureQuests = new List<Tuple<uint, uint>>[maxEventId];
-                mGameEventGameObjectQuests = new List<Tuple<uint, uint>>[maxEventId];
-                mGameEventVendors = new Dictionary<uint, VendorItem>[maxEventId];
-                mGameEventNPCFlags = new List<(ulong guid, ulong npcflag)>[maxEventId];
-                mGameEventModelEquip = new List<Tuple<ulong, ModelEquip>>[maxEventId];
+                mGameEventCreatureQuests = new List<(int, int)>[maxEventId];
+                mGameEventGameObjectQuests = new List<(int, int)>[maxEventId];
+                mGameEventVendors = new Dictionary<int, VendorItem>[maxEventId];
+                mGameEventNPCFlags = new List<(long guid, NPCFlags npcflag)>[maxEventId];
+                mGameEventModelEquip = new List<(long, ModelEquip)>[maxEventId];
                 for (var i = 0; i < maxEventId; ++i)
                 {
-                    mGameEvent[i] = new GameEventData();
-                    mGameEventCreatureQuests[i] = new List<Tuple<uint, uint>>();
-                    mGameEventGameObjectQuests[i] = new List<Tuple<uint, uint>>();
-                    mGameEventVendors[i] = new Dictionary<uint, VendorItem>();
-                    mGameEventNPCFlags[i] = new List<(ulong guid, ulong npcflag)>();
-                    mGameEventModelEquip[i] = new List<Tuple<ulong, ModelEquip>>();
+                    mGameEvent[i] = new ();
+                    mGameEventCreatureQuests[i] = new();
+                    mGameEventGameObjectQuests[i] = new();
+                    mGameEventVendors[i] = new();
+                    mGameEventNPCFlags[i] = new();
+                    mGameEventModelEquip[i] = new();
                 }
             }
         }
@@ -1686,11 +1686,11 @@ namespace Game
         List<(int, int)>[] mGameEventCreatureQuests;
         List<(int, int)>[] mGameEventGameObjectQuests;
         Dictionary<int, VendorItem>[] mGameEventVendors;
-        List<Tuple<long, ModelEquip>>[] mGameEventModelEquip;
+        List<(long, ModelEquip)>[] mGameEventModelEquip;
         List<int>[] mGameEventPoolIds;
         GameEventData[] mGameEvent;
         Dictionary<int, GameEventQuestToEventConditionNum> mQuestToEventConditions = new();
-        List<(long guid, long npcflag)>[] mGameEventNPCFlags;
+        List<(long guid, NPCFlags npcflag)>[] mGameEventNPCFlags;
         List<ushort> m_ActiveEvents = new();
         bool isSystemInit;
 

@@ -29,18 +29,18 @@ namespace Game.Entities
 
         bool _isMissingCanSwimFlagOutOfCombat;
 
-        uint _gossipMenuId;
-        uint? _trainerId;
+        int _gossipMenuId;
+        int? _trainerId;
         float _sparringHealthPct;
 
-        public ulong m_PlayerDamageReq;
+        public long m_PlayerDamageReq;
         public float m_SightDistance;
         public float m_CombatDistance;
         public bool m_isTempWorldObject; //true when possessed
 
         ReactStates reactState;                           // for AI, not charmInfo
         public MovementGeneratorType DefaultMovementType { get; set; }
-        public ulong m_spawnId;
+        public long m_spawnId;
         byte m_equipmentId;
         sbyte m_originalEquipmentId; // can be -1
 
@@ -50,19 +50,19 @@ namespace Game.Entities
         uint m_cannotReachTimer;
 
         SpellSchools m_meleeDamageSchool;
-        public uint m_originalEntry;
+        public int m_originalEntry;
 
         Position m_homePosition;
         Position m_transportHomePosition = new();
 
         bool DisableReputationGain;
 
-        uint? _lootId;
+        int? _lootId;
         LootModes m_LootMode;                                  // Bitmask (default: LOOT_MODE_DEFAULT) that determines what loot will be lootable
 
         // Waypoint path
-        uint _waypointPathId;
-        (uint nodeId, uint pathId) _currentWaypointNodeInfo;
+        int _waypointPathId;
+        (int nodeId, int pathId) _currentWaypointNodeInfo;
 
         //Formation var
         CreatureGroup m_formation;

@@ -17,14 +17,14 @@ namespace Game.Entities
     {
         public Difficulty GetDifficultyID(MapRecord mapEntry)
         {
-            if (!mapEntry.IsRaid())
+            if (!mapEntry.IsRaid)
                 return m_dungeonDifficulty;
 
             MapDifficultyRecord defaultDifficulty = Global.DB2Mgr.GetDefaultMapDifficulty(mapEntry.Id);
             if (defaultDifficulty == null)
                 return m_legacyRaidDifficulty;
 
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(defaultDifficulty.DifficultyID);
+            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey((int)defaultDifficulty.DifficultyID);
             if (difficulty == null || difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy))
                 return m_legacyRaidDifficulty;
 
@@ -39,7 +39,7 @@ namespace Game.Entities
 
         public static Difficulty CheckLoadedDungeonDifficultyID(Difficulty difficulty)
         {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
             if (difficultyEntry == null)
                 return Difficulty.Normal;
 
@@ -53,7 +53,7 @@ namespace Game.Entities
         }
         public static Difficulty CheckLoadedRaidDifficultyID(Difficulty difficulty)
         {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
             if (difficultyEntry == null)
                 return Difficulty.NormalRaid;
 
@@ -67,7 +67,7 @@ namespace Game.Entities
         }
         public static Difficulty CheckLoadedLegacyRaidDifficultyID(Difficulty difficulty)
         {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
             if (difficultyEntry == null)
                 return Difficulty.Raid10N;
 
@@ -89,7 +89,7 @@ namespace Game.Entities
             SendPacket(raidGroupOnly);
         }
 
-        void UpdateArea(uint newArea)
+        void UpdateArea(int newArea)
         {
             // FFA_PVP flags are area and not zone id dependent
             // so apply them accordingly
@@ -97,7 +97,7 @@ namespace Game.Entities
 
             AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(newArea);
             bool oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
-            pvpInfo.IsInFFAPvPArea = area != null && area.GetFlags().HasFlag(AreaFlags.FreeForAllPvP);
+            pvpInfo.IsInFFAPvPArea = area != null && area.HasFlag(AreaFlags.FreeForAllPvP);
             UpdatePvPState(true);
 
             // check if we were in ffa arena and we left
@@ -114,7 +114,7 @@ namespace Game.Entities
 
             // previously this was in UpdateZone (but after UpdateArea) so nothing will break
             pvpInfo.IsInNoPvPArea = false;
-            if (area != null && area.IsSanctuary())    // in sanctuary
+            if (area != null && area.IsSanctuary)    // in sanctuary
             {
                 SetPvpFlag(UnitPVPStateFlags.Sanctuary);
                 pvpInfo.IsInNoPvPArea = true;
@@ -125,7 +125,7 @@ namespace Game.Entities
                 RemovePvpFlag(UnitPVPStateFlags.Sanctuary);
 
             AreaFlags areaRestFlag = (GetTeam() == Team.Alliance) ? AreaFlags.AllianceResting : AreaFlags.HordeResting;
-            if (area != null && area.GetFlags().HasFlag(areaRestFlag))
+            if (area != null && area.HasFlag(areaRestFlag))
                 _restMgr.SetRestFlag(RestFlag.FactionArea);
             else
                 _restMgr.RemoveRestFlag(RestFlag.FactionArea);
@@ -137,12 +137,12 @@ namespace Game.Entities
             UpdateMountCapability();
         }
 
-        public void UpdateZone(uint newZone, uint newArea)
+        public void UpdateZone(int newZone, int newArea)
         {
             if (!IsInWorld)
                 return;
 
-            uint oldZone = m_zoneUpdateId;
+            int oldZone = m_zoneUpdateId;
             m_zoneUpdateId = newZone;
             m_zoneUpdateTimer = 1 * Time.InMilliseconds;
 
@@ -181,9 +181,9 @@ namespace Game.Entities
 
             UpdateHostileAreaState(zone);
 
-            if (zone.GetFlags().HasFlag(AreaFlags.LinkedChat))                     // Is in a capital city
+            if (zone.HasFlag(AreaFlags.LinkedChat))                     // Is in a capital city
             {
-                if (!pvpInfo.IsInHostileArea || zone.IsSanctuary())
+                if (!pvpInfo.IsInHostileArea || zone.IsSanctuary)
                     _restMgr.SetRestFlag(RestFlag.City);
                 pvpInfo.IsInNoPvPArea = true;
             }
@@ -224,19 +224,19 @@ namespace Game.Entities
 
             pvpInfo.IsInHostileArea = false;
 
-            if (area.IsSanctuary()) // sanctuary and arena cannot be overriden
+            if (area.IsSanctuary) // sanctuary and arena cannot be overriden
                 pvpInfo.IsInHostileArea = false;
-            else if (area.GetFlags().HasFlag(AreaFlags.FreeForAllPvP))
+            else if (area.HasFlag(AreaFlags.FreeForAllPvP))
                 pvpInfo.IsInHostileArea = true;
             else if (overrideZonePvpType == ZonePVPTypeOverride.None)
             {
                 if (area != null)
                 {
-                    if (InBattleground() || area.GetFlags().HasFlag(AreaFlags.CombatZone) || (area.PvpCombatWorldStateID != -1 && Global.WorldStateMgr.GetValue(area.PvpCombatWorldStateID, GetMap()) != 0))
+                    if (InBattleground() || area.HasFlag(AreaFlags.CombatZone) || (area.PvpCombatWorldStateID != -1 && Global.WorldStateMgr.GetValue(area.PvpCombatWorldStateID, GetMap()) != 0))
                         pvpInfo.IsInHostileArea = true;
-                    else if (IsWarModeLocalActive() || area.GetFlags().HasFlag(AreaFlags.EnemiesPvPFlagged))
+                    else if (IsWarModeLocalActive() || area.HasFlag(AreaFlags.EnemiesPvPFlagged))
                     {
-                        if (area.GetFlags().HasFlag(AreaFlags.Contested))
+                        if (area.HasFlag(AreaFlags.Contested))
                             pvpInfo.IsInHostileArea = IsWarModeLocalActive();
                         else
                         {
@@ -285,7 +285,7 @@ namespace Game.Entities
                 map.CreateInstanceLockForPlayer(this);
         }
 
-        public void SetPendingBind(uint instanceId, uint bindTimer)
+        public void SetPendingBind(int instanceId, uint bindTimer)
         {
             _pendingBindId = instanceId;
             _pendingBindTimer = bindTimer;
@@ -304,7 +304,7 @@ namespace Game.Entities
                 InstanceLockPkt lockInfos = new();
                 lockInfos.InstanceID = instanceLock.GetInstanceId();
                 lockInfos.MapID = instanceLock.GetMapId();
-                lockInfos.DifficultyID = (uint)instanceLock.GetDifficultyId();
+                lockInfos.DifficultyID = instanceLock.GetDifficultyId();
                 lockInfos.TimeRemaining = (int)Math.Max((instanceLock.GetEffectiveExpiryTime() - now).TotalSeconds, 0);
                 lockInfos.CompletedMask = instanceLock.GetData().CompletedEncountersMask;
 
@@ -317,16 +317,16 @@ namespace Game.Entities
             SendPacket(instanceInfo);
         }
 
-        public bool Satisfy(AccessRequirement ar, uint target_map, TransferAbortParams abortParams = null, bool report = false)
+        public bool Satisfy(AccessRequirement ar, int target_map, TransferAbortParams abortParams = null, bool report = false)
         {
             if (!IsGameMaster())
             {
                 byte LevelMin = 0;
                 byte LevelMax = 0;
-                uint failedMapDifficultyXCondition = 0;
-                uint missingItem = 0;
-                uint missingQuest = 0;
-                uint missingAchievement = 0;
+                int failedMapDifficultyXCondition = 0;
+                int missingItem = 0;
+                int missingQuest = 0;
+                int missingAchievement = 0;
 
                 MapRecord mapEntry = CliDB.MapStorage.LookupByKey(target_map);
                 if (mapEntry == null)
@@ -336,7 +336,7 @@ namespace Game.Entities
                 MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(target_map, ref target_difficulty);
                 if (!WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreLevel))
                 {
-                    var mapDifficultyConditions = Global.DB2Mgr.GetMapDifficultyConditions(mapDiff.Id);
+                    var mapDifficultyConditions = Global.DB2Mgr.GetMapDifficultyConditions((Difficulty)mapDiff.Id);
                     foreach (var pair in mapDifficultyConditions)
                     {
                         if (!ConditionManager.IsPlayerMeetingCondition(this, pair.Item2))
@@ -433,7 +433,7 @@ namespace Game.Entities
 
             Group group = GetGroup();
             // raid instances require the player to be in a raid group to be valid
-            if (map.IsRaid() && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid) && (map.GetEntry().Expansion() >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)))
+            if (map.IsRaid() && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid) && (map.GetEntry().Expansion >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)))
                 if (group == null || group.IsRaidGroup())
                     return false;
 
@@ -453,14 +453,14 @@ namespace Game.Entities
             return true;
         }
 
-        public bool CheckInstanceCount(uint instanceId)
+        public bool CheckInstanceCount(int instanceId)
         {
             if (_instanceResetTimes.Count < WorldConfig.GetIntValue(WorldCfg.MaxInstancesPerHour))
                 return true;
             return _instanceResetTimes.ContainsKey(instanceId);
         }
 
-        public void AddInstanceEnterTime(uint instanceId, long enterTime)
+        public void AddInstanceEnterTime(int instanceId, long enterTime)
         {
             if (!_instanceResetTimes.ContainsKey(instanceId))
                 _instanceResetTimes.Add(instanceId, enterTime + Time.Hour);
@@ -474,7 +474,7 @@ namespace Game.Entities
             if (mapEntry.Instanceable)
             {
                 // Check if we can contact the instancescript of the instance for an updated entrance location
-                uint targetInstanceId = Global.MapMgr.FindInstanceIdForPlayer(targetMapId, this);
+                var targetInstanceId = Global.MapMgr.FindInstanceIdForPlayer(targetMapId, this);
                 if (targetInstanceId != 0)
                 {
                     Map map = Global.MapMgr.FindMap(targetMapId, targetInstanceId);
@@ -520,7 +520,7 @@ namespace Game.Entities
             SendPacket(raidDifficultySet);
         }
 
-        public void SendResetFailedNotify(uint mapid)
+        public void SendResetFailedNotify(int mapid)
         {
             SendPacket(new ResetFailedNotify());
         }
@@ -647,12 +647,12 @@ namespace Game.Entities
                 m_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
         }
 
-        public uint GetRecentInstanceId(uint mapId)
+        public int GetRecentInstanceId(int mapId)
         {
             return m_recentInstances.LookupByKey(mapId);
         }
 
-        public void SetRecentInstance(uint mapId, uint instanceId)
+        public void SetRecentInstance(int mapId, int instanceId)
         {
             m_recentInstances[mapId] = instanceId;
         }

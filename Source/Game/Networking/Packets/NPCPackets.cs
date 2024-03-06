@@ -337,7 +337,7 @@ namespace Game.Networking.Packets
         public GossipOptionNpc OptionNPC;
         public byte OptionFlags;
         public int OptionCost;
-        public uint OptionLanguage;
+        public int OptionLanguage;
         public GossipOptionFlags Flags;
         public int OrderIndex;
         public GossipOptionStatus Status;
@@ -353,7 +353,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8((byte)OptionNPC);
             data.WriteInt8((sbyte)OptionFlags);
             data.WriteInt32(OptionCost);
-            data.WriteUInt32(OptionLanguage);
+            data.WriteInt32(OptionLanguage);
             data.WriteInt32((int)Flags);
             data.WriteInt32(OrderIndex);
             data.WriteBits(Text.GetByteCount(), 12);
@@ -385,8 +385,8 @@ namespace Game.Networking.Packets
             data.WriteInt32(QuestType);
             data.WriteInt32(QuestLevel);
             data.WriteInt32(QuestMaxScalingLevel);
-            data.WriteInt32(QuestFlags);
-            data.WriteInt32(QuestFlagsEx);
+            data.WriteUInt32((uint)QuestFlags);
+            data.WriteUInt32((uint)QuestFlagsEx);
 
             data.WriteBit(Repeatable);
             data.WriteBit(Important);
@@ -404,8 +404,8 @@ namespace Game.Networking.Packets
         public bool Repeatable;
         public bool Important;
         public string QuestTitle;
-        public int QuestFlags;
-        public int QuestFlagsEx;
+        public QuestFlags QuestFlags;
+        public QuestFlagsEx QuestFlagsEx;
     }
 
     public class VendorItemPkt

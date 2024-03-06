@@ -45,7 +45,7 @@ namespace Game.BattleFields
             }
         }
 
-        public void HandlePlayerEnterZone(Player player, uint zone)
+        public void HandlePlayerEnterZone(Player player, int zone)
         {
             // If battle is started,
             // If not full of players > invite player to join the war
@@ -259,7 +259,7 @@ namespace Game.BattleFields
             PlayerAcceptInviteToWar(player);
         }
 
-        public void InitStalker(uint entry, Position pos)
+        public void InitStalker(int entry, Position pos)
         {
             Creature creature = SpawnCreature(entry, pos);
             if (creature != null)
@@ -328,7 +328,7 @@ namespace Game.BattleFields
             OnBattleEnd(endByTimer);
         }
 
-        void DoPlaySoundToAll(uint soundID)
+        void DoPlaySoundToAll(int soundID)
         {
             BroadcastPacketToWar(new PlaySound(ObjectGuid.Empty, soundID, 0));
         }
@@ -378,7 +378,7 @@ namespace Game.BattleFields
             }
         }
 
-        public void TeamCastSpell(uint teamIndex, int spellId)
+        public void TeamCastSpell(int teamIndex, int spellId)
         {
             foreach (var guid in m_PlayersInWar[teamIndex])
             {
@@ -386,9 +386,9 @@ namespace Game.BattleFields
                 if (player != null)
                 {
                     if (spellId > 0)
-                        player.CastSpell(player, (uint)spellId, true);
+                        player.CastSpell(player, spellId, true);
                     else
-                        player.RemoveAuraFromStack((uint)-spellId);
+                        player.RemoveAuraFromStack(-spellId);
                 }
             }
         }
@@ -447,12 +447,12 @@ namespace Game.BattleFields
             m_capturePoints[cp.GetCapturePointEntry()] = cp;
         }
 
-        BfCapturePoint GetCapturePoint(uint entry)
+        BfCapturePoint GetCapturePoint(int entry)
         {
             return m_capturePoints.LookupByKey(entry);
         }
 
-        public void RegisterZone(uint zoneId)
+        public void RegisterZone(int zoneId)
         {
             Global.BattleFieldMgr.AddZone(zoneId, this);
         }
@@ -585,7 +585,7 @@ namespace Game.BattleFields
             return null;
         }
 
-        public Creature SpawnCreature(uint entry, Position pos)
+        public Creature SpawnCreature(int entry, Position pos)
         {
             if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
             {
@@ -611,7 +611,7 @@ namespace Game.BattleFields
         }
 
         // Method for spawning gameobject on map
-        public GameObject SpawnGameObject(uint entry, Position pos, Quaternion rotation)
+        public GameObject SpawnGameObject(int entry, Position pos, Quaternion rotation)
         {
             if (Global.ObjectMgr.GetGameObjectTemplate(entry) == null)
             {
@@ -655,11 +655,11 @@ namespace Game.BattleFields
         // Called when a Unit is kill in battlefield zone
         public virtual void HandleKill(Player killer, Unit killed) { }
 
-        public uint GetTypeId() { return m_TypeId; }
-        public uint GetZoneId() { return m_ZoneId; }
-        public uint GetMapId()  { return m_MapId; }
+        public int GetTypeId() { return m_TypeId; }
+        public int GetZoneId() { return m_ZoneId; }
+        public int GetMapId()  { return m_MapId; }
         public Map GetMap()  { return m_Map; }
-        public ulong GetQueueId() { return MathFunctions.MakePair64(m_BattleId | 0x20000, 0x1F100000); }
+        public long GetQueueId() { return MathFunctions.MakePair64(m_BattleId | 0x20000, 0x1F100000); }
 
         // Return true if battle is start, false if battle is not started
         public bool IsWarTime() { return m_isActive; }
@@ -730,7 +730,7 @@ namespace Game.BattleFields
         protected uint m_DefenderTeam;
 
         // Map of the objectives belonging to this OutdoorPvP
-        Dictionary<uint, BfCapturePoint> m_capturePoints = new();
+        Dictionary<int, BfCapturePoint> m_capturePoints = new();
 
         // Players info maps
         protected List<ObjectGuid>[] m_players = new List<ObjectGuid>[2];                      // Players in zone
@@ -872,7 +872,7 @@ namespace Game.BattleFields
                 if (capturePoint != null)
                 {
                     player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldState1, 1);
-                    player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldstate2, (uint)(Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f)));
+                    player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldstate2, (int)(Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f)));
                     player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldstate3, m_neutralValuePct);
                 }
             }
@@ -903,7 +903,7 @@ namespace Game.BattleFields
                 // send this too, sometimes the slider disappears, dunno why :(
                 SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldState1, 1);
                 // send these updates to only the ones in this objective
-                SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldstate2, (uint)Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
+                SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldstate2, (int)Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
                 // send this too, sometimes it resets :S
                 SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldstate3, m_neutralValuePct);
             }
@@ -1091,7 +1091,7 @@ namespace Game.BattleFields
             return false;
         }
 
-        void SendUpdateWorldState(uint field, uint value)
+        void SendUpdateWorldState(int field, int value)
         {
             for (byte team = 0; team < SharedConst.PvpTeamsCount; ++team)
             {
@@ -1104,7 +1104,7 @@ namespace Game.BattleFields
             }
         }
 
-        void SendObjectiveComplete(uint id, ObjectGuid guid)
+        void SendObjectiveComplete(int id, ObjectGuid guid)
         {
             uint team;
             switch (m_State)
@@ -1157,7 +1157,7 @@ namespace Game.BattleFields
         BattleFieldObjectiveStates m_State;
 
         // Neutral value on capture bar
-        uint m_neutralValuePct;
+        int m_neutralValuePct;
 
         // Battlefield this objective belongs to
         protected BattleField m_Bf;

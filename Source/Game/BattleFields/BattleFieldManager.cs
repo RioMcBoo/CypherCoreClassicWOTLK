@@ -73,12 +73,12 @@ namespace Game.BattleFields
             _battlefieldsByMap.Remove(map);
         }
 
-        public void AddZone(uint zoneId, BattleField bf)
+        public void AddZone(int zoneId, BattleField bf)
         {
             _battlefieldsByZone[(bf.GetMap(), zoneId)] = bf;
         }
 
-        public void HandlePlayerEnterZone(Player player, uint zoneId)
+        public void HandlePlayerEnterZone(Player player, int zoneId)
         {
             var bf = _battlefieldsByZone.LookupByKey((player.GetMap(), zoneId));
             if (bf == null)

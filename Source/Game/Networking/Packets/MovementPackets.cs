@@ -233,7 +233,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(TransferSpellID.HasValue);
             if (Ship.HasValue)
             {
-                _worldPacket.WriteUInt32(Ship.Value.Id);
+                _worldPacket.WriteInt32(Ship.Value.Id);
                 _worldPacket.WriteInt32(Ship.Value.OriginMapID);
             }
 
@@ -250,7 +250,7 @@ namespace Game.Networking.Packets
 
         public struct ShipTransferPending
         {
-            public uint Id;              // gameobject_template.entry of the transport the player is teleporting on
+            public int Id;              // gameobject_template.entry of the transport the player is teleporting on
             public int OriginMapID;     // Map id the player is currently on (before teleport)
         }
     }
@@ -610,19 +610,19 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteInt32(SequenceIndex);
             _worldPacket.WriteFloat(Height);
             _worldPacket.WriteFloat(Scale);
             _worldPacket.WriteUInt8((byte)Reason);
-            _worldPacket.WriteUInt32(MountDisplayID);
+            _worldPacket.WriteInt32(MountDisplayID);
             _worldPacket.WriteInt32(ScaleDuration);
         }
 
         public float Scale = 1.0f;
         public ObjectGuid MoverGUID;
-        public uint MountDisplayID;
+        public int MountDisplayID;
         public UpdateCollisionHeightReason Reason;
-        public uint SequenceIndex;
+        public int SequenceIndex;
         public int ScaleDuration;
         public float Height = 1.0f;
     }
@@ -765,13 +765,13 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteInt32(SequenceIndex);
             _worldPacket.WriteBits(Reason, 2);
             _worldPacket.FlushBits();
         }
 
-        public uint SequenceIndex = 1;
-        public uint Reason = 1;
+        public int SequenceIndex = 1;
+        public int Reason = 1;
     }
 
     class SuspendTokenResponse : ClientPacket
@@ -780,10 +780,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            SequenceIndex = _worldPacket.ReadUInt32();
+            SequenceIndex = _worldPacket.ReadInt32();
         }
 
-        public uint SequenceIndex;
+        public int SequenceIndex;
     }
 
     class ResumeToken : ServerPacket

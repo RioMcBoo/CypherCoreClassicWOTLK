@@ -41,18 +41,18 @@ namespace Game.Networking.Packets
                 _worldPacket.WritePackedGuid(Info.GuildGuid);
                 _worldPacket.WriteUInt32(Info.VirtualRealmAddress);
                 _worldPacket.WriteInt32(Info.Ranks.Count);
-                _worldPacket.WriteUInt32(Info.EmblemStyle);
-                _worldPacket.WriteUInt32(Info.EmblemColor);
-                _worldPacket.WriteUInt32(Info.BorderStyle);
-                _worldPacket.WriteUInt32(Info.BorderColor);
-                _worldPacket.WriteUInt32(Info.BackgroundColor);
+                _worldPacket.WriteInt32(Info.EmblemStyle);
+                _worldPacket.WriteInt32(Info.EmblemColor);
+                _worldPacket.WriteInt32(Info.BorderStyle);
+                _worldPacket.WriteInt32(Info.BorderColor);
+                _worldPacket.WriteInt32(Info.BackgroundColor);
                 _worldPacket.WriteBits(Info.GuildName.GetByteCount(), 7);
                 _worldPacket.FlushBits();
 
                 foreach (var rank in Info.Ranks)
                 {
-                    _worldPacket.WriteUInt32(rank.RankID);
-                    _worldPacket.WriteUInt32(rank.RankOrder);
+                    _worldPacket.WriteInt32(rank.RankID);
+                    _worldPacket.WriteInt32(rank.RankOrder);
                     _worldPacket.WriteBits(rank.RankName.GetByteCount(), 7);
                     _worldPacket.FlushBits();
 
@@ -73,25 +73,25 @@ namespace Game.Networking.Packets
 
             public uint VirtualRealmAddress; // a special identifier made from the Index, BattleGroup and Region.
 
-            public uint EmblemStyle;
-            public uint EmblemColor;
-            public uint BorderStyle;
-            public uint BorderColor;
-            public uint BackgroundColor;
+            public int EmblemStyle;
+            public int EmblemColor;
+            public int BorderStyle;
+            public int BorderColor;
+            public int BackgroundColor;
             public List<RankInfo> Ranks = new();
             public string GuildName = string.Empty;
 
             public struct RankInfo
             {
-                public RankInfo(uint id, uint order, string name)
+                public RankInfo(int id, int order, string name)
                 {
                     RankID = id;
                     RankOrder = order;
                     RankName = name;
                 }
 
-                public uint RankID;
-                public uint RankOrder;
+                public int RankID;
+                public int RankOrder;
                 public string RankName;
             }
         }
@@ -240,11 +240,11 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteUInt32(OldGuildVirtualRealmAddress);
             _worldPacket.WritePackedGuid(OldGuildGUID);
-            _worldPacket.WriteUInt32(EmblemStyle);
-            _worldPacket.WriteUInt32(EmblemColor);
-            _worldPacket.WriteUInt32(BorderStyle);
-            _worldPacket.WriteUInt32(BorderColor);
-            _worldPacket.WriteUInt32(Background);
+            _worldPacket.WriteInt32(EmblemStyle);
+            _worldPacket.WriteInt32(EmblemColor);
+            _worldPacket.WriteInt32(BorderStyle);
+            _worldPacket.WriteInt32(BorderColor);
+            _worldPacket.WriteInt32(Background);
             _worldPacket.WriteInt32(AchievementPoints);
 
             _worldPacket.WriteString(InviterName);
@@ -255,11 +255,11 @@ namespace Game.Networking.Packets
         public ObjectGuid GuildGUID;
         public ObjectGuid OldGuildGUID;
         public int AchievementPoints;
-        public uint EmblemStyle;
-        public uint EmblemColor;        
-        public uint BorderStyle;
-        public uint BorderColor;
-        public uint Background;
+        public int EmblemStyle;
+        public int EmblemColor;        
+        public int BorderStyle;
+        public int BorderColor;
+        public int Background;
         public uint GuildVirtualRealmAddress;
         public uint OldGuildVirtualRealmAddress;
         public uint InviterVirtualRealmAddress;
@@ -364,10 +364,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(Money);
+            _worldPacket.WriteInt64(Money);
         }
 
-        public ulong Money;
+        public long Money;
     }
 
     public class GuildEventDisbanded : ServerPacket
@@ -1020,7 +1020,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(Money);
+            _worldPacket.WriteInt64(Money);
             _worldPacket.WriteInt32(Tab);
             _worldPacket.WriteInt32(WithdrawalsRemaining);
             _worldPacket.WriteInt32(TabInfo.Count);
@@ -1039,7 +1039,7 @@ namespace Game.Networking.Packets
         public List<GuildBankTabInfo> TabInfo;
         public int WithdrawalsRemaining;
         public int Tab;
-        public ulong Money;
+        public long Money;
         public bool FullUpdate;
     }
 
@@ -1230,7 +1230,7 @@ namespace Game.Networking.Packets
                 _worldPacket.FlushBits();
 
                 if (logEntry.Money.HasValue)
-                    _worldPacket.WriteUInt64(logEntry.Money.Value);
+                    _worldPacket.WriteInt64(logEntry.Money.Value);
 
                 if (logEntry.ItemID.HasValue)
                     _worldPacket.WriteInt32(logEntry.ItemID.Value);
@@ -1544,12 +1544,12 @@ namespace Game.Networking.Packets
             data.WriteUInt8(RankID);
             data.WriteInt32(RankOrder);
             data.WriteUInt32(Flags);
-            data.WriteUInt32(WithdrawGoldLimit);
+            data.WriteInt32(WithdrawGoldLimit);
 
             for (byte i = 0; i < GuildConst.MaxBankTabs; i++)
             {
-                data.WriteUInt32(TabFlags[i]);
-                data.WriteUInt32(TabWithdrawItemLimit[i]);
+                data.WriteInt32((int)TabFlags[i]);
+                data.WriteInt32(TabWithdrawItemLimit[i]);
             }
 
             data.WriteBits(RankName.GetByteCount(), 7);
@@ -1559,10 +1559,10 @@ namespace Game.Networking.Packets
         public byte RankID;
         public int RankOrder;
         public uint Flags;
-        public uint WithdrawGoldLimit;
+        public int WithdrawGoldLimit;
         public string RankName;
-        public uint[] TabFlags = new uint[GuildConst.MaxBankTabs];
-        public uint[] TabWithdrawItemLimit = new uint[GuildConst.MaxBankTabs];
+        public GuildBankRights[] TabFlags = new GuildBankRights[GuildConst.MaxBankTabs];
+        public int[] TabWithdrawItemLimit = new int[GuildConst.MaxBankTabs];
     }
 
     public class GuildRewardItem
@@ -1723,7 +1723,7 @@ namespace Game.Networking.Packets
         public ObjectGuid PlayerGUID;
         public uint TimeOffset;
         public sbyte EntryType;
-        public ulong? Money;
+        public long? Money;
         public int? ItemID;
         public int? Count;
         public sbyte? OtherTab;

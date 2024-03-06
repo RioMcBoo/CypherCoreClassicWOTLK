@@ -123,7 +123,7 @@ namespace Game.Entities
             base.Dispose();
         }
 
-        public bool Create(ulong guidlow, uint entry, float x, float y, float z, float ang)
+        public bool Create(long guidlow, int entry, float x, float y, float z, float ang)
         {
             Relocate(x, y, z, ang);
 
@@ -275,7 +275,7 @@ namespace Game.Entities
 
                 if (legIndex != _currentPathLeg)
                 {
-                    uint oldMapId = _transportInfo.PathLegs[_currentPathLeg].MapId;
+                    var oldMapId = _transportInfo.PathLegs[_currentPathLeg].MapId;
                     _currentPathLeg = legIndex;
                     TeleportTransport(oldMapId, _transportInfo.PathLegs[legIndex].MapId, newPosition.GetPositionX(), newPosition.GetPositionY(), newPosition.GetPositionZ(), newPosition.GetOrientation());
                     return;
@@ -351,7 +351,7 @@ namespace Game.Entities
             return this;
         }
 
-        public Creature CreateNPCPassenger(ulong guid, CreatureData data)
+        public Creature CreateNPCPassenger(long guid, CreatureData data)
         {
             Map map = GetMap();
             if (map.GetCreatureRespawnTime(guid) != 0)
@@ -590,7 +590,7 @@ namespace Game.Entities
 
         void LoadStaticPassengers()
         {
-            uint mapId = (uint)GetGoInfo().MoTransport.SpawnMap;
+            var mapId = GetGoInfo().MoTransport.SpawnMap;
             var cells = Global.ObjectMgr.GetMapObjectGuids(mapId, GetMap().GetDifficultyID());
             if (cells == null)
                 return;
@@ -634,7 +634,7 @@ namespace Game.Entities
 
         public void SetDelayedAddModelToMap() { _delayedAddModel = true; }
 
-        bool TeleportTransport(uint oldMapId, uint newMapId, float x, float y, float z, float o)
+        bool TeleportTransport(int oldMapId, int newMapId, float x, float y, float z, float o)
         {
             if (oldMapId != newMapId)
             {
@@ -669,7 +669,7 @@ namespace Game.Entities
             }
         }
 
-        void TeleportPassengersAndHideTransport(uint newMapid, float x, float y, float z, float o)
+        void TeleportPassengersAndHideTransport(int newMapid, float x, float y, float z, float o)
         {
             if (newMapid == GetMapId())
             {
@@ -753,7 +753,7 @@ namespace Game.Entities
             ClearUpdateMask(true);
         }
 
-        public uint GetExpectedMapId()
+        public int GetExpectedMapId()
         {
             return _transportInfo.PathLegs[_currentPathLeg].MapId;
         }

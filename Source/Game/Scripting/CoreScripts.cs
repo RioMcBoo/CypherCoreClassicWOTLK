@@ -276,15 +276,15 @@ namespace Game.Scripting
             Global.ScriptMgr.AddScript(this);
         }
 
-        public virtual void OnHeal(Unit healer, Unit reciever, ref uint gain) { }
+        public virtual void OnHeal(Unit healer, Unit reciever, ref int gain) { }
 
-        public virtual void OnDamage(Unit attacker, Unit victim, ref uint damage) { }
+        public virtual void OnDamage(Unit attacker, Unit victim, ref int damage) { }
 
         // Called when DoT's Tick Damage is being Dealt
-        public virtual void ModifyPeriodicDamageAurasTick(Unit target, Unit attacker, ref uint damage) { }
+        public virtual void ModifyPeriodicDamageAurasTick(Unit target, Unit attacker, ref int damage) { }
 
         // Called when Melee Damage is being Dealt
-        public virtual void ModifyMeleeDamage(Unit target, Unit attacker, ref uint damage) { }
+        public virtual void ModifyMeleeDamage(Unit target, Unit attacker, ref int damage) { }
 
         // Called when Spell Damage is being Dealt
         public virtual void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo) { }

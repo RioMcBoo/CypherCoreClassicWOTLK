@@ -32,6 +32,7 @@ namespace Framework.Constants
     // only used in code
     public enum SpellCategories
     {
+        None = 0,
         HealthManaPotions = 4,
         DevourMagic = 12,
         Judgement = 1210,               // Judgement (seal trigger)

@@ -1170,7 +1170,7 @@ namespace Game.Networking.Packets
         }
 
         public bool IsFullUpdate;
-        public Dictionary<uint, HeirloomData> Heirlooms = new();
+        public Dictionary<int, HeirloomData> Heirlooms = new();
         public int Unk;
     }
 
@@ -1215,13 +1215,13 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteInt32(Threshold);
+            _worldPacket.WriteInt32((int)Threshold);
             _worldPacket.WriteInt32(ItemID);
         }
 
         public ObjectGuid Guid;
         public int ItemID;
-        public int Threshold;
+        public DrunkenState Threshold;
     }
 
     class SetTaxiBenchmarkMode : ClientPacket
@@ -1391,9 +1391,9 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(Quantity);
+            _worldPacket.WriteInt64(Quantity);
             _worldPacket.WriteUInt8((byte)DisplayToastMethod);
-            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(QuestID);
 
             _worldPacket.WriteBit(Mailed);
             _worldPacket.WriteBits((byte)Type, 2);
@@ -1408,7 +1408,7 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteInt8((sbyte)Gender);
                     break;
                 case DisplayToastType.NewCurrency:
-                    _worldPacket.WriteUInt32(CurrencyID);
+                    _worldPacket.WriteInt32(CurrencyID);
                     break;
                 default:
                     break;
@@ -1417,17 +1417,17 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
         
-        public ulong Quantity;
+        public long Quantity;
         public DisplayToastMethod DisplayToastMethod = DisplayToastMethod.DoNotDisplay;
         public bool Mailed;
         public DisplayToastType Type = DisplayToastType.Money;
-        public uint QuestID;
+        public int QuestID;
         public bool IsSecondaryResult;
         public ItemInstance Item;
         public bool BonusRoll;
         public int LootSpec;
         public Gender Gender = Gender.None;
-        public uint CurrencyID;
+        public int CurrencyID;
     }
 
     public class SetMaxWeeklyQuantity : ServerPacket
