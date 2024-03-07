@@ -189,7 +189,7 @@ namespace Framework.Constants
         ModPowerDisplay = 179,
         ModFlatSpellDamageVersus = 180,
         ModSpellCurrencyReagentsCountPct = 181,  // NYI
-        SuppressItemPassiveEffectBySpellLabel = 182,  //NYI
+        HandleAuraModResistenceOfStatPercent = 182,  //NYI
         ModCritChanceVersusTargetHealth = 183,
         ModAttackerMeleeHitChance = 184,
         ModAttackerRangedHitChance = 185,

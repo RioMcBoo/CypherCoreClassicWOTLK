@@ -1608,19 +1608,16 @@ namespace Game.Entities
             float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);    // base armor
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);            // armor percent
 
-            // SPELL_AURA_MOD_ARMOR_PCT_FROM_STAT counts as base armor
-            GetTotalAuraModifier(AuraType.ModArmorPctFromStat, aurEff =>
-            {
-                int miscValue = aurEff.GetMiscValue();
-                Stats stat = (miscValue != -2) ? (Stats)miscValue : GetPrimaryStat();
-
-                value += MathFunctions.CalculatePct((float)GetStat(stat), aurEff.GetAmount());
-                return true;
-            });
-
             float baseValue = value;
 
             value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);        // bonus armor from auras and items
+
+            // add dynamic flat mods
+            var mResbyIntellect = GetAuraEffectsByType(AuraType.SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT);
+            foreach ( var aurEff in mResbyIntellect)
+                if (aurEff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal))
+                    value += MathFunctions.CalculatePct(GetStat((Stats)aurEff.GetMiscValueB()), aurEff.GetAmount());
+
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
             value *= GetTotalAuraMultiplier(AuraType.ModBonusArmorPct);
 
@@ -2125,25 +2122,6 @@ namespace Game.Entities
         {
             ModSpellHitChance = 15.0f + GetTotalAuraModifier(AuraType.ModSpellHitChance);
             ModSpellHitChance += GetRatingBonusValue(CombatRating.HitSpell);
-        }
-
-        Stats GetPrimaryStat()
-        {
-            byte primaryStatPriority;
-            var specialization = GetPrimarySpecializationEntry();
-            if (specialization != null)
-                primaryStatPriority = (byte)specialization.PrimaryStatPriority;
-            else
-                primaryStatPriority = CliDB.ChrClassesStorage.LookupByKey((int)GetClass()).PrimaryStatPriority;
-
-
-            if (primaryStatPriority >= 4)
-                return Stats.Strength;
-
-            if (primaryStatPriority >= 2)
-                return Stats.Agility;
-
-            return Stats.Intellect;
         }
         
         public override void UpdateMaxHealth()

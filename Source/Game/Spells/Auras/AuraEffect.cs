@@ -5954,20 +5954,27 @@ namespace Game.Spells
                 return;            
         }
         
-        [AuraEffectHandler(AuraType.SuppressItemPassiveEffectBySpellLabel)]
-        void HandleSuppressItemPassiveEffectBySpellLabel(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        [AuraEffectHandler(AuraType.HandleAuraModResistenceOfStatPercent)]
+        void HandleAuraModResistenceOfStatPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
-            List<Aura> suppressedAuras = new();
-            foreach (var appliedAura in aurApp.GetTarget().GetOwnedAuras())
-                if (appliedAura.Value.GetSpellInfo().HasLabel((uint)GetMiscValue()))
-                    suppressedAuras.Add(appliedAura.Value);
+            Unit target = aurApp.GetTarget();
 
-            // Refresh applications
-            foreach (Aura aura in suppressedAuras)
-                aura.ApplyForTargets();
+            if (target.GetTypeId() != TypeId.Player)
+                return;
+
+            if ((SpellSchoolMask)GetMiscValue() != SpellSchoolMask.Normal)
+            {
+                // support required adding replace UpdateArmor by loop by UpdateResistence at intellect update
+                // and include in UpdateResistence same code as in UpdateArmor for aura mod apply.
+                Log.outInfo(LogFilter.Spells, "Aura SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT(182) does not work for non-armor type resistances!");
+                return;
+            }
+
+            // Recalculate Armor
+            target.UpdateArmor();
         }
 
         [AuraEffectHandler(AuraType.ForceBeathBar)]
