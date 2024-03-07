@@ -422,7 +422,7 @@ namespace Game
                 Values[WorldCfg.StartPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
-            Values[WorldCfg.StartDeathKnightPlayerLevel] = GetDefaultValue("StartDeathKnightPlayerLevel", 8);
+            Values[WorldCfg.StartDeathKnightPlayerLevel] = GetDefaultValue("StartDeathKnightPlayerLevel", 55);
             if ((int)Values[WorldCfg.StartDeathKnightPlayerLevel] < 1)
             {
                 Log.outError(LogFilter.ServerLoading, "StartDeathKnightPlayerLevel ({0}) must be in range 1..MaxPlayerLevel({1}). Set to 1.",
