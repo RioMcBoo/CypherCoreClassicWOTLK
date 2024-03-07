@@ -11066,6 +11066,13 @@ namespace Game
                 case Expansion.BurningCrusade:
                     return 70;
                 case Expansion.WrathOfTheLichKing:
+                case Expansion.Cataclysm:           // since we do support retail accounts, we will make all newer expansions follow the support max level
+                case Expansion.MistsOfPandaria:
+                case Expansion.WarlordsOfDraenor:
+                case Expansion.Legion:
+                case Expansion.BattleForAzeroth:
+                case Expansion.ShadowLands:
+                case Expansion.Dragonflight:
                     return 80;
                 default:
                     break;
