@@ -3348,7 +3348,6 @@ namespace Game.Entities
             SetPower(PowerType.Rage, 0);
             SetFullPower(PowerType.Energy);
             SetFullPower(PowerType.Focus);
-            SetPower(PowerType.LunarPower, 0);
 
             if (resurrectAura != 0)
                 CastSpell(this, resurrectAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(resurrectGUID));
@@ -3461,11 +3460,11 @@ namespace Game.Entities
             m_regenTimerCount += RegenTimer;
             m_foodEmoteTimerCount += RegenTimer;
 
-            for (PowerType power = PowerType.Mana; power < PowerType.Max; power++)// = power + 1)
-                if (power != PowerType.Runes)
-                    Regenerate(power);
+            for (PowerType power = PowerType.Mana; power < PowerType.Max; power++)
+                Regenerate(power);
 
             // Runes act as cooldowns, and they don't need to send any data
+            /*
             if (GetClass() == Class.Deathknight)
             {
                 uint regeneratedRunes = 0;
@@ -3485,6 +3484,7 @@ namespace Game.Entities
                     ++regeneratedRunes;
                 }
             }
+            */
 
             if (m_regenTimerCount >= 2000)
             {
@@ -3558,28 +3558,25 @@ namespace Game.Entities
                 WorldCfg.RatePowerRageLoss,
                 WorldCfg.RatePowerFocus,
                 WorldCfg.RatePowerEnergy,
-                WorldCfg.RatePowerComboPointsLoss,
-                0, // runes
+                0, // happiness
                 WorldCfg.RatePowerRunicPowerLoss,
-                WorldCfg.RatePowerSoulShards,
-                WorldCfg.RatePowerLunarPower,
-                WorldCfg.RatePowerHolyPower,
-                0, // alternate
-                WorldCfg.RatePowerMaelstrom,
-                WorldCfg.RatePowerChi,
-                WorldCfg.RatePowerInsanity,
-                0, // burning embers, unused
-                0, // demonic fury, unused
-                WorldCfg.RatePowerArcaneCharges,
-                WorldCfg.RatePowerFury,
-                WorldCfg.RatePowerPain,
-                WorldCfg.RatePowerEssence,
-                0, // runes
-                0, // runes
-                0, // runes
-                0, // alternate
-                0, // alternate
-                0, // alternate
+                0, //unused
+                0, //unused
+                0, //unused
+                0, //unused
+                0, //unused
+                0, //unused
+                0, //unused
+                0, //unused
+                WorldCfg.RatePowerComboPointsLoss,
+                0, //unused
+                0, //unused
+                0, //unused
+                0, //unused
+                0, //unused
+                0, //unused
+                0, //unused
+                0, //unused
             };
 
             if (RatesForPower[(int)power] != 0)
@@ -3741,9 +3738,6 @@ namespace Game.Entities
                     break;
                 case PowerType.RunicPower:
                     SetPower(PowerType.RunicPower, 0);
-                    break;
-                case PowerType.LunarPower:
-                    SetPower(PowerType.LunarPower, 0);
                     break;
                 default:
                     break;
@@ -4191,7 +4185,6 @@ namespace Game.Entities
                 SetPower(PowerType.Rage, 0);
                 SetPower(PowerType.Energy, (int)(GetMaxPower(PowerType.Energy) * restore_percent));
                 SetPower(PowerType.Focus, (int)(GetMaxPower(PowerType.Focus) * restore_percent));
-                SetPower(PowerType.LunarPower, 0);
             }
 
             // trigger update zone for alive state zone updates

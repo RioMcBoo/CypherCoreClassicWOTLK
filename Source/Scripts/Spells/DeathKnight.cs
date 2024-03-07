@@ -74,9 +74,11 @@ namespace Scripts.Spells.DeathKnight
                 if (player == null || caster.GetClass() != Class.Deathknight)
                     return false;
 
+                /*
                 for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                     if (player.GetRuneCooldown(i) == 0)
                         return false;
+                */
 
                 return true;
             }

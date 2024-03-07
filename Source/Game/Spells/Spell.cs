@@ -3795,8 +3795,8 @@ namespace Game.Spells
             if ((m_caster.IsTypeId(TypeId.Player) || (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
                 castFlags |= SpellCastFlags.PowerLeftSelf;
 
-            if (HasPowerTypeCost(PowerType.Runes))
-                castFlags |= SpellCastFlags.NoGCD; // not needed, but Blizzard sends it
+            //if (HasPowerTypeCost(PowerType.Runes))
+            //    castFlags |= SpellCastFlags.NoGCD; // not needed, but Blizzard sends it
 
             SpellStart packet = new();
             SpellCastData castData = packet.Cast;
@@ -3828,6 +3828,7 @@ namespace Game.Spells
                 }
             }
 
+            /*
             if (castFlags.HasAnyFlag(SpellCastFlags.RuneList)) // rune cooldowns list
             {
                 castData.RemainingRunes = new();
@@ -3856,6 +3857,7 @@ namespace Game.Spells
                         runeData.Cooldowns.Add(0);
                 }
             }
+            */
 
             if (castFlags.HasFlag(SpellCastFlags.Projectile))
                 castData.AmmoDisplayID = (int)GetSpellCastDataAmmo();
@@ -3898,7 +3900,8 @@ namespace Game.Spells
                 castFlags |= SpellCastFlags.PowerLeftSelf;
 
             if (m_caster.IsTypeId(TypeId.Player) && m_caster.ToPlayer().GetClass() == Class.Deathknight &&
-                HasPowerTypeCost(PowerType.Runes) && !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerAndReagentCost))
+                //HasPowerTypeCost(PowerType.Runes) && 
+                !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerAndReagentCost))
             {
                 castFlags |= SpellCastFlags.NoGCD;                   // same as in SMSG_SPELL_START
                 castFlags |= SpellCastFlags.RuneList;                    // rune cooldowns list
@@ -3952,12 +3955,14 @@ namespace Game.Spells
                 Player player = m_caster.ToPlayer();
                 runeData.Start = m_runesState; // runes state before
                 runeData.Count = player.GetRunesState(); // runes state after
+                /*
                 for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                 {
                     // float casts ensure the division is performed on floats as we need float result
                     float baseCd = (float)player.GetRuneBaseCooldown();
                     runeData.Cooldowns.Add((byte)((baseCd - (float)player.GetRuneCooldown(i)) / baseCd * 255)); // rune cooldown passed
                 }
+                */
             }
 
             if (castFlags.HasFlag(SpellCastFlags.AdjustMissile))
@@ -4446,11 +4451,13 @@ namespace Game.Spells
                     }
                 }
 
+                /*
                 if (cost.Power == PowerType.Runes)
                 {
                     TakeRunePower(hit);
                     continue;
                 }
+                */
 
                 if (cost.Amount == 0)
                     continue;
@@ -4474,6 +4481,7 @@ namespace Game.Spells
 
         SpellCastResult CheckRuneCost()
         {
+            /*
             int runeCost = m_powerCost.Sum(cost => cost.Power == PowerType.Runes ? cost.Amount : 0);
             if (runeCost == 0)
                 return SpellCastResult.SpellCastOk;
@@ -4492,12 +4500,14 @@ namespace Game.Spells
 
             if (readyRunes < runeCost)
                 return SpellCastResult.NoPower;                       // not sure if result code is correct
+            */
 
             return SpellCastResult.SpellCastOk;
         }
 
         void TakeRunePower(bool didHit)
         {
+            /*
             if (!m_caster.IsTypeId(TypeId.Player) || m_caster.ToPlayer().GetClass() != Class.Deathknight)
                 return;
 
@@ -4513,6 +4523,7 @@ namespace Game.Spells
                     --runeCost;
                 }
             }
+            */
         }
 
         void TakeReagents()
@@ -6268,12 +6279,14 @@ namespace Game.Spells
                 }
 
                 //check rune cost only if a spell has PowerType == POWER_RUNES
+                /*
                 if (cost.Power == PowerType.Runes)
                 {
                     SpellCastResult failReason = CheckRuneCost();
                     if (failReason != SpellCastResult.SpellCastOk)
                         return failReason;
                 }
+                */
 
                 // Check power amount
                 if (unitCaster.GetPower(cost.Power) < cost.Amount)

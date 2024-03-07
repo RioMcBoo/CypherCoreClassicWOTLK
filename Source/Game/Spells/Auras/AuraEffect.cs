@@ -3424,8 +3424,8 @@ namespace Game.Spells
             // Update manaregen value
             if (GetMiscValue() == (int)PowerType.Mana)
                 target.ToPlayer().UpdateManaRegen();
-            else if (GetMiscValue() == (int)PowerType.Runes)
-                target.ToPlayer().UpdateAllRunesRegen();
+            //else if (GetMiscValue() == (int)PowerType.Runes)
+            //    target.ToPlayer().UpdateAllRunesRegen();
             // other powers are not immediate effects - implemented in Player.Regenerate, Creature.Regenerate
         }
 
@@ -5621,11 +5621,13 @@ namespace Game.Spells
             UnitPowerBarRecord powerEntry = CliDB.UnitPowerBarStorage.LookupByKey(altPowerId);
             if (powerEntry == null)
                 return;
-
+           
+            /*
             if (apply)
                 aurApp.GetTarget().SetMaxPower(PowerType.AlternatePower, (int)powerEntry.MaxPower);
             else
                 aurApp.GetTarget().SetMaxPower(PowerType.AlternatePower, 0);
+            */
         }
 
         [AuraEffectHandler(AuraType.ModSpellCategoryCooldown)]

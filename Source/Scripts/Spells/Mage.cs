@@ -154,20 +154,6 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.ArcaneBarrageR3, SpellIds.ArcaneBarrageEnergize) && ValidateSpellEffect((spellInfo.Id, 1));
         }
 
-        void ConsumeArcaneCharges()
-        {
-            Unit caster = GetCaster();
-
-            // Consume all arcane charges
-            int arcaneCharges = -caster.ModifyPower(PowerType.ArcaneCharges, -caster.GetMaxPower(PowerType.ArcaneCharges), false);
-            if (arcaneCharges != 0)
-            {
-                AuraEffect auraEffect = caster.GetAuraEffect(SpellIds.ArcaneBarrageR3, 0, caster.GetGUID());
-                if (auraEffect != null)
-                    caster.CastSpell(caster, SpellIds.ArcaneBarrageEnergize, new CastSpellExtraArgs(SpellValueMod.BasePoint0, arcaneCharges * auraEffect.GetAmount() / 100));
-            }
-        }
-
         void HandleEffectHitTarget(uint effIndex)
         {
             if (GetHitUnit().GetGUID() != _primaryTarget)
@@ -183,7 +169,6 @@ namespace Scripts.Spells.Mage
         {
             OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
             OnEffectLaunchTarget.Add(new(MarkPrimaryTarget, 1, SpellEffectName.Dummy));
-            AfterCast.Add(new(ConsumeArcaneCharges));
         }
     }
 

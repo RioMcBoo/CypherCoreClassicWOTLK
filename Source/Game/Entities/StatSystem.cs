@@ -129,28 +129,11 @@ namespace Game.Entities
                 case UnitMods.Rage:
                 case UnitMods.Focus:
                 case UnitMods.Energy:
-                case UnitMods.Happiness:
-                case UnitMods.Runes:
-                case UnitMods.RunicPower:
-                case UnitMods.SoulShards:
-                case UnitMods.LunarPower:
-                case UnitMods.HolyPower:
-                case UnitMods.Alternate:
-                case UnitMods.Maelstrom:
-                case UnitMods.Chi:
-                case UnitMods.Insanity:
                 case UnitMods.ComboPoints:
-                case UnitMods.DemonicFury:
-                case UnitMods.ArcaneCharges:
-                case UnitMods.Fury:
-                case UnitMods.Pain:
-                case UnitMods.Essence:
+                case UnitMods.RunicPower:
                 case UnitMods.RuneBlood:
                 case UnitMods.RuneFrost:
                 case UnitMods.RuneUnholy:
-                case UnitMods.AlternateQuest:
-                case UnitMods.AlternateEncounter:
-                case UnitMods.AlternateMount:
                     UpdateMaxPower((PowerType)(unitMod - UnitMods.PowerStart));
                     break;
                 case UnitMods.ResistanceHoly:
@@ -181,7 +164,7 @@ namespace Game.Entities
             }
         }
 
-        int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
+        int GetMinPower(PowerType power) { return 0; }
 
         // returns negative amount on power reduction
         public int ModifyPower(PowerType power, int dVal, bool withPowerUpdate = true)
@@ -2319,14 +2302,6 @@ namespace Game.Entities
             {
                 case PowerType.ComboPoints:
                     return 2;
-                case PowerType.AlternatePower:
-                    return 1;
-                case PowerType.AlternateQuest:
-                    return 3;
-                case PowerType.AlternateEncounter:
-                    return 4;
-                case PowerType.AlternateMount:
-                    return 5;
                 default:
                     break;
             }

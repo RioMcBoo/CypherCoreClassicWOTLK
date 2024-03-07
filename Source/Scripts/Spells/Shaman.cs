@@ -114,24 +114,11 @@ namespace Scripts.Spells.Shaman
 
         bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            Spell procSpell = eventInfo.GetProcSpell();
-            if (procSpell != null)
-            {
-                var cost = procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom);
-                if (cost.HasValue)
-                    return cost.Value > 0 && RandomHelper.randChance(aurEff.GetAmount());
-            }
-
             return false;
         }
 
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            Spell procSpell = eventInfo.GetProcSpell();
-            int? energize = procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom);
-
-            eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.AftershockEnergize, new CastSpellExtraArgs(energize.HasValue)
-                .AddSpellMod(SpellValueMod.BasePoint0, energize.Value));
         }
 
         public override void Register()

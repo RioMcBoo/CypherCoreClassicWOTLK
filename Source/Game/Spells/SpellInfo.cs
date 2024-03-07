@@ -2851,9 +2851,6 @@ namespace Game.Spells
                         case PowerType.Mana:
                             powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetCreateMana(), power.PowerCostPct);
                             break;
-                        case PowerType.AlternatePower:
-                            Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power Type '{power.PowerType}' in spell {Id}");
-                            return null;
                         default:
                         {
                             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(power.PowerType);

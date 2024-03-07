@@ -419,9 +419,6 @@ namespace Scripts.Spells.Paladin
             if (procSpell == null)
                 return false;
 
-            if (!procSpell.HasPowerTypeCost(PowerType.HolyPower))
-                return false;
-
             return RandomHelper.randChance(aurEff.GetAmount());
         }
 
@@ -558,15 +555,6 @@ namespace Scripts.Spells.Paladin
             return ValidateSpellInfo(SpellIds.HammerOfJustice);
         }
 
-        bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            Spell procSpell = eventInfo.GetProcSpell();
-            if (procSpell != null)
-                return procSpell.HasPowerTypeCost(PowerType.HolyPower);
-
-            return false;
-        }
-
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             int value = aurEff.GetAmount() / 10;
@@ -576,7 +564,6 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new(CheckEffectProc, 0, AuraType.Dummy));
             OnEffectProc.Add(new(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
@@ -1153,17 +1140,6 @@ namespace Scripts.Spells.Paladin
             return ValidateSpellInfo(SpellIds.AvengingWrath, SpellIds.GuardianOfAncientKings);
         }
 
-        bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            SpellInfo procSpell = eventInfo.GetSpellInfo();
-            if (procSpell != null)
-                _baseHolyPowerCost = procSpell.CalcPowerCost(PowerType.HolyPower, false, eventInfo.GetActor(), eventInfo.GetSchoolMask());
-            else
-                _baseHolyPowerCost = null;
-
-            return _baseHolyPowerCost != null;
-        }
-
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             int value = aurEff.GetAmount() * 100 * _baseHolyPowerCost.Amount;
@@ -1174,7 +1150,6 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new(CheckEffectProc, 0, AuraType.Dummy));
             OnEffectProc.Add(new(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
@@ -1203,10 +1178,6 @@ namespace Scripts.Spells.Paladin
     {
         bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            Spell procSpell = eventInfo.GetProcSpell();
-            if (procSpell != null)
-                return procSpell.HasPowerTypeCost(PowerType.HolyPower);
-
             return false;
         }
 

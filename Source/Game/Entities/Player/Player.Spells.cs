@@ -3478,21 +3478,26 @@ namespace Game.Entities
         public void SetRuneCooldown(byte index, uint cooldown)
         {
             m_runes.Cooldown[index] = cooldown;
-            m_runes.SetRuneState(index, (cooldown == 0));
+            m_runes.SetRuneState(index, cooldown == 0);
+
+            /*
             int activeRunes = m_runes.Cooldown.Count(p => p == 0);
             if (activeRunes != GetPower(PowerType.Runes))
                 SetPower(PowerType.Runes, activeRunes);
+            */
         }
 
         public byte GetRunesState()
         {
-            return (byte)(m_runes.RuneState & ((1 << GetMaxPower(PowerType.Runes)) - 1));
+            return 0;
+            //return (byte)(m_runes.RuneState & ((1 << GetMaxPower(PowerType.Runes)) - 1));
         }
 
         public uint GetRuneBaseCooldown()
         {
             float cooldown = RuneCooldowns.Base;
 
+            /*
             var regenAura = GetAuraEffectsByType(AuraType.ModPowerRegenPercent);
             foreach (var i in regenAura)
                 if (i.GetMiscValue() == (int)PowerType.Runes)
@@ -3507,12 +3512,14 @@ namespace Game.Entities
             hastePct += GetTotalAuraModifier(AuraType.ModMeleeHaste3);
 
             cooldown *= 1.0f - (hastePct / 100.0f);
+            */
 
             return (uint)cooldown;
         }
 
         public void ResyncRunes()
         {
+            /*
             int maxRunes = GetMaxPower(PowerType.Runes);
 
             ResyncRunes data = new();
@@ -3524,6 +3531,7 @@ namespace Game.Entities
                 data.Runes.Cooldowns.Add((byte)((baseCd - GetRuneCooldown(i)) / baseCd * 255));
 
             SendPacket(data);
+            */
         }
 
         public void InitRunes()
@@ -3531,6 +3539,9 @@ namespace Game.Entities
             if (GetClass() != Class.Deathknight)
                 return;
 
+            return;
+
+            /*
             uint runeIndex = GetPowerIndex(PowerType.Runes);
             if (runeIndex == (int)PowerType.Max)
                 return;
@@ -3543,6 +3554,7 @@ namespace Game.Entities
 
             // set a base regen timer equal to 10 sec
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)runeIndex), 0.0f);
+            */
         }
 
         public void UpdateAllRunesRegen()
@@ -3550,6 +3562,9 @@ namespace Game.Entities
             if (GetClass() != Class.Deathknight)
                 return;
 
+            return;
+
+            /*             
             uint runeIndex = GetPowerIndex(PowerType.Runes);
             if (runeIndex == (int)PowerType.Max)
                 return;
@@ -3558,6 +3573,7 @@ namespace Game.Entities
 
             uint cooldown = GetRuneBaseCooldown();
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)runeIndex), (float)(1 * Time.InMilliseconds) / cooldown - runeEntry.RegenPeace);
+            */
         }
 
         public uint GetRuneCooldown(byte index) { return m_runes.Cooldown[index]; }
