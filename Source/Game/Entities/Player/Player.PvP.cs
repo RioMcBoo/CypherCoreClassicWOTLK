@@ -370,8 +370,6 @@ namespace Game.Entities
             return false;
         }
 
-        public int[] GetPvpTalentMap(byte spec) { return _specializationInfo.PvpTalents[spec]; }
-
         //BGs
         public Battleground GetBattleground()
         {

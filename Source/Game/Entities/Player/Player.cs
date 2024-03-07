@@ -316,14 +316,9 @@ namespace Game.Entities
                     }
                 }
             }
-            // all item positions resolved
 
-            ChrSpecializationRecord defaultSpec = DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
-            if (defaultSpec != null)
-            {
-                SetActiveTalentGroup((byte)defaultSpec.OrderIndex);
-                SetPrimarySpecialization(defaultSpec.Id);
-            }
+            // all item positions
+            SetActiveTalentGroup(0);
 
             GetThreatManager().Initialize();
 
@@ -5243,7 +5238,6 @@ namespace Game.Entities
                 packet.StatDelta[(int)i] = info.stats[(int)i] - (int)GetCreateStat(i);
 
             packet.NumNewTalents = DB2Mgr.GetNumTalentsAtLevel(level, GetClass()) - DB2Mgr.GetNumTalentsAtLevel(oldLevel, GetClass());
-            packet.NumNewPvpTalentSlots = DB2Mgr.GetPvpTalentNumSlotsAtLevel(level, GetClass()) - DB2Mgr.GetPvpTalentNumSlotsAtLevel(oldLevel, GetClass());
 
             SendPacket(packet);
 

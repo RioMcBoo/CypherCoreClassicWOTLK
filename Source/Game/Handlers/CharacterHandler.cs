@@ -979,8 +979,7 @@ namespace Game
             if (pCurrChar.HasAtLoginFlag(AtLoginFlags.ResetTalents))
             {
                 pCurrChar.ResetTalents(true);
-                //pCurrChar.ResetTalentSpecialization();
-                pCurrChar.SendTalentsInfoData(false);              // original talents send already in to SendInitialPacketsBeforeAddToMap, resend reset state
+                pCurrChar.SendTalentsInfoData();              // original talents send already in to SendInitialPacketsBeforeAddToMap, resend reset state
                 SendNotification(CypherStrings.ResetTalents);
             }
 
@@ -2826,10 +2825,6 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Talents, stmt);
 
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_PVP_TALENTS);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.PvpTalents, stmt);
-
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PLAYER_ACCOUNT_DATA);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.AccountData, stmt);
@@ -2976,7 +2971,6 @@ namespace Game
         BgData,
         Glyphs,
         Talents,
-        PvpTalents,
         AccountData,
         Skills,
         WeeklyQuestStatus,

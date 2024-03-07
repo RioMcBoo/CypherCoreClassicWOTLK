@@ -4765,16 +4765,6 @@ namespace Game.Spells
 
             if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
                 return;
-
-            Player player = unitTarget.ToPlayer();
-            uint specID = m_misc.SpecializationId;
-            ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(specID);
-
-            // Safety checks done in Spell::CheckCast
-            if (!spec.IsPetSpecialization())
-                player.ActivateTalentGroup(spec);
-            else
-                player.GetPet().SetSpecialization(specID);
         }
 
         [SpellEffectHandler(SpellEffectName.PlaySound)]

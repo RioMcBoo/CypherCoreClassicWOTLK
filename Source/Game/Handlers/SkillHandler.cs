@@ -34,27 +34,6 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LearnPvpTalents, Processing = PacketProcessing.Inplace)]
         void HandleLearnPvpTalents(LearnPvpTalents packet)
         {
-            LearnPvpTalentFailed learnPvpTalentFailed = new();
-            bool anythingLearned = false;
-            foreach (var pvpTalent in packet.Talents)
-            {
-                TalentLearnResult result = _player.LearnPvpTalent(pvpTalent.PvPTalentID, pvpTalent.Slot, ref learnPvpTalentFailed.SpellID);
-                if (result != 0)
-                {
-                    if (learnPvpTalentFailed.Reason == 0)
-                        learnPvpTalentFailed.Reason = (uint)result;
-
-                    learnPvpTalentFailed.Talents.Add(pvpTalent);
-                }
-                else
-                    anythingLearned = true;
-            }
-
-            if (learnPvpTalentFailed.Reason != 0)
-                SendPacket(learnPvpTalentFailed);
-
-            if (anythingLearned)
-                _player.SendTalentsInfoData(false);
         }
 
         [WorldPacketHandler(ClientOpcodes.ConfirmRespecWipe)]

@@ -361,13 +361,11 @@ namespace Game.Entities
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
                 Talents[i] = new Dictionary<int, PlayerTalent>();
-                PvpTalents[i] = new int[PlayerConst.MaxPvpTalentSlots];
                 Glyphs[i] = new int[PlayerConst.MaxGlyphSlotIndex];
             }
         }
 
         public Dictionary<int, PlayerTalent>[] Talents = new Dictionary<int, PlayerTalent>[PlayerConst.MaxSpecializations];
-        public int[][] PvpTalents = new int[PlayerConst.MaxSpecializations][];
         public int[][] Glyphs = new int[PlayerConst.MaxSpecializations][];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;
@@ -681,12 +679,12 @@ namespace Game.Entities
 
     public readonly record struct PlayerTalent
     {
-        public PlayerTalent(byte spec, PlayerSpellState state)
+        public PlayerTalent(byte rank, PlayerSpellState state)
         {
             this.state = state;
-            this.spec = spec;
+            this.rank = rank;
         }
         public readonly PlayerSpellState state;
-        public readonly byte spec;
+        public readonly byte rank;
     };
 }

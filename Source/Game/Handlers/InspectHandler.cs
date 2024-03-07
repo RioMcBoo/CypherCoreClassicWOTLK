@@ -39,10 +39,6 @@ namespace Game
                         inspectResult.Talents.Add((ushort)v.Key);
                 }
 
-                var pvpTalents = player.GetPvpTalentMap(player.GetActiveTalentGroup());
-                for (int i = 0; i < pvpTalents.Length; ++i)
-                    inspectResult.PvpTalents[i] = (ushort)pvpTalents[i];
-
                 inspectResult.TalentTraits.Level = (int)player.GetLevel();
                 inspectResult.TalentTraits.ChrSpecializationID = (int)player.GetPrimarySpecialization();
                 TraitConfig traitConfig = player.GetTraitConfig((int)(uint)player.m_activePlayerData.ActiveCombatTraitConfigID);

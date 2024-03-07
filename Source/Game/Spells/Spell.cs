@@ -5540,20 +5540,9 @@ namespace Game.Spells
                     }
                     case SpellEffectName.TalentSpecSelect:
                     {
-                        ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(m_misc.SpecializationId);
                         Player playerCaster = m_caster.ToPlayer();
                         if (playerCaster == null)
                             return SpellCastResult.TargetNotPlayer;
-
-                        if (spec == null || (spec.ClassID != (uint)player.GetClass() && !spec.IsPetSpecialization()))
-                            return SpellCastResult.NoSpec;
-
-                        if (spec.IsPetSpecialization())
-                        {
-                            Pet pet = player.GetPet();
-                            if (pet == null || pet.GetPetType() != PetType.Hunter || pet.GetCharmInfo() == null)
-                                return SpellCastResult.NoPet;
-                        }
 
                         // can't change during already started arena/Battleground
                         Battleground bg = player.GetBattleground();

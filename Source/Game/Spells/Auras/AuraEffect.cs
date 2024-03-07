@@ -5742,17 +5742,6 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.PvpTalents)]
         void HandleAuraPvpTalents(AuraApplication auraApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
-                return;
-
-            Player target = auraApp.GetTarget().ToPlayer();
-            if (target != null)
-            {
-                if (apply)
-                    target.TogglePvpTalents(true);
-                else if (!target.HasAuraType(AuraType.PvpTalents))
-                    target.TogglePvpTalents(false);
-            }
         }
 
         [AuraEffectHandler(AuraType.LinkedSummon)]

@@ -75,27 +75,18 @@ namespace Framework.Constants
         {
             ItemModifier.TransmogAppearanceSpec1,
             ItemModifier.TransmogAppearanceSpec2,
-            ItemModifier.TransmogAppearanceSpec3,
-            ItemModifier.TransmogAppearanceSpec4,
-            ItemModifier.TransmogAppearanceSpec5
         };
 
         public static ItemModifier[] IllusionModifierSlotBySpec =
         {
             ItemModifier.EnchantIllusionSpec1,
             ItemModifier.EnchantIllusionSpec2,
-            ItemModifier.EnchantIllusionSpec3,
-            ItemModifier.EnchantIllusionSpec4,
-            ItemModifier.EnchantIllusionSpec5
         };
 
         public static ItemModifier[] SecondaryAppearanceModifierSlotBySpec =
         {
             ItemModifier.TransmogSecondaryAppearanceSpec1,
             ItemModifier.TransmogSecondaryAppearanceSpec2,
-            ItemModifier.TransmogSecondaryAppearanceSpec3,
-            ItemModifier.TransmogSecondaryAppearanceSpec4,
-            ItemModifier.TransmogSecondaryAppearanceSpec5
         };
     }
 

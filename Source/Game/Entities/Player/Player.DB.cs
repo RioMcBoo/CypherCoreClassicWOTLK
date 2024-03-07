@@ -981,24 +981,6 @@ namespace Game.Entities
             }
         }
 
-        void _LoadPvpTalents(SQLResult result)
-        {
-            // "SELECT talentID0, talentID1, talentID2, talentID3, talentGroup FROM character_pvp_talent WHERE guid = ?"
-            if (!result.IsEmpty())
-            {
-                do
-                {
-                    for (byte slot = 0; slot < PlayerConst.MaxPvpTalentSlots; ++slot)
-                    {
-                        PvpTalentRecord talent = CliDB.PvpTalentStorage.LookupByKey(result.Read<byte>(slot));
-                        if (talent != null)
-                            AddPvpTalent(talent, result.Read<byte>(4), slot);
-                    }
-                }
-                while (result.NextRow());
-            }
-        }
-
         void _LoadTraits(SQLResult configsResult, SQLResult entriesResult)
         {
             MultiMap<int, TraitEntryPacket> traitEntriesByConfig = new();
@@ -2306,23 +2288,6 @@ namespace Game.Entities
                     trans.Append(stmt);
                 }
             }
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_PVP_TALENT);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            trans.Append(stmt);
-
-            for (byte group = 0; group < PlayerConst.MaxSpecializations; ++group)
-            {
-                var talents = GetPvpTalentMap(group);
-                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_PVP_TALENT);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                stmt.AddValue(1, talents[0]);
-                stmt.AddValue(2, talents[1]);
-                stmt.AddValue(3, talents[2]);
-                stmt.AddValue(4, talents[3]);
-                stmt.AddValue(5, group);
-                trans.Append(stmt);
-            }
         }
 
         void _SaveTraits(SQLTransaction trans)
@@ -3317,20 +3282,16 @@ namespace Game.Entities
             SetNumRespecs(numRespecs);
             SetPrimarySpecialization(primarySpecialization);
             SetActiveTalentGroup(activeTalentGroup);
-            ChrSpecializationRecord primarySpec = GetPrimarySpecializationEntry();
-            if (primarySpec == null || primarySpec.ClassID != (byte)GetClass() || GetActiveTalentGroup() >= PlayerConst.MaxSpecializations)
-                ResetTalentSpecialization();
 
-            //ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(lootSpecId);
-            //if (chrSpec != null)
-            //{
-            //    if (chrSpec.ClassID == (uint)GetClass())
-            //        SetLootSpecId(lootSpecId);
-            //}
+            ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(lootSpecId);
+            if (chrSpec != null)
+            {
+                if (chrSpec.ClassID == (uint)GetClass())
+                    SetLootSpecId(lootSpecId);
+            }
 
             UpdateDisplayPower();
             _LoadTalents(holder.GetResult(PlayerLoginQueryLoad.Talents));
-            _LoadPvpTalents(holder.GetResult(PlayerLoginQueryLoad.PvpTalents));
             _LoadSpells(holder.GetResult(PlayerLoginQueryLoad.Spells), holder.GetResult(PlayerLoginQueryLoad.SpellFavorites));
             GetSession().GetCollectionMgr().LoadToys();
             GetSession().GetCollectionMgr().LoadHeirlooms();

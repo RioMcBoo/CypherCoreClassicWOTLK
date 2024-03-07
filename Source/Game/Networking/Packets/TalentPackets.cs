@@ -14,7 +14,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(UnspentTalentPoints);
+            _worldPacket.WriteInt32(UnspentTalentPoints);
             _worldPacket.WriteUInt8(ActiveGroup);
             _worldPacket.WriteInt32(TalentGroupInfos.Count);
 
@@ -24,7 +24,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsPetTalents);
         }
 
-        public uint UnspentTalentPoints;
+        public int UnspentTalentPoints;
         public byte ActiveGroup;
         public bool IsPetTalents;
         public List<TalentGroupInfo> TalentGroupInfos = new();        
@@ -253,24 +253,30 @@ namespace Game.Networking.Packets
 
         public byte SpecID;
         public List<TalentInfo> Talents;
-        public uint[] GlyphIDs;
+        public int[] GlyphIDs;
     }
 
     public struct TalentInfo
     {
+        public TalentInfo(int talentId, byte rank)
+        {
+            TalentID = talentId;
+            Rank = rank;
+        }
+
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(TalentID);
+            data.WriteInt32(TalentID);
             data.WriteUInt8(Rank);
         }
 
         public void Read(WorldPacket data)
         {
-            TalentID = data.ReadUInt32();
+            TalentID = data.ReadInt32();
             Rank = data.ReadUInt8();
         }
 
-        public uint TalentID;
+        public int TalentID;
         public byte Rank;
     };
 }

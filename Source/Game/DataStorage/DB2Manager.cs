@@ -1595,35 +1595,6 @@ namespace Game.DataStorage
             return null;
         }
 
-        public int GetRequiredLevelForPvpTalentSlot(byte slot, Class class_)
-        {
-            Cypher.Assert(slot < PlayerConst.MaxPvpTalentSlots);
-            if (_pvpTalentSlotUnlock[slot] != null)
-            {
-                switch (class_)
-                {
-                    case Class.Deathknight:
-                        return _pvpTalentSlotUnlock[slot].DeathKnightLevelRequired;
-                    case Class.DemonHunter:
-                        return _pvpTalentSlotUnlock[slot].DemonHunterLevelRequired;
-                    default:
-                        break;
-                }
-                return _pvpTalentSlotUnlock[slot].LevelRequired;
-            }
-
-            return 0;
-        }
-
-        public int GetPvpTalentNumSlotsAtLevel(int level, Class class_)
-        {
-            int slots = 0;
-            for (byte slot = 0; slot < PlayerConst.MaxPvpTalentSlots; ++slot)
-                if (level >= GetRequiredLevelForPvpTalentSlot(slot, class_))
-                    ++slots;
-            return slots;
-        }
-
         public List<QuestLineXQuestRecord> GetQuestsForQuestLine(int questLineId)
         {
             return _questsByQuestLine.LookupByKey(questLineId);
@@ -2192,7 +2163,6 @@ namespace Game.DataStorage
         MultiMap<int, int> _phasesByGroup = new();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new();
         Dictionary<int, byte> _pvpItemBonus = new();
-        PvpTalentSlotUnlockRecord[] _pvpTalentSlotUnlock = new PvpTalentSlotUnlockRecord[PlayerConst.MaxPvpTalentSlots];
         MultiMap<int, QuestLineXQuestRecord> _questsByQuestLine = new();
         Dictionary<int, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>> _questPackages = new();
         MultiMap<int, RewardPackXCurrencyTypeRecord> _rewardPackCurrencyTypes = new();

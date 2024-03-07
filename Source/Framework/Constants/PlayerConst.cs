@@ -18,9 +18,8 @@ namespace Framework.Constants
         public const int MaxTalentColumns = 4;
         public const int MaxTalentRank = 5;
         public const int MaxPetTalentRank = 3;
-        public const int MaxPvpTalentSlots = 4;
         public const int MinSpecializationLevel = 10;
-        public const int MaxSpecializations = 5;
+        public const int MaxSpecializations = 2;
         public const int InitialSpecializationIndex = 4;
         public const int MaxMasterySpells = 2;
 

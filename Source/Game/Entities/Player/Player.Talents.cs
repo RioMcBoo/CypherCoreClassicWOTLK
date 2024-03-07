@@ -18,16 +18,13 @@ namespace Game.Entities
     {
         public void InitTalentForLevel()
         {
-            uint level = GetLevel();
-            // talents base at level diff (talents = level - 9 but some can be used already)
+            var level = GetLevel();
+
             if (level < PlayerConst.MinSpecializationLevel)
             {
-                // Remove all talent points
-                if (GetUsedTalentCount() > 0)                           // Free any used talents
-                {
-                    ResetTalents(true);
-                    SetFreeTalentPoints(0);
-                }
+                // Remove all talent points                
+                ResetTalents(true);
+
             }
             else
             {
@@ -37,7 +34,7 @@ namespace Game.Entities
                     SetActiveTalentGroup(0);
                 }
 
-                uint talentPointsForLevel = GetNumTalentsAtLevel(GetLevel());
+                var talentPointsForLevel = GetNumTalentsAtLevel(GetLevel());
 
                 // if used more that have then reset
                 if (GetUsedTalentCount() > talentPointsForLevel)
@@ -53,7 +50,7 @@ namespace Game.Entities
             }
 
             if (!GetSession().PlayerLoading())
-                SendTalentsInfoData(false);   // update at client
+                SendTalentsInfoData();   // update at client
         }
 
         public bool AddTalent(int spellId, byte spec, bool learning)
@@ -224,37 +221,6 @@ namespace Game.Entities
             SetFreeTalentPoints(CurTalentPoints - (talentRank - curtalent_maxrank + 1));
         }
 
-        public void ResetTalentSpecialization()
-        {
-            /*
-            // Reset only talents that have different spells for each spec
-            Class class_ = GetClass();
-            for (uint t = 0; t < PlayerConst.MaxTalentTiers; ++t)
-            {
-                for (uint c = 0; c < PlayerConst.MaxTalentColumns; ++c)
-                {
-                    if (Global.DB2Mgr.GetTalentsByPosition(class_, t, c).Count > 1)
-                    {
-                        foreach (TalentRecord talent in Global.DB2Mgr.GetTalentsByPosition(class_, t, c))
-                            RemoveTalent((uint)talent.SpellID);
-                    }
-                }
-            }
-
-            ResetPvpTalents();
-            RemoveSpecializationSpells();
-
-            ChrSpecializationRecord defaultSpec = Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
-            SetPrimarySpecialization(defaultSpec.Id);
-            SetActiveTalentGroup((byte)defaultSpec.OrderIndex);
-
-            LearnSpecializationSpells();
-
-            SendTalentsInfoData(false);
-            UpdateItemSetAuras(false);
-            */
-        }
-
         bool HasTalent(int talentId, byte group)
         {
             if (GetTalentMap(group).TryGetValue(talentId, out PlayerTalent itr))
@@ -294,9 +260,9 @@ namespace Game.Entities
             return Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass()).Id;
         }
 
-        public void ActivateTalentGroup(ChrSpecializationRecord spec)
+        public void ActivateTalentGroup(byte talentGroup)
         {
-            if (GetActiveTalentGroup() == spec.OrderIndex)
+            if (GetActiveTalentGroup() == talentGroup)
                 return;
 
             if (IsNonMeleeSpellCast(false))
@@ -354,24 +320,7 @@ namespace Game.Entities
                     RemoveOverrideSpell((uint)talentInfo.OverridesSpellID, (uint)talentInfo.SpellID);
             }
 
-            foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
-            {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
-                if (spellInfo == null)
-                    continue;
-
-                RemoveSpell(talentInfo.SpellID, true);
-
-                // search for spells that the talent teaches and unlearn them
-                foreach (var spellEffectInfo in spellInfo.GetEffects())
-                    if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
-                        RemoveSpell(spellEffectInfo.TriggerSpell, true);
-
-                if (talentInfo.OverridesSpellID != 0)
-                    RemoveOverrideSpell((uint)talentInfo.OverridesSpellID, (uint)talentInfo.SpellID);
-            }
-
-            ApplyTraitConfig((int)(uint)m_activePlayerData.ActiveCombatTraitConfigID, false);
+            ApplyTraitConfig(m_activePlayerData.ActiveCombatTraitConfigID, false);
 
             // Remove spec specific spells
             RemoveSpecializationSpells();
@@ -379,19 +328,9 @@ namespace Game.Entities
             foreach (var glyphId in GetGlyphs(GetActiveTalentGroup()))
                 RemoveAurasDueToSpell(CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID);
 
-            SetActiveTalentGroup((byte)spec.OrderIndex);
-            SetPrimarySpecialization(spec.Id);
-            int specTraitConfigIndex = m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
-            {
-                return (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat
-                    && traitConfig.ChrSpecializationID == spec.Id
-                    && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) != TraitCombatConfigFlags.None;
-            });
-            if (specTraitConfigIndex >= 0)
-                SetActiveCombatTraitConfigID(m_activePlayerData.TraitConfigs[specTraitConfigIndex].ID);
-            else
-                SetActiveCombatTraitConfigID(0);
-
+            SetActiveTalentGroup(talentGroup);
+            SetPrimarySpecialization(0);
+           
             foreach (var talentInfo in CliDB.TalentStorage.Values)
             {
                 // learn only talents for character class
@@ -409,32 +348,8 @@ namespace Game.Entities
                 }
             }
 
-            for (byte slot = 0; slot < PlayerConst.MaxPvpTalentSlots; ++slot)
-            {
-                PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(GetPvpTalentMap(GetActiveTalentGroup())[slot]);
-                if (talentInfo == null)
-                    continue;
-
-                if (talentInfo.SpellID == 0)
-                    continue;
-
-                AddPvpTalent(talentInfo, GetActiveTalentGroup(), slot);
-            }
-
             LearnSpecializationSpells();
-
-            if (CanUseMastery())
-            {
-                for (uint i = 0; i < PlayerConst.MaxMasterySpells; ++i)
-                {
-                    uint mastery = (uint)spec.MasterySpellID[i];
-                    if (mastery != 0)
-                        LearnSpell(mastery, true);
-                }
-            }
-
-            ApplyTraitConfig((int)(uint)m_activePlayerData.ActiveCombatTraitConfigID, true);
-
+            
             InitTalentForLevel();
 
             StartLoadingActionButtons();
@@ -455,20 +370,8 @@ namespace Game.Entities
                     SetVisibleItemSlot(i, equippedItem);
             }
 
-            foreach (var glyphId in GetGlyphs((byte)spec.OrderIndex))
+            foreach (var glyphId in GetGlyphs(talentGroup))
                 CastSpell(this, CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID, true);
-
-            ActiveGlyphs activeGlyphs = new();
-            foreach (var glyphId in GetGlyphs((byte)spec.OrderIndex))
-            {
-                List<int> bindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
-                foreach (var bindableSpell in bindableSpells)
-                    if (HasSpell(bindableSpell) && !m_overrideSpells.ContainsKey(bindableSpell))
-                        activeGlyphs.Glyphs.Add(new GlyphBinding(bindableSpell, (ushort)glyphId));
-            }
-
-            activeGlyphs.IsFullUpdate = true;
-            SendPacket(activeGlyphs);
 
             var shapeshiftAuras = GetAuraEffectsByType(AuraType.ModShapeshift);
             foreach (AuraEffect aurEff in shapeshiftAuras)
@@ -631,61 +534,44 @@ namespace Game.Entities
         public void SendTalentsInfoData()
         {
             UpdateTalentData packet = new();
+            var ActiveGroup = GetActiveTalentGroup();
+            packet.ActiveGroup = ActiveGroup;
             packet.UnspentTalentPoints = GetFreeTalentPoints();
-            packet.ActiveGroup = 0;
 
-            /*
             for (byte specIdx = 0; specIdx < GetTalentGroupCount(); ++specIdx)
             {
                 TalentGroupInfo groupInfoPkt = new();
-                groupInfoPkt.SpecID = 0;
+                groupInfoPkt.SpecID = PlayerConst.MaxSpecializations;
+                var talents = GetTalentMap(specIdx);
 
-
-                // find class talent tabs (all players have 3 talent tabs)
-                uint[] talentTabIds = Global.DB2Mgr.GetTalentTabPages((uint)GetClass());
-
-                for (byte i = 0; i < PlayerConst.MaxTalentTabs; ++i)
+                foreach (var pair in talents)
                 {
-                    uint talentTabId = talentTabIds[i];
+                    if (pair.Value.state == PlayerSpellState.Removed)
+                        continue;
 
-                    for (uint talentId = 0; talentId < CliDB.TalentStorage.GetNumRows(); ++talentId)
+                    TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(pair.Key);
+                    if (talentInfo == null)
                     {
-                        TalentRecord talent = CliDB.TalentStorage.LookupByKey(talentId);
-                        if (talent == null)
-                            continue;
-
-                        // skip another tab talents
-                        if (talent.TabID != talentTabId)
-                            continue;
-
-                        // find max talent rank (0~4)
-                        int curtalent_maxrank = -1;
-                        for (int rank = PlayerConst.MaxTalentRank - 1; rank >= 0; --rank)
-                        {
-                            if (talent.SpellRank[rank] != 0 && HasTalent((uint)talent.SpellRank[rank], specIdx))
-                            {
-                                curtalent_maxrank = rank;
-                                break;
-                            }
-                        }
-
-                        // not learned talent
-                        if (curtalent_maxrank < 0)
-                            continue;
-
-                        TalentInfo talentInfo;
-                        talentInfo.TalentID = talent.Id;
-                        talentInfo.Rank = (byte)curtalent_maxrank;
-
-                        groupInfoPkt.Talents.Add(talentInfo);
+                        Log.outError(LogFilter.Player, 
+                            $"Player::SendTalentsInfoData: Player '{GetName()}' ({GetGuild()}) has unknown talent id: {pair.Key}.");
+                        continue;
                     }
+
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                    if (spellEntry == null)
+                    {
+                        Log.outError(LogFilter.Player, 
+                            $"Player::SendTalentsInfoData: Player '{GetName()}' ({GetGuild()}) has unknown talent spell: {talentInfo.SpellID}.");
+                        continue;
+                    }
+
+                    groupInfoPkt.Talents.Add(new(pair.Key, pair.Value.rank));
                 }
 
                 groupInfoPkt.GlyphIDs = GetGlyphs(specIdx);
-
                 packet.TalentGroupInfos.Add(groupInfoPkt);
             }
-            */
+
             SendPacket(packet);
         }
 
@@ -697,154 +583,6 @@ namespace Game.Entities
             respecWipeConfirm.RespecType = respecType;
             SendPacket(respecWipeConfirm);
         }
-
-        //Pvp
-        void ResetPvpTalents()
-        {
-            for (byte spec = 0; spec < PlayerConst.MaxSpecializations; ++spec)
-            {
-                foreach (uint talentId in GetPvpTalentMap(spec))
-                {
-                    var talentInfo = CliDB.PvpTalentStorage.LookupByKey(talentId);
-                    if (talentInfo != null)
-                        RemovePvpTalent(talentInfo, spec);
-                }
-            }
-        }
-
-        public TalentLearnResult LearnPvpTalent(uint talentID, byte slot, ref uint spellOnCooldown)
-        {
-            if (slot >= PlayerConst.MaxPvpTalentSlots)
-                return TalentLearnResult.FailedUnknown;
-
-            if (IsInCombat())
-                return TalentLearnResult.FailedAffectingCombat;
-
-            if (IsDead())
-                return TalentLearnResult.FailedCantDoThatRightNow;
-
-            PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(talentID);
-            if (talentInfo == null)
-                return TalentLearnResult.FailedUnknown;
-
-            if ((ChrSpecialization)talentInfo.SpecID != GetPrimarySpecialization())
-                return TalentLearnResult.FailedUnknown;
-
-            if (talentInfo.LevelRequired > GetLevel())
-                return TalentLearnResult.FailedUnknown;
-
-            if (Global.DB2Mgr.GetRequiredLevelForPvpTalentSlot(slot, GetClass()) > GetLevel())
-                return TalentLearnResult.FailedUnknown;
-
-            PvpTalentCategoryRecord talentCategory = CliDB.PvpTalentCategoryStorage.LookupByKey(talentInfo.PvpTalentCategoryID);
-            if (talentCategory != null)
-                if (!Convert.ToBoolean(talentCategory.TalentSlotMask & (1 << slot)))
-                    return TalentLearnResult.FailedUnknown;
-
-            // Check if player doesn't have this talent in other slot
-            if (HasPvpTalent(talentID, GetActiveTalentGroup()))
-                return TalentLearnResult.FailedUnknown;
-
-            PvpTalentRecord talent = CliDB.PvpTalentStorage.LookupByKey(GetPvpTalentMap(GetActiveTalentGroup())[slot]);
-            if (talent != null)
-            {
-                if (!HasPlayerFlag(PlayerFlags.Resting) && !HasUnitFlag2(UnitFlags2.AllowChangingTalents))
-                    return TalentLearnResult.FailedRestArea;
-
-                if (GetSpellHistory().HasCooldown((uint)talent.SpellID))
-                {
-                    spellOnCooldown = (uint)talent.SpellID;
-                    return TalentLearnResult.FailedCantRemoveTalent;
-                }
-
-                RemovePvpTalent(talent, GetActiveTalentGroup());
-            }
-
-            if (!AddPvpTalent(talentInfo, GetActiveTalentGroup(), slot))
-                return TalentLearnResult.FailedUnknown;
-
-            return TalentLearnResult.LearnOk;
-        }
-
-        bool AddPvpTalent(PvpTalentRecord talent, byte activeTalentGroup, byte slot)
-        {
-            //ASSERT(talent);
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talent.SpellID, Difficulty.None);
-            if (spellInfo == null)
-            {
-                Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) does not exist.");
-                return false;
-            }
-
-            if (!Global.SpellMgr.IsSpellValid(spellInfo, this, false))
-            {
-                Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) is invalid");
-                return false;
-            }
-
-            if (activeTalentGroup == GetActiveTalentGroup() && HasAuraType(AuraType.PvpTalents))
-            {
-                LearnSpell((uint)talent.SpellID, true);
-
-                // Move this to toggle ?
-                if (talent.OverridesSpellID != 0)
-                    AddOverrideSpell((uint)talent.OverridesSpellID, (uint)talent.SpellID);
-            }
-
-            GetPvpTalentMap(activeTalentGroup)[slot] = talent.Id;
-
-            return true;
-        }
-
-        void RemovePvpTalent(PvpTalentRecord talent, byte activeTalentGroup)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)talent.SpellID, Difficulty.None);
-            if (spellInfo == null)
-                return;
-
-            RemoveSpell((uint)talent.SpellID, true);
-
-            // Move this to toggle ?
-            if (talent.OverridesSpellID != 0)
-                RemoveOverrideSpell((uint)talent.OverridesSpellID, (uint)talent.SpellID);
-
-            // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
-            var talents = GetPvpTalentMap(activeTalentGroup);
-            for (var i = 0; i < PlayerConst.MaxPvpTalentSlots; ++i)
-            {
-                if (talents[i] == talent.Id)
-                    talents[i] = 0;
-            }
-        }
-
-        public void TogglePvpTalents(bool enable)
-        {
-            var pvpTalents = GetPvpTalentMap(GetActiveTalentGroup());
-            foreach (uint pvpTalentId in pvpTalents)
-            {
-                PvpTalentRecord pvpTalentInfo = CliDB.PvpTalentStorage.LookupByKey(pvpTalentId);
-                if (pvpTalentInfo != null)
-                {
-                    if (enable)
-                    {
-                        LearnSpell((uint)pvpTalentInfo.SpellID, false);
-                        if (pvpTalentInfo.OverridesSpellID != 0)
-                            AddOverrideSpell((uint)pvpTalentInfo.OverridesSpellID, (uint)pvpTalentInfo.SpellID);
-                    }
-                    else
-                    {
-                        if (pvpTalentInfo.OverridesSpellID != 0)
-                            RemoveOverrideSpell((uint)pvpTalentInfo.OverridesSpellID, (uint)pvpTalentInfo.SpellID);
-                        RemoveSpell((uint)pvpTalentInfo.SpellID, true);
-                    }
-                }
-            }
-        }
-
-        bool HasPvpTalent(uint talentID, byte activeTalentGroup)
-        {
-            return GetPvpTalentMap(activeTalentGroup).Contains(talentID);
-        }
                 
         uint GetUsedTalentCount() { return _specializationInfo.UsedTalentCount; }
         void SetUsedTalentCount(uint count) { _specializationInfo.UsedTalentCount = count; }
@@ -852,7 +590,7 @@ namespace Game.Entities
         void SetQuestRewardTalentCount(uint count) { _specializationInfo.QuestRewardTalentCount = count; }
         byte GetTalentGroupCount() { return _specializationInfo.TalentGroupCount; }
         void SetTalentGroupCount(byte count) { _specializationInfo.TalentGroupCount = count; }
-        uint GetFreeTalentPoints() { return (uint)m_activePlayerData.CharacterPoints.GetValue(); }
+        int GetFreeTalentPoints() { return m_activePlayerData.CharacterPoints; }
         public void SetFreeTalentPoints(uint points)
         {
             Global.ScriptMgr.OnPlayerFreeTalentPointsChanged(this, points);
