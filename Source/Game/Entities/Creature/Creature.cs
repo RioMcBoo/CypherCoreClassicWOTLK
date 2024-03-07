@@ -333,17 +333,15 @@ namespace Game.Entities
 
             if (updateLevel)
                 SelectLevel();
-            else if (!IsGuardian())
+
+            // Do not update guardian stats here - they are handled in Guardian::InitStatsForLevel()
+            if (!IsGuardian())
             {
                 ulong previousHealth = GetHealth();
                 UpdateLevelDependantStats(); // We still re-initialize level dependant stats on entry update
                 if (previousHealth > 0)
                     SetHealth(previousHealth);
-            }
-
-            // Do not update guardian stats here - they are handled in Guardian::InitStatsForLevel()
-            if (!IsGuardian())
-            {
+            
                 SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
                 SetStatFlatModifier(UnitMods.ResistanceHoly, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Holy]);
                 SetStatFlatModifier(UnitMods.ResistanceFire, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Fire]);
@@ -1447,7 +1445,6 @@ namespace Game.Entities
         public void SelectLevel()
         {
             // Level
-            // Level
             CreatureDifficulty difficulty = GetCreatureDifficulty();
             if (difficulty.MinLevel != difficulty.MaxLevel)
                 SetLevel(RandomHelper.IRand(difficulty.MinLevel, difficulty.MaxLevel));
@@ -1459,14 +1456,13 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureEliteType rank = IsPet() ? 0 : cInfo.Rank;
-            uint level = GetLevel();
-            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
+            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(GetLevel(), cInfo.UnitClass);
 
             // health
             float healthmod = GetHealthMod(rank);
 
-            int basehp = (uint)GetMaxHealthByLevel(level);
-            int health = (uint)(basehp * healthmod);
+            int basehp = stats.GenerateHealth(GetCreatureDifficulty());
+            int health = (int)(basehp * healthmod);
 
             SetCreateHealth(health);
             SetMaxHealth(health);
@@ -1491,7 +1487,7 @@ namespace Game.Entities
             }
 
             //Damage
-            float basedamage = GetBaseDamageForLevel(level);
+            float basedamage = stats.GenerateBaseDamage(GetCreatureDifficulty());
             float weaponBaseMinDamage = basedamage;
             float weaponBaseMaxDamage = basedamage * 1.5f;
 
@@ -1507,7 +1503,7 @@ namespace Game.Entities
             SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, stats.AttackPower);
             SetStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Base, stats.RangedAttackPower);
 
-            float armor = GetBaseArmorForLevel(level);
+            float armor = stats.GenerateArmor(GetCreatureDifficulty());  // @todo Why is this treated as int32 when it's a float?
             SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, armor);
         }
 
