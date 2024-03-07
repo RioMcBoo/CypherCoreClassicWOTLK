@@ -2150,6 +2150,16 @@ namespace Game.Entities
             return moreStam * ratio;
         }
 
+        float GetManaBonusFromIntellect()
+        {
+            float intellect = GetStat(Stats.Intellect);
+
+            float baseInt = Math.Min(20.0f, intellect);
+            float moreInt = intellect - baseInt;
+
+            return baseInt + (moreInt * 15.0f);
+        }
+
         public override uint GetPowerIndex(PowerType powerType)
         {
             return Global.DB2Mgr.GetPowerIndexByClass(powerType, GetClass());
@@ -2163,9 +2173,11 @@ namespace Game.Entities
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
+            float bonusPower = (power == PowerType.Mana && GetCreatePowerValue(power) > 0) ? GetManaBonusFromIntellect() : 0;
+
             float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowerValue(power);
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total) + bonusPower;
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             SetMaxPower(power, (int)Math.Round(value));
