@@ -866,12 +866,40 @@ namespace Framework.Constants
         Focus = 2,
         Energy = 3,
         Happinnes = 4,
-        RunicPower = 5,
+        Runes = 5,
+        RunicPower = 6,
+        ///<summary>(unused 3.4.3)</summary> 
+        SoulShards = 7,
+        ///<summary>(unused 3.4.3)</summary> 
+        LunarPower = 8,
+        ///<summary>(unused 3.4.3)</summary> 
+        HolyPower = 9,
+        ///<summary>(unused 3.4.3)</summary> 
+        AlternatePower = 10,
+        ///<summary>(unused 3.4.3)</summary> 
+        Maelstrom = 11,
+        ///<summary>(unused 3.4.3)</summary> 
+        Chi = 12,
+        ///<summary>(unused 3.4.3)</summary> 
+        Insanity = 13,
         ComboPoints = 14,
+        ///<summary>(unused 3.4.3)</summary> 
+        DemonicFury = 15,
+        ///<summary>(unused 3.4.3)</summary> 
+        ArcaneCharges = 16,
+        ///<summary>(unused 3.4.3)</summary> 
+        Fury = 17,
+        ///<summary>(unused 3.4.3)</summary> 
+        Pain = 18,
+        ///<summary>(unused 3.4.3)</summary> 
+        Essence = 19,
         RuneBlood = 20,
         RuneFrost = 21,
         RuneUnholy = 22,
-        Max = 23,
+        AlternateQuest = 23,
+        AlternateEncounter = 24,
+        AlternateMount = 25,
+        Max = 26,
 
         All = 127,          // default for class?
         MaxPerClass = 10

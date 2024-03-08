@@ -3555,24 +3555,27 @@ namespace Game.Entities
                 WorldCfg.RatePowerFocus,
                 WorldCfg.RatePowerEnergy,
                 0, // happiness
+                0, // runes
                 WorldCfg.RatePowerRunicPowerLoss,
-                0, //unused
-                0, //unused
-                0, //unused
-                0, //unused
-                0, //unused
-                0, //unused
-                0, //unused
-                0, //unused
+                WorldCfg.RatePowerSoulShards,
+                WorldCfg.RatePowerLunarPower,
+                WorldCfg.RatePowerHolyPower,
+                0, // alternate
+                WorldCfg.RatePowerMaelstrom,
+                WorldCfg.RatePowerChi,
+                WorldCfg.RatePowerInsanity,
                 WorldCfg.RatePowerComboPointsLoss,
-                0, //unused
-                0, //unused
-                0, //unused
-                0, //unused
-                0, //unused
-                0, //unused
-                0, //unused
-                0, //unused
+                0, // demonic fury, unused
+                WorldCfg.RatePowerArcaneCharges,
+                WorldCfg.RatePowerFury,
+                WorldCfg.RatePowerPain,
+                WorldCfg.RatePowerEssence,
+                0, // runes
+                0, // runes
+                0, // runes
+                0, // alternate
+                0, // alternate
+                0, // alternate
             };
 
             if (RatesForPower[(int)power] != 0)
