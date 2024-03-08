@@ -294,20 +294,6 @@ namespace Game.Spells
                     }
                     (m_spellmod as SpellModifierByClassMask).value = GetAmount();
                     break;
-                case AuraType.AddFlatModifierBySpellLabel:
-                    if (m_spellmod == null)
-                    {
-                        SpellFlatModifierByLabel spellmod = new(GetBase());
-                        spellmod.op = (SpellModOp)GetMiscValue();
-
-                        spellmod.type = SpellModType.LabelFlat;
-                        spellmod.spellId = GetId();
-                        spellmod.value.ModIndex = GetMiscValue();
-                        spellmod.value.LabelID = GetMiscValueB();
-                        m_spellmod = spellmod;
-                    }
-                    (m_spellmod as SpellFlatModifierByLabel).value.ModifierValue = GetAmount();
-                    break;
                 case AuraType.AddPctModifierBySpellLabel:
                     if (m_spellmod == null)
                     {
@@ -3435,8 +3421,9 @@ namespace Game.Spells
             HandleModPowerRegen(aurApp, mode, apply);
         }
 
+        [AuraEffectHandler(AuraType.ModManaRegenFromStat)]
         [AuraEffectHandler(AuraType.ModManaRegenPct)]
-        void HandleModManaRegenPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        void HandleModManaRegen(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;

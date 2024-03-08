@@ -1472,18 +1472,18 @@ namespace Game.Entities
             // Mana regen from SPELL_AURA_MOD_POWER_REGEN aura
             float power_regen_mp5 = (GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana) + m_baseManaRegen) / 5.0f;
 
-            // SPELL_AURA_ADD_FLAT_MODIFIER_BY_SPELL_LABEL is the proper name, needs proper implementation
             // Get bonus from SPELL_AURA_MOD_MANA_REGEN_FROM_STAT aura
-            //AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_MANA_REGEN_FROM_STAT);
-            //for (AuraEffectList::const_iterator i = regenAura.begin(); i != regenAura.end(); ++i)
-            //    power_regen_mp5 += GetStat(Stats((*i)->GetMiscValue())) * (*i)->GetAmount() / 500.0f;
+            var regenAura = GetAuraEffectsByType(AuraType.ModManaRegenFromStat);
+            foreach (var aura in regenAura)
+                power_regen_mp5 += GetStat((Stats)aura.GetMiscValue()) * aura.GetAmount() / 500.0f;
 
             // Set regen rate in cast state apply only on spirit based regen
             int modManaRegenInterrupt = GetTotalAuraModifier(AuraType.ModManaRegenInterrupt);
             if (modManaRegenInterrupt > 100)
                 modManaRegenInterrupt = 100;
 
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)manaIndex), power_regen_mp5 + power_regen);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)manaIndex), power_regen_mp5 + MathFunctions.CalculatePct(power_regen, modManaRegenInterrupt));
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)manaIndex), power_regen_mp5 + power_regen);
         }
 
         public void UpdateSpellDamageAndHealingBonus()

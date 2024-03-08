@@ -226,7 +226,7 @@ namespace Framework.Constants
         HasteSpells = 216,
         ModMeleeHaste2 = 217,
         AddPctModifierBySpellLabel = 218,
-        AddFlatModifierBySpellLabel = 219,
+        ModManaRegenFromStat = 219,
         ModAbilitySchoolMask = 220, //NYI
         ModDetaunt = 221,
         RemoveTransmogCost = 222,

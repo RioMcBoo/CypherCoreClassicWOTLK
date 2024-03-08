@@ -1407,7 +1407,7 @@ namespace Game.Entities
                                     continue;
 
                                 if (spellEffectInfo.ApplyAuraName == AuraType.AddPctModifier || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifier
-                                    || spellEffectInfo.ApplyAuraName == AuraType.AddPctModifierBySpellLabel || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifierBySpellLabel
+                                    || spellEffectInfo.ApplyAuraName == AuraType.AddPctModifierBySpellLabel
                                     || spellEffectInfo.ApplyAuraName == AuraType.IgnoreSpellCooldown)
                                 {
                                     found = true;
@@ -2213,7 +2213,6 @@ namespace Game.Entities
                     case AuraType.AddFlatModifier:
                     case AuraType.AddPctModifier:
                     case AuraType.AddPctModifierBySpellLabel:
-                    case AuraType.AddFlatModifierBySpellLabel:
                         Cypher.Assert(effect.EffectMiscValue[0] < (int)SpellModOp.Max, $"MAX_SPELLMOD must be at least {effect.EffectMiscValue[0] + 1}");
                         break;
                     default:

@@ -25,6 +25,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Game.AI.SmartTarget;
 using static Global;
 
 namespace Game.Entities
@@ -3685,6 +3686,10 @@ namespace Game.Entities
                 return;
 
             float HealthIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RateHealth);
+
+            if (GetLevel() < 15)
+                HealthIncreaseRate *= (2.066f - (GetLevel() * 0.066f));
+
             float addValue = 0.0f;
 
             // polymorphed case

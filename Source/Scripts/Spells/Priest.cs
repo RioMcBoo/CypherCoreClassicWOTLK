@@ -217,60 +217,7 @@ namespace Scripts.Spells.Priest
                 }
             }
         }
-    }
-
-    [Script] // 391387 - Answered Prayers
-    class spell_pri_answered_prayers : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.AnsweredPrayers, SpellIds.Apotheosis)
-                && ValidateSpellEffect((spellInfo.Id, 1));
-        }
-
-        void HandleOnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            TimeSpan extraDuration = TimeSpan.FromMilliseconds(0);
-            AuraEffect durationEffect = GetEffect(1);
-            if (durationEffect != null)
-                extraDuration = TimeSpan.FromSeconds(durationEffect.GetAmount());
-
-            Unit target = eventInfo.GetActor();
-
-            Aura answeredPrayers = target.GetAura(SpellIds.AnsweredPrayers);
-
-            // Note: if caster has no aura, we must cast it first.
-            if (answeredPrayers == null)
-                target.CastSpell(target, SpellIds.AnsweredPrayers, TriggerCastFlags.IgnoreCastInProgress);
-            else
-            {
-                // Note: there's no BaseValue dummy that we can use as reference, so we hardcode the increasing stack value.
-                answeredPrayers.ModStackAmount(1);
-
-                // Note: if current stacks match max. stacks, trigger Apotheosis.
-                if (answeredPrayers.GetStackAmount() != aurEff.GetAmount())
-                    return;
-
-                answeredPrayers.Remove();
-
-                Aura apotheosis = GetTarget().GetAura(SpellIds.Apotheosis);
-                if (apotheosis != null)
-                {
-                    apotheosis.SetDuration((int)(apotheosis.GetDuration() + extraDuration.TotalMilliseconds));
-                    apotheosis.SetMaxDuration((int)(apotheosis.GetMaxDuration() + extraDuration.TotalMilliseconds));
-                }
-                else
-                    target.CastSpell(target, SpellIds.Apotheosis,
-                        new CastSpellExtraArgs(TriggerCastFlags.FullMask & ~TriggerCastFlags.CastDirectly)
-                        .AddSpellMod(SpellValueMod.Duration, (int)extraDuration.TotalMilliseconds));
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new(HandleOnProc, 0, AuraType.AddFlatModifierBySpellLabel));
-        }
-    }
+    }    
 
     [Script] // 26169 - Oracle Healing Bonus
     class spell_pri_aq_3p_bonus : AuraScript

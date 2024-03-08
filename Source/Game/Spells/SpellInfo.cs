@@ -3690,7 +3690,6 @@ namespace Game.Spells
                     }
                     case AuraType.AddFlatModifier:          // mods
                     case AuraType.AddPctModifier:
-                    case AuraType.AddFlatModifierBySpellLabel:
                     case AuraType.AddPctModifierBySpellLabel:
                     {
                         switch ((SpellModOp)effect.MiscValue)
