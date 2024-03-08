@@ -716,7 +716,7 @@ namespace Game.Entities
             owner.ToPlayer().SendPacket(packet);
         }
 
-        void SetLastManaUse(uint spellCastTime) { m_lastManaUse = spellCastTime; }        
+        public void SetLastManaUse(uint spellCastTime) { m_lastManaUseTime = spellCastTime; }        
 
         public Pet CreateTamedPetFrom(Creature creatureTarget, uint spell_id = 0)
         {

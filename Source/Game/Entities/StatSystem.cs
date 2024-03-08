@@ -697,7 +697,7 @@ namespace Game.Entities
             return 0;
         }
 
-        public virtual uint GetPowerIndex(PowerType powerType) { return 0; }
+        public virtual int GetPowerIndex(PowerType powerType) { return 0; }
 
         public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f * GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
 
@@ -1459,7 +1459,7 @@ namespace Game.Entities
 
         public void UpdateManaRegen()
         {
-            uint manaIndex = GetPowerIndex(PowerType.Mana);
+            var manaIndex = GetPowerIndex(PowerType.Mana);
             if (manaIndex == (int)PowerType.Max)
                 return;
 
@@ -1482,8 +1482,8 @@ namespace Game.Entities
             if (modManaRegenInterrupt > 100)
                 modManaRegenInterrupt = 100;
 
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)manaIndex), power_regen_mp5 + MathFunctions.CalculatePct(power_regen, modManaRegenInterrupt));
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)manaIndex), power_regen_mp5 + power_regen);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, manaIndex), power_regen_mp5 + MathFunctions.CalculatePct(power_regen, modManaRegenInterrupt));
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, manaIndex), power_regen_mp5 + power_regen);
         }
 
         public void UpdateSpellDamageAndHealingBonus()
@@ -2160,11 +2160,11 @@ namespace Game.Entities
             return baseInt + (moreInt * 15.0f);
         }
 
-        public override uint GetPowerIndex(PowerType powerType)
+        public override int GetPowerIndex(PowerType powerType)
         {
             return Global.DB2Mgr.GetPowerIndexByClass(powerType, GetClass());
         }
-
+        
         public override void UpdateMaxPower(PowerType power)
         {
             uint powerIndex = GetPowerIndex(power);

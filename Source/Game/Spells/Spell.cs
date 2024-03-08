@@ -4476,6 +4476,10 @@ namespace Game.Spells
                 }
 
                 unitCaster.ModifyPower(cost.Power, -cost.Amount);
+
+                if (cost.Power == PowerType.Mana)
+                    unitCaster.SetLastManaUse(GameTime.GetGameTimeMS());
+
             }
         }
 

@@ -2345,9 +2345,9 @@ namespace Game.Entities
             return !IsSitState() && s != UnitStandStateType.Sleep && s != UnitStandStateType.Kneel;
         }
 
-        public bool IsUnderLastManaUseEffect()
+        public bool IsPowerRegenInterruptedByMP5Rule()
         {
-            return Time.GetMSTimeDiff(m_lastManaUse, GameTime.GetGameTimeMS()) < 5000;
+            return Time.GetMSTimeDiff(m_lastManaUseTime, GameTime.GetGameTimeMS()) < 5000;
         }
 
         public void SetStandState(UnitStandStateType state, uint animKitId = 0)

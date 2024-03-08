@@ -109,7 +109,7 @@ namespace Game.Entities
         public ObjectGuid[] m_ObjectSlot = new ObjectGuid[4];
         public UnitTypeMask UnitTypeMask { get; set; }
         UnitState m_state;
-        uint m_lastManaUse; // msecs
+        uint m_lastManaUseTime; // msecs
         protected LiquidTypeRecord _lastLiquid;
         protected DeathState m_deathState;
         public Vehicle m_vehicle { get; set; }

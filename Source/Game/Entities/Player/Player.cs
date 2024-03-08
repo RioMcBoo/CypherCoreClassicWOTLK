@@ -3523,7 +3523,7 @@ namespace Game.Entities
         void Regenerate(PowerType power)
         {
             // Skip regeneration for power Type we cannot have
-            uint powerIndex = GetPowerIndex(power);
+            var powerIndex = GetPowerIndex(power);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
@@ -3540,13 +3540,13 @@ namespace Game.Entities
 
             float addvalue = 0;
 
-            if (!IsInCombat())
-            {
-                if (powerType.GetFlags().HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) < GameTime.Now())
-                    return;
+            if (power == PowerType.Mana && IsPowerRegenInterruptedByMP5Rule())
+                addvalue = (powerType.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[powerIndex]) * 0.001f * RegenTimer;            
+            else
+                addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[powerIndex]) * 0.001f * RegenTimer;
 
-                addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
-            }
+            if (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) < GameTime.Now())
+                return;
 
             WorldCfg[] RatesForPower =
             {
@@ -3660,15 +3660,15 @@ namespace Game.Entities
                 // throttle packet sending
                 DoWithSuppressingObjectUpdates(() =>
                 {
-                    SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)powerIndex), curValue);
-                    m_unitData.ClearChanged(m_unitData.Power, (int)powerIndex);
+                    SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, powerIndex), curValue);
+                    m_unitData.ClearChanged(m_unitData.Power, powerIndex);
                 });
             }
         }
 
         public void InterruptPowerRegen(PowerType power)
         {
-            uint powerIndex = GetPowerIndex(power);
+            var powerIndex = GetPowerIndex(power);
             if (powerIndex == (uint)PowerType.Max || powerIndex >= (uint)PowerType.MaxPerClass)
                 return;
 

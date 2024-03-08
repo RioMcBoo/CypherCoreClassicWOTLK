@@ -926,7 +926,7 @@ namespace Game.DataStorage
             return classEntry.Name[Locale.enUS];
         }
 
-        public uint GetPowerIndexByClass(PowerType powerType, Class classId)
+        public int GetPowerIndexByClass(PowerType powerType, Class classId)
         {
             return _powersByClass[(int)classId][(int)powerType];
         }
@@ -2125,7 +2125,7 @@ namespace Game.DataStorage
         Dictionary<(int azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new();
         Dictionary<(int broadcastTextId, CascLocaleBit cascLocaleBit), int> _broadcastTextDurations = new();
         ChrClassUIDisplayRecord[] _uiDisplayByClass = new ChrClassUIDisplayRecord[(int)Class.Max];
-        uint[][] _powersByClass = new uint[(int)Class.Max][];
+        int[][] _powersByClass = new int[(int)Class.Max][];
         MultiMap<int, ChrCustomizationChoiceRecord> _chrCustomizationChoicesByOption = new();
         Dictionary<(Race, Gender), ChrModelRecord> _chrModelsByRaceAndGender = new();
         Dictionary<(Race, Gender, ShapeShiftForm), ShapeshiftFormModelData> _chrCustomizationChoicesForShapeshifts = new();

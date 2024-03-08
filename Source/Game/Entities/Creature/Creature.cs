@@ -631,7 +631,7 @@ namespace Game.Entities
                         // Combat and any controlled creature
                         if (IsInCombat() || GetCharmerOrOwnerGUID().IsEmpty())
                         {
-                            if (!IsUnderLastManaUseEffect())
+                            if (!IsPowerRegenInterruptedByMP5Rule())
                             {
                                 float ManaIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RatePowerMana);
                                 float Spirit = GetStat(Stats.Spirit);
