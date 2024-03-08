@@ -2139,10 +2139,6 @@ namespace Game.Entities
         float GetHealthBonusFromStamina()
         {
             float ratio = 10.0f;
-            GtHpPerStaRecord hpBase = CliDB.HpPerStaGameTable.GetRow(GetLevel());
-            if (hpBase != null)
-                ratio = hpBase.Health;
-
             float stamina = GetStat(Stats.Stamina);
             float baseStam = Math.Min(20f, stamina);
             float moreStam = stamina - baseStam;
