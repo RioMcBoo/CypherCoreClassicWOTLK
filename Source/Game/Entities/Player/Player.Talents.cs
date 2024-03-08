@@ -529,7 +529,7 @@ namespace Game.Entities
             }
 
             return true;
-        }
+        }        
 
         public void SendTalentsInfoData()
         {
@@ -597,7 +597,12 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), (int)points);
         }
 
-        public uint GetNumTalentsAtLevel(uint level)
+        public int CalculateTalentsPoints()
+        {
+            return GetNumTalentsAtLevel(GetLevel()) + m_questRewardedTalentPoints;
+        }
+
+        public int GetNumTalentsAtLevel(int level)
         {
             var talentsAtLevel = CliDB.NumTalentsAtLevelStorage;
             talentsAtLevel.TryGetValue(level, out NumTalentsAtLevelRecord numTalentsAtLevel);

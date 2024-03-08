@@ -99,6 +99,7 @@ namespace Game.Entities
         int m_baseHealthRegen;
         int m_spellPenetrationItemMod;
         int m_lastPotionId;
+        int m_questRewardedTalentPoints;
 
         //Spell
         Dictionary<int, PlayerSpell> m_spells = new();

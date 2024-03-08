@@ -1080,6 +1080,12 @@ namespace Game.Entities
                     SetTitle(titleEntry);
             }
 
+            if (quest.RewardSkillPoints != 0)
+            {
+                m_questRewardedTalentPoints += quest.RewardSkillPoints;
+                InitTalentForLevel();
+            }
+
             // Send reward mail
             var mail_template_id = quest.RewardMailTemplateId;
             if (mail_template_id != 0)

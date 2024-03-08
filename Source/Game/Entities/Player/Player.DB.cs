@@ -808,6 +808,10 @@ namespace Game.Entities
                                 SetTitle(titleEntry);
                         }
 
+                        if (quest.RewardSkillPoints != 0)
+                            m_questRewardedTalentPoints += quest.RewardSkillPoints;
+
+
                         // Skip loading special quests - they are also added to rewarded quests but only once and remain there forever
                         // instead add them separately from load daily/weekly/monthly/seasonal
                         if (!quest.IsDailyOrWeekly() && !quest.IsMonthly() && !quest.IsSeasonal())
