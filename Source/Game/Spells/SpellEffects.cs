@@ -4764,9 +4764,11 @@ namespace Game.Spells
                 return;
 
             if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
-                return;
+                return;                       
 
-            unitTarget.ToPlayer().SetBonusTalentGroupCount(effectInfo.BasePoints);
+            Player playerCaster = unitTarget.ToPlayer();
+            playerCaster.SetBonusTalentGroupCount(effectInfo.BasePoints);
+            playerCaster.SendTalentsInfoData();
         }
 
         [SpellEffectHandler(SpellEffectName.TalentSpecSelect)]

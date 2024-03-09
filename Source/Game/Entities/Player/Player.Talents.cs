@@ -236,7 +236,7 @@ namespace Game.Entities
         void SetActiveTalentGroup(int group) { _specializationInfo.ActiveGroup = (byte)group; }
 
         byte GetBonusTalentGroupCount() { return _specializationInfo.BonusGroups; }
-        void SetBonusTalentGroupCount(int amount)
+        public void SetBonusTalentGroupCount(int amount)
         {
             if (_specializationInfo.BonusGroups == amount)
                 return;
@@ -247,8 +247,6 @@ namespace Game.Entities
                 ResetTalents(true);
                 ActivateTalentGroup(0);
             }
-            else
-                SendTalentsInfoData();
         }
 
     // Loot Spec
