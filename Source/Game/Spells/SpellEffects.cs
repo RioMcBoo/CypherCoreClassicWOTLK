@@ -4757,14 +4757,28 @@ namespace Game.Spells
             unitTarget.ToPlayer().SendPacket(new PlayMusic(soundid));
         }
 
-        [SpellEffectHandler(SpellEffectName.TalentSpecSelect)]
-        void EffectActivateSpec()
+        [SpellEffectHandler(SpellEffectName.TalentSpecCount)]
+        void EffectTalentSpecCount()
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
             if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
                 return;
+
+            unitTarget.ToPlayer().SetBonusTalentGroupCount(effectInfo.BasePoints);
+        }
+
+        [SpellEffectHandler(SpellEffectName.TalentSpecSelect)]
+        void EffectTalentSpecSelect()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
+                return;
+
+            unitTarget.ToPlayer().ActivateTalentGroup(effectInfo.BasePoints);
         }
 
         [SpellEffectHandler(SpellEffectName.PlaySound)]

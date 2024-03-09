@@ -361,19 +361,17 @@ namespace Game.Entities
         {
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
-                Talents[i] = new Dictionary<int, PlayerTalent>();
+                Talents[i] = new Dictionary<int, PlayerTalentState>();
                 Glyphs[i] = new int[PlayerConst.MaxGlyphSlotIndex];
             }
         }
 
-        public Dictionary<int, PlayerTalent>[] Talents = new Dictionary<int, PlayerTalent>[PlayerConst.MaxSpecializations];
+        public Dictionary<int, PlayerTalentState>[] Talents = new Dictionary<int, PlayerTalentState>[PlayerConst.MaxSpecializations];
         public int[][] Glyphs = new int[PlayerConst.MaxSpecializations][];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;
-        public uint UsedTalentCount;
-        public uint QuestRewardTalentCount;
         public byte ActiveGroup;
-        public byte TalentGroupCount;
+        public byte BonusGroups;
     }
 
     public class Runes
@@ -678,9 +676,9 @@ namespace Game.Entities
         public QuestObjective Objective;
     }
 
-    public readonly record struct PlayerTalent
+    public readonly record struct PlayerTalentState
     {
-        public PlayerTalent(byte rank, PlayerSpellState state)
+        public PlayerTalentState(byte rank, PlayerSpellState state)
         {
             this.state = state;
             this.rank = rank;

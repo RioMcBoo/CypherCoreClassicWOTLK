@@ -790,7 +790,7 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnLevelChanged(player, oldLevel));
         }
-        public void OnPlayerFreeTalentPointsChanged(Player player, uint newPoints)
+        public void OnPlayerFreeTalentPointsChanged(Player player, int newPoints)
         {
             ForEach<PlayerScript>(p => p.OnFreeTalentPointsChanged(player, newPoints));
         }

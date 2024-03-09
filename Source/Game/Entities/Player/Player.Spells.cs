@@ -303,54 +303,6 @@ namespace Game.Entities
             m_overrideSpells.Remove(overridenSpellId, newSpellId);
         }
 
-        void LearnSpecializationSpells()
-        {
-            var specSpells = Global.DB2Mgr.GetSpecializationSpells((uint)GetPrimarySpecialization());
-            if (specSpells != null)
-            {
-                for (int j = 0; j < specSpells.Count; ++j)
-                {
-                    SpecializationSpellsRecord specSpell = specSpells[j];
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID, Difficulty.None);
-                    if (spellInfo == null || spellInfo.SpellLevel > GetLevel())
-                        continue;
-
-                    LearnSpell(specSpell.SpellID, true);
-                    if (specSpell.OverridesSpellID != 0)
-                        AddOverrideSpell(specSpell.OverridesSpellID, specSpell.SpellID);
-                }
-            }
-        }
-
-        void RemoveSpecializationSpells()
-        {
-            for (uint i = 0; i < PlayerConst.MaxSpecializations; ++i)
-            {
-                ChrSpecializationRecord specialization = Global.DB2Mgr.GetChrSpecializationByIndex(GetClass(), i);
-                if (specialization != null)
-                {
-                    var specSpells = Global.DB2Mgr.GetSpecializationSpells(specialization.Id);
-                    if (specSpells != null)
-                    {
-                        for (int j = 0; j < specSpells.Count; ++j)
-                        {
-                            SpecializationSpellsRecord specSpell = specSpells[j];
-                            RemoveSpell(specSpell.SpellID, true);
-                            if (specSpell.OverridesSpellID != 0)
-                                RemoveOverrideSpell(specSpell.OverridesSpellID, specSpell.SpellID);
-                        }
-                    }
-
-                    for (uint j = 0; j < PlayerConst.MaxMasterySpells; ++j)
-                    {
-                        uint mastery = (uint)specialization.MasterySpellID[j];
-                        if (mastery != 0)
-                            RemoveAurasDueToSpell(mastery);
-                    }
-                }
-            }
-        }
-
         public void SendSpellCategoryCooldowns()
         {
             SpellCategoryCooldown cooldowns = new();

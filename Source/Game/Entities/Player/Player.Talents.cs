@@ -19,35 +19,21 @@ namespace Game.Entities
         public void InitTalentForLevel()
         {
             var level = GetLevel();
+            var talentPoints = CalculateTalentsPoints();
+            var spentTalentPoints = GetSpentTalentPointsCount();
 
-            if (level < PlayerConst.MinSpecializationLevel)
+            if (spentTalentPoints > 0 && level < PlayerConst.MinSpecializationLevel)
             {
                 // Remove all talent points                
                 ResetTalents(true);
-
             }
-            else
+            else if (!GetSession().HasPermission(RBACPermissions.SkipCheckMoreTalentsThanAllowed))
             {
-                if (level < WorldConfig.GetIntValue(WorldCfg.MinDualspecLevel) || GetTalentGroupCount() == 0)
-                {
-                    SetTalentGroupCount(1);
-                    SetActiveTalentGroup(0);
-                }
-
-                var talentPointsForLevel = GetNumTalentsAtLevel(GetLevel());
-
-                // if used more that have then reset
-                if (GetUsedTalentCount() > talentPointsForLevel)
-                {
-                    if (!GetSession().HasPermission(RBACPermissions.SkipCheckMoreTalentsThanAllowed))
-                        ResetTalents(true);
-                    else
-                        SetFreeTalentPoints(0);
-                }
-                // else update amount of free points
-                else
-                    SetFreeTalentPoints(talentPointsForLevel - GetUsedTalentCount());
+                if (spentTalentPoints > talentPoints)
+                    ResetTalents(true);
             }
+           
+            SetFreeTalentPoints(talentPoints, spentTalentPoints);            
 
             if (!GetSession().PlayerLoading())
                 SendTalentsInfoData();   // update at client
@@ -223,7 +209,7 @@ namespace Game.Entities
 
         bool HasTalent(int talentId, byte group)
         {
-            if (GetTalentMap(group).TryGetValue(talentId, out PlayerTalent itr))
+            if (GetTalentMap(group).TryGetValue(talentId, out PlayerTalentState itr))
                 return itr.state != PlayerSpellState.Removed;
             else
                 return false;
@@ -247,11 +233,26 @@ namespace Game.Entities
         }
         
         public byte GetActiveTalentGroup() { return _specializationInfo.ActiveGroup; }
+        void SetActiveTalentGroup(int group) { _specializationInfo.ActiveGroup = (byte)group; }
 
-        void SetActiveTalentGroup(byte group) { _specializationInfo.ActiveGroup = group; }
+        byte GetBonusTalentGroupCount() { return _specializationInfo.BonusGroups; }
+        void SetBonusTalentGroupCount(int amount)
+        {
+            if (_specializationInfo.BonusGroups == amount)
+                return;
 
-        // Loot Spec
-        public void SetLootSpecId(ChrSpecialization id) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); }
+            _specializationInfo.BonusGroups = (byte)Math.Min(amount, PlayerConst.MaxSpecializations - 1);
+            if (GetActiveTalentGroup() > amount)
+            {
+                ResetTalents(true);
+                ActivateTalentGroup(0);
+            }
+            else
+                SendTalentsInfoData();
+        }
+
+    // Loot Spec
+    public void SetLootSpecId(ChrSpecialization id) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); }
 
         public ChrSpecialization GetLootSpecId() { return (ChrSpecialization)m_activePlayerData.LootSpecID.GetValue(); }
 
@@ -260,7 +261,7 @@ namespace Game.Entities
             return Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass()).Id;
         }
 
-        public void ActivateTalentGroup(byte talentGroup)
+        public void ActivateTalentGroup(int talentGroup)
         {
             if (GetActiveTalentGroup() == talentGroup)
                 return;
@@ -322,9 +323,6 @@ namespace Game.Entities
 
             ApplyTraitConfig(m_activePlayerData.ActiveCombatTraitConfigID, false);
 
-            // Remove spec specific spells
-            RemoveSpecializationSpells();
-
             foreach (var glyphId in GetGlyphs(GetActiveTalentGroup()))
                 RemoveAurasDueToSpell(CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID);
 
@@ -347,8 +345,6 @@ namespace Game.Entities
                         AddOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
                 }
             }
-
-            LearnSpecializationSpells();
             
             InitTalentForLevel();
 
@@ -423,8 +419,8 @@ namespace Game.Entities
                 }));
         }
 
-        public Dictionary<int, PlayerTalent> GetTalentMap(int spec) { return _specializationInfo.Talents[spec]; }
-        public int[] GetGlyphs(byte spec) { return _specializationInfo.Glyphs[spec]; }
+        public Dictionary<int, PlayerTalentState> GetTalentMap(int spec) { return _specializationInfo.Talents[spec]; }
+        public int[] GetGlyphs(int spec) { return _specializationInfo.Glyphs[spec]; }
 
         public uint GetNextResetTalentsCost()
         {
@@ -538,7 +534,7 @@ namespace Game.Entities
             packet.ActiveGroup = ActiveGroup;
             packet.UnspentTalentPoints = GetFreeTalentPoints();
 
-            for (byte specIdx = 0; specIdx < GetTalentGroupCount(); ++specIdx)
+            for (byte specIdx = 0; specIdx < (1 + GetBonusTalentGroupCount()); ++specIdx)
             {
                 TalentGroupInfo groupInfoPkt = new();
                 groupInfoPkt.SpecID = PlayerConst.MaxSpecializations;
@@ -583,18 +579,30 @@ namespace Game.Entities
             respecWipeConfirm.RespecType = respecType;
             SendPacket(respecWipeConfirm);
         }
-                
-        uint GetUsedTalentCount() { return _specializationInfo.UsedTalentCount; }
-        void SetUsedTalentCount(uint count) { _specializationInfo.UsedTalentCount = count; }
-        uint GetQuestRewardTalentCount() { return _specializationInfo.QuestRewardTalentCount; }
-        void SetQuestRewardTalentCount(uint count) { _specializationInfo.QuestRewardTalentCount = count; }
-        byte GetTalentGroupCount() { return _specializationInfo.TalentGroupCount; }
-        void SetTalentGroupCount(byte count) { _specializationInfo.TalentGroupCount = count; }
+
         int GetFreeTalentPoints() { return m_activePlayerData.CharacterPoints; }
-        public void SetFreeTalentPoints(uint points)
+
+        int GetSpentTalentPointsCount()
         {
-            Global.ScriptMgr.OnPlayerFreeTalentPointsChanged(this, points);
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), (int)points);
+            var talentMap = _specializationInfo.Talents[GetActiveTalentGroup()];
+
+            int spentCount = 0;
+            
+            foreach (var talentState in talentMap)
+            {
+                if (talentState.Value.state != PlayerSpellState.Removed)
+                    spentCount++;
+            }
+
+            return spentCount;
+        }
+
+        public void SetFreeTalentPoints(int talentPoints, int spentTalentPoints)
+        {
+            int freeTalentPoints = talentPoints - spentTalentPoints;
+            Global.ScriptMgr.OnPlayerFreeTalentPointsChanged(this, freeTalentPoints);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxTalentTiers), talentPoints);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), freeTalentPoints);
         }
 
         public int CalculateTalentsPoints()

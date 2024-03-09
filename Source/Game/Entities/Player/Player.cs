@@ -5260,7 +5260,6 @@ namespace Game.Entities
 
             UpdateSkillsForLevel();
             LearnDefaultSkills();
-            LearnSpecializationSpells();
 
             // save base values (bonuses already included in stored stats
             for (var i = Stats.Strength; i < Stats.Max; ++i)

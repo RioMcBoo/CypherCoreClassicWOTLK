@@ -2781,7 +2781,8 @@ namespace Game.Entities
             byte is_logout_resting = result.Read<byte>(fieldIndex++);
             uint resettalents_cost = result.Read<uint>(fieldIndex++);
             long resettalents_time = result.Read<long>(fieldIndex++);
-            uint primarySpecialization = result.Read<uint>(fieldIndex++);
+            byte activeTalentGroup = result.Read<byte>(fieldIndex++);
+            byte bonusTalentGroups = result.Read<byte>(fieldIndex++);
             float trans_x = result.Read<float>(fieldIndex++);
             float trans_y = result.Read<float>(fieldIndex++);
             float trans_z = result.Read<float>(fieldIndex++);
@@ -2808,7 +2809,6 @@ namespace Game.Entities
                 powers[i] = result.Read<uint>(fieldIndex++);
 
             uint instance_id = result.Read<uint>(fieldIndex++);
-            byte activeTalentGroup = result.Read<byte>(fieldIndex++);
             uint lootSpecId = result.Read<uint>(fieldIndex++);
             string exploredZones = result.Read<string>(fieldIndex++);
             string knownTitles = result.Read<string>(fieldIndex++);
@@ -3284,8 +3284,8 @@ namespace Game.Entities
             UpdateSkillsForLevel();
 
             SetNumRespecs(numRespecs);
-            SetPrimarySpecialization(primarySpecialization);
             SetActiveTalentGroup(activeTalentGroup);
+            SetBonusTalentGroupCount(bonusTalentGroups);
 
             ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(lootSpecId);
             if (chrSpec != null)
@@ -3301,8 +3301,6 @@ namespace Game.Entities
             GetSession().GetCollectionMgr().LoadHeirlooms();
             GetSession().GetCollectionMgr().LoadMounts();
             GetSession().GetCollectionMgr().LoadItemAppearances();
-
-            LearnSpecializationSpells();
 
             _LoadGlyphs(holder.GetResult(PlayerLoginQueryLoad.Glyphs));
             _LoadAuras(holder.GetResult(PlayerLoginQueryLoad.Auras), holder.GetResult(PlayerLoginQueryLoad.AuraEffects), time_diff);
@@ -3606,7 +3604,8 @@ namespace Game.Entities
                 //save, but in tavern/city
                 stmt.AddValue(index++, GetTalentResetCost());
                 stmt.AddValue(index++, GetTalentResetTime());
-                stmt.AddValue(index++, (uint)GetPrimarySpecialization());
+                stmt.AddValue(index++, GetActiveTalentGroup());
+                stmt.AddValue(index++, GetBonusTalentGroupCount());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
                 stmt.AddValue(index++, 0); // summonedPetNumber
                 stmt.AddValue(index++, (ushort)atLoginFlags);
@@ -3628,8 +3627,7 @@ namespace Game.Entities
                     stmt.AddValue(index++, m_unitData.Power[i]);
 
                 stmt.AddValue(index++, GetSession().GetLatency());
-                stmt.AddValue(index++, GetActiveTalentGroup());
-                stmt.AddValue(index++, GetLootSpecId());
+                stmt.AddValue(index++, (int)GetLootSpecId());
 
                 ss.Clear();
                 for (int i = 0; i < PlayerConst.ExploredZonesSize; ++i)
