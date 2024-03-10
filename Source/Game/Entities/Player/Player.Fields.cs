@@ -361,12 +361,12 @@ namespace Game.Entities
         {
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
-                Talents[i] = new Dictionary<int, PlayerTalentState>();
+                Talents[i] = new Dictionary<int, PlayerTalent>();
                 Glyphs[i] = new int[PlayerConst.MaxGlyphSlotIndex];
             }
         }
 
-        public Dictionary<int, PlayerTalentState>[] Talents = new Dictionary<int, PlayerTalentState>[PlayerConst.MaxSpecializations];
+        public Dictionary<int, PlayerTalent>[] Talents = new Dictionary<int, PlayerTalent>[PlayerConst.MaxSpecializations];
         public int[][] Glyphs = new int[PlayerConst.MaxSpecializations][];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;
@@ -676,14 +676,14 @@ namespace Game.Entities
         public QuestObjective Objective;
     }
 
-    public readonly record struct PlayerTalentState
+    public readonly record struct PlayerTalent
     {
-        public PlayerTalentState(byte rank, PlayerSpellState state)
+        public PlayerTalent(int rank, PlayerSpellState state)
         {
-            this.state = state;
-            this.rank = rank;
+            State = state;
+            Rank = (byte)rank;
         }
-        public readonly PlayerSpellState state;
-        public readonly byte rank;
+        public readonly PlayerSpellState State;
+        public readonly byte Rank;
     };
 }

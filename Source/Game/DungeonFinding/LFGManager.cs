@@ -2303,15 +2303,15 @@ namespace Game.DungeonFinding
 
     public class LfgLockInfoData
     {
-        public LfgLockInfoData(LfgLockStatusType _lockStatus = 0, ushort _requiredItemLevel = 0, float _currentItemLevel = 0)
+        public LfgLockInfoData(LfgLockStatusType _lockStatus = 0, int _requiredItemLevel = 0, int _currentItemLevel = 0)
         {
             lockStatus = _lockStatus;
-            requiredItemLevel = _requiredItemLevel;
-            currentItemLevel = _currentItemLevel;
+            requiredItemLevel = (ushort)_requiredItemLevel;
+            currentItemLevel = (ushort)_currentItemLevel;
         }
 
         public LfgLockStatusType lockStatus;
         public ushort requiredItemLevel;
-        public float currentItemLevel;
+        public ushort currentItemLevel;
     }
 }

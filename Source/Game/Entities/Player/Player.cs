@@ -5210,9 +5210,9 @@ namespace Game.Entities
             return GetGuildId() != 0 ? GuildMgr.GetGuildById(GetGuildId()).GetName() : "";
         }
 
-        public void SetFreePrimaryProfessions(uint profs)
+        public void SetFreePrimaryProfessions(int profs)
         { 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), (int)profs);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs);
         }
 
         public void GiveLevel(int level)

@@ -15,8 +15,9 @@ namespace Framework.Constants
         public const int MaxGlyphSlotIndex = 6;
         public const int MaxTalentTabs = 3;
         public const int MaxTalentTiers = 11;
+        public const int TalentPointsPerTalentTier = 5;
         public const int MaxTalentColumns = 4;
-        public const int MaxTalentRank = 5;
+        public const int MaxTalentRank = 9;
         public const int MaxPetTalentRank = 3;
         public const int MinSpecializationLevel = 10;
         public const int MaxSpecializations = 2;
@@ -743,21 +744,6 @@ namespace Framework.Constants
     {
         Success = 0,
         Error = 1
-    }
-
-    public enum TalentLearnResult
-    {
-        LearnOk = 0,
-        FailedUnknown = 1,
-        FailedNotEnoughTalentsInPrimaryTree = 2,
-        FailedNoPrimaryTreeSelected = 3,
-        FailedCantDoThatRightNow = 4,
-        FailedAffectingCombat = 5,
-        FailedCantRemoveTalent = 6,
-        FailedCantDoThatChallengeModeActive = 7,
-        FailedRestArea = 8,
-        UnspentTalentPoints = 9,
-        InPvpMatch = 10
     }
 
     public enum TutorialsFlag

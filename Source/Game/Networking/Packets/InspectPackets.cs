@@ -38,13 +38,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt16(TodayHK);
             _worldPacket.WriteUInt16(YesterdayHK);
             _worldPacket.WriteUInt32(LifetimeHK);
-            _worldPacket.WriteUInt32(HonorLevel);
+            _worldPacket.WriteInt32(HonorLevel);
 
             for (int i = 0; i < Glyphs.Count; ++i)
-                _worldPacket.WriteUInt16(Glyphs[i]);
+                _worldPacket.WriteUInt16((ushort)Glyphs[i]);
 
             for (int i = 0; i < Talents.Count; ++i)
-                _worldPacket.WriteUInt16(Talents[i]);
+                _worldPacket.WriteUInt16((ushort)Talents[i]);
 
             _worldPacket.WriteBit(GuildData.HasValue);
             _worldPacket.WriteBit(AzeriteLevel.HasValue);
@@ -63,14 +63,14 @@ namespace Game.Networking.Packets
         }
 
         public PlayerModelDisplayInfo DisplayInfo;
-        public List<ushort> Glyphs = new();
-        public List<ushort> Talents = new();
+        public List<int> Glyphs = new();
+        public List<int> Talents = new();
         public InspectGuildData? GuildData;
         public Array<PVPBracketData> Bracket = new(7, default);
         public uint? AzeriteLevel;
         public int ItemLevel;
         public uint LifetimeHK;
-        public uint HonorLevel;
+        public int HonorLevel;
         public ushort TodayHK;
         public ushort YesterdayHK;
         public byte LifetimeMaxRank;
@@ -291,16 +291,16 @@ namespace Game.Networking.Packets
 
     public struct TraitInspectInfo
     {
-        public int Level;
-        public int ChrSpecializationID;
-        public TraitConfigPacket Config;
-
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Level);
-            data.WriteInt32(ChrSpecializationID);
+            data.WriteInt32((int)ChrSpecializationID);
             Config.Write(data);
         }
+
+        public int Level;
+        public ChrSpecialization ChrSpecializationID;
+        public TraitConfigPacket Config;
     }
 
     public struct AzeriteEssenceData

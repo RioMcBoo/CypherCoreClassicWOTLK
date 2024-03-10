@@ -974,12 +974,12 @@ namespace Game.Entities
 
         void _LoadTalents(SQLResult result)
         {
-            //"SELECT spell, talentGroup FROM character_talent WHERE guid = ?"
+            // "SELECT talentId, talentRank, talentGroup FROM character_talent WHERE guid = ?"
             if (!result.IsEmpty())
             {
                 do
-                {
-                    AddTalent(result.Read<uint>(0), result.Read<byte>(1), false);
+                {   if (CliDB.TalentStorage.LookupByKey(result.Read<int>(0)) is TalentRecord talent)
+                    AddTalent(talent, result.Read<byte>(1), result.Read<byte>(2), false);
                 }
                 while (result.NextRow());
             }
@@ -2273,24 +2273,30 @@ namespace Game.Entities
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_TALENT);
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
-
+            
             for (byte group = 0; group < PlayerConst.MaxSpecializations; ++group)
             {
-                var talents = GetTalentMap(group);
-                foreach (var pair in talents.ToList())
+                var talents = GetPlayerTalents(group);
+                var ToRemove = new List<int>();
+
+                foreach (var pair in talents)
                 {
-                    if (pair.Value.state == PlayerSpellState.Removed)
+                    if (pair.Value.State == PlayerSpellState.Removed)
                     {
-                        talents.Remove(pair.Key);
+                        ToRemove.Add(pair.Key);
                         continue;
                     }
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_TALENT);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     stmt.AddValue(1, pair.Key);
-                    stmt.AddValue(2, group);
+                    stmt.AddValue(2, pair.Value.Rank);
+                    stmt.AddValue(3, group);
                     trans.Append(stmt);
                 }
+
+                foreach (var tab in ToRemove)
+                    talents.Remove(tab);
             }
         }
 

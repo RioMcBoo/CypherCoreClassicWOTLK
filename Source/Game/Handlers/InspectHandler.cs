@@ -17,7 +17,7 @@ namespace Game
             Player player = Global.ObjAccessor.GetPlayer(_player, inspect.Target);
             if (player == null)
             {
-                Log.outDebug(LogFilter.Network, "WorldSession.HandleInspectOpcode: Target {0} not found.", inspect.Target.ToString());
+                Log.outDebug(LogFilter.Network, $"WorldSession.HandleInspectOpcode: Target {inspect.Target} not found.");
                 return;
             }
 
@@ -32,16 +32,16 @@ namespace Game
 
             if (GetPlayer().CanBeGameMaster() || WorldConfig.GetIntValue(WorldCfg.TalentsInspecting) + (GetPlayer().GetEffectiveTeam() == player.GetEffectiveTeam() ? 1 : 0) > 1)
             {
-                var talents = player.GetTalentMap(player.GetActiveTalentGroup());
+                var talents = player.GetPlayerTalents(player.GetActiveTalentGroup());
                 foreach (var v in talents)
                 {
-                    if (v.Value.state != PlayerSpellState.Removed)
-                        inspectResult.Talents.Add((ushort)v.Key);
+                    if (v.Value.State != PlayerSpellState.Removed)
+                        inspectResult.Talents.Add(v.Key);
                 }
 
-                inspectResult.TalentTraits.Level = (int)player.GetLevel();
-                inspectResult.TalentTraits.ChrSpecializationID = (int)player.GetPrimarySpecialization();
-                TraitConfig traitConfig = player.GetTraitConfig((int)(uint)player.m_activePlayerData.ActiveCombatTraitConfigID);
+                inspectResult.TalentTraits.Level = player.GetLevel();
+                inspectResult.TalentTraits.ChrSpecializationID = player.GetPrimarySpecialization();
+                TraitConfig traitConfig = player.GetTraitConfig(player.m_activePlayerData.ActiveCombatTraitConfigID);
                 if (traitConfig != null)
                     inspectResult.TalentTraits.Config = new TraitConfigPacket(traitConfig);
             }
@@ -52,17 +52,17 @@ namespace Game
                 InspectGuildData guildData;
                 guildData.GuildGUID = guild.GetGUID();
                 guildData.NumGuildMembers = guild.GetMembersCount();
-                guildData.AchievementPoints = (int)guild.GetAchievementMgr().GetAchievementPoints();
+                guildData.AchievementPoints = guild.GetAchievementMgr().GetAchievementPoints();
 
                 inspectResult.GuildData = guildData;
             }
 
-            inspectResult.ItemLevel = (int)player.GetAverageItemLevel();
+            inspectResult.ItemLevel = player.GetAverageItemLevel();
             inspectResult.LifetimeMaxRank = player.m_activePlayerData.LifetimeMaxRank;
             inspectResult.TodayHK = player.m_activePlayerData.TodayHonorableKills;
             inspectResult.YesterdayHK = player.m_activePlayerData.YesterdayHonorableKills;
             inspectResult.LifetimeHK = player.m_activePlayerData.LifetimeHonorableKills;
-            inspectResult.HonorLevel = (uint)player.m_playerData.HonorLevel.GetValue();
+            inspectResult.HonorLevel = player.m_playerData.HonorLevel.GetValue();
 
             SendPacket(inspectResult);
         }

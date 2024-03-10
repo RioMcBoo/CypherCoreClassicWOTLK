@@ -298,7 +298,7 @@ namespace Game.Entities
             m_overrideSpells.Add(overridenSpellId, newSpellId);
         }
 
-        public void RemoveOverrideSpell(uint overridenSpellId, uint newSpellId)
+        public void RemoveOverrideSpell(int overridenSpellId, int newSpellId)
         {
             m_overrideSpells.Remove(overridenSpellId, newSpellId);
         }
@@ -2218,7 +2218,7 @@ namespace Game.Entities
             // learn all disabled higher ranks and required spells (recursive)
             if (disabled)
             {
-                uint nextSpell = Global.SpellMgr.GetNextSpellInChain(spellId);
+                var nextSpell = Global.SpellMgr.GetNextSpellInChain(spellId);
                 if (nextSpell != 0)
                 {
                     var _spell = m_spells.LookupByKey(nextSpell);
@@ -2562,11 +2562,11 @@ namespace Game.Entities
                 RemoveTemporarySpell(spellId);
             if (spell != null)
             {
-                uint next_active_spell_id = 0;
+                var next_active_spell_id = 0;
                 // fix activate state for non-stackable low rank (and find next spell for !active case)
                 if (spellInfo.IsRanked())
                 {
-                    uint next = Global.SpellMgr.GetNextSpellInChain(spellId);
+                    var next = Global.SpellMgr.GetNextSpellInChain(spellId);
                     if (next != 0)
                     {
                         if (HasSpell(next))
@@ -2603,7 +2603,7 @@ namespace Game.Entities
                     {
                         TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(spell.TraitDefinitionId.Value);
                         if (traitDefinition != null)
-                            RemoveOverrideSpell((uint)traitDefinition.OverridesSpellID, spellId);
+                            RemoveOverrideSpell(traitDefinition.OverridesSpellID, spellId);
                     }
 
                     spell.TraitDefinitionId = traitDefinitionId;
@@ -2678,7 +2678,7 @@ namespace Game.Entities
             if (!disabled_case) // skip new spell adding if spell already known (disabled spells case)
             {
                 // non talent spell: learn low ranks (recursive call)
-                uint prev_spell = Global.SpellMgr.GetPrevSpellInChain(spellId);
+                var prev_spell = Global.SpellMgr.GetPrevSpellInChain(spellId);
                 if (prev_spell != 0)
                 {
                     if (!IsInWorld || disabled)                    // at spells loading, no output, but allow save
@@ -2767,7 +2767,7 @@ namespace Game.Entities
 
                 if (traitDefinitionId.HasValue)
                 {
-                    TraitConfig traitConfig = GetTraitConfig((int)(uint)m_activePlayerData.ActiveCombatTraitConfigID);
+                    TraitConfig traitConfig = GetTraitConfig(m_activePlayerData.ActiveCombatTraitConfigID);
                     if (traitConfig != null)
                     {
                         int traitEntryIndex = traitConfig.Entries.FindIndexIf(traitEntry =>
@@ -2789,9 +2789,9 @@ namespace Game.Entities
                                     if (traitDefinitionEffectPoint.EffectIndex >= spellInfo.GetEffects().Count)
                                         continue;
 
-                                    float basePoints = Global.DB2Mgr.GetCurveValueAt((uint)traitDefinitionEffectPoint.CurveID, rank);
-                                    if (traitDefinitionEffectPoint.GetOperationType() == TraitPointsOperationType.Multiply)
-                                        basePoints *= spellInfo.GetEffect((uint)traitDefinitionEffectPoint.EffectIndex).CalcBaseValue(this, null, 0, -1);
+                                    float basePoints = Global.DB2Mgr.GetCurveValueAt(traitDefinitionEffectPoint.CurveID, rank);
+                                    if (traitDefinitionEffectPoint.OperationType == TraitPointsOperationType.Multiply)
+                                        basePoints *= spellInfo.GetEffect(traitDefinitionEffectPoint.EffectIndex).CalcBaseValue(this, null, 0, -1);
 
                                     args.AddSpellMod(SpellValueMod.BasePoint0 + traitDefinitionEffectPoint.EffectIndex, (int)basePoints);
                                 }
@@ -2813,7 +2813,7 @@ namespace Game.Entities
             }
 
             // update free primary prof.points (if any, can be none in case GM .learn prof. learning)
-            uint freeProfs = GetFreePrimaryProfessionPoints();
+            var freeProfs = GetFreePrimaryProfessionPoints();
             if (freeProfs != 0)
             {
                 if (spellInfo.IsPrimaryProfessionFirstRank())
@@ -3356,7 +3356,7 @@ namespace Game.Entities
                 SendPacket(pctMods);
         }
 
-        void SendSupercededSpell(uint oldSpell, uint newSpell)
+        void SendSupercededSpell(int oldSpell, int newSpell)
         {
             SupercededSpells supercededSpells = new();
             LearnedSpellInfo learnedSpellInfo = new();

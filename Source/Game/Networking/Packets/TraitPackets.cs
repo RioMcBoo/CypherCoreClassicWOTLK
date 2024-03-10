@@ -151,7 +151,7 @@ namespace Game.Networking.Packets
     public class TraitConfigPacket
     {
         public TraitConfigPacket() { }
-        public TraitConfigPacket(TraitConfigPacket ufConfig)
+        public TraitConfigPacket(TraitConfig ufConfig)
         {
             ID = ufConfig.ID;
             Type = (TraitConfigType)(int)ufConfig.Type;

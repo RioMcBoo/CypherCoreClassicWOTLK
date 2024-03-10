@@ -3223,6 +3223,7 @@ namespace Game.Entities
                 }
             }
         }
+
         public void RemoveAurasDueToSpellByDispel(uint spellId, uint dispellerSpellId, ObjectGuid casterGUID, WorldObject dispeller, byte chargesRemoved = 1)
         {
             foreach (var pair in GetOwnedAuras())

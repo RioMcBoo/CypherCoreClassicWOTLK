@@ -200,7 +200,6 @@ namespace Game.Chat.Commands
             static bool HandleLearnAllTalentsCommand(CommandHandler handler)
             {
                 Player player = handler.GetSession().GetPlayer();
-                uint classMask = player.GetClassMask();
 
                 foreach (var (_, talentInfo) in CliDB.TalentStorage)
                 {
@@ -208,34 +207,29 @@ namespace Game.Chat.Commands
                     if (talentTabInfo == null)
                         continue;
 
-                    if ((classMask & talentTabInfo.ClassMask) == 0)
+                    if (!talentTabInfo.ClassMask.HasClass(player.GetClass()))
                         continue;
 
                     // search highest talent rank
-                    uint spellId = 0;
+                    int highestrank = 0;
                     for (byte rank = PlayerConst.MaxTalentRank - 1; rank >= 0; --rank)
                     {
                         if (talentInfo.SpellRank[rank] != 0)
                         {
-                            spellId = (uint)talentInfo.SpellRank[rank];
+                            highestrank = rank + 1;
                             break;
                         }
                     }
 
-                    if (spellId == 0)    // ??? none spells in talent
+                    if (highestrank == 0)    // ??? none spells in talent
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
-                    if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
-                        continue;
-
-                    // learn highest rank of talent and learn all non-talent spell ranks (recursive by tree)
-                    player.AddTalent(spellId, player.GetActiveTalentGroup(), true);
-                    player.LearnSpell((uint)talentInfo.SpellID, false);
+                    // learn highest rank of talent
+                    player.AddTalent(talentInfo, highestrank, player.GetActiveTalentGroup(), true);
                 }
 
                 player.SetFreeTalentPoints(0);
-                player.SendTalentsInfoData(false);
+                player.SendTalentsInfoData();
 
                 handler.SendSysMessage(CypherStrings.CommandLearnClassTalents);
                 return true;

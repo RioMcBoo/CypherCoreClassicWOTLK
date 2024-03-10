@@ -23,7 +23,7 @@ namespace Game.DataStorage
         public byte Flags;
         public byte ColumnIndex;
         public ushort TabID;
-        public byte ClassID;
+        private byte _classID;
         public ushort SpecID;
         public int SpellID;
         public int OverridesSpellID;
@@ -32,6 +32,10 @@ namespace Game.DataStorage
         public int[] SpellRank = new int[9];
         public int[] PrereqTalent = new int[3];
         public int[] PrereqRank = new int[3];
+
+        #region Properties
+        public Class ClassID => (Class)_classID;
+        #endregion
     }
 
     public sealed class TalentTabRecord
@@ -40,10 +44,15 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public string BackgroundFile;
         public int OrderIndex;
-        public int RaceMask;
-        public int ClassMask;
-        public int PetTalentMask;
+        private int _raceMask;
+        private int _classMask;
+        public uint PetTalentMask;
         public int SpellIconID;
+
+        #region Properties
+        public RaceMask RaceMask => (RaceMask)_raceMask;
+        public ClassMask ClassMask => (ClassMask)_classMask;
+        #endregion
     };
 
     public sealed class TaxiNodesRecord

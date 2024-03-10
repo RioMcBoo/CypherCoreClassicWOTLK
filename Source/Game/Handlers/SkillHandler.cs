@@ -16,8 +16,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LearnTalent, Processing = PacketProcessing.Inplace)]
         void HandleLearnTalent(LearnTalent packet)
         {
-            _player.LearnTalent((uint)packet.TalentID, packet.Rank);
-            _player.SendTalentsInfoData(false);
+            if (_player.LearnTalent(packet.TalentID, packet.Rank))
+                _player.SendTalentsInfoData();
         }
 
         [WorldPacketHandler(ClientOpcodes.LearnPreviewTalents, Processing = PacketProcessing.Inplace)]
@@ -27,13 +27,7 @@ namespace Game
             {
                 _player.LearnTalent(talentInfo.TalentID, talentInfo.Rank);
             }
-            _player.SendTalentsInfoData(false);
-        }
-        
-
-        [WorldPacketHandler(ClientOpcodes.LearnPvpTalents, Processing = PacketProcessing.Inplace)]
-        void HandleLearnPvpTalents(LearnPvpTalents packet)
-        {
+            _player.SendTalentsInfoData();
         }
 
         [WorldPacketHandler(ClientOpcodes.ConfirmRespecWipe)]
@@ -62,7 +56,7 @@ namespace Game
             if (!GetPlayer().ResetTalents())
                 return;
 
-            GetPlayer().SendTalentsInfoData(false);
+            GetPlayer().SendTalentsInfoData();
             unit.CastSpell(GetPlayer(), 14867, true);                  //spell: "Untalent Visual Effect"
         }
 

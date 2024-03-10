@@ -2300,10 +2300,10 @@ namespace Game.Entities
             }
         }
 
-        public float GetAverageItemLevel()
+        public int GetAverageItemLevel()
         {
-            float sum = 0;
-            uint count = 0;
+            var sum = 0;
+            var count = 0;
 
             for (int i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
             {

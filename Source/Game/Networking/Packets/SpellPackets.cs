@@ -423,14 +423,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(SpellID.Count);
-            foreach (uint spellId in SpellID)
-                _worldPacket.WriteUInt32(spellId);
+            foreach (var spellId in SpellID)
+                _worldPacket.WriteInt32(spellId);
 
             _worldPacket.WriteBit(SuppressMessaging);
             _worldPacket.FlushBits();
         }
 
-        public List<uint> SpellID = new();
+        public List<int> SpellID = new();
         public bool SuppressMessaging;
     }
 
