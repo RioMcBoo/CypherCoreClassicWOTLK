@@ -650,7 +650,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GlyphInfos, slotIndex).ModifyValue(m_activePlayerData.GlyphInfos[slotIndex].Glyph), glyph);
         }
     
-        public uint GetGlyph(byte slotIndex) { return _specializationInfo.Glyphs[GetActiveTalentGroup()][slotIndex]; }
+        public int GetGlyph(byte slotIndex) { return _specializationInfo.Glyphs[GetActiveTalentGroup()][slotIndex]; }
 
         // Only sent on CreateObject
         void InitGlyphsForLevel()
@@ -661,7 +661,7 @@ namespace Game.Entities
                     SetGlyphSlot((byte)(gs.ToolTip - 1), gs.Id);
             }
 
-            uint level = GetLevel();
+            var level = GetLevel();
             byte value = 0;
 
             // 0x3F = 0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 for 80 level

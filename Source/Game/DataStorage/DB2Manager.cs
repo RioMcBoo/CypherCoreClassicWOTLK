@@ -39,7 +39,7 @@ namespace Game.DataStorage
         public void LoadStores()
         {
             foreach (var areaGroupMember in AreaGroupMemberStorage.Values)
-                _areaGroupMembers.Add(areaGroupMember.AreaGroupID, areaGroupMember.AreaID);           
+                _areaGroupMembers.Add(areaGroupMember.AreaGroupID, areaGroupMember.AreaID);
 
             foreach (BattlemasterListRecord battlemaster in BattlemasterListStorage.Values)
             {
@@ -176,7 +176,7 @@ namespace Game.DataStorage
                 _conditionalContentTuning.Add(conditionalContentTuning.ParentContentTuningID, conditionalContentTuning);
 
             foreach (CurrencyContainerRecord currencyContainer in CurrencyContainerStorage.Values)
-                _currencyContainers.Add(currencyContainer.CurrencyTypesID, currencyContainer);            
+                _currencyContainers.Add(currencyContainer.CurrencyTypesID, currencyContainer);
 
             MultiMap<int, CurvePointRecord> unsortedPoints = new();
             foreach (var curvePoint in CurvePointStorage.Values)
@@ -209,7 +209,7 @@ namespace Game.DataStorage
             foreach (GameObjectDisplayInfoRecord gameObjectDisplayInfo in GameObjectDisplayInfoStorage.Values)
             {
                 if (gameObjectDisplayInfo.GeoBoxMax.X < gameObjectDisplayInfo.GeoBoxMin.X)
-                    (gameObjectDisplayInfo.GeoBoxMax, gameObjectDisplayInfo.GeoBoxMin) = (gameObjectDisplayInfo.GeoBoxMin, gameObjectDisplayInfo.GeoBoxMax);                
+                    (gameObjectDisplayInfo.GeoBoxMax, gameObjectDisplayInfo.GeoBoxMin) = (gameObjectDisplayInfo.GeoBoxMin, gameObjectDisplayInfo.GeoBoxMax);
             }
 
             foreach (HeirloomRecord heirloom in HeirloomStorage.Values)
@@ -238,7 +238,7 @@ namespace Game.DataStorage
                 _itemsWithCurrencyCost.Add(itemCurrencyCost.ItemID);
 
             foreach (ItemEffectRecord itemEffect in ItemEffectStorage.Values)
-                _itemEffectsByItemId[itemEffect.ParentItemID] = itemEffect;
+                _itemEffectsByItemId.Add(itemEffect.ParentItemID, itemEffect);
 
 
             foreach (ItemLimitCategoryConditionRecord condition in ItemLimitCategoryConditionStorage.Values)
@@ -355,8 +355,8 @@ namespace Game.DataStorage
 
             foreach (PvpDifficultyRecord record in PvpDifficultyStorage.Values)
             {
-                Cypher.Assert(record.BracketId < BattlegroundBracketId.Max, 
-                    $"PvpDifficulty bracket {record.BracketId} exceeded max allowed value {BattlegroundBracketId.Max}");              
+                Cypher.Assert(record.BracketId < BattlegroundBracketId.Max,
+                    $"PvpDifficulty bracket {record.BracketId} exceeded max allowed value {BattlegroundBracketId.Max}");
             }
 
             foreach (PvpItemRecord pvpItem in PvpItemStorage.Values)
@@ -407,7 +407,7 @@ namespace Game.DataStorage
                 _spellFamilyNames.Add(classOption.SpellClassSet);
 
             foreach (SpellProcsPerMinuteModRecord ppmMod in SpellProcsPerMinuteModStorage.Values)
-                _spellProcsPerMinuteMods.Add(ppmMod.SpellProcsPerMinuteID,ppmMod);
+                _spellProcsPerMinuteMods.Add(ppmMod.SpellProcsPerMinuteID, ppmMod);
 
             foreach (SpellVisualMissileRecord spellVisualMissile in SpellVisualMissileStorage.Values)
                 _spellVisualMissilesBySet.Add(spellVisualMissile.SpellVisualMissileSetID, spellVisualMissile);
@@ -417,10 +417,10 @@ namespace Game.DataStorage
 
             foreach (TalentRecord talentInfo in TalentStorage.Values)
             {
-                Cypher.Assert(talentInfo.ClassID < (byte)Class.Max);
+                Cypher.Assert(talentInfo.ClassID < Class.Max);
                 Cypher.Assert(talentInfo.TierID < PlayerConst.MaxTalentTiers);
                 Cypher.Assert(talentInfo.ColumnIndex < PlayerConst.MaxTalentColumns);
-                _talentsByPosition[talentInfo.ClassID][talentInfo.TierID][talentInfo.ColumnIndex].Add(talentInfo);
+                _talentsByPosition[(int)talentInfo.ClassID][talentInfo.TierID][talentInfo.ColumnIndex].Add(talentInfo);
             }
 
             //for (var i = 0; i < (int)Class.Max; ++i)
@@ -2096,6 +2096,11 @@ namespace Game.DataStorage
             return null;
         }
 
+        public List<ItemEffectRecord> GetItemEffectsForItemId(int itemId)
+        {
+            return _itemEffectsByItemId[itemId];
+        }
+
         public bool HasItemCurrencyCost(int itemId) { return _itemsWithCurrencyCost.Contains(itemId); }
 
         public Dictionary<int, Dictionary<Difficulty, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
@@ -2150,7 +2155,7 @@ namespace Game.DataStorage
         Dictionary<int, ItemModifiedAppearanceRecord> _itemModifiedAppearancesByItem = new();
         MultiMap<int, ItemSetSpellRecord> _itemSetSpells = new();
         MultiMap<int, ItemSpecOverrideRecord> _itemSpecOverrides = new();
-        Dictionary<int, ItemEffectRecord> _itemEffectsByItemId = new();
+        MultiMap<int, ItemEffectRecord> _itemEffectsByItemId = new();
         List<JournalTierRecord> _journalTiersByIndex = new();
         Dictionary<int, Dictionary<Difficulty, MapDifficultyRecord>> _mapDifficulties = new();
         MultiMap<Difficulty, (int, PlayerConditionRecord)> _mapDifficultyConditions = new();

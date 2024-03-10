@@ -5180,6 +5180,10 @@ namespace Game
                     if (specs.Count == 0)
                         specs.SetAll(true);
 
+                if (Global.DB2Mgr.GetItemEffectsForItemId(sparse.Id) is List<ItemEffectRecord> itemEffects)
+                    foreach (var itemEffect in itemEffects)
+                        itemTemplate.Effects.Add(itemEffect);
+
                 ++sparseCount;
                 ItemTemplateStorage.Add(sparse.Id, itemTemplate);
             }
