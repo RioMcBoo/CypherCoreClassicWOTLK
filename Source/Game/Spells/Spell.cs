@@ -5144,7 +5144,7 @@ namespace Game.Spells
                         if (!pet.HaveInDiet(foodItem.GetTemplate()))
                             return SpellCastResult.WrongPetFood;
 
-                        if (foodItem.GetTemplate().GetBaseItemLevel() + 30 <= pet.GetLevel())
+                        if (foodItem.GetTemplate().GetItemLevel() + 30 <= pet.GetLevel())
                             return SpellCastResult.FoodLowlevel;
 
                         if (m_caster.ToPlayer().IsInCombat() || pet.IsInCombat())
@@ -6588,9 +6588,9 @@ namespace Game.Spells
                         // Apply item level restriction if the enchanting spell has max level restrition set
                         if (m_CastItem != null && m_spellInfo.MaxLevel > 0)
                         {
-                            if (item.GetTemplate().GetBaseItemLevel() < m_CastItem.GetTemplate().GetBaseRequiredLevel())
+                            if (item.GetTemplate().GetItemLevel() < m_CastItem.GetTemplate().GetBaseRequiredLevel())
                                 return SpellCastResult.Lowlevel;
-                            if (item.GetTemplate().GetBaseItemLevel() > m_spellInfo.MaxLevel)
+                            if (item.GetTemplate().GetItemLevel() > m_spellInfo.MaxLevel)
                                 return SpellCastResult.Highlevel;
                         }
                         break;

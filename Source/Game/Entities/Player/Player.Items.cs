@@ -15,6 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static Game.AI.SmartAction;
+using static Game.Entities.GameObjectTemplate;
 
 namespace Game.Entities
 {
@@ -3073,7 +3075,7 @@ namespace Game.Entities
 
             if (crItem.maxcount != 0) // bought
             {
-                if (pProto.GetQuality() > ItemQuality.Epic || (pProto.GetQuality() == ItemQuality.Epic && pProto.GetBaseItemLevel() >= GuildConst.MinNewsItemLevel))
+                if (pProto.GetQuality() > ItemQuality.Epic || (pProto.GetQuality() == ItemQuality.Epic && pProto.GetItemLevel() >= GuildConst.MinNewsItemLevel))
                 {
                     Guild guild = GetGuild();
                     if (guild != null)
@@ -3241,26 +3243,46 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, "_ApplyItemMods complete.");
         }
 
-        public void _ApplyItemBonuses(Item item, byte slot, bool apply)
+        public void _ApplyItemBonuses(Item item, byte slot, bool apply, bool onlyForScalingItems)
         {
             ItemTemplate proto = item.GetTemplate();
             if (slot >= InventorySlots.BagEnd || proto == null)
                 return;
 
-            var itemLevel = item.GetItemLevel(this);
-            float combatRatingMultiplier = 1.0f;
+            var ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(proto.GetScalingStatDistributionID());
+            var ssv = (ssd != null && proto.GetScalingStatValue() != 0) ? Global.DB2Mgr.GetScalingStatValuesForLevel(Math.Clamp(GetLevel(), ssd.MinLevel, ssd.MaxLevel)) : null;
+
+            if (onlyForScalingItems && (ssd == null || ssv == null))
+                return;
 
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
             {
-                var statType = item.GetItemStatType(i);
-                if (statType == ItemModType.None)
-                    continue;
+                ItemModType statType = 0;
+                var val = 0;
 
-                float val = item.GetItemStatValue(i, this);
+                if (ssd != null && ssv != null)
+                {
+                    statType = ssd.StatID(i);
+                    if (statType == ItemModType.None)
+                        continue;
+
+                    val = (ssv.getSSDMultiplier(proto.GetScalingStatValue()) * ssd.Bonus[i]) / 10000;
+                }
+                else
+                {
+                    statType = proto.GetStatModifierBonusStat(i);
+                    if (statType == ItemModType.None)
+                        continue;
+
+                    val = proto.GetStatModifierBonusAmount(i);
+                }
+
                 if (val == 0)
                     continue;
 
-                switch ((ItemModType)statType)
+                float combatRatingMultiplier = 1.0f;
+
+                switch (statType)
                 {
                     case ItemModType.Mana:
                         HandleStatFlatModifier(UnitMods.Mana, UnitModifierFlatType.Base, (float)val, apply);
@@ -3454,15 +3476,29 @@ namespace Game.Entities
                 }
             }
 
-            var armor = proto.GetArmor(itemLevel);
-            if (armor != 0)
+            // Apply Spell Power from ScalingStatValue if set
+            if (ssv != null)
+                if (ssv.getSpellBonus(proto.GetScalingStatValue()) is int spellbonus && spellbonus != 0)
+                    ApplySpellPowerBonus(spellbonus, apply);
+
+            for (SpellSchools i = 0; i < SpellSchools.Max; ++i)
             {
-                HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, (float)armor, apply);
-                if (proto.GetClass() == ItemClass.Armor && proto.GetSubClass().Armor == ItemSubClassArmor.Shield)
-                    SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), apply ? (int)(armor * 2.5f) : 0);
+                var school = i;
+                var resistance = proto.GetResistance(school);
+
+                if (school == SpellSchools.Normal && ssv != null)
+                    if (ssv.getArmorMod(proto.GetScalingStatValue()) is int ssvarmor && ssvarmor != 0)
+                        resistance = ssvarmor;
+
+                if (resistance != 0)
+                    HandleStatFlatModifier(UnitMods.Armor + (int)i, UnitModifierFlatType.Base, (float)resistance, apply);
             }
 
-            WeaponAttackType attType = GetAttackBySlot(slot, proto.GetInventoryType());
+            if (proto.GetShieldBlockValue(proto.GetItemLevel()) is int shieldBlockValue && shieldBlockValue != 0)
+                if (proto.GetClass() == ItemClass.Armor && proto.GetSubClass().Armor == ItemSubClassArmor.Shield)
+                    SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), apply? shieldBlockValue : 0);
+
+            var attType = GetAttackBySlot(slot, proto.GetInventoryType());
             if (attType != WeaponAttackType.Max)
                 _ApplyWeaponDamage(slot, item, apply);
         }

@@ -180,7 +180,7 @@ namespace Game.Entities
             var selector = CliDB.ItemLevelSelectorStorage.LookupByKey(itemLevelSelectorId);
             if (selector != null)
             {
-                short delta = (short)(selector.MinItemLevel - itemTemplate.GetBaseItemLevel());
+                short delta = (short)(selector.MinItemLevel - itemTemplate.GetItemLevel());
 
                 int bonus = GetItemBonusListForItemLevelDelta(delta);
                 if (bonus != 0)

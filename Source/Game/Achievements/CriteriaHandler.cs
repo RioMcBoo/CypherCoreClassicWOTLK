@@ -1253,7 +1253,7 @@ namespace Game.Achievements
                 {
                     // miscValue1 is itemid
                     ItemTemplate item = Global.ObjectMgr.GetItemTemplate((int)miscValue1);
-                    if (item == null || item.GetBaseItemLevel() < reqValue)
+                    if (item == null || item.GetItemLevel() < reqValue)
                         return false;
                     break;
                 }
@@ -4089,7 +4089,7 @@ namespace Game.Achievements
                     ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
                     if (itemTemplate == null)
                         return false;
-                    return itemTemplate.GetBaseItemLevel() >= EquippedItem.ItemLevel && (uint)itemTemplate.GetQuality() >= EquippedItem.ItemQuality;
+                    return itemTemplate.GetItemLevel() >= EquippedItem.ItemLevel && (uint)itemTemplate.GetQuality() >= EquippedItem.ItemQuality;
                 }
                 case CriteriaDataType.MapId:
                     return source.GetMapId() == MapId.Id;

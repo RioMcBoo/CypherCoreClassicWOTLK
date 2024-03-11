@@ -67,7 +67,11 @@ namespace Game.DataStorage
         public int MinLevel;
         public int MaxLevel;
         public int[] Bonus = new int[10];
-        public int[] StatID = new int[10];
+        private int[] _statID = new int[10];
+
+        #region Properties
+        public ItemModType StatID(int index) => (ItemModType)_statID[index];
+        #endregion
     };
 
     public sealed class ScalingStatValuesRecord
@@ -98,51 +102,48 @@ namespace Game.DataStorage
         public int PlateChestArmor;
 
         #region Helpers
-        public int getSSDMultiplier(uint mask)
+        public int getSSDMultiplier(int mask)
         {
-            int Mask = (int)mask;
-            if (Mask.HasAnyFlag(0x4001F))
+            if (mask.HasAnyFlag(0x4001F))
             {
-                if (Mask.HasAnyFlag(0x00000001)) return ShoulderBudget;
-                if (Mask.HasAnyFlag(0x00000002)) return TrinketBudget;
-                if (Mask.HasAnyFlag(0x00000004)) return WeaponBudget1H;
-                if (Mask.HasAnyFlag(0x00000008)) return PrimaryBudget;
-                if (Mask.HasAnyFlag(0x00000010)) return RangedBudget;
-                if (Mask.HasAnyFlag(0x00040000)) return TertiaryBudget;
+                if (mask.HasAnyFlag(0x00000001)) return ShoulderBudget;
+                if (mask.HasAnyFlag(0x00000002)) return TrinketBudget;
+                if (mask.HasAnyFlag(0x00000004)) return WeaponBudget1H;
+                if (mask.HasAnyFlag(0x00000008)) return PrimaryBudget;
+                if (mask.HasAnyFlag(0x00000010)) return RangedBudget;
+                if (mask.HasAnyFlag(0x00040000)) return TertiaryBudget;
             }
             return 0;
         }
 
-        public int getArmorMod(uint mask)
+        public int getArmorMod(int mask)
         {
-            int Mask = (int)mask;
-            if (Mask.HasAnyFlag(0x00F001E0))
+            if (mask.HasAnyFlag(0x00F001E0))
             {
-                if (Mask.HasAnyFlag(0x00000020)) return ClothShoulderArmor;
-                if (Mask.HasAnyFlag(0x00000040)) return LeatherShoulderArmor;
-                if (Mask.HasAnyFlag(0x00000080)) return MailShoulderArmor;
-                if (Mask.HasAnyFlag(0x00000100)) return PlateShoulderArmor;
+                if (mask.HasAnyFlag(0x00000020)) return ClothShoulderArmor;
+                if (mask.HasAnyFlag(0x00000040)) return LeatherShoulderArmor;
+                if (mask.HasAnyFlag(0x00000080)) return MailShoulderArmor;
+                if (mask.HasAnyFlag(0x00000100)) return PlateShoulderArmor;
 
-                if (Mask.HasAnyFlag(0x00080000)) return ClothCloakArmor;
-                if (Mask.HasAnyFlag(0x00100000)) return ClothChestArmor;
-                if (Mask.HasAnyFlag(0x00200000)) return LeatherChestArmor;
-                if (Mask.HasAnyFlag(0x00400000)) return MailChestArmor;
-                if (Mask.HasAnyFlag(0x00800000)) return PlateChestArmor;
+                if (mask.HasAnyFlag(0x00080000)) return ClothCloakArmor;
+                if (mask.HasAnyFlag(0x00100000)) return ClothChestArmor;
+                if (mask.HasAnyFlag(0x00200000)) return LeatherChestArmor;
+                if (mask.HasAnyFlag(0x00400000)) return MailChestArmor;
+                if (mask.HasAnyFlag(0x00800000)) return PlateChestArmor;
             }
             return 0;
         }
 
-        public int getDPSMod(uint mask)
+        public int getDPSMod(int mask)
         {
-            int Mask = (int)mask;
             if (Mask.HasAnyFlag(0x7E00))
             {
-                if (Mask.HasAnyFlag(0x00000200)) return WeaponDPS1H;
-                if (Mask.HasAnyFlag(0x00000400)) return WeaponDPS2H;
-                if (Mask.HasAnyFlag(0x00000800)) return SpellcasterDPS1H;
-                if (Mask.HasAnyFlag(0x00001000)) return SpellcasterDPS2H;
-                if (Mask.HasAnyFlag(0x00002000)) return RangedDPS;
-                if (Mask.HasAnyFlag(0x00004000)) return WandDPS;
+                if (mask.HasAnyFlag(0x00000200)) return WeaponDPS1H;
+                if (mask.HasAnyFlag(0x00000400)) return WeaponDPS2H;
+                if (mask.HasAnyFlag(0x00000800)) return SpellcasterDPS1H;
+                if (mask.HasAnyFlag(0x00001000)) return SpellcasterDPS2H;
+                if (mask.HasAnyFlag(0x00002000)) return RangedDPS;
+                if (mask.HasAnyFlag(0x00004000)) return WandDPS;
             }
             return 0;
         }
@@ -158,10 +159,9 @@ namespace Game.DataStorage
             return false;
         }
 
-        public int getSpellBonus(uint mask)
+        public int getSpellBonus(int mask)
         {
-            int Mask = (int)mask;
-            if (Mask.HasAnyFlag(0x00008000)) return SpellPower;
+            if (mask.HasAnyFlag(0x00008000)) return SpellPower;
             return 0;
         }
         #endregion

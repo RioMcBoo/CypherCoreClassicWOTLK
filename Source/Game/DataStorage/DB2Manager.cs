@@ -2101,6 +2101,11 @@ namespace Game.DataStorage
             return _itemEffectsByItemId[itemId];
         }
 
+        public ScalingStatValuesRecord GetScalingStatValuesForLevel(int level)
+        {
+            return _scalingStatValuesByLevel[level];
+        }
+
         public bool HasItemCurrencyCost(int itemId) { return _itemsWithCurrencyCost.Contains(itemId); }
 
         public Dictionary<int, Dictionary<Difficulty, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
@@ -2180,7 +2185,7 @@ namespace Game.DataStorage
         List<SpellFamilyNames> _spellFamilyNames = new();
         MultiMap<int, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new();
         MultiMap<int, SpellVisualMissileRecord> _spellVisualMissilesBySet = new();
-        MultiMap<int, ScalingStatValuesRecord> _scalingStatValuesByLevel = new();
+        Dictionary<int, ScalingStatValuesRecord> _scalingStatValuesByLevel = new();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
         List<uint> _toys = new();
         MultiMap<int, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new();

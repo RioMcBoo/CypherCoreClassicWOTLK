@@ -1129,7 +1129,7 @@ namespace Game.Entities
                         foreach (var bonusListId in gem.BonusListIDs)
                             gemBonus.AddBonusList(bonusListId);
 
-                        int gemBaseItemLevel = gemTemplate.GetBaseItemLevel();
+                        int gemBaseItemLevel = gemTemplate.GetItemLevel();
                         if (gemBonus.PlayerLevelToItemLevelCurveId != 0)
                         {
                             int scaledIlvl = (int)Global.DB2Mgr.GetCurveValueAt(gemBonus.PlayerLevelToItemLevelCurveId, gemScalingLevel);
@@ -1725,7 +1725,7 @@ namespace Game.Entities
             if (qualityPrice == null)
                 return 0;
 
-            var basePrice = CliDB.ItemPriceBaseStorage.LookupByKey(proto.GetBaseItemLevel());
+            var basePrice = CliDB.ItemPriceBaseStorage.LookupByKey(proto.GetItemLevel());
             if (basePrice == null)
                 return 0;
 
@@ -1888,7 +1888,7 @@ namespace Game.Entities
             if (itemTemplate == null)
                 return 1;
 
-            int itemLevel = itemTemplate.GetBaseItemLevel();
+            int itemLevel = itemTemplate.GetItemLevel();
 
             if (bonusData.PlayerLevelToItemLevelCurveId != 0)
             {

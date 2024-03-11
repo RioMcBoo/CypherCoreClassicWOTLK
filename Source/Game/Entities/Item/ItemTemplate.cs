@@ -131,66 +131,6 @@ namespace Game.Entities
             }
         }
 
-        public int GetArmor(int itemLevel)
-        {
-            ItemQuality quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
-            if (quality > ItemQuality.Artifact)
-                return 0;
-
-            // all items but shields
-            if (GetClass() != ItemClass.Armor || GetSubClass().Armor != ItemSubClassArmor.Shield)
-            {
-                ItemArmorQualityRecord armorQuality = CliDB.ItemArmorQualityStorage.LookupByKey(itemLevel);
-                ItemArmorTotalRecord armorTotal = CliDB.ItemArmorTotalStorage.LookupByKey(itemLevel);
-                if (armorQuality == null || armorTotal == null)
-                    return 0;
-
-                InventoryType inventoryType = GetInventoryType();
-                if (inventoryType == InventoryType.Robe)
-                    inventoryType = InventoryType.Chest;
-
-                ArmorLocationRecord location = CliDB.ArmorLocationStorage.LookupByKey((int)inventoryType);
-                if (location == null)
-                    return 0;
-
-                if (GetSubClass().Armor < ItemSubClassArmor.Cloth || GetSubClass().Armor > ItemSubClassArmor.Plate)
-                    return 0;
-
-                float total = 1.0f;
-                float locationModifier = 1.0f;
-                switch (GetSubClass().Armor)
-                {
-                    case ItemSubClassArmor.Cloth:
-                        total = armorTotal.Cloth;
-                        locationModifier = location.Clothmodifier;
-                        break;
-                    case ItemSubClassArmor.Leather:
-                        total = armorTotal.Leather;
-                        locationModifier = location.Leathermodifier;
-                        break;
-                    case ItemSubClassArmor.Mail:
-                        total = armorTotal.Mail;
-                        locationModifier = location.Chainmodifier;
-                        break;
-                    case ItemSubClassArmor.Plate:
-                        total = armorTotal.Plate;
-                        locationModifier = location.Platemodifier;
-                        break;
-                    default:
-                        break;
-                }
-
-                return (int)(armorQuality.QualityMod[(int)quality] * total * locationModifier + 0.5f);
-            }
-
-            // shields
-            ItemArmorShieldRecord shield = CliDB.ItemArmorShieldStorage.LookupByKey(itemLevel);
-            if (shield == null)
-                return 0;
-
-            return (int)(shield.Quality[(int)quality] + 0.5f);
-        }
-
         public float GetDPS(int itemLevel)
         {
             ItemQuality quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
@@ -301,19 +241,23 @@ namespace Game.Entities
         public InventoryType GetInventoryType() { return ExtendedData.InventoryType; }
         public ClassMask GetAllowableClass() { return ExtendedData.AllowableClass; }
         public RaceMask GetAllowableRace() { return ExtendedData.AllowableRace; }
-        public int GetBaseItemLevel() { return ExtendedData.ItemLevel; }
+        public int GetItemLevel() { return ExtendedData.ItemLevel; }
         public int GetBaseRequiredLevel() { return ExtendedData.RequiredLevel; }
         public SkillType GetRequiredSkill() { return (SkillType)ExtendedData.RequiredSkill; }
         public int GetRequiredSkillRank() { return ExtendedData.RequiredSkillRank; }
         public int GetRequiredSpell() { return ExtendedData.RequiredAbility; }
         public int GetRequiredReputationFaction() { return ExtendedData.MinFactionID; }
         public ReputationRank GetRequiredReputationRank() { return ExtendedData.MinReputation; }
+        public int GetResistance(SpellSchools school) { return ExtendedData.Resistances[(int)school]; }
         public int GetMaxCount() { return ExtendedData.MaxCount; }
         public byte GetContainerSlots() { return ExtendedData.ContainerSlots; }
         public ItemModType GetStatModifierBonusStat(int index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatModifierBonusStat(index); }
+        public short GetStatModifierBonusAmount(int index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatModifierBonusAmount[index]; }
         public int GetStatPercentEditor(int index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentEditor[index]; }
         public float GetStatPercentageOfSocket(int index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentageOfSocket[index]; }
         public int GetScalingStatContentTuning() { return ExtendedData.ContentTuningID; }
+        public ushort GetScalingStatDistributionID() { return ExtendedData.ScalingStatDistributionID; }
+        public int GetScalingStatValue() { return BasicData.ScalingStatValue; }
         public int GetPlayerLevelToItemLevelCurveId() { return ExtendedData.PlayerLevelToItemLevelCurveID; }
         public SpellSchools GetDamageType() { return ExtendedData.DamageType; }
         public uint GetDelay() { return ExtendedData.ItemDelay; }
@@ -327,11 +271,19 @@ namespace Game.Entities
         public int GetMap() { return ExtendedData.InstanceBound; }
         public BagFamilyMask GetBagFamily() { return (BagFamilyMask)ExtendedData.BagFamily; }
         public int GetTotemCategory() { return ExtendedData.TotemCategoryID; }
+
         public SocketColor GetSocketColor(int index)
         {
             Cypher.Assert(index < ItemConst.MaxGemSockets);
             return (SocketColor)ExtendedData.SocketType[index];
         }
+
+        public int GetShieldBlockValue(int itemLevel)
+        {
+            var blockEntry = CliDB.ShieldBlockRegularGameTable.GetRow(itemLevel);
+            return CliDB.GetShieldBlockRegularColumnForQuality(blockEntry, GetQuality());
+        }
+
         public int GetSocketBonus() { return ExtendedData.SocketMatchEnchantmentId; }
         public int GetGemProperties() { return ExtendedData.GemProperties; }
         public float GetQualityModifier() { return ExtendedData.QualityModifier; }

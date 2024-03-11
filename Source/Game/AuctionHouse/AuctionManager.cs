@@ -564,7 +564,7 @@ namespace Game
                         break;
                     case ItemClass.Gem:
                     case ItemClass.ItemEnhancement:
-                        bucket.SortLevel = (byte)itemTemplate.GetBaseItemLevel();
+                        bucket.SortLevel = (byte)itemTemplate.GetItemLevel();
                         break;
                     case ItemClass.Consumable:
                         bucket.SortLevel = Math.Max((byte)1, bucket.RequiredLevel);
@@ -1974,7 +1974,7 @@ namespace Game
 
         public static AuctionsBucketKey ForCommodity(ItemTemplate itemTemplate)
         {
-            return new AuctionsBucketKey(itemTemplate.GetId(), (ushort)itemTemplate.GetBaseItemLevel(), 0, 0);
+            return new AuctionsBucketKey(itemTemplate.GetId(), (ushort)itemTemplate.GetItemLevel(), 0, 0);
         }
     }
 

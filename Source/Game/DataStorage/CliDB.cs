@@ -922,30 +922,41 @@ namespace Game.DataStorage
             return row.Wins * row.Xp;
         }
 
-        public static float GetShieldBlockRegularColumnForQuality(GtShieldBlockRegularRecord row, ItemQuality quality)
+        public static int GetShieldBlockRegularColumnForQuality(GtShieldBlockRegularRecord row, ItemQuality quality)
         {
+            int value;
+
             switch (quality)
             {
                 case ItemQuality.Poor:
-                    return row.Poor;
+                    value = (int)row.Poor;
+                    break;
                 case ItemQuality.Normal:
-                    return row.Standard;
+                    value = (int)row.Standard;
+                    break;
                 case ItemQuality.Uncommon:
-                    return row.Good;
+                    value = (int)row.Good;
+                    break;
                 case ItemQuality.Rare:
-                    return row.Superior;
+                    value = (int)row.Superior;
+                    break;
                 case ItemQuality.Epic:
-                    return row.Epic;
+                    value = (int)row.Epic;
+                    break;
                 case ItemQuality.Legendary:
-                    return row.Legendary;
+                    value = (int)row.Legendary;
+                    break;
                 case ItemQuality.Artifact:
-                    return row.Artifact;
+                    value = (int)row.Artifact;
+                    break;
                 case ItemQuality.Heirloom:
-                    return row.ScalingStat;
+                    value = (int)row.ScalingStat;
+                    break;
                 default:
+                    value = 0;
                     break;
             }
-            return 0.0f;
+            return value;
         }
         #endregion
     }

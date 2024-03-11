@@ -3199,7 +3199,7 @@ namespace Game.Spells
             ExecuteLogEffectDestroyItem(effectInfo.Effect, foodItem.GetEntry());
 
             int pct;
-            int levelDiff = (int)pet.GetLevel() - (int)foodItem.GetTemplate().GetBaseItemLevel();
+            int levelDiff = (int)pet.GetLevel() - (int)foodItem.GetTemplate().GetItemLevel();
             if (levelDiff >= 30)
                 return;
             else if (levelDiff >= 20)
