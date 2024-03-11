@@ -2138,12 +2138,11 @@ namespace Game.Entities
 
         float GetHealthBonusFromStamina()
         {
-            float ratio = 10.0f;
             float stamina = GetStat(Stats.Stamina);
             float baseStam = Math.Min(20f, stamina);
             float moreStam = stamina - baseStam;
 
-            return moreStam * ratio;
+            return baseStam + (moreStam * 10.0f);
         }
 
         float GetManaBonusFromIntellect()
