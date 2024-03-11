@@ -302,9 +302,9 @@ namespace Game.DataStorage
 
     public sealed class GlyphSlotRecord
     {
-        public uint Id;
+        public int Id;
         public int ToolTip;
-        public uint Type;
+        public int Type;
     }
 
     public sealed class GlyphPropertiesRecord

@@ -642,23 +642,28 @@ namespace Game.Entities
             return 0;
         }
 
-        public void SetGlyphSlot(byte slotIndex, uint slotType) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GlyphInfos, slotIndex).ModifyValue(m_activePlayerData.GlyphInfos[slotIndex].GlyphSlot), slotType); }
-        public uint GetGlyphSlot(byte slotIndex) { return m_activePlayerData.GlyphInfos[slotIndex].GlyphSlot; }
-        public void SetGlyph(byte slotIndex, uint glyph)
+        public void SetGlyphSlot(int slotIndex, int slotType)
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GlyphSlots, slotIndex), slotType);
+        }
+
+        public int GetGlyphSlot(int slotIndex) { return m_activePlayerData.GlyphSlots[slotIndex]; }
+
+        public void SetGlyph(int slotIndex, int glyph)
         {
-            GetGlyphs(GetActiveTalentGroup())[slotIndex] = (ushort)glyph;
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GlyphInfos, slotIndex).ModifyValue(m_activePlayerData.GlyphInfos[slotIndex].Glyph), glyph);
+            _specializationInfo.Glyphs[GetActiveTalentGroup()][slotIndex] = glyph;
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Glyphs, slotIndex), glyph);
         }
     
-        public int GetGlyph(byte slotIndex) { return _specializationInfo.Glyphs[GetActiveTalentGroup()][slotIndex]; }
+        public int GetGlyph(int slotIndex) { return _specializationInfo.Glyphs[GetActiveTalentGroup()][slotIndex]; }
 
         // Only sent on CreateObject
         void InitGlyphsForLevel()
         {
-            foreach (GlyphSlotRecord gs in CliDB.GlyphSlotStorage.Values)
+            foreach (var gs in CliDB.GlyphSlotStorage.Values)
             {
-                if (gs.ToolTip != 0 && (gs.ToolTip <= PlayerConst.MaxGlyphSlotIndex))
-                    SetGlyphSlot((byte)(gs.ToolTip - 1), gs.Id);
+                if (gs.ToolTip != 0)
+                    SetGlyphSlot(gs.ToolTip - 1, gs.Id);
             }
 
             var level = GetLevel();
@@ -677,27 +682,7 @@ namespace Game.Entities
                 value |= 0x20;
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GlyphsEnabled), value);
-        }
-
-        void UpdateGlyphsEnabled()
-        {
-            uint level = GetLevel();
-            byte value = 0;
-
-            // 0x3F = 0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 for 80 level
-            if (level >= 15)
-                value |= (0x01 | 0x02);
-            if (level >= 30)
-                value |= 0x08;
-            if (level >= 50)
-                value |= 0x04;
-            if (level >= 70)
-                value |= 0x10;
-            if (level >= 80)
-                value |= 0x20;
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GlyphsEnabled), value);
-        }        
+        }   
 
         //Traits
         public void CreateTraitConfig(TraitConfigPacket traitConfig)

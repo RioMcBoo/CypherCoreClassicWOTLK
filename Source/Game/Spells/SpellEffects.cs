@@ -3030,7 +3030,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
-            if (m_misc.GlyphIndex >= PlayerConst.MaxGlyphSlotIndex)
+            if (m_misc.GlyphSlot >= PlayerConst.MaxGlyphSlotIndex)
                 return;
 
             Player player = m_caster.ToPlayer();
@@ -3039,7 +3039,7 @@ namespace Game.Spells
 
             // glyph sockets level requirement
             byte minLevel = 0;
-            switch (m_misc.GlyphIndex)
+            switch (m_misc.GlyphSlot)
             {
                 case 0:
                 case 1: minLevel = 15; break;
@@ -3048,41 +3048,43 @@ namespace Game.Spells
                 case 4: minLevel = 70; break;
                 case 5: minLevel = 80; break;
             }
-            if (minLevel !=0  && player.GetLevel() < minLevel)
+
+            if (minLevel != 0 && player.GetLevel() < minLevel)
             {
                 SendCastResult(SpellCastResult.GlyphSocketLocked);
                 return;
             }
 
-            // apply new one
-            uint glyph = (uint)effectInfo.MiscValue;
-            if (glyph != 0)
+            var glyph = effectInfo.MiscValue;
+            if (glyph == 0)
+                return;
+
+            if (CliDB.GlyphPropertiesStorage.TryGetValue(glyph, out GlyphPropertiesRecord gp))
             {
-                if (CliDB.GlyphPropertiesStorage.TryGetValue(glyph, out GlyphPropertiesRecord gp))
+                if (CliDB.GlyphSlotStorage.TryGetValue(player.GetGlyphSlot((byte)m_misc.GlyphSlot), out GlyphSlotRecord gs))
                 {
-                    if (CliDB.GlyphSlotStorage.TryGetValue(player.GetGlyphSlot((byte)m_misc.GlyphIndex), out GlyphSlotRecord gs))
+                    if (gp.GlyphSlotFlags != gs.Type)
                     {
-                        if (gp.GlyphSlotFlags != gs.Type)
-                        {
-                            SendCastResult(SpellCastResult.InvalidGlyph);
-                            return;                                 // glyph slot mismatch
-                        }
+                        SendCastResult(SpellCastResult.InvalidGlyph);
+                        return;                                 // glyph slot mismatch
                     }
-
-                    // remove old glyph
-                    if (player.GetGlyph((byte)m_misc.GlyphIndex) is uint oldglyph && oldglyph != 0)
-                    {
-                        if (CliDB.GlyphPropertiesStorage.TryGetValue(oldglyph, out GlyphPropertiesRecord old_gp))
-                        {
-                            player.RemoveAurasDueToSpell(old_gp.SpellID);
-                            player.SetGlyph((byte)m_misc.GlyphIndex, 0);
-                        }
-                    }
-
-                    player.CastSpell(player, gp.SpellID, true);
-                    player.SetGlyph((byte)m_misc.GlyphIndex, glyph);
-                    player.SendTalentsInfoData(false);
                 }
+
+                // remove old glyph
+                if (player.GetGlyph(m_misc.GlyphSlot) is int oldglyph && oldglyph != 0)
+                {
+                    if (CliDB.GlyphPropertiesStorage.TryGetValue(oldglyph, out GlyphPropertiesRecord old_gp))
+                    {
+                        player.RemoveAurasDueToSpell(old_gp.SpellID);
+                        player.SetGlyph(m_misc.GlyphSlot, 0);
+                    }
+                }
+
+                player.CastSpell(player, gp.SpellID, true);
+                player.SetGlyph(m_misc.GlyphSlot, glyph);
+                player.SendTalentsInfoData();
+
+                player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.ChangeGlyph);
             }
         }
 

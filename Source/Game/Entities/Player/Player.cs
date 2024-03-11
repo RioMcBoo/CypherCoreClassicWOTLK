@@ -5267,7 +5267,8 @@ namespace Game.Entities
 
             SetCreateHealth(0);
             SetCreateMana(basemana);
-            UpdateGlyphsEnabled();
+
+            InitGlyphsForLevel();
             InitTalentForLevel();
             InitTaxiNodesForLevel();
 

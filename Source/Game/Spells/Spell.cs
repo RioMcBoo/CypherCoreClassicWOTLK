@@ -5119,59 +5119,12 @@ namespace Game.Spells
                         if (!m_caster.IsTypeId(TypeId.Player))
                             return SpellCastResult.GlyphNoSpec;
 
-                        Player caster = m_caster.ToPlayer();
-                        if (!caster.HasSpell(m_misc.SpellId))
-                            return SpellCastResult.NotKnown;
-
-                        uint glyphId = (uint)spellEffectInfo.MiscValue;
+                        var glyphId = spellEffectInfo.MiscValue;
                         if (glyphId != 0)
                         {
                             GlyphPropertiesRecord glyphProperties = CliDB.GlyphPropertiesStorage.LookupByKey(glyphId);
                             if (glyphProperties == null)
-                                return SpellCastResult.InvalidGlyph;
-
-                            List<uint> glyphBindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
-                            if (glyphBindableSpells.Empty())
-                                return SpellCastResult.InvalidGlyph;
-
-                            if (!glyphBindableSpells.Contains(m_misc.SpellId))
-                                return SpellCastResult.InvalidGlyph;
-
-                            List<ChrSpecialization> glyphRequiredSpecs = Global.DB2Mgr.GetGlyphRequiredSpecs(glyphId);
-                            if (!glyphRequiredSpecs.Empty())
-                            {
-                                if (caster.GetPrimarySpecialization() == ChrSpecialization.None)
-                                    return SpellCastResult.GlyphNoSpec;
-
-                                if (!glyphRequiredSpecs.Contains(caster.GetPrimarySpecialization()))
-                                    return SpellCastResult.GlyphInvalidSpec;
-                            }
-
-                            uint replacedGlyph = 0;
-                            foreach (uint activeGlyphId in caster.GetGlyphs(caster.GetActiveTalentGroup()))
-                            {
-                                List<uint> activeGlyphBindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(activeGlyphId);
-                                if (!activeGlyphBindableSpells.Empty())
-                                {
-                                    if (activeGlyphBindableSpells.Contains(m_misc.SpellId))
-                                    {
-                                        replacedGlyph = activeGlyphId;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            foreach (uint activeGlyphId in caster.GetGlyphs(caster.GetActiveTalentGroup()))
-                            {
-                                if (activeGlyphId == replacedGlyph)
-                                    continue;
-
-                                if (activeGlyphId == glyphId)
-                                    return SpellCastResult.UniqueGlyph;
-
-                                if (CliDB.GlyphPropertiesStorage.LookupByKey(activeGlyphId).GlyphExclusiveCategoryID == glyphProperties.GlyphExclusiveCategoryID)
-                                    return SpellCastResult.GlyphExclusiveCategory;
-                            }
+                                return SpellCastResult.InvalidGlyph;                            
                         }
                         break;
                     }
@@ -6302,18 +6255,13 @@ namespace Game.Spells
             }
             else
             {
-                uint itemid = m_CastItem.GetEntry();
+                var itemid = m_CastItem.GetEntry();
                 if (!player.HasItemCount(itemid))
                     return SpellCastResult.ItemNotReady;
 
                 ItemTemplate proto = m_CastItem.GetTemplate();
                 if (proto == null)
                     return SpellCastResult.ItemNotReady;
-
-                foreach (ItemEffectRecord itemEffect in m_CastItem.GetEffects())
-                    if (itemEffect.LegacySlotIndex < m_CastItem.m_itemData.SpellCharges.GetSize() && itemEffect.Charges != 0)
-                        if (m_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex) == 0)
-                            return SpellCastResult.NoChargesRemain;
 
                 // consumable cast item checks
                 if (proto.GetClass() == ItemClass.Consumable && m_targets.GetUnitTarget() != null)
@@ -8178,7 +8126,7 @@ namespace Game.Spells
 
         // SPELL_EFFECT_APPLY_GLYPH
         [FieldOffset(0)]
-        public uint GlyphIndex;
+        public int GlyphSlot;
 
         [FieldOffset(0)]
         public uint Data0;

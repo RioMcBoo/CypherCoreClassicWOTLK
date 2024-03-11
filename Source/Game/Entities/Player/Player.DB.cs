@@ -1126,33 +1126,45 @@ namespace Game.Entities
 
         void _LoadGlyphs(SQLResult result)
         {
-            // SELECT talentGroup, glyph1, glyph2, glyph3, glyph4, glyph5, glyph6 from character_glyphs WHERE guid = ?
+            // SELECT talentGroup, glyphSlot, glyphId from character_glyphs WHERE guid = ?
             if (result.IsEmpty())
                 return;
 
             do
             {
-                byte spec = result.Read<byte>(0);
-                if (spec >= PlayerConst.MaxTalentSpecs && spec >= GetTalentGroupCount())
+                byte talentGroupId = result.Read<byte>(0);
+                if (talentGroupId >= PlayerConst.MaxTalentSpecs)
                     continue;
 
-                for (byte slotIndex = 0; slotIndex < PlayerConst.MaxGlyphSlotIndex; ++slotIndex)
-                {
-                    uint glyphId = result.Read<ushort>(slotIndex + 1);
-                    if (CliDB.GlyphPropertiesStorage.LookupByKey(glyphId) is GlyphPropertiesRecord)
-                        GetGlyphs(spec)[slotIndex] = 0;
-                    else
-                        GetGlyphs(spec)[slotIndex] = (ushort)glyphId;
-                }
+                byte glyphSlot = result.Read<byte>(1);
+                if (glyphSlot >= PlayerConst.MaxGlyphSlotIndex)
+                    continue;
+
+                int glyphId = result.Read<ushort>(2);
+                if (CliDB.GlyphPropertiesStorage.LookupByKey(glyphId) == null)
+                    continue;
+
+                SetGlyph(glyphSlot, glyphId);
 
             } while (result.NextRow());
         }
 
         void _LoadGlyphAuras()
         {
+            foreach (var glyphId in GetGlyphs(GetActiveTalentGroup()))
+            {
+                if (glyphId==0)
+                    continue;
+                var glyphProperty = CliDB.GlyphPropertiesStorage.LookupByKey(glyphId);
+                Cypher.Assert(glyphProperty != null);
+
+                CastSpell(this, glyphProperty.SpellID, true);
+            }
+
+            /*
             for (byte i = 0; i < PlayerConst.MaxGlyphSlotIndex; ++i)
             {
-                if (GetGlyph(i) is uint glyph && glyph != 0)
+                if (GetGlyph(i) is int glyph && glyph != 0)
                 {
                     CliDB.GlyphPropertiesStorage.TryGetValue(glyph, out GlyphPropertiesRecord gp);
                     if (gp != null)
@@ -1174,11 +1186,13 @@ namespace Game.Entities
                     else
                         Log.outError(LogFilter.Player, "Player::_LoadGlyphAuras: Player '{0}' ({1}) has not existing glyph entry {2} on index {3}", GetName(), GetGUID().ToString(), glyph, i);
 
-                // On any error remove glyph
-                SetGlyph(i, 0);
+                    // On any error remove glyph
+                    SetGlyph(i, 0);
+                }
             }
+            */
         }
-    }
+
         public void LoadCorpse(SQLResult result)
         {
             if (IsAlive() || HasAtLoginFlag(AtLoginFlags.Resurrect))
@@ -1928,16 +1942,20 @@ namespace Game.Entities
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 
-            for (byte spec = 0; spec < PlayerConst.MaxTalentSpecs; ++spec)
+            for (byte spec = 0; spec < PlayerConst.MaxTalentSpecs; spec++)
             {
-                byte index = 0;
-
+                for (byte i = 0; i < GetGlyphs(spec).Length; i++)
+                {
+                    byte index = 0;
+                    int glyphId = GetGlyphs(spec)[i];
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_GLYPHS);
                     stmt.AddValue(index++, GetGUID().GetCounter());
                     stmt.AddValue(index++, spec);
+                    stmt.AddValue(index++, i);
                     stmt.AddValue(index++, glyphId);
 
-                trans.Append(stmt);
+                    trans.Append(stmt);
+                }
             }
         }
 

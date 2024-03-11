@@ -3624,8 +3624,8 @@ namespace Game.Entities
         public UpdateFieldArray<uint> BagSlotFlags = new(4, 623, 624);
         public UpdateFieldArray<uint> BankBagSlotFlags = new(7, 628, 629);
         public UpdateFieldArray<ulong> QuestCompleted = new(875, 636, 637);
-        public UpdateFieldArray<uint> GlyphSlots = new(6, 1512, 1513);
-        public UpdateFieldArray<uint> Glyphs = new(6, 1512, 1519);
+        public UpdateFieldArray<int> GlyphSlots = new(6, 1512, 1513);
+        public UpdateFieldArray<int> Glyphs = new(6, 1512, 1519);
         static int changeMaskLength = 1525;
 
         public static int ExploredZonesSize;
@@ -3825,8 +3825,8 @@ namespace Game.Entities
             data.WriteInt32(ActiveCombatTraitConfigID);            
             for (int i = 0; i < 6; ++i)
             {
-                data.WriteUInt32(GlyphSlots[i]);
-                data.WriteUInt32(Glyphs[i]);
+                data.WriteInt32(GlyphSlots[i]);
+                data.WriteInt32(Glyphs[i]);
             }
             data.WriteUInt8(GlyphsEnabled);
             data.WriteUInt8(LfgRoles);
@@ -4881,11 +4881,11 @@ namespace Game.Entities
                 {
                     if (changesMask[1513 + i])
                     {
-                        data.WriteUInt32(GlyphSlots[i]);
+                        data.WriteInt32(GlyphSlots[i]);
                     }
                     if (changesMask[1519 + i])
                     {
-                        data.WriteUInt32(Glyphs[i]);
+                        data.WriteInt32(Glyphs[i]);
                     }
                 }
             }
