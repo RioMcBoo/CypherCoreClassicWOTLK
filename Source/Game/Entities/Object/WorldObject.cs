@@ -59,8 +59,9 @@ namespace Game.Entities
             if (IsInWorld)
             {
                 Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() {0} deleted but still in world!!", GetGUID().ToString());
-                if (IsTypeMask(TypeMask.Item))
-                    Log.outFatal(LogFilter.Misc, "Item slot {0}", ((Item)this).InventorySlot);
+                Item item = ToItem();
+                if (item != null)
+                    Log.outFatal(LogFilter.Misc, "Item slot {0}", item.InventorySlot);
                 Cypher.Assert(false);
             }
 
@@ -3017,7 +3018,8 @@ namespace Game.Entities
                 if (!player.HaveAtClient(this))
                     continue;
 
-                if (IsTypeMask(TypeMask.Unit) && (ToUnit().GetCharmerGUID() == player.GetGUID()))// @todo this is for puppet
+                Unit unit = ToUnit();
+                if (unit != null && unit.GetCharmerGUID() == player.GetGUID())// @todo this is for puppet
                     continue;
 
                 DestroyForPlayer(player);
@@ -3089,6 +3091,7 @@ namespace Game.Entities
         public bool IsDestroyedObject() { return _isDestroyedObject; }
         public void SetDestroyedObject(bool destroyed) { _isDestroyedObject = destroyed; }
 
+        public bool IsWorldObject() { return IsTypeMask(TypeMask.WorldObject); }
         public bool IsCreature() { return GetTypeId() == TypeId.Unit; }
         public bool IsPlayer() { return GetTypeId() == TypeId.Player; }
         public bool IsGameObject() { return GetTypeId() == TypeId.GameObject; }
@@ -3098,6 +3101,7 @@ namespace Game.Entities
         public bool IsAreaTrigger() { return GetTypeId() == TypeId.AreaTrigger; }
         public bool IsConversation() { return GetTypeId() == TypeId.Conversation; }
         public bool IsSceneObject() { return GetTypeId() == TypeId.SceneObject; }
+        public bool IsItem() { return GetTypeId() == TypeId.Item; }
 
         public Creature ToCreature() { return IsCreature() ? (this as Creature) : null; }
         public Player ToPlayer() { return IsPlayer() ? (this as Player) : null; }
@@ -3108,6 +3112,7 @@ namespace Game.Entities
         public AreaTrigger ToAreaTrigger() { return IsAreaTrigger() ? (this as AreaTrigger) : null; }
         public Conversation ToConversation() { return IsConversation() ? (this as Conversation) : null; }
         public SceneObject ToSceneObject() { return IsSceneObject() ? (this as SceneObject) : null; }
+        public Item ToItem() { return IsItem() ? (this as Item) : null; }
 
         public static Creature ToCreature(WorldObject o) { return o != null ? o.ToCreature() : null; }
         public static Player ToPlayer(WorldObject o) { return o != null ? o.ToPlayer() : null; }
@@ -3459,7 +3464,12 @@ namespace Game.Entities
         {
             float newZ = GetMapHeight(x, y, z);
             if (newZ > MapConst.InvalidHeight)
-                z = newZ + (IsUnit() ? ToUnit().GetHoverOffset() : 0.0f);
+            {
+                z = newZ;
+                Unit unit = ToUnit();
+                if (unit != null)
+                    z += ToUnit().GetHoverOffset();
+            }
         }
 
         public void UpdateAllowedPositionZ(float x, float y, ref float z)

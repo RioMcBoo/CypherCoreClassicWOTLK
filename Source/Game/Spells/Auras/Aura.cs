@@ -309,7 +309,7 @@ namespace Game.Spells
         {
             return $"Base: {(GetBase() != null ? GetBase().GetDebugInfo() : "NULL")}\nTarget: {(GetTarget() != null ? GetTarget().GetDebugInfo() : "NULL")}";
         }
-        
+
         public Unit GetTarget() { return _target; }
         public Aura GetBase() { return _base; }
 
@@ -2269,7 +2269,7 @@ namespace Game.Spells
                 loadedScript._FinishScriptCall();
             }
         }
-        
+
         public bool CallScriptCheckProcHandlers(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             bool result = true;
@@ -2411,7 +2411,7 @@ namespace Game.Spells
             Cypher.Assert(GetAuraType() == AuraObjectType.DynObj);
             return m_owner.ToDynamicObject();
         }
-        
+
         public void SetCastItemGUID(ObjectGuid guid)
         {
             m_castItemGuid = guid;
@@ -2617,10 +2617,11 @@ namespace Game.Spells
                 createInfo.CasterGUID = createInfo.Caster.GetGUID();
 
             // check if aura can be owned by owner
-            if (createInfo.GetOwner().IsTypeMask(TypeMask.Unit))
-                if (!createInfo.GetOwner().IsInWorld || createInfo.GetOwner().ToUnit().IsDuringRemoveFromWorld())
+            Unit ownerUnit = createInfo.GetOwner().ToUnit();
+            if (ownerUnit != null)
+                if (!ownerUnit.IsInWorld || ownerUnit.IsDuringRemoveFromWorld())
                     // owner not in world so don't allow to own not self casted single target auras
-                    if (createInfo.CasterGUID != createInfo.GetOwner().GetGUID() && createInfo.GetSpellInfo().IsSingleTarget())
+                    if (createInfo.CasterGUID != ownerUnit.GetGUID() && createInfo.GetSpellInfo().IsSingleTarget())
                         return null;
 
             Aura aura;
@@ -2814,7 +2815,7 @@ namespace Game.Spells
                     case SpellEffectName.ApplyAuraOnPet:
                     {
                         Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
-                        if (pet  != null)
+                        if (pet != null)
                             if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(pet, refe, condList))
                                 units.Add(pet);
                         break;

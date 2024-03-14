@@ -3820,7 +3820,10 @@ namespace Game.Maps
             // prepare static data
             ObjectGuid sourceGUID = source != null ? source.GetGUID() : ObjectGuid.Empty; //some script commands doesn't have source
             ObjectGuid targetGUID = target != null ? target.GetGUID() : ObjectGuid.Empty;
-            ObjectGuid ownerGUID = (source != null && source.IsTypeMask(TypeMask.Item)) ? ((Item)source).GetOwnerGUID() : ObjectGuid.Empty;
+            ObjectGuid ownerGUID = ObjectGuid.Empty;
+            var item = source?.ToItem();
+            if (item != null)
+                ownerGUID = item.GetOwnerGUID();
 
             // Schedule script execution for all scripts in the script map
             bool immedScript = false;
@@ -3967,7 +3970,7 @@ namespace Game.Maps
             if (obj == null)
                 Log.outError(LogFilter.Scripts, "{0} {1} object is NULL.", scriptInfo.GetDebugInfo(),
                     isSource ? "source" : "target");
-            else if (!obj.IsTypeMask(TypeMask.Unit))
+            else if (!obj.IsUnit())
                 Log.outError(LogFilter.Scripts,
                     "{0} {1} object is not unit (TypeId: {2}, Entry: {3}, GUID: {4}), skipping.", scriptInfo.GetDebugInfo(), isSource ? "source" : "target", obj.GetTypeId(), obj.GetEntry(), obj.GetGUID().ToString());
             else
@@ -4045,7 +4048,7 @@ namespace Game.Maps
                 Log.outError(LogFilter.Scripts, "{0} door guid is not specified.", scriptInfo.GetDebugInfo());
             else if (source == null)
                 Log.outError(LogFilter.Scripts, "{0} source object is NULL.", scriptInfo.GetDebugInfo());
-            else if (!source.IsTypeMask(TypeMask.Unit))
+            else if (!source.IsUnit())
                 Log.outError(LogFilter.Scripts,
                     "{0} source object is not unit (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.", scriptInfo.GetDebugInfo(), source.GetTypeId(), source.GetEntry(), source.GetGUID().ToString());
             else
@@ -4064,12 +4067,10 @@ namespace Game.Maps
                     {
                         pDoor.UseDoorOrButton((uint)nTimeToToggle);
 
-                        if (target != null && target.IsTypeMask(TypeMask.GameObject))
-                        {
-                            GameObject goTarget = target.ToGameObject();
-                            if (goTarget != null && goTarget.GetGoType() == GameObjectTypes.Button)
-                                goTarget.UseDoorOrButton((uint)nTimeToToggle);
-                        }
+                        GameObject goTarget = target?.ToGameObject();
+                        if (goTarget != null && goTarget.GetGoType() == GameObjectTypes.Button)
+                            goTarget.UseDoorOrButton((uint)nTimeToToggle);
+
                     }
                 }
             }
