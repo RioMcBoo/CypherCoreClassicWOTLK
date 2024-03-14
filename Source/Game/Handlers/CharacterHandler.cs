@@ -991,7 +991,7 @@ namespace Game
                 // start with every map explored
                 if (WorldConfig.GetBoolValue(WorldCfg.StartAllExplored))
                 {
-                    for (uint i = 0; i < PlayerConst.ExploredZonesSize; i++)
+                    for (int i = 0; i < PlayerConst.ExploredZonesSize; i++)
                         pCurrChar.AddExploredZones(i, 0xFFFFFFFFFFFFFFFF);
                 }
 

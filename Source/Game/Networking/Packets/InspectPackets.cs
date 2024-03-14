@@ -73,7 +73,7 @@ namespace Game.Networking.Packets
         public ushort TodayHK;
         public ushort YesterdayHK;
         public byte LifetimeMaxRank;
-        public TraitInspectInfo TalentTraits;
+        public TraitInspectInfo TalentTraits = new();
     }
 
     public class QueryInspectAchievements : ClientPacket

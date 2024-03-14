@@ -689,7 +689,7 @@ namespace Game.Chat
                 return false;
             }
 
-            uint offset = (uint)(area.AreaBit / ActivePlayerData.ExploredZonesBits);
+            int offset = area.AreaBit / ActivePlayerData.ExploredZonesBits;
             if (offset >= PlayerConst.ExploredZonesSize)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
@@ -1685,7 +1685,7 @@ namespace Game.Chat
                 return false;
             }
 
-            uint offset = (uint)(area.AreaBit / ActivePlayerData.ExploredZonesBits);
+            int offset = area.AreaBit / ActivePlayerData.ExploredZonesBits;
             if (offset >= PlayerConst.ExploredZonesSize)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);

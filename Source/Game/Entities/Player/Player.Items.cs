@@ -5263,7 +5263,7 @@ namespace Game.Entities
 
                 --loot.unlootedCount;
 
-                if (newitem != null && newitem.GetQuality() > ItemQuality.Epic || (newitem.GetQuality() == ItemQuality.Epic && newitem.GetItemLevel(this) >= GuildConst.MinNewsItemLevel))
+                if (newitem != null && (newitem.GetQuality() > ItemQuality.Epic || (newitem.GetQuality() == ItemQuality.Epic && newitem.GetItemLevel(this) >= GuildConst.MinNewsItemLevel)))
                 {
                     Guild guild = GetGuild();
                     if (guild != null)
