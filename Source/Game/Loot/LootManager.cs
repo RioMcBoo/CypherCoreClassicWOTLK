@@ -51,8 +51,8 @@ namespace Game.Loots
             LoadLootTemplates_Reference();
         }
 
-        public static Dictionary<ObjectGuid, Loot> GenerateDungeonEncounterPersonalLoot(uint dungeonEncounterId, uint lootId, LootStore store,
-            LootType type, WorldObject lootOwner, uint minMoney, uint maxMoney, ushort lootMode, MapDifficultyRecord mapDifficulty, List<Player> tappers)
+        public static Dictionary<ObjectGuid, Loot> GenerateDungeonEncounterPersonalLoot(int dungeonEncounterId, int lootId, LootStore store,
+            LootType type, WorldObject lootOwner, long minMoney, long maxMoney, LootModes lootMode, MapDifficultyRecord mapDifficulty, List<Player> tappers)
         {
             Dictionary<Player, Loot> tempLoot = new();
 
@@ -485,14 +485,14 @@ namespace Game.Loots
         public int itemid;                 // id of the item
         public int reference;              // referenced TemplateleId
         public float chance;                // Chance to drop for both quest and non-quest items, Chance to be used for refs
-        public ushort lootmode;
+        public LootModes lootmode;
         public bool needs_quest;            // quest drop (negative ChanceOrQuestChance in DB)
         public byte groupid;
         public byte mincount;               // mincount for drop items
         public byte maxcount;               // max drop count for the item mincount or Ref multiplicator
         public List<Condition> conditions;  // additional loot condition
 
-        public LootStoreItem(int _itemid, int _reference, float _chance, bool _needs_quest, ushort _lootmode, byte _groupid, byte _mincount, byte _maxcount)
+        public LootStoreItem(int _itemid, int _reference, float _chance, bool _needs_quest, LootModes _lootmode, byte _groupid, byte _mincount, byte _maxcount)
         {
             itemid = _itemid;
             reference = _reference;
@@ -753,7 +753,7 @@ namespace Game.Loots
                 Entries.Add(item);
         }
 
-        public void Process(Loot loot, bool rate, ushort lootMode, byte groupId, Player personalLooter = null)
+        public void Process(Loot loot, bool rate, LootModes lootMode, byte groupId, Player personalLooter = null)
         {
             if (groupId != 0)                                            // Group reference uses own processing of the group
             {
@@ -806,7 +806,7 @@ namespace Game.Loots
             }
         }
 
-        public void ProcessPersonalLoot(Dictionary<Player, Loot> personalLoot, bool rate, ushort lootMode)
+        public void ProcessPersonalLoot(Dictionary<Player, Loot> personalLoot, bool rate, LootModes lootMode)
         {
             List<Player> getLootersForItem(Func<Player, bool> predicate)
             {
@@ -1154,12 +1154,13 @@ namespace Game.Loots
                 return false;
             }
 
-            public void Process(Loot loot, ushort lootMode, Player personalLooter = null)
+            public void Process(Loot loot, LootModes lootMode, Player personalLooter = null)
             {
                 LootStoreItem item = Roll(lootMode, personalLooter);
                 if (item != null)
                     loot.AddItem(item);
             }
+
             float RawTotalChance()
             {
                 float result = 0;
@@ -1168,6 +1169,7 @@ namespace Game.Loots
                     if (!i.needs_quest)
                         result += i.chance;
 
+               
                 return result;
             }
             float TotalChance()

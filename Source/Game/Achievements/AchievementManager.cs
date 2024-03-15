@@ -705,8 +705,10 @@ namespace Game.Achievements
             DB.Characters.CommitTransaction(trans);
         }
 
-        public void LoadFromDB(SQLResult achievementResult, SQLResult criteriaResult)
+        public (int, int) LoadFromDB(SQLResult achievementResult, SQLResult criteriaResult)
         {
+            (int achievementCount, int criteriaCount) count = (0, 0);
+
             if (!achievementResult.IsEmpty())
             {
                 do
@@ -733,6 +735,8 @@ namespace Game.Achievements
                     ca.Changed = false;
 
                     _achievementPoints += achievement.Points;
+                    count.achievementCount++;
+
                 } while (achievementResult.NextRow());
             }
 
@@ -768,9 +772,12 @@ namespace Game.Achievements
                     progress.Changed = false;
 
                     _criteriaProgress[id] = progress;
+                    count.criteriaCount++;
 
                 } while (criteriaResult.NextRow());
             }
+
+            return count;
         }
 
         public void SaveToDB(SQLTransaction trans)

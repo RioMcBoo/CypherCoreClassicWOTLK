@@ -1893,7 +1893,7 @@ namespace Game.BattleGrounds
         public virtual ObjectGuid GetFlagPickerGUID(int teamIndex = -1) { return ObjectGuid.Empty; }
         public virtual void SetDroppedFlagGUID(ObjectGuid guid, int teamIndex = -1) { }
         public virtual void HandleQuestComplete(int questid, Player player) { }
-        public virtual bool CanActivateGO(int entry, uint team) { return true; }
+        public virtual bool CanActivateGO(int entry, Team team) { return true; }
         public virtual bool IsSpellAllowed(int spellId, Player player) { return true; }
 
         public virtual void RemovePlayer(Player player, ObjectGuid guid, Team team) { }

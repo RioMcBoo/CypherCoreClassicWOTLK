@@ -77,7 +77,7 @@ namespace Game.Mails
             m_items.Clear();
         }
 
-        public void SendReturnToSender(uint senderAcc, ulong senderGuid, ulong receiver_guid, SQLTransaction trans)
+        public void SendReturnToSender(int senderAcc, long senderGuid, long receiver_guid, SQLTransaction trans)
         {
             ObjectGuid receiverGuid = ObjectGuid.Create(HighGuid.Player, receiver_guid);
             Player receiver = Global.ObjAccessor.FindPlayer(receiverGuid);
@@ -222,12 +222,12 @@ namespace Game.Mails
         ulong GetCOD() { return m_COD; }
         string GetBody() { return m_body; }
 
-        public MailDraft AddMoney(ulong money)
+        public MailDraft AddMoney(long money)
         {
             m_money = money;
             return this;
         }
-        public MailDraft AddCOD(uint COD)
+        public MailDraft AddCOD(int COD)
         {
             m_COD = COD;
             return this;
@@ -238,9 +238,9 @@ namespace Game.Mails
         string m_subject;
         string m_body;
 
-        Dictionary<ulong, Item> m_items = new();
+        Dictionary<long, Item> m_items = new();
 
-        ulong m_money;
-        ulong m_COD;
+        long m_money;
+        long m_COD;
     }
 }

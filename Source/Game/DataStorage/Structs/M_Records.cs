@@ -216,8 +216,8 @@ namespace Game.DataStorage
 
     public sealed class ModifierTreeRecord
     {
-        public uint Id;
-        public uint Parent;
+        public int Id;
+        public int Parent;
         public sbyte Operator;
         public sbyte Amount;
         public int Type;

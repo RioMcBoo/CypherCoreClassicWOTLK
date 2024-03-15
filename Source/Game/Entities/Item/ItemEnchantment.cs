@@ -130,29 +130,64 @@ namespace Game.Entities
             return 0;
         }
 
-        public static Dictionary<int, List<(int EnchantmentID, float Chance)>> RandomEnchantmentData;
-
-
         public static ItemRandomProperties GenerateRandomProperties(int item_id)
         {
-            //ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
-            //if (itemProto == null)
-            //    return 0;
+            var properties = ItemRandomProperties.Default;
 
-            //// item must have one from this field values not null if it can have random enchantments
-            //if (itemProto.RandomBonusListTemplateId == 0)
-            //    return 0;
+            ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
+            if (itemProto == null)
+                return properties;
 
-            //var tab = _storage.LookupByKey(itemProto.RandomBonusListTemplateId);
-            //if (tab == null)
-            //{
-            //    Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
-            //    return 0;
-            //}
-            ////todo fix me this is ulgy
-            //return tab.BonusListIDs.SelectRandomElementByWeight(x => (float)tab.Chances[tab.BonusListIDs.IndexOf(x)]);
-            return new();
+            var randomSelect = itemProto.GetRandomSelect();
+            var randomSuffix = itemProto.GetRandomSuffixGroupID();
+
+            if (randomSelect == 0 && randomSuffix == 0)
+                return properties;
+
+            if (randomSelect != 0)
+            {
+                var tab = RandomEnchantmentData.LookupByKey(randomSelect);
+                if (tab == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Item RandomSelect Id {randomSelect} used but it does not have records in `item_random_enchantment_template` table.");
+                    return properties;
+                }
+
+                var randomPropertiesId = tab.SelectRandomElementByWeight(x => x.Chance);
+                var randomPropertiesEntry = CliDB.ItemRandomPropertiesStorage.LookupByKey(randomPropertiesId.EnchantmentID);
+                if (randomPropertiesEntry == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Enchantment Id {randomPropertiesId.EnchantmentID} used but it doesn't have records in 'ItemRandomProperties.db2'.");
+                    return properties;
+                }
+
+                properties.RandomPropertiesID = randomPropertiesEntry.Id;
+            }
+            else if (randomSuffix != 0)
+            {
+                var tab = RandomEnchantmentData.LookupByKey(randomSuffix);
+                if (tab == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Item RandomSuffixGroupID Id {randomSuffix} used but it does not have records in `item_random_enchantment_template` table.");
+                    return properties;
+                }
+
+                var randomSuffixId = tab.SelectRandomElementByWeight(x => x.Chance);
+                var randomSuffixEntry = CliDB.ItemRandomSuffixStorage.LookupByKey(randomSuffixId.EnchantmentID);
+                if (randomSuffixEntry == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Enchantment id Id {randomSuffixId} used but it doesn't have records in 'ItemRandomSuffixEntry.db2'.");
+                    return properties;
+                }
+
+                properties.RandomPropertiesID = randomSuffixEntry.Id;
+                properties.RandomPropertiesSeed = GetRandomPropertyPoints(itemProto.GetItemLevel(), itemProto.GetQuality(), itemProto.GetInventoryType());
+            }
+
+            return properties;
         }
+
+        public static Dictionary<int, List<(int EnchantmentID, float Chance)>> RandomEnchantmentData;
     }
 
     public struct EnchStoreItem
@@ -232,5 +267,13 @@ namespace Game.Entities
 
         public int RandomPropertiesID;
         public int RandomPropertiesSeed;
+
+        public static readonly ItemRandomProperties Default = new();
     }
+
+    public class RandomEnchantmentData
+    {
+        public List<ushort> EnchantmentIDs = new();
+        public List<float> Chances = new();
+    };
 }

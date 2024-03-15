@@ -587,7 +587,7 @@ namespace Game.Networking.Packets
 
     public class StandStateUpdate : ServerPacket
     {
-        public StandStateUpdate(UnitStandStateType state, uint animKitId) : base(ServerOpcodes.StandStateUpdate)
+        public StandStateUpdate(UnitStandStateType state, int animKitId) : base(ServerOpcodes.StandStateUpdate)
         {
             State = state;
             AnimKitID = animKitId;
@@ -595,11 +595,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(AnimKitID);
+            _worldPacket.WriteInt32(AnimKitID);
             _worldPacket.WriteUInt8((byte)State);
         }
 
-        uint AnimKitID;
+        int AnimKitID;
         UnitStandStateType State;
     }
 

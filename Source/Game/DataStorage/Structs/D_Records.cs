@@ -74,7 +74,7 @@ namespace Game.DataStorage
     public sealed class DungeonEncounterRecord
     {
         public LocalizedString Name;
-        public uint Id;
+        public int Id;
         private short _mapID;
         private int _difficultyID;
         public int OrderIndex;

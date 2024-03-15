@@ -287,24 +287,24 @@ namespace Game.DataStorage
         public byte ArtifactID;
         public byte MaxPurchasableRank;
         public int Label;
-        private byte _flags;
+        public byte Flags;
         public byte Tier;
 
-        #region Properties
-        public ArtifactPowerFlag Flags => (ArtifactPowerFlag)_flags;
-        #endregion
+        //#region Properties
+        //public ArtifactPowerFlag Flags => (ArtifactPowerFlag)_flags;
+        //#endregion
 
-        #region Helpers
-        public bool HasFlag(ArtifactPowerFlag flag)
-        {
-            return _flags.HasFlag((byte)flag);
-        }
+        //#region Helpers
+        //public bool HasFlag(ArtifactPowerFlag flag)
+        //{
+        //    return _flags.HasFlag((byte)flag);
+        //}
 
-        public bool HasAnyFlag(ArtifactPowerFlag flag)
-        {
-            return _flags.HasAnyFlag((byte)flag);
-        }
-        #endregion
+        //public bool HasAnyFlag(ArtifactPowerFlag flag)
+        //{
+        //    return _flags.HasAnyFlag((byte)flag);
+        //}
+        //#endregion
     }
 
     public sealed class ArtifactPowerLinkRecord
@@ -456,24 +456,23 @@ namespace Game.DataStorage
 
     public sealed class AzeriteTierUnlockSetRecord
     {
-        public uint Id;
-        private int _flags;
+        public int Id;
+        public int Flags;
 
+        //#region Properties
+        //public AzeriteTierUnlockSetFlags Flags => (AzeriteTierUnlockSetFlags)_flags;
+        //#endregion
 
-        #region Properties
-        public AzeriteTierUnlockSetFlags Flags => (AzeriteTierUnlockSetFlags)_flags;
-        #endregion
+        //#region Helpers
+        //public bool HasFlag(AzeriteTierUnlockSetFlags flag)
+        //{
+        //    return _flags.HasFlag((int)flag);
+        //}
 
-        #region Helpers
-        public bool HasFlag(AzeriteTierUnlockSetFlags flag)
-        {
-            return _flags.HasFlag((int)flag);
-        }
-
-        public bool HasAnyFlag(AzeriteTierUnlockSetFlags flag)
-        {
-            return _flags.HasAnyFlag((int)flag);
-        }
-        #endregion
+        //public bool HasAnyFlag(AzeriteTierUnlockSetFlags flag)
+        //{
+        //    return _flags.HasAnyFlag((int)flag);
+        //}
+        //#endregion
     }
 }

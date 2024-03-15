@@ -112,13 +112,13 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ObjectGUID);
-            _worldPacket.WriteUInt32(CustomAnim);
+            _worldPacket.WriteInt32(CustomAnim);
             _worldPacket.WriteBit(PlayAsDespawn);
             _worldPacket.FlushBits();
         }
 
         public ObjectGuid ObjectGUID;
-        public uint CustomAnim;
+        public int CustomAnim;
         public bool PlayAsDespawn;
     }
 

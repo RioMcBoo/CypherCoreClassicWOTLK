@@ -897,7 +897,7 @@ namespace Game.Entities
                         hasFilteredQuestPackageReward = true;
                         if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos Pos, int Count)> dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
-                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(questPackageItem.ItemID));
+                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateRandomProperties(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
                     }
@@ -916,7 +916,7 @@ namespace Game.Entities
 
                         if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
-                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(questPackageItem.ItemID));
+                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateRandomProperties(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
                     }                    
@@ -933,7 +933,7 @@ namespace Game.Entities
             var questId = quest.Id;
             QuestStatus oldStatus = GetQuestStatus(questId);
 
-            foreach (QuestObjective obj in quest.Objectives)
+            foreach (var obj in quest.Objectives)
             {
                 switch (obj.Type)
                 {
@@ -951,7 +951,7 @@ namespace Game.Entities
                 }
             }
 
-            if (!quest.FlagsEx.HasAnyFlag(QuestFlagsEx.NoItemRemoval))
+            if (!quest.HasAnyFlag(QuestFlagsEx.NoItemRemoval))
             {
                 for (byte i = 0; i < SharedConst.QuestItemDropCount; ++i)
                 {
@@ -976,7 +976,7 @@ namespace Game.Entities
                     {
                         if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
                         {
-                            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(itemId));
+                            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId));
                             SendNewItem(item, quest.RewardItemCount[i], true, false);
                         }
                         else if (quest.IsDFQuest())
@@ -1003,16 +1003,17 @@ namespace Game.Entities
 
             switch (rewardType)
             {
-                case LootItemType.Item:                    
-                    if (quest.GetRewChoiceItemsCount() != 0)
+                case LootItemType.Item:
+                    var rewardProto = Global.ObjectMgr.GetItemTemplate(rewardId);
+                    if (rewardProto != null && quest.GetRewChoiceItemsCount() != 0)
                     {
-                        for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
+                        for (int i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                         {
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == rewardId)
                             {
                                 if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
                                 {
-                                    Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(rewardId));
+                                    Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateRandomProperties(rewardId));
                                     SendNewItem(item, quest.RewardChoiceItemCount[i], true, false);
                                 }
                             }
@@ -1026,7 +1027,7 @@ namespace Game.Entities
                 case LootItemType.Currency:
                     if (CliDB.CurrencyTypesStorage.HasRecord(rewardId) && quest.GetRewChoiceItemsCount() != 0)
                     {
-                        for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
+                        for (int i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Currency && quest.RewardChoiceItemId[i] == rewardId)
                                 AddCurrency(quest.RewardChoiceItemId[i], quest.RewardChoiceItemCount[i], currencyGainSource);
                     }
@@ -1043,7 +1044,7 @@ namespace Game.Entities
             if (skill != 0)
                 UpdateSkillPro(skill, 1000, quest.RewardSkillPoints);
 
-            ushort log_slot = FindQuestSlot(questId);
+            var log_slot = FindQuestSlot(questId);
             if (log_slot < SharedConst.MaxQuestLogSize)
                 SetQuestSlot(log_slot, 0);
 
@@ -1169,7 +1170,7 @@ namespace Game.Entities
             // make full db save
             SaveToDB(false);
 
-            uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
+            var questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
             if (questBit != 0)
                 SetQuestCompletedBit(questBit, true);
 
@@ -2333,7 +2334,7 @@ namespace Game.Entities
             StartCriteria(CriteriaStartEvent.KillNPC, real_entry);   // MUST BE CALLED FIRST
             UpdateCriteria(CriteriaType.KillCreature, real_entry, addKillCount, 0, killed);
 
-            UpdateQuestObjectiveProgress(QuestObjectiveType.Monster, (int)entry, 1, guid);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.Monster, entry, 1, guid);
         }
 
         public void KilledPlayerCredit(ObjectGuid victimGuid)
@@ -2342,9 +2343,9 @@ namespace Game.Entities
             UpdateQuestObjectiveProgress(QuestObjectiveType.PlayerKills, 0, 1, victimGuid);
         }
 
-        public void KillCreditGO(uint entry, ObjectGuid guid = default)
+        public void KillCreditGO(int entry, ObjectGuid guid = default)
         {
-            UpdateQuestObjectiveProgress(QuestObjectiveType.GameObject, (int)entry, 1, guid);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.GameObject, entry, 1, guid);
         }
 
         public void KillCreditCriteriaTreeObjective(QuestObjective questObjective)
@@ -2352,9 +2353,9 @@ namespace Game.Entities
             UpdateQuestObjectiveProgress(QuestObjectiveType.CriteriaTree, questObjective.ObjectID, 1);
         }
 
-        public void TalkedToCreature(uint entry, ObjectGuid guid)
+        public void TalkedToCreature(int entry, ObjectGuid guid)
         {
-            UpdateQuestObjectiveProgress(QuestObjectiveType.TalkTo, (int)entry, 1, guid);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.TalkTo, entry, 1, guid);
         }
 
         public void MoneyChanged(long value)

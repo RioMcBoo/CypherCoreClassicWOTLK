@@ -731,7 +731,7 @@ namespace Game.Networking.Packets
     //Structs
     public class AuctionBucketKey
     {
-        public uint ItemID;
+        public int ItemID;
         public ushort ItemLevel;
         public ushort? BattlePetSpeciesID;
         public ushort? SuffixItemNameDescriptionID;
@@ -942,7 +942,7 @@ namespace Game.Networking.Packets
         public int Count;
         public int Charges;
         public List<ItemEnchantData> Enchantments = new();
-        public int Flags;
+        public uint Flags;
         public int AuctionID;
         public ObjectGuid Owner;
         public ulong? MinBid;
@@ -988,7 +988,7 @@ namespace Game.Networking.Packets
 
             data.WriteInt32(Count);
             data.WriteInt32(Charges);
-            data.WriteInt32(Flags);
+            data.WriteUInt32(Flags);
             data.WriteInt32(AuctionID);
             data.WritePackedGuid(Owner);
             data.WriteInt32(DurationLeft);

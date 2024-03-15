@@ -31,7 +31,7 @@ namespace Framework.Constants
         public static int[] ChallengeMaxLevelGoldReward = { 0, 125, 500, 250, 125, 250 };
         public static int[] ChallengesMaxCount = { 0, 7, 1, 3, 0, 3 };
 
-        public static uint MinNewsItemLevel = 353;
+        public static int MinNewsItemLevel = 353;
 
         public static byte OldMaxLevel = 25;
 

@@ -70,7 +70,7 @@ namespace Game.Spells
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell specialization definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public static bool CanCreateExtraItems(Player player, uint spellId, ref float additionalChance, ref byte additionalMax)
+        public static bool CanCreateExtraItems(Player player, int spellId, ref float additionalChance, ref byte additionalMax)
         {
             // get the info for the specified spell
             var specEntry = SkillExtraItemStorage.LookupByKey(spellId);
@@ -166,7 +166,7 @@ namespace Game.Spells
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell perfection definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public static bool CanCreatePerfectItem(Player player, uint spellId, ref float perfectCreateChance, ref uint perfectItemType)
+        public static bool CanCreatePerfectItem(Player player, int spellId, ref float perfectCreateChance, ref int perfectItemType)
         {
             var entry = SkillPerfectItemStorage.LookupByKey(spellId);
             // no entry in DB means no perfection proc possible

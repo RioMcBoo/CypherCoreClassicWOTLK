@@ -677,7 +677,7 @@ namespace Game.Entities
 
     public class ContainerData : HasChangesMask
     {
-        public UpdateField<uint> NumSlots = new(0, 1);
+        public UpdateField<int> NumSlots = new(0, 1);
         public UpdateFieldArray<ObjectGuid> Slots = new(36, 2, 3);
         static int ChangeMaskLength = 39;
 
@@ -689,7 +689,7 @@ namespace Game.Entities
             {
                 data.WritePackedGuid(Slots[i]);
             }
-            data.WriteUInt32(NumSlots);
+            data.WriteInt32(NumSlots);
         }
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Bag owner, Player receiver)
@@ -709,7 +709,7 @@ namespace Game.Entities
             {
                 if (_changesMask[1])
                 {
-                    data.WriteUInt32(NumSlots);
+                    data.WriteInt32(NumSlots);
                 }
             }
             if (_changesMask[2])
@@ -3568,8 +3568,8 @@ namespace Game.Entities
         public UpdateField<ushort> ThisWeekHonorableKills = new(70, 83);
         public UpdateField<ushort> ThisWeekDishonorableKills = new(70, 84);
         public UpdateField<uint> ThisWeekContribution = new(70, 85);
-        public UpdateField<uint> LifetimeHonorableKills = new(70, 86);
-        public UpdateField<uint> LifetimeDishonorableKills = new(70, 87);
+        public UpdateField<int> LifetimeHonorableKills = new(70, 86);
+        public UpdateField<int> LifetimeDishonorableKills = new(70, 87);
         public UpdateField<uint> Field_F24 = new(70, 88);
         public UpdateField<uint> YesterdayContribution = new(70, 89);
         public UpdateField<uint> LastWeekContribution = new(70, 90);
@@ -3736,8 +3736,8 @@ namespace Game.Entities
             data.WriteUInt16(ThisWeekHonorableKills);
             data.WriteUInt16(ThisWeekDishonorableKills);
             data.WriteUInt32(ThisWeekContribution);
-            data.WriteUInt32(LifetimeHonorableKills);
-            data.WriteUInt32(LifetimeDishonorableKills);
+            data.WriteInt32(LifetimeHonorableKills);
+            data.WriteInt32(LifetimeDishonorableKills);
             data.WriteUInt32(Field_F24);
             data.WriteUInt32(YesterdayContribution);
             data.WriteUInt32(LastWeekContribution);
@@ -4567,11 +4567,11 @@ namespace Game.Entities
                 }
                 if (changesMask[86])
                 {
-                    data.WriteUInt32(LifetimeHonorableKills);
+                    data.WriteInt32(LifetimeHonorableKills);
                 }
                 if (changesMask[87])
                 {
-                    data.WriteUInt32(LifetimeDishonorableKills);
+                    data.WriteInt32(LifetimeDishonorableKills);
                 }
                 if (changesMask[88])
                 {
@@ -5067,7 +5067,7 @@ namespace Game.Entities
         public DynamicUpdateField<int> EnableDoodadSets = new(0, 2);
         public DynamicUpdateField<int> WorldEffects = new(0, 3);
         public UpdateField<int> DisplayID = new(0, 4);
-        public UpdateField<uint> SpellVisualID = new(0, 5);
+        public UpdateField<int> SpellVisualID = new(0, 5);
         public UpdateField<uint> StateSpellVisualID = new(0, 6);
         public UpdateField<int> SpawnTrackingStateAnimID = new(0, 7);
         public UpdateField<int> SpawnTrackingStateAnimKitID = new(0, 8);
@@ -5089,7 +5089,7 @@ namespace Game.Entities
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
         {
             data.WriteInt32(DisplayID);
-            data.WriteUInt32(SpellVisualID);
+            data.WriteInt32(SpellVisualID);
             data.WriteUInt32(StateSpellVisualID);
             data.WriteInt32(SpawnTrackingStateAnimID);
             data.WriteInt32(SpawnTrackingStateAnimKitID);
@@ -5189,7 +5189,7 @@ namespace Game.Entities
                 }
                 if (changesMask[5])
                 {
-                    data.WriteUInt32(SpellVisualID);
+                    data.WriteInt32(SpellVisualID);
                 }
                 if (changesMask[6])
                 {

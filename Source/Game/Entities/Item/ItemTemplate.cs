@@ -225,8 +225,10 @@ namespace Game.Entities
             return ((int)spec.ClassID - 1) * PlayerConst.MaxSpecializations + spec.OrderIndex;
         }
 
-        public int GetRandomProperty()  { return ExtendedData.RandomSelect; }
         public int GetRandomSuffix()  { return ExtendedData.ItemRandomSuffixGroupID; }
+
+        public int GetRandomSuffixGroupID() { return BasicData.ItemRandomSuffixGroupID; }
+        public int GetRandomSelect()  { return BasicData.RandomSelect; }
 
         public int GetId() { return BasicData.Id; }
         public ItemClass GetClass() { return BasicData.ClassID; }

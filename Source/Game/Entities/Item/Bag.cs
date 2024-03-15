@@ -119,10 +119,10 @@ namespace Game.Entities
             base.DeleteFromDB(trans);
         }
 
-        public uint GetFreeSlots()
+        public int GetFreeSlots()
         {
-            uint slots = 0;
-            for (uint i = 0; i < GetBagSize(); ++i)
+            var slots = 0;
+            for (int i = 0; i < GetBagSize(); ++i)
                 if (m_bagslot[i] == null)
                     ++slots;
 

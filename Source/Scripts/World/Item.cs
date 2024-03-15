@@ -75,7 +75,7 @@ namespace Scripts.World.Items
         {
             InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos, int)> dest, 39883, 1); // Cracked Egg
             if (msg == InventoryResult.Ok)
-                player.StoreNewItem(dest, 39883, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(39883));
+                player.StoreNewItem(dest, 39883, true, ItemEnchantmentManager.GenerateRandomProperties(39883));
 
             return true;
         }
@@ -90,7 +90,7 @@ namespace Scripts.World.Items
         {
             InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos, int)> dest, 44718, 1); // Ripe Disgusting Jar
             if (msg == InventoryResult.Ok)
-                player.StoreNewItem(dest, 44718, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(44718));
+                player.StoreNewItem(dest, 44718, true, ItemEnchantmentManager.GenerateRandomProperties(44718));
 
             return true;
         }

@@ -435,17 +435,6 @@ namespace Game.Entities
                 }
             }
 
-            //m_randomEnchantment.Type = (ItemRandomEnchantmentType)fields.Read<byte>(9);
-            //m_randomEnchantment.Id = fields.Read<int>(10);
-            //if (m_randomEnchantment.Type == ItemRandomEnchantmentType.Property)
-            //    SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.RandomPropertiesID), (int)m_randomEnchantment.Id);
-            //else if (m_randomEnchantment.Type == ItemRandomEnchantmentType.Suffix)
-            //{
-            //    SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.RandomPropertiesID), -(int)m_randomEnchantment.Id);
-            //    // recalculate suffix factor
-            //    UpdateItemSuffixFactor();
-            //}
-
             // Remove bind flag for items vs NO_BIND set
             if (IsSoulBound() && GetBonding() == ItemBondingType.None)
             {

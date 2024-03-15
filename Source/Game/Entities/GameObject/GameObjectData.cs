@@ -880,21 +880,21 @@ namespace Game.Entities
             public int questID;                                 // 8 questID, References: QuestV2, NoValue = 0
             public int InteractRadiusOverride;                  // 9 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
             public int requireLOS;                              // 10 require LOS, enum { false, true, }; Default: false
-            public uint leaveLoot;                               // 11 leaveLoot, enum { false, true, }; Default: false
-            public uint notInCombat;                             // 12 notInCombat, enum { false, true, }; Default: false
-            public uint logloot;                                 // 13 log loot, enum { false, true, }; Default: false
-            public uint openTextID;                              // 14 openTextID, References: BroadcastText, NoValue = 0
-            public uint usegrouplootrules;                       // 15 use group loot rules, enum { false, true, }; Default: false
-            public uint floatingTooltip;                         // 16 floatingTooltip, enum { false, true, }; Default: false
+            public int leaveLoot;                               // 11 leaveLoot, enum { false, true, }; Default: false
+            public int notInCombat;                             // 12 notInCombat, enum { false, true, }; Default: false
+            public int logloot;                                 // 13 log loot, enum { false, true, }; Default: false
+            public int openTextID;                              // 14 openTextID, References: BroadcastText, NoValue = 0
+            public int usegrouplootrules;                       // 15 use group loot rules, enum { false, true, }; Default: false
+            public int floatingTooltip;                         // 16 floatingTooltip, enum { false, true, }; Default: false
             public int conditionID1;                            // 17 conditionID1, References: PlayerCondition, NoValue = 0
-            public uint Unused;                                  // 18 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
-            public uint xpDifficulty;                            // 19 xpDifficulty, enum { No Exp, Trivial, Very Small, Small, Substandard, Standard, High, Epic, Dungeon, 5, }; Default: No Exp
-            public uint Unused2;                                 // 20 Unused, int, Min value: 0, Max value: 123, Default value: 0
-            public uint GroupXP;                                 // 21 Group XP, enum { false, true, }; Default: false
-            public uint DamageImmuneOK;                          // 22 Damage Immune OK, enum { false, true, }; Default: false
-            public uint trivialSkillLow;                         // 23 trivialSkillLow, int, Min value: 0, Max value: 65535, Default value: 0
-            public uint trivialSkillHigh;                        // 24 trivialSkillHigh, int, Min value: 0, Max value: 65535, Default value: 0
-            public uint DungeonEncounter;                        // 25 Dungeon Encounter, References: DungeonEncounter, NoValue = 0
+            public int Unused;                                  // 18 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
+            public int xpDifficulty;                            // 19 xpDifficulty, enum { No Exp, Trivial, Very Small, Small, Substandard, Standard, High, Epic, Dungeon, 5, }; Default: No Exp
+            public int Unused2;                                 // 20 Unused, int, Min value: 0, Max value: 123, Default value: 0
+            public int GroupXP;                                 // 21 Group XP, enum { false, true, }; Default: false
+            public int DamageImmuneOK;                          // 22 Damage Immune OK, enum { false, true, }; Default: false
+            public int trivialSkillLow;                         // 23 trivialSkillLow, int, Min value: 0, Max value: 65535, Default value: 0
+            public int trivialSkillHigh;                        // 24 trivialSkillHigh, int, Min value: 0, Max value: 65535, Default value: 0
+            public int DungeonEncounter;                        // 25 Dungeon Encounter, References: DungeonEncounter, NoValue = 0
             public int spell;                                   // 26 spell, References: Spell, NoValue = 0
             public int GiganticAOI;                             // 27 Gigantic AOI, enum { false, true, }; Default: false
             public int LargeAOI;                                // 28 Large AOI, enum { false, true, }; Default: false
@@ -1468,30 +1468,30 @@ namespace Game.Entities
         {
             public int open;                                    // 0 open, References: Lock_, NoValue = 0
             public int chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
-            public uint Unused;                                  // 2 Unused, int, Min value: 0, Max value: 65535, Default value: 0
-            public uint notInCombat;                             // 3 notInCombat, enum { false, true, }; Default: false
-            public uint trivialSkillLow;                         // 4 trivialSkillLow, int, Min value: 0, Max value: 65535, Default value: 0
-            public uint trivialSkillHigh;                        // 5 trivialSkillHigh, int, Min value: 0, Max value: 65535, Default value: 0
+            public int Unused;                                  // 2 Unused, int, Min value: 0, Max value: 65535, Default value: 0
+            public int notInCombat;                             // 3 notInCombat, enum { false, true, }; Default: false
+            public int trivialSkillLow;                         // 4 trivialSkillLow, int, Min value: 0, Max value: 65535, Default value: 0
+            public int trivialSkillHigh;                        // 5 trivialSkillHigh, int, Min value: 0, Max value: 65535, Default value: 0
             public uint ObjectDespawnDelay;                      // 6 Object Despawn Delay, int, Min value: 0, Max value: 600, Default value: 15
             public int triggeredEvent;                          // 7 triggeredEvent, References: GameEvents, NoValue = 0
             public int requireLOS;                              // 8 require LOS, enum { false, true, }; Default: false
             public int openTextID;                              // 9 openTextID, References: BroadcastText, NoValue = 0
             public int floatingTooltip;                         // 10 floatingTooltip, enum { false, true, }; Default: false
             public int conditionID1;                            // 11 conditionID1, References: PlayerCondition, NoValue = 0
-            public uint Unused2;                                 // 12 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
-            public uint xpDifficulty;                            // 13 xpDifficulty, enum { No Exp, Trivial, Very Small, Small, Substandard, Standard, High, Epic, Dungeon, 5, }; Default: No Exp
-            public uint spell;                                   // 14 spell, References: Spell, NoValue = 0
-            public uint GiganticAOI;                             // 15 Gigantic AOI, enum { false, true, }; Default: false
-            public uint LargeAOI;                                // 16 Large AOI, enum { false, true, }; Default: false
-            public uint SpawnVignette;                           // 17 Spawn Vignette, References: vignette, NoValue = 0
-            public uint MaxNumberofLoots;                        // 18 Max Number of Loots, int, Min value: 1, Max value: 40, Default value: 10
-            public uint logloot;                                 // 19 log loot, enum { false, true, }; Default: false
+            public int Unused2;                                 // 12 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
+            public int xpDifficulty;                            // 13 xpDifficulty, enum { No Exp, Trivial, Very Small, Small, Substandard, Standard, High, Epic, Dungeon, 5, }; Default: No Exp
+            public int spell;                                   // 14 spell, References: Spell, NoValue = 0
+            public int GiganticAOI;                             // 15 Gigantic AOI, enum { false, true, }; Default: false
+            public int LargeAOI;                                // 16 Large AOI, enum { false, true, }; Default: false
+            public int SpawnVignette;                           // 17 Spawn Vignette, References: vignette, NoValue = 0
+            public int MaxNumberofLoots;                        // 18 Max Number of Loots, int, Min value: 1, Max value: 40, Default value: 10
+            public int logloot;                                 // 19 log loot, enum { false, true, }; Default: false
             public int linkedTrap;                              // 20 linkedTrap, References: GameObjects, NoValue = 0
-            public uint PlayOpenAnimationonOpening;              // 21 Play Open Animation on Opening, enum { false, true, }; Default: false
-            public uint turnpersonallootsecurityoff;             // 22 turn personal loot security off, enum { false, true, }; Default: false
-            public uint ClearObjectVignetteonOpening;            // 23 Clear Object Vignette on Opening, enum { false, true, }; Default: false
+            public int PlayOpenAnimationonOpening;              // 21 Play Open Animation on Opening, enum { false, true, }; Default: false
+            public int turnpersonallootsecurityoff;             // 22 turn personal loot security off, enum { false, true, }; Default: false
+            public int ClearObjectVignetteonOpening;            // 23 Clear Object Vignette on Opening, enum { false, true, }; Default: false
             public int InteractRadiusOverride;                  // 24 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
-            public uint Overrideminimaptrackingicon;             // 25 Override minimap tracking icon, References: UiTextureAtlasMember, NoValue = 0
+            public int Overrideminimaptrackingicon;             // 25 Override minimap tracking icon, References: UiTextureAtlasMember, NoValue = 0
         }
 
         public struct challengemodereward

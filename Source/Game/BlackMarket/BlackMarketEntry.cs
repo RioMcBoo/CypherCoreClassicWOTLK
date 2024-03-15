@@ -55,10 +55,10 @@ namespace Game.BlackMarket
             return true;
         }
 
-        public uint MarketID;
-        public uint SellerNPC;
-        public uint Quantity;
-        public ulong MinBid;
+        public int MarketID;
+        public int SellerNPC;
+        public int Quantity;
+        public long MinBid;
         public long Duration;
         public float Chance;
         public ItemInstance Item;
@@ -206,7 +206,7 @@ namespace Game.BlackMarket
         public uint GetNumBids() { return _numBids; }
         void SetNumBids(uint numBids) { _numBids = numBids; }
 
-        public ulong GetBidder() { return _bidder; }
+        public long GetBidder() { return _bidder; }
         void SetBidder(ulong bidder) { _bidder = bidder; }
 
         public ulong GetMinIncrement() { return (_currentBid / 20) - ((_currentBid / 20) % MoneyConstants.Gold); } //5% increase every bid (has to be round gold value)
@@ -217,7 +217,7 @@ namespace Game.BlackMarket
         uint _marketId;
         ulong _currentBid;
         uint _numBids;
-        ulong _bidder;
+        long _bidder;
         uint _secondsRemaining;
         bool _mailSent;
     }

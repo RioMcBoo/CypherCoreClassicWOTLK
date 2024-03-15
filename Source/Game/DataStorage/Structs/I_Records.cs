@@ -326,8 +326,12 @@ namespace Game.DataStorage
         public int IconFileDataID;
         public int UnequippedIconFileDataID;
         public byte SheatheType;
-        public sbyte DisplayWeaponSubclassID;
+        private sbyte _displayWeaponSubclassID;
         public sbyte DisplayInventoryType;
+
+        #region Properties
+        public ItemSubClass DisplayWeaponSubclassID => (ItemSubClass)_displayWeaponSubclassID;
+        #endregion
     }
 
     public sealed class ItemNameDescriptionRecord

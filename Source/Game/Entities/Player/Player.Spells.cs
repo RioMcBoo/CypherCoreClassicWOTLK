@@ -429,8 +429,8 @@ namespace Game.Entities
 
                         // If we're dealing with a gem inside a prismatic socket we need to check the prismatic socket requirements
                         // rather than the gem requirements itself. If the socket has no color it is a prismatic socket.
-                        if ((slot == EnchantmentSlot.EnhancementSocket1 || slot == EnchantmentSlot.EnhancementSocket2 || slot == EnchantmentSlot.EnhancementSocket3)
-                            && m_items[i].GetSocketColor((uint)(slot - EnchantmentSlot.EnhancementSocket1)) == 0)
+                        if ((slot == EnchantmentSlot.EnhancementSocket || slot == EnchantmentSlot.EnhancementSocket2 || slot == EnchantmentSlot.EnhancementSocket3)
+                            && m_items[i].GetSocketColor((uint)(slot - EnchantmentSlot.EnhancementSocket)) == 0)
                         {
                             SpellItemEnchantmentRecord pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(m_items[i].GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic));
 
@@ -501,9 +501,9 @@ namespace Game.Entities
 
             // If we're dealing with a gem inside a prismatic socket we need to check the prismatic socket requirements
             // rather than the gem requirements itself. If the socket has no color it is a prismatic socket.
-            if ((slot == EnchantmentSlot.EnhancementSocket1 || slot == EnchantmentSlot.EnhancementSocket2 || slot == EnchantmentSlot.EnhancementSocket3))
+            if ((slot == EnchantmentSlot.EnhancementSocket || slot == EnchantmentSlot.EnhancementSocket2 || slot == EnchantmentSlot.EnhancementSocket3))
             {
-                if (item.GetSocketColor((uint)(slot - EnchantmentSlot.EnhancementSocket1)) == 0)
+                if (item.GetSocketColor((uint)(slot - EnchantmentSlot.EnhancementSocket)) == 0)
                 {
                     // Check if the requirements for the prismatic socket are met before applying the gem stats
                     SpellItemEnchantmentRecord pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic));
@@ -512,7 +512,7 @@ namespace Game.Entities
                 }
 
                 // Cogwheel gems dont have requirement data set in SpellItemEnchantment.dbc, but they do have it in Item-sparse.db2
-                SocketedGem gem = item.GetGem((ushort)(slot - EnchantmentSlot.EnhancementSocket1));
+                SocketedGem gem = item.GetGem((ushort)(slot - EnchantmentSlot.EnhancementSocket));
                 if (gem != null)
                 {
                     ItemTemplate gemTemplate = Global.ObjectMgr.GetItemTemplate((uint)gem.ItemId.GetValue());
@@ -1085,9 +1085,10 @@ namespace Game.Entities
 
         public bool HasSkill(SkillType skill)
         {
-            return HasSkill((uint)skill);
+            return HasSkill((int)skill);
         }
-        public bool HasSkill(uint skill)
+
+        public bool HasSkill(int skill)
         {
             if (skill == 0)
                 return false;
@@ -1098,7 +1099,7 @@ namespace Game.Entities
             return skillStatusData != null && skillStatusData.State != SkillState.Deleted && skillInfoField.SkillRank[skillStatusData.Pos] != 0;
         }
 
-        public void SetSkill(uint skill, uint step, uint newVal, uint maxVal)
+        public void SetSkill(int skill, int step, int newVal, int maxVal)
         {
             SetSkill((SkillType)skill, step, newVal, maxVal);
         }
@@ -1594,7 +1595,7 @@ namespace Game.Entities
                 if (pItem == null || pItem.GetSocketColor(0) == 0)
                     continue;
 
-                for (EnchantmentSlot enchant_slot = EnchantmentSlot.EnhancementSocket1; enchant_slot < EnchantmentSlot.EnhancementSocket3; ++enchant_slot)
+                for (EnchantmentSlot enchant_slot = EnchantmentSlot.EnhancementSocket; enchant_slot < EnchantmentSlot.EnhancementSocket3; ++enchant_slot)
                 {
                     uint enchant_id = pItem.GetEnchantmentId(enchant_slot);
                     if (enchant_id == 0)
