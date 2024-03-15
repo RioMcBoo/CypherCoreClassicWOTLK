@@ -27,8 +27,7 @@ namespace Game.Loots
             follow_loot_rules = !li.needs_quest || (proto != null && proto.FlagsCu.HasAnyFlag(ItemFlagsCustom.FollowLootRules));
 
             needs_quest = li.needs_quest;
-            randomSuffix = ItemEnchantmentManager.GenerateEnchSuffixFactor(itemid);
-            randomPropertyId = ItemEnchantmentManager.GenerateItemRandomPropertyId(itemid);
+            randomProperties = ItemEnchantmentManager.GenerateRandomProperties(itemid);
         }
 
         /// <summary>
@@ -66,7 +65,7 @@ namespace Game.Loots
             // Don't allow loot for players without profession or those who already know the recipe
             if (pProto.HasFlag(ItemFlags.HideUnusableRecipe))
             {
-                if (!player.HasSkill((SkillType)pProto.GetRequiredSkill()))
+                if (!player.HasSkill(pProto.GetRequiredSkill()))
                     return false;
 
                 foreach (var itemEffect in pProto.Effects)
@@ -177,9 +176,7 @@ namespace Game.Loots
 
         public int itemid;
         public int LootListId;
-        public int randomSuffix;
-        public ItemRandomEnchantmentId randomPropertyId;
-        public List<int> BonusListIDs = new();
+        public ItemRandomProperties randomProperties;
         public ItemContext context;
         public List<Condition> conditions = new();                               // additional loot condition
         public List<ObjectGuid> allowedGUIDs = new();
@@ -666,7 +663,7 @@ namespace Game.Loots
                 return;
 
             var count = RandomHelper.IRand(item.mincount, item.maxcount);
-            var stacks = count / proto.GetMaxStackSize() + (Convert.ToBoolean(count % proto.GetMaxStackSize()) ? 1 : 0);
+            var stacks = count / proto.GetMaxStackSize() + ((count % proto.GetMaxStackSize()) > 0 ? 1 : 0);
 
             for (int i = 0; i < stacks && items.Count < SharedConst.MaxNRLootItems; ++i)
             {
@@ -674,7 +671,6 @@ namespace Game.Loots
                 generatedLoot.context = _itemContext;
                 generatedLoot.count = (byte)Math.Min(count, proto.GetMaxStackSize());
                 generatedLoot.LootListId = items.Count;
-                generatedLoot.BonusListIDs = ItemBonusMgr.GetBonusListsForItem(generatedLoot.itemid, new(_itemContext));
 
                 items.Add(generatedLoot);
                 count -= proto.GetMaxStackSize();
@@ -684,7 +680,7 @@ namespace Game.Loots
         public bool AutoStore(Player player, bool broadcast = false, bool createdByPlayer = false)
         {
             bool allLooted = true;
-            for (uint i = 0; i < items.Count; ++i)
+            for (int i = 0; i < items.Count; ++i)
             {
                 LootItem lootItem = LootItemInSlot(i, player, out NotNormalLootItem ffaitem);
                 
@@ -718,7 +714,7 @@ namespace Game.Loots
 
                 --unlootedCount;
 
-                Item pItem = player.StoreNewItem(dest, lootItem.itemid, true, lootItem.randomPropertyId, null, lootItem.context, lootItem.BonusListIDs);
+                Item pItem = player.StoreNewItem(dest, lootItem.itemid, true, lootItem.randomProperties, null, lootItem.context);
                 player.SendNewItem(pItem, lootItem.count, false, createdByPlayer, broadcast);
                 player.ApplyItemLootedSpell(pItem, true);
             }
@@ -741,7 +737,7 @@ namespace Game.Loots
         }
 
         // Calls processor of corresponding LootTemplate (which handles everything including references)
-        public bool FillLoot(int lootId, LootStore store, Player lootOwner, bool personal, bool noEmptyError = false, LootModes lootMode = LootModes.Default, ItemContext context = 0)
+        public bool FillLoot(int lootId, LootStore store, Player lootOwner, bool personal, bool noEmptyError = false, LootModes lootMode = LootModes.Default)
         {
             // Must be provided
             if (lootOwner == null)
@@ -932,7 +928,7 @@ namespace Game.Loots
             return _allowedLooters.Contains(looter);
         }
         
-        public void GenerateMoneyLoot(uint minAmount, uint maxAmount)
+        public void GenerateMoneyLoot(long minAmount, long maxAmount)
         {
             if (maxAmount > 0)
             {
@@ -945,19 +941,19 @@ namespace Game.Loots
             }
         }
 
-        public LootItem LootItemInSlot(uint lootSlot, Player player)
+        public LootItem LootItemInSlot(int lootSlot, Player player)
         {
             return LootItemInSlot(lootSlot, player, out _);
         }
 
-        public LootItem LootItemInSlot(uint lootListId, Player player, out NotNormalLootItem ffaItem)
+        public LootItem LootItemInSlot(int lootListId, Player player, out NotNormalLootItem ffaItem)
         {
             ffaItem = null;
 
             if (lootListId >= items.Count)
                 return null;
 
-            LootItem item = items[(int)lootListId];
+            LootItem item = items[lootListId];
             bool is_looted = item.is_looted;
 
             if (item.freeforall)

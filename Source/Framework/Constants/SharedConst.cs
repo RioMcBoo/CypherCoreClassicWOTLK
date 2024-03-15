@@ -38,9 +38,6 @@ namespace Framework.Constants
         public const int MaxWorldMapOverlayArea = 4;
         public const int MaxMountCapabilities = 24;
         public const int MaxLockCase = 8;
-        public const int MaxAzeriteEmpoweredTier = 5;
-        public const int MaxAzeriteEssenceSlot = 4;
-        public const int MaxAzeriteEssenceRank = 4;
         public const int AchivementCategoryPetBattles = 15117;
         public const int MaxUnitClasses = 4;
 

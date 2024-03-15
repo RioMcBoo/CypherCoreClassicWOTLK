@@ -489,30 +489,22 @@ namespace Game.Entities
 
     public class VoidStorageItem
     {
-        public VoidStorageItem(long id, int entry, ObjectGuid creator, ItemRandomEnchantmentId randomPropertyId, int itemSuffixFactor, int fixedScalingLevel, int artifactKnowledgeLevel, ItemContext context, List<int> bonuses)
+        public VoidStorageItem(long id, int entry, ObjectGuid creator, int fixedScalingLevel, ItemRandomProperties randomProperties, ItemContext context)
         {
             ItemId = id;
             ItemEntry = entry;
             CreatorGuid = creator;
-            ItemRandomPropertyId = randomPropertyId;
-            ItemSuffixFactor = itemSuffixFactor;
             FixedScalingLevel = fixedScalingLevel;
-            ArtifactKnowledgeLevel = artifactKnowledgeLevel;
+            RandomProperties = randomProperties;
             Context = context;
-
-            foreach (var value in bonuses)
-                BonusListIDs.Add(value);
         }
 
         public long ItemId;
         public int ItemEntry;
         public ObjectGuid CreatorGuid;
-        public ItemRandomEnchantmentId ItemRandomPropertyId;
-        public int ItemSuffixFactor;
         public int FixedScalingLevel;
-        public int ArtifactKnowledgeLevel;
+        public ItemRandomProperties RandomProperties;
         public ItemContext Context;
-        public List<int> BonusListIDs = new();
     }
 
     public class EquipmentSetInfo

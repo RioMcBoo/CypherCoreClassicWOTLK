@@ -1414,19 +1414,6 @@ namespace Game.Entities
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
             {
-                Aura artifactAura = GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
-                if (artifactAura != null)
-                {
-                    Item artifact = ToPlayer().GetItemByGuid(artifactAura.GetCastItemGUID());
-                    if (artifact != null)
-                    {
-                        ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifact.GetModifier(ItemModifier.ArtifactAppearanceId));
-                        if (artifactAppearance != null)
-                            if ((ShapeShiftForm)artifactAppearance.OverrideShapeshiftFormID == form)
-                                return artifactAppearance.OverrideShapeshiftDisplayID;
-                    }
-                }
-
                 ShapeshiftFormModelData formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(GetRace(), thisPlayer.GetNativeGender(), form);
                 if (formModelData != null)
                 {
@@ -2350,7 +2337,7 @@ namespace Game.Entities
             return Time.GetMSTimeDiff(m_lastManaUseTime, GameTime.GetGameTimeMS()) < 5000;
         }
 
-        public void SetStandState(UnitStandStateType state, uint animKitId = 0)
+        public void SetStandState(UnitStandStateType state, int animKitId = 0)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StandState), (byte)state);
 

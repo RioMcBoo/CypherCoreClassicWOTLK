@@ -2542,7 +2542,7 @@ namespace Game.Entities
         }
 
         //Chat - Text - Channel
-        public void PrepareGossipMenu(WorldObject source, uint menuId, bool showQuests = false)
+        public void PrepareGossipMenu(WorldObject source, int menuId, bool showQuests = false)
         {
             PlayerMenu menu = PlayerTalkClass;
             menu.ClearMenus();
@@ -5234,13 +5234,7 @@ namespace Game.Entities
             packet.HealthDelta = 0;
 
             // @todo find some better solution
-            packet.PowerDelta[0] = basemana - GetCreateMana();
-            packet.PowerDelta[1] = 0;
-            packet.PowerDelta[2] = 0;
-            packet.PowerDelta[3] = 0;
-            packet.PowerDelta[4] = 0;
-            packet.PowerDelta[5] = 0;
-            packet.PowerDelta[6] = 0;
+            packet.PowerDelta[0] = basemana - GetCreateMana(); // [0] is PowerType value? or dynamic powerindex?
 
             for (Stats i = Stats.Strength; i < Stats.Max; ++i)
                 packet.StatDelta[(int)i] = info.stats[(int)i] - (int)GetCreateStat(i);
@@ -5274,15 +5268,7 @@ namespace Game.Entities
 
             UpdateAllStats();
 
-            _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms
-
-            Aura artifactAura = GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
-            if (artifactAura != null)
-            {
-                Item artifact = GetItemByGuid(artifactAura.GetCastItemGUID());
-                if (artifact != null)
-                    artifact.CheckArtifactRelicSlotUnlock(this);
-            }
+            _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms            
 
             // Only health and mana are set to maximum.
             SetFullHealth();
@@ -7322,7 +7308,7 @@ namespace Game.Entities
             packet.Index = title.MaskID;
             SendPacket(packet);
         }
-        public void SetChosenTitle(uint title) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerTitle), (int)title); }
+        public void SetChosenTitle(int title) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerTitle), title); }
         public void SetKnownTitles(int index, ulong mask) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.KnownTitles, index), mask); }
 
         public void SetViewpoint(WorldObject target, bool apply)
@@ -7578,13 +7564,14 @@ namespace Game.Entities
         public void SetVirtualPlayerRealm(uint virtualRealmAddress) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VirtualPlayerRealm), virtualRealmAddress); }
         public void SetCurrentBattlePetBreedQuality(byte battlePetBreedQuality) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.CurrentBattlePetBreedQuality), battlePetBreedQuality); }
 
-        public void AddHeirloom(uint itemId, uint flags)
+        public void AddHeirloom(int itemId, uint flags)
         {
-            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms), (int)itemId);
+            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms), itemId);
             AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HeirloomFlags), flags);
         }
-        public void SetHeirloom(int slot, uint itemId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms, slot), (int)itemId); }
-        public void SetHeirloomFlags(int slot, uint flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HeirloomFlags, slot), flags); }
+
+        public void SetHeirloom(int slot, int itemId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Heirlooms, slot), itemId); }
+        public void SetHeirloomFlags(int slot, HeirloomPlayerFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.HeirloomFlags, slot), (uint)flags); }
 
         public void AddToy(int itemId, ToyFlags flags)
         {
@@ -7628,7 +7615,7 @@ namespace Game.Entities
         public byte GetNumRespecs() { return m_activePlayerData.NumRespecs; }
         public void SetNumRespecs(byte numRespecs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NumRespecs), numRespecs); }
 
-        public void SetWatchedFactionIndex(uint index) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.WatchedFactionIndex), (int)index); }
+        public void SetWatchedFactionIndex(int index) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.WatchedFactionIndex), index); }
 
         public void AddAuraVision(PlayerFieldByte2Flags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
         public void RemoveAuraVision(PlayerFieldByte2Flags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }

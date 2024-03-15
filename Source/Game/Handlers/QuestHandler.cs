@@ -768,7 +768,7 @@ namespace Game
                 return;
             }
 
-            Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), (uint)choiceResponse.ChoiceID, (uint)choiceResponse.ResponseIdentifier);
+            Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), choiceResponse.ChoiceID, choiceResponse.ResponseIdentifier);
 
             if (playerChoiceResponse.Reward != null)
             {
@@ -777,26 +777,26 @@ namespace Game
                     _player.SetTitle(CliDB.CharTitlesStorage.LookupByKey(reward.TitleId), false);
 
                 if (reward.PackageId != 0)
-                    _player.RewardQuestPackage((uint)reward.PackageId, ItemContext.None);
+                    _player.RewardQuestPackage(reward.PackageId, ItemContext.None);
 
-                if (reward.SkillLineId != 0 && _player.HasSkill((SkillType)reward.SkillLineId))
-                    _player.UpdateSkillPro((uint)reward.SkillLineId, 1000, reward.SkillPointCount);
+                if (reward.SkillLineId != 0 && _player.HasSkill(reward.SkillLineId))
+                    _player.UpdateSkillPro(reward.SkillLineId, 1000, reward.SkillPointCount);
 
                 if (reward.HonorPointCount != 0)
                     _player.AddHonorXP(reward.HonorPointCount);
 
                 if (reward.Money != 0)
-                    _player.ModifyMoney((long)reward.Money, false);
+                    _player.ModifyMoney(reward.Money, false);
 
                 if (reward.Xp != 0)
                     _player.GiveXP(reward.Xp, null, 0.0f);
 
                 foreach (PlayerChoiceResponseRewardItem item in reward.Items)
                 {
-                    if (_player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item.Id, (uint)item.Quantity) == InventoryResult.Ok)
+                    if (_player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item.Id, item.Quantity) == InventoryResult.Ok)
                     {
-                        Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(item.Id), null, ItemContext.QuestReward, item.BonusListIDs);
-                        _player.SendNewItem(newItem, (uint)item.Quantity, true, false);
+                        Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateRandomProperties(item.Id), null, ItemContext.QuestReward);
+                        _player.SendNewItem(newItem, item.Quantity, true, false);
                     }
                 }
 

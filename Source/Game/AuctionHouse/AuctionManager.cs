@@ -98,21 +98,23 @@ namespace Game
 
         public string BuildItemAuctionMailSubject(AuctionMailType type, AuctionPosting auction)
         {
-            return BuildAuctionMailSubject(auction.Items[0].GetEntry(), type, auction.Id, auction.GetTotalItemCount(),
-                auction.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId), auction.Items[0].GetContext(), auction.Items[0].GetBonusListIDs());
+            return BuildAuctionMailSubject(
+                auction.Items[0].GetEntry(), 
+                type, 
+                auction.Id, 
+                auction.GetTotalItemCount(),
+                auction.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId), 
+                auction.Items[0].GetContext());
         }
 
-        public string BuildCommodityAuctionMailSubject(AuctionMailType type, uint itemId, uint itemCount)
+        public string BuildCommodityAuctionMailSubject(AuctionMailType type, int itemId, int itemCount)
         {
-            return BuildAuctionMailSubject(itemId, type, 0, itemCount, 0, ItemContext.None, null);
+            return BuildAuctionMailSubject(itemId, type, 0, itemCount, 0, ItemContext.None);
         }
 
-        public string BuildAuctionMailSubject(uint itemId, AuctionMailType type, uint auctionId, uint itemCount, uint battlePetSpeciesId, ItemContext context, List<int> bonusListIds)
+        public string BuildAuctionMailSubject(int itemId, AuctionMailType type, int auctionId, int itemCount, int battlePetSpeciesId, ItemContext context)
         {
-            string str = $"{itemId}:0:{(uint)type}:{auctionId}:{itemCount}:{battlePetSpeciesId}:0:0:0:0:{(uint)context}:{bonusListIds.Count}";
-
-            foreach (var bonusListId in bonusListIds)
-                str += ':' + bonusListId;
+            string str = $"{itemId}:0:{(int)type}:{auctionId}:{itemCount}:{battlePetSpeciesId}:0:0:0:0:{(int)context}";
 
             return str;
         }
@@ -1631,9 +1633,9 @@ namespace Game
             return Items.Count > 1 || Items[0].GetTemplate().GetMaxStackSize() > 1;
         }
 
-        public uint GetTotalItemCount()
+        public int GetTotalItemCount()
         {
-            return (uint)Items.Sum(item => { return item.GetCount(); });
+            return Items.Sum(item => { return item.GetCount(); });
         }
 
         public void BuildAuctionItem(AuctionItem auctionItem, bool alwaysSendItem, bool sendKey, bool censorServerInfo, bool censorBidInfo)
@@ -1915,17 +1917,17 @@ namespace Game
 
     public class AuctionsBucketKey : IComparable<AuctionsBucketKey>
     {
-        public uint ItemId { get; set; }
+        public int ItemId { get; set; }
         public ushort ItemLevel { get; set; }
         public ushort BattlePetSpeciesId { get; set; }
         public ushort SuffixItemNameDescriptionId { get; set; }
 
-        public AuctionsBucketKey(uint itemId, ushort itemLevel, ushort battlePetSpeciesId, ushort suffixItemNameDescriptionId)
+        public AuctionsBucketKey(int itemId, int itemLevel, int battlePetSpeciesId, int suffixItemNameDescriptionId)
         {
             ItemId = itemId;
-            ItemLevel = itemLevel;
-            BattlePetSpeciesId = battlePetSpeciesId;
-            SuffixItemNameDescriptionId = suffixItemNameDescriptionId;
+            ItemLevel = (ushort)itemLevel;
+            BattlePetSpeciesId = (ushort)battlePetSpeciesId;
+            SuffixItemNameDescriptionId = (ushort)suffixItemNameDescriptionId;
         }
 
         public AuctionsBucketKey(AuctionBucketKey key)
@@ -1965,8 +1967,11 @@ namespace Game
             ItemTemplate itemTemplate = item.GetTemplate();
             if (itemTemplate.GetMaxStackSize() == 1)
             {
-                return new AuctionsBucketKey(item.GetEntry(), (ushort)Item.GetItemLevel(itemTemplate, item.GetBonus(), 0, (uint)item.GetRequiredLevel(), 0, 0, 0, false),
-                    (ushort)item.GetModifier(ItemModifier.BattlePetSpeciesId), (ushort)item.GetBonus().Suffix);
+                return new AuctionsBucketKey(
+                    item.GetEntry(),
+                    Item.GetItemLevel(itemTemplate, item.GetBonus(), 0, item.GetRequiredLevel(), 0, 0, 0, false),
+                    item.GetModifier(ItemModifier.BattlePetSpeciesId),
+                    item.GetBonus().Suffix);
             }
             else
                 return ForCommodity(itemTemplate);

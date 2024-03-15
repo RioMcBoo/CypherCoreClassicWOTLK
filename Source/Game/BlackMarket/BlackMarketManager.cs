@@ -199,7 +199,7 @@ namespace Game.BlackMarket
             if (entry.GetMailSent())
                 return;
 
-            uint bidderAccId;
+            int bidderAccId;
             ObjectGuid bidderGuid = ObjectGuid.Create(HighGuid.Player, entry.GetBidder());
             Player bidder = Global.ObjAccessor.FindConnectedPlayer(bidderGuid);
             // data for gm.log
@@ -228,13 +228,7 @@ namespace Game.BlackMarket
             BlackMarketTemplate templ = entry.GetTemplate();
             Item item = Item.CreateItem(templ.Item.ItemID, templ.Quantity, ItemContext.BlackMarket);
             if (item == null)
-                return;
-
-            if (templ.Item.ItemBonus != null)
-            {
-                foreach (uint bonusList in templ.Item.ItemBonus.BonusListIDs)
-                    item.AddBonuses(bonusList);
-            }
+                return;                       
 
             item.SetOwnerGUID(bidderGuid);
 

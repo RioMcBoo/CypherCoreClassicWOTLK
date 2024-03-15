@@ -83,13 +83,13 @@ namespace Game
             Creature unit = player.GetNPCIfCanInteractWith(voidStorageTransfer.Npc, NPCFlags.VaultKeeper, NPCFlags2.None);
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - {0} not found or player can't interact with it.", voidStorageTransfer.Npc.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleVoidStorageTransfer - {voidStorageTransfer.Npc} not found or player can't interact with it.");
                 return;
             }
 
             if (!player.IsVoidStorageUnlocked())
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - Player ({0}, name: {1}) queried void storage without unlocking it.", player.GetGUID().ToString(), player.GetName());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleVoidStorageTransfer - Player ({player.GetGUID()}, name: {player.GetName()}) queried void storage without unlocking it.");
                 return;
             }
 
@@ -99,7 +99,7 @@ namespace Game
                 return;
             }
 
-            uint freeBagSlots = 0;
+            var freeBagSlots = 0;
             if (!voidStorageTransfer.Withdrawals.Empty())
             {
                 // make this a Player function
@@ -109,6 +109,7 @@ namespace Game
                     if (bag != null)
                         freeBagSlots += bag.GetFreeSlots();
                 }
+
                 int inventoryEnd = InventorySlots.ItemStart + _player.GetInventorySlotCount();
                 for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
                 {
@@ -137,13 +138,12 @@ namespace Game
                 Item item = player.GetItemByGuid(voidStorageTransfer.Deposits[i]);
                 if (item == null)
                 {
-                    Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - {0} {1} wants to deposit an invalid item ({2}).", player.GetGUID().ToString(), player.GetName(), voidStorageTransfer.Deposits[i].ToString());
+                    Log.outDebug(LogFilter.Network, $"WORLD: HandleVoidStorageTransfer - {player.GetGUID()} {player.GetName()} wants to deposit an invalid item ({voidStorageTransfer.Deposits[i]}).");
                     continue;
                 }
 
-                VoidStorageItem itemVS = new(Global.ObjectMgr.GenerateVoidStorageItemId(), item.GetEntry(), item.GetCreator(), 
-                    item.GetItemRandomBonusListId(), item.GetModifier(ItemModifier.TimewalkerLevel), item.GetModifier(ItemModifier.ArtifactKnowledgeLevel), 
-                    item.GetContext(), item.GetBonusListIDs());
+                VoidStorageItem itemVS = new(Global.ObjectMgr.GenerateVoidStorageItemId(), item.GetEntry(), item.GetCreator(), item.GetModifier(ItemModifier.TimewalkerLevel),
+                    new ItemRandomProperties(item.GetItemRandomPropertyId(), item.GetItemSuffixFactor()), item.GetContext());
 
                 VoidItem voidItem;
                 voidItem.Guid = ObjectGuid.Create(HighGuid.Item, itemVS.ItemId);
@@ -167,7 +167,8 @@ namespace Game
                 VoidStorageItem itemVS = player.GetVoidStorageItem(voidStorageTransfer.Withdrawals[i].GetCounter(), out slot);          
                 if (itemVS == null)
                 {
-                    Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - {0} {1} tried to withdraw an invalid item ({2})", player.GetGUID().ToString(), player.GetName(), voidStorageTransfer.Withdrawals[i].ToString());
+                    Log.outDebug(LogFilter.Network, 
+                        $"WORLD: HandleVoidStorageTransfer - {player.GetGUID()} {player.GetName()} tried to withdraw an invalid item ({voidStorageTransfer.Withdrawals[i]}).");
                     continue;
                 }
 
@@ -175,11 +176,12 @@ namespace Game
                 if (msg != InventoryResult.Ok)
                 {
                     SendVoidStorageTransferResult(VoidTransferError.InventoryFull);
-                    Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - {0} {1} couldn't withdraw {2} because inventory was full.", player.GetGUID().ToString(), player.GetName(), voidStorageTransfer.Withdrawals[i].ToString());
+                    Log.outDebug(LogFilter.Network, 
+                        $"WORLD: HandleVoidStorageTransfer - {player.GetGUID()} {player.GetName()} couldn't withdraw {voidStorageTransfer.Withdrawals[i]} because inventory was full.");
                     return;
                 }
 
-                Item item = player.StoreNewItem(dest, itemVS.ItemEntry, true, itemVS.ItemRandomPropertyId, null, itemVS.Context, itemVS.BonusListIDs);
+                Item item = player.StoreNewItem(dest, itemVS.ItemEntry, true, itemVS.RandomProperties, null, itemVS.Context);
                 item.SetCreator(itemVS.CreatorGuid);
                 item.SetBinding(true);
                 GetCollectionMgr().AddItemAppearance(item);

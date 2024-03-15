@@ -197,7 +197,7 @@ namespace Game.Entities
             }
         }
 
-        bool UpdateAccountHeirlooms(uint itemId, HeirloomPlayerFlags flags)
+        bool UpdateAccountHeirlooms(int itemId, HeirloomPlayerFlags flags)
         {
             if (_heirlooms.ContainsKey(itemId))
                 return false;
@@ -206,7 +206,7 @@ namespace Game.Entities
             return true;
         }
 
-        public uint GetHeirloomBonus(uint itemId)
+        public int GetHeirloomBonus(int itemId)
         {
             var data = _heirlooms.LookupByKey(itemId);
             if (data != null)
@@ -221,18 +221,18 @@ namespace Game.Entities
                 _owner.GetPlayer().AddHeirloom(item.Key, (uint)item.Value.flags);
         }
 
-        public void AddHeirloom(uint itemId, HeirloomPlayerFlags flags)
+        public void AddHeirloom(int itemId, HeirloomPlayerFlags flags)
         {
             if (UpdateAccountHeirlooms(itemId, flags))
                 _owner.GetPlayer().AddHeirloom(itemId, (uint)flags);
         }
 
-        public bool HasHeirloom(uint itemId)
+        public bool HasHeirloom(int itemId)
         {
             return _heirlooms.ContainsKey(itemId);
         }
         
-        public void UpgradeHeirloom(uint itemId, uint castItem)
+        public void UpgradeHeirloom(int itemId, int castItem)
         {
             Player player = _owner.GetPlayer();
             if (player == null)
@@ -247,7 +247,7 @@ namespace Game.Entities
                 return;
 
             HeirloomPlayerFlags flags = data.flags;
-            uint bonusId = 0;
+            var bonusId = 0;
 
             for (int upgradeLevel = 0; upgradeLevel < heirloom.UpgradeItemID.Length; ++upgradeLevel)
             {
@@ -258,14 +258,11 @@ namespace Game.Entities
                 }
             }
 
-            foreach (Item item in player.GetItemListByEntry(itemId, true))
-                item.AddBonuses(bonusId);
-
             // Get heirloom offset to update only one part of dynamic field
             List<int> heirlooms = player.m_activePlayerData.Heirlooms;
-            int offset = heirlooms.IndexOf((int)itemId);
+            int offset = heirlooms.IndexOf(itemId);
 
-            player.SetHeirloomFlags(offset, (uint)flags);
+            player.SetHeirloomFlags(offset, flags);
             data.flags = flags;
             data.bonusId = bonusId;
         }
@@ -278,57 +275,44 @@ namespace Game.Entities
 
             // Check already owned heirloom for upgrade kits
             HeirloomRecord heirloom = Global.DB2Mgr.GetHeirloomByItemId(item.GetEntry());
-            if (heirloom != null)
+            if (heirloom == null)
+                return;
+
+            var data = _heirlooms.LookupByKey(item.GetEntry());
+            if (data == null)
+                return;
+
+            // Check for heirloom pairs (normal - heroic, heroic - mythic)
+            var heirloomItemId = heirloom.StaticUpgradedItemID;
+            var newItemId = 0;
+            HeirloomRecord heirloomDiff;
+            while ((heirloomDiff = Global.DB2Mgr.GetHeirloomByItemId(heirloomItemId)) != null)
             {
-                var data = _heirlooms.LookupByKey(item.GetEntry());
-                if (data == null)
-                    return;
+                if (player.GetItemByEntry(heirloomDiff.ItemID) != null)
+                    newItemId = heirloomDiff.ItemID;
 
-                // Check for heirloom pairs (normal - heroic, heroic - mythic)
-                uint heirloomItemId = heirloom.StaticUpgradedItemID;
-                uint newItemId = 0;
-                HeirloomRecord heirloomDiff;
-                while ((heirloomDiff = Global.DB2Mgr.GetHeirloomByItemId(heirloomItemId)) != null)
+                HeirloomRecord heirloomSub = Global.DB2Mgr.GetHeirloomByItemId(heirloomDiff.StaticUpgradedItemID);
+                if (heirloomSub != null)
                 {
-                    if (player.GetItemByEntry(heirloomDiff.ItemID) != null)
-                        newItemId = heirloomDiff.ItemID;
-
-                    HeirloomRecord heirloomSub = Global.DB2Mgr.GetHeirloomByItemId(heirloomDiff.StaticUpgradedItemID);
-                    if (heirloomSub != null)
-                    {
-                        heirloomItemId = heirloomSub.ItemID;
-                        continue;
-                    }
-
-                    break;
+                    heirloomItemId = heirloomSub.ItemID;
+                    continue;
                 }
 
-                if (newItemId != 0)
-                {
-                    List<int> heirlooms = player.m_activePlayerData.Heirlooms;
-                    int offset = heirlooms.IndexOf((int)item.GetEntry());
+                break;
+            }
 
-                    player.SetHeirloom(offset, newItemId);
-                    player.SetHeirloomFlags(offset, 0);
+            if (newItemId != 0)
+            {
+                List<int> heirlooms = player.m_activePlayerData.Heirlooms;
+                int offset = heirlooms.IndexOf(item.GetEntry());
 
-                    _heirlooms.Remove(item.GetEntry());
-                    _heirlooms[newItemId] = null;
+                player.SetHeirloom(offset, newItemId);
+                player.SetHeirloomFlags(offset, 0);
 
-                    return;
-                }
+                _heirlooms.Remove(item.GetEntry());
+                _heirlooms[newItemId] = null;
 
-                List<uint> bonusListIDs = item.GetBonusListIDs();
-                foreach (uint bonusId in bonusListIDs)
-                {
-                    if (bonusId != data.bonusId)
-                    {
-                        item.ClearBonuses();
-                        break;
-                    }
-                }
-
-                if (!bonusListIDs.Contains((int)data.bonusId))
-                    item.AddBonuses(data.bonusId);
+                return;
             }
         }
 
@@ -437,6 +421,10 @@ namespace Game.Entities
                 owner.AddConditionalTransmog(value);
         }
 
+        public void LoadTransmogIllusions()
+        {
+        }
+
         public void LoadAccountItemAppearances(SQLResult knownAppearances, SQLResult favoriteAppearances)
         {
             if (!knownAppearances.IsEmpty())
@@ -541,7 +529,7 @@ namespace Game.Entities
             AddItemAppearance(itemModifiedAppearance);
         }
 
-        public void AddItemAppearance(uint itemId, uint appearanceModId = 0)
+        public void AddItemAppearance(int itemId, int appearanceModId = 0)
         {
             ItemModifiedAppearanceRecord itemModifiedAppearance = Global.DB2Mgr.GetItemModifiedAppearance(itemId, appearanceModId);
             if (!CanAddAppearance(itemModifiedAppearance))
@@ -694,9 +682,9 @@ namespace Game.Entities
             }
         }
 
-        public (bool PermAppearance, bool TempAppearance) HasItemAppearance(uint itemModifiedAppearanceId)
+        public (bool PermAppearance, bool TempAppearance) HasItemAppearance(int itemModifiedAppearanceId)
         {
-            if (itemModifiedAppearanceId < _appearances.Count && _appearances.Get((int)itemModifiedAppearanceId))
+            if (itemModifiedAppearanceId < _appearances.Count && _appearances.Get(itemModifiedAppearanceId))
                 return (true, false);
 
             if (_temporaryAppearances.ContainsKey(itemModifiedAppearanceId))
@@ -705,7 +693,7 @@ namespace Game.Entities
             return (false, false);
         }
 
-        public List<ObjectGuid> GetItemsProvidingTemporaryAppearance(uint itemModifiedAppearanceId)
+        public List<ObjectGuid> GetItemsProvidingTemporaryAppearance(int itemModifiedAppearanceId)
         {
             return _temporaryAppearances.LookupByKey(itemModifiedAppearanceId);
         }
@@ -719,7 +707,7 @@ namespace Game.Entities
             return appearances;
         }
 
-        public void SetAppearanceIsFavorite(uint itemModifiedAppearanceId, bool apply)
+        public void SetAppearanceIsFavorite(int itemModifiedAppearanceId, bool apply)
         {
             var apperanceState = _favoriteAppearances.LookupByKey(itemModifiedAppearanceId);
             if (apply)
@@ -826,9 +814,9 @@ namespace Game.Entities
     public class HeirloomData
     {
         public HeirloomPlayerFlags flags;
-        public uint bonusId;
+        public int bonusId;
 
-        public HeirloomData(HeirloomPlayerFlags _flags = 0, uint _bonusId = 0)
+        public HeirloomData(HeirloomPlayerFlags _flags = 0, int _bonusId = 0)
         {
             flags = _flags;
             bonusId = _bonusId;

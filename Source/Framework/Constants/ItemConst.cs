@@ -7,6 +7,8 @@ namespace Framework.Constants
 {
     public struct ItemConst
     {
+        public const int MinItemLevel = 1;
+        public const int MaxItemLevel = 1300;
         public const int MaxDamages = 2;                           // changed in 3.1.0
         public const int MaxGemSockets = 3;
         public const int MaxSpells = 5;
@@ -553,7 +555,7 @@ namespace Framework.Constants
         EnhancementPermanent = 0,
         /// <summary>Temporary weapon enchantment</summary>
         EnhancementTemporary = 1,
-        EnhancementSocket1 = 2,
+        EnhancementSocket = 2,
         EnhancementSocket2 = 3,
         EnhancementSocket3 = 4,
         /// <summary>Active when color matches all sockets</summary>
@@ -1025,6 +1027,7 @@ namespace Framework.Constants
         Max = 8
     }
 
+    [Flags]
     public enum ItemFieldFlags : uint
     {
         Soulbound = 0x01, // Item Is Soulbound And Cannot Be Traded <<--

@@ -966,16 +966,15 @@ namespace Game.Entities
 
         public Loot GetFishLoot(Player lootOwner)
         {
-            uint defaultzone = 1;
+            var defaultzone = 1;
 
             Loot fishLoot = new(GetMap(), GetGUID(), LootType.Fishing, null);
 
-            uint areaId = GetAreaId();
-            ItemContext itemContext = ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), lootOwner);
+            var areaId = GetAreaId();
             AreaTableRecord areaEntry;
             while ((areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId)) != null)
             {
-                fishLoot.FillLoot(areaId, LootStorage.Fishing, lootOwner, true, true, LootModes.Default, itemContext);
+                fishLoot.FillLoot(areaId, LootStorage.Fishing, lootOwner, true, true, LootModes.Default);
                 if (!fishLoot.IsLooted())
                     break;
 
@@ -983,7 +982,7 @@ namespace Game.Entities
             }
 
             if (fishLoot.IsLooted())
-                fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true, LootModes.Default, itemContext);
+                fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true, LootModes.Default);
 
             return fishLoot;
         }
@@ -995,11 +994,10 @@ namespace Game.Entities
             Loot fishLoot = new(GetMap(), GetGUID(), LootType.FishingJunk, null);
 
             var areaId = GetAreaId();
-            ItemContext itemContext = ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), lootOwner);
             AreaTableRecord areaEntry;
             while ((areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId)) != null)
             {
-                fishLoot.FillLoot(areaId, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish, itemContext);
+                fishLoot.FillLoot(areaId, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
                 if (!fishLoot.IsLooted())
                     break;
 
@@ -1007,7 +1005,7 @@ namespace Game.Entities
             }
 
             if (fishLoot.IsLooted())
-                fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish, itemContext);
+                fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
 
             return fishLoot;
         }
@@ -1635,12 +1633,11 @@ namespace Game.Entities
         public void Use(Unit user)
         {
             // by default spell caster is user
-            Unit spellCaster = user;
-            int spellId = 0;
-            bool triggered = false;
+            var spellCaster = user;
+            var spellId = 0;
+            var triggered = false;
 
-            Player playerUser = user.ToPlayer();
-            if (playerUser != null)
+            if (user.ToPlayer() is Player playerUser)
             {
                 if (m_goInfo.GetNoDamageImmune() != 0 && playerUser.HasUnitFlag(UnitFlags.Immune))
                     return;
@@ -1688,7 +1685,7 @@ namespace Game.Entities
                         return;
 
                     Battleground bg = player.GetBattleground();
-                    if (bg != null && !bg.CanActivateGO((int)GetEntry(), (uint)bg.GetPlayerTeam(user.GetGUID())))
+                    if (bg != null && !bg.CanActivateGO(GetEntry(), bg.GetPlayerTeam(user.GetGUID())))
                         return;
 
                     GameObjectTemplate info = GetGoInfo();
@@ -1701,7 +1698,7 @@ namespace Game.Entities
 
                             loot = new Loot(GetMap(), GetGUID(), LootType.Chest, groupRules ? group : null);
                             loot.SetDungeonEncounterId(info.Chest.DungeonEncounter);
-                            loot.FillLoot(info.GetLootId(), LootStorage.Gameobject, player, !groupRules, false, GetLootMode(), ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
+                            loot.FillLoot(info.GetLootId(), LootStorage.Gameobject, player, !groupRules, false, GetLootMode());
 
                             if (GetLootMode() > 0)
                             {
@@ -1748,7 +1745,7 @@ namespace Game.Entities
                                 m_personalLoot[player.GetGUID()] = loot;
 
                                 loot.SetDungeonEncounterId(info.Chest.DungeonEncounter);
-                                loot.FillLoot(info.Chest.chestPersonalLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
+                                loot.FillLoot(info.Chest.chestPersonalLoot, LootStorage.Gameobject, player, true, false, GetLootMode());
 
                                 if (GetLootMode() > 0 && addon != null)
                                     loot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
@@ -1761,7 +1758,7 @@ namespace Game.Entities
                         if (info.Chest.chestPushLoot != 0)
                         {
                             Loot pushLoot = new(GetMap(), GetGUID(), LootType.Chest, null);
-                            pushLoot.FillLoot(info.Chest.chestPushLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
+                            pushLoot.FillLoot(info.Chest.chestPushLoot, LootStorage.Gameobject, player, true, false, GetLootMode());
                             pushLoot.AutoStore(player);
                         }
 
@@ -1769,7 +1766,7 @@ namespace Game.Entities
                             GameEvents.Trigger(info.Chest.triggeredEvent, player, this);
 
                         // triggering linked GO
-                        uint trapEntry = info.Chest.linkedTrap;
+                        var trapEntry = info.Chest.linkedTrap;
                         if (trapEntry != 0)
                             TriggeringLinkedGameObject(trapEntry, player);
 
@@ -1882,7 +1879,7 @@ namespace Game.Entities
                 case GameObjectTypes.SpellFocus:                   //8
                 {
                     // triggering linked GO
-                    uint trapEntry = GetGoInfo().SpellFocus.linkedTrap;
+                    var trapEntry = GetGoInfo().SpellFocus.linkedTrap;
                     if (trapEntry != 0)
                         TriggeringLinkedGameObject(trapEntry, user);
                     break;
@@ -1936,7 +1933,7 @@ namespace Game.Entities
                             player.KillCreditGO(info.entry, GetGUID());
                     }
 
-                    uint trapEntry = info.Goober.linkedTrap;
+                    var trapEntry = info.Goober.linkedTrap;
                     if (trapEntry != 0)
                         TriggeringLinkedGameObject(trapEntry, user);
 
@@ -2273,7 +2270,7 @@ namespace Game.Entities
                     Player player = user.ToPlayer();
 
                     Loot loot = new Loot(GetMap(), GetGUID(), LootType.Fishinghole, null);
-                    loot.FillLoot(GetGoInfo().GetLootId(), LootStorage.Gameobject, player, true, false, LootModes.Default, ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
+                    loot.FillLoot(GetGoInfo().GetLootId(), LootStorage.Gameobject, player, true, false, LootModes.Default);
                     m_personalLoot[player.GetGUID()] = loot;
 
                     player.SendLoot(loot);
@@ -2483,7 +2480,7 @@ namespace Game.Entities
                             Loot newLoot = new(GetMap(), GetGUID(), LootType.Chest, null);
                             m_personalLoot[player.GetGUID()] = newLoot;
 
-                            newLoot.FillLoot(info.GatheringNode.chestLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
+                            newLoot.FillLoot(info.GatheringNode.chestLoot, LootStorage.Gameobject, player, true, false, GetLootMode());
                         }
 
                         if (info.GatheringNode.triggeredEvent != 0)
@@ -2499,7 +2496,7 @@ namespace Game.Entities
                             QuestXPRecord questXp = CliDB.QuestXPStorage.LookupByKey(player.GetLevel());
                             if (questXp != null)
                             {
-                                uint xp = Quest.RoundXPValue(questXp.Difficulty[info.GatheringNode.xpDifficulty]);
+                                var xp = Quest.RoundXPValue(questXp.Difficulty[info.GatheringNode.xpDifficulty]);
                                 if (xp != 0)
                                     player.GiveXP(xp, null);
                             }
@@ -2563,7 +2560,7 @@ namespace Game.Entities
             }
         }
 
-        public void SendCustomAnim(uint anim)
+        public void SendCustomAnim(int anim)
         {
             GameObjectCustomAnim customAnim = new();
             customAnim.ObjectGUID = GetGUID();
@@ -3366,7 +3363,7 @@ namespace Game.Entities
             SendMessageToSet(activateAnimKit, true);
         }
 
-        public void SetSpellVisualId(uint spellVisualId, ObjectGuid activatorGuid = default)
+        public void SetSpellVisualId(int spellVisualId, ObjectGuid activatorGuid = default)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpellVisualID), spellVisualId);
 
@@ -3520,7 +3517,7 @@ namespace Game.Entities
                     packet.CapturePointInfo.CaptureTotalDuration = TimeSpan.FromMilliseconds(GetGoInfo().CapturePoint.CaptureTime);
                     packet.CapturePointInfo.CaptureTime = m_goValue.CapturePoint.AssaultTimer;
                     bg.SendPacketToAll(packet);
-                    bg.UpdateWorldState((int)GetGoInfo().CapturePoint.worldState1, (byte)m_goValue.CapturePoint.State);
+                    bg.UpdateWorldState(GetGoInfo().CapturePoint.worldState1, (int)m_goValue.CapturePoint.State);
                 }
             }
 
@@ -3608,7 +3605,7 @@ namespace Game.Entities
 
         public override ushort GetAIAnimKitId() { return _animKitId; }
 
-        public uint GetWorldEffectID() { return _worldEffectID; }
+        public int GetWorldEffectID() { return _worldEffectID; }
         public void SetWorldEffectID(int worldEffectID) { _worldEffectID = worldEffectID; }
 
         public GameObjectTemplate GetGoInfo() { return m_goInfo; }

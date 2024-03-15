@@ -2636,7 +2636,7 @@ namespace Game
 
         public void Initialize()
         {
-            ulong lowGuid = m_guid.GetCounter();
+            var lowGuid = m_guid.GetCounter();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER);
             stmt.AddValue(0, lowGuid);
@@ -2710,26 +2710,6 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Inventory, stmt);
 
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_ARTIFACT);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.Artifacts, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.Azerite, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.AzeriteMilestonePowers, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.AzeriteUnlockedEssences, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.AzeriteEmpowered, stmt);
-
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_VOID_STORAGE);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.VoidStorage, stmt);
@@ -2741,26 +2721,6 @@ namespace Game
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.MailItems, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_ARTIFACT);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.MailItemsArtifact, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.MailItemsAzerite, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_MILESTONE_POWER);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.MailItemsAzeriteMilestonePower, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.MailItemsAzeriteUnlockedEssence, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.MailItemsAzeriteEmpowered, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SOCIALLIST);
             stmt.AddValue(0, lowGuid);
@@ -2945,18 +2905,8 @@ namespace Game
         DailyQuestStatus,
         Reputation,
         Inventory,
-        Artifacts,
-        Azerite,
-        AzeriteMilestonePowers,
-        AzeriteUnlockedEssences,
-        AzeriteEmpowered,
         Mails,
         MailItems,
-        MailItemsArtifact,
-        MailItemsAzerite,
-        MailItemsAzeriteMilestonePower,
-        MailItemsAzeriteUnlockedEssence,
-        MailItemsAzeriteEmpowered,
         SocialList,
         HomeBind,
         SpellCooldowns,

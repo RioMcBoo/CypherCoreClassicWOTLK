@@ -580,11 +580,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Enchant Spells Proc datas...");
             Global.SpellMgr.LoadSpellEnchantProcData();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading item bonus data...");
-            ItemBonusMgr.Load();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading Random item bonus list definitions...");
-            ItemEnchantmentManager.LoadItemRandomBonusListTemplates();
             Log.outInfo(LogFilter.ServerLoading, "Loading Item Random Enchantments Table...");
             ItemEnchantmentManager.LoadRandomEnchantmentsTable();
 
@@ -1970,7 +1965,7 @@ namespace Game
             Log.outDebug(LogFilter.Misc, "AutoBroadcast: '{0}'", pair.Value.Message);
         }
 
-        public void UpdateRealmCharCount(uint accountId)
+        public void UpdateRealmCharCount(int accountId)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_COUNT);
             stmt.AddValue(0, accountId);

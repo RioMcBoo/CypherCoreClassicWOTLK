@@ -890,7 +890,7 @@ namespace Game.Entities
             if (pItem == null)
                 return null;
 
-            Item lastItem = pItem;
+            var lastItem = pItem;
             for (var i = 0; i < dest.Count; i++)
             {
                 var itemPosCount = dest[i];
@@ -904,64 +904,56 @@ namespace Game.Entities
                 lastItem = _StoreItem(itemPosCount.Pos, pItem, itemPosCount.Count, true, update);
             }
 
-            AutoUnequipChildItem(lastItem);
-
             return lastItem;
         }
 
-        bool StoreNewItemInBestSlots(int titem_id, int titem_amount)
+        bool StoreNewItemInBestSlots(int itemId, int amount, ItemContext itemContext)
         {
-            Log.outDebug(LogFilter.Player, "STORAGE: Creating initial item, itemId = {0}, count = {1}", titem_id, titem_amount);
+            Log.outDebug(LogFilter.Player, $"Player.StoreNewItemInBestSlots: Creating initial item, itemId = {itemId}, count = {amount}.");
 
-            ItemContext itemContext = ItemContext.NewCharacter;
-            var bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(titem_id, itemContext);
             List<(ItemPos item, int count)> Dest;
             InventoryResult msg;
                         
             // attempt equip by one
             while (amount > 0)
             {
-                msg = CanEquipNewItem(ItemSlot.Null, out Dest, titem_id, false);
+                msg = CanEquipNewItem(ItemSlot.Null, out Dest, itemId, false);
                 if (msg != InventoryResult.Ok)
                     break;
 
-                Item item = EquipNewItem(Dest, titem_id, itemContext, true);
-                item.SetBonuses(bonusListIDs);
+                EquipNewItem(Dest, itemId, itemContext, true);
                 AutoUnequipOffhandIfNeed();
                 --amount;
             }
 
-            if (titem_amount == 0)
+            if (amount == 0)
                 return true;                                        // equipped
 
             // attempt store
 
             // store in main bag to simplify second pass (special bags can be not equipped yet at this moment)
-            msg = CanStoreNewItem(ItemPos.Undefined, out Dest, titem_id, titem_amount);
+            msg = CanStoreNewItem(ItemPos.Undefined, out Dest, itemId, amount);
             if (msg == InventoryResult.Ok)
             {
-                StoreNewItem(Dest, titem_id, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(titem_id), null, itemContext, bonusListIDs);
+                StoreNewItem(Dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId), null, itemContext);
                 return true;                                        // stored
             }
 
             // item can't be added
-            Log.outError(LogFilter.Player, $"STORAGE: Can't equip or store initial item {titem_id} for race {GetRace()} class {GetClass()}, error msg = {msg}");
+            Log.outError(LogFilter.Player, $"Player.StoreNewItemInBestSlots: Player '{GetName()}' ({GetGUID()}) can't equip or store initial item (ItemID: {itemId}, Race: {GetRace()}, Class: {GetClass()}, InventoryResult: {msg}).");
             return false;
         }
 
-        public Item StoreNewItem(List<(ItemPos item, int count)> pos, int itemId, bool update, ItemRandomEnchantmentId randomPropertyId, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, List<int> bonusListIDs = null, bool addToCollection = true)
+        public Item StoreNewItem(List<(ItemPos item, int count)> pos, int itemId, bool update, ItemRandomProperties randomProperties, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, bool addToCollection = true)
         {
-            int count = 0;
+            var count = 0;
             foreach (var ipc in pos)
                 count += ipc.count;
 
-            Item item = Item.CreateItem(itemId, count, context, this, bonusListIDs == null);
+            Item item = Item.CreateItem(itemId, count, context, this);
             if (item != null)
             {
                 item.SetItemFlag(ItemFieldFlags.NewItem);
-
-                if (bonusListIDs != null)
-                    item.SetBonuses(bonusListIDs);
 
                 item = StoreItem(pos, item, update);
 
@@ -970,7 +962,7 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaType.AcquireItem, itemId, count);
 
                 item.SetFixedLevel(GetLevel());
-                item.SetItemRandomProperties(randomPropertyId);
+                item.SetItemRandomProperties(randomProperties);
 
                 if (allowedLooters != null && allowedLooters.Count > 1 && item.GetTemplate().GetMaxStackSize() == 1 && item.IsSoulBound())
                 {
@@ -990,25 +982,7 @@ namespace Game.Entities
                 }
 
                 if (addToCollection)
-                    GetSession().GetCollectionMgr().OnItemAdded(item);
-
-                ItemChildEquipmentRecord childItemEntry = Global.DB2Mgr.GetItemChildEquipment(itemId);
-                if (childItemEntry != null)
-                {
-                    ItemTemplate childTemplate = Global.ObjectMgr.GetItemTemplate(childItemEntry.ChildItemID);
-                    if (childTemplate != null)
-                    {
-                        List<(ItemPos item, int count)> childDest = new();
-                        CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, childDest, childTemplate, ref count, null, ItemPos.Undefined, 0, null);
-                        Item childItem = StoreNewItem(childDest, childTemplate.GetId(), update, new ItemRandomEnchantmentId(), null, context, null, addToCollection);
-                        if (childItem != null)
-                        {
-                            childItem.SetCreator(item.GetGUID());
-                            childItem.SetItemFlag(ItemFieldFlags.Child);
-                            item.SetChildItem(childItem.GetGUID());
-                        }
-                    }
-                }
+                    GetSession().GetCollectionMgr().OnItemAdded(item);                
 
                 if (item.GetTemplate().GetInventoryType() != InventoryType.NonEquip)
                     UpdateAverageItemLevelTotal();
@@ -1343,106 +1317,6 @@ namespace Game.Entities
             return pItem;
         }
 
-        public void EquipChildItem(ItemPos parentPos, Item parentItem)
-        {
-            ItemChildEquipmentRecord itemChildEquipment = Global.DB2Mgr.GetItemChildEquipment(parentItem.GetEntry());
-            if (itemChildEquipment != null)
-            {
-                Item childItem = GetChildItemByGuid(parentItem.GetChildItem());
-                if (childItem != null)
-                {
-                    ItemPos childDest = new(itemChildEquipment.ChildItemEquipSlot);
-                    if (childItem.InventoryPosition != childDest)
-                    {
-                        Item dstItem = GetItemByPos(childDest);
-                        if (dstItem == null)                                      // empty slot, simple case
-                        {
-                            RemoveItem(childItem.InventoryPosition, true);
-                            EquipItem(childDest, childItem, true);
-                            AutoUnequipOffhandIfNeed();
-                        }
-                        else                                                    // have currently equipped item, not simple case
-                        {
-                            InventoryResult msg = CanUnequipItem(childDest, !childItem.IsBag());
-                            if (msg != InventoryResult.Ok)
-                            {
-                                SendEquipError(msg, dstItem);
-                                return;
-                            }
-
-                            // check dest.src move possibility but try to store currently equipped item in the bag where the parent item is
-                            List<(ItemPos item, int count)> Source = new();
-
-                            if (parentPos.IsInventoryPos)
-                            {
-                                msg = CanStoreItem(new(ItemSlot.Null, parentPos.Container), out Source, dstItem, forSwap: true);
-                                if (msg != InventoryResult.Ok)
-                                    msg = CanStoreItem(ItemPos.Undefined, out Source, dstItem, forSwap: true);
-                            }
-                            else if (parentPos.IsBankPos)
-                            {
-                                msg = CanBankItem(new(ItemSlot.Null, parentPos.Container), out Source, dstItem, true);
-                                if (msg != InventoryResult.Ok)
-                                    msg = CanBankItem(ItemPos.Undefined, out Source, dstItem, true);
-                            }
-                            else if (parentPos.IsEquipmentPos)
-                            {
-                                msg = CanEquipItem(parentPos.Slot, out Source, dstItem, true);
-                                if (msg == InventoryResult.Ok)
-                                    msg = CanUnequipItem(Source, true);
-                            }
-
-                            if (msg != InventoryResult.Ok)
-                            {
-                                SendEquipError(msg, dstItem, childItem);
-                                return;
-                            }
-
-                            // now do moves, remove...
-                            RemoveItem(dstItem.InventoryPosition, false);
-                            RemoveItem(childItem.InventoryPosition, false);
-
-                            // add to dest
-                            EquipItem(childDest, childItem, true);
-
-                            // add to src
-                            if (parentPos.IsInventoryPos)
-                                StoreItem(Source, dstItem, true);
-                            else if (parentPos.IsBankPos)
-                                BankItem(Source, dstItem, true);
-                            else if (parentPos.IsEquipmentPos)
-                                EquipItem(Source, dstItem, true);
-
-                            AutoUnequipOffhandIfNeed();
-                        }
-                    }
-                }
-            }
-        }
-
-        public void AutoUnequipChildItem(Item parentItem)
-        {
-            if (Global.DB2Mgr.GetItemChildEquipment(parentItem.GetEntry()) != null)
-            {
-                Item childItem = GetChildItemByGuid(parentItem.GetChildItem());
-                if (childItem != null)
-                {
-                    ItemPos childPos = childItem.InventoryPosition;
-                    if (childPos.IsChildEquipmentPos)
-                        return;
-
-                    List<(ItemPos item, int count)> dest = new();
-                    var count = childItem.GetCount();
-                    InventoryResult result = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, childItem.GetTemplate(), ref count, childItem, ItemPos.Undefined, 0, null);
-                    if (result != InventoryResult.Ok)
-                        return;
-
-                    RemoveItem(childPos, true);
-                    StoreItem(dest, childItem, true);
-                }
-            }
-        }
-
         void QuickEquipItem(List<(ItemPos Pos, int count)> pos, Item pItem)
         {
             QuickEquipItem(pos.FirstOrDefault().Pos, pItem);
@@ -1537,7 +1411,7 @@ namespace Game.Entities
                 return false;
             }
 
-            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(itemId));
+            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId));
             if (item != null)
                 SendNewItem(item, count, true, false);
             else
@@ -1555,7 +1429,7 @@ namespace Game.Entities
             Item pItem = GetItemByPos(pos);
             if (pItem != null)
             {
-                Log.outDebug(LogFilter.Player, $"STORAGE: RemoveItem bag = {pos.Container}, slot = {pos.Slot}, item = {pItem.GetEntry()}");
+                Log.outDebug(LogFilter.Player, $"Player.RemoveItem: RemoveItem bag = {pos.Container}, slot = {pos.Slot}, item = {pItem.GetEntry()}");
 
                 RemoveEnchantmentDurations(pItem);
                 RemoveItemDurations(pItem);
@@ -1621,8 +1495,6 @@ namespace Game.Entities
                 pItem.InventorySlot = ItemSlot.Null;
                 if (IsInWorld && update)
                     pItem.SendUpdateToPlayer(this);
-
-                AutoUnequipChildItem(pItem);
 
                 if (!pos.IsContainerPos)
                     UpdateAverageItemLevelEquipped();
@@ -1746,7 +1618,6 @@ namespace Game.Entities
                 {
                     if (src.IsEquipmentPos)
                     {
-                        AutoUnequipChildItem(parentItem);   // we need to unequip child first since it cannot go into whatever is going to happen next
                         SwapItem(dst, src);                 // src is now empty
                         SwapItem(parentItem.InventoryPosition, dst);// dst is now empty
                         return;
@@ -1760,7 +1631,6 @@ namespace Game.Entities
                 {
                     if (dst.IsEquipmentPos)
                     {
-                        AutoUnequipChildItem(parentItem);   // we need to unequip child first since it cannot go into whatever is going to happen next
                         SwapItem(src, dst);                 // dst is now empty
                         SwapItem(parentItem.InventoryPosition, src);// src is now empty
                         return;
@@ -1768,7 +1638,7 @@ namespace Game.Entities
                 }
             }
 
-            Log.outDebug(LogFilter.Player, $"STORAGE: SwapItem bag = {dst.Container}, slot = {dst.Slot}, item = {pSrcItem.GetEntry()}");
+            Log.outDebug(LogFilter.Player, $"Player.SwapItem: SwapItem bag = {dst.Container}, slot = {dst.Slot}, item = {pSrcItem.GetEntry()}");
 
             if (!IsAlive())
             {
@@ -1885,9 +1755,6 @@ namespace Game.Entities
                 else
                     return;
 
-                if (msg == InventoryResult.Ok && dst.IsEquipmentPos && !pSrcItem.GetChildItem().IsEmpty())
-                    msg = CanEquipChildItem(pSrcItem);
-
                 // can be merge/fill
                 if (msg == InventoryResult.Ok)
                 {
@@ -1902,9 +1769,6 @@ namespace Game.Entities
                         else if (dst.IsEquipmentPos)
                         {
                             EquipItem(dest, pSrcItem, true);
-                            if (!pSrcItem.GetChildItem().IsEmpty())
-                                EquipChildItem(src, pSrcItem);
-
                             AutoUnequipOffhandIfNeed();
                         }
                     }
@@ -1937,9 +1801,6 @@ namespace Game.Entities
 
             // check dest->src move possibility
             _msg = CheckMovePossibility(pDstItem, src, out List<(ItemPos item, int count)> sDest2);
-            if (_msg == InventoryResult.Ok && dst.IsEquipmentPos && !pSrcItem.GetChildItem().IsEmpty())
-                _msg = CanEquipChildItem(pSrcItem);
-
             if (_msg != InventoryResult.Ok)
             {
                 SendEquipError(_msg, pDstItem, pSrcItem);
@@ -2026,8 +1887,6 @@ namespace Game.Entities
             else if (dst.IsEquipmentPos)
             {
                 EquipItem(sDest1, pSrcItem, true);
-                if (!pSrcItem.GetChildItem().IsEmpty())
-                    EquipChildItem(src, pSrcItem);
             }
 
             // add to src
@@ -2133,6 +1992,8 @@ namespace Game.Entities
             if (crItem.ExtendedCost != 0) // case for new honor system
             {
                 var iece = CliDB.ItemExtendedCostStorage.LookupByKey(crItem.ExtendedCost);
+                Cypher.Assert(iece != null);
+
                 for (int i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
                 {
                     if (iece.ItemID[i] != 0)
@@ -2151,7 +2012,7 @@ namespace Game.Entities
 
             Item it;
             if (bStore)
-                it = StoreNewItem(dest, item, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(item), null, ItemContext.Vendor, crItem.BonusListIDs, false);
+                it = StoreNewItem(dest, item, true, ItemEnchantmentManager.GenerateRandomProperties(item), null, ItemContext.Vendor, false);
             else
                 it = EquipNewItem(dest, item, ItemContext.Vendor, true);
 
@@ -2175,7 +2036,7 @@ namespace Game.Entities
                 {
                     it.SetItemFlag(ItemFieldFlags.Refundable);
                     it.SetRefundRecipient(GetGUID());
-                    it.SetPaidMoney((uint)price);
+                    it.SetPaidMoney(price);
                     it.SetPaidExtendedCost(crItem.ExtendedCost);
                     it.SaveRefundDataToDB();
                     AddRefundReference(it.GetGUID());
@@ -2284,7 +2145,7 @@ namespace Game.Entities
                     continue;
 
                 //cycle all (gem)enchants
-                for (EnchantmentSlot enchant_slot = EnchantmentSlot.EnhancementSocket1; enchant_slot < EnchantmentSlot.EnhancementSocket1 + 3; ++enchant_slot)
+                for (EnchantmentSlot enchant_slot = EnchantmentSlot.EnhancementSocket; enchant_slot < EnchantmentSlot.EnhancementSocket + 3; ++enchant_slot)
                 {
                     int enchant_id = pItem.GetEnchantmentId(enchant_slot);
                     if (enchant_id == 0)                                 //if no enchant go to next enchant(slot)
@@ -2466,23 +2327,6 @@ namespace Game.Entities
 
                 return default;
             });
-        }
-
-        public Item GetChildItemByGuid(ObjectGuid guid)
-        {
-            Item result = null;
-            ForEachItem(ItemSearchLocation.Equipment | ItemSearchLocation.Inventory, item =>
-            {
-                if (item.GetGUID() == guid)
-                {
-                    result = item;
-                    return false;
-                }
-
-                return true;
-            });
-
-            return result;
         }
 
         int GetItemCountWithLimitCategory(int limitCategory, Item skipItem)
@@ -4697,45 +4541,6 @@ namespace Game.Entities
             return !swap ? InventoryResult.ItemNotFound : InventoryResult.CantSwap;
         }
 
-        public InventoryResult CanEquipChildItem(Item parentItem)
-        {
-            Item childItem = GetChildItemByGuid(parentItem.GetChildItem());
-            if (childItem == null)
-                return InventoryResult.Ok;
-
-            ItemChildEquipmentRecord childEquipement = Global.DB2Mgr.GetItemChildEquipment(parentItem.GetEntry());
-            if (childEquipement == null)
-                return InventoryResult.Ok;
-
-            Item dstItem = GetItemByPos(childEquipement.ChildItemEquipSlot);
-            if (dstItem == null)
-                return InventoryResult.Ok;
-
-            ItemPos childDest = new(childEquipement.ChildItemEquipSlot);
-            InventoryResult msg = CanUnequipItem(childDest, !childItem.IsBag());
-            if (msg != InventoryResult.Ok)
-                return msg;
-
-            // check dest->src move possibility
-            ItemPos src = parentItem.InventoryPosition;
-            if (src.IsInventoryPos)
-            {
-                msg = CanStoreItem(new(ItemSlot.Null, parentItem.InventoryBagSlot), out _, dstItem, forSwap: true);
-                if (msg != InventoryResult.Ok)
-                    msg = CanStoreItem(ItemPos.Undefined, out _, dstItem, forSwap: true);
-            }
-            else if (src.IsBankPos)
-            {
-                msg = CanBankItem(new(ItemSlot.Null, parentItem.InventoryBagSlot), out _, dstItem, true);
-                if (msg != InventoryResult.Ok)
-                    msg = CanBankItem(ItemPos.Undefined, out _, dstItem, true);
-            }
-            else if (src.IsEquipmentPos)
-                return InventoryResult.CantSwap;
-
-            return msg;
-        }
-
         public InventoryResult CanEquipUniqueItem(Item pItem, byte eslot = ItemSlot.Null, int limit_count = 1)
         {
             ItemTemplate pProto = pItem.GetTemplate();
@@ -5402,6 +5207,7 @@ namespace Game.Entities
         //Loot
         public ObjectGuid GetLootGUID() { return m_playerData.LootTargetGUID; }
         public void SetLootGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.LootTargetGUID), guid); }
+
         public void StoreLootItem(ObjectGuid lootWorldObjectGuid, byte lootSlot, Loot loot, AELootResult aeResult = null)
         {
             LootItem item = loot.LootItemInSlot(lootSlot, this, out NotNormalLootItem ffaItem);
@@ -5433,7 +5239,7 @@ namespace Game.Entities
             InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item.itemid, item.count);
             if (msg == InventoryResult.Ok)
             {
-                Item newitem = StoreNewItem(dest, item.itemid, true, item.randomPropertyId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
+                Item newitem = StoreNewItem(dest, item.itemid, true, ItemEnchantmentManager.GenerateRandomProperties(item.itemid), item.GetAllowedLooters(), item.context);
                 if (ffaItem != null)
                 {
                     //freeforall case, notify only one player of the removal
@@ -5461,7 +5267,7 @@ namespace Game.Entities
                 {
                     SendNewItem(newitem, item.count, false, false, true, loot.GetDungeonEncounterId());
                     UpdateCriteria(CriteriaType.LootItem, item.itemid, item.count);
-                    UpdateCriteria(CriteriaType.GetLootByType, item.itemid, item.count, (uint)SharedConst.GetLootTypeForClient(loot.loot_type));
+                    UpdateCriteria(CriteriaType.GetLootByType, item.itemid, item.count, (long)SharedConst.GetLootTypeForClient(loot.loot_type));
                     UpdateCriteria(CriteriaType.LootAnyItem, item.itemid, item.count);
                 }
                 else

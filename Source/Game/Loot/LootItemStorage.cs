@@ -329,10 +329,8 @@ namespace Game.Loots
             Counted = lootItem.is_counted;
             UnderThreshold = lootItem.is_underthreshold;
             NeedsQuest = lootItem.needs_quest;
-            RandomSuffix = lootItem.randomSuffix;
-            RandomPropertyId = lootItem.randomPropertyId;
+            RandomProperties = lootItem.randomProperties;
             Context = lootItem.context;
-            BonusListIDs = lootItem.BonusListIDs;
         }
 
         public int ItemId;
@@ -344,9 +342,7 @@ namespace Game.Loots
         public bool Counted;
         public bool UnderThreshold;
         public bool NeedsQuest;
-        public int RandomSuffix;
-        public ItemRandomEnchantmentId RandomPropertyId;
+        public ItemRandomProperties RandomProperties;
         public ItemContext Context;
-        public List<int> BonusListIDs = new();
     }
 }

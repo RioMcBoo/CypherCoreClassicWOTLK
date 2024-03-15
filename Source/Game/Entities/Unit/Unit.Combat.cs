@@ -805,8 +805,8 @@ namespace Game.Entities
                         if (dungeonEncounter != null)
                         {
                             creature.m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id, creature.GetLootId(),
-                                LootStorage.Creature, LootType.Corpse, creature, creature.GetCreatureDifficulty().GoldMin, creature.GetCreatureDifficulty().GoldMax,
-                                (ushort)creature.GetLootMode(), creature.GetMap().GetMapDifficulty(), tappers);
+                                LootStorage.Creature, LootType.Corpse, creature, creature.GetCreatureDifficulty().GoldMin, creature.GetCreatureDifficulty().GoldMax,                                
+                                creature.GetLootMode(), creature.GetMap().GetMapDifficulty(), tappers);
                         }
                         else if (!tappers.Empty())
                         {
@@ -815,9 +815,9 @@ namespace Game.Entities
 
                             Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Corpse, dungeonEncounter != null ? group : null);
 
-                            uint lootid = creature.GetLootId();
+                            var lootid = creature.GetLootId();
                             if (lootid != 0)
-                                loot.FillLoot(lootid, LootStorage.Creature, looter, dungeonEncounter != null, false, creature.GetLootMode(), ItemBonusMgr.GetContextForPlayer(creature.GetMap().GetMapDifficulty(), looter));
+                                loot.FillLoot(lootid, LootStorage.Creature, looter, dungeonEncounter != null, false, creature.GetLootMode());
 
                             if (creature.GetLootMode() > 0)
                                 loot.GenerateMoneyLoot(creature.GetCreatureDifficulty().GoldMin, creature.GetCreatureDifficulty().GoldMax);
@@ -844,7 +844,7 @@ namespace Game.Entities
 
                             uint lootid = creature.GetLootId();
                             if (lootid != 0)
-                                loot.FillLoot(lootid, LootStorage.Creature, tapper, true, false, creature.GetLootMode(), ItemBonusMgr.GetContextForPlayer(creature.GetMap().GetMapDifficulty(), tapper));
+                                loot.FillLoot(lootid, LootStorage.Creature, tapper, true, false, creature.GetLootMode());
 
                             if (creature.GetLootMode() > 0)
                                 loot.GenerateMoneyLoot(creature.GetCreatureDifficulty().GoldMin, creature.GetCreatureDifficulty().GoldMax);
@@ -920,8 +920,8 @@ namespace Game.Entities
                 if ((durabilityLoss && player == null && !victim.ToPlayer().InBattleground()) || (player != null && WorldConfig.GetBoolValue(WorldCfg.DurabilityLossInPvp)))
                 {
                     double baseLoss = WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath);
-                    uint loss = (uint)(baseLoss - (baseLoss * plrVictim.GetTotalAuraMultiplier(AuraType.ModDurabilityLoss)));
-                    Log.outDebug(LogFilter.Unit, "We are dead, losing {0} percent durability", loss);
+                    var loss = (int)(baseLoss - (baseLoss * plrVictim.GetTotalAuraMultiplier(AuraType.ModDurabilityLoss)));
+                    Log.outDebug(LogFilter.Unit, $"We are dead, losing {loss} percent durability.");
                     // Durability loss is calculated more accurately again for each item in Player.DurabilityLoss
                     plrVictim.DurabilityLossAll(baseLoss, false);
                     // durability lost message
@@ -997,6 +997,10 @@ namespace Game.Entities
                     bf.HandleKill(player, victim);
             }
 
+            //if (victim->GetTypeId() == TYPEID_PLAYER)
+            //    if (OutdoorPvP* pvp = victim->ToPlayer()->GetOutdoorPvP())
+            //        pvp->HandlePlayerActivityChangedpVictim->ToPlayer();
+
             // Battlegroundthings (do this at the end, so the death state flag will be properly set to handle in the bg.handlekill)
             if (player != null && player.InBattleground())
             {
@@ -1017,7 +1021,7 @@ namespace Game.Entities
                 if (attacker.IsCreature())
                     victim.ToPlayer().UpdateCriteria(CriteriaType.KilledByCreature, attacker.GetEntry());
                 else if (attacker.IsPlayer() && victim != attacker)
-                    victim.ToPlayer().UpdateCriteria(CriteriaType.KilledByPlayer, 1, (ulong)attacker.ToPlayer().GetEffectiveTeam());
+                    victim.ToPlayer().UpdateCriteria(CriteriaType.KilledByPlayer, 1, (long)attacker.ToPlayer().GetEffectiveTeam());
             }
 
             // Hook for OnPVPKill Event

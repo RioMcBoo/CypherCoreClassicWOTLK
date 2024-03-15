@@ -2096,31 +2096,11 @@ namespace Game.Chat
             if (count == 0)
                 count = 1;
 
-            List<int> bonusListIDs = new();
-            var bonuses = args.NextString();
             var context = args.NextString();
-
-            // semicolon separated bonuslist ids (parse them after all arguments are extracted by strtok!)
-            if (!bonuses.IsEmpty())
-            {
-                var tokens = new StringArray(bonuses, ';');
-                for (var i = 0; i < tokens.Length; ++i)
-                {
-                    if (int.TryParse(tokens[i], out int id))
-                        bonusListIDs.Add(id);
-                }
-            }
 
             ItemContext itemContext = ItemContext.None;
             if (!context.IsEmpty())
-            {
                 itemContext = context.ToEnum<ItemContext>();
-                if (itemContext < ItemContext.Max)
-                {
-                    var contextBonuses = ItemBonusMgr.GetBonusListsForItem(itemId, new(itemContext));
-                    bonusListIDs.AddRange(contextBonuses);
-                }
-            }
 
             Player player = handler.GetSession().GetPlayer();
             Player playerTarget = handler.GetSelectedPlayer();
@@ -2131,6 +2111,7 @@ namespace Game.Chat
             if (itemTemplate == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandItemidinvalid, itemId);
+                handler.SetSentErrorMessage(true);
                 return false;
             }
 
@@ -2145,7 +2126,7 @@ namespace Game.Chat
                     handler.SendSysMessage(CypherStrings.Removeitem, itemId, destroyedItemCount, handler.GetNameLink(playerTarget));
 
                     // check to see if we were unable to destroy all of the amount requested.
-                    uint unableToDestroyItemCount = (uint)(-count - destroyedItemCount);
+                    var unableToDestroyItemCount = -count - destroyedItemCount;
                     if (unableToDestroyItemCount > 0)
                     {
                         // output message for the amount of items we couldn't destroy
@@ -2161,10 +2142,10 @@ namespace Game.Chat
             }
 
             // Adding items
-            int noSpaceForCount = 0;
+            var noSpaceForCount = 0;
 
             // check space and find places
-            List<(ItemPos item, int count)> dest;
+            List<(ItemPos Item, int Count)> dest;
             InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= noSpaceForCount;
@@ -2174,16 +2155,14 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.ItemCannotCreate, itemId, noSpaceForCount);
                 return false;
             }
-
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(itemId), null, itemContext, bonusListIDs);
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext, bonusListIDs.Empty() ? null : bonusListIDs);
+            var item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId), null, itemContext);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)
             {
                 foreach (var posCount in dest)
                 {
-                    Item item1 = player.GetItemByPos(posCount.Pos);
+                    var item1 = player.GetItemByPos(posCount.Item);
                     if (item1 != null)
                         item1.SetBinding(false);
                 }
@@ -2204,26 +2183,14 @@ namespace Game.Chat
         }
 
         [Command("set", RBACPermissions.CommandAdditemset)]
-        static bool HandleAddItemSetCommand(CommandHandler handler, uint itemSetId, [OptionalArg] string bonuses, byte? context)
+        static bool HandleAddItemSetCommand(CommandHandler handler, int itemSetId, byte? context)
         {
             // prevent generation all items with itemset field value '0'
             if (itemSetId == 0)
             {
                 handler.SendSysMessage(CypherStrings.NoItemsFromItemsetFound, itemSetId);
+                handler.SetSentErrorMessage(true);
                 return false;
-            }
-
-            List<int> bonusListIDs = new();
-
-            // semicolon separated bonuslist ids (parse them after all arguments are extracted by strtok!)
-            if (!bonuses.IsEmpty())
-            {
-                var tokens = new StringArray(bonuses, ';');
-                for (var i = 0; i < tokens.Length; ++i)
-                {
-                    if (int.TryParse(tokens[i], out int id))
-                        bonusListIDs.Add(id);
-                }
             }
 
             ItemContext itemContext = ItemContext.None;
@@ -2246,17 +2213,10 @@ namespace Game.Chat
 
                 found = true;
                 
-                InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, template.Value, 1, out _);
+                InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos Item, int Count)> dest, template.Value, 1, out _);
                 if (msg == InventoryResult.Ok)
                 {
-                    List<int> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
-                    if (itemContext < ItemContext.Max)
-                    {
-                        var contextBonuses = ItemBonusMgr.GetBonusListsForItem(template.Value.GetId(), new(itemContext));
-                        bonusListIDsForItem.AddRange(contextBonuses);
-                    }
-
-                    Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, new ItemRandomEnchantmentId(), null, itemContext, bonusListIDsForItem);
+                    var item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, ItemEnchantmentManager.GenerateRandomProperties(template.Key), null, itemContext);
 
                     // remove binding (let GM give it to another player later)
                     if (player == playerTarget)
@@ -2276,6 +2236,7 @@ namespace Game.Chat
             if (!found)
             {
                 handler.SendSysMessage(CypherStrings.CommandNoitemsetfound, itemSetId);
+                handler.SetSentErrorMessage(true);
                 return false;
             }
             return true;
@@ -2292,11 +2253,11 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out playerTarget))
                 return false;
 
-            StringArguments tailArgs = new StringArguments(args.NextString(""));
+            var tailArgs = new StringArguments(args.NextString(""));
             if (tailArgs.Empty())
                 return false;
 
-            int itemId = 0;
+            var itemId = 0;
 
             if (tailArgs[0] == '[')                                        // [name] manual form
             {
@@ -2316,6 +2277,7 @@ namespace Game.Chat
                     if (itr == null)
                     {
                         handler.SendSysMessage(CypherStrings.CommandCouldnotfind, itemName);
+                        handler.SetSentErrorMessage(true);
                         return false;
                     }
 
@@ -2341,43 +2303,24 @@ namespace Game.Chat
             if (count == 0)
                 count = 1;
 
-            List<int> bonusListIDs = new();
-            string bonuses = tailArgs.NextString();
-
-            string context = tailArgs.NextString();
+            var context = tailArgs.NextString();
 
             ItemContext itemContext = ItemContext.None;
             if (!context.IsEmpty())
-            {
                 itemContext = context.ToEnum<ItemContext>();
-                if (itemContext < ItemContext.Max)
-                {
-                    var contextBonuses = ItemBonusMgr.GetBonusListsForItem(itemId, new(itemContext));
-                    bonusListIDs.AddRange(contextBonuses);
-                }
-            }
-
-            // semicolon separated bonuslist ids
-            if (!bonuses.IsEmpty())
-            {
-                foreach (var token in bonuses.Split(';', StringSplitOptions.RemoveEmptyEntries))
-                {
-                    if (int.TryParse(token, out int bonusListId))
-                        bonusListIDs.Add(bonusListId);
-                }
-            }
 
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
             if (itemTemplate == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandItemidinvalid, itemId);
+                handler.SetSentErrorMessage(true);
                 return false;
             }
 
             // Subtract
             if (count < 0)
             {
-                int destroyedItemCount = playerTarget.DestroyItemCount(itemId, -count, true, false);
+                var destroyedItemCount = playerTarget.DestroyItemCount(itemId, -count, true, false);
 
                 if (destroyedItemCount > 0)
                 {
@@ -2402,10 +2345,10 @@ namespace Game.Chat
             }
 
             // Adding items
-            int noSpaceForCount = 0;
+            var noSpaceForCount = 0;
 
             // check space and find places
-            List<(ItemPos item, int count)> dest;
+            List<(ItemPos Item, int Count)> dest;
             InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out dest, itemTemplate, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= noSpaceForCount;
@@ -2413,17 +2356,18 @@ namespace Game.Chat
             if (count == 0 || dest.Empty())                         // can't add any
             {
                 handler.SendSysMessage(CypherStrings.ItemCannotCreate, itemId, noSpaceForCount);
+                handler.SetSentErrorMessage(true);
                 return false;
             }
 
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId), null, itemContext, bonusListIDs.Empty() ? null : bonusListIDs);
+            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId), null, itemContext);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)
             {
                 foreach (var itemPosCount in dest)
                 {
-                    Item item1 = player.GetItemByPos(itemPosCount.item);
+                    Item item1 = player.GetItemByPos(itemPosCount.Item);
                     if (item1 != null)
                         item1.SetBinding(false);
                 }

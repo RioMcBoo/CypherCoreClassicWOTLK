@@ -49,10 +49,6 @@ namespace Framework.Constants
 
         public const int CustomDisplaySize = 3;
 
-        public const int ArtifactsAllWeaponsGeneralWeaponEquippedPassive = 197886;
-
-        public const int MaxArtifactTier = 1;
-
         public const int MaxHonorLevel = 500;
         public const byte LevelMinHonor = 10;
         public const int SpellPvpRulesEnabled = 134735;

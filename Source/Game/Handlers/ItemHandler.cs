@@ -147,14 +147,14 @@ namespace Game
         {
             if (autoEquipItem.Inv.Items.Count != 1)
             {
-                Log.outError(LogFilter.Network, "WORLD: HandleAutoEquipItem - Invalid itemCount ({0})", autoEquipItem.Inv.Items.Count);
+                Log.outError(LogFilter.Network, $"WORLD: HandleAutoEquipItem - Invalid itemCount ({autoEquipItem.Inv.Items.Count}).");
                 return;
             }
 
             var player = GetPlayer();
-            ItemPos src = new(autoEquipItem.Slot, autoEquipItem.PackSlot);
+            var src = new ItemPos(autoEquipItem.Slot, autoEquipItem.PackSlot);
 
-            Item srcItem = player.GetItemByPos(src);
+            var srcItem = player.GetItemByPos(src);
             if (srcItem == null)
                 return;                                             // only at cheat
 
@@ -168,23 +168,11 @@ namespace Game
             if (dest == src)                                           // prevent equip in same slot, only at cheat
                 return;
 
-            Item dstItem = player.GetItemByPos(dest);
+            var dstItem = player.GetItemByPos(dest);
             if (dstItem == null)                                         // empty slot, simple case
             {
-                if (!srcItem.GetChildItem().IsEmpty())
-                {
-                    InventoryResult childEquipResult = _player.CanEquipChildItem(srcItem);
-                    if (childEquipResult != InventoryResult.Ok)
-                    {
-                        _player.SendEquipError(msg, srcItem);
-                        return;
-                    }
-                }
-
                 player.RemoveItem(src, true);
                 player.EquipItem(dest, srcItem, true);
-                if (!srcItem.GetChildItem().IsEmpty())
-                    _player.EquipChildItem(src, srcItem);
 
                 player.AutoUnequipOffhandIfNeed();
             }
@@ -224,9 +212,6 @@ namespace Game
                             msg = player.CanUnequipItem(sSrc, true);
                     }
 
-                    if (msg == InventoryResult.Ok && dest.IsEquipmentPos && !srcItem.GetChildItem().IsEmpty())
-                        msg = _player.CanEquipChildItem(srcItem);
-
                     if (msg != InventoryResult.Ok)
                     {
                         player.SendEquipError(msg, dstItem, srcItem);
@@ -247,18 +232,14 @@ namespace Game
                         player.BankItem(sSrc, dstItem, true);
                     else if (src.IsEquipmentPos)
                         player.EquipItem(sSrc, dstItem, true);
-
-                    if (dest.IsEquipmentPos && !srcItem.GetChildItem().IsEmpty())
-                        _player.EquipChildItem(src, srcItem);
                 }
                 else
                 {
-                    Item parentItem = _player.GetItemByGuid(dstItem.GetCreator());
+                    var parentItem = _player.GetItemByGuid(dstItem.GetCreator());
                     if (parentItem != null)
                     {
                         if (dest.IsEquipmentPos)
                         {
-                            _player.AutoUnequipChildItem(parentItem);
                             // dest is now empty
                             _player.SwapItem(src, dest);
                             // src is now empty
@@ -761,10 +742,10 @@ namespace Game
             //this slot is excepted when applying / removing meta gem bonus
             byte slot = itemTarget.IsEquipped() ? itemTarget.InventorySlot : ItemSlot.Null;
 
-            Item[] gems = new Item[ItemConst.MaxGemSockets];
-            ItemDynamicFieldGems[] gemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];
-            GemPropertiesRecord[] gemProperties = new GemPropertiesRecord[ItemConst.MaxGemSockets];
-            SocketedGem[] oldGemData = new SocketedGem[ItemConst.MaxGemSockets];
+            var gems = new Item[ItemConst.MaxGemSockets];
+            var gemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];
+            var gemProperties = new GemPropertiesRecord[ItemConst.MaxGemSockets];
+            var oldGemData = new SocketedGem[ItemConst.MaxGemSockets];
 
 
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
@@ -785,11 +766,11 @@ namespace Game
             }
 
             // Find first prismatic socket
-            uint firstPrismatic = 0;
+            var firstPrismatic = 0;
             while (firstPrismatic < ItemConst.MaxGemSockets && itemTarget.GetSocketColor(firstPrismatic) != 0)
                 ++firstPrismatic;
 
-            for (uint i = 0; i < ItemConst.MaxGemSockets; ++i)                //check for hack maybe
+            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)                //check for hack maybe
             {
                 if (gemProperties[i] == null)
                     continue;
@@ -887,7 +868,7 @@ namespace Game
                 // for equipped item check all equipment for duplicate equipped gems
                 if (itemTarget.IsEquipped())
                 {
-                    InventoryResult res = GetPlayer().CanEquipUniqueItem(gems[i], slot, (uint)Math.Max(limit_newcount, 0));
+                    InventoryResult res = GetPlayer().CanEquipUniqueItem(gems[i], slot, Math.Max(limit_newcount, 0));
                     if (res != 0)
                     {
                         GetPlayer().SendEquipError(res, itemTarget);
@@ -901,41 +882,26 @@ namespace Game
 
             //if a meta gem is being equipped, all information has to be written to the item before testing if the conditions for the gem are met
 
-            //remove ALL mods - gem can change item level
-            if (itemTarget.IsEquipped())
-                _player._ApplyItemMods(itemTarget, itemTarget.InventorySlot, false);
+            //remove ALL enchants
+            for (EnchantmentSlot enchanmentSlot = EnchantmentSlot.EnhancementSocket; enchanmentSlot < (EnchantmentSlot.EnhancementSocket + ItemConst.MaxGemSockets); ++enchanmentSlot)
+                _player.ApplyEnchantment(itemTarget, enchanmentSlot, false);
 
             for (ushort i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
                 if (gems[i] != null)
                 {
-                    int gemScalingLevel = _player.GetLevel();
-                    int fixedLevel = gems[i].GetModifier(ItemModifier.TimewalkerLevel);
-                    if (fixedLevel != 0)
-                        gemScalingLevel = fixedLevel;
-
-                    itemTarget.SetGem(i, gemData[i], gemScalingLevel);
+                    itemTarget.SetGem(i, gemData[i]);
 
                     if (gemProperties[i] != null && gemProperties[i].EnchantId != 0)
-                        itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocket1 + i, gemProperties[i].EnchantId, 0, 0, GetPlayer().GetGUID());
+                        itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocket + i, gemProperties[i].EnchantId, 0, 0, GetPlayer().GetGUID());
 
-                    uint gemCount = 1;
+                    var gemCount = 1;
                     GetPlayer().DestroyItemCount(gems[i], ref gemCount, true);
                 }
             }
 
-            if (itemTarget.IsEquipped())
-                _player._ApplyItemMods(itemTarget, itemTarget.InventorySlot, true);
-
-            Item childItem = _player.GetChildItemByGuid(itemTarget.GetChildItem());
-            if (childItem != null)
-            {
-                if (childItem.IsEquipped())
-                    _player._ApplyItemMods(childItem, childItem.InventorySlot, false);
-                childItem.CopyArtifactDataFromParent(itemTarget);
-                if (childItem.IsEquipped())
-                    _player._ApplyItemMods(childItem, childItem.InventorySlot, true);
-            }
+            for (EnchantmentSlot enchanmentSlot = EnchantmentSlot.EnhancementSocket; enchanmentSlot < (EnchantmentSlot.EnhancementSocket + ItemConst.MaxGemSockets); ++enchanmentSlot)
+                _player.ApplyEnchantment(itemTarget, enchanmentSlot, true);           
 
             bool SocketBonusToBeActivated = itemTarget.GemsFitSockets();//current socketbonus state
             if (SocketBonusActivated ^ SocketBonusToBeActivated)     //if there was a change...

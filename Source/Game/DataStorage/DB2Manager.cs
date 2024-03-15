@@ -819,74 +819,6 @@ namespace Game.DataStorage
             return false;
         }
 
-        public List<ArtifactPowerRecord> GetArtifactPowers(byte artifactId)
-        {
-            return _artifactPowers.LookupByKey(artifactId);
-        }
-
-        public List<int> GetArtifactPowerLinks(int artifactPowerId)
-        {
-            return _artifactPowerLinks.LookupByKey(artifactPowerId);
-        }
-
-        public ArtifactPowerRankRecord GetArtifactPowerRank(int artifactPowerId, byte rank)
-        {
-            return _artifactPowerRanks.LookupByKey(Tuple.Create(artifactPowerId, rank));
-        }
-
-        public AzeriteEmpoweredItemRecord GetAzeriteEmpoweredItem(int itemId)
-        {
-            return _azeriteEmpoweredItems.LookupByKey(itemId);
-        }
-
-        public bool IsAzeriteItem(int itemId)
-        {
-            return AzeriteItemStorage.Any(pair => pair.Value.ItemID == itemId);
-        }
-
-        public AzeriteEssencePowerRecord GetAzeriteEssencePower(int azeriteEssenceId, uint rank)
-        {
-            return _azeriteEssencePowersByIdAndRank.LookupByKey((azeriteEssenceId, rank));
-        }
-
-        public List<AzeriteItemMilestonePowerRecord> GetAzeriteItemMilestonePowers()
-        {
-            return _azeriteItemMilestonePowers;
-        }
-
-        public AzeriteItemMilestonePowerRecord GetAzeriteItemMilestonePower(int slot)
-        {
-            //ASSERT(slot < MAX_AZERITE_ESSENCE_SLOT, "Slot %u must be lower than MAX_AZERITE_ESSENCE_SLOT (%u)", uint32(slot), MAX_AZERITE_ESSENCE_SLOT);
-            return _azeriteItemMilestonePowerByEssenceSlot[slot];
-        }
-
-        public List<AzeritePowerSetMemberRecord> GetAzeritePowers(int itemId)
-        {
-            AzeriteEmpoweredItemRecord azeriteEmpoweredItem = GetAzeriteEmpoweredItem(itemId);
-            if (azeriteEmpoweredItem != null)
-                return _azeritePowers.LookupByKey(azeriteEmpoweredItem.AzeritePowerSetID);
-
-            return null;
-        }
-
-        public int GetRequiredAzeriteLevelForAzeritePowerTier(int azeriteUnlockSetId, ItemContext context, uint tier)
-        {
-            //ASSERT(tier < MAX_AZERITE_EMPOWERED_TIER);
-            var levels = _azeriteTierUnlockLevels.LookupByKey((azeriteUnlockSetId, context));
-            if (levels != null)
-                return levels[tier];
-
-            AzeriteTierUnlockSetRecord azeriteTierUnlockSet = AzeriteTierUnlockSetStorage.LookupByKey(azeriteUnlockSetId);
-            if (azeriteTierUnlockSet != null && azeriteTierUnlockSet.HasAnyFlag(AzeriteTierUnlockSetFlags.Default))
-            {
-                levels = _azeriteTierUnlockLevels.LookupByKey((azeriteUnlockSetId, ItemContext.None));
-                if (levels != null)
-                    return levels[tier];
-            }
-
-            return AzeriteLevelInfoStorage.GetNumRows();
-        }
-
         public string GetBroadcastTextValue(BroadcastTextRecord broadcastText, Locale locale = Locale.enUS, Gender gender = Gender.Male, bool forceGender = false)
         {
             if ((gender == Gender.Female || gender == Gender.None) && (forceGender || broadcastText.Text1.HasString(SharedConst.DefaultLocale)))
@@ -2124,15 +2056,6 @@ namespace Game.DataStorage
         MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[] _hotfixOptionalData = new MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[(int)Locale.Total];
 
         MultiMap<int, int> _areaGroupMembers = new();
-        MultiMap<int, ArtifactPowerRecord> _artifactPowers = new();
-        MultiMap<int, int> _artifactPowerLinks = new();
-        Dictionary<Tuple<int, byte>, ArtifactPowerRankRecord> _artifactPowerRanks = new();
-        Dictionary<int, AzeriteEmpoweredItemRecord> _azeriteEmpoweredItems = new();
-        Dictionary<(int azeriteEssenceId, uint rank), AzeriteEssencePowerRecord> _azeriteEssencePowersByIdAndRank = new();
-        List<AzeriteItemMilestonePowerRecord> _azeriteItemMilestonePowers = new();
-        AzeriteItemMilestonePowerRecord[] _azeriteItemMilestonePowerByEssenceSlot = new AzeriteItemMilestonePowerRecord[SharedConst.MaxAzeriteEssenceSlot];
-        MultiMap<int, AzeritePowerSetMemberRecord> _azeritePowers = new();
-        Dictionary<(int azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new();
         Dictionary<(int broadcastTextId, CascLocaleBit cascLocaleBit), int> _broadcastTextDurations = new();
         ChrClassUIDisplayRecord[] _uiDisplayByClass = new ChrClassUIDisplayRecord[(int)Class.Max];
         int[][] _powersByClass = new int[(int)Class.Max][];

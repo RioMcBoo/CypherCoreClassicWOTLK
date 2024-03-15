@@ -3682,58 +3682,6 @@ namespace Scripts.Spells.Items
         uint _spellId;
     }
 
-    [Script]
-    class spell_item_artifical_stamina : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return spellInfo.GetEffects().Count > 1;
-        }
-
-        public override bool Load()
-        {
-            return GetOwner().IsTypeId(TypeId.Player);
-        }
-
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
-        {
-            Item artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
-            if (artifact)
-                amount = (int)(GetEffectInfo(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100);
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModTotalStatPercentage));
-        }
-    }
-
-    [Script]
-    class spell_item_artifical_damage : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return spellInfo.GetEffects().Count > 1;
-        }
-
-        public override bool Load()
-        {
-            return GetOwner().IsTypeId(TypeId.Player);
-        }
-
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
-        {
-            Item artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
-            if (artifact)
-                amount = (int)(GetSpellInfo().GetEffect(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100);
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModDamagePercentDone));
-        }
-    }
-
     [Script] // 28200 - Ascendance
     class spell_item_talisman_of_ascendance : AuraScript
     {

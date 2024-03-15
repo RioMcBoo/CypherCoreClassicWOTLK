@@ -4166,10 +4166,10 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).GenericVictimTargets.Add(spellLogEffectGenericVictimParams);
         }
 
-        void ExecuteLogEffectCreateItem(SpellEffectName effect, uint entry)
+        void ExecuteLogEffectCreateItem(SpellEffectName effect, int entry)
         {
             SpellLogEffectTradeSkillItemParams spellLogEffectTradeSkillItemParams;
-            spellLogEffectTradeSkillItemParams.ItemID = (int)entry;
+            spellLogEffectTradeSkillItemParams.ItemID = entry;
 
             GetExecuteLogEffect(effect).TradeSkillTargets.Add(spellLogEffectTradeSkillItemParams);
         }
@@ -5518,7 +5518,7 @@ namespace Game.Spells
                         if (talent == null)
                             return SpellCastResult.DontReport;
 
-                        if (playerCaster.GetSpellHistory().HasCooldown((uint)talent.SpellID))
+                        if (playerCaster.GetSpellHistory().HasCooldown(talent.SpellID))
                         {
                             param1 = talent.SpellID;
                             return SpellCastResult.CantUntalent;
@@ -5533,29 +5533,6 @@ namespace Game.Spells
                         if (!m_caster.ToPlayer().GetSession().GetCollectionMgr().HasHeirloom(m_misc.ItemId))
                             return SpellCastResult.BadTargets;
 
-                        break;
-                    }
-                    case SpellEffectName.GiveArtifactPower:
-                    case SpellEffectName.GiveArtifactPowerNoBonus:
-                    {
-                        Player playerCaster = m_caster.ToPlayer();
-                        if (playerCaster == null)
-                            return SpellCastResult.BadTargets;
-
-                        Aura artifactAura = playerCaster.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
-                        if (artifactAura == null)
-                            return SpellCastResult.NoArtifactEquipped;
-
-                        Item artifact = playerCaster.ToPlayer().GetItemByGuid(artifactAura.GetCastItemGUID());
-                        if (artifact == null)
-                            return SpellCastResult.NoArtifactEquipped;
-
-                        if (spellEffectInfo.Effect == SpellEffectName.GiveArtifactPower)
-                        {
-                            ArtifactRecord artifactEntry = CliDB.ArtifactStorage.LookupByKey(artifact.GetTemplate().GetArtifactID());
-                            if (artifactEntry == null || artifactEntry.ArtifactCategoryID != spellEffectInfo.MiscValue)
-                                return SpellCastResult.WrongArtifactEquipped;
-                        }
                         break;
                     }
                     case SpellEffectName.ChangeBattlepetQuality:
@@ -5588,7 +5565,7 @@ namespace Game.Spells
                                         if (battlePet.PacketInfo.Level >= SharedConst.MaxBattlePetLevel)
                                             return SpellCastResult.GrantPetLevelFail;
 
-                                    if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.CantBattle))
+                                    if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.CantBattle))
                                         return SpellCastResult.BadTargets;
                                 }
                             }
@@ -5600,9 +5577,9 @@ namespace Game.Spells
                 }
 
                 if (spellEffectInfo.IsAura())
-                    approximateAuraEffectMask |= 1u << (int)spellEffectInfo.EffectIndex;
+                    approximateAuraEffectMask |= 1u << spellEffectInfo.EffectIndex;
                 else if (spellEffectInfo.IsEffect())
-                    nonAuraEffectMask |= 1u << (int)spellEffectInfo.EffectIndex;
+                    nonAuraEffectMask |= 1u << spellEffectInfo.EffectIndex;
             }
 
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
@@ -8097,13 +8074,13 @@ namespace Game.Spells
     {
         // Alternate names for this value 
         [FieldOffset(0)]
-        public uint TalentId;
+        public int TalentId;
 
         [FieldOffset(0)]
-        public uint SpellId;
+        public int SpellId;
 
         [FieldOffset(0)]
-        public uint SpecializationId;
+        public int SpecializationId;
 
         // SPELL_EFFECT_SET_FOLLOWER_QUALITY
         // SPELL_EFFECT_INCREASE_FOLLOWER_ITEM_LEVEL
@@ -8111,32 +8088,32 @@ namespace Game.Spells
         // SPELL_EFFECT_RANDOMIZE_FOLLOWER_ABILITIES
         // SPELL_EFFECT_LEARN_FOLLOWER_ABILITY
         [FieldOffset(0)]
-        public uint FollowerId;
+        public int FollowerId;
 
         [FieldOffset(4)]
-        public uint FollowerAbilityId;   // only SPELL_EFFECT_LEARN_FOLLOWER_ABILITY
+        public int FollowerAbilityId;   // only SPELL_EFFECT_LEARN_FOLLOWER_ABILITY
 
         // SPELL_EFFECT_FINISH_GARRISON_MISSION
         [FieldOffset(0)]
-        public uint GarrMissionId;
+        public int GarrMissionId;
 
         // SPELL_EFFECT_UPGRADE_HEIRLOOM
         [FieldOffset(0)]
-        public uint ItemId;
+        public int ItemId;
 
         // SPELL_EFFECT_APPLY_GLYPH
         [FieldOffset(0)]
         public int GlyphSlot;
 
         [FieldOffset(0)]
-        public uint Data0;
+        public int Data0;
 
         [FieldOffset(4)]
-        public uint Data1;
+        public int Data1;
 
-        public uint[] GetRawData()
+        public int[] GetRawData()
         {
-            return new uint[] { Data0, Data1 };
+            return [ Data0, Data1 ];
         }
     }
 

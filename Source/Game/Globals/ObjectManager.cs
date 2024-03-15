@@ -5479,16 +5479,6 @@ namespace Game
                             $"Table `(gameevent)npcvendor` has `maxcount`=0 for item {vItem.item} of vendor (Entry: {vendorentry}) but `incrtime`<>0, ignore.");
                     return false;
                 }
-
-                foreach (int bonusListId in vItem.BonusListIDs)
-                {
-                    if (ItemBonusMgr.GetItemBonuses(bonusListId).Empty())
-                    {
-                        Log.outError(LogFilter.Sql,
-                            $"Table `(game_event_)npc_vendor` have Item (Entry: {vItem.item}) with invalid bonus {bonusListId} for vendor ({vendorentry}), ignore.");
-                        return false;
-                    }
-                }
             }
 
             VendorItemData vItems = GetNpcVendorItemList(vendorentry);
@@ -12618,7 +12608,7 @@ namespace Game
     {
         public int TitleId;
         public int PackageId;
-        public int SkillLineId;
+        public SkillType SkillLineId;
         public int SkillPointCount;
         public int ArenaPointCount;
         public int HonorPointCount;

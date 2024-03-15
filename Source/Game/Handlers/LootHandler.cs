@@ -406,9 +406,9 @@ namespace Game
                 return;
             }
 
-            foreach (LootRequest req in masterLootItem.Loot)
+            foreach (var req in masterLootItem.Loot)
             {
-                Loot loot = _player.GetAELootView().LookupByKey(req.Object);
+                var loot = _player.GetAELootView().LookupByKey(req.Object);
 
                 if (loot == null || loot.GetLootMethod() != LootMethod.MasterLoot)
                     return;
@@ -432,7 +432,7 @@ namespace Game
                     return;
                 }
 
-                LootItem item = loot.items[req.LootListID];
+                var item = loot.items[req.LootListID];
 
                 InventoryResult msg = target.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item.itemid, item.count);
                 if (!item.HasAllowedLooter(target.GetGUID()))
@@ -450,7 +450,7 @@ namespace Game
                 }
 
                 // now move item from loot to target inventory
-                Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomPropertyId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
+                Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomProperties, item.GetAllowedLooters(), item.context);
                 aeResult.Add(newitem, item.count, loot.loot_type, loot.GetDungeonEncounterId());
 
                 // mark as looted
@@ -465,7 +465,7 @@ namespace Game
             {
                 target.SendNewItem(resultValue.item, resultValue.count, false, false, true);
                 target.UpdateCriteria(CriteriaType.LootItem, resultValue.item.GetEntry(), resultValue.count);
-                target.UpdateCriteria(CriteriaType.GetLootByType, resultValue.item.GetEntry(), resultValue.count, (ulong)resultValue.lootType);
+                target.UpdateCriteria(CriteriaType.GetLootByType, resultValue.item.GetEntry(), resultValue.count, (long)resultValue.lootType);
                 target.UpdateCriteria(CriteriaType.LootAnyItem, resultValue.item.GetEntry(), resultValue.count);
             }
         }

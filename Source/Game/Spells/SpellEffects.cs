@@ -927,14 +927,14 @@ namespace Game.Spells
             }
         }
 
-        public void DoCreateItem(uint itemId, ItemContext context = 0, List<int> bonusListIds = null)
+        public void DoCreateItem(int itemId, ItemContext context = 0)
         {
             if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
                 return;
 
             Player player = unitTarget.ToPlayer();
 
-            uint newitemid = itemId;
+            var newitemid = itemId;
             ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(newitemid);
             if (pProto == null)
             {
@@ -942,7 +942,7 @@ namespace Game.Spells
                 return;
             }
 
-            uint num_to_add = (uint)damage;
+            var num_to_add = damage;
 
             if (num_to_add < 1)
                 num_to_add = 1;
@@ -954,7 +954,7 @@ namespace Game.Spells
             // the Chance of getting a perfect result
             float perfectCreateChance = 0.0f;
             // the resulting perfect item if successful
-            uint perfectItemType = itemId;
+            var perfectItemType = itemId;
             // get perfection capability and Chance
             if (SkillPerfectItems.CanCreatePerfectItem(player, m_spellInfo.Id, ref perfectCreateChance, ref perfectItemType))
                 if (RandomHelper.randChance(perfectCreateChance)) // if the roll succeeds...
@@ -975,11 +975,10 @@ namespace Game.Spells
             }
 
             // really will be created more items
-            num_to_add *= (uint)items_count;
+            num_to_add *= items_count;
 
             // can the player store the new item?
-            uint no_space;
-            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, pProto, num_to_add, out no_space);
+            InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, pProto, num_to_add, out int no_space);
             if (msg != InventoryResult.Ok)
             {
                 // convert to possible store amount
@@ -996,7 +995,7 @@ namespace Game.Spells
             if (num_to_add != 0)
             {
                 // create the new item and store it
-                Item pItem = player.StoreNewItem(dest, newitemid, true, ItemEnchantmentManager.GenerateItemRandomPropertyId(newitemid), null, context, bonusListIds);
+                Item pItem = player.StoreNewItem(dest, newitemid, true, ItemEnchantmentManager.GenerateRandomProperties(newitemid), null, context);
 
                 // was it successful? return error if not
                 if (pItem == null)
@@ -5221,10 +5220,7 @@ namespace Game.Spells
             if (collectionMgr == null)
                 return;
 
-            List<int> bonusList = new();
-            bonusList.Add((int)collectionMgr.GetHeirloomBonus(m_misc.Data0));
-
-            DoCreateItem(m_misc.Data0, ItemContext.None, bonusList);
+            DoCreateItem(m_misc.Data0, ItemContext.None);
             ExecuteLogEffectCreateItem(effectInfo.Effect, m_misc.Data0);
         }
 
@@ -5436,43 +5432,6 @@ namespace Game.Spells
                 return;
 
             unitTarget.ToPlayer().UpdateAreaDependentAuras(unitTarget.GetAreaId());
-        }
-
-        [SpellEffectHandler(SpellEffectName.GiveArtifactPower)]
-        void EffectGiveArtifactPower()
-        {
-            if (effectHandleMode != SpellEffectHandleMode.LaunchTarget)
-                return;
-
-            Player playerCaster = m_caster.ToPlayer();
-            if (playerCaster == null)
-                return;
-
-            Aura artifactAura = playerCaster.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
-            if (artifactAura != null)
-            {
-                Item artifact = playerCaster.GetItemByGuid(artifactAura.GetCastItemGUID());
-                if (artifact != null)
-                    artifact.GiveArtifactXp((ulong)damage, m_CastItem, (ArtifactCategory)effectInfo.MiscValue);
-            }
-        }
-
-        [SpellEffectHandler(SpellEffectName.GiveArtifactPowerNoBonus)]
-        void EffectGiveArtifactPowerNoBonus()
-        {
-            if (effectHandleMode != SpellEffectHandleMode.LaunchTarget)
-                return;
-
-            if (unitTarget == null || !m_caster.IsTypeId(TypeId.Player))
-                return;
-
-            Aura artifactAura = unitTarget.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
-            if (artifactAura != null)
-            {
-                Item artifact = unitTarget.ToPlayer().GetItemByGuid(artifactAura.GetCastItemGUID());
-                if (artifact != null)
-                    artifact.GiveArtifactXp((ulong)damage, m_CastItem, 0);
-            }
         }
 
         [SpellEffectHandler(SpellEffectName.PlaySceneScriptPackage)]

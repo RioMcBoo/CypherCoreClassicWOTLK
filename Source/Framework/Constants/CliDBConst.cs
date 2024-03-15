@@ -955,38 +955,6 @@ namespace Framework.Constants
         ClientEnforcesMount = 0x10
     }
 
-    public enum ArtifactCategory
-    {
-        Primary = 1,
-        Fishing = 2
-    }
-
-    [Flags]
-    public enum ArtifactPowerFlag : byte
-    {
-        Gold = 0x01,
-        NoLinkRequired = 0x02,
-        Final = 0x04,
-        ScalesWithNumPowers = 0x08,
-        DontCountFirstBonusRank = 0x10,
-        MaxRankWithTier = 0x20,
-
-        First = NoLinkRequired | DontCountFirstBonusRank,
-    }
-
-    public enum AzeriteItemMilestoneType
-    {
-        MajorEssence = 0,
-        MinorEssence = 1,
-        BonusStamina = 2
-    }
-
-    [Flags]
-    public enum AzeriteTierUnlockSetFlags : int
-    {
-        Default = 0x01
-    }
-
     /// <summary>
     /// bracketId for level ranges
     /// </summary>
