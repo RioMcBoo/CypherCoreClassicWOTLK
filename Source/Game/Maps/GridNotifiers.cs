@@ -2398,7 +2398,7 @@ namespace Game.Maps
     // Success at unit in range, range update for next check (this can be use with CreatureLastSearcher to find nearest creature)
     class NearestCreatureEntryWithLiveStateInObjectRangeCheck : ICheck<Creature>
     {
-        public NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject obj, uint entry, bool alive, float range)
+        public NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject obj, int entry, bool alive, float range)
         {
             i_obj = obj;
             i_entry = entry;
@@ -2417,7 +2417,7 @@ namespace Game.Maps
         }
 
         WorldObject i_obj;
-        uint i_entry;
+        int i_entry;
         bool i_alive;
         float i_range;
     }

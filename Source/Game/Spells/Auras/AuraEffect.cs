@@ -4518,7 +4518,7 @@ namespace Game.Spells
             int noSpaceForCount;
             int count = GetAmount();
 
-            InventoryResult msg = plCaster.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos, int)> dest, itemTemplate, count, out noSpaceForCount);
+            InventoryResult msg = plCaster.CanStoreNewItem(ItemPos.Undefined, out var dest, itemTemplate, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)
             {
                 count -= noSpaceForCount;
@@ -4527,7 +4527,7 @@ namespace Game.Spells
                     return;
             }
 
-            Item newitem = plCaster.StoreNewItem(dest, GetSpellEffectInfo().ItemType, true, new ItemRandomEnchantmentId());
+            Item newitem = plCaster.StoreNewItem(dest, GetSpellEffectInfo().ItemType, true);
             if (newitem == null)
             {
                 plCaster.SendEquipError(InventoryResult.ItemNotFound);

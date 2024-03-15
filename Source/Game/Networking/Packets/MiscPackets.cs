@@ -1045,11 +1045,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Unit);
-            _worldPacket.WriteUInt16(AnimKitID);
+            _worldPacket.WriteUInt16((ushort)AnimKitID);
         }
 
         public ObjectGuid Unit;
-        public ushort AnimKitID;
+        public int AnimKitID;
     }
 
     class SetAIAnimKit : ServerPacket
@@ -1059,11 +1059,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Unit);
-            _worldPacket.WriteUInt16(AnimKitID);
+            _worldPacket.WriteUInt16((ushort)AnimKitID);
         }
 
         public ObjectGuid Unit;
-        public ushort AnimKitID;
+        public int AnimKitID;
     }
 
     class SetMovementAnimKit : ServerPacket

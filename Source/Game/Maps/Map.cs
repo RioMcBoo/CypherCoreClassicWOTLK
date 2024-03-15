@@ -4019,7 +4019,7 @@ namespace Game.Maps
                 return;
 
             // Process overdue queued scripts
-            KeyValuePair<long, ScriptAction> iter = m_scriptSchedule.First();
+            var iter = m_scriptSchedule.First();
             while (!m_scriptSchedule.Empty() && (iter.Key <= GameTime.GetGameTime()))
             {
                 ScriptAction step = iter.Value;
@@ -4052,8 +4052,8 @@ namespace Game.Maps
                             source = GetCorpse(step.sourceGUID);
                             break;
                         default:
-                            Log.outError(LogFilter.Scripts, "{0} source with unsupported high guid (GUID: {1}, high guid: {2}).",
-                                step.script.GetDebugInfo(), step.sourceGUID, step.sourceGUID.ToString());
+                            Log.outError(LogFilter.Scripts, 
+                                $"{step.script.GetDebugInfo()} source with unsupported high guid (GUID: {step.sourceGUID}, high guid: {step.sourceGUID.GetHighValue()}).");
                             break;
                     }
                 }
@@ -4081,7 +4081,8 @@ namespace Game.Maps
                             target = GetCorpse(step.targetGUID);
                             break;
                         default:
-                            Log.outError(LogFilter.Scripts, "{0} target with unsupported high guid {1}.", step.script.GetDebugInfo(), step.targetGUID.ToString());
+                            Log.outError(LogFilter.Scripts, 
+                                $"{step.script.GetDebugInfo()} target with unsupported high guid {step.targetGUID.GetHighValue()}.");
                             break;
                     }
                 }
@@ -4092,8 +4093,8 @@ namespace Game.Maps
                     {
                         if (step.script.Talk.ChatType > ChatMsg.Whisper && step.script.Talk.ChatType != ChatMsg.RaidBossWhisper)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} invalid chat Type ({1}) specified, skipping.",
-                                step.script.GetDebugInfo(), step.script.Talk.ChatType);
+                            Log.outError(LogFilter.Scripts,
+                                $"{step.script.GetDebugInfo()} invalid chat Type ({step.script.Talk.ChatType}) specified, skipping.");
                             break;
                         }
 
@@ -4107,30 +4108,32 @@ namespace Game.Maps
                             Unit sourceUnit = source.ToUnit();
                             if (sourceUnit == null)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} source object ({1}) is not an unit, skipping.", step.script.GetDebugInfo(), source.GetGUID().ToString());
+                                Log.outError(LogFilter.Scripts,
+                                    $"{step.script.GetDebugInfo()} source object ({source.GetGUID()}) is not an unit, skipping.");
                                 break;
                             }
 
                             switch (step.script.Talk.ChatType)
                             {
                                 case ChatMsg.Say:
-                                    sourceUnit.Say((uint)step.script.Talk.TextID, target);
+                                    sourceUnit.Say(step.script.Talk.TextID, target);
                                     break;
                                 case ChatMsg.Yell:
-                                    sourceUnit.Yell((uint)step.script.Talk.TextID, target);
+                                    sourceUnit.Yell(step.script.Talk.TextID, target);
                                     break;
                                 case ChatMsg.Emote:
                                 case ChatMsg.RaidBossEmote:
-                                    sourceUnit.TextEmote((uint)step.script.Talk.TextID, target, step.script.Talk.ChatType == ChatMsg.RaidBossEmote);
+                                    sourceUnit.TextEmote(step.script.Talk.TextID, target, step.script.Talk.ChatType == ChatMsg.RaidBossEmote);
                                     break;
                                 case ChatMsg.Whisper:
                                 case ChatMsg.RaidBossWhisper:
                                 {
                                     Player receiver = target != null ? target.ToPlayer() : null;
                                     if (receiver == null)
-                                        Log.outError(LogFilter.Scripts, "{0} attempt to whisper to non-player unit, skipping.", step.script.GetDebugInfo());
+                                        Log.outError(LogFilter.Scripts,
+                                            $"{step.script.GetDebugInfo()} attempt to whisper to non-player unit, skipping.");
                                     else
-                                        sourceUnit.Whisper((uint)step.script.Talk.TextID, receiver, step.script.Talk.ChatType == ChatMsg.RaidBossWhisper);
+                                        sourceUnit.Whisper(step.script.Talk.TextID, receiver, step.script.Talk.ChatType == ChatMsg.RaidBossWhisper);
                                     break;
                                 }
                                 default:
@@ -4197,12 +4200,12 @@ namespace Game.Maps
                     {
                         if (source == null)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} source object is NULL.", step.script.GetDebugInfo());
+                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} source object is NULL.");
                             break;
                         }
                         if (target == null)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} target object is NULL.", step.script.GetDebugInfo());
+                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} target object is NULL.");
                             break;
                         }
 
@@ -4213,8 +4216,9 @@ namespace Game.Maps
                         {
                             if (!source.IsTypeId(TypeId.Unit) && !source.IsTypeId(TypeId.GameObject) && !source.IsTypeId(TypeId.Player))
                             {
-                                Log.outError(LogFilter.Scripts, "{0} source is not unit, gameobject or player (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.",
-                                    step.script.GetDebugInfo(), source.GetTypeId(), source.GetEntry(), source.GetGUID().ToString());
+                                Log.outError(LogFilter.Scripts, 
+                                    $"{step.script.GetDebugInfo()} source is not unit, gameobject or player (TypeId: {source.GetTypeId()}, Entry: {source.GetEntry()}, " +
+                                    $"GUID: {source.GetGUID()}), skipping.");
                                 break;
                             }
                             worldObject = source;
@@ -4227,15 +4231,17 @@ namespace Game.Maps
                                 if (!target.IsTypeId(TypeId.Unit) && !target.IsTypeId(TypeId.GameObject) && !target.IsTypeId(TypeId.Player))
                                 {
                                     Log.outError(LogFilter.Scripts,
-                                        "{0} target is not unit, gameobject or player (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.", step.script.GetDebugInfo(), target.GetTypeId(), target.GetEntry(), target.GetGUID().ToString());
+                                        $"{step.script.GetDebugInfo()} target is not unit, gameobject or player (TypeId: {target.GetTypeId()}, Entry: {target.GetEntry()}, " +
+                                        $"GUID: {target.GetGUID()}), skipping.");
                                     break;
                                 }
                                 worldObject = target;
                             }
                             else
                             {
-                                Log.outError(LogFilter.Scripts, "{0} neither source nor target is player (Entry: {0}, GUID: {1}; target: Entry: {2}, GUID: {3}), skipping.",
-                                    step.script.GetDebugInfo(), source.GetEntry(), source.GetGUID().ToString(), target.GetEntry(), target.GetGUID().ToString());
+                                Log.outError(LogFilter.Scripts, 
+                                    $"{step.script.GetDebugInfo()} neither source nor target is player (Entry: {source.GetEntry()}, GUID: {source.GetGUID()}; " +
+                                    $"target: Entry: {target.GetEntry()}, GUID: {target.GetGUID()}), skipping.");
                                 break;
                             }
                         }
@@ -4268,7 +4274,7 @@ namespace Game.Maps
                     {
                         if (step.script.RespawnGameObject.GOGuid == 0)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} gameobject guid (datalong) is not specified.", step.script.GetDebugInfo());
+                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} gameobject guid (datalong) is not specified.");
                             break;
                         }
 
@@ -4279,16 +4285,18 @@ namespace Game.Maps
                             GameObject pGO = _FindGameObject(pSummoner, step.script.RespawnGameObject.GOGuid);
                             if (pGO == null)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} gameobject was not found (guid: {1}).", step.script.GetDebugInfo(), step.script.RespawnGameObject.GOGuid);
+                                Log.outError(LogFilter.Scripts, 
+                                    $"{step.script.GetDebugInfo()} gameobject was not found (guid: {step.script.RespawnGameObject.GOGuid}).");
                                 break;
                             }
 
                             if (pGO.GetGoType() == GameObjectTypes.FishingNode ||
-                                pGO.GetGoType() == GameObjectTypes.Door || pGO.GetGoType() == GameObjectTypes.Button ||
+                                pGO.GetGoType() == GameObjectTypes.Door || 
+                                pGO.GetGoType() == GameObjectTypes.Button ||
                                 pGO.GetGoType() == GameObjectTypes.Trap)
                             {
                                 Log.outError(LogFilter.Scripts,
-                                    "{0} can not be used with gameobject of Type {1} (guid: {2}).", step.script.GetDebugInfo(), pGO.GetGoType(), step.script.RespawnGameObject.GOGuid);
+                                    $"{step.script.GetDebugInfo()} can not be used with gameobject of Type {pGO.GetGoType()} (guid: {step.script.RespawnGameObject.GOGuid}).");
                                 break;
                             }
 
@@ -4311,7 +4319,7 @@ namespace Game.Maps
                         if (pSummoner != null)
                         {
                             if (step.script.TempSummonCreature.CreatureEntry == 0)
-                                Log.outError(LogFilter.Scripts, "{0} creature entry (datalong) is not specified.", step.script.GetDebugInfo());
+                                Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} creature entry (datalong) is not specified.");
                             else
                             {
                                 float x = step.script.TempSummonCreature.PosX;
@@ -4320,7 +4328,7 @@ namespace Game.Maps
                                 float o = step.script.TempSummonCreature.Orientation;
 
                                 if (pSummoner.SummonCreature(step.script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMilliseconds(step.script.TempSummonCreature.DespawnDelay)) == null)
-                                    Log.outError(LogFilter.Scripts, "{0} creature was not spawned (entry: {1}).", step.script.GetDebugInfo(), step.script.TempSummonCreature.CreatureEntry);
+                                    Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} creature was not spawned (entry: {step.script.TempSummonCreature.CreatureEntry}).");
                             }
                         }
                         break;
@@ -4339,15 +4347,15 @@ namespace Game.Maps
                             // Target must be GameObject.
                             if (target == null)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} target object is NULL.", step.script.GetDebugInfo());
+                                Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} target object is NULL.");
                                 break;
                             }
 
                             if (!target.IsTypeId(TypeId.GameObject))
                             {
                                 Log.outError(LogFilter.Scripts,
-                                    "{0} target object is not gameobject (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.", step.script.GetDebugInfo(), target.GetTypeId(), target.GetEntry(),
-                                    target.GetGUID().ToString());
+                                    $"{step.script.GetDebugInfo()} target object is not gameobject (TypeId: {target.GetTypeId()}, Entry: {target.GetEntry()}, " +
+                                    $"GUID: {target.GetGUID()}), skipping.");
                                 break;
                             }
                             GameObject pGO = target.ToGameObject();
@@ -4369,7 +4377,7 @@ namespace Game.Maps
                     {
                         if (source == null && target == null)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} source and target objects are NULL.", step.script.GetDebugInfo());
+                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} source and target objects are NULL.");
                             break;
                         }
 
@@ -4396,19 +4404,19 @@ namespace Game.Maps
                                 break;
                             case eScriptFlags.CastspellSearchCreature: // source . creature with entry
                                 uSource = source;
-                                uTarget = uSource?.FindNearestCreature((uint)Math.Abs(step.script.CastSpell.CreatureEntry), step.script.CastSpell.SearchRadius);
+                                uTarget = uSource?.FindNearestCreature(Math.Abs(step.script.CastSpell.CreatureEntry), step.script.CastSpell.SearchRadius);
                                 break;
                         }
 
                         if (uSource == null)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} no source worldobject found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
+                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} no source worldobject found for spell {step.script.CastSpell.SpellID}");
                             break;
                         }
 
                         if (uTarget == null)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} no target worldobject found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
+                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} no target worldobject found for spell {step.script.CastSpell.SpellID}");
                             break;
                         }
 
@@ -4447,10 +4455,10 @@ namespace Game.Maps
                         Player pReceiver = _GetScriptPlayerSourceOrTarget(source, target, step.script);
                         if (pReceiver != null)
                         {
-                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
+                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemPos.Undefined, out var dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
                             if (msg == InventoryResult.Ok)
                             {
-                                Item item = pReceiver.StoreNewItem(dest, step.script.CreateItem.ItemEntry, true, new ItemRandomEnchantmentId());
+                                Item item = pReceiver.StoreNewItem(dest, step.script.CreateItem.ItemEntry, true);
                                 if (item != null)
                                     pReceiver.SendNewItem(item, step.script.CreateItem.Amount, false, true);
                             }
@@ -4480,7 +4488,7 @@ namespace Game.Maps
                         if (unit != null)
                         {
                             if (Global.WaypointMgr.GetPath(step.script.LoadPath.PathID) == null)
-                                Log.outError(LogFilter.Scripts, "{0} source object has an invalid path ({1}), skipping.", step.script.GetDebugInfo(), step.script.LoadPath.PathID);
+                                Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} source object has an invalid path ({step.script.LoadPath.PathID}), skipping.");
                             else
                                 unit.GetMotionMaster().MovePath(step.script.LoadPath.PathID, step.script.LoadPath.IsRepeatable != 0);
                         }
@@ -4490,12 +4498,12 @@ namespace Game.Maps
                     {
                         if (step.script.CallScript.CreatureEntry == 0)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} creature entry is not specified, skipping.", step.script.GetDebugInfo());
+                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} creature entry is not specified, skipping.");
                             break;
                         }
                         if (step.script.CallScript.ScriptID == 0)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} script id is not specified, skipping.", step.script.GetDebugInfo());
+                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} script id is not specified, skipping.");
                             break;
                         }
 
@@ -4511,7 +4519,7 @@ namespace Game.Maps
 
                         if (cTarget == null)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} target was not found (entry: {1})", step.script.GetDebugInfo(), step.script.CallScript.CreatureEntry);
+                            Log.outError(LogFilter.Scripts, $"{step.script.GetDebugInfo()} target was not found (entry: {step.script.CallScript.CreatureEntry})");
                             break;
                         }
 
@@ -4527,7 +4535,8 @@ namespace Game.Maps
                         if (cSource != null)
                         {
                             if (cSource.IsDead())
-                                Log.outError(LogFilter.Scripts, "{0} creature is already dead (Entry: {1}, GUID: {2})", step.script.GetDebugInfo(), cSource.GetEntry(), cSource.GetGUID().ToString());
+                                Log.outError(LogFilter.Scripts, 
+                                    $"{step.script.GetDebugInfo()} creature is already dead (Entry: {cSource.GetEntry()}, GUID: {cSource.GetGUID()})");
                             else
                             {
                                 cSource.SetDeathState(DeathState.JustDied);
@@ -4562,7 +4571,7 @@ namespace Game.Maps
                         // Source must be Creature.
                         Creature cSource = _GetScriptCreature(source, target != null, step.script);
                         if (cSource != null)
-                            cSource.LoadEquipment((int)step.script.Equip.EquipmentID);
+                            cSource.LoadEquipment(step.script.Equip.EquipmentID);
                         break;
                     }
                     case ScriptCommands.Model:
@@ -4606,7 +4615,7 @@ namespace Game.Maps
                                     cSource.GetMotionMaster().MoveRandom(step.script.Movement.MovementDistance);
                                     break;
                                 case MovementGeneratorType.Waypoint:
-                                    cSource.GetMotionMaster().MovePath((uint)step.script.Movement.Path, false);
+                                    cSource.GetMotionMaster().MovePath(step.script.Movement.Path, false);
                                     break;
                             }
                         }
@@ -4617,11 +4626,11 @@ namespace Game.Maps
                         // Source must be Creature.
                         Creature cSource = _GetScriptCreature(source, true, step.script);
                         if (cSource != null)
-                            cSource.PlayOneShotAnimKitId((ushort)step.script.PlayAnimKit.AnimKitID);
+                            cSource.PlayOneShotAnimKitId(step.script.PlayAnimKit.AnimKitID);
                         break;
                     }
                     default:
-                        Log.outError(LogFilter.Scripts, "Unknown script command {0}.", step.script.GetDebugInfo());
+                        Log.outError(LogFilter.Scripts, $"Unknown script command {step.script.GetDebugInfo()}.");
                         break;
                 }
 

@@ -513,60 +513,39 @@ namespace Game.Entities
 
         public void SetItemRandomProperties(ItemRandomProperties randomProperties)
         {
-            if (randomProperties.Id == 0)
+            if (randomProperties.RandomPropertiesID == 0)
                 return;
 
-            switch (randomProperties.Type)
+            if (randomProperties.RandomPropertiesID > 0)
             {
-                case ItemRandomEnchantmentType.Property:
-                    if (CliDB.ItemRandomPropertiesStorage.TryGetValue(randomProperties.Id, out ItemRandomPropertiesRecord item_prop))
+                var randomPropertiesEntry = CliDB.ItemRandomPropertiesStorage.LookupByKey(randomProperties.RandomPropertiesID);
+                if (randomPropertiesEntry != null)
+                {
+                    if (m_itemData.RandomPropertiesID != randomProperties.RandomPropertiesID)
                     {
-                        if (m_itemData.RandomPropertiesID != randomProperties.Id)
-                        {
-                            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.RandomPropertiesID), (int)randomProperties.Id);
-                            SetState(ItemUpdateState.Changed, GetOwner());
-                        }
-                        for (EnchantmentSlot i = EnchantmentSlot.PropertyStart; i <= EnchantmentSlot.PropertyEnd; ++i)
-                            SetEnchantment(i, item_prop.Enchantment[i - EnchantmentSlot.PropertyStart], 0, 0);
+                        SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.RandomPropertiesID), randomProperties.RandomPropertiesID);
+                        SetState(ItemUpdateState.Changed, GetOwner());
                     }
-                    break;
-                case ItemRandomEnchantmentType.Suffix:
-                    if (CliDB.ItemRandomSuffixStorage.TryGetValue(randomProperties.Id, out ItemRandomSuffixRecord item_suffix))
-                    {
-                        if (m_itemData.RandomPropertiesID != -randomProperties.Id || GetItemSuffixFactor() == 0)
-                        {
-                            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.RandomPropertiesID), -(int)randomProperties.Id);
-                            UpdateItemSuffixFactor();
-                            SetState(ItemUpdateState.Changed, GetOwner());
-                        }
-
-                        for (EnchantmentSlot i = EnchantmentSlot.PropertyStart; i <= EnchantmentSlot.PropertyEnd; ++i)
-                            SetEnchantment(i, item_suffix.Enchantment[i - EnchantmentSlot.PropertyStart], 0, 0);
-                    }
-                    break;
-                case ItemRandomEnchantmentType.BonusList:
-                    AddBonuses(randomProperties.Id);
-                    break;
-                default:
-                    break;
+                    for (EnchantmentSlot i = EnchantmentSlot.Property2; i < EnchantmentSlot.Property2 + 3; ++i)
+                        SetEnchantment(i, randomPropertiesEntry.Enchantment[i - EnchantmentSlot.Property2], 0, 0);
+                }
             }
-        }
-
-        public void UpdateItemSuffixFactor()
-        {
-            if (GetTemplate().GetRandomSuffix() == null)
-                return;
-
-            int suffixFactor = 0;
-            if (GetOwner() is Player owner)
-                suffixFactor = ItemEnchantmentManager.GetRandomPropertyPoints(GetItemLevel(owner), GetQuality(), GetTemplate().GetInventoryType());
             else
-                suffixFactor = ItemEnchantmentManager.GenerateEnchSuffixFactor(GetEntry());
+            {
+                var randomSuffixEntry = CliDB.ItemRandomSuffixStorage.LookupByKey(Math.Abs(randomProperties.RandomPropertiesID));
+                if (randomSuffixEntry != null)
+                {
+                    if (m_itemData.RandomPropertiesID != randomProperties.RandomPropertiesID || m_itemData.PropertySeed != 0)
+                    {
+                        SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.RandomPropertiesID), randomProperties.RandomPropertiesID);
+                        SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.PropertySeed), randomProperties.RandomPropertiesSeed);
+                        SetState(ItemUpdateState.Changed, GetOwner());
+                    }
 
-            if (GetItemSuffixFactor() == suffixFactor)
-                return;
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.PropertySeed), suffixFactor);
+                    for (EnchantmentSlot i = EnchantmentSlot.Property0; i < EnchantmentSlot.Property0 + 3; ++i)
+                        SetEnchantment(i, randomSuffixEntry.Enchantment[i - EnchantmentSlot.Property0], 0, 0);
+                }
+            }
         }
 
         public void SetState(ItemUpdateState state, Player forplayer = null)
@@ -2102,12 +2081,6 @@ namespace Game.Entities
         public bool IsConjuredConsumable() { return GetTemplate().IsConjuredConsumable(); }
         public bool IsRangedWeapon() { return GetTemplate().IsRangedWeapon(); }
         public ItemQuality GetQuality() { return _bonusData.Quality; }
-
-        public ItemModType GetItemStatType(int index)
-        {
-            Cypher.Assert(index < ItemConst.MaxStats && index > -1);
-            return _bonusData.ItemStatType[index];
-        }
 
         public SocketColor GetSocketColor(int index)
         {

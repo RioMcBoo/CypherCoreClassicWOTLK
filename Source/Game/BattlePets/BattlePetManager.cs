@@ -564,7 +564,7 @@ namespace Game.BattlePets
             if (_owner.GetPlayer().CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, SharedConst.BattlePetCageItemId, 1) != InventoryResult.Ok)
                 return;
 
-            Item item = _owner.GetPlayer().StoreNewItem(dest, SharedConst.BattlePetCageItemId, true, new ItemRandomEnchantmentId());
+            Item item = _owner.GetPlayer().StoreNewItem(dest, SharedConst.BattlePetCageItemId, true);
             if (item == null)
                 return;
 

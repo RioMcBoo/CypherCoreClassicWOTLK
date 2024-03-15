@@ -11898,14 +11898,14 @@ namespace Game
 
         public struct playsound                     // PLAYSOUND (16)
         {
-            public uint SoundID;         // datalong
+            public int SoundID;         // datalong
             public eScriptFlags Flags;           // datalong2
         }
 
         public struct createitem                   // CREATEITEM (17)
         {
             public int ItemEntry;       // datalong
-            public uint Amount;          // datalong2
+            public int Amount;          // datalong2
         }
 
         public struct despawnself                 // DESPAWNSELF (18)
@@ -11915,15 +11915,15 @@ namespace Game
 
         public struct loadpath                    // LOADPATH (20)
         {
-            public uint PathID;          // datalong
-            public uint IsRepeatable;    // datalong2
+            public int PathID;          // datalong
+            public int IsRepeatable;    // datalong2
         }
 
         public struct callscript                   // CALLSCRIPTTOUNIT (21)
         {
-            public uint CreatureEntry;   // datalong
-            public uint ScriptID;        // datalong2
-            public uint ScriptType;      // dataint
+            public int CreatureEntry;   // datalong
+            public int ScriptID;        // datalong2
+            public int ScriptType;      // dataint
         }
 
         public struct kill                    // KILL (22)
@@ -11947,25 +11947,25 @@ namespace Game
 
         public struct equip                  // EQUIP (31)
         {
-            public uint EquipmentID;     // datalong
+            public int EquipmentID;     // datalong
         }
 
         public struct model                    // MODEL (32)
         {
-            public uint ModelID;         // datalong
+            public int ModelID;         // datalong
         }
 
         // CLOSEGOSSIP (33)
 
         public struct playmovie                    // PLAYMOVIE (34)
         {
-            public uint MovieID;         // datalong
+            public int MovieID;         // datalong
         }
 
         public struct movement                      // SCRIPT_COMMAND_MOVEMENT (35)
         {
-            public uint MovementType;     // datalong
-            public uint MovementDistance; // datalong2
+            public int MovementType;     // datalong
+            public int MovementDistance; // datalong2
             public int Path;             // dataint
         }
 

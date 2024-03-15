@@ -69,8 +69,8 @@ namespace Game.DataStorage
             foreach (var power in powers)
             {
                 // Personal serial number of the power type for each class. Simply skips unused power types during counting.
-                uint index = 0;
-                for (uint j = 0; j < (int)PowerType.Max; ++j)
+                var index = 0;
+                for (int j = 0; j < (int)PowerType.Max; ++j)
                     if (_powersByClass[power.ClassID][j] != (int)PowerType.Max)
                         ++index;
 

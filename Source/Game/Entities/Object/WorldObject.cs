@@ -1669,7 +1669,7 @@ namespace Game.Entities
             }
         }
 
-        public Creature FindNearestCreature(uint entry, float range, bool alive = true)
+        public Creature FindNearestCreature(int entry, float range, bool alive = true)
         {
             var checker = new NearestCreatureEntryWithLiveStateInObjectRangeCheck(this, entry, alive, range);
             var searcher = new CreatureLastSearcher(this, checker);

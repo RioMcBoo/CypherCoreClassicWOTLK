@@ -4644,7 +4644,7 @@ namespace Game.Entities
 
             if (pet != null)
             {
-                Log.outDebug(LogFilter.Pet, "RemovePet {0}, {1}, {2}", pet.GetEntry(), mode, returnreagent);
+                Log.outDebug(LogFilter.Pet, $"RemovePet {pet.GetEntry()}, {mode}, {returnreagent}.");
 
                 if (pet.m_removed)
                     return;
@@ -4658,15 +4658,15 @@ namespace Game.Entities
 
                 if (spellInfo != null)
                 {
-                    for (uint i = 0; i < SpellConst.MaxReagents; ++i)
+                    for (int i = 0; i < SpellConst.MaxReagents; ++i)
                     {
                         if (spellInfo.Reagent[i] > 0)
                         {
                             //for succubus, voidwalker, felhunter and felguard credit soulshard when despawn reason other than death (out of range, logout)
-                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
+                            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos, int)> dest, spellInfo.Reagent[i], spellInfo.ReagentCount[i]);
                             if (msg == InventoryResult.Ok)
                             {
-                                Item item = StoreNewItem(dest, spellInfo.Reagent[i], true, new ItemRandomEnchantmentId());
+                                Item item = StoreNewItem(dest, spellInfo.Reagent[i], true);
                                 if (IsInWorld)
                                     SendNewItem(item, spellInfo.ReagentCount[i], true, false);
                             }

@@ -1233,11 +1233,11 @@ namespace Game.Achievements
             int secondaryAsset = modifier.SecondaryAsset;
             int tertiaryAsset = modifier.TertiaryAsset;
 
-            switch ((ModifierTreeType)modifier.Type)
+            switch (modifier.Type)
             {
                 case ModifierTreeType.PlayerInebriationLevelEqualOrGreaterThan: // 1
                 {
-                    uint inebriation = (uint)Math.Min(Math.Max(referencePlayer.GetDrunkValue(), referencePlayer.m_playerData.FakeInebriation), 100);
+                    var inebriation = Math.Min(Math.Max(referencePlayer.GetDrunkValue(), referencePlayer.m_playerData.FakeInebriation), 100);
                     if (inebriation < reqValue)
                         return false;
                     break;
@@ -3931,9 +3931,9 @@ namespace Game.Achievements
                 case CriteriaDataType.TPlayerClassRace:
                     if (target == null || !target.IsTypeId(TypeId.Player))
                         return false;
-                    if (ClassRace.ClassId != 0 && ClassRace.ClassId != (uint)target.ToPlayer().GetClass())
+                    if (ClassRace.ClassId != 0 && ClassRace.ClassId != (int)target.ToPlayer().GetClass())
                         return false;
-                    if (ClassRace.RaceId != 0 && ClassRace.RaceId != (uint)target.ToPlayer().GetRace())
+                    if (ClassRace.RaceId != 0 && ClassRace.RaceId != (int)target.ToPlayer().GetRace())
                         return false;
                     return true;
                 case CriteriaDataType.SPlayerClassRace:
@@ -3947,7 +3947,7 @@ namespace Game.Achievements
                 case CriteriaDataType.TPlayerLessHealth:
                     if (target == null || !target.IsTypeId(TypeId.Player))
                         return false;
-                    return !target.ToPlayer().HealthAbovePct((int)Health.Percent);
+                    return !target.ToPlayer().HealthAbovePct(Health.Percent);
                 case CriteriaDataType.SAura:
                     return source.HasAuraEffect(Aura.SpellId, (byte)Aura.EffectIndex);
                 case CriteriaDataType.TAura:
@@ -3999,7 +3999,7 @@ namespace Game.Achievements
                     if (bg == null)
                         return false;
 
-                    int score = (int)bg.GetTeamScore(bg.GetPlayerTeam(source.GetGUID()) == Team.Alliance ? Framework.Constants.TeamId.Horde : Framework.Constants.TeamId.Alliance);
+                    int score = bg.GetTeamScore(bg.GetPlayerTeam(source.GetGUID()) == Team.Alliance ? Framework.Constants.TeamId.Horde : Framework.Constants.TeamId.Alliance);
                     return score >= BattlegroundScore.Min && score <= BattlegroundScore.Max;
                 }
                 case CriteriaDataType.InstanceScript:
@@ -4009,15 +4009,15 @@ namespace Game.Achievements
                     Map map = source.GetMap();
                     if (!map.IsDungeon())
                     {
-                        Log.outError(LogFilter.Achievement, "Achievement system call AchievementCriteriaDataType.InstanceScript ({0}) for achievement criteria {1} for non-dungeon/non-raid map {2}",
-                            CriteriaDataType.InstanceScript, criteriaId, map.GetId());
+                        Log.outError(LogFilter.Achievement, $"Achievement system call AchievementCriteriaDataType.InstanceScript ({CriteriaDataType.InstanceScript}) " +
+                            $"for achievement criteria {criteriaId} for non-dungeon/non-raid map {map.GetId()}.");
                         return false;
                     }
                     InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
                     if (instance == null)
                     {
-                        Log.outError(LogFilter.Achievement, "Achievement system call criteria_data_INSTANCE_SCRIPT ({0}) for achievement criteria {1} for map {2} but map does not have a instance script",
-                            CriteriaDataType.InstanceScript, criteriaId, map.GetId());
+                        Log.outError(LogFilter.Achievement, $"Achievement system call criteria_data_INSTANCE_SCRIPT ({CriteriaDataType.InstanceScript}) for " +
+                            $"achievement criteria {criteriaId} for map {map.GetId()} but map does not have a instance script.");
                         return false;
                     }
 
@@ -4051,7 +4051,7 @@ namespace Game.Achievements
                     ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate((int)miscValue1);
                     if (pProto == null)
                         return false;
-                    return (uint)pProto.GetQuality() == itemQuality.Quality;
+                    return (int)pProto.GetQuality() == itemQuality.Quality;
                 }
                 default:
                     break;

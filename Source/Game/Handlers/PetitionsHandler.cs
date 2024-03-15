@@ -20,7 +20,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Petitioner, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandlePetitionBuyOpcode - {0} not found or you can't interact with him.", packet.Unit.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandlePetitionBuyOpcode - {packet.Unit} not found or you can't interact with him.");
                 return;
             }
 
@@ -28,8 +28,8 @@ namespace Game
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            uint charterItemID = GuildConst.CharterItemId;
-            int cost = WorldConfig.GetIntValue(WorldCfg.CharterCostGuild);
+            var charterItemID = GuildConst.CharterItemId;
+            var cost = WorldConfig.GetIntValue(WorldCfg.CharterCostGuild);
 
             // do not let if already in guild.
             if (GetPlayer().GetGuildId() != 0)
@@ -60,7 +60,7 @@ namespace Game
                 return;
             }
 
-            InventoryResult msg = GetPlayer().CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, pProto, pProto.GetBuyCount(), out _);
+            InventoryResult msg = GetPlayer().CanStoreNewItem(ItemPos.Undefined, out var dest, pProto, pProto.GetBuyCount(), out _);
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, null, null, charterItemID);
@@ -68,11 +68,11 @@ namespace Game
             }
 
             GetPlayer().ModifyMoney(-cost);
-            Item charter = GetPlayer().StoreNewItem(dest, charterItemID, true, new ItemRandomEnchantmentId());
+            Item charter = GetPlayer().StoreNewItem(dest, charterItemID, true);
             if (charter == null)
                 return;
 
-            charter.SetPetitionId((uint)charter.GetGUID().GetCounter());
+            charter.SetPetitionId((int)charter.GetGUID().GetCounter());
             charter.SetState(ItemUpdateState.Changed, GetPlayer());
             GetPlayer().SendNewItem(charter, 1, true, false);
 

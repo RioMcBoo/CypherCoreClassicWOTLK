@@ -132,7 +132,7 @@ namespace Game.Entities
 
         public static ItemRandomProperties GenerateRandomProperties(int item_id)
         {
-            var properties = ItemRandomProperties.Default;
+            var properties = new ItemRandomProperties();
 
             ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
             if (itemProto == null)
@@ -190,73 +190,6 @@ namespace Game.Entities
         public static Dictionary<int, List<(int EnchantmentID, float Chance)>> RandomEnchantmentData;
     }
 
-    public struct EnchStoreItem
-    {
-        public EnchStoreItem() { }
-        public EnchStoreItem(ItemRandomEnchantmentId itemRandomEnchantmentId, float chance)
-        {
-            itemRandomEnchantmentId = itemRandomEnchantmentId;
-            Chance = chance;
-        }
-        public EnchStoreItem(ItemRandomEnchantmentType type, int id, float chance)
-        {
-            itemRandomEnchantmentId.Type = type;
-            itemRandomEnchantmentId.Id = id;
-            Chance = chance;
-        }
-        public ItemRandomEnchantmentId itemRandomEnchantmentId;
-        public float Chance;
-    }
-
-    public struct ItemRandomEnchantmentId
-    {
-        public ItemRandomEnchantmentId() { }
-        public ItemRandomEnchantmentId(ItemRandomEnchantmentType type, int id)
-        {
-            Type = type;
-            Id = id;
-        }
-
-        public ItemRandomEnchantmentType Type;
-        public int Id;
-    };
-
-    class EnchantmentStore
-    {
-        private Dictionary<ItemRandomEnchantmentType, Dictionary<uint, List<EnchStoreItem>>> _data;
-        private ItemRandomEnchantmentType Check(ItemRandomEnchantmentType type)
-        {
-            // random bonus lists use RandomSuffix field in Item-sparse.db2
-            //ASSERT(Type != ItemRandomEnchantmentType.BonusList, "Random bonus lists do not have their own storage, use Suffix for them");
-            if (type == ItemRandomEnchantmentType.BonusList)
-                return ItemRandomEnchantmentType.Suffix;
-            return type;
-        }
-
-        public EnchantmentStore()
-        {
-            _data = new()
-            {
-                { ItemRandomEnchantmentType.Property, new Dictionary<uint,List<EnchStoreItem>>() },
-                { ItemRandomEnchantmentType.Suffix, new Dictionary<uint,List<EnchStoreItem>>() },
-                //{ ItemRandomEnchantmentType.BonusList, new Dictionary<uint,EnchStoreItem>() }
-            };
-        }
-
-        public Dictionary<uint, List<EnchStoreItem>> this[ItemRandomEnchantmentType type]
-        {
-            get => _data[Check(type)];
-            set => _data[Check(type)] = value;
-        }
-    }
-
-    public enum ItemRandomEnchantmentType : byte
-    {
-        Property = 0,
-        Suffix = 1,
-        BonusList = 2
-    }
-
     public struct ItemRandomProperties
     {
         public ItemRandomProperties(int randomPropertiesId = 0, int randomPropertiesSeed = 0)
@@ -267,13 +200,5 @@ namespace Game.Entities
 
         public int RandomPropertiesID;
         public int RandomPropertiesSeed;
-
-        public static readonly ItemRandomProperties Default = new();
     }
-
-    public class RandomEnchantmentData
-    {
-        public List<ushort> EnchantmentIDs = new();
-        public List<float> Chances = new();
-    };
 }

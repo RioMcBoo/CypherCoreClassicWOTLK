@@ -1759,10 +1759,10 @@ namespace Game.Entities
                 if (count <= 0)
                     count = 1;
 
-                InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemTemplate, count, out _);
+                InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out var dest, itemTemplate, count, out _);
                 if (msg == InventoryResult.Ok)
                 {
-                    Item item = StoreNewItem(dest, srcitem, true, new ItemRandomEnchantmentId());
+                    Item item = StoreNewItem(dest, srcitem, true);
                     SendNewItem(item, count, true, false);
                     return true;
                 }

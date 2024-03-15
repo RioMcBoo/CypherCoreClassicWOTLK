@@ -87,7 +87,7 @@ namespace Game.Entities
 
             SendItemRefundResult(item, iece, 0);
 
-            ulong moneyRefund = item.GetPaidMoney();  // item. will be invalidated in DestroyItem
+            var moneyRefund = item.GetPaidMoney();  // item. will be invalidated in DestroyItem
 
             // Save all relevant data to DB to prevent desynchronisation exploits
             SQLTransaction trans = new();
@@ -106,9 +106,9 @@ namespace Game.Entities
                 int itemid = iece.ItemID[i];
                 if (count != 0 && itemid != 0)
                 {
-                    InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemid, count);
+                    InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out var dest, itemid, count);
                     Cypher.Assert(msg == InventoryResult.Ok); // Already checked before
-                    Item it = StoreNewItem(dest, itemid, true, new ItemRandomEnchantmentId());
+                    Item it = StoreNewItem(dest, itemid, true);
                     SendNewItem(it, count, true, false, true);
                 }
             }
@@ -127,7 +127,7 @@ namespace Game.Entities
 
             // Grant back money
             if (moneyRefund != 0)
-                ModifyMoney((long)moneyRefund); // Saved in SaveInventoryAndGoldToDB
+                ModifyMoney(moneyRefund); // Saved in SaveInventoryAndGoldToDB
 
             SaveInventoryAndGoldToDB(trans);
 
@@ -944,7 +944,7 @@ namespace Game.Entities
             return false;
         }
 
-        public Item StoreNewItem(List<(ItemPos item, int count)> pos, int itemId, bool update, ItemRandomProperties randomProperties, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, bool addToCollection = true)
+        public Item StoreNewItem(List<(ItemPos item, int count)> pos, int itemId, bool update, ItemRandomProperties randomProperties = new(), List<ObjectGuid> allowedLooters = null, ItemContext context = 0, bool addToCollection = true)
         {
             var count = 0;
             foreach (var ipc in pos)

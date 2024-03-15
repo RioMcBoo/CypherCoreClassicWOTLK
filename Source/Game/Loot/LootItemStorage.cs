@@ -28,7 +28,7 @@ namespace Game.Loots
                 {
                     do
                     {
-                        long key = result.Read<long>(0);
+                        var key = result.Read<long>(0);
                         if (!_lootItemStorage.ContainsKey(key))
                             _lootItemStorage[key] = new StoredLootContainer(key);
 
@@ -44,24 +44,19 @@ namespace Game.Loots
                         lootItem.is_counted = result.Read<bool>(7);
                         lootItem.is_underthreshold = result.Read<bool>(8);
                         lootItem.needs_quest = result.Read<bool>(9);
-                        lootItem.randomPropertyId.Type = (ItemRandomEnchantmentType)result.Read<byte>(10);
-                        lootItem.randomPropertyId.Id = result.Read<int>(11);
-                        lootItem.randomSuffix = result.Read<int>(12);
-                        lootItem.context = (ItemContext)result.Read<byte>(13);
-                        StringArray bonusLists = new(result.Read<string>(14), ' ');
-
-                        foreach (int str in bonusLists)
-                            lootItem.BonusListIDs.Add(str);
+                        lootItem.randomProperties.RandomPropertiesID = result.Read<int>(10);
+                        lootItem.randomProperties.RandomPropertiesSeed = result.Read<int>(11);
+                        lootItem.context = (ItemContext)result.Read<byte>(12);
 
                         storedContainer.AddLootItem(lootItem, null);
 
                         ++count;
                     } while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item loots in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item loots in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
                 else
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item loots");
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item loots.");
             }
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_MONEY);
@@ -72,7 +67,7 @@ namespace Game.Loots
                     count = 0;
                     do
                     {
-                        long key = result.Read<long>(0);
+                        var key = result.Read<long>(0);
                         if (!_lootItemStorage.ContainsKey(key))
                             _lootItemStorage.TryAdd(key, new StoredLootContainer(key));
 
@@ -82,7 +77,7 @@ namespace Game.Loots
                         ++count;
                     } while (result.NextRow());
 
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item money in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item money in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
                 else
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item money");

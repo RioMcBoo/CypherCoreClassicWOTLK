@@ -1778,11 +1778,11 @@ namespace Game.Entities
         }
         public MotionMaster GetMotionMaster() { return i_motionMaster; }
 
-        public void PlayOneShotAnimKitId(ushort animKitId)
+        public void PlayOneShotAnimKitId(int animKitId)
         {
             if (!CliDB.AnimKitStorage.ContainsKey(animKitId))
             {
-                Log.outError(LogFilter.Unit, "Unit.PlayOneShotAnimKitId using invalid AnimKit ID: {0}", animKitId);
+                Log.outError(LogFilter.Unit, $"Unit.PlayOneShotAnimKitId using invalid AnimKit ID: {animKitId}");
                 return;
             }
 
@@ -1792,7 +1792,7 @@ namespace Game.Entities
             SendMessageToSet(packet, true);
         }
 
-        public void SetAIAnimKitId(ushort animKitId)
+        public void SetAIAnimKitId(int animKitId)
         {
             if (_aiAnimKitId == animKitId)
                 return;
@@ -1800,7 +1800,7 @@ namespace Game.Entities
             if (animKitId != 0 && !CliDB.AnimKitStorage.ContainsKey(animKitId))
                 return;
 
-            _aiAnimKitId = animKitId;
+            _aiAnimKitId = (ushort)animKitId;
 
             SetAIAnimKit data = new();
             data.Unit = GetGUID();

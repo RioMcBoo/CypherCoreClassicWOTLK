@@ -13,7 +13,7 @@ namespace Game.Movement
     public class WaypointMovementGenerator : MovementGeneratorMedium<Creature>
     {
         TimeTracker _nextMoveTime;
-        uint _pathId;
+        int _pathId;
         bool _repeating;
         bool _loadedFromDB;
 
@@ -29,7 +29,7 @@ namespace Game.Movement
         bool _isReturningToStart;
         bool _generatePath;
 
-        public WaypointMovementGenerator(uint pathId = 0, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+        public WaypointMovementGenerator(int pathId = 0, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
             (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool followPathBackwardsFromEndToStart = false, bool generatePath = true)
 
         {

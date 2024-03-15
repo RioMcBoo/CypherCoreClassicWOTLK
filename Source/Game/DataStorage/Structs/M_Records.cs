@@ -220,10 +220,14 @@ namespace Game.DataStorage
         public int Parent;
         public sbyte Operator;
         public sbyte Amount;
-        public int Type;
+        private int _type;
         public int Asset;
         public int SecondaryAsset;
         public sbyte TertiaryAsset;
+
+        #region Properties
+        public ModifierTreeType Type => (ModifierTreeType)_type;
+        #endregion
     }
 
     public sealed class MountRecord

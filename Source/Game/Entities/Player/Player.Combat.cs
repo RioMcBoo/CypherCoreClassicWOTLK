@@ -30,7 +30,7 @@ namespace Game.Entities
             }
         }
 
-        public void RewardPlayerAndGroupAtEvent(uint creature_id, WorldObject pRewardSource)
+        public void RewardPlayerAndGroupAtEvent(int creature_id, WorldObject pRewardSource)
         {
             if (pRewardSource == null)
                 return;
