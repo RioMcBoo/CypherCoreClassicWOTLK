@@ -61,7 +61,7 @@ namespace Game
                 return mNeutralAuctions;
         }
 
-        public AuctionHouseObject GetAuctionsById(uint auctionHouseId)
+        public AuctionHouseObject GetAuctionsById(int auctionHouseId)
         {
             switch (auctionHouseId)
             {
@@ -140,11 +140,11 @@ namespace Game
             _itemsByGuid.Clear();
 
             // data needs to be at first place for Item.LoadFromDB                
-            MultiMap<uint, Item> itemsByAuction = new();
-            MultiMap<uint, ObjectGuid> biddersByAuction = new();
+            MultiMap<int, Item> itemsByAuction = new();
+            MultiMap<int, ObjectGuid> biddersByAuction = new();
 
             // perfomance and quantity counters
-            uint count = 0;
+            var count = 0;
             uint oldMSTime = Time.GetMSTime();            
 
             using (var result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_ITEMS)))
@@ -157,8 +157,8 @@ namespace Game
 
                 do
                 {
-                    ulong itemGuid = result.Read<ulong>(0);
-                    uint itemEntry = result.Read<uint>(1);
+                    var itemGuid = result.Read<long>(0);
+                    var itemEntry = result.Read<int>(1);
 
                     ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
                     if (proto == null)
@@ -168,19 +168,19 @@ namespace Game
                     }
 
                     Item item = Item.NewItemOrBag(proto);
-                    if (!item.LoadFromDB(itemGuid, ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(51)), result.GetFields(), itemEntry))
+                    if (!item.LoadFromDB(itemGuid, ObjectGuid.Create(HighGuid.Player, result.Read<long>(46)), result.GetFields(), itemEntry))
                     {
                         item.Dispose();
                         continue;
                     }
 
-                    uint auctionId = result.Read<uint>(52);
+                    var auctionId = result.Read<int>(47);
                     itemsByAuction.Add(auctionId, item);
 
                     ++count;
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction items in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction items in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
             }            
 
             oldMSTime = Time.GetMSTime();
@@ -192,12 +192,12 @@ namespace Game
                 {
                     do
                     {
-                        biddersByAuction.Add(result.Read<uint>(0), ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1)));
+                        biddersByAuction.Add(result.Read<int>(0), ObjectGuid.Create(HighGuid.Player, result.Read<long>(1)));
 
                     } while (result.NextRow());
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction bidders in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auction bidders in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
             }
 
             oldMSTime = Time.GetMSTime();
@@ -211,8 +211,8 @@ namespace Game
                     do
                     {
                         AuctionPosting auction = new();
-                        auction.Id = result.Read<uint>(0);
-                        uint auctionHouseId = result.Read<uint>(1);
+                        auction.Id = result.Read<int>(0);
+                        var auctionHouseId = result.Read<int>(1);
 
                         AuctionHouseObject auctionHouse = GetAuctionsById(auctionHouseId);
                         if (auctionHouse == null)
@@ -234,16 +234,16 @@ namespace Game
                         }
 
                         auction.Items = itemsByAuction[auction.Id];
-                        auction.Owner = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2));
+                        auction.Owner = ObjectGuid.Create(HighGuid.Player, result.Read<long>(2));
                         auction.OwnerAccount = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner));
-                        ulong bidder = result.Read<ulong>(3);
+                        var bidder = result.Read<long>(3);
                         if (bidder != 0)
                             auction.Bidder = ObjectGuid.Create(HighGuid.Player, bidder);
 
-                        auction.MinBid = result.Read<ulong>(4);
-                        auction.BuyoutOrUnitPrice = result.Read<ulong>(5);
-                        auction.Deposit = result.Read<ulong>(6);
-                        auction.BidAmount = result.Read<ulong>(7);
+                        auction.MinBid = result.Read<long>(4);
+                        auction.BuyoutOrUnitPrice = result.Read<long>(5);
+                        auction.Deposit = result.Read<long>(6);
+                        auction.BidAmount = result.Read<long>(7);
                         auction.StartTime = Time.UnixTimeToDateTime(result.Read<long>(8));
                         auction.EndTime = Time.UnixTimeToDateTime(result.Read<long>(9));
                         auction.ServerFlags = (AuctionPostingServerFlag)result.Read<byte>(10);
@@ -259,7 +259,7 @@ namespace Game
                     DB.Characters.CommitTransaction(trans);
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auctions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} auctions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
             }
         }
 
@@ -1618,10 +1618,10 @@ namespace Game
         public ObjectGuid Owner;
         public ObjectGuid OwnerAccount;
         public ObjectGuid Bidder;
-        public ulong MinBid;
-        public ulong BuyoutOrUnitPrice;
-        public ulong Deposit;
-        public ulong BidAmount;
+        public long MinBid;
+        public long BuyoutOrUnitPrice;
+        public long Deposit;
+        public long BidAmount;
         public DateTime StartTime = DateTime.MinValue;
         public DateTime EndTime = DateTime.MinValue;
         public AuctionPostingServerFlag ServerFlags;
@@ -1644,7 +1644,7 @@ namespace Game
             //auctionItem.Item - here to unify comment
 
             // all (not optional<>)
-            auctionItem.Count = (int)GetTotalItemCount();
+            auctionItem.Count = GetTotalItemCount();
             auctionItem.Flags = Items[0].m_itemData.DynamicFlags;
             auctionItem.AuctionID = Id;
             auctionItem.Owner = Owner;

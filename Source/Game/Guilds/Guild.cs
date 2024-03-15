@@ -1399,11 +1399,10 @@ namespace Game.Guilds
 
         public bool LoadBankItemFromDB(SQLFields field)
         {
-            byte tabId = field.Read<byte>(53);
+            var tabId = field.Read<byte>(45);
             if (tabId >= _GetPurchasedTabsSize())
             {
-                Log.outError(LogFilter.Guild, "Invalid tab for item (GUID: {0}, id: {1}) in guild bank, skipped.",
-                    field.Read<uint>(0), field.Read<uint>(1));
+                Log.outError(LogFilter.Guild, $"Invalid tab for item (GUID: {field.Read<long>(0)}, id: {field.Read<int>(1)}) in guild bank, skipped.");
                 return false;
             }
             return m_bankTabs[tabId].LoadItemFromDB(field);
@@ -3346,26 +3345,26 @@ namespace Game.Guilds
 
             public bool LoadItemFromDB(SQLFields field)
             {
-                byte slotId = field.Read<byte>(54);
-                long itemGuid = field.Read<int>(0);
-                int itemEntry = field.Read<int>(1);
+                var slotId = field.Read<byte>(49);
+                var itemGuid = field.Read<long>(0);
+                var itemEntry = field.Read<int>(1);
                 if (slotId >= GuildConst.MaxBankSlots)
                 {
-                    Log.outError(LogFilter.Guild, "Invalid slot for item (GUID: {0}, id: {1}) in guild bank, skipped.", itemGuid, itemEntry);
+                    Log.outError(LogFilter.Guild, $"Invalid slot for item (GUID: {itemGuid}, id: {itemEntry}) in guild bank, skipped.");
                     return false;
                 }
 
-                ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
+                var proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
                 if (proto == null)
                 {
-                    Log.outError(LogFilter.Guild, "Unknown item (GUID: {0}, id: {1}) in guild bank, skipped.", itemGuid, itemEntry);
+                    Log.outError(LogFilter.Guild, $"Unknown item (GUID: {itemGuid}, id: {itemEntry}) in guild bank, skipped.");
                     return false;
                 }
 
-                Item pItem = Bag.NewItemOrBag(proto);
+                var pItem = Item.NewItemOrBag(proto);
                 if (!pItem.LoadFromDB(itemGuid, ObjectGuid.Empty, field, itemEntry))
                 {
-                    Log.outError(LogFilter.Guild, "Item (GUID {0}, id: {1}) not found in item_instance, deleting from guild bank!", itemGuid, itemEntry);
+                    Log.outError(LogFilter.Guild, $"Item (GUID {itemGuid}, id: {itemEntry}) not found in item_instance, deleting from guild bank!");
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_NONEXISTENT_GUILD_BANK_ITEM);
                     stmt.AddValue(0, m_guildId);
