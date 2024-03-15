@@ -1289,27 +1289,10 @@ namespace Game.Entities
 
         bool HasStats()
         {
-            if (GetItemRandomPropertyId() != 0)
-                return true;
-
             ItemTemplate proto = GetTemplate();
-            Player owner = GetOwner();
-            for (byte i = 0; i < ItemConst.MaxStats; ++i)
-            {
-                if ((owner != null ? GetItemStatValue(i, owner) : proto.GetStatPercentEditor(i)) != 0)
+            for (int i = 0; i < ItemConst.MaxStats; ++i)
+                if (proto.GetStatModifierBonusAmount(i) != 0)
                     return true;
-            }
-
-            return false;
-        }
-
-        static bool HasStats(ItemInstance itemInstance, BonusData bonus)
-        {
-            for (byte i = 0; i < ItemConst.MaxStats; ++i)
-            {
-                if (bonus.StatPercentEditor[i] != 0)
-                    return true;
-            }
 
             return false;
         }
@@ -1646,33 +1629,6 @@ namespace Game.Entities
             }
 
             return Math.Min(Math.Max(itemLevel, ItemConst.MinItemLevel), ItemConst.MaxItemLevel);
-        }
-
-        public float GetItemStatValue(int index, Player owner)
-        {
-            Cypher.Assert(index < ItemConst.MaxStats);
-            switch (GetItemStatType(index))
-            {
-                case ItemModType.Corruption:
-                case ItemModType.CorruptionResistance:
-                    return _bonusData.StatPercentEditor[index];
-                default:
-                    break;
-            }
-
-            var itemLevel = GetItemLevel(owner);
-            float randomPropPoints = ItemEnchantmentManager.GetRandomPropertyPoints(itemLevel, GetQuality(), GetTemplate().GetInventoryType());
-            if (randomPropPoints != 0)
-            {
-                float statValue = _bonusData.StatPercentEditor[index] * randomPropPoints * 0.0001f;
-                GtItemSocketCostPerLevelRecord gtCost = CliDB.ItemSocketCostPerLevelGameTable.GetRow(itemLevel);
-                if (gtCost != null)
-                    statValue -= _bonusData.ItemStatSocketCostMultiplier[index] * gtCost.SocketCost;
-
-                return statValue;
-            }
-
-            return 0f;
         }
 
         public ItemDisenchantLootRecord GetDisenchantLoot(Player owner)
@@ -2331,10 +2287,8 @@ namespace Game.Entities
             for (int i = 0; i < ItemConst.MaxStats; ++i)
                 ItemStatSocketCostMultiplier[i] = proto.GetStatPercentageOfSocket(i);
 
-            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
-            {
+            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)           
                 socketColor[i] = proto.GetSocketColor(i);
-            }
 
             Bonding = proto.GetBonding();
 
@@ -2370,7 +2324,7 @@ namespace Game.Entities
         public int ItemLevelBonus;
         public int RequiredLevel;
         public ItemModType[] ItemStatType = new ItemModType[ItemConst.MaxStats];
-        public int[] StatPercentEditor = new int[ItemConst.MaxStats];
+        public int[] ItemStatBonusAmount = new int[ItemConst.MaxStats];
         public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
         public SocketColor[] socketColor = new SocketColor[ItemConst.MaxGemSockets];
         public ItemBondingType Bonding;
@@ -2379,9 +2333,6 @@ namespace Game.Entities
         public int ContentTuningId;
         public int PlayerLevelToItemLevelCurveId;
         public int DisenchantLootId;
-        public int[] GemItemLevelBonus = new int[ItemConst.MaxGemSockets];
-        public int[] GemRelicType = new int[ItemConst.MaxGemSockets];
-        public ushort[] GemRelicRankBonus = new ushort[ItemConst.MaxGemSockets];
         public int RelicType;
         public int RequiredLevelOverride;
         public int Suffix;
