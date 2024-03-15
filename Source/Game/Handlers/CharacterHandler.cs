@@ -277,13 +277,13 @@ namespace Game
                     var team = Player.TeamIdForRace(charCreate.CreateInfo.RaceId);
                     switch (team)
                     {
-                        case BatttleGroundTeamId.Alliance:
+                        case BattleGroundTeamId.Alliance:
                             disabled = Convert.ToBoolean(mask & (1 << 0));
                             break;
-                        case BatttleGroundTeamId.Horde:
+                        case BattleGroundTeamId.Horde:
                             disabled = Convert.ToBoolean(mask & (1 << 1));
                             break;
-                        case BatttleGroundTeamId.Neutral:
+                        case BattleGroundTeamId.Neutral:
                             disabled = Convert.ToBoolean(mask & (1 << 2));
                             break;
                     }
@@ -1763,7 +1763,7 @@ namespace Game
             }
 
             var newTeamId = Player.TeamIdForRace(factionChangeInfo.RaceID);
-            if (newTeamId == BatttleGroundTeamId.Neutral)
+            if (newTeamId == BattleGroundTeamId.Neutral)
             {
                 SendCharFactionChange(ResponseCodes.CharCreateRestrictedRaceclass, factionChangeInfo);
                 return;
@@ -1882,7 +1882,7 @@ namespace Game
                 stmt.AddValue(0, lowGuid);
 
                 // Faction specific languages
-                if (newTeamId == BatttleGroundTeamId.Horde)
+                if (newTeamId == BattleGroundTeamId.Horde)
                     stmt.AddValue(1, 109);
                 else
                     stmt.AddValue(1, 98);
@@ -1957,7 +1957,7 @@ namespace Game
                         string taximaskstream = "";
 
 
-                        var factionMask = newTeamId == BatttleGroundTeamId.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
+                        var factionMask = newTeamId == BattleGroundTeamId.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
                         for (int i = 0; i < factionMask.Length; ++i)
                         {
                             // i = (315 - 1) / 8 = 39
@@ -2011,7 +2011,7 @@ namespace Game
 
                     WorldLocation loc;
                     ushort zoneId = 0;
-                    if (newTeamId == BatttleGroundTeamId.Alliance)
+                    if (newTeamId == BattleGroundTeamId.Alliance)
                     {
                         loc = new WorldLocation(0, -8867.68f, 673.373f, 97.9034f, 0.0f);
                         zoneId = 1519;
@@ -2038,19 +2038,19 @@ namespace Game
                         int achiev_horde = it.Value;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENT_BY_ACHIEVEMENT);
-                        stmt.AddValue(0, (ushort)(newTeamId == BatttleGroundTeamId.Alliance ? achiev_alliance : achiev_horde));
+                        stmt.AddValue(0, (ushort)(newTeamId == BattleGroundTeamId.Alliance ? achiev_alliance : achiev_horde));
                         stmt.AddValue(1, lowGuid);
                         trans.Append(stmt);
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_ACHIEVEMENT);
-                        stmt.AddValue(0, (ushort)(newTeamId == BatttleGroundTeamId.Alliance ? achiev_alliance : achiev_horde));
-                        stmt.AddValue(1, (ushort)(newTeamId == BatttleGroundTeamId.Alliance ? achiev_horde : achiev_alliance));
+                        stmt.AddValue(0, (ushort)(newTeamId == BattleGroundTeamId.Alliance ? achiev_alliance : achiev_horde));
+                        stmt.AddValue(1, (ushort)(newTeamId == BattleGroundTeamId.Alliance ? achiev_horde : achiev_alliance));
                         stmt.AddValue(2, lowGuid);
                         trans.Append(stmt);
                     }
 
                     // Item conversion
-                    var itemConversionMap = newTeamId == BatttleGroundTeamId.Alliance ? Global.ObjectMgr.FactionChangeItemsHordeToAlliance : Global.ObjectMgr.FactionChangeItemsAllianceToHorde;
+                    var itemConversionMap = newTeamId == BattleGroundTeamId.Alliance ? Global.ObjectMgr.FactionChangeItemsHordeToAlliance : Global.ObjectMgr.FactionChangeItemsAllianceToHorde;
                     foreach (var it in itemConversionMap)
                     {
                         int oldItemId = it.Key;
@@ -2076,12 +2076,12 @@ namespace Game
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_REWARDED_BY_QUEST);
                         stmt.AddValue(0, lowGuid);
-                        stmt.AddValue(1, (newTeamId == BatttleGroundTeamId.Alliance ? quest_alliance : quest_horde));
+                        stmt.AddValue(1, (newTeamId == BattleGroundTeamId.Alliance ? quest_alliance : quest_horde));
                         trans.Append(stmt);
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_FACTION_CHANGE);
-                        stmt.AddValue(0, (newTeamId == BatttleGroundTeamId.Alliance ? quest_alliance : quest_horde));
-                        stmt.AddValue(1, (newTeamId == BatttleGroundTeamId.Alliance ? quest_horde : quest_alliance));
+                        stmt.AddValue(0, (newTeamId == BattleGroundTeamId.Alliance ? quest_alliance : quest_horde));
+                        stmt.AddValue(1, (newTeamId == BattleGroundTeamId.Alliance ? quest_horde : quest_alliance));
                         stmt.AddValue(2, lowGuid);
                         trans.Append(stmt);
                     }
@@ -2096,7 +2096,7 @@ namespace Game
                         var questTemplates = Global.ObjectMgr.GetQuestTemplates();
                         foreach (Quest quest in questTemplates.Values)
                         {
-                            RaceMask newRaceMask = newTeamId == BatttleGroundTeamId.Alliance ? RaceMask.Alliance : RaceMask.Horde;
+                            RaceMask newRaceMask = newTeamId == BattleGroundTeamId.Alliance ? RaceMask.Alliance : RaceMask.Horde;
                             if (quest.AllowableRaces != (RaceMask)(-1) && !quest.AllowableRaces.HasAnyFlag(newRaceMask))
                             {
                                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);
@@ -2114,13 +2114,13 @@ namespace Game
                         int spell_horde = it.Value;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_BY_SPELL);
-                        stmt.AddValue(0, (newTeamId == BatttleGroundTeamId.Alliance ? spell_alliance : spell_horde));
+                        stmt.AddValue(0, (newTeamId == BattleGroundTeamId.Alliance ? spell_alliance : spell_horde));
                         stmt.AddValue(1, lowGuid);
                         trans.Append(stmt);
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_SPELL_FACTION_CHANGE);
-                        stmt.AddValue(0, (newTeamId == BatttleGroundTeamId.Alliance ? spell_alliance : spell_horde));
-                        stmt.AddValue(1, (newTeamId == BatttleGroundTeamId.Alliance ? spell_horde : spell_alliance));
+                        stmt.AddValue(0, (newTeamId == BattleGroundTeamId.Alliance ? spell_alliance : spell_horde));
+                        stmt.AddValue(1, (newTeamId == BattleGroundTeamId.Alliance ? spell_horde : spell_alliance));
                         stmt.AddValue(2, lowGuid);
                         trans.Append(stmt);
                     }
@@ -2130,8 +2130,8 @@ namespace Game
                     {
                         int reputation_alliance = it.Key;
                         int reputation_horde = it.Value;
-                        int newReputation = (newTeamId == BatttleGroundTeamId.Alliance) ? reputation_alliance : reputation_horde;
-                        int oldReputation = (newTeamId == BatttleGroundTeamId.Alliance) ? reputation_horde : reputation_alliance;
+                        int newReputation = (newTeamId == BattleGroundTeamId.Alliance) ? reputation_alliance : reputation_horde;
+                        int oldReputation = (newTeamId == BattleGroundTeamId.Alliance) ? reputation_horde : reputation_alliance;
 
                         // select old standing set in db
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_REP_BY_FACTION);
@@ -2188,7 +2188,7 @@ namespace Game
                             CharTitlesRecord atitleInfo = CliDB.CharTitlesStorage.LookupByKey(title_alliance);
                             CharTitlesRecord htitleInfo = CliDB.CharTitlesStorage.LookupByKey(title_horde);
                             // new team
-                            if (newTeamId == BatttleGroundTeamId.Alliance)
+                            if (newTeamId == BattleGroundTeamId.Alliance)
                             {
                                 uint maskID = htitleInfo.MaskID;
                                 int index = (int)maskID / 32;

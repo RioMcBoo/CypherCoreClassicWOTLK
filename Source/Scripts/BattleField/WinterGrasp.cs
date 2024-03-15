@@ -34,7 +34,7 @@ namespace Game.BattleFields
 
             m_TimeForAcceptInvite = 20;
             m_StartGroupingTimer = 15 * Time.Minute * Time.InMilliseconds;
-            m_tenacityTeam = BatttleGroundTeamId.Neutral;
+            m_tenacityTeam = BattleGroundTeamId.Neutral;
 
             KickPosition = new WorldLocation(m_MapId, 5728.117f, 2714.346f, 697.733f, 0);
 
@@ -72,7 +72,7 @@ namespace Game.BattleFields
                 BfGraveyardWG graveyard = new(this);
 
                 // When between games, the graveyard is controlled by the defending team
-                if (gy.StartControl == BatttleGroundTeamId.Neutral)
+                if (gy.StartControl == BattleGroundTeamId.Neutral)
                     graveyard.Initialize(m_DefenderTeam, gy.GraveyardID);
                 else
                     graveyard.Initialize(gy.StartControl, gy.GraveyardID);
@@ -127,14 +127,14 @@ namespace Game.BattleFields
                 GameObject go = SpawnGameObject(teleporter.AllianceEntry, teleporter.Pos, teleporter.Rot);
                 if (go != null)
                 {
-                    DefenderPortalList[BatttleGroundTeamId.Alliance].Add(go.GetGUID());
-                    go.SetRespawnTime((int)(GetDefenderTeam() == BatttleGroundTeamId.Alliance ? BattlegroundConst.RespawnImmediately : BattlegroundConst.RespawnOneDay));
+                    DefenderPortalList[BattleGroundTeamId.Alliance].Add(go.GetGUID());
+                    go.SetRespawnTime((int)(GetDefenderTeam() == BattleGroundTeamId.Alliance ? BattlegroundConst.RespawnImmediately : BattlegroundConst.RespawnOneDay));
                 }
                 go = SpawnGameObject(teleporter.HordeEntry, teleporter.Pos, teleporter.Rot);
                 if (go != null)
                 {
-                    DefenderPortalList[BatttleGroundTeamId.Horde].Add(go.GetGUID());
-                    go.SetRespawnTime((int)(GetDefenderTeam() == BatttleGroundTeamId.Horde ? BattlegroundConst.RespawnImmediately : BattlegroundConst.RespawnOneDay));
+                    DefenderPortalList[BattleGroundTeamId.Horde].Add(go.GetGUID());
+                    go.SetRespawnTime((int)(GetDefenderTeam() == BattleGroundTeamId.Horde ? BattlegroundConst.RespawnImmediately : BattlegroundConst.RespawnOneDay));
                 }
             }
 
@@ -229,9 +229,9 @@ namespace Game.BattleFields
 
             foreach (var workshop in Workshops)
             {
-                if (workshop.GetTeamControl() == BatttleGroundTeamId.Alliance)
+                if (workshop.GetTeamControl() == BattleGroundTeamId.Alliance)
                     UpdateData(WGData.MaxVehicleA, 4);
-                else if (workshop.GetTeamControl() == BatttleGroundTeamId.Horde)
+                else if (workshop.GetTeamControl() == BattleGroundTeamId.Horde)
                     UpdateData(WGData.MaxVehicleH, 4);
             }
 
@@ -258,10 +258,10 @@ namespace Game.BattleFields
                 WorldStates worldStateId;
                 // successful defense
                 if (endByTimer)
-                    worldStateId = GetDefenderTeam() == BatttleGroundTeamId.Horde ? WorldStates.BattlefieldWgDefendedH : WorldStates.BattlefieldWgDefendedA;
+                    worldStateId = GetDefenderTeam() == BattleGroundTeamId.Horde ? WorldStates.BattlefieldWgDefendedH : WorldStates.BattlefieldWgDefendedA;
                 // successful attack (note that teams have already been swapped, so defender team is the one who won)
                 else
-                    worldStateId = GetDefenderTeam() == BatttleGroundTeamId.Horde ? WorldStates.BattlefieldWgAttackedH : WorldStates.BattlefieldWgAttackedA;
+                    worldStateId = GetDefenderTeam() == BattleGroundTeamId.Horde ? WorldStates.BattlefieldWgAttackedH : WorldStates.BattlefieldWgAttackedA;
 
                 Global.WorldStateMgr.SetValueAndSaveInDb(worldStateId, Global.WorldStateMgr.GetValue((int)worldStateId, m_Map) + 1, false, m_Map);
             }
@@ -362,17 +362,17 @@ namespace Game.BattleFields
                         Player player = Global.ObjAccessor.FindPlayer(guid);
                         if (player != null)
                         {
-                            player.RemoveAurasDueToSpell(m_DefenderTeam == BatttleGroundTeamId.Alliance ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player.GetGUID());
-                            player.AddAura(m_DefenderTeam == BatttleGroundTeamId.Horde ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player);
+                            player.RemoveAurasDueToSpell(m_DefenderTeam == BattleGroundTeamId.Alliance ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player.GetGUID());
+                            player.AddAura(m_DefenderTeam == BattleGroundTeamId.Horde ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player);
                         }
                     }
                 }
             }
 
             if (!endByTimer) // win alli/horde
-                SendWarning((GetDefenderTeam() == BatttleGroundTeamId.Alliance) ? WintergraspText.FortressCaptureAlliance : WintergraspText.FortressCaptureHorde);
+                SendWarning((GetDefenderTeam() == BattleGroundTeamId.Alliance) ? WintergraspText.FortressCaptureAlliance : WintergraspText.FortressCaptureHorde);
             else // defend alli/horde
-                SendWarning((GetDefenderTeam() == BatttleGroundTeamId.Alliance) ? WintergraspText.FortressDefendAlliance : WintergraspText.FortressDefendHorde);
+                SendWarning((GetDefenderTeam() == BattleGroundTeamId.Alliance) ? WintergraspText.FortressDefendAlliance : WintergraspText.FortressDefendHorde);
         }
 
         public override void DoCompleteOrIncrementAchievement(int achievement, Player player, byte incrementNumber = 1)
@@ -436,7 +436,7 @@ namespace Game.BattleFields
                 case WGNpcs.DwarvenSpiritGuide:
                 case WGNpcs.TaunkaSpiritGuide:
                 {
-                    int teamIndex = (creature.GetEntry() == WGNpcs.DwarvenSpiritGuide ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde);
+                    int teamIndex = (creature.GetEntry() == WGNpcs.DwarvenSpiritGuide ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde);
                     byte graveyardId = (byte)GetSpiritGraveyardId(creature.GetAreaId());
                     if (m_GraveyardList[graveyardId] != null)
                         m_GraveyardList[graveyardId].SetSpirit(creature, teamIndex);
@@ -463,7 +463,7 @@ namespace Game.BattleFields
 
                         Player creator = Global.ObjAccessor.FindPlayer(creature.ToTempSummon().GetSummonerGUID());
                         int teamIndex = creator.GetBatttleGroundTeamId();
-                        if (teamIndex == BatttleGroundTeamId.Horde)
+                        if (teamIndex == BattleGroundTeamId.Horde)
                         {
                             if (GetData(WGData.VehicleH) < GetData(WGData.MaxVehicleH))
                             {
@@ -530,12 +530,12 @@ namespace Game.BattleFields
                 if (workshop.GetId() == workshopId)
                 {
                     ControlZoneHandlers[go.GetEntry()] =new WintergraspCapturePoint(this, workshop);
-                    if (GetAttackerTeam() == BatttleGroundTeamId.Alliance)
+                    if (GetAttackerTeam() == BattleGroundTeamId.Alliance)
                     {
                         //go->SetGoArtKit(); // todo set art kit
                         go.HandleCustomTypeCommand(new SetControlZoneValue(100));
                     }
-                    else if (GetAttackerTeam() == BatttleGroundTeamId.Horde)
+                    else if (GetAttackerTeam() == BattleGroundTeamId.Horde)
                     {
                         //go->SetGoArtKit(); // todo set art kit
                         go.HandleCustomTypeCommand(new SetControlZoneValue(0));
@@ -567,7 +567,7 @@ namespace Game.BattleFields
                 if (m_vehicles[i].Contains(vehicle.GetGUID()))
                 {
                     m_vehicles[i].Remove(vehicle.GetGUID());
-                    if (i == BatttleGroundTeamId.Horde)
+                    if (i == BattleGroundTeamId.Horde)
                         UpdateData(WGData.VehicleH, -1);
                     else
                         UpdateData(WGData.VehicleA, -1);
@@ -657,7 +657,7 @@ namespace Game.BattleFields
                     player.TeleportTo(571, 5345, 2842, 410, 3.14f);
                 else
                 {
-                    if (player.GetBatttleGroundTeamId() == BatttleGroundTeamId.Horde)
+                    if (player.GetBatttleGroundTeamId() == BattleGroundTeamId.Horde)
                         player.TeleportTo(571, 5025.857422f, 3674.628906f, 362.737122f, 4.135169f);
                     else
                         player.TeleportTo(571, 5101.284f, 2186.564f, 373.549f, 3.812f);
@@ -713,7 +713,7 @@ namespace Game.BattleFields
             if (!m_isActive)
                 RemoveAurasFromPlayer(player);
 
-            player.AddAura(m_DefenderTeam == BatttleGroundTeamId.Horde ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player);
+            player.AddAura(m_DefenderTeam == BattleGroundTeamId.Horde ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player);
         }
 
         public override int GetData(int data)
@@ -862,8 +862,8 @@ namespace Game.BattleFields
 
         void UpdateTenacity()
         {
-            int alliancePlayers = m_PlayersInWar[BatttleGroundTeamId.Alliance].Count;
-            int hordePlayers = m_PlayersInWar[BatttleGroundTeamId.Horde].Count;
+            int alliancePlayers = m_PlayersInWar[BattleGroundTeamId.Alliance].Count;
+            int hordePlayers = m_PlayersInWar[BattleGroundTeamId.Horde].Count;
             int newStack = 0;
 
             if (alliancePlayers != 0 && hordePlayers != 0)
@@ -879,7 +879,7 @@ namespace Game.BattleFields
 
             m_tenacityStack = newStack;
             // Remove old buff
-            if (m_tenacityTeam != BatttleGroundTeamId.Neutral)
+            if (m_tenacityTeam != BattleGroundTeamId.Neutral)
             {
                 foreach (var guid in m_players[m_tenacityTeam])
                 {
@@ -900,7 +900,7 @@ namespace Game.BattleFields
             // Apply new buff
             if (newStack != 0)
             {
-                m_tenacityTeam = newStack > 0 ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde;
+                m_tenacityTeam = newStack > 0 ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde;
 
                 if (newStack < 0)
                     newStack = -newStack;
@@ -947,7 +947,7 @@ namespace Game.BattleFields
                 }
             }
             else
-                m_tenacityTeam = BatttleGroundTeamId.Neutral;
+                m_tenacityTeam = BattleGroundTeamId.Neutral;
         }
 
         public GameObject GetRelic() { return GetGameObject(m_titansRelicGUID); }
@@ -983,7 +983,7 @@ namespace Game.BattleFields
         public BfWGGameObjectBuilding(BattlefieldWG WG, WGGameObjectBuildingType type, int worldState)
         {
             _wg = WG;
-            _teamControl = BatttleGroundTeamId.Neutral;
+            _teamControl = BattleGroundTeamId.Neutral;
             _type = type;
             _worldState = worldState;
             _state = WGGameObjectState.None;
@@ -1010,7 +1010,7 @@ namespace Game.BattleFields
                     _teamControl = _wg.GetAttackerTeam();           // The towers in the south should be the attacker's
                     break;
                 default:
-                    _teamControl = BatttleGroundTeamId.Neutral;
+                    _teamControl = BattleGroundTeamId.Neutral;
                     break;
             }
 
@@ -1138,7 +1138,7 @@ namespace Game.BattleFields
                     _teamControl = _wg.GetAttackerTeam();           // The towers in the south should be the attacker's
                     break;
                 default:
-                    _teamControl = BatttleGroundTeamId.Neutral;
+                    _teamControl = BattleGroundTeamId.Neutral;
                     break;
             }
 
@@ -1148,13 +1148,13 @@ namespace Game.BattleFields
                 // set to default state based on Type
                 switch (_teamControl)
                 {
-                    case BatttleGroundTeamId.Alliance:
+                    case BattleGroundTeamId.Alliance:
                         _state = WGGameObjectState.AllianceIntact;
                         break;
-                    case BatttleGroundTeamId.Horde:
+                    case BattleGroundTeamId.Horde:
                         _state = WGGameObjectState.HordeIntact;
                         break;
-                    case BatttleGroundTeamId.Neutral:
+                    case BattleGroundTeamId.Neutral:
                         _state = WGGameObjectState.NeutralIntact;
                         break;
                     default:
@@ -1215,11 +1215,11 @@ namespace Game.BattleFields
                 {
                     GameObject goHorde = _wg.SpawnGameObject(gobData.HordeEntry, gobData.Pos, gobData.Rot);
                     if (goHorde != null)
-                        m_GameObjectList[BatttleGroundTeamId.Horde].Add(goHorde.GetGUID());
+                        m_GameObjectList[BattleGroundTeamId.Horde].Add(goHorde.GetGUID());
 
                     GameObject goAlliance = _wg.SpawnGameObject(gobData.AllianceEntry, gobData.Pos, gobData.Rot);
                     if (goAlliance != null)
-                        m_GameObjectList[BatttleGroundTeamId.Alliance].Add(goAlliance.GetGUID());
+                        m_GameObjectList[BattleGroundTeamId.Alliance].Add(goAlliance.GetGUID());
                 }
 
                 // Spawn associate npc bottom
@@ -1227,11 +1227,11 @@ namespace Game.BattleFields
                 {
                     Creature creature = _wg.SpawnCreature(creatureData.HordeEntry, creatureData.Pos);
                     if (creature != null)
-                        m_CreatureBottomList[BatttleGroundTeamId.Horde].Add(creature.GetGUID());
+                        m_CreatureBottomList[BattleGroundTeamId.Horde].Add(creature.GetGUID());
 
                     creature = _wg.SpawnCreature(creatureData.AllianceEntry, creatureData.Pos);
                     if (creature != null)
-                        m_CreatureBottomList[BatttleGroundTeamId.Alliance].Add(creature.GetGUID());
+                        m_CreatureBottomList[BattleGroundTeamId.Alliance].Add(creature.GetGUID());
                 }
             }
 
@@ -1444,7 +1444,7 @@ namespace Game.BattleFields
         {
             _wg = wg;
             _state = WGGameObjectState.None;
-            _teamControl = BatttleGroundTeamId.Neutral;
+            _teamControl = BattleGroundTeamId.Neutral;
             _staticInfo = WGConst.WorkshopData[type];
         }
 
@@ -1457,14 +1457,14 @@ namespace Game.BattleFields
         {
             switch (teamId)
             {
-                case BatttleGroundTeamId.Neutral:
+                case BattleGroundTeamId.Neutral:
                 {
                     // Send warning message to all player to inform a faction attack to a workshop
                     // alliance / horde attacking a workshop
                     _wg.SendWarning(_teamControl != 0 ? _staticInfo.HordeAttackTextId : _staticInfo.AllianceAttackTextId);
                     break;
                 }
-                case BatttleGroundTeamId.Alliance:
+                case BattleGroundTeamId.Alliance:
                 {
                     // Updating worldstate
                     _state = WGGameObjectState.AllianceIntact;
@@ -1479,12 +1479,12 @@ namespace Game.BattleFields
                     {
                         BfGraveyard gy = _wg.GetGraveyardById(_staticInfo.WorkshopId);
                         if (gy != null)
-                            gy.GiveControlTo(BatttleGroundTeamId.Alliance);
+                            gy.GiveControlTo(BattleGroundTeamId.Alliance);
                     }
                     _teamControl = teamId;
                     break;
                 }
-                case BatttleGroundTeamId.Horde:
+                case BattleGroundTeamId.Horde:
                 {
                     // Update worldstate
                     _state = WGGameObjectState.HordeIntact;
@@ -1499,7 +1499,7 @@ namespace Game.BattleFields
                     {
                         BfGraveyard gy = _wg.GetGraveyardById(_staticInfo.WorkshopId);
                         if (gy != null)
-                            gy.GiveControlTo(BatttleGroundTeamId.Horde);
+                            gy.GiveControlTo(BattleGroundTeamId.Horde);
                     }
 
                     _teamControl = teamId;
@@ -1540,26 +1540,26 @@ namespace Game.BattleFields
         {
             Cypher.Assert(m_Workshop != null);
             base.HandleContestedEventHorde(controlZone);
-            m_Workshop.GiveControlTo(BatttleGroundTeamId.Neutral);
+            m_Workshop.GiveControlTo(BattleGroundTeamId.Neutral);
         }
 
         public override void HandleContestedEventAlliance(GameObject controlZone)
         {
             Cypher.Assert(m_Workshop != null);
             base.HandleContestedEventAlliance(controlZone);
-            m_Workshop.GiveControlTo(BatttleGroundTeamId.Neutral);
+            m_Workshop.GiveControlTo(BattleGroundTeamId.Neutral);
         }
 
         public override void HandleProgressEventHorde(GameObject controlZone)
         {
             Cypher.Assert(m_Workshop != null);
-            m_Workshop.GiveControlTo(BatttleGroundTeamId.Horde);
+            m_Workshop.GiveControlTo(BattleGroundTeamId.Horde);
         }
 
         public override void HandleProgressEventAlliance(GameObject controlZone)
         {
             Cypher.Assert(m_Workshop != null);
-            m_Workshop.GiveControlTo(BatttleGroundTeamId.Alliance);
+            m_Workshop.GiveControlTo(BattleGroundTeamId.Alliance);
         }
 
         protected WGWorkshop m_Workshop;

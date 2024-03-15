@@ -782,7 +782,7 @@ namespace Game.Entities
                 lowGuid = map.GenerateLowGuid(HighGuid.Creature);
 
             Creature creature = new();
-            if (creature.Create(lowGuid, map, entry, pos, null, vehId))
+            if (!creature.Create(lowGuid, map, entry, pos, null, vehId))
                 return null;
 
             return creature;
@@ -791,7 +791,7 @@ namespace Game.Entities
         public static Creature CreateCreatureFromDB(long spawnId, Map map, bool addToMap = true, bool allowDuplicate = false)
         {
             Creature creature = new();
-            if (creature.LoadFromDB(spawnId, map, addToMap, allowDuplicate))
+            if (!creature.LoadFromDB(spawnId, map, addToMap, allowDuplicate))
                 return null;
 
             return creature;

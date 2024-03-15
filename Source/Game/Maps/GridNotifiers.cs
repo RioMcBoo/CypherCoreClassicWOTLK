@@ -274,7 +274,7 @@ namespace Game.Maps
                 Creature creature = objs[i];
                 CreatureUnitRelocationWorker(i_creature, creature);
 
-                if (creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
+                if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     CreatureUnitRelocationWorker(creature, i_creature);
             }
         }
@@ -317,7 +317,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
+                if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
 
                 CreatureRelocationNotifier relocate = new(creature);
@@ -449,7 +449,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
+                if (!creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if ((!required3dDist ? creature.GetExactDist2dSq(i_source) : creature.GetExactDistSq(i_source)) > i_distSq)
@@ -544,7 +544,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
+                if (!creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (creature.GetExactDist2dSq(i_source) > i_distSq)
@@ -849,7 +849,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.GetSharedVisionList().Empty())
+                if (!creature.GetSharedVisionList().Empty())
                 {
                     foreach (var visionPlayer in creature.GetSharedVisionList())
                         BuildPacket(visionPlayer);
@@ -1069,7 +1069,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
+                if (!creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1252,7 +1252,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
+                if (!creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1584,7 +1584,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
+                if (!creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1628,7 +1628,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
+                if (!creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1696,7 +1696,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
+                if (!creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1727,7 +1727,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
+                if (!creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))

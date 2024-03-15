@@ -49,8 +49,8 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
                 {
                     _pointsTimer.Reset(Misc.PointsTickTime);
 
-                    byte baseCountAlliance = GetControlledBaseCount(BatttleGroundTeamId.Alliance);
-                    byte baseCountHorde = GetControlledBaseCount(BatttleGroundTeamId.Horde);
+                    byte baseCountAlliance = GetControlledBaseCount(BattleGroundTeamId.Alliance);
+                    byte baseCountHorde = GetControlledBaseCount(BattleGroundTeamId.Horde);
                     if (baseCountAlliance > 0)
                         AddPoints(Team.Alliance, Misc.TickPoints[baseCountAlliance - 1]);
                     if (baseCountHorde > 0)
@@ -109,11 +109,11 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
                 int point = controlZoneHandler.Value.GetPoint();
                 switch (teamId)
                 {
-                    case BatttleGroundTeamId.Alliance:
+                    case BattleGroundTeamId.Alliance:
                         if (GetBgMap().GetWorldStateValue(Misc.m_PointsIconStruct[point].WorldStateAllianceControlledIndex) == 1)
                             baseCount++;
                         break;
-                    case BatttleGroundTeamId.Horde:
+                    case BattleGroundTeamId.Horde:
                         if (GetBgMap().GetWorldStateValue(Misc.m_PointsIconStruct[point].WorldStateHordeControlledIndex) == 1)
                             baseCount++;
                         break;
@@ -178,13 +178,13 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             if (score >= ScoreIds.MaxTeamScore)
             {
                 score = ScoreIds.MaxTeamScore;
-                if (team == BatttleGroundTeamId.Alliance)
+                if (team == BattleGroundTeamId.Alliance)
                     EndBattleground(Team.Alliance);
                 else
                     EndBattleground(Team.Horde);
             }
 
-            if (team == BatttleGroundTeamId.Alliance)
+            if (team == BattleGroundTeamId.Alliance)
                 UpdateWorldState(WorldStateIds.AllianceResources, score);
             else
                 UpdateWorldState(WorldStateIds.HordeResources, score);
@@ -207,10 +207,10 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
         void UpdatePointsCount(int teamId)
         {
-            if (teamId == BatttleGroundTeamId.Alliance)
-                UpdateWorldState(WorldStateIds.AllianceBase, GetControlledBaseCount(BatttleGroundTeamId.Alliance));
+            if (teamId == BattleGroundTeamId.Alliance)
+                UpdateWorldState(WorldStateIds.AllianceBase, GetControlledBaseCount(BattleGroundTeamId.Alliance));
             else
-                UpdateWorldState(WorldStateIds.HordeBase, GetControlledBaseCount(BatttleGroundTeamId.Horde));
+                UpdateWorldState(WorldStateIds.HordeBase, GetControlledBaseCount(BattleGroundTeamId.Horde));
         }
 
         public override void OnGameObjectCreate(GameObject gameobject)
@@ -395,8 +395,8 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             //call parent's class reset
             base.Reset();
 
-            m_TeamScores[BatttleGroundTeamId.Alliance] = 0;
-            m_TeamScores[BatttleGroundTeamId.Horde] = 0;
+            m_TeamScores[BattleGroundTeamId.Alliance] = 0;
+            m_TeamScores[BattleGroundTeamId.Horde] = 0;
             m_HonorScoreTics = [0, 0];
             m_FlagCapturedBgObjectType = 0;
             bool isBGWeekend = Global.BattlegroundMgr.IsBGWeekend(GetTypeID());
@@ -414,12 +414,12 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
         public void EventTeamLostPoint(int teamId, int point, WorldObject controlZone)
         {
-            if (teamId == BatttleGroundTeamId.Alliance)
+            if (teamId == BattleGroundTeamId.Alliance)
             {
                 SendBroadcastText(Misc.m_LosingPointTypes[point].MessageIdAlliance, ChatMsg.BgSystemAlliance, controlZone);
                 UpdateWorldState(Misc.m_PointsIconStruct[point].WorldStateAllianceControlledIndex, 0);
             }
-            else if (teamId == BatttleGroundTeamId.Horde)
+            else if (teamId == BattleGroundTeamId.Horde)
             {
                 SendBroadcastText(Misc.m_LosingPointTypes[point].MessageIdHorde, ChatMsg.BgSystemHorde, controlZone);
                 UpdateWorldState(Misc.m_PointsIconStruct[point].WorldStateHordeControlledIndex, 0);
@@ -431,12 +431,12 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
         public void EventTeamCapturedPoint(int teamId, int point, WorldObject controlZone)
         {
-            if (teamId == BatttleGroundTeamId.Alliance)
+            if (teamId == BattleGroundTeamId.Alliance)
             {
                 SendBroadcastText(Misc.m_CapturingPointTypes[point].MessageIdAlliance, ChatMsg.BgSystemAlliance, controlZone);
                 UpdateWorldState(Misc.m_PointsIconStruct[point].WorldStateAllianceControlledIndex, 1);
             }
-            else if (teamId == BatttleGroundTeamId.Horde)
+            else if (teamId == BattleGroundTeamId.Horde)
             {
                 SendBroadcastText(Misc.m_CapturingPointTypes[point].MessageIdHorde, ChatMsg.BgSystemHorde, controlZone);
                 UpdateWorldState(Misc.m_PointsIconStruct[point].WorldStateHordeControlledIndex, 1);
@@ -469,9 +469,9 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
         public override Team GetPrematureWinner()
         {
-            if (GetTeamScore(BatttleGroundTeamId.Alliance) > GetTeamScore(BatttleGroundTeamId.Horde))
+            if (GetTeamScore(BattleGroundTeamId.Alliance) > GetTeamScore(BattleGroundTeamId.Horde))
                 return Team.Alliance;
-            else if (GetTeamScore(BatttleGroundTeamId.Horde) > GetTeamScore(BatttleGroundTeamId.Alliance))
+            else if (GetTeamScore(BattleGroundTeamId.Horde) > GetTeamScore(BattleGroundTeamId.Alliance))
                 return Team.Horde;
 
             return base.GetPrematureWinner();
@@ -604,22 +604,22 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
         public override void HandleProgressEventHorde(GameObject controlZone)
         {
-            _battleground.EventTeamCapturedPoint(BatttleGroundTeamId.Horde, _point, controlZone);
+            _battleground.EventTeamCapturedPoint(BattleGroundTeamId.Horde, _point, controlZone);
         }
 
         public override void HandleProgressEventAlliance(GameObject controlZone)
         {
-            _battleground.EventTeamCapturedPoint(BatttleGroundTeamId.Alliance, _point, controlZone);
+            _battleground.EventTeamCapturedPoint(BattleGroundTeamId.Alliance, _point, controlZone);
         }
 
         public override void HandleNeutralEventHorde(GameObject controlZone)
         {
-            _battleground.EventTeamLostPoint(BatttleGroundTeamId.Horde, _point, controlZone);
+            _battleground.EventTeamLostPoint(BattleGroundTeamId.Horde, _point, controlZone);
         }
 
         public override void HandleNeutralEventAlliance(GameObject controlZone)
         {
-            _battleground.EventTeamLostPoint(BatttleGroundTeamId.Alliance, _point, controlZone);
+            _battleground.EventTeamLostPoint(BattleGroundTeamId.Alliance, _point, controlZone);
         }
 
         public int GetPoint() { return _point; }

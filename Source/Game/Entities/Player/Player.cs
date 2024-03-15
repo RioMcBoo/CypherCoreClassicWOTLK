@@ -2541,13 +2541,13 @@ namespace Game.Entities
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.Battlemaster:
-                            if (creature.CanInteractWithBattleMaster(this, false))
+                            if (!creature.CanInteractWithBattleMaster(this, false))
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.TalentMaster:
                         case GossipOptionNpc.SpecializationMaster:
                         case GossipOptionNpc.GlyphMaster:
-                            if (creature.CanResetTalents(this))
+                            if (!creature.CanResetTalents(this))
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.Stablemaster:
@@ -3365,7 +3365,7 @@ namespace Game.Entities
 
         public bool IsAllowedToLoot(Creature creature)
         {
-            if (creature.IsDead())
+            if (!creature.IsDead())
                 return false;
 
             if (HasPendingBind())
@@ -4230,7 +4230,7 @@ namespace Game.Entities
                 return;
             }
 
-            if (creature.IsAreaSpiritHealer())
+            if (!creature.IsAreaSpiritHealer())
                 return;
 
             _areaSpiritHealerGUID = creature.GetGUID();
@@ -5074,14 +5074,14 @@ namespace Game.Entities
                 return rEntry.Alliance;
 
             Log.outError(LogFilter.Player, "Race ({0}) not found in DBC: wrong DBC files?", race);
-            return BatttleGroundTeamId.Neutral;
+            return BattleGroundTeamId.Neutral;
         }
 
         public Team GetTeam() { return m_team; }
-        public int GetBatttleGroundTeamId() { return m_team == Team.Alliance ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde; }
+        public int GetBatttleGroundTeamId() { return m_team == Team.Alliance ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde; }
 
         public Team GetEffectiveTeam() { return HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode) ? (GetTeam() == Team.Alliance ? Team.Horde : Team.Alliance) : GetTeam(); }
-        public int GetEffectiveTeamId() { return GetEffectiveTeam() == Team.Alliance ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde; }
+        public int GetEffectiveTeamId() { return GetEffectiveTeam() == Team.Alliance ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde; }
 
         //Money
         public long GetMoney() { return m_activePlayerData.Coinage; }

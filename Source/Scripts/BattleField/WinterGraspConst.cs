@@ -18,13 +18,13 @@ namespace Game.BattleFields
         #region Data
         public static BfWGCoordGY[] WGGraveYard =
         [
-            new BfWGCoordGY(5104.750f, 2300.940f, 368.579f, 0.733038f, 1329, WGGossipText.GYNE, BatttleGroundTeamId.Neutral),
-            new BfWGCoordGY(5099.120f, 3466.036f, 368.484f, 5.317802f, 1330, WGGossipText.GYNW, BatttleGroundTeamId.Neutral),
-            new BfWGCoordGY(4314.648f, 2408.522f, 392.642f, 6.268125f, 1333, WGGossipText.GYSE, BatttleGroundTeamId.Neutral),
-            new BfWGCoordGY(4331.716f, 3235.695f, 390.251f, 0.008500f, 1334, WGGossipText.GYSW, BatttleGroundTeamId.Neutral),
-            new BfWGCoordGY(5537.986f, 2897.493f, 517.057f, 4.819249f, 1285, WGGossipText.GYKeep, BatttleGroundTeamId.Neutral),
-            new BfWGCoordGY(5032.454f, 3711.382f, 372.468f, 3.971623f, 1331, WGGossipText.GYHorde, BatttleGroundTeamId.Horde),
-            new BfWGCoordGY(5140.790f, 2179.120f, 390.950f, 1.972220f, 1332, WGGossipText.GYAlliance, BatttleGroundTeamId.Alliance),
+            new BfWGCoordGY(5104.750f, 2300.940f, 368.579f, 0.733038f, 1329, WGGossipText.GYNE, BattleGroundTeamId.Neutral),
+            new BfWGCoordGY(5099.120f, 3466.036f, 368.484f, 5.317802f, 1330, WGGossipText.GYNW, BattleGroundTeamId.Neutral),
+            new BfWGCoordGY(4314.648f, 2408.522f, 392.642f, 6.268125f, 1333, WGGossipText.GYSE, BattleGroundTeamId.Neutral),
+            new BfWGCoordGY(4331.716f, 3235.695f, 390.251f, 0.008500f, 1334, WGGossipText.GYSW, BattleGroundTeamId.Neutral),
+            new BfWGCoordGY(5537.986f, 2897.493f, 517.057f, 4.819249f, 1285, WGGossipText.GYKeep, BattleGroundTeamId.Neutral),
+            new BfWGCoordGY(5032.454f, 3711.382f, 372.468f, 3.971623f, 1331, WGGossipText.GYHorde, BattleGroundTeamId.Horde),
+            new BfWGCoordGY(5140.790f, 2179.120f, 390.950f, 1.972220f, 1332, WGGossipText.GYAlliance, BattleGroundTeamId.Alliance),
         ];
 
         public static WorldStates[] ClockWorldState = [WorldStates.BattlefieldWgTimeBattleEnd, WorldStates.BattlefieldWgTimeNextBattle];

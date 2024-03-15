@@ -2998,6 +2998,9 @@ namespace Game
 
         public bool IsEmpty()
         {
+            if (Conditions == null)
+                return true;
+
             return Conditions.Empty();
         }
     }

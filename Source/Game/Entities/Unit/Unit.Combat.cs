@@ -1017,10 +1017,10 @@ namespace Game.Entities
             {
                 Log.outDebug(LogFilter.Unit, "DealDamageNotPlayer");
 
-                if (creature.IsPet())
+                if (!creature.IsPet())
                 {
                     // must be after setDeathState which resets dynamic flags
-                    if (creature.IsFullyLooted())
+                    if (!creature.IsFullyLooted())
                         creature.SetDynamicFlag(UnitDynFlags.Lootable);
                     else
                         creature.AllLootRemovedFromCorpse();

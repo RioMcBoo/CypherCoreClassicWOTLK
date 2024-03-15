@@ -24,7 +24,7 @@ namespace Game.BattleFields
         public BattleField(Map map)
         {
             m_IsEnabled = true;
-            m_DefenderTeam = BatttleGroundTeamId.Neutral;
+            m_DefenderTeam = BattleGroundTeamId.Neutral;
 
             m_TimeForAcceptInvite = 20;
             m_uiKickDontAcceptTimer = 1000;
@@ -486,7 +486,7 @@ namespace Game.BattleFields
             creature.SetVisible(true);
             creature.RemoveUnitFlag(UnitFlags.NonAttackable);
             creature.SetUninteractible(false);
-            if (creature.IsAlive())
+            if (!creature.IsAlive())
                 creature.Respawn(true);
             if (aggressive)
                 creature.SetReactState(ReactStates.Aggressive);
@@ -704,7 +704,7 @@ namespace Game.BattleFields
         // Battlefield - generic methods
         public int GetDefenderTeam() { return m_DefenderTeam; }
         public int GetAttackerTeam() { return 1 - m_DefenderTeam; }
-        public int GetOtherTeam(int teamIndex) { return (teamIndex == BatttleGroundTeamId.Horde ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde); }
+        public int GetOtherTeam(int teamIndex) { return (teamIndex == BattleGroundTeamId.Horde ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde); }
         void SetDefenderTeam(int team) { m_DefenderTeam = team; }
 
         // Called on start
@@ -789,7 +789,7 @@ namespace Game.BattleFields
         {
             m_Bf = battlefield;
             m_GraveyardId = 0;
-            m_ControlTeam = BatttleGroundTeamId.Neutral;
+            m_ControlTeam = BattleGroundTeamId.Neutral;
             m_SpiritGuide[0] = ObjectGuid.Empty;
             m_SpiritGuide[1] = ObjectGuid.Empty;
         }
@@ -837,14 +837,14 @@ namespace Game.BattleFields
 
         public bool HasNpc(ObjectGuid guid)
         {
-            if (m_SpiritGuide[BatttleGroundTeamId.Alliance].IsEmpty() || m_SpiritGuide[BatttleGroundTeamId.Horde].IsEmpty())
+            if (m_SpiritGuide[BattleGroundTeamId.Alliance].IsEmpty() || m_SpiritGuide[BattleGroundTeamId.Horde].IsEmpty())
                 return false;
 
-            if (m_Bf.GetCreature(m_SpiritGuide[BatttleGroundTeamId.Alliance]) == null ||
-                m_Bf.GetCreature(m_SpiritGuide[BatttleGroundTeamId.Horde]) == null)
+            if (m_Bf.GetCreature(m_SpiritGuide[BattleGroundTeamId.Alliance]) == null ||
+                m_Bf.GetCreature(m_SpiritGuide[BattleGroundTeamId.Horde]) == null)
                 return false;
 
-            return (m_SpiritGuide[BatttleGroundTeamId.Alliance] == guid || m_SpiritGuide[BatttleGroundTeamId.Horde] == guid);
+            return (m_SpiritGuide[BattleGroundTeamId.Alliance] == guid || m_SpiritGuide[BattleGroundTeamId.Horde] == guid);
         }
 
         // Get the graveyard's ID.

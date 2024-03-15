@@ -1137,7 +1137,7 @@ namespace Game.Maps
                 {
                     // if creature can't be move in new cell/grid (not loaded) move it to repawn cell/grid
                     // creature coordinates will be updated and notifiers send
-                    if (CreatureRespawnRelocation(creature, false))
+                    if (!CreatureRespawnRelocation(creature, false))
                     {
                         // ... or unload (if respawn grid also not loaded)
                         //This may happen when a player just logs in and a pet moves to a nearby unloaded cell
@@ -4799,8 +4799,8 @@ namespace Game.Maps
             // this make sure it gets unloaded if for some reason no player joins
             m_unloadTimer = (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
 
-            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, instanceTeam == BatttleGroundTeamId.Alliance ? 1 : 0, false, this);
-            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, instanceTeam == BatttleGroundTeamId.Horde ? 1 : 0, false, this);
+            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, instanceTeam == BattleGroundTeamId.Alliance ? 1 : 0, false, this);
+            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, instanceTeam == BattleGroundTeamId.Horde ? 1 : 0, false, this);
 
             if (i_instanceLock != null)
             {
@@ -5179,13 +5179,13 @@ namespace Game.Maps
         public int GetTeamIdInInstance()
         {
             if (Global.WorldStateMgr.GetValue(WorldStates.TeamInInstanceAlliance, this) != 0)
-                return BatttleGroundTeamId.Alliance;
+                return BattleGroundTeamId.Alliance;
             if (Global.WorldStateMgr.GetValue(WorldStates.TeamInInstanceHorde, this) != 0)
-                return BatttleGroundTeamId.Horde;
-            return BatttleGroundTeamId.Neutral;
+                return BattleGroundTeamId.Horde;
+            return BattleGroundTeamId.Neutral;
         }
 
-        public Team GetTeamInInstance() { return GetTeamIdInInstance() == BatttleGroundTeamId.Alliance ? Team.Alliance : Team.Horde; }
+        public Team GetTeamInInstance() { return GetTeamIdInInstance() == BattleGroundTeamId.Alliance ? Team.Alliance : Team.Horde; }
 
         public int GetScriptId()
         {

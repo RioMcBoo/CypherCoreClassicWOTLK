@@ -160,7 +160,7 @@ namespace Game.PvP
         public void TeamApplyBuff(int teamIndex, int spellId, int spellId2)
         {
             TeamCastSpell(teamIndex, spellId);
-            TeamCastSpell((teamIndex == BatttleGroundTeamId.Alliance ? BatttleGroundTeamId.Horde : BatttleGroundTeamId.Alliance), spellId2 != 0 ? -spellId2 : -spellId);
+            TeamCastSpell((teamIndex == BattleGroundTeamId.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance), spellId2 != 0 ? -spellId2 : -spellId);
         }
 
         public void SendDefenseMessage(int zoneId, int id)
@@ -254,7 +254,7 @@ namespace Game.PvP
 
         public OPvPCapturePoint(OutdoorPvP pvp)
         {
-            m_team = BatttleGroundTeamId.Neutral;
+            m_team = BattleGroundTeamId.Neutral;
             OldState = ObjectiveStates.Neutral;
             State = ObjectiveStates.Neutral;
             PvP = pvp;

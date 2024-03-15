@@ -260,7 +260,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                     m_Team_QuestStatus[teamIndex][4]++;
                     if (m_Team_QuestStatus[teamIndex][4] >= 200)
                         Log.outDebug(LogFilter.Battleground, "BG_AV Quest {} completed (need to implement some events here", questid);
-                    UpdateWorldState((int)(teamIndex == BatttleGroundTeamId.Alliance ? WorldStateIds.IvusStormCrystalCount : WorldStateIds.LokholarStormpikeSoldiersBloodCount), (int)m_Team_QuestStatus[teamIndex][4]);
+                    UpdateWorldState((int)(teamIndex == BattleGroundTeamId.Alliance ? WorldStateIds.IvusStormCrystalCount : WorldStateIds.LokholarStormpikeSoldiersBloodCount), (int)m_Team_QuestStatus[teamIndex][4]);
                     break;
                 case QuestIds.ANearMine:
                 case QuestIds.HNearMine:
@@ -314,17 +314,17 @@ namespace Game.BattleGrounds.Zones.AlteracValley
             int teamindex = GetTeamIndexByTeamId(team);
             _teamResources[teamindex] += points;
 
-            UpdateWorldState((int)(teamindex == BatttleGroundTeamId.Horde ? WorldStateIds.HordeReinforcements : WorldStateIds.AllianceReinforcements), _teamResources[teamindex]);
+            UpdateWorldState((int)(teamindex == BattleGroundTeamId.Horde ? WorldStateIds.HordeReinforcements : WorldStateIds.AllianceReinforcements), _teamResources[teamindex]);
             if (points < 0)
             {
                 if (_teamResources[teamindex] < 1)
                 {
                     _teamResources[teamindex] = 0;
-                    EndBattleground(teamindex == BatttleGroundTeamId.Horde ? Team.Alliance : Team.Horde);
+                    EndBattleground(teamindex == BattleGroundTeamId.Horde ? Team.Alliance : Team.Horde);
                 }
                 else if (!_isInformedNearVictory[teamindex] && _teamResources[teamindex] < MiscConst.NearLosePoints)
                 {
-                    if (teamindex == BatttleGroundTeamId.Alliance)
+                    if (teamindex == BattleGroundTeamId.Alliance)
                         SendBroadcastText((int)BroadcastTextIds.AllianceNearLose, ChatMsg.BgSystemAlliance);
                     else
                         SendBroadcastText((int)BroadcastTextIds.HordeNearLose, ChatMsg.BgSystemHorde);
@@ -353,7 +353,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                 _mineResourceTimer.Reset(MiscConst.MineResourceTimer);
             }
 
-            for (byte i = BatttleGroundTeamId.Alliance; i <= BatttleGroundTeamId.Horde; i++)
+            for (byte i = BattleGroundTeamId.Alliance; i <= BattleGroundTeamId.Horde; i++)
             {
                 if (!IsCaptainAlive(i))
                     continue;
@@ -383,9 +383,9 @@ namespace Game.BattleGrounds.Zones.AlteracValley
 
         bool IsCaptainAlive(uint teamId)
         {
-            if (teamId == BatttleGroundTeamId.Horde)
+            if (teamId == BattleGroundTeamId.Horde)
                 return GetBgMap().GetWorldStateValue((int)WorldStateIds.GalvagarAlive) == 1;
-            else if (teamId == BatttleGroundTeamId.Alliance)
+            else if (teamId == BattleGroundTeamId.Alliance)
                 return GetBgMap().GetWorldStateValue((int)WorldStateIds.BalindaAlive) == 1;
 
             return false;
@@ -447,18 +447,18 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                 {
                     if (_nodes[i].Owner == Team.Alliance)
                     {
-                        rep[BatttleGroundTeamId.Alliance] += MiscConst.RepGainSurvivingTower;
-                        kills[BatttleGroundTeamId.Alliance] += MiscConst.HonorKillBonusSurvivingTower;
+                        rep[BattleGroundTeamId.Alliance] += MiscConst.RepGainSurvivingTower;
+                        kills[BattleGroundTeamId.Alliance] += MiscConst.HonorKillBonusSurvivingTower;
                     }
                     else
                     {
-                        rep[BatttleGroundTeamId.Horde] += MiscConst.RepGainSurvivingTower;
-                        kills[BatttleGroundTeamId.Horde] += MiscConst.HonorKillBonusSurvivingTower;
+                        rep[BattleGroundTeamId.Horde] += MiscConst.RepGainSurvivingTower;
+                        kills[BattleGroundTeamId.Horde] += MiscConst.HonorKillBonusSurvivingTower;
                     }
                 }
             }
 
-            for (byte i = BatttleGroundTeamId.Alliance; i <= BatttleGroundTeamId.Horde; ++i)
+            for (byte i = BattleGroundTeamId.Alliance; i <= BattleGroundTeamId.Horde; ++i)
             {
                 if (IsCaptainAlive(i))
                 {
@@ -924,9 +924,9 @@ namespace Game.BattleGrounds.Zones.AlteracValley
             switch (dataId)
             {
                 case MiscConst.DataDefenderTierAlliance:
-                    return (int)getDefenderTierForTeam(BatttleGroundTeamId.Alliance);
+                    return (int)getDefenderTierForTeam(BattleGroundTeamId.Alliance);
                 case MiscConst.DataDefenderTierHorde:
-                    return (int)getDefenderTierForTeam(BatttleGroundTeamId.Horde);
+                    return (int)getDefenderTierForTeam(BattleGroundTeamId.Horde);
                 default:
                     return base.GetData(dataId);
             }

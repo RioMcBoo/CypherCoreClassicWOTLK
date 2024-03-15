@@ -3938,7 +3938,7 @@ namespace Game.Achievements
                     if (bg == null)
                         return false;
 
-                    int score = bg.GetTeamScore(bg.GetPlayerTeam(source.GetGUID()) == Team.Alliance ? BatttleGroundTeamId.Horde : BatttleGroundTeamId.Alliance);
+                    int score = bg.GetTeamScore(bg.GetPlayerTeam(source.GetGUID()) == Team.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance);
                     return score >= BattlegroundScore.Min && score <= BattlegroundScore.Max;
                 }
                 case CriteriaDataType.InstanceScript:

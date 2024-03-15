@@ -810,13 +810,13 @@ namespace Game.Chat
             switch (command)
             {
                 case "alliance":
-                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Alliance, rewardValue.GetValueOrDefault(0));
+                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(BattleGroundTeamId.Alliance, rewardValue.GetValueOrDefault(0));
                     break;
                 case "horde":
-                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Horde, rewardValue.GetValueOrDefault(0));
+                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(BattleGroundTeamId.Horde, rewardValue.GetValueOrDefault(0));
                     break;
                 case "neutral":
-                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Neutral);
+                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(BattleGroundTeamId.Neutral);
                     break;
                 case "off":
                     Global.WorldMgr.DisableForcedWarModeFactionBalanceState();
@@ -1299,13 +1299,13 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.BadValue);
                         return false;
                     case "alliance":
-                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Alliance, rewardValue);
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(BattleGroundTeamId.Alliance, rewardValue);
                         break;
                     case "horde":
-                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Horde, rewardValue);
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(BattleGroundTeamId.Horde, rewardValue);
                         break;
                     case "neutral":
-                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Neutral);
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(BattleGroundTeamId.Neutral);
                         break;
                     case "off":
                         Global.WorldMgr.DisableForcedWarModeFactionBalanceState();
