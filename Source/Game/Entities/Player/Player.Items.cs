@@ -2733,14 +2733,14 @@ namespace Game.Entities
             Creature creature = GetNPCIfCanInteractWith(vendorguid, NPCFlags.Vendor, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: BuyItemFromVendor - {0} not found or you can't interact with him.", vendorguid.ToString());
+                Log.outDebug(LogFilter.Network, $"Player.BuyItemFromVendorSlot: Vendor {vendorguid} not found or you can't interact with him.");
                 SendBuyError(BuyResult.DistanceTooFar, null, item);
                 return false;
             }
 
             if (!Global.ConditionMgr.IsObjectMeetingVendorItemConditions(creature.GetEntry(), item, this, creature))
             {
-                Log.outDebug(LogFilter.Condition, "BuyItemFromVendor: conditions not met for creature entry {0} item {1}", creature.GetEntry(), item);
+                Log.outDebug(LogFilter.Condition, $"Player.BuyItemFromVendorSlot: Player ({GetName()}) doesn't met for creature entry {creature.GetEntry()} item {item}.");
                 SendBuyError(BuyResult.CantFindItem, creature, item);
                 return false;
             }
@@ -2805,7 +2805,7 @@ namespace Game.Entities
                 var iece = CliDB.ItemExtendedCostStorage.LookupByKey(crItem.ExtendedCost);
                 if (iece == null)
                 {
-                    Log.outError(LogFilter.Player, $"Item {pProto.GetId()} have wrong ExtendedCost field value {crItem.ExtendedCost}");
+                    Log.outError(LogFilter.Player, $"Player.BuyItemFromVendorSlot: Item {pProto.GetId()} have wrong ExtendedCost field value {crItem.ExtendedCost}");
                     return false;
                 }
 
@@ -2873,10 +2873,10 @@ namespace Game.Entities
             if (pProto.GetBuyPrice() > 0) //Assume price cannot be negative (do not know why it is int32)
             {
                 float buyPricePerItem = (float)pProto.GetBuyPrice() / pProto.GetBuyCount();
-                ulong maxCount = (ulong)(PlayerConst.MaxMoneyAmount / buyPricePerItem);
+                var maxCount = (long)(PlayerConst.MaxMoneyAmount / buyPricePerItem);
                 if (count > maxCount)
                 {
-                    Log.outError(LogFilter.Player, $"Player {GetName()} tried to buy {count} item id {pProto.GetId()}, causing overflow");
+                    Log.outError(LogFilter.Player, $"Player.BuyItemFromVendorSlot: Player {GetName()} tried to buy {count} item id {pProto.GetId()}, causing overflow.");
                     count = (byte)maxCount;
                 }
                 price = (long)(buyPricePerItem * count); //it should not exceed MAX_MONEY_AMOUNT
@@ -2887,7 +2887,7 @@ namespace Game.Entities
 
                 int priceMod = GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
                 if (priceMod != 0)
-                    price -= (long)MathFunctions.CalculatePct(price, priceMod);
+                    price -= MathFunctions.CalculatePct(price, priceMod);
 
                 if (!HasEnoughMoney(price))
                 {
@@ -3052,7 +3052,7 @@ namespace Game.Entities
             return false;
         }
 
-        public void _ApplyItemMods(Item item, byte slot, bool apply, bool updateItemAuras = true)
+        public void _ApplyItemMods(Item item, byte slot, bool apply, bool updateItemAuras = true, bool onlyForScalingItems = false)
         {
             if (slot >= InventorySlots.BagEnd || item == null)
                 return;
@@ -3066,12 +3066,12 @@ namespace Game.Entities
             if (item.IsBroken())
                 return;
 
-            Log.outInfo(LogFilter.Player, $"Applying mods for item {item.GetGUID()}.");
+            Log.outInfo(LogFilter.Player, $"Player._ApplyItemMods: Applying mods for item {item.GetGUID()}.");
 
             if (item.GetSocketColor(0) != 0)                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
                 CorrectMetaGemEnchants(slot, apply);
 
-            _ApplyItemBonuses(item, slot, apply);
+            _ApplyItemBonuses(item, slot, apply, onlyForScalingItems);
             ApplyItemEquipSpell(item, apply);
 
             if (updateItemAuras)
@@ -3084,7 +3084,7 @@ namespace Game.Entities
 
             ApplyEnchantment(item, apply);
 
-            Log.outDebug(LogFilter.Player, "_ApplyItemMods complete.");
+            Log.outDebug(LogFilter.Player, "Player._ApplyItemMods: complete.");
         }
 
         public void _ApplyItemBonuses(Item item, byte slot, bool apply, bool onlyForScalingItems)
@@ -3129,29 +3129,29 @@ namespace Game.Entities
                 switch (statType)
                 {
                     case ItemModType.Mana:
-                        HandleStatFlatModifier(UnitMods.Mana, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.Mana, UnitModifierFlatType.Base, val, apply);
                         break;
                     case ItemModType.Health:                           // modify HP
-                        HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Base, val, apply);
                         break;
                     case ItemModType.Agility:                          // modify agility
-                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
                         UpdateStatBuffMod(Stats.Agility);
                         break;
                     case ItemModType.Strength:                         //modify strength
-                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
                         UpdateStatBuffMod(Stats.Strength);
                         break;
                     case ItemModType.Intellect:                        //modify intellect
-                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
                         UpdateStatBuffMod(Stats.Intellect);
                         break;
                     case ItemModType.Spirit:                           //modify spirit
-                        HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Base, val, apply);
                         UpdateStatBuffMod(Stats.Spirit);
                         break;
                     case ItemModType.Stamina:                          //modify stamina
-                        HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, val, apply);
                         UpdateStatBuffMod(Stats.Stamina);
                         break;
                     case ItemModType.DefenseSkillRating:
@@ -3335,7 +3335,7 @@ namespace Game.Entities
                         resistance = ssvarmor;
 
                 if (resistance != 0)
-                    HandleStatFlatModifier(UnitMods.Armor + (int)i, UnitModifierFlatType.Base, (float)resistance, apply);
+                    HandleStatFlatModifier(UnitMods.Armor + (int)i, UnitModifierFlatType.Base, resistance, apply);
             }
 
             if (proto.GetShieldBlockValue(proto.GetItemLevel()) is int shieldBlockValue && shieldBlockValue != 0)
@@ -3564,7 +3564,7 @@ namespace Game.Entities
                     if (!CanUseAttackType(GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
                         continue;
 
-                    _ApplyItemMods(m_items[i], i, apply);
+                    _ApplyItemMods(m_items[i], i, apply, true);
 
                     // Update item sets for heirlooms
                     if (Global.DB2Mgr.GetHeirloomByItemId(m_items[i].GetEntry()) != null && m_items[i].GetTemplate().GetItemSet() != 0)

@@ -2296,8 +2296,6 @@ namespace Game.Entities
         public ItemQuality Quality;
         public int ItemLevelBonus;
         public int RequiredLevel;
-        public ItemModType[] ItemStatType = new ItemModType[ItemConst.MaxStats];
-        public int[] ItemStatBonusAmount = new int[ItemConst.MaxStats];
         public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
         public SocketColor[] socketColor = new SocketColor[ItemConst.MaxGemSockets];
         public ItemBondingType Bonding;

@@ -136,7 +136,7 @@ namespace Game.DataStorage
 
         public int getDPSMod(int mask)
         {
-            if (Mask.HasAnyFlag(0x7E00))
+            if (mask.HasAnyFlag(0x7E00))
             {
                 if (mask.HasAnyFlag(0x00000200)) return WeaponDPS1H;
                 if (mask.HasAnyFlag(0x00000400)) return WeaponDPS2H;

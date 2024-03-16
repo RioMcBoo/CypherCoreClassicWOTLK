@@ -4174,10 +4174,10 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).TradeSkillTargets.Add(spellLogEffectTradeSkillItemParams);
         }
 
-        void ExecuteLogEffectDestroyItem(SpellEffectName effect, uint entry)
+        void ExecuteLogEffectDestroyItem(SpellEffectName effect, int entry)
         {
             SpellLogEffectFeedPetParams spellLogEffectFeedPetParams;
-            spellLogEffectFeedPetParams.ItemID = (int)entry;
+            spellLogEffectFeedPetParams.ItemID = entry;
 
             GetExecuteLogEffect(effect).FeedPetTargets.Add(spellLogEffectFeedPetParams);
         }

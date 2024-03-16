@@ -3198,7 +3198,7 @@ namespace Game.Spells
             ExecuteLogEffectDestroyItem(effectInfo.Effect, foodItem.GetEntry());
 
             int pct;
-            int levelDiff = (int)pet.GetLevel() - (int)foodItem.GetTemplate().GetItemLevel();
+            var levelDiff = pet.GetLevel() - foodItem.GetTemplate().GetItemLevel();
             if (levelDiff >= 30)
                 return;
             else if (levelDiff >= 20)
@@ -3208,7 +3208,7 @@ namespace Game.Spells
             else
                 pct = 50;
 
-            uint count = 1;
+            var count = 1;
             player.DestroyItemCount(foodItem, ref count, true);
             // @todo fix crash when a spell has two effects, both pointed at the same item target
 
