@@ -146,13 +146,12 @@ namespace Game.Entities
         
         public float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType)
         {
-            float baseExpertise = 7.5f;
             switch (attType)
             {
                 case WeaponAttackType.BaseAttack:
-                    return baseExpertise + m_activePlayerData.MainhandExpertise / 4.0f;
+                    return m_activePlayerData.MainhandExpertise / 4.0f;
                 case WeaponAttackType.OffAttack:
-                    return baseExpertise + m_activePlayerData.OffhandExpertise / 4.0f;
+                    return m_activePlayerData.OffhandExpertise / 4.0f;
                 default:
                     break;
             }

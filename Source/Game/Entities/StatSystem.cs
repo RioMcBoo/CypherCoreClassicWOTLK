@@ -1144,6 +1144,7 @@ namespace Game.Entities
                     UpdateShieldBlockValue();
                     break;
                 case Stats.Agility:
+                    UpdateArmor();
                     UpdateAllCritPercentages();
                     UpdateDodgePercentage();
                     break;
@@ -1163,14 +1164,12 @@ namespace Game.Entities
                 UpdateAttackPowerAndDamage(false);
             else if (stat == Stats.Agility)
             {
-                UpdateAttackPowerAndDamage(false);
+                //UpdateAttackPowerAndDamage(false); duplicated in UpdateArmor();
                 UpdateAttackPowerAndDamage(true);
             }
-
-            UpdateArmor();
+            
             UpdateSpellDamageAndHealingBonus();
             UpdateManaRegen();
-
             return true;
         }
 
@@ -1603,15 +1602,15 @@ namespace Game.Entities
         {
             UnitMods unitMod = UnitMods.Armor;
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);    // base armor
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);     // base armor
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);            // armor percent
-
+            value += GetStat(Stats.Agility) * 2.0f;                                      // armor bonus from stats
             float baseValue = value;
 
             value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);        // bonus armor from auras and items
 
             // add dynamic flat mods
-            var mResbyIntellect = GetAuraEffectsByType(AuraType.SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT);
+            var mResbyIntellect = GetAuraEffectsByType(AuraType.HandleAuraModResistenceOfStatPercent);
             foreach ( var aurEff in mResbyIntellect)
                 if (aurEff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal))
                     value += MathFunctions.CalculatePct(GetStat((Stats)aurEff.GetMiscValueB()), aurEff.GetAmount());
@@ -2160,8 +2159,8 @@ namespace Game.Entities
         
         public override void UpdateMaxPower(PowerType power)
         {
-            uint powerIndex = GetPowerIndex(power);
-            if (powerIndex == (uint)PowerType.Max || powerIndex >= (uint)PowerType.MaxPerClass)
+            var powerIndex = GetPowerIndex(power);
+            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
