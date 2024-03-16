@@ -877,7 +877,7 @@ namespace Game
                 }
             }
 
-            bool SocketBonusActivated = itemTarget.GemsFitSockets();    //save state of socketbonus
+            bool hadSocketBonusActive = itemTarget.GemsFitSockets();    //save state of socketbonus
             GetPlayer().ToggleMetaGemsActive(slot, false);             //turn off all metagems (except for the target item)
 
             //if a meta gem is being equipped, all information has to be written to the item before testing if the conditions for the gem are met
@@ -904,7 +904,7 @@ namespace Game
                 _player.ApplyEnchantment(itemTarget, enchanmentSlot, true);           
 
             bool SocketBonusToBeActivated = itemTarget.GemsFitSockets();//current socketbonus state
-            if (SocketBonusActivated ^ SocketBonusToBeActivated)     //if there was a change...
+            if (hadSocketBonusActive ^ SocketBonusToBeActivated)     //if there was a change...
             {
                 GetPlayer().ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementSocketBonus, false);
                 itemTarget.SetEnchantment(EnchantmentSlot.EnhancementSocketBonus, SocketBonusToBeActivated ? itemTarget.GetTemplate().GetSocketBonus() : 0, 0, 0, GetPlayer().GetGUID());

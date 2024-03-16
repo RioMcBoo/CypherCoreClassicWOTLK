@@ -12474,9 +12474,9 @@ namespace Game
             }
         }
 
-        public uint ItemType;
+        public int ItemType;
         public ItemSpecStat[] ItemSpecStatTypes = new ItemSpecStat[ItemConst.MaxStats];
-        public uint ItemSpecStatCount;
+        public int ItemSpecStatCount;
     }
 
     public class SkillTiersEntry

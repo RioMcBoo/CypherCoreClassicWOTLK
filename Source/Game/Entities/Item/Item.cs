@@ -2213,7 +2213,6 @@ namespace Game.Entities
         int mb_in_trade;
         long m_lastPlayedTimeUpdate;
         List<ObjectGuid> allowedGUIDs = new();
-        Array<int> m_gemScalingLevels = new(ItemConst.MaxGemSockets);
         #endregion
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
