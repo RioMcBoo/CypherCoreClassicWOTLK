@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Game.DataStorage;
-using Game.Miscellaneous;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -262,6 +261,8 @@ namespace Game.Entities
         public int GetScalingStatContentTuning() { return ExtendedData.ContentTuningID; }
         public ushort GetScalingStatDistributionID() { return ExtendedData.ScalingStatDistributionID; }
         public int GetScalingStatValue() { return BasicData.ScalingStatValue; }
+        public ushort GetMinDamage(int index) { return BasicData.MinDamage[index]; }
+        public ushort GetMaxDamage(int index) { return BasicData.MaxDamage[index]; }
         public int GetPlayerLevelToItemLevelCurveId() { return ExtendedData.PlayerLevelToItemLevelCurveID; }
         public SpellSchools GetDamageType() { return ExtendedData.DamageType; }
         public uint GetDelay() { return ExtendedData.ItemDelay; }

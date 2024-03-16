@@ -56,10 +56,10 @@ namespace Game.DataStorage
         public uint MaxDurability;
         public byte AmmunitionType;
         public int ScalingStatValue;
-        public byte[] DamageType = new byte[5];
+        public byte[] DamageType = new byte[ItemConst.MaxDamages];
         public short[] Resistances = new short[7];
-        public ushort[] MinDamage = new ushort[5];
-        public ushort[] MaxDamage = new ushort[5];
+        public ushort[] MinDamage = new ushort[ItemConst.MaxDamages];
+        public ushort[] MaxDamage = new ushort[ItemConst.MaxDamages];
 
         #region Properties
         public ItemClass ClassID => (ItemClass)_classID;

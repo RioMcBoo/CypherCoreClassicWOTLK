@@ -224,24 +224,45 @@ namespace Game.Entities
             if (!IsInFeralForm() && apply && !CanUseAttackType(attType))
                 return;
 
+            var ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(proto.GetScalingStatDistributionID());
+            var ssv = (ssd != null && proto.GetScalingStatValue() != 0) ? Global.DB2Mgr.GetScalingStatValuesForLevel(Math.Clamp(GetLevel(), ssd.MinLevel, ssd.MaxLevel)) : null;
+
             float damage = 0.0f;
-            uint itemLevel = item.GetItemLevel(this);
-            float minDamage, maxDamage;
-            proto.GetDamage(itemLevel, out minDamage, out maxDamage);
+            var itemLevel = item.GetItemLevel(this);
 
-            if (minDamage > 0)
+            //for (int i = 0; i < ItemConst.MaxDamages; ++i)
             {
-                damage = apply ? minDamage : SharedConst.BaseMinDamage;
-                SetBaseWeaponDamage(attType, WeaponDamageRange.MinDamage, damage);
+                float minDamage = proto.GetMinDamage(0);
+                float maxDamage = proto.GetMaxDamage(0);
+
+                // If set dpsMod in ScalingStatValue use it for min(70 % from average), max(130 % from average) damage
+                if (ssv != null)
+                {
+                    var extraDPS = ssv.getDPSMod(proto.GetScalingStatValue());
+                    if (extraDPS != 0)
+                    {
+                        float average = extraDPS * proto.GetDelay() / 1000.0f;
+                        float mod = ssv.isTwoHand((uint)proto.GetScalingStatValue()) ? 0.2f : 0.3f;
+
+                        minDamage = (1.0f - mod) * average;
+                        maxDamage = (1.0f + mod) * average;
+                    }
+                }
+                
+                if (minDamage > 0)
+                {
+                    damage = apply ? minDamage : SharedConst.BaseMinDamage;
+                    SetBaseWeaponDamage(attType, WeaponDamageRange.MinDamage, damage);
+                }
+
+                if (maxDamage > 0)
+                {
+                    damage = apply ? maxDamage : SharedConst.BaseMaxDamage;
+                    SetBaseWeaponDamage(attType, WeaponDamageRange.MaxDamage, damage);
+                }
             }
 
-            if (maxDamage > 0)
-            {
-                damage = apply ? maxDamage : SharedConst.BaseMaxDamage;
-                SetBaseWeaponDamage(attType, WeaponDamageRange.MaxDamage, damage);
-            }
-
-            SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetShapeshiftForm());
+            SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey((int)GetShapeshiftForm());
             if (proto.GetDelay() != 0 && !(shapeshift != null && shapeshift.CombatRoundTime != 0))
                 SetBaseAttackTime(attType, apply ? proto.GetDelay() : SharedConst.BaseAttackTime);
 

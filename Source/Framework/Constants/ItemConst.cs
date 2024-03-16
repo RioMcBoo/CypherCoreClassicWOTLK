@@ -9,7 +9,7 @@ namespace Framework.Constants
     {
         public const int MinItemLevel = 1;
         public const int MaxItemLevel = 1300;
-        public const int MaxDamages = 2;                           // changed in 3.1.0
+        public const int MaxDamages = 5;
         public const int MaxGemSockets = 3;
         public const int MaxSpells = 5;
         public const int MaxStats = 10;
