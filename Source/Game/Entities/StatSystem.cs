@@ -1,16 +1,13 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Bgs.Protocol.Notification.V1;
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Networking.Packets;
 using Game.Spells;
-using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Game.AI.SmartTarget;
 
 namespace Game.Entities
 {
@@ -1409,7 +1406,7 @@ namespace Game.Entities
 
             float attackPowerMod = Math.Max(GetAPMultiplier(attType, normalized), 0.25f);
 
-            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType) / 3.5f * attackPowerMod;
+            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType) / 14.0f * attackPowerMod;
             float basePct = GetPctModifierValue(unitMod, UnitModifierPctType.Base);
             float totalValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
             float totalPct = addTotalPct ? GetPctModifierValue(unitMod, UnitModifierPctType.Total) : 1.0f;
@@ -1529,16 +1526,17 @@ namespace Game.Entities
                 {
                     float strengthValue = Math.Max((GetStat(Stats.Strength)) * entry.AttackPowerPerStrength, 0.0f);
                     float agilityValue = Math.Max((GetStat(Stats.Agility)) * entry.AttackPowerPerAgility, 0.0f);
+                    float classSpecificBonus = GetClass() switch
+                    {
+                        Class.Warrior or Class.Paladin or Class.Deathknight => GetLevel() * 3.0f - 20.0f,
+                        Class.Rogue or Class.Hunter or Class.Shaman or Class.Druid => GetLevel() * 2.0f - 20.0f,
+                        _ => -20f
+                    };
 
-                    var form = CliDB.SpellShapeshiftFormStorage.LookupByKey((int)GetShapeshiftForm());
-                    // Directly taken from client, SHAPESHIFT_FLAG_AP_FROM_STRENGTH ?
-                    if (form != null && Convert.ToBoolean((uint)form.Flags & 0x20))
-                        agilityValue += Math.Max(GetStat(Stats.Agility) * entry.AttackPowerPerStrength, 0.0f);
-
-                    val2 = strengthValue + agilityValue;
+                    val2 = strengthValue + agilityValue + classSpecificBonus;
                 }
                 else
-                    val2 = (level + Math.Max(GetStat(Stats.Agility), 0.0f)) * entry.RangedAttackPowerPerAgility;
+                    val2 = (level + Math.Max(GetStat(Stats.Agility), 0.0f)) * entry.RangedAttackPowerPerAgility - 10.0f;
             }
             else
             {
@@ -2377,7 +2375,7 @@ namespace Game.Entities
 
             float attackPower = GetTotalAttackPowerValue(attType);
             float attackSpeedMulti = Math.Max(GetAPMultiplier(attType, normalized), 0.25f);
-            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + (attackPower / 3.5f) * variance;
+            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + (attackPower / 14.0f) * variance;
             float basePct = GetPctModifierValue(unitMod, UnitModifierPctType.Base) * attackSpeedMulti;
             float totalValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
             float totalPct = addTotalPct ? GetPctModifierValue(unitMod, UnitModifierPctType.Total) : 1.0f;
