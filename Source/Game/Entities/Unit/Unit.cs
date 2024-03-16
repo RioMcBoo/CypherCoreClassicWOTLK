@@ -3843,19 +3843,17 @@ namespace Game.Entities
             }
 
             if (MathFunctions.fuzzyLe(armor, 0.0f))
-                return damage;
+                armor = 0;
 
             float levelModifier = attacker != null ? attacker.GetLevel() : attackerLevel;
             if (levelModifier > 59.0f)
                 levelModifier = levelModifier + 4.5f * (levelModifier - 59.0f);
 
-            // Expansion and ContentTuningID necessary? Does Player get a ContentTuningID too ?
-            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, attackerClass, 0);
-            if ((armor + armorConstant) == 0)
-                return damage;
+            float damageReduction = 0.1f * armor / (8.5f * levelModifier + 40.0f);
+            damageReduction /= (1.0f + damageReduction);
 
             MathFunctions.RoundToInterval(ref damageReduction, 0.0f, 0.75f);
-            return (uint)Math.Ceiling(Math.Max(damage * (1.0f - damageReduction), 0.0f));
+            return (int)Math.Ceiling(Math.Max(damage * (1.0f - damageReduction), 0.0f));
         }
 
         public int MeleeDamageBonusDone(Unit victim, int damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, Mechanics mechanic = default, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, Spell spell = null, AuraEffect aurEff = null)
