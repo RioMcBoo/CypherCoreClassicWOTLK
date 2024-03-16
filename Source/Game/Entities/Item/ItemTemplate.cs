@@ -131,13 +131,15 @@ namespace Game.Entities
             }
         }
 
-        public float GetDPS(int itemLevel)
+        public float GetDPS()
         {
             ItemQuality quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
             if (GetClass() != ItemClass.Weapon || quality > ItemQuality.Artifact)
                 return 0.0f;
 
             float dps = 0.0f;
+            var itemLevel = GetItemLevel();
+
             switch (GetInventoryType())
             {
                 case InventoryType.Ammo:
@@ -184,10 +186,10 @@ namespace Game.Entities
             return dps;
         }
 
-        public void GetDamage(int itemLevel, out float minDamage, out float maxDamage)
+        public void GetDamage(out float minDamage, out float maxDamage)
         {
             minDamage = maxDamage = 0.0f;
-            float dps = GetDPS(itemLevel);
+            float dps = GetDPS();
             if (dps > 0.0f)
             {
                 float avgDamage = dps * GetDelay() * 0.001f;
