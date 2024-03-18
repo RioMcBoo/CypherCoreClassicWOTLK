@@ -740,13 +740,12 @@ namespace Game
                 return;
 
             //this slot is excepted when applying / removing meta gem bonus
-            byte slot = itemTarget.IsEquipped() ? itemTarget.InventorySlot : ItemSlot.Null;
+            var slot = itemTarget.IsEquipped() ? itemTarget.InventorySlot : ItemSlot.Null;
 
             var gems = new Item[ItemConst.MaxGemSockets];
             var gemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];
             var gemProperties = new GemPropertiesRecord[ItemConst.MaxGemSockets];
             var oldGemData = new SocketedGem[ItemConst.MaxGemSockets];
-
 
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
@@ -756,43 +755,43 @@ namespace Game
                     gems[i] = gem;
                     gemData[i].ItemId = gem.GetEntry();
                     gemData[i].Context = (byte)gem.m_itemData.Context;
-                    for (int b = 0; b < gem.GetBonusListIDs().Count && b < 16; ++b)
-                        gemData[i].BonusListIDs[b] = (ushort)gem.GetBonusListIDs()[b];
 
                     gemProperties[i] = CliDB.GemPropertiesStorage.LookupByKey(gem.GetTemplate().GetGemProperties());
                 }
 
-                oldGemData[i] = itemTarget.GetGem((ushort)i);
+                oldGemData[i] = itemTarget.GetGem(i);
             }
 
-            // Find first prismatic socket
-            var firstPrismatic = 0;
-            while (firstPrismatic < ItemConst.MaxGemSockets && itemTarget.GetSocketColor(firstPrismatic) != 0)
-                ++firstPrismatic;
+            //There can only be one enchanted prismatic socket (SocketType.None + EnchantmentSlot.EnhancementSocketPrismatic)
+            int? enchantedPrismaticSocket = null;
 
-            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)                //check for hack maybe
+            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
                 if (gemProperties[i] == null)
                     continue;
 
-                // tried to put gem in socket where no socket exists (take care about prismatic sockets)
-                if (itemTarget.GetSocketColor(i) == 0)
+                // tried to put gem in socket where no socket exists (take care about enchanted prismatic sockets)
+                if (itemTarget.GetSocketType(i) == SocketType.None)
                 {
-                    // no prismatic socket
+                    // no enchanted prismatic socket
                     if (itemTarget.GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic) == 0)
                         return;
 
-                    if (i != firstPrismatic)
+                    // already has enchanted prismatic socket
+                    if (enchantedPrismaticSocket.HasValue)
                         return;
-                }     
 
-                // Gem must match socket color
-                if (ItemConst.SocketColorToGemTypeMask[(int)itemTarget.GetSocketColor(i)] != gemProperties[i].Type)
-                {
-                    // unless its red, blue, yellow or prismatic
-                    if (!ItemConst.SocketColorToGemTypeMask[(int)itemTarget.GetSocketColor(i)].HasAnyFlag(SocketColor.Prismatic) || !gemProperties[i].Type.HasAnyFlag(SocketColor.Prismatic))
-                        return;
+                    enchantedPrismaticSocket = i;
                 }
+
+                // Gem must match socket type
+                var socketType =
+                    (enchantedPrismaticSocket.HasValue && enchantedPrismaticSocket.Value == i) ?
+                    SocketType.Prismatic :
+                    itemTarget.GetSocketType(i);
+
+                if (!gemProperties[i].Color.DoesMatchType(socketType))
+                    return;
             }
 
             // check unique-equipped conditions
@@ -877,7 +876,7 @@ namespace Game
                 }
             }
 
-            bool hadSocketBonusActive = itemTarget.GemsFitSockets();    //save state of socketbonus
+            bool hadSocketBonusActive = itemTarget.HasAllSocketsFilledWithMatchingColors();    //save state of socketbonus
             GetPlayer().ToggleMetaGemsActive(slot, false);             //turn off all metagems (except for the target item)
 
             //if a meta gem is being equipped, all information has to be written to the item before testing if the conditions for the gem are met
@@ -903,7 +902,7 @@ namespace Game
             for (EnchantmentSlot enchanmentSlot = EnchantmentSlot.EnhancementSocket; enchanmentSlot < (EnchantmentSlot.EnhancementSocket + ItemConst.MaxGemSockets); ++enchanmentSlot)
                 _player.ApplyEnchantment(itemTarget, enchanmentSlot, true);           
 
-            bool SocketBonusToBeActivated = itemTarget.GemsFitSockets();//current socketbonus state
+            bool SocketBonusToBeActivated = itemTarget.HasAllSocketsFilledWithMatchingColors();//current socketbonus state
             if (hadSocketBonusActive ^ SocketBonusToBeActivated)     //if there was a change...
             {
                 GetPlayer().ApplyEnchantment(itemTarget, EnchantmentSlot.EnhancementSocketBonus, false);

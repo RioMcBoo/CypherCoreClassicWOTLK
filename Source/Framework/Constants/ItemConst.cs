@@ -43,16 +43,6 @@ namespace Framework.Constants
             0xffe6cc80  // LIGHT YELLOW
         };
 
-        public static SocketColor[] SocketColorToGemTypeMask =
-        {
-            0,
-            SocketColor.Meta,
-            SocketColor.Red,
-            SocketColor.Yellow,
-            SocketColor.Blue,
-            SocketColor.Prismatic,
-        };
-
         public static ItemModifier[] AppearanceModifierSlotBySpec =
         {
             ItemModifier.TransmogAppearanceSpec1,
@@ -166,15 +156,30 @@ namespace Framework.Constants
         public const byte End = 19;
     }
 
+    public enum SocketType : int
+    {
+        None = 0,
+        Meta = 1,
+        Red = 2,
+        Yellow = 3,
+        Blue = 4,
+        Prismatic = 5,
+    }
+
     [Flags]
     public enum SocketColor : int
     {
-        None = 0x00000,
-        Meta = 0x00001,
-        Red = 0x00002,
-        Yellow = 0x00004,
-        Blue = 0x00008,
+        None = 0,
+        Meta = 1 << (SocketType.Meta - 1),
+        Red = 1 << (SocketType.Red - 1),
+        Yellow = 1 << (SocketType.Yellow - 1),
+        Blue = 1 << (SocketType.Blue - 1),
+
         Prismatic = Red | Yellow | Blue,
+
+        Orange = Red | Yellow,
+        Green = Yellow | Blue,
+        Violet = Red | Blue,
     }
 
     [Flags]

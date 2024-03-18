@@ -277,10 +277,10 @@ namespace Game.Entities
         public BagFamilyMask GetBagFamily() { return (BagFamilyMask)ExtendedData.BagFamily; }
         public int GetTotemCategory() { return ExtendedData.TotemCategoryID; }
 
-        public SocketColor GetSocketColor(int index)
+        public SocketType GetSocketColor(int index)
         {
             Cypher.Assert(index < ItemConst.MaxGemSockets);
-            return (SocketColor)ExtendedData.SocketType[index];
+            return (SocketType)ExtendedData.SocketType[index];
         }
 
         public int GetShieldBlockValue(int itemLevel)

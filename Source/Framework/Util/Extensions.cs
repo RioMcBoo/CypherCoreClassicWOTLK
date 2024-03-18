@@ -40,6 +40,39 @@ namespace System
             return (lValue & lFlag) == lFlag;
         }
 
+        public static bool DoesMatchColor(this SocketColor mask, SocketType type)
+        {
+            switch (type)
+            {
+                case SocketType.Meta:
+                    return mask.HasAnyFlag(SocketColor.Meta);
+                case SocketType.Red:
+                    return mask.HasAnyFlag(SocketColor.Red);
+                case SocketType.Yellow:
+                    return mask.HasAnyFlag(SocketColor.Yellow);
+                case SocketType.Blue:
+                    return mask.HasAnyFlag(SocketColor.Blue);
+                case SocketType.Prismatic:
+                    return mask.HasAnyFlag(SocketColor.Prismatic);
+                default: return false;
+            }
+        }
+
+        public static bool DoesMatchType(this SocketColor mask, SocketType type)
+        {
+            switch (type)
+            {
+                case SocketType.Meta:
+                    return mask.HasAnyFlag(SocketColor.Meta);
+                case SocketType.Red:
+                case SocketType.Yellow:
+                case SocketType.Blue:
+                case SocketType.Prismatic:
+                    return mask.HasAnyFlag(SocketColor.Prismatic);
+                default: return false;
+            }
+        }
+
         public static bool HasRace(this RaceMask mask, Race _race)
         {
             switch (_race)

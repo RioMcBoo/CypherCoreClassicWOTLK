@@ -869,7 +869,7 @@ namespace Game.Entities
             SetState(ItemUpdateState.Changed, GetOwner());
         }
 
-        public SocketedGem GetGem(ushort slot)
+        public SocketedGem GetGem(int slot)
         {
             //ASSERT(slot < MAX_GEM_SOCKETS);
             return slot < m_itemData.Gems.Size() ? m_itemData.Gems[slot] : null;
@@ -887,26 +887,39 @@ namespace Game.Entities
                 SetUpdateFieldValue(ref gemField.ModifyValue(gemField.BonusListIDs, i), gem.BonusListIDs[i]);
         }
 
-        public bool GemsFitSockets()
+        public bool HasAllSocketsFilledWithMatchingColors()
         {
-            int gemSlot = 0;
-            foreach (SocketedGem gemData in m_itemData.Gems)
+            var gemSlots = new Dictionary<int, SocketType>(ItemConst.MaxGemSockets);
+            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
-                SocketColor SocketColor = GetTemplate().GetSocketColor(gemSlot);
-                if (SocketColor == 0) // no socket slot
+                var socketType = GetTemplate().GetSocketColor(i);
+                if (socketType != SocketType.None)  // no socket slot
+                    gemSlots.Add(i, socketType);
+            }
+
+            if (gemSlots.Count > m_itemData.Gems.Size())
+                return false;
+
+            var gemSlot = 0;
+            foreach (var gemData in m_itemData.Gems)
+            {
+                if (gemSlots.TryGetValue(gemSlot, out var socketType))
+                {
+                    gemSlot++;
                     continue;
+                }                    
 
-                SocketColor GemColor = 0;
+                var gemColor = SocketColor.None;
 
-                ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId.GetValue());
+                var gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId);
                 if (gemProto != null)
                 {
-                    GemPropertiesRecord gemProperty = CliDB.GemPropertiesStorage.LookupByKey(gemProto.GetGemProperties());
+                    var gemProperty = CliDB.GemPropertiesStorage.LookupByKey(gemProto.GetGemProperties());
                     if (gemProperty != null)
-                        GemColor = gemProperty.Type;
+                        gemColor = gemProperty.Color;
                 }
 
-                if (!GemColor.HasAnyFlag(ItemConst.SocketColorToGemTypeMask[(int)SocketColor])) // bad gem color on this socket
+                if (!gemColor.DoesMatchColor(socketType)) // bad gem color on this socket
                     return false;
             }
             return true;
@@ -1793,10 +1806,7 @@ namespace Game.Entities
                 return enchant.ItemVisual;
 
             return 0;
-        }
-
-        public List<int> GetBonusListIDs() { return m_itemData.ItemBonusKey.GetValue().BonusListIDs; }
-                
+        }                
 
         public ItemContext GetContext() { return (ItemContext)(int)m_itemData.Context; }
         public void SetContext(ItemContext context) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Context), (int)context); }
@@ -2082,7 +2092,7 @@ namespace Game.Entities
         public bool IsRangedWeapon() { return GetTemplate().IsRangedWeapon(); }
         public ItemQuality GetQuality() { return _bonusData.Quality; }
 
-        public SocketColor GetSocketColor(int index)
+        public SocketType GetSocketType(int index)
         {
             Cypher.Assert(index < ItemConst.MaxGemSockets && index > -1);
             return _bonusData.socketColor[index];
@@ -2296,7 +2306,7 @@ namespace Game.Entities
         public int ItemLevelBonus;
         public int RequiredLevel;
         public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
-        public SocketColor[] socketColor = new SocketColor[ItemConst.MaxGemSockets];
+        public SocketType[] socketColor = new SocketType[ItemConst.MaxGemSockets];
         public ItemBondingType Bonding;
         public int AppearanceModID;
         public float RepairCostMultiplier;

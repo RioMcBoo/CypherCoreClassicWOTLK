@@ -2141,7 +2141,7 @@ namespace Game.Entities
 
                 Item pItem = GetItemByPos(slot);
 
-                if (pItem == null || pItem.GetSocketColor(0) == 0)   //if item has no sockets or no item is equipped go to next item
+                if (pItem == null || pItem.GetSocketType(0) == 0)   //if item has no sockets or no item is equipped go to next item
                     continue;
 
                 //cycle all (gem)enchants
@@ -3068,7 +3068,7 @@ namespace Game.Entities
 
             Log.outInfo(LogFilter.Player, $"Player._ApplyItemMods: Applying mods for item {item.GetGUID()}.");
 
-            if (item.GetSocketColor(0) != 0)                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
+            if (item.GetSocketType(0) != 0)                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
                 CorrectMetaGemEnchants(slot, apply);
 
             _ApplyItemBonuses(item, slot, apply, onlyForScalingItems);

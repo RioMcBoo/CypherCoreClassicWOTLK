@@ -285,11 +285,11 @@ namespace Game.DataStorage
     {
         public int Id;
         public ushort EnchantId;
-        private int _type;
+        private int _typeMask;
         public ushort MinItemLevel;
 
         #region Properties
-        public SocketColor Type => (SocketColor)_type;
+        public SocketColor Color => (SocketColor)_typeMask;
         #endregion
     }
 

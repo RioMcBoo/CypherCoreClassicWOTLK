@@ -1539,7 +1539,7 @@ namespace Game.Entities
                         if (gemProperty == null)
                             continue;
 
-                        uint GemColor = (uint)gemProperty.Type;
+                        uint GemColor = (uint)gemProperty.Color;
 
                         for (byte b = 0, tmpcolormask = 1; b < 4; b++, tmpcolormask <<= 1)
                         {
@@ -1592,7 +1592,7 @@ namespace Game.Entities
 
                 Item pItem = GetItemByPos(slot);
 
-                if (pItem == null || pItem.GetSocketColor(0) == 0)
+                if (pItem == null || pItem.GetSocketType(0) == 0)
                     continue;
 
                 for (EnchantmentSlot enchant_slot = EnchantmentSlot.EnhancementSocket; enchant_slot < EnchantmentSlot.EnhancementSocket3; ++enchant_slot)
