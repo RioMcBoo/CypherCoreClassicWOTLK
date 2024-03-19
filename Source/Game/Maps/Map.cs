@@ -3296,7 +3296,7 @@ namespace Game.Maps
         public bool IsHeroic()
         {
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(i_spawnMode);
-            if (difficulty != null && difficulty.Flags.HasFlag(DifficultyFlags.DisplayHeroic))
+            if (difficulty != null && difficulty.HasFlag(DifficultyFlags.DisplayHeroic))
                 return true;
 
             // compatibility purposes of old difficulties
@@ -3311,7 +3311,7 @@ namespace Game.Maps
         {
             var difficulty = CliDB.DifficultyStorage.LookupByKey(i_spawnMode);
             if (difficulty != null)
-                return difficulty.Flags.HasFlag(DifficultyFlags.DisplayMythic);
+                return difficulty.HasFlag(DifficultyFlags.DisplayMythic);
 
             return false;
         }

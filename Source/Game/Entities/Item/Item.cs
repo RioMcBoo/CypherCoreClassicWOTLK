@@ -1874,7 +1874,7 @@ namespace Game.Entities
             if (set.RequiredSkill != 0 && player.GetSkillValue((SkillType)set.RequiredSkill) < set.RequiredSkillRank)
                 return;
 
-            if (set.SetFlags.HasAnyFlag(ItemSetFlags.LegacyInactive))
+            if (set.HasFlag(ItemSetFlags.LegacyInactive))
                 return;
 
             // Check player level for heirlooms

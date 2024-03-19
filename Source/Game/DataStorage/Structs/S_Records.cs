@@ -263,12 +263,12 @@ namespace Game.DataStorage
         #endregion
 
         #region Helpers
-        public bool HasFlag(SkillRaceClassInfoFlags flag)
+        public bool HasFlag(SkillLineAbilityFlags flag)
         {
             return _flags.HasFlag((sbyte)flag);
         }
 
-        public bool HasAnyFlag(SkillRaceClassInfoFlags flag)
+        public bool HasAnyFlag(SkillLineAbilityFlags flag)
         {
             return _flags.HasAnyFlag((sbyte)flag);
         }

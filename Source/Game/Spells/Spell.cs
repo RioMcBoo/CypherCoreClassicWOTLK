@@ -6180,7 +6180,7 @@ namespace Game.Spells
             (float minRange, float maxRange) = GetMinMaxRange(strict);
 
             // dont check max_range to strictly after cast
-            if (m_spellInfo.RangeEntry != null && m_spellInfo.RangeEntry.Flags != SpellRangeFlag.Melee && !strict)
+            if (m_spellInfo.RangeEntry != null && !m_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Melee) && !strict)
                 maxRange += Math.Min(3.0f, maxRange * 0.1f); // 10% but no more than 3.0f
 
             // get square values for sqr distance checks
@@ -6233,7 +6233,7 @@ namespace Game.Spells
             if (m_spellInfo.RangeEntry != null)
             {
                 Unit target = m_targets.GetUnitTarget();
-                if (m_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Melee))
+                if (m_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Melee))
                 {
                     // when the target is not a unit, take the caster's combat reach as the target's combat reach.
                     if (unitCaster != null)
@@ -6242,7 +6242,7 @@ namespace Game.Spells
                 else
                 {
                     float meleeRange = 0.0f;
-                    if (m_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Ranged))
+                    if (m_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Ranged))
                     {
                         // when the target is not a unit, take the caster's combat reach as the target's combat reach.
                         if (unitCaster != null)
@@ -6256,13 +6256,13 @@ namespace Game.Spells
                     {
                         rangeMod = m_caster.GetCombatReach() + (target != null ? target.GetCombatReach() : m_caster.GetCombatReach());
 
-                        if (minRange > 0.0f && !m_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Ranged))
+                        if (minRange > 0.0f && !m_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Ranged))
                             minRange += rangeMod;
                     }
                 }
 
                 if (target != null && unitCaster != null && unitCaster.IsMoving() && target.IsMoving() && !unitCaster.IsWalking() && !target.IsWalking() &&
-                    (m_spellInfo.RangeEntry.Flags.HasFlag(SpellRangeFlag.Melee) || target.IsPlayer()))
+                    (m_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Melee) || target.IsPlayer()))
                     rangeMod += 8.0f / 3.0f;
             }
 

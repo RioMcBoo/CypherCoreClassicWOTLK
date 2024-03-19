@@ -81,6 +81,7 @@ namespace Framework.Constants
         Spell = 16,
     }
 
+    [Flags]
     public enum SpellRangeFlag : byte
     {
         Default = 0,

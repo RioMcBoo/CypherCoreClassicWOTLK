@@ -62,7 +62,7 @@ namespace Game
             }
 
             BattlemasterListRecord battlemasterListEntry = CliDB.BattlemasterListStorage.LookupByKey((int)bgQueueTypeId.BattlemasterListId);
-            if (Global.DisableMgr.IsDisabledFor(DisableType.Battleground, (int)bgQueueTypeId.BattlemasterListId, null) || battlemasterListEntry.Flags.HasAnyFlag(BattlemasterListFlags.Disabled))
+            if (Global.DisableMgr.IsDisabledFor(DisableType.Battleground, (int)bgQueueTypeId.BattlemasterListId, null) || battlemasterListEntry.HasFlag(BattlemasterListFlags.Disabled))
             {
                 GetPlayer().SendSysMessage(CypherStrings.BgDisabled);
                 return;

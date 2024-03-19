@@ -1654,7 +1654,7 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        //Repitation
+        //Reputation
         public int CalculateReputationGain(ReputationSource source, int creatureOrQuestLevel, int rep, int faction, bool noQuestBonus = false)
         {
             float percent = 100.0f;
@@ -2114,7 +2114,7 @@ namespace Game.Entities
         public int GetStartLevel(Race race, Class playerClass, int? characterTemplateId = null)
         {
             int startLevel = WorldConfig.GetIntValue(WorldCfg.StartPlayerLevel);
-            if (CliDB.ChrRacesStorage.LookupByKey((int)race).HasAnyFlag(ChrRacesFlag.IsAlliedRace))
+            if (CliDB.ChrRacesStorage.LookupByKey((int)race).HasFlag(ChrRacesFlag.IsAlliedRace))
                 startLevel = WorldConfig.GetIntValue(WorldCfg.StartAlliedRaceLevel);
 
             if (playerClass == Class.Deathknight)
@@ -2159,7 +2159,7 @@ namespace Game.Entities
                 }
             });
 
-            if (m_unitMovedByMe.GetVehicleBase() == null || !m_unitMovedByMe.GetVehicle().GetVehicleInfo().Flags.HasAnyFlag(VehicleFlags.FixedPosition))
+            if (m_unitMovedByMe.GetVehicleBase() == null || !m_unitMovedByMe.GetVehicle().GetVehicleInfo().HasFlag(VehicleFlags.FixedPosition))
                 RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Root), MovementFlag.Root);
 
             /*! This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid
@@ -5638,7 +5638,7 @@ namespace Game.Entities
             {
                 Difficulty mapDifficulty = GetMap().GetDifficultyID();
                 var difficulty = CliDB.DifficultyStorage.LookupByKey(mapDifficulty);
-                SendRaidDifficulty((difficulty.Flags & DifficultyFlags.Legacy) != 0, (int)mapDifficulty);
+                SendRaidDifficulty(difficulty.HasFlag(DifficultyFlags.Legacy), (int)mapDifficulty);
             }
             else if (GetMap().IsNonRaidDungeon())
                 SendDungeonDifficulty((int)GetMap().GetDifficultyID());
@@ -6949,7 +6949,7 @@ namespace Game.Entities
             // change but I couldn't find a suitable alternative. OK to use class because only DK
             // can use this taxi.
             int mount_display_id;
-            if (node.HasAnyFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
+            if (node.HasFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
                 mount_display_id = preferredMountDisplay;
             else
                 mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));

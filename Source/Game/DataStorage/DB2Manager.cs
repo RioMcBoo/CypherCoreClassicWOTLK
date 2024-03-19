@@ -524,7 +524,7 @@ namespace Game.DataStorage
                 UiMapRecord parentUiMap = UiMapStorage.LookupByKey(uiMap.ParentUiMapID);
                 if (parentUiMap != null)
                 {
-                    if (parentUiMap.HasAnyFlag(UiMapFlag.NoWorldPositions))
+                    if (parentUiMap.HasFlag(UiMapFlag.NoWorldPositions))
                         continue;
                     UiMapAssignmentRecord uiMapAssignment = null;
                     UiMapAssignmentRecord parentUiMapAssignment = null;
@@ -1399,7 +1399,7 @@ namespace Game.DataStorage
                 if (difficultyEntry == null)
                     continue;
 
-                if (difficultyEntry.HasAnyFlag(DifficultyFlags.Default))
+                if (difficultyEntry.HasFlag(DifficultyFlags.Default))
                 {
                     difficulty = pair.Key;
                     return pair.Value;

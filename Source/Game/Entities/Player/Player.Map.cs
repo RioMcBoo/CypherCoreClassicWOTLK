@@ -25,7 +25,7 @@ namespace Game.Entities
                 return m_legacyRaidDifficulty;
 
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(defaultDifficulty.DifficultyID);
-            if (difficulty == null || difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy))
+            if (difficulty == null || difficulty.HasFlag(DifficultyFlags.Legacy))
                 return m_legacyRaidDifficulty;
 
             return m_raidDifficulty;
@@ -46,7 +46,7 @@ namespace Game.Entities
             if (difficultyEntry.InstanceType != MapTypes.Instance)
                 return Difficulty.Normal;
 
-            if (!difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.CanSelect))
+            if (!difficultyEntry.HasFlag(DifficultyFlags.CanSelect))
                 return Difficulty.Normal;
 
             return difficulty;
@@ -60,7 +60,7 @@ namespace Game.Entities
             if (difficultyEntry.InstanceType != MapTypes.Raid)
                 return Difficulty.NormalRaid;
 
-            if (!difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.CanSelect) || difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.Legacy))
+            if (!difficultyEntry.HasFlag(DifficultyFlags.CanSelect) || difficultyEntry.HasFlag(DifficultyFlags.Legacy))
                 return Difficulty.NormalRaid;
 
             return difficulty;
@@ -74,7 +74,7 @@ namespace Game.Entities
             if (difficultyEntry.InstanceType != MapTypes.Raid)
                 return Difficulty.Raid10N;
 
-            if (!difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.CanSelect) || !difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.Legacy))
+            if (!difficultyEntry.HasFlag(DifficultyFlags.CanSelect) || !difficultyEntry.HasFlag(DifficultyFlags.Legacy))
                 return Difficulty.Raid10N;
 
             return difficulty;

@@ -227,7 +227,7 @@ namespace Game.Movement
             uint map0 = _path[_currentNode].ContinentID;
             for (int i = _currentNode + 1; i < _path.Count; ++i)
             {
-                if (_path[i].ContinentID != map0 || _path[i - 1].Flags.HasFlag(TaxiPathNodeFlags.Teleport))
+                if (_path[i].ContinentID != map0 || _path[i - 1].HasFlag(TaxiPathNodeFlags.Teleport))
                 {
                     _currentNode = i;
                     return;

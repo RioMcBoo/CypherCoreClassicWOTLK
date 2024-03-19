@@ -4130,7 +4130,7 @@ namespace Game
 
         public CreatureData NewOrExistCreatureData(long spawnId)
         {
-            if (creatureDataStorage.ContainsKey(spawnId))
+            if (!creatureDataStorage.ContainsKey(spawnId))
                 creatureDataStorage[spawnId] = new CreatureData();
             return creatureDataStorage[spawnId];
         }
@@ -11068,12 +11068,11 @@ namespace Game
             TaxiNodeFlags requireFlag = (team == Team.Alliance) ? TaxiNodeFlags.ShowOnAllianceMap : TaxiNodeFlags.ShowOnHordeMap;
             foreach (var node in CliDB.TaxiNodesStorage.Values)
             {
-                var i = node.Id;
-                if (node.ContinentID != mapid || !node.HasAnyFlag(requireFlag) || node.HasAnyFlag(TaxiNodeFlags.IgnoreForFindNearest))
+                if (node.ContinentID != mapid || !node.HasFlag(requireFlag) || node.HasFlag(TaxiNodeFlags.IgnoreForFindNearest))
                     continue;
 
-                var field = (i - 1) / 8;
-                byte submask = (byte)(1 << ((i - 1) % 8));
+                var field = (node.Id - 1) / 8;
+                byte submask = (byte)(1 << ((node.Id - 1) % 8));
 
                 // skip not taxi network nodes
                 if ((CliDB.TaxiNodesMask[field] & submask) == 0)
@@ -11085,14 +11084,14 @@ namespace Game
                     if (dist2 < dist)
                     {
                         dist = dist2;
-                        id = i;
+                        id = node.Id;
                     }
                 }
                 else
                 {
                     found = true;
                     dist = dist2;
-                    id = i;
+                    id = node.Id;
                 }
             }
 

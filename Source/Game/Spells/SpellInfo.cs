@@ -469,7 +469,7 @@ namespace Game.Spells
                 return true;
 
             SpellCategoryRecord category = CliDB.SpellCategoryStorage.LookupByKey((int)CategoryId);
-            return category != null && category.Flags.HasAnyFlag(SpellCategoryFlags.CooldownStartsOnEvent);
+            return category != null && category.HasFlag(SpellCategoryFlags.CooldownStartsOnEvent);
         }
 
         public bool IsDeathPersistent()
@@ -789,12 +789,12 @@ namespace Game.Spells
                     Log.outError(LogFilter.Spells, "GetErrorAtShapeshiftedCast: unknown shapeshift {0}", form);
                     return SpellCastResult.SpellCastOk;
                 }
-                actAsShifted = !shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.Stance);
+                actAsShifted = !shapeInfo.HasFlag(SpellShapeshiftFormFlags.Stance);
             }
 
             if (actAsShifted)
             {
-                if (HasAttribute(SpellAttr0.NotShapeshifted) || (shapeInfo != null && shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.CanOnlyCastShapeshiftSpells))) // not while shapeshifted
+                if (HasAttribute(SpellAttr0.NotShapeshifted) || (shapeInfo != null && shapeInfo.HasFlag(SpellShapeshiftFormFlags.CanOnlyCastShapeshiftSpells))) // not while shapeshifted
                     return SpellCastResult.NotShapeshift;
                 else if (Stances != 0)   // needs other shapeshift
                     return SpellCastResult.OnlyShapeshift;
@@ -1234,7 +1234,7 @@ namespace Game.Spells
                     if (effectInfo.IsAura(AuraType.ModShapeshift))
                     {
                         var shapeShiftFromEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey(effectInfo.MiscValue);
-                        if (shapeShiftFromEntry != null && !shapeShiftFromEntry.HasAnyFlag(SpellShapeshiftFormFlags.Stance))
+                        if (shapeShiftFromEntry != null && !shapeShiftFromEntry.HasFlag(SpellShapeshiftFormFlags.Stance))
                             checkMask |= VehicleSeatFlags.Uncontrolled;
                         break;
                     }

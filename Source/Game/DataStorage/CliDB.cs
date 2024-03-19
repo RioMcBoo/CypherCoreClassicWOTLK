@@ -399,9 +399,9 @@ namespace Game.DataStorage
                 byte submask = (byte)(1 << (node.Id - 1) % 8);
 
                 TaxiNodesMask[field] |= submask;
-                if (node.HasAnyFlag(TaxiNodeFlags.ShowOnHordeMap))
+                if (node.HasFlag(TaxiNodeFlags.ShowOnHordeMap))
                     HordeTaxiNodesMask[field] |= submask;
-                if (node.HasAnyFlag(TaxiNodeFlags.ShowOnAllianceMap))
+                if (node.HasFlag(TaxiNodeFlags.ShowOnAllianceMap))
                     AllianceTaxiNodesMask[field] |= submask;
 
                 int uiMapId;

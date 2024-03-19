@@ -365,7 +365,7 @@ namespace Game.Entities
             // checked and error show at loading templates
             var factionTemplate = CliDB.FactionTemplateStorage.LookupByKey(cInfo.Faction);
             if (factionTemplate != null)  
-                SetPvP(factionTemplate.HasAnyFlag(FactionTemplateFlags.PVP));               
+                SetPvP(factionTemplate.HasFlag(FactionTemplateFlags.PVP));               
 
             // updates spell bars for vehicles and set player's faction - should be called here, to overwrite faction that is set from the new template
             if (IsVehicle())

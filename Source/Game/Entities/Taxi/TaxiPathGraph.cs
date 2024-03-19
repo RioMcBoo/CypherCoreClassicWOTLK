@@ -59,7 +59,7 @@ namespace Game.Entities
 
                 for (int i = first + 1; i < last; ++i)
                 {
-                    if (nodes[i - 1].Flags.HasAnyFlag(TaxiPathNodeFlags.Teleport))
+                    if (nodes[i - 1].HasFlag(TaxiPathNodeFlags.Teleport))
                         continue;
 
                     int uiMap1, uiMap2;

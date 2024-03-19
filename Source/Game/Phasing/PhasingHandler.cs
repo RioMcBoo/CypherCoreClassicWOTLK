@@ -32,10 +32,10 @@ namespace Game
             PhaseRecord phase = CliDB.PhaseStorage.LookupByKey(phaseId);
             if (phase != null)
             {
-                if (phase.HasAnyFlag(PhaseEntryFlags.Cosmetic))
+                if (phase.HasFlag(PhaseEntryFlags.Cosmetic))
                     return PhaseFlags.Cosmetic;
 
-                if (phase.HasAnyFlag(PhaseEntryFlags.Personal))
+                if (phase.HasFlag(PhaseEntryFlags.Personal))
                     return PhaseFlags.Personal;
             }
 
@@ -629,7 +629,7 @@ namespace Game
         {
             var phase = CliDB.PhaseStorage.LookupByKey(phaseId);
             if (phase != null)
-                return phase.Flags.HasFlag(PhaseEntryFlags.Personal);
+                return phase.HasFlag(PhaseEntryFlags.Personal);
 
             return false;
         }

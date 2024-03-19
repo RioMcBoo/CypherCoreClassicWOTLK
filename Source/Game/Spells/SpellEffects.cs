@@ -1955,7 +1955,7 @@ namespace Game.Spells
             ushort skillval = Math.Max((ushort)1, playerTarget.GetPureSkillValue(skillid));
             ushort maxSkillVal = (ushort)tier.GetValueForTierIndex(damage - 1);
 
-            if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+            if (rcEntry.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                 skillval = maxSkillVal;
 
             playerTarget.SetSkill(skillid, damage, skillval, maxSkillVal);
@@ -4341,7 +4341,7 @@ namespace Game.Spells
             ushort skillval = Math.Max((ushort)1, playerTarget.GetPureSkillValue(skillid));
             ushort maxSkillVal = (ushort)tier.GetValueForTierIndex(damage - 1);
 
-            if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+            if (rcEntry.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                 skillval = maxSkillVal;
 
             playerTarget.SetSkill(skillid, damage, skillval, maxSkillVal);
