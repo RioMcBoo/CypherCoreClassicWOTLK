@@ -2956,7 +2956,7 @@ namespace Game.Entities
 
         public void AddSpellMod(SpellModifier mod, bool apply)
         {
-            Log.outDebug(LogFilter.Spells, "Player.AddSpellMod {0}", mod.spellId);
+            Log.outDebug(LogFilter.Spells, $"Player.AddSpellMod: Player '{GetName()}' ({GetGUID()}), SpellID: {mod.spellId}.");
 
             // First, manipulate our spellmodifier container
             if (apply)
@@ -2985,20 +2985,11 @@ namespace Game.Entities
                             if ((mod as SpellModifierByClassMask).mask & mask)
                             {
                                 SpellModifierData modData = new();
-                                if (mod.type == SpellModType.Flat)
-                                {
-                                    modData.ModifierValue = 0.0f;
-                                    foreach (SpellModifierByClassMask spell in m_spellMods[(int)mod.op][(int)SpellModType.Flat])
-                                        if (spell.mask & mask)
-                                            modData.ModifierValue += spell.value;
-                                }
-                                else
-                                {
-                                    modData.ModifierValue = 1.0f;
-                                    foreach (SpellModifierByClassMask spell in m_spellMods[(int)mod.op][(int)SpellModType.Pct])
-                                        if (spell.mask & mask)
-                                            modData.ModifierValue *= 1.0f + MathFunctions.CalculatePct(1.0f, spell.value);
-                                }
+                                modData.ModifierValue = 0.0f;
+
+                                foreach (SpellModifierByClassMask spell in m_spellMods[(int)mod.op][(int)mod.type])
+                                    if (spell.mask & mask)
+                                        modData.ModifierValue += spell.value;
 
                                 modData.ClassIndex = (byte)eff;
 
