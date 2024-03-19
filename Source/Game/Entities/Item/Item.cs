@@ -892,7 +892,7 @@ namespace Game.Entities
             var gemSlots = new Dictionary<int, SocketType>(ItemConst.MaxGemSockets);
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
-                var socketType = GetTemplate().GetSocketColor(i);
+                var socketType = GetTemplate().GetSocketType(i);
                 if (socketType != SocketType.None)  // no socket slot
                     gemSlots.Add(i, socketType);
             }
@@ -2095,7 +2095,7 @@ namespace Game.Entities
         public SocketType GetSocketType(int index)
         {
             Cypher.Assert(index < ItemConst.MaxGemSockets && index > -1);
-            return _bonusData.socketColor[index];
+            return _bonusData.socketType[index];
         }
 
         public int GetAppearanceModId() { return m_itemData.ItemAppearanceModID; }
@@ -2270,7 +2270,7 @@ namespace Game.Entities
                 ItemStatSocketCostMultiplier[i] = proto.GetStatPercentageOfSocket(i);
 
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)           
-                socketColor[i] = proto.GetSocketColor(i);
+                socketType[i] = proto.GetSocketType(i);
 
             Bonding = proto.GetBonding();
 
@@ -2306,7 +2306,7 @@ namespace Game.Entities
         public int ItemLevelBonus;
         public int RequiredLevel;
         public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
-        public SocketType[] socketColor = new SocketType[ItemConst.MaxGemSockets];
+        public SocketType[] socketType = new SocketType[ItemConst.MaxGemSockets];
         public ItemBondingType Bonding;
         public int AppearanceModID;
         public float RepairCostMultiplier;

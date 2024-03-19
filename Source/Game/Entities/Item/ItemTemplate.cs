@@ -277,7 +277,7 @@ namespace Game.Entities
         public BagFamilyMask GetBagFamily() { return (BagFamilyMask)ExtendedData.BagFamily; }
         public int GetTotemCategory() { return ExtendedData.TotemCategoryID; }
 
-        public SocketType GetSocketColor(int index)
+        public SocketType GetSocketType(int index)
         {
             Cypher.Assert(index < ItemConst.MaxGemSockets);
             return (SocketType)ExtendedData.SocketType[index];
