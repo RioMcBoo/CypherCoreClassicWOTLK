@@ -6691,7 +6691,7 @@ namespace Game.Entities
             UpdateBaseModGroup(modGroup);
         }
 
-        public override void UpdateDamageDoneMods(WeaponAttackType attackType, int skipEnchantSlot = -1)
+        public override void UpdateDamageDoneMods(WeaponAttackType attackType, EnchantmentSlot? skipEnchantSlot = null)
         {
             base.UpdateDamageDoneMods(attackType, skipEnchantSlot);
 
@@ -6704,16 +6704,16 @@ namespace Game.Entities
             };
 
             float amount = 0.0f;
-            Item item = GetWeaponForAttack(attackType, true);
+            var item = GetWeaponForAttack(attackType, true);
             if (item == null)
                 return;
 
             for (var slot = EnchantmentSlot.EnhancementPermanent; slot < EnchantmentSlot.Max; ++slot)
             {
-                if (skipEnchantSlot == (int)slot)
+                if (skipEnchantSlot.HasValue && skipEnchantSlot.Value == slot)
                     continue;
 
-                SpellItemEnchantmentRecord enchantmentEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(slot));
+                var enchantmentEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(slot));
                 if (enchantmentEntry == null)
                     continue;
 
@@ -7436,13 +7436,13 @@ namespace Game.Entities
             return item;
         }
 
-        public static WeaponAttackType GetAttackBySlot(byte slot, InventoryType inventoryType)
+        public static WeaponAttackType? GetAttackBySlot(byte slot, InventoryType inventoryType)
         {
             return slot switch
             {
                 EquipmentSlot.MainHand => inventoryType != InventoryType.Ranged && inventoryType != InventoryType.RangedRight ? WeaponAttackType.BaseAttack : WeaponAttackType.RangedAttack,
                 EquipmentSlot.OffHand => WeaponAttackType.OffAttack,
-                _ => WeaponAttackType.Max,
+                _ => null,
             };
         }
 

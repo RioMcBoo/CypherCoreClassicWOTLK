@@ -4080,7 +4080,7 @@ namespace Game.Entities
 
         public virtual SpellSchools GetMeleeDamageSchool(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return SpellSchools.Normal; }
 
-        public virtual void UpdateDamageDoneMods(WeaponAttackType attackType, int skipEnchantSlot = -1)
+        public virtual void UpdateDamageDoneMods(WeaponAttackType attackType, EnchantmentSlot? skipEnchantSlot = null)
         {
             UnitMods unitMod = attackType switch
             {

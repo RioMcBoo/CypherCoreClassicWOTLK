@@ -697,8 +697,7 @@ namespace Game.Loots
                 if (!lootItem.rollWinnerGUID.IsEmpty() && lootItem.rollWinnerGUID != GetGUID())
                     continue;
                                 
-                List<(ItemPos item, int count)> dest = null;
-                InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out dest, lootItem.itemid, lootItem.count);                
+                InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out var dest, lootItem.itemid, lootItem.count);                
                 if (msg != InventoryResult.Ok)
                 {
                     player.SendEquipError(msg, null, null, lootItem.itemid);

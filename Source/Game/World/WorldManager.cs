@@ -580,11 +580,11 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Enchant Spells Proc datas...");
             Global.SpellMgr.LoadSpellEnchantProcData();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Item Random Enchantments Table...");
-            ItemEnchantmentManager.LoadRandomEnchantmentsTable();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading Disables");                         // must be before loading quests and items
             Global.DisableMgr.LoadDisables();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Item Random Enchantments Table...");
+            ItemEnchantmentManager.LoadRandomEnchantmentsTable();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Items...");                         // must be after LoadRandomEnchantmentsTable and LoadPageTexts
             Global.ObjectMgr.LoadItemTemplates();

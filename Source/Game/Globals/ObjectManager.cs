@@ -5130,7 +5130,6 @@ namespace Game
                         {
                             itemTemplate.ItemSpecClassMask |= specialization.ClassID.GetClassMask();
                             itemTemplate.Specializations[0].Set(ItemTemplate.CalculateItemSpecBit(specialization), true);
-
                             itemTemplate.Specializations[1] = itemTemplate.Specializations[1].Or(itemTemplate.Specializations[0]);
                             itemTemplate.Specializations[2] = itemTemplate.Specializations[2].Or(itemTemplate.Specializations[0]);
                         }
@@ -5147,7 +5146,7 @@ namespace Game
 
                         bool hasPrimary = itemSpec.PrimaryStat == ItemSpecStat.None;
                         bool hasSecondary = itemSpec.SecondaryStat == ItemSpecStat.None;
-                        for (uint i = 0; i < itemSpecStats.ItemSpecStatCount; ++i)
+                        for (int i = 0; i < itemSpecStats.ItemSpecStatCount; ++i)
                         {
                             if (itemSpecStats.ItemSpecStatTypes[i] == itemSpec.PrimaryStat)
                                 hasPrimary = true;
@@ -5161,7 +5160,7 @@ namespace Game
                         ChrSpecializationRecord specialization = CliDB.ChrSpecializationStorage.LookupByKey(itemSpec.SpecializationID);
                         if (specialization != null)
                         {
-                            if (specialization.ClassID.GetClassMask().HasAnyFlag(sparse.AllowableClass))
+                            if (sparse.AllowableClass.HasClass(specialization.ClassID))
                             {
                                 itemTemplate.ItemSpecClassMask |= specialization.ClassID.GetClassMask();
                                 int specBit = ItemTemplate.CalculateItemSpecBit(specialization);
@@ -5305,12 +5304,10 @@ namespace Game
                     if (minMoneyLoot > maxMoneyLoot)
                     {
                         Log.outError(LogFilter.Sql, $"Minimum money loot specified in `itemtemplateaddon` for item {itemId} was greater than maximum amount, swapping.");
-                        uint temp = minMoneyLoot;
-                        minMoneyLoot = maxMoneyLoot;
-                        maxMoneyLoot = temp;
+                        (minMoneyLoot, maxMoneyLoot) = (maxMoneyLoot, minMoneyLoot);
                     }
                     itemTemplate.FlagsCu = (ItemFlagsCustom)result.Read<uint>(1);
-                    itemTemplate.FoodType = result.Read<uint>(2);
+                    itemTemplate.FoodType = result.Read<byte>(2);
                     itemTemplate.MinMoneyLoot = minMoneyLoot;
                     itemTemplate.MaxMoneyLoot = maxMoneyLoot;
                     itemTemplate.SpellPPMRate = result.Read<float>(5);

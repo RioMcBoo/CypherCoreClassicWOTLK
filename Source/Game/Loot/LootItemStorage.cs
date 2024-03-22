@@ -109,10 +109,8 @@ namespace Game.Loots
                     li.is_counted = storedItem.Counted;
                     li.is_underthreshold = storedItem.UnderThreshold;
                     li.needs_quest = storedItem.NeedsQuest;
-                    li.randomPropertyId = storedItem.RandomPropertyId;
-                    li.randomSuffix = storedItem.RandomSuffix;
+                    li.randomProperties = storedItem.RandomProperties;
                     li.context = storedItem.Context;
-                    li.BonusListIDs = storedItem.BonusListIDs;
 
                     // Copy the extra loot conditions from the item in the loot template
                     lt.CopyConditions(li);
@@ -229,8 +227,8 @@ namespace Game.Loots
                 return;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_ITEMS);
-
-            // container_id, item_id, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix
+            //   0              1       2           3               4       5       6       7           8               9               10                      11               12
+            //container_id, item_id, item_count, item_index, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, random_properties_id, random_properties_seed, context            
             stmt.AddValue(0, _containerId);
             stmt.AddValue(1, lootItem.itemid);
             stmt.AddValue(2, lootItem.count);
@@ -240,17 +238,10 @@ namespace Game.Loots
             stmt.AddValue(6, lootItem.is_blocked);
             stmt.AddValue(7, lootItem.is_counted);
             stmt.AddValue(8, lootItem.is_underthreshold);
-            stmt.AddValue(9, lootItem.needs_quest); 
-            stmt.AddValue(10, (byte)lootItem.randomPropertyId.Type);
-            stmt.AddValue(11, lootItem.randomPropertyId.Id);
-            stmt.AddValue(13, lootItem.randomSuffix);
-            stmt.AddValue(14, (uint)lootItem.context);
-
-            StringBuilder bonusListIDs = new();
-            foreach (int bonusListID in lootItem.BonusListIDs)
-                bonusListIDs.Append(bonusListID + ' ');
-
-            stmt.AddValue(12, bonusListIDs.ToString());
+            stmt.AddValue(9, lootItem.needs_quest);
+            stmt.AddValue(10, lootItem.randomProperties.RandomPropertiesID);
+            stmt.AddValue(11, lootItem.randomProperties.RandomPropertiesSeed);
+            stmt.AddValue(12, (byte)lootItem.context);
             trans.Append(stmt);
         }
 

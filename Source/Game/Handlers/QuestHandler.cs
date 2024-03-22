@@ -793,7 +793,7 @@ namespace Game
 
                 foreach (PlayerChoiceResponseRewardItem item in reward.Items)
                 {
-                    if (_player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item.Id, item.Quantity) == InventoryResult.Ok)
+                    if (_player.CanStoreNewItem(ItemPos.Undefined, out var dest, item.Id, item.Quantity) == InventoryResult.Ok)
                     {
                         Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateRandomProperties(item.Id), null, ItemContext.QuestReward);
                         _player.SendNewItem(newItem, item.Quantity, true, false);

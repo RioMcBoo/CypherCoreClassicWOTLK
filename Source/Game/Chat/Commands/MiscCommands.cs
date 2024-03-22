@@ -2153,6 +2153,7 @@ namespace Game.Chat
             if (count == 0)   // can't add any
             {
                 handler.SendSysMessage(CypherStrings.ItemCannotCreate, itemId, noSpaceForCount);
+                handler.SetSentErrorMessage(true);
                 return false;
             }
             var item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId), null, itemContext);
@@ -2213,7 +2214,7 @@ namespace Game.Chat
 
                 found = true;
                 
-                InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos Item, int Count)> dest, template.Value, 1, out _);
+                InventoryResult msg = playerTarget.CanStoreNewItem(ItemPos.Undefined, out var dest, template.Value, 1, out _);
                 if (msg == InventoryResult.Ok)
                 {
                     var item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, ItemEnchantmentManager.GenerateRandomProperties(template.Key), null, itemContext);

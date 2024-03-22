@@ -1400,7 +1400,7 @@ namespace Game.Entities
             if (itemTemplate == null)
                 return false;
 
-            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemTemplate, count, out int noSpaceForCount);
+            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out var dest, itemTemplate, count, out int noSpaceForCount);
             if (msg != InventoryResult.Ok)
                 count -= noSpaceForCount;
 
@@ -5210,7 +5210,7 @@ namespace Game.Entities
 
         public void StoreLootItem(ObjectGuid lootWorldObjectGuid, byte lootSlot, Loot loot, AELootResult aeResult = null)
         {
-            LootItem item = loot.LootItemInSlot(lootSlot, this, out NotNormalLootItem ffaItem);
+            LootItem item = loot.LootItemInSlot(lootSlot, this, out var ffaItem);
             if (item == null || item.is_looted)
             {
                 SendEquipError(InventoryResult.LootGone);
@@ -5236,7 +5236,7 @@ namespace Game.Entities
                 return;
             }
 
-            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item.itemid, item.count);
+            InventoryResult msg = CanStoreNewItem(ItemPos.Undefined, out var dest, item.itemid, item.count);
             if (msg == InventoryResult.Ok)
             {
                 Item newitem = StoreNewItem(dest, item.itemid, true, ItemEnchantmentManager.GenerateRandomProperties(item.itemid), item.GetAllowedLooters(), item.context);

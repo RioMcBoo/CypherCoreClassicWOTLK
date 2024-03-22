@@ -887,7 +887,7 @@ namespace Game.Entities
             var questPackageItems = Global.DB2Mgr.GetQuestPackageItems(questPackageId);
             if (questPackageItems != null)
             {
-                foreach (QuestPackageItemRecord questPackageItem in questPackageItems)
+                foreach (var questPackageItem in questPackageItems)
                 {
                     if (onlyItemId != 0 && questPackageItem.ItemID != onlyItemId)
                         continue;
@@ -895,9 +895,9 @@ namespace Game.Entities
                     if (CanSelectQuestPackageItem(questPackageItem))
                     {
                         hasFilteredQuestPackageReward = true;
-                        if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos Pos, int Count)> dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemPos.Undefined, out var dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
-                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateRandomProperties(questPackageItem.ItemID));
+                            var item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateRandomProperties(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
                     }
@@ -909,14 +909,14 @@ namespace Game.Entities
                 var questPackageItemsFallback = Global.DB2Mgr.GetQuestPackageItemsFallback(questPackageId);
                 if (questPackageItemsFallback != null)
                 {
-                    foreach (QuestPackageItemRecord questPackageItem in questPackageItemsFallback)
+                    foreach (var questPackageItem in questPackageItemsFallback)
                     {
                         if (onlyItemId != 0 && questPackageItem.ItemID != onlyItemId)
                             continue;
 
-                        if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemPos.Undefined, out var dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
-                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateRandomProperties(questPackageItem.ItemID));
+                            var item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateRandomProperties(questPackageItem.ItemID));
                             SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
                     }                    
@@ -931,7 +931,7 @@ namespace Game.Entities
             SetCanDelayTeleport(true);
 
             var questId = quest.Id;
-            QuestStatus oldStatus = GetQuestStatus(questId);
+            var oldStatus = GetQuestStatus(questId);
 
             foreach (var obj in quest.Objectives)
             {
@@ -974,9 +974,9 @@ namespace Game.Entities
                     var itemId = quest.RewardItemId[i];
                     if (itemId != 0)
                     {
-                        if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemPos.Undefined, out var dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
                         {
-                            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId));
+                            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateRandomProperties(itemId), null, ItemContext.QuestReward);
                             SendNewItem(item, quest.RewardItemCount[i], true, false);
                         }
                         else if (quest.IsDFQuest())
@@ -985,7 +985,7 @@ namespace Game.Entities
                 }
             }
 
-            CurrencyGainSource currencyGainSource = CurrencyGainSource.QuestReward;
+            var currencyGainSource = CurrencyGainSource.QuestReward;
 
             if (quest.HasAnyFlag(QuestFlagsEx.RewardsIgnoreCaps))
             {
@@ -1011,9 +1011,9 @@ namespace Game.Entities
                         {
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == rewardId)
                             {
-                                if (CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
+                                if (CanStoreNewItem(ItemPos.Undefined, out var dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
                                 {
-                                    Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateRandomProperties(rewardId));
+                                    var item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateRandomProperties(rewardId), null, ItemContext.QuestReward);
                                     SendNewItem(item, quest.RewardChoiceItemCount[i], true, false);
                                 }
                             }
@@ -1076,7 +1076,7 @@ namespace Game.Entities
             // title reward
             if (quest.RewardTitleId != 0)
             {
-                CharTitlesRecord titleEntry = CliDB.CharTitlesStorage.LookupByKey(quest.RewardTitleId);
+                var titleEntry = CliDB.CharTitlesStorage.LookupByKey(quest.RewardTitleId);
                 if (titleEntry != null)
                     SetTitle(titleEntry);
             }

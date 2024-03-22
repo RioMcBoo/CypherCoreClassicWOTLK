@@ -434,7 +434,7 @@ namespace Game
 
                 var item = loot.items[req.LootListID];
 
-                InventoryResult msg = target.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item.itemid, item.count);
+                InventoryResult msg = target.CanStoreNewItem(ItemPos.Undefined, out var dest, item.itemid, item.count);
                 if (!item.HasAllowedLooter(target.GetGUID()))
                     msg = InventoryResult.CantEquipEver;
                 if (msg != InventoryResult.Ok)

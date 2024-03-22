@@ -3073,6 +3073,8 @@ namespace Game.Spells
 
         float CalcPPMItemLevelMod(SpellProcsPerMinuteModRecord mod, int itemLevel)
         {
+            return 0f;
+            /*
             if (itemLevel == mod.Param)
                 return 0.0f;
 
@@ -3082,6 +3084,7 @@ namespace Game.Spells
                 return 0.0f;
 
             return ((itemLevelPoints / basePoints) - 1.0f) * mod.Coeff;
+            */
         }
 
         public float CalcProcPPM(Unit caster, int itemLevel)
@@ -4221,6 +4224,7 @@ namespace Game.Spells
                     if (Scaling.Class == 0)
                         return 0;
 
+                    /*
                     int effectiveItemLevel = itemLevel != -1 ? itemLevel : 1;
                     if (_spellInfo.Scaling.ScalesFromItemLevel != 0 || _spellInfo.HasAttribute(SpellAttr11.ScalesWithItemLevel))
                     {
@@ -4239,7 +4243,8 @@ namespace Game.Spells
                             tempValue = ItemEnchantmentManager.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest);
                     }
                     else
-                        tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), Scaling.Class);                    
+                        tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), Scaling.Class);     
+                    */
                 }
 
                 tempValue *= Scaling.Coefficient;

@@ -2063,6 +2063,7 @@ namespace Game.Entities
         // ItemRandomPropertyId (signed but stored as unsigned)
         public int GetItemRandomPropertyId() { return m_itemData.RandomPropertiesID; }
         public int GetItemSuffixFactor() { return m_itemData.PropertySeed; }
+
         public int GetEnchantmentId(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].ID.GetValue(); }
         public uint GetEnchantmentDuration(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Duration; }
         public int GetEnchantmentCharges(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Charges; }

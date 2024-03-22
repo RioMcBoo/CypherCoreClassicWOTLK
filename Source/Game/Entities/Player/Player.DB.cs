@@ -1218,8 +1218,8 @@ namespace Game.Entities
                 return;
 
             do
-            {
-                // SELECT itemId, itemEntry, slot, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs FROM character_void_storage WHERE playerGuid = ?
+            {   //           0      1           2     3             4                   5                   6                   7
+                // "SELECT itemId, itemEntry, slot, creatorGuid, fixedScalingLevel, randomPropertiesId, randomPropertiesSeed, context FROM character_void_storage WHERE playerGuid = ?"
                 var itemId = result.Read<long>(0);
                 var itemEntry = result.Read<int>(1);
                 var slot = result.Read<byte>(2);
@@ -1228,7 +1228,7 @@ namespace Game.Entities
                 var randomProperties = new ItemRandomProperties(
                     result.Read<int>(5), result.Read<int>(6)
                     );
-                ItemContext context = (ItemContext)(result.Read<byte>(5));
+                var context = (ItemContext)result.Read<byte>(7);
                 
                 if (itemId == 0)
                 {
@@ -2653,8 +2653,9 @@ namespace Game.Entities
                 }
 
                 else
-                {
-                    // REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, slot, creatorGuid, randomBonusListId, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, bonusListIDs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                { 
+                    //                                       0        1            2        3       4           5                   6                   7                   8
+                    //"REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, slot, creatorGuid, fixedScalingLevel, randomPropertiesId, randomPropertiesSeed, context) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_CHAR_VOID_STORAGE_ITEM);
                     stmt.AddValue(0, _voidStorageItems[i].ItemId);
                     stmt.AddValue(1, GetGUID().GetCounter());

@@ -124,7 +124,7 @@ namespace Game
                 return;
             }
 
-            if (!player.HasEnoughMoney((voidStorageTransfer.Deposits.Length * SharedConst.VoidStorageStoreItemCost)))
+            if (!player.HasEnoughMoney(voidStorageTransfer.Deposits.Length * SharedConst.VoidStorageStoreItemCost))
             {
                 SendVoidStorageTransferResult(VoidTransferError.NotEnoughMoney);
                 return;
@@ -172,7 +172,7 @@ namespace Game
                     continue;
                 }
 
-                InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemVS.ItemEntry, 1);
+                InventoryResult msg = player.CanStoreNewItem(ItemPos.Undefined, out var dest, itemVS.ItemEntry, 1);
                 if (msg != InventoryResult.Ok)
                 {
                     SendVoidStorageTransferResult(VoidTransferError.InventoryFull);
