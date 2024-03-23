@@ -58,7 +58,7 @@ namespace Game.Entities
             return DoneAdvertisedBenefit;
         }
 
-        public int SpellDamageBonusDone(Unit victim, SpellInfo spellProto, int pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null, AuraEffect aurEff = null)
+        public int SpellDamageBonusDone(Unit victim, SpellInfo spellProto, int pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, int stack = 1, Spell spell = null, AuraEffect aurEff = null)
         {
             if (spellProto == null || victim == null)
                 return pdamage;
@@ -383,7 +383,7 @@ namespace Game.Entities
             return damage;
         }
 
-        public int SpellHealingBonusDone(Unit victim, SpellInfo spellProto, int healamount, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null, AuraEffect aurEff = null)
+        public int SpellHealingBonusDone(Unit victim, SpellInfo spellProto, int healamount, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, int stack = 1, Spell spell = null, AuraEffect aurEff = null)
         {
             // For totems get healing bonus from owner (statue isn't totem in fact)
             if (IsTypeId(TypeId.Unit) && IsTotem())
@@ -1805,10 +1805,10 @@ namespace Game.Entities
             return false;
         }
 
-        public static uint SpellCriticalDamageBonus(Unit caster, SpellInfo spellProto, uint damage, Unit victim = null)
+        public static int SpellCriticalDamageBonus(Unit caster, SpellInfo spellProto, int damage, Unit victim = null)
         {
             // Calculate critical bonus
-            int crit_bonus = (int)damage * 2;
+            int crit_bonus = damage * 2;
             float crit_mod = 0.0f;
 
             if (caster != null)
@@ -1830,10 +1830,10 @@ namespace Game.Entities
                 if (modOwner != null)
                     modOwner.ApplySpellMod(spellProto, SpellModOp.CritDamageAndHealing, ref crit_bonus);
 
-                crit_bonus += (int)damage;
+                crit_bonus += damage;
             }
 
-            return (uint)crit_bonus;
+            return (int)crit_bonus;
         }
 
         public void _DeleteRemovedAuras()
@@ -1884,9 +1884,9 @@ namespace Game.Entities
                 gain = (int)victim.ModifyHealth(addhealth);
 
             // Hook for OnHeal Event
-            uint tempGain = (uint)gain;
+            int tempGain = gain;
             Global.ScriptMgr.OnHeal(healer, victim, ref tempGain);
-            gain = (int)tempGain;
+            gain = tempGain;
 
             Unit unit = healer;
             if (healer != null && healer.IsCreature() && healer.IsTotem())
@@ -1928,7 +1928,7 @@ namespace Game.Entities
             spellHealLog.CasterGUID = healInfo.GetHealer().GetGUID();
             spellHealLog.SpellID = healInfo.GetSpellInfo().Id;
             spellHealLog.Health = healInfo.GetHeal();
-            spellHealLog.OriginalHeal = (int)healInfo.GetOriginalHeal();
+            spellHealLog.OriginalHeal = healInfo.GetOriginalHeal();
             spellHealLog.OverHeal = healInfo.GetHeal() - healInfo.GetEffectiveHeal();
             spellHealLog.Absorbed = healInfo.GetAbsorb();
             spellHealLog.Crit = critical;
@@ -2006,7 +2006,7 @@ namespace Game.Entities
             if (!spellInfo.HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
                 if (IsDamageReducedByArmor(damageSchoolMask, spellInfo))
-                    damage = (int)CalcArmorReducedDamage(damageInfo.attacker, victim, (uint)damage, spellInfo, attackType);
+                    damage = (int)CalcArmorReducedDamage(damageInfo.attacker, victim, damage, spellInfo, attackType);
 
                 // Per-school calc
                 switch (spellInfo.DmgClass)
@@ -2031,23 +2031,23 @@ namespace Game.Entities
                             float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
 
                             if (critPctDamageMod != 0)
-                                MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
+                                MathFunctions.AddPct(ref damage, critPctDamageMod);
                         }
 
                         // Spell weapon based damage CAN BE crit & blocked at same time
                         if (blocked)
                         {
                             // double blocked amount if block is critical
-                            uint value = victim.GetShieldBlockValue();
+                            int value = victim.GetShieldBlockValue();
                             if (victim.IsBlockCritical())
                                 value *= 2;
                             damageInfo.blocked = value;
                             if (damage <= damageInfo.blocked)
                             {
-                                damageInfo.blocked = (uint)damage;
+                                damageInfo.blocked = damage;
                                 damageInfo.fullBlock = true;
                             }
-                            damage -= (int)damageInfo.blocked;
+                            damage -= damageInfo.blocked;
                         }
 
                         if (CanApplyResilience())
@@ -2063,7 +2063,7 @@ namespace Game.Entities
                         if (crit)
                         {
                             damageInfo.HitInfo |= HitInfo.CriticalHit;
-                            damage = (int)SpellCriticalDamageBonus(this, spellInfo, (uint)damage, victim);
+                            damage = (int)SpellCriticalDamageBonus(this, spellInfo, damage, victim);
                         }
 
                         if (CanApplyResilience())
@@ -2083,8 +2083,8 @@ namespace Game.Entities
             if (damage < 0)
                 damage = 0;
 
-            damageInfo.damage = (uint)damage;
-            damageInfo.originalDamage = (uint)damage;
+            damageInfo.damage = damage;
+            damageInfo.originalDamage = damage;
             DamageInfo dmgInfo = new(damageInfo, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack, ProcFlagsHit.None);
             CalcAbsorbResist(dmgInfo, spell);
             damageInfo.absorb = dmgInfo.GetAbsorb();
@@ -2128,21 +2128,21 @@ namespace Game.Entities
             packet.Me = log.target.GetGUID();
             packet.CasterGUID = log.attacker.GetGUID();
             packet.CastID = log.castId;
-            packet.SpellID = (int)(log.Spell != null ? log.Spell.Id : 0);
+            packet.SpellID = (log.Spell != null ? log.Spell.Id : 0);
             packet.Visual = log.SpellVisual;
-            packet.Damage = (int)log.damage;
-            packet.OriginalDamage = (int)log.originalDamage;
+            packet.Damage = log.damage;
+            packet.OriginalDamage = log.originalDamage;
             if (log.damage > log.preHitHealth)
-                packet.Overkill = (int)(log.damage - log.preHitHealth);
+                packet.Overkill = (log.damage - log.preHitHealth);
             else
                 packet.Overkill = -1;
 
-            packet.SchoolMask = (byte)log.schoolMask;
-            packet.Absorbed = (int)log.absorb;
-            packet.Resisted = (int)log.resist;
-            packet.ShieldBlock = (int)log.blocked;
+            packet.SchoolMask = log.schoolMask;
+            packet.Absorbed = log.absorb;
+            packet.Resisted = log.resist;
+            packet.ShieldBlock = log.blocked;
             packet.Periodic = log.periodicLog;
-            packet.Flags = (int)log.HitInfo;
+            packet.Flags = log.HitInfo;
 
             ContentTuningParams contentTuningParams = new();
             if (contentTuningParams.GenerateDataForUnits(log.attacker, log.target))
@@ -3224,7 +3224,7 @@ namespace Game.Entities
             }
         }
 
-        public void RemoveAurasDueToSpellByDispel(uint spellId, uint dispellerSpellId, ObjectGuid casterGUID, WorldObject dispeller, byte chargesRemoved = 1)
+        public void RemoveAurasDueToSpellByDispel(int spellId, int dispellerSpellId, ObjectGuid casterGUID, WorldObject dispeller, byte chargesRemoved = 1)
         {
             foreach (var pair in GetOwnedAuras())
             {
@@ -4016,7 +4016,7 @@ namespace Game.Entities
                     if (scAura != aura && scAura.IsSingleTargetWith(aura))
                         aurasSharingLimit.Enqueue(scAura);
 
-                uint maxOtherAuras = aura.GetSpellInfo().MaxAffectedTargets - 1;
+                int maxOtherAuras = aura.GetSpellInfo().MaxAffectedTargets - 1;
                 while (aurasSharingLimit.Count > maxOtherAuras)
                 {
                     aurasSharingLimit.Peek().Remove();

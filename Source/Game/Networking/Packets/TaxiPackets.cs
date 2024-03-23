@@ -95,15 +95,15 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Vendor = _worldPacket.ReadPackedGuid();
-            Node = _worldPacket.ReadUInt32();
-            GroundMountID = _worldPacket.ReadUInt32();
-            FlyingMountID = _worldPacket.ReadUInt32();
+            Node = _worldPacket.ReadInt32();
+            GroundMountID = _worldPacket.ReadInt32();
+            FlyingMountID = _worldPacket.ReadInt32();
         }
 
         public ObjectGuid Vendor;
-        public uint Node;
-        public uint GroundMountID;
-        public uint FlyingMountID;
+        public int Node;
+        public int GroundMountID;
+        public int FlyingMountID;
     }
 
     class NewTaxiPath : ServerPacket

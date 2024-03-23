@@ -600,7 +600,7 @@ namespace Game.Entities
 
         public void SetMaxPower(PowerType powerType, int val)
         {
-            uint powerIndex = GetPowerIndex(powerType);
+            int powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
@@ -626,7 +626,7 @@ namespace Game.Entities
 
         public void SetPower(PowerType powerType, int val, bool withPowerUpdate = true)
         {
-            uint powerIndex = GetPowerIndex(powerType);
+            int powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
@@ -666,7 +666,7 @@ namespace Game.Entities
 
         public int GetPower(PowerType powerType)
         {
-            uint powerIndex = GetPowerIndex(powerType);
+            int powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return 0;
 
@@ -675,7 +675,7 @@ namespace Game.Entities
 
         public int GetMaxPower(PowerType powerType)
         {
-            uint powerIndex = GetPowerIndex(powerType);
+            int powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return 0;
 
@@ -770,11 +770,11 @@ namespace Game.Entities
             damage -= (int)target.GetDamageReduction((uint)damage);
         }
 
-        public int CalculateAOEAvoidance(int damage, uint schoolMask, ObjectGuid casterGuid)
+        public int CalculateAOEAvoidance(int damage, SpellSchoolMask schoolMask, ObjectGuid casterGuid)
         {
-            damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModAoeDamageAvoidance, schoolMask));
+            damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModAoeDamageAvoidance, (uint)schoolMask));
             if (casterGuid.IsAnyTypeCreature())
-                damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModCreatureAoeDamageAvoidance, schoolMask));
+                damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModCreatureAoeDamageAvoidance, (uint)schoolMask));
 
             return damage;
         }
@@ -1200,7 +1200,7 @@ namespace Game.Entities
                     itr.State = SkillState.Changed;
 
                 UpdateSkillEnchantments(skill_id, value, new_value);
-                UpdateCriteria(CriteriaType.SkillRaised, (ulong)skill_id);
+                UpdateCriteria(CriteriaType.SkillRaised, (long)skill_id);
                 return true;
             }
 
@@ -1241,15 +1241,15 @@ namespace Game.Entities
             ushort weapon_skill_gain = (ushort)WorldConfig.GetUIntValue(WorldCfg.SkillGainWeapon);
 
             Item tmpitem = GetWeaponForAttack(attType, true);
-            if (!tmpitem && attType == WeaponAttackType.BaseAttack)
+            if (tmpitem == null && attType == WeaponAttackType.BaseAttack)
             {
                 // Keep unarmed & fist weapon skills in sync
                 UpdateSkill(SkillType.Unarmed, weapon_skill_gain);
                 UpdateSkill(SkillType.FistWeapons, weapon_skill_gain);
             }
-            else if (tmpitem)
+            else if (tmpitem != null)
             {
-                switch ((ItemSubClassWeapon)tmpitem.GetTemplate().GetSubClass())
+                switch (tmpitem.GetTemplate().GetSubClass().Weapon)
                 {
                     case ItemSubClassWeapon.Fist:
                         UpdateSkill(tmpitem.GetSkill(), weapon_skill_gain);
@@ -1276,11 +1276,11 @@ namespace Game.Entities
             if (moblevel > plevel + 5)
                 moblevel = plevel + 5;
 
-            uint lvldif = moblevel - greylevel;
+            int lvldif = moblevel - greylevel;
             if (lvldif < 3)
                 lvldif = 3;
 
-            uint skilldif = 5 * plevel - (defense ? GetBaseDefenseSkillValue() : GetBaseWeaponSkillValue(attType));
+            int skilldif = 5 * plevel - (defense ? GetBaseDefenseSkillValue() : GetBaseWeaponSkillValue(attType));
             if (skilldif <= 0)
                 return;
 
@@ -2276,7 +2276,7 @@ namespace Game.Entities
             SetMaxHealth((uint)value);
         }
 
-        public override uint GetPowerIndex(PowerType powerType)
+        public override int GetPowerIndex(PowerType powerType)
         {
             if (powerType == GetPowerType())
                 return 0;
@@ -2289,7 +2289,7 @@ namespace Game.Entities
                     break;
             }
 
-            return (uint)PowerType.Max;
+            return (int)PowerType.Max;
         }
 
         public override void UpdateMaxPower(PowerType power)

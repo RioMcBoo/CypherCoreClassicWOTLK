@@ -56,8 +56,8 @@ namespace Game.Entities
         public int BaseSpellCritChance { get; set; }
         public uint RegenTimer { get; set; }
 
-        uint _lastExtraAttackSpell;
-        Dictionary<ObjectGuid, uint> extraAttacksTargets = new();
+        int _lastExtraAttackSpell;
+        Dictionary<ObjectGuid, int> extraAttacksTargets = new();
         ObjectGuid _lastDamagedTargetGuid;
 
         //Charm
@@ -488,7 +488,7 @@ namespace Game.Entities
         public int blocked;
         public HitInfo HitInfo;
         // Used for help
-        public uint cleanDamage;
+        public int cleanDamage;
         public bool fullBlock;
         public int preHitHealth;
     }
@@ -512,7 +512,7 @@ namespace Game.Entities
 
     public class DispelInfo
     {
-        public DispelInfo(WorldObject dispeller, uint dispellerSpellId, byte chargesRemoved)
+        public DispelInfo(WorldObject dispeller, int dispellerSpellId, byte chargesRemoved)
         {
             _dispeller = dispeller;
             _dispellerSpell = dispellerSpellId;
@@ -520,7 +520,7 @@ namespace Game.Entities
         }
 
         public WorldObject GetDispeller() { return _dispeller; }
-        uint GetDispellerSpellId() { return _dispellerSpell; }
+        int GetDispellerSpellId() { return _dispellerSpell; }
         public byte GetRemovedCharges() { return _chargesRemoved; }
         public void SetRemovedCharges(byte amount)
         {
@@ -528,7 +528,7 @@ namespace Game.Entities
         }
 
         WorldObject _dispeller;
-        uint _dispellerSpell;
+        int _dispellerSpell;
         byte _chargesRemoved;
     }
 

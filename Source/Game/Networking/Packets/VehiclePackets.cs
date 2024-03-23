@@ -13,12 +13,12 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteInt32(SequenceIndex);
             _worldPacket.WriteInt32(VehicleRecID);
         }
 
         public ObjectGuid MoverGUID;
-        public uint SequenceIndex;
+        public int SequenceIndex;
         public int VehicleRecID;
     }
 

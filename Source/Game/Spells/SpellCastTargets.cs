@@ -258,7 +258,7 @@ namespace Game.Spells
             return m_dst.Position;
         }
 
-        public void SetDst(float x, float y, float z, float orientation, uint mapId = 0xFFFFFFFF)
+        public void SetDst(float x, float y, float z, float orientation, int mapId = -1)
         {
             m_dst = new SpellDestination(x, y, z, orientation, mapId);
             m_targetMask |= SpellCastTargetFlags.DestLocation;
@@ -357,7 +357,7 @@ namespace Game.Spells
 
         public ObjectGuid GetItemTargetGUID() { return m_itemTargetGUID; }
         public Item GetItemTarget() { return m_itemTarget; }
-        public uint GetItemTargetEntry() { return m_itemTargetEntry; }
+        public int GetItemTargetEntry() { return m_itemTargetEntry; }
 
         public bool HasSrc() { return Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.SourceLocation); }
         public bool HasDst() { return Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.DestLocation); }
@@ -384,7 +384,7 @@ namespace Game.Spells
         // object GUID/etc, can be used always
         ObjectGuid m_objectTargetGUID;
         ObjectGuid m_itemTargetGUID;
-        uint m_itemTargetEntry;
+        int m_itemTargetEntry;
 
         SpellDestination m_src;
         SpellDestination m_dst;

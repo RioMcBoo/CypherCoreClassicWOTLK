@@ -397,7 +397,7 @@ namespace Game.Entities
                 SatisfyQuestDependentQuests(quest, false) && SatisfyQuestDay(quest, false) && SatisfyQuestWeek(quest, false) &&
                 SatisfyQuestMonth(quest, false) && SatisfyQuestSeasonal(quest, false))
             {
-                return GetLevel() + WorldConfig.GetIntValue(WorldCfg.QuestHighLevelHideDiff) >= GetQuestMinLevel(quest);
+                return GetLevel() + WorldConfig.GetIntValue(WorldCfg.QuestHighLevelHideDiff) >= quest.MinLevel;
             }
 
             return false;

@@ -154,8 +154,8 @@ namespace Game.Entities
         Item _LoadItem(SQLTransaction trans, int zoneId, uint timeDiff, SQLFields fields)
         {
             Item item = null;
-            ulong itemGuid = fields.Read<ulong>(0);
-            uint itemEntry = fields.Read<uint>(1);
+            long itemGuid = fields.Read<long>(0);
+            int itemEntry = fields.Read<int>(1);
             ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
             if (proto != null)
             {
@@ -201,7 +201,7 @@ namespace Game.Entities
                             if (!result.IsEmpty())
                             {
                                 item.SetRefundRecipient(GetGUID());
-                                item.SetPaidMoney(result.Read<ulong>(0));
+                                item.SetPaidMoney(result.Read<long>(0));
                                 item.SetPaidExtendedCost(result.Read<ushort>(1));
                                 AddRefundReference(item.GetGUID());
                             }
@@ -225,7 +225,7 @@ namespace Game.Entities
                             List<ObjectGuid> looters = new();
                             for (var i = 0; i < GUIDlist.Length; ++i)
                             {
-                                if (ulong.TryParse(GUIDlist[i], out ulong guid))
+                                if (long.TryParse(GUIDlist[i], out long guid))
                                     looters.Add(ObjectGuid.Create(HighGuid.Item, guid));
                             }
 
@@ -287,8 +287,8 @@ namespace Game.Entities
         void _LoadSkills(SQLResult result)
         {
             Race race = GetRace();
-            Dictionary<uint, uint> loadedSkillValues = new();
-            List<ushort> loadedProfessionsWithoutSlot = new(); // fixup old characters
+            Dictionary<SkillType, int> loadedSkillValues = new();
+            List<SkillType> loadedProfessionsWithoutSlot = new(); // fixup old characters
             if (!result.IsEmpty())
             {
                 do
@@ -308,7 +308,7 @@ namespace Game.Entities
                     if (rcEntry == null)
                     {
                         Log.outError(LogFilter.Player, $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID()}, Race: {race}, Class: {GetClass()}) has forbidden skill {skill} for his race/class combination");
-                        mSkillStatus.Add(skill, new SkillStatusData((uint)mSkillStatus.Count, SkillState.Deleted));
+                        mSkillStatus.Add(skill, new SkillStatusData(mSkillStatus.Count, SkillState.Deleted));
                         continue;
                     }
 
@@ -329,25 +329,25 @@ namespace Game.Entities
                     }
 
                     if (!mSkillStatus.ContainsKey(skill))
-                        mSkillStatus.Add(skill, new SkillStatusData((uint)mSkillStatus.Count, SkillState.Unchanged));
+                        mSkillStatus.Add(skill, new SkillStatusData(mSkillStatus.Count, SkillState.Unchanged));
 
                     var skillStatusData = mSkillStatus[skill];
-                    ushort step = 0;
+                    int step = 0;
 
-                    SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey(rcEntry.SkillID);
+                    SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey((int)rcEntry.SkillID);
                     if (skillLine != null)
                     {
                         if (skillLine.CategoryID == SkillCategory.Secondary)
-                            step = (ushort)(max / 75);
+                            step = max / 75;
 
                         if (skillLine.CategoryID == SkillCategory.Profession)
                         {
-                            step = (ushort)(max / 75);
+                            step = max / 75;
 
                             if (skillLine.ParentSkillLineID != 0 && skillLine.ParentTierIndex != 0)
                             {
                                 if (professionSlot != -1)
-                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, professionSlot), skill);
+                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, professionSlot), (int)skill);
                                 else
                                     loadedProfessionsWithoutSlot.Add(skill);
                             }
@@ -372,7 +372,7 @@ namespace Game.Entities
                 LearnSkillRewardedSpells(skillId, skillValue, race);
 
                 // enable parent skill line if missing
-                var skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
+                var skillEntry = CliDB.SkillLineStorage.LookupByKey((int)skillId);
                 if (skillEntry.ParentSkillLineID != 0 && skillEntry.ParentTierIndex > 0 && GetSkillStep(skillEntry.ParentSkillLineID) < skillEntry.ParentTierIndex)
                 {
                     var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillEntry.ParentSkillLineID, GetRace(), GetClass());
@@ -380,7 +380,7 @@ namespace Game.Entities
                     {
                         var tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
                         if (tier != null)
-                            SetSkill(skillEntry.ParentSkillLineID, (uint)skillEntry.ParentTierIndex, Math.Max(GetPureSkillValue(skillEntry.ParentSkillLineID), 1u), tier.GetValueForTierIndex(skillEntry.ParentTierIndex - 1));
+                            SetSkill(skillEntry.ParentSkillLineID, skillEntry.ParentTierIndex, Math.Max((int)GetPureSkillValue(skillEntry.ParentSkillLineID), 1), tier.GetValueForTierIndex(skillEntry.ParentTierIndex - 1));
                     }
                 }
 
@@ -394,8 +394,8 @@ namespace Game.Entities
 
                         if (!mSkillStatus.ContainsKey(childSkillLine.Id))
                         {
-                            uint pos = (uint)mSkillStatus.Count;
-                            SetSkillLineId(pos, (ushort)childSkillLine.Id);
+                            int pos = mSkillStatus.Count;
+                            SetSkillLineId(pos, childSkillLine.Id);
                             SetSkillStartingRank(pos, 1);
                             mSkillStatus.Add(childSkillLine.Id, new SkillStatusData(pos, SkillState.Unchanged));
                         }
@@ -403,12 +403,12 @@ namespace Game.Entities
                 }
             }
 
-            foreach (ushort skill in loadedProfessionsWithoutSlot)
+            foreach (var skill in loadedProfessionsWithoutSlot)
             {
                 int emptyProfessionSlot = FindEmptyProfessionSlotFor(skill);
                 if (emptyProfessionSlot != -1)
                 {
-                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, emptyProfessionSlot), skill);
+                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, emptyProfessionSlot), (int)skill);
                     mSkillStatus[skill].State = SkillState.Changed;
                 }
             }
@@ -423,7 +423,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    AddSpell(result.Read<uint>(0), result.Read<bool>(1), false, false, result.Read<bool>(2), true);
+                    AddSpell(result.Read<int>(0), result.Read<bool>(1), false, false, result.Read<bool>(2), true);
                 }
                 while (result.NextRow());
             }
@@ -432,7 +432,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    var spell = m_spells.LookupByKey(favoritesResult.Read<uint>(0));
+                    var spell = m_spells.LookupByKey(favoritesResult.Read<int>(0));
                     if (spell !=null)
                         spell.Favorite = true;
                 } while (favoritesResult.NextRow());
@@ -456,7 +456,7 @@ namespace Game.Entities
                         casterGuid.SetRawValue(effectResult.Read<byte[]>(0));
                         itemGuid.SetRawValue(effectResult.Read<byte[]>(1));
 
-                        AuraKey key = new(casterGuid, itemGuid, effectResult.Read<uint>(2), effectResult.Read<uint>(3));
+                        AuraKey key = new(casterGuid, itemGuid, effectResult.Read<int>(2), effectResult.Read<uint>(3));
                         if (!effectInfo.ContainsKey(key))
                             effectInfo[key] = new AuraLoadEffectInfo();
 
@@ -474,14 +474,14 @@ namespace Game.Entities
                 {
                     casterGuid.SetRawValue(auraResult.Read<byte[]>(0));
                     itemGuid.SetRawValue(auraResult.Read<byte[]>(1));
-                    AuraKey key = new(casterGuid, itemGuid, auraResult.Read<uint>(2), auraResult.Read<uint>(3));
+                    AuraKey key = new(casterGuid, itemGuid, auraResult.Read<int>(2), auraResult.Read<uint>(3));
                     uint recalculateMask = auraResult.Read<uint>(4);
                     Difficulty difficulty = (Difficulty)auraResult.Read<byte>(5);
                     byte stackCount = auraResult.Read<byte>(6);
                     int maxDuration = auraResult.Read<int>(7);
                     int remainTime = auraResult.Read<int>(8);
                     byte remainCharges = auraResult.Read<byte>(9);
-                    uint castItemId = auraResult.Read<uint>(10);
+                    int castItemId = auraResult.Read<int>(10);
                     int castItemLevel = auraResult.Read<int>(11);
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId, difficulty);
@@ -491,7 +491,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey(difficulty))
+                    if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey((int)difficulty))
                     {
                         Log.outError(LogFilter.Player, $"Player._LoadAuras: Player '{GetName()}' ({GetGUID()}) has an invalid aura difficulty {difficulty} (SpellID: {key.SpellId}), ignoring.");
                         continue;
@@ -542,6 +542,7 @@ namespace Game.Entities
                 while (auraResult.NextRow());
             }
         }
+
         bool _LoadHomeBind(SQLResult result)
         {
             PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
@@ -554,14 +555,14 @@ namespace Game.Entities
             bool ok = false;
             if (!result.IsEmpty())
             {
-                homebind.WorldRelocate(result.Read<uint>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
-                homebindAreaId = result.Read<uint>(1);
+                homebind.WorldRelocate(result.Read<int>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
+                homebindAreaId = result.Read<int>(1);
 
                 var map = CliDB.MapStorage.LookupByKey(homebind.GetMapId());
 
                 // accept saved data only for valid position (and non instanceable), and accessable
                 if (GridDefines.IsValidMapCoord(homebind) &&
-                    !map.Instanceable() && GetSession().GetExpansion() >= map.Expansion())
+                    !map.Instanceable && GetSession().GetExpansion() >= map.Expansion)
                     ok = true;
                 else
                 {
@@ -616,6 +617,7 @@ namespace Game.Entities
 
             return true;
         }
+
         void _LoadCurrency(SQLResult result)
         {
             if (result.IsEmpty())
@@ -631,11 +633,11 @@ namespace Game.Entities
 
                 PlayerCurrency cur = new();
                 cur.state = PlayerCurrencyState.Unchanged;
-                cur.Quantity = result.Read<uint>(1);
-                cur.WeeklyQuantity = result.Read<uint>(2);
-                cur.TrackedQuantity = result.Read<uint>(3);
-                cur.IncreasedCapQuantity = result.Read<uint>(4);
-                cur.EarnedQuantity = result.Read<uint>(5);
+                cur.Quantity = result.Read<int>(1);
+                cur.WeeklyQuantity = result.Read<int>(2);
+                cur.TrackedQuantity = result.Read<int>(3);
+                cur.IncreasedCapQuantity = result.Read<int>(4);
+                cur.EarnedQuantity = result.Read<int>(5);
                 cur.Flags = (CurrencyDbFlags)result.Read<byte>(6);
 
                 _currencyStorage.Add(currencyID, cur);
@@ -646,7 +648,7 @@ namespace Game.Entities
         {
             _LoadActions(result);
 
-            SendActionButtons(1);
+            SendActionButtons(ActionsButtonsUpdateReason.AfterSpecSwap);
         }
 
         void _LoadActions(SQLResult result)
@@ -682,7 +684,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint questId = result.Read<uint>(0);
+                    int questId = result.Read<int>(0);
                     // used to be new, no delete?
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                     if (quest != null)
@@ -758,7 +760,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint questID = result.Read<uint>(0);
+                    int questID = result.Read<int>(0);
 
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
 
@@ -774,7 +776,7 @@ namespace Game.Entities
                             if (!objective.IsStoringFlag())
                                 SetQuestSlotCounter(questStatusData.Slot, storageIndex, (ushort)data);
                             else if (data != 0)
-                                SetQuestSlotState(questStatusData.Slot, 256 << storageIndex);
+                                SetQuestSlotState(questStatusData.Slot, QuestSlotStateMask.None.SetSlot(storageIndex));
                         }
                         else
                             Log.outError(LogFilter.Player, $"Player {GetName()} ({GetGUID()}) has quest {questID} out of range objective index {storageIndex}.");
@@ -792,7 +794,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint quest_id = result.Read<uint>(0);
+                    int quest_id = result.Read<int>(0);
                     // used to be new, no delete?
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
                     if (quest != null)
@@ -834,7 +836,7 @@ namespace Game.Entities
                             {
                                 ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(questPackageItem.ItemID);
                                 if (rewardProto != null)
-                                    if (rewardProto.ItemSpecClassMask.HasAnyFlag(GetClassMask()))
+                                    if (rewardProto.ItemSpecClassMask.HasClass(GetClass()))
                                         GetSession().GetCollectionMgr().AddItemAppearance(questPackageItem.ItemID);
                             }
                         }
@@ -855,7 +857,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint quest_id = result.Read<uint>(0);
+                    int quest_id = result.Read<int>(0);
                     Quest qQuest = Global.ObjectMgr.GetQuestTemplate(quest_id);
                     if (qQuest != null)
                     {
@@ -874,7 +876,7 @@ namespace Game.Entities
                     if (quest == null)
                         continue;
 
-                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), (int)quest_id);
+                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), quest_id);
                     uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
@@ -894,7 +896,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint quest_id = result.Read<uint>(0);
+                    int quest_id = result.Read<int>(0);
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
                     if (quest == null)
                         continue;
@@ -919,8 +921,8 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint quest_id = result.Read<uint>(0);
-                    uint event_id = result.Read<uint>(1);
+                    int quest_id = result.Read<int>(0);
+                    int event_id = result.Read<int>(1);
                     long completedTime = result.Read<long>(2);
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
                     if (quest == null)
@@ -951,7 +953,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint quest_id = result.Read<uint>(0);
+                    int quest_id = result.Read<int>(0);
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
                     if (quest == null)
                         continue;
@@ -1022,7 +1024,7 @@ namespace Game.Entities
                             traitConfig.LocalIdentifier = configsResult.Read<int>(4);
                             break;
                         case TraitConfigType.Profession:
-                            traitConfig.SkillLineID = configsResult.Read<uint>(5);
+                            traitConfig.SkillLineID = configsResult.Read<int>(5);
                             break;
                         case TraitConfigType.Generic:
                             traitConfig.TraitSystemID = configsResult.Read<int>(6);
@@ -1072,7 +1074,7 @@ namespace Game.Entities
                 return index;
             }
 
-            for (uint i = 0; i < PlayerConst.MaxSpecializations - 1 /*initial spec doesnt get a config*/; ++i)
+            for (int i = 0; i < PlayerConst.MaxSpecializations - 1 /*initial spec doesnt get a config*/; ++i)
             {
                 var spec = Global.DB2Mgr.GetChrSpecializationByIndex(GetClass(), i);
                 if (spec != null)
@@ -1110,7 +1112,7 @@ namespace Game.Entities
                             continue;
                         break;
                     case TraitConfigType.Profession:
-                        if (!HasSkill((uint)(int)traitConfig.SkillLineID))
+                        if (!HasSkill(traitConfig.SkillLineID))
                             continue;
                         break;
                     default:
@@ -1202,7 +1204,7 @@ namespace Game.Entities
                 else if (!result.IsEmpty())
                 {
                     _corpseLocation = new WorldLocation(result.Read<ushort>(0), result.Read<float>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4));
-                    if (!CliDB.MapStorage.LookupByKey(_corpseLocation.GetMapId()).Instanceable())
+                    if (!CliDB.MapStorage.LookupByKey(_corpseLocation.GetMapId()).Instanceable)
                         SetPlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
                     else
                         RemovePlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
@@ -1376,7 +1378,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint arenaTeamId = result.Read<uint>(0);
+                    int arenaTeamId = result.Read<int>(0);
 
                     ArenaTeam arenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(arenaTeamId);
                     if (arenaTeam == null)
@@ -1391,7 +1393,7 @@ namespace Game.Entities
 
                     SetArenaTeamInfoField(arenaSlot, ArenaTeamInfoType.Id, arenaTeamId);
                     SetArenaTeamInfoField(arenaSlot, ArenaTeamInfoType.Type, arenaTeam.GetArenaType());
-                    SetArenaTeamInfoField(arenaSlot, ArenaTeamInfoType.Member, (uint)(arenaTeam.GetCaptain() == GetGUID() ? 0 : 1));
+                    SetArenaTeamInfoField(arenaSlot, ArenaTeamInfoType.Member, arenaTeam.GetCaptain() == GetGUID() ? 0 : 1);
                     SetArenaTeamInfoField(arenaSlot, ArenaTeamInfoType.GamesWeek, result.Read<ushort>(1));
                     SetArenaTeamInfoField(arenaSlot, ArenaTeamInfoType.GamesSeason, result.Read<ushort>(2));
                     SetArenaTeamInfoField(arenaSlot, ArenaTeamInfoType.WinsSeason, result.Read<ushort>(3));
@@ -1414,7 +1416,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint spellId = result.Read<uint>(0);
+                    int spellId = result.Read<int>(0);
 
                     if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                     {
@@ -1422,7 +1424,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    WorldLocation location = new(result.Read<uint>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
+                    WorldLocation location = new(result.Read<int>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
                     if (!GridDefines.IsValidMapCoord(location))
                     {
                         Log.outError(LogFilter.Spells, $"Player._LoadStoredAuraTeleportLocations: Player {GetName()} ({GetGUID()}) spell (ID: {spellId}) has invalid position on map {location.GetMapId()}, {location}.");
@@ -1442,7 +1444,7 @@ namespace Game.Entities
         {
             if (!result.IsEmpty())
             {
-                Group group = Global.GroupMgr.GetGroupByDbStoreId(result.Read<uint>(0));
+                Group group = Global.GroupMgr.GetGroupByDbStoreId(result.Read<int>(0));
                 if (group != null)
                 {
                     if (group.IsLeader(GetGUID()))
@@ -1470,7 +1472,7 @@ namespace Game.Entities
 
             do
             {
-                _instanceResetTimes.Add(result.Read<uint>(0), result.Read<long>(1));
+                _instanceResetTimes.Add(result.Read<int>(0), result.Read<long>(1));
             } while (result.NextRow());
         }
         void _LoadEquipmentSets(SQLResult result)
@@ -1481,7 +1483,7 @@ namespace Game.Entities
             do
             {
                 EquipmentSetInfo eqSet = new();
-                eqSet.Data.Guid = result.Read<ulong>(0);
+                eqSet.Data.Guid = result.Read<long>(0);
                 eqSet.Data.Type = EquipmentSetInfo.EquipmentSetType.Equipment;
                 eqSet.Data.SetID = result.Read<byte>(1);
                 eqSet.Data.SetName = result.Read<string>(2);
@@ -1492,7 +1494,7 @@ namespace Game.Entities
 
                 for (int i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
                 {
-                    ulong guid = result.Read<uint>(6 + i);
+                    long guid = result.Read<long>(6 + i);
                     if (guid != 0)
                         eqSet.Data.Pieces[i] = ObjectGuid.Create(HighGuid.Item, guid);
                 }
@@ -1519,7 +1521,7 @@ namespace Game.Entities
             {
                 EquipmentSetInfo eqSet = new();
 
-                eqSet.Data.Guid = result.Read<ulong>(0);
+                eqSet.Data.Guid = result.Read<long>(0);
                 eqSet.Data.Type = EquipmentSetInfo.EquipmentSetType.Transmog;
                 eqSet.Data.SetID = result.Read<byte>(1);
                 eqSet.Data.SetName = result.Read<string>(2);
@@ -1583,13 +1585,13 @@ namespace Game.Entities
             // Expecting only one row
             //         0           1     2      3      4      5      6          7          8        9           10
             // SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell, queueTypeId FROM character_Battleground_data WHERE guid = ?
-            m_bgData.bgInstanceID = result.Read<uint>(0);
-            m_bgData.bgTeam = result.Read<ushort>(1);
+            m_bgData.bgInstanceID = result.Read<int>(0);
+            m_bgData.bgTeam = (Team)result.Read<ushort>(1);
             m_bgData.joinPos = new WorldLocation(result.Read<ushort>(6), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
-            m_bgData.taxiPath[0] = result.Read<uint>(7);
-            m_bgData.taxiPath[1] = result.Read<uint>(8);
-            m_bgData.mountSpell = result.Read<uint>(9);
-            m_bgData.queueId = BattlegroundQueueTypeId.FromPacked(result.Read<ulong>(10));
+            m_bgData.taxiPath[0] = result.Read<int>(7);
+            m_bgData.taxiPath[1] = result.Read<int>(8);
+            m_bgData.mountSpell = result.Read<int>(9);
+            m_bgData.queueId = BattlegroundQueueTypeId.FromPacked(result.Read<long>(10));
         }
         void _LoadPetStable(int summonedPetNumber, SQLResult result)
         {
@@ -1604,20 +1606,20 @@ namespace Game.Entities
             do
             {
                 PetStable.PetInfo petInfo = new();
-                petInfo.PetNumber = result.Read<uint>(0);
-                petInfo.CreatureId = result.Read<uint>(1);
-                petInfo.DisplayId = result.Read<uint>(2);
+                petInfo.PetNumber = result.Read<int>(0);
+                petInfo.CreatureId = result.Read<int>(1);
+                petInfo.DisplayId = result.Read<int>(2);
                 petInfo.Level = result.Read<byte>(3);
-                petInfo.Experience = result.Read<uint>(4);
+                petInfo.Experience = result.Read<int>(4);
                 petInfo.ReactState = (ReactStates)result.Read<byte>(5);
                 PetSaveMode slot = (PetSaveMode)result.Read<short>(6);
                 petInfo.Name = result.Read<string>(7);
                 petInfo.WasRenamed = result.Read<bool>(8);
-                petInfo.Health = result.Read<uint>(9);
-                petInfo.Mana = result.Read<uint>(10);
+                petInfo.Health = result.Read<int>(9);
+                petInfo.Mana = result.Read<int>(10);
                 petInfo.ActionBar = result.Read<string>(11);
                 petInfo.LastSaveTime = result.Read<uint>(12);
-                petInfo.CreatedBySpellId = result.Read<uint>(13);
+                petInfo.CreatedBySpellId = result.Read<int>(13);
                 petInfo.Type = (PetType)result.Read<byte>(14);
                 petInfo.SpecializationId = result.Read<ushort>(15);
                 if (slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot)
@@ -1713,7 +1715,7 @@ namespace Game.Entities
                     Item test = GetItemByPos(item.InventoryPosition);
                     if (test == null)
                     {
-                        ulong bagTestGUID = 0;
+                        long bagTestGUID = 0;
                         Item test2 = GetItemByPos(item.InventoryBagSlot);
                         if (test2 != null)
                             bagTestGUID = test2.GetGUID().GetCounter();
@@ -1991,7 +1993,7 @@ namespace Game.Entities
             }
         }
 
-        public static void SavePlayerCustomizations(SQLTransaction trans, ulong guid, List<ChrCustomizationChoice> customizations)
+        public static void SavePlayerCustomizations(SQLTransaction trans, long guid, List<ChrCustomizationChoice> customizations)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_CUSTOMIZATIONS);
             stmt.AddValue(0, guid);
@@ -2007,7 +2009,7 @@ namespace Game.Entities
             }
         }
 
-        public static void SaveCustomizations(SQLTransaction trans, ulong guid, List<ChrCustomizationChoice> customizations)
+        public static void SaveCustomizations(SQLTransaction trans, long guid, List<ChrCustomizationChoice> customizations)
         {
             SavePlayerCustomizations(trans, guid, customizations);
         }
@@ -2026,7 +2028,7 @@ namespace Game.Entities
         {
             int traitConfigId = 0;
             
-            TraitConfig traitConfig = GetTraitConfig((int)(uint)m_activePlayerData.ActiveCombatTraitConfigID);
+            TraitConfig traitConfig = GetTraitConfig(m_activePlayerData.ActiveCombatTraitConfigID);
             if (traitConfig != null)
             {
                 int usedSavedTraitConfigIndex = m_activePlayerData.TraitConfigs.FindIndexIf(savedConfig =>
@@ -2675,7 +2677,7 @@ namespace Game.Entities
         void _SaveCUFProfiles(SQLTransaction trans)
         {
             PreparedStatement stmt;
-            ulong lowGuid = GetGUID().GetCounter();
+            long lowGuid = GetGUID().GetCounter();
 
             for (byte i = 0; i < PlayerConst.MaxCUFProfiles; ++i)
             {
@@ -3597,7 +3599,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetY()));
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetZ()));
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetO()));
-                ulong transLowGUID = 0;
+                long transLowGUID = 0;
                 Transport transport = GetTransport<Transport>();
                 if (transport != null)
                     transLowGUID = transport.GetGUID().GetCounter();
@@ -3665,7 +3667,7 @@ namespace Game.Entities
                         else
                             ss.Append('0');
 
-                        ss.Append($" {(uint)CliDB.ItemStorage.LookupByKey(item.GetVisibleEntry(this)).SubclassID} {(uint)item.GetVisibleSecondaryModifiedAppearanceId(this)} ");
+                        ss.Append($" {(uint)CliDB.ItemStorage.LookupByKey(item.GetVisibleEntry(this)).SubclassID.data} {(uint)item.GetVisibleSecondaryModifiedAppearanceId(this)} ");
                     }
                     else
                         ss.Append("0 0 0 0 0 ");
@@ -3728,7 +3730,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetY()));
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetZ()));
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetO()));
-                ulong transLowGUID = 0;
+                long transLowGUID = 0;
                 Transport transport = GetTransport<Transport>();
                 if (transport != null)
                     transLowGUID = transport.GetGUID().GetCounter();
@@ -3800,7 +3802,7 @@ namespace Game.Entities
                         else
                             ss.Append('0');
 
-                        ss.Append($" {(uint)CliDB.ItemStorage.LookupByKey(item.GetVisibleEntry(this)).SubclassID} {(uint)item.GetVisibleSecondaryModifiedAppearanceId(this)} ");
+                        ss.Append($" {(uint)CliDB.ItemStorage.LookupByKey(item.GetVisibleEntry(this)).SubclassID.data} {(uint)item.GetVisibleSecondaryModifiedAppearanceId(this)} ");
                     }
                     else
                         ss.Append("0 0 0 0 0 ");
@@ -4426,7 +4428,7 @@ namespace Game.Entities
             }
         }
 
-        public static void SavePositionInDB(WorldLocation loc, uint zoneId, ObjectGuid guid, SQLTransaction trans = null)
+        public static void SavePositionInDB(WorldLocation loc, int zoneId, ObjectGuid guid, SQLTransaction trans = null)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_POSITION);
             stmt.AddValue(0, loc.GetPositionX());

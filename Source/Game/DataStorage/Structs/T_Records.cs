@@ -169,12 +169,12 @@ namespace Game.DataStorage
     {
         public LocalizedString SourceText;
         public int Id;
-        private int _itemID;
+        public int ItemID;
         public byte Flags;
         public sbyte SourceTypeEnum;
 
         #region Properties
-        public uint ItemID => (uint)_itemID;
+        //public ??? Flags => (???)Flags;
         #endregion
     }   
 

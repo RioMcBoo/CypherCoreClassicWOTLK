@@ -18,11 +18,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             VendorGUID = _worldPacket.ReadPackedGuid();
-            Slot = _worldPacket.ReadUInt32();
+            Slot = _worldPacket.ReadInt32();
         }
 
         public ObjectGuid VendorGUID;
-        public uint Slot;
+        public int Slot;
     }
 
     public class BuyItem : ClientPacket
@@ -374,12 +374,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Count = _worldPacket.ReadUInt32();
+            Count = _worldPacket.ReadInt32();
             ContainerId = _worldPacket.ReadUInt8();
             SlotNum = _worldPacket.ReadUInt8();
         }
 
-        public uint Count;
+        public int Count;
         public byte SlotNum;
         public byte ContainerId;
     }
@@ -1074,7 +1074,7 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt64(Money);
+            data.WriteInt64(Money);
             for (int i = 0; i < 5; ++i)
                 Items[i].Write(data);
 
@@ -1082,7 +1082,7 @@ namespace Game.Networking.Packets
                 Currencies[i].Write(data);
         }
 
-        public ulong Money;
+        public long Money;
         public ItemPurchaseRefundItem[] Items = new ItemPurchaseRefundItem[5];
         public ItemPurchaseRefundCurrency[] Currencies = new ItemPurchaseRefundCurrency[5];
     }

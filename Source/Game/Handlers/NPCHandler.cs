@@ -52,14 +52,14 @@ namespace Game
                 return;
             }
 
-            uint trainerId = npc.GetTrainerId();
+            int trainerId = npc.GetTrainerId();
             if (trainerId != 0)
                 SendTrainerList(npc, trainerId);
             else
                 Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - Creature id {npc.GetEntry()} has no trainer data.");
         }
 
-        public void SendTrainerList(Creature npc, uint trainerId)
+        public void SendTrainerList(Creature npc, int trainerId)
         {
             // remove fake death
             if (GetPlayer().HasUnitState(UnitState.Died))
@@ -106,7 +106,7 @@ namespace Game
             trainer.TeachSpell(npc, _player, packet.SpellID);
         }
 
-        void SendTrainerBuyFailed(ObjectGuid trainerGUID, uint spellID, TrainerFailReason trainerFailedReason)
+        void SendTrainerBuyFailed(ObjectGuid trainerGUID, int spellID, TrainerFailReason trainerFailedReason)
         {
             TrainerBuyFailed trainerBuyFailed = new();
             trainerBuyFailed.TrainerGUID = trainerGUID;
@@ -302,7 +302,7 @@ namespace Game
             if (GetPlayer().GetMap().Instanceable())
                 return;
 
-            uint bindspell = 3286;
+            int bindspell = 3286;
 
             // send spell for homebinding (3286)
             npc.CastSpell(GetPlayer(), bindspell, true);
@@ -415,7 +415,7 @@ namespace Game
 
             float discountMod = GetPlayer().GetReputationPriceDiscount(vendor);
             byte count = 0;
-            for (uint slot = 0; slot < rawItemCount; ++slot)
+            for (int slot = 0; slot < rawItemCount; ++slot)
             {
                 VendorItem vendorItem = vendorItems.GetItem(slot);
                 if (vendorItem == null)
@@ -437,7 +437,7 @@ namespace Game
                     int leftInStock = vendorItem.maxcount == 0 ? -1 : (int)vendor.GetVendorItemCurrentCount(vendorItem);
                     if (!GetPlayer().IsGameMaster())
                     {
-                        if (!Convert.ToBoolean(itemTemplate.GetAllowableClass() & GetPlayer().GetClassMask()) && itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
+                        if (!itemTemplate.GetAllowableClass().HasClass(GetPlayer().GetClass()) && itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
                             continue;
 
                         if ((itemTemplate.HasFlag(ItemFlags2.FactionHorde) && GetPlayer().GetTeam() == Team.Alliance) ||

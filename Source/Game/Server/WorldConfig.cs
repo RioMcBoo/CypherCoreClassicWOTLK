@@ -705,7 +705,7 @@ namespace Game
 
             Values[WorldCfg.DeclinedNamesUsed] = GetDefaultValue("DeclinedNames", false);
             // always use declined names in the russian client
-            var category = CliDB.CfgCategoriesStorage.LookupByKey((uint)Values[WorldCfg.RealmZone]);
+            var category = CliDB.CfgCategoriesStorage.LookupByKey((int)Values[WorldCfg.RealmZone]);
             if (category != null && category.GetCreateCharsetMask().HasFlag(CfgCategoriesCharsets.Russian))
                 Values[WorldCfg.DeclinedNamesUsed] = true;
 

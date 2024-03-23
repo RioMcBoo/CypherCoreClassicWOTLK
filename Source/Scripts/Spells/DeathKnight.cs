@@ -15,51 +15,51 @@ namespace Scripts.Spells.DeathKnight
 {
     struct SpellIds
     {
-        public const uint ArmyFleshBeastTransform = 127533;
-        public const uint ArmyGeistTransform = 127534;
-        public const uint ArmyNorthrendSkeletonTransform = 127528;
-        public const uint ArmySkeletonTransform = 127527;
-        public const uint ArmySpikedGhoulTransform = 127525;
-        public const uint ArmySuperZombieTransform = 127526;
-        public const uint Blood = 137008;
-        public const uint BloodPlague = 55078;
-        public const uint BloodShieldAbsorb = 77535;
-        public const uint BloodShieldMastery = 77513;
-        public const uint BreathOfSindragosa = 152279;
-        public const uint CorpseExplosionTriggered = 43999;
-        public const uint DeathAndDecayDamage = 52212;
-        public const uint DeathCoilDamage = 47632;
-        public const uint DeathGripDummy = 243912;
-        public const uint DeathGripJump = 49575;
-        public const uint DeathGripTaunt = 51399;
-        public const uint DeathStrikeHeal = 45470;
-        public const uint DeathStrikeOffhand = 66188;
-        public const uint FesteringWound = 194310;
-        public const uint Frost = 137006;
-        public const uint FrostFever = 55095;
-        public const uint FrostScythe = 207230;
-        public const uint GlyphOfFoulMenagerie = 58642;
-        public const uint GlyphOfTheGeist = 58640;
-        public const uint GlyphOfTheSkeleton = 146652;
-        public const uint KillingMachineProc = 51124;
-        public const uint MarkOfBloodHeal = 206945;
-        public const uint NecrosisEffect = 216974;
-        public const uint Obliteration = 281238;
-        public const uint ObliterationRuneEnergize = 281327;
-        public const uint PillarOfFrost = 51271;
-        public const uint RaiseDeadSummon = 52150;
-        public const uint RecentlyUsedDeathStrike = 180612;
-        public const uint RunicPowerEnergize = 49088;
-        public const uint RunicReturn = 61258;
-        public const uint SludgeBelcher = 207313;
-        public const uint SludgeBelcherSummon = 212027;
-        public const uint DeathStrikeEnabler = 89832; // Server Side
-        public const uint TighteningGrasp = 206970;
-        public const uint TighteningGraspSlow = 143375;
-        public const uint Unholy = 137007;
-        public const uint UnholyVigor = 196263;
-        public const uint VolatileShielding = 207188;
-        public const uint VolatileShieldingDamage = 207194;
+        public const int ArmyFleshBeastTransform = 127533;
+        public const int ArmyGeistTransform = 127534;
+        public const int ArmyNorthrendSkeletonTransform = 127528;
+        public const int ArmySkeletonTransform = 127527;
+        public const int ArmySpikedGhoulTransform = 127525;
+        public const int ArmySuperZombieTransform = 127526;
+        public const int Blood = 137008;
+        public const int BloodPlague = 55078;
+        public const int BloodShieldAbsorb = 77535;
+        public const int BloodShieldMastery = 77513;
+        public const int BreathOfSindragosa = 152279;
+        public const int CorpseExplosionTriggered = 43999;
+        public const int DeathAndDecayDamage = 52212;
+        public const int DeathCoilDamage = 47632;
+        public const int DeathGripDummy = 243912;
+        public const int DeathGripJump = 49575;
+        public const int DeathGripTaunt = 51399;
+        public const int DeathStrikeHeal = 45470;
+        public const int DeathStrikeOffhand = 66188;
+        public const int FesteringWound = 194310;
+        public const int Frost = 137006;
+        public const int FrostFever = 55095;
+        public const int FrostScythe = 207230;
+        public const int GlyphOfFoulMenagerie = 58642;
+        public const int GlyphOfTheGeist = 58640;
+        public const int GlyphOfTheSkeleton = 146652;
+        public const int KillingMachineProc = 51124;
+        public const int MarkOfBloodHeal = 206945;
+        public const int NecrosisEffect = 216974;
+        public const int Obliteration = 281238;
+        public const int ObliterationRuneEnergize = 281327;
+        public const int PillarOfFrost = 51271;
+        public const int RaiseDeadSummon = 52150;
+        public const int RecentlyUsedDeathStrike = 180612;
+        public const int RunicPowerEnergize = 49088;
+        public const int RunicReturn = 61258;
+        public const int SludgeBelcher = 207313;
+        public const int SludgeBelcherSummon = 212027;
+        public const int DeathStrikeEnabler = 89832; // Server Side
+        public const int TighteningGrasp = 206970;
+        public const int TighteningGraspSlow = 143375;
+        public const int Unholy = 137007;
+        public const int UnholyVigor = 196263;
+        public const int VolatileShielding = 207188;
+        public const int VolatileShieldingDamage = 207194;
     }
 
     [Script] // 70656 - Advantage (T10 4P Melee Bonus)
@@ -96,8 +96,8 @@ namespace Scripts.Spells.DeathKnight
     class spell_dk_anti_magic_shell : AuraScript
     {
         int absorbPct;
-        ulong maxHealth;
-        uint absorbedAmount;
+        long maxHealth;
+        int absorbedAmount;
 
         public spell_dk_anti_magic_shell()
         {
@@ -125,7 +125,7 @@ namespace Scripts.Spells.DeathKnight
             amount = (int)MathFunctions.CalculatePct(maxHealth, absorbPct);
         }
 
-        void Trigger(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        void Trigger(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
         {
             absorbedAmount += absorbAmount;
 
@@ -160,7 +160,7 @@ namespace Scripts.Spells.DeathKnight
     [Script] /// 6.x, does this belong here or in spell_generic? where do we cast this? sniffs say this is only cast when caster has glyph of foul menagerie.
     class spell_dk_army_transform : SpellScript
     {
-        uint[] ArmyTransforms =
+        int[] ArmyTransforms =
         {
             SpellIds.ArmyFleshBeastTransform,
             SpellIds.ArmyGeistTransform,
@@ -190,7 +190,7 @@ namespace Scripts.Spells.DeathKnight
             return SpellCastResult.SpellUnavailable;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().CastSpell(GetCaster(), ArmyTransforms.SelectRandom(), true);
         }
@@ -225,7 +225,7 @@ namespace Scripts.Spells.DeathKnight
     [Script] /// 7.1.5
     class spell_dk_dancing_rune_weapon : AuraScript
     {
-        const uint NpcDkDancingRuneWeapon = 27893;
+        const int NpcDkDancingRuneWeapon = 27893;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -263,10 +263,10 @@ namespace Scripts.Spells.DeathKnight
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int amount = (int)damageInfo.GetDamage() / 2;
+            int amount = damageInfo.GetDamage() / 2;
             SpellNonMeleeDamage log = new(drw, drw.GetVictim(), spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw), 0), spellInfo.GetSchoolMask());
-            log.damage = (uint)amount;
-            Unit.DealDamage(drw, drw.GetVictim(), (uint)amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
+            log.damage = amount;
+            Unit.DealDamage(drw, drw.GetVictim(), amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
             drw.SendSpellNonMeleeDamageLog(log);
         }
 
@@ -324,7 +324,7 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.DeathCoilDamage, SpellIds.Unholy, SpellIds.UnholyVigor);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             caster.CastSpell(GetHitUnit(), SpellIds.DeathCoilDamage, true);
@@ -353,12 +353,12 @@ namespace Scripts.Spells.DeathKnight
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             Unit target = GetHitUnit();
             if (target != null)
-                target.CastSpell(target, (uint)GetEffectValue(), false);
+                target.CastSpell(target, GetEffectValue(), false);
         }
 
         public override void Register()
@@ -386,7 +386,7 @@ namespace Scripts.Spells.DeathKnight
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.DeathGripDummy, true);
             GetHitUnit().CastSpell(GetCaster(), SpellIds.DeathGripJump, true);
@@ -431,7 +431,7 @@ namespace Scripts.Spells.DeathKnight
                 && ValidateSpellEffect((spellInfo.Id, 2));
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
 
@@ -473,7 +473,7 @@ namespace Scripts.Spells.DeathKnight
         // Amount of seconds we calculate damage over
         const byte LastSeconds = 5;
 
-        uint[] _damagePerSecond = new uint[LastSeconds];
+        int[] _damagePerSecond = new int[LastSeconds];
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
@@ -515,7 +515,7 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.FesteringWound);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.FesteringWound, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, GetEffectValue()));
         }
@@ -534,12 +534,12 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.CorpseExplosionTriggered) && ValidateSpellEffect((spellInfo.Id, 2));
         }
 
-        void HandleDamage(uint effIndex)
+        void HandleDamage(int effIndex)
         {
             SetHitDamage((int)GetCaster().CountPctFromMaxHealth(GetEffectInfo(2).CalcValue(GetCaster())));
         }
 
-        void Suicide(uint effIndex)
+        void Suicide(int effIndex)
         {
             Unit unitTarget = GetHitUnit();
             if (unitTarget != null)
@@ -559,7 +559,7 @@ namespace Scripts.Spells.DeathKnight
     [Script] // 69961 - Glyph of Scourge Strike
     class spell_dk_glyph_of_scourge_strike_script : SpellScript
     {
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -601,7 +601,7 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.FrostFever);
         }
 
-        void HandleFrostFever(uint effIndex)
+        void HandleFrostFever(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.FrostFever);
         }
@@ -774,9 +774,9 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.RaiseDeadSummon, SpellIds.SludgeBelcher, SpellIds.SludgeBelcherSummon);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
-            uint spellId = SpellIds.RaiseDeadSummon;
+            int spellId = SpellIds.RaiseDeadSummon;
             if (GetCaster().HasAura(SpellIds.SludgeBelcher))
                 spellId = SpellIds.SludgeBelcherSummon;
 

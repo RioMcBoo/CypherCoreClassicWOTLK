@@ -86,7 +86,7 @@ namespace Game.Spells
                     m_canBeRecalculated = false;
                     break;
                 case AuraType.Mounted:
-                    uint mountType = (uint)GetMiscValueB();
+                    int mountType = GetMiscValueB();
                     MountRecord mountEntry = Global.DB2Mgr.GetMount(GetId());
                     if (mountEntry != null)
                         mountType = mountEntry.MountTypeID;
@@ -126,7 +126,7 @@ namespace Game.Spells
 
         public static float? CalculateEstimatedAmount(Unit caster, Unit target, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, int amount, byte stack, AuraEffect aurEff)
         {
-            uint stackAmountForBonuses = !spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? stack : 1u;
+            int stackAmountForBonuses = !spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? stack : 1;
 
             switch (spellEffectInfo.ApplyAuraName)
             {
@@ -455,9 +455,9 @@ namespace Game.Spells
                     // if aura is cast by others, it will not be affected
                     if ((aura.IsPassive() || aura.IsPermanent()) && aura.GetCasterGUID() == guid && aura.GetSpellInfo().IsAffectedBySpellMod(m_spellmod))
                     {
-                        for (uint i = 0; i < recalculateEffectMask.Count; ++i)
+                        for (int i = 0; i < recalculateEffectMask.Count; ++i)
                         {
-                            if (recalculateEffectMask[(int)i])
+                            if (recalculateEffectMask[i])
                             {
                                 AuraEffect aurEff = aura.GetEffect(i);
                                 if (aurEff != null)
@@ -656,7 +656,7 @@ namespace Game.Spells
                 case AuraType.ProcTriggerSpellWithValue:
                 {
                     // Don't proc extra attacks while already processing extra attack spell
-                    uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+                    int triggerSpellId = GetSpellEffectInfo().TriggerSpell;
                     SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
                     if (triggeredSpellInfo != null)
                     {
@@ -1225,9 +1225,9 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
-                PhasingHandler.AddPhase(target, (uint)GetMiscValueB(), true);
+                PhasingHandler.AddPhase(target, GetMiscValueB(), true);
             else
-                PhasingHandler.RemovePhase(target, (uint)GetMiscValueB(), true);
+                PhasingHandler.RemovePhase(target, GetMiscValueB(), true);
         }
 
         [AuraEffectHandler(AuraType.PhaseGroup)]
@@ -1239,9 +1239,9 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
-                PhasingHandler.AddPhaseGroup(target, (uint)GetMiscValueB(), true);
+                PhasingHandler.AddPhaseGroup(target, GetMiscValueB(), true);
             else
-                PhasingHandler.RemovePhaseGroup(target, (uint)GetMiscValueB(), true);
+                PhasingHandler.RemovePhaseGroup(target, GetMiscValueB(), true);
         }
 
         [AuraEffectHandler(AuraType.PhaseAlwaysVisible)]
@@ -1277,7 +1277,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
             ShapeShiftForm form = (ShapeShiftForm)GetMiscValue();
-            uint modelid = target.GetModelForForm(form, GetId());
+            int modelid = target.GetModelForForm(form, GetId());
 
             if (apply)
             {
@@ -1445,43 +1445,43 @@ namespace Game.Spells
                                 {
                                     // Blood Elf
                                     case Race.BloodElf:
-                                        target.SetDisplayId(isFemale ? 17830 : 17829u);
+                                        target.SetDisplayId(isFemale ? 17830 : 17829);
                                         break;
                                     // Orc
                                     case Race.Orc:
-                                        target.SetDisplayId(isFemale ? 10140 : 10139u);
+                                        target.SetDisplayId(isFemale ? 10140 : 10139);
                                         break;
                                     // Troll
                                     case Race.Troll:
-                                        target.SetDisplayId(isFemale ? 10134 : 10135u);
+                                        target.SetDisplayId(isFemale ? 10134 : 10135);
                                         break;
                                     // Tauren
                                     case Race.Tauren:
-                                        target.SetDisplayId(isFemale ? 10147 : 10136u);
+                                        target.SetDisplayId(isFemale ? 10147 : 10136);
                                         break;
                                     // Undead
                                     case Race.Undead:
-                                        target.SetDisplayId(isFemale ? 10145 : 10146u);
+                                        target.SetDisplayId(isFemale ? 10145 : 10146);
                                         break;
                                     // Draenei
                                     case Race.Draenei:
-                                        target.SetDisplayId(isFemale ? 17828 : 17827u);
+                                        target.SetDisplayId(isFemale ? 17828 : 17827);
                                         break;
                                     // Dwarf
                                     case Race.Dwarf:
-                                        target.SetDisplayId(isFemale ? 10142 : 10141u);
+                                        target.SetDisplayId(isFemale ? 10142 : 10141);
                                         break;
                                     // Gnome
                                     case Race.Gnome:
-                                        target.SetDisplayId(isFemale ? 10149 : 10148u);
+                                        target.SetDisplayId(isFemale ? 10149 : 10148);
                                         break;
                                     // Human
                                     case Race.Human:
-                                        target.SetDisplayId(isFemale ? 10138 : 10137u);
+                                        target.SetDisplayId(isFemale ? 10138 : 10137);
                                         break;
                                     // Night Elf
                                     case Race.NightElf:
-                                        target.SetDisplayId(isFemale ? 10144 : 10143u);
+                                        target.SetDisplayId(isFemale ? 10144 : 10143);
                                         break;
                                     default:
                                         break;
@@ -1504,43 +1504,43 @@ namespace Game.Spells
                                 {
                                     // Blood Elf
                                     case Race.BloodElf:
-                                        target.SetDisplayId(isFemale ? 25043 : 25032u);
+                                        target.SetDisplayId(isFemale ? 25043 : 25032);
                                         break;
                                     // Orc
                                     case Race.Orc:
-                                        target.SetDisplayId(isFemale ? 25050 : 25039u);
+                                        target.SetDisplayId(isFemale ? 25050 : 25039);
                                         break;
                                     // Troll
                                     case Race.Troll:
-                                        target.SetDisplayId(isFemale ? 25052 : 25041u);
+                                        target.SetDisplayId(isFemale ? 25052 : 25041);
                                         break;
                                     // Tauren
                                     case Race.Tauren:
-                                        target.SetDisplayId(isFemale ? 25051 : 25040u);
+                                        target.SetDisplayId(isFemale ? 25051 : 25040);
                                         break;
                                     // Undead
                                     case Race.Undead:
-                                        target.SetDisplayId(isFemale ? 25053 : 25042u);
+                                        target.SetDisplayId(isFemale ? 25053 : 25042);
                                         break;
                                     // Draenei
                                     case Race.Draenei:
-                                        target.SetDisplayId(isFemale ? 25044 : 25033u);
+                                        target.SetDisplayId(isFemale ? 25044 : 25033);
                                         break;
                                     // Dwarf
                                     case Race.Dwarf:
-                                        target.SetDisplayId(isFemale ? 25045 : 25034u);
+                                        target.SetDisplayId(isFemale ? 25045 : 25034);
                                         break;
                                     // Gnome
                                     case Race.Gnome:
-                                        target.SetDisplayId(isFemale ? 25035 : 25046u);
+                                        target.SetDisplayId(isFemale ? 25035 : 25046);
                                         break;
                                     // Human
                                     case Race.Human:
-                                        target.SetDisplayId(isFemale ? 25037 : 25048u);
+                                        target.SetDisplayId(isFemale ? 25037 : 25048);
                                         break;
                                     // Night Elf
                                     case Race.NightElf:
-                                        target.SetDisplayId(isFemale ? 25038 : 25049u);
+                                        target.SetDisplayId(isFemale ? 25038 : 25049);
                                         break;
                                     default:
                                         break;
@@ -1554,15 +1554,15 @@ namespace Game.Spells
                             // Honor the Dead
                             case 65386:
                             case 65495:
-                                target.SetDisplayId(isFemale ? 29204 : 29203u);
+                                target.SetDisplayId(isFemale ? 29204 : 29203);
                                 break;
                             // Darkspear Pride
                             case 75532:
-                                target.SetDisplayId(isFemale ? 31738 : 31737u);
+                                target.SetDisplayId(isFemale ? 31738 : 31737);
                                 break;
                             // Gnomeregan Pride
                             case 75531:
-                                target.SetDisplayId(isFemale ? 31655 : 31654u);
+                                target.SetDisplayId(isFemale ? 31655 : 31654);
                                 break;
                             default:
                                 break;
@@ -1570,7 +1570,7 @@ namespace Game.Spells
                     }
                     else
                     {
-                        CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate((uint)GetMiscValue());
+                        CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(GetMiscValue());
                         if (ci == null)
                         {
                             target.SetDisplayId(16358);              // pig pink ^_^
@@ -1578,8 +1578,8 @@ namespace Game.Spells
                         }
                         else
                         {
-                            uint model_id = 0;
-                            uint modelid = ObjectManager.ChooseDisplayId(ci).CreatureDisplayID;
+                            int model_id = 0;
+                            int modelid = ObjectManager.ChooseDisplayId(ci).CreatureDisplayID;
                             if (modelid != 0)
                                 model_id = modelid;                     // Will use the default model here
 
@@ -1618,7 +1618,7 @@ namespace Game.Spells
                     if (!target.GetAuraEffectsByType(AuraType.Mounted).Empty())
                     {
                         int cr_id = target.GetAuraEffectsByType(AuraType.Mounted)[0].GetMiscValue();
-                        CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate((uint)cr_id);
+                        CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(cr_id);
                         if (ci != null)
                         {
                             CreatureModel model = ObjectManager.ChooseDisplayId(ci);
@@ -1834,14 +1834,14 @@ namespace Game.Spells
                 Item item = player.GetItemByPos(slot);
                 if (item != null)
                 {
-                    WeaponAttackType attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
+                    var attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
 
                     player.ApplyItemDependentAuras(item, !apply);
-                    if (attackType < WeaponAttackType.Max)
+                    if (attackType.HasValue)
                     {
                         player._ApplyWeaponDamage(slot, item, !apply);
                         if (!apply) // apply case already handled on item dependent aura removal (if any)
-                            player.UpdateWeaponDependentAuras(attackType);
+                            player.UpdateWeaponDependentAuras(attackType.Value);
                     }
                 }
             }
@@ -2101,9 +2101,9 @@ namespace Game.Spells
             {
                 if (mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 {
-                    uint creatureEntry = (uint)GetMiscValue();
-                    uint displayId = 0;
-                    uint vehicleId = 0;
+                    int creatureEntry = GetMiscValue();
+                    int displayId = 0;
+                    int vehicleId = 0;
 
                     var mountEntry = Global.DB2Mgr.GetMount(GetId());
                     if (mountEntry != null)
@@ -2111,7 +2111,7 @@ namespace Game.Spells
                         var mountDisplays = Global.DB2Mgr.GetMountDisplays(mountEntry.Id);
                         if (mountDisplays != null)
                         {
-                            if (mountEntry.IsSelfMount())
+                            if (mountEntry.IsSelfMount)
                             {
                                 displayId = SharedConst.DisplayIdHiddenMount;
                             }
@@ -2737,7 +2737,7 @@ namespace Game.Spells
                 {
                     //Players on flying mounts must be immune to polymorph
                     if (target.IsTypeId(TypeId.Player))
-                        target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, (uint)Mechanics.Polymorph, apply);
+                        target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Polymorph, apply);
 
                     // Dragonmaw Illusion (overwrite mount model, mounted aura already applied)
                     if (apply && target.HasAuraEffect(42016, 0) && target.GetMountDisplayId() != 0)
@@ -3256,7 +3256,7 @@ namespace Game.Spells
             // recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR0_ABILITY 0x00000010 flag)
             // this check is total bullshit i think
             if ((Convert.ToBoolean(GetMiscValueB() & 1 << (int)Stats.Stamina) || GetMiscValueB() == 0) && m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
-                target.SetHealth(Math.Max(MathFunctions.CalculatePct(target.GetMaxHealth(), healthPct), (zeroHealth ? 0 : 1ul)));
+                target.SetHealth(Math.Max(MathFunctions.CalculatePct(target.GetMaxHealth(), healthPct), (zeroHealth ? 0 : 1)));
         }
 
         [AuraEffectHandler(AuraType.ModExpertise)]
@@ -3680,7 +3680,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
             int thresholdPct = GetAmount();
-            uint triggerSpell = GetSpellEffectInfo().TriggerSpell;
+            int triggerSpell = GetSpellEffectInfo().TriggerSpell;
 
             switch ((AuraTriggerOnHealthChangeDirection)GetMiscValue())
             {
@@ -4015,7 +4015,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            if ((target.GetClassMask() & (uint)Class.ClassMaskWandUsers) != 0)
+            if (!ClassMask.WandUsers.HasClass(target.GetClass()))
                 return;
 
             target.HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, GetAmount(), apply);
@@ -4047,7 +4047,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            if ((target.GetClassMask() & (uint)Class.ClassMaskWandUsers) != 0)
+            if (!ClassMask.WandUsers.HasClass(target.GetClass()))
                 return;
 
             //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
@@ -4330,14 +4330,14 @@ namespace Game.Spells
                                     break;
                                 }
                                 case 42783: // Wrath of the Astromancer
-                                    target.CastSpell(target, (uint)GetAmount(), new CastSpellExtraArgs(this));
+                                    target.CastSpell(target, GetAmount(), new CastSpellExtraArgs(this));
                                     break;
                                 case 46308: // Burning Winds casted only at creatures at spawn
                                     target.CastSpell(target, 47287, new CastSpellExtraArgs(this));
                                     break;
                                 case 52172:  // Coyote Spirit Despawn Aura
                                 case 60244:  // Blood Parrot Despawn Aura
-                                    target.CastSpell((Unit)null, (uint)GetAmount(), new CastSpellExtraArgs(this));
+                                    target.CastSpell(null, GetAmount(), new CastSpellExtraArgs(this));
                                     break;
                                 case 91604: // Restricted Flight Area
                                     if (aurApp.GetRemoveMode() == AuraRemoveMode.Expire)
@@ -4348,7 +4348,7 @@ namespace Game.Spells
                         case SpellFamilyNames.Deathknight:
                             // Summon Gargoyle (Dismiss Gargoyle at remove)
                             if (GetId() == 61777)
-                                target.CastSpell(target, (uint)GetAmount(), new CastSpellExtraArgs(this));
+                                target.CastSpell(target, GetAmount(), new CastSpellExtraArgs(this));
                             break;
                         default:
                             break;
@@ -4368,12 +4368,12 @@ namespace Game.Spells
                     {
                         // Recently Bandaged
                         case 11196:
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, (uint)GetMiscValue(), apply);
+                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, GetMiscValue(), apply);
                             break;
                         // Unstable Power
                         case 24658:
                         {
-                            uint spellId = 24659;
+                            int spellId = 24659;
                             if (apply && caster != null)
                             {
                                 SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
@@ -4393,7 +4393,7 @@ namespace Game.Spells
                         // Restless Strength
                         case 24661:
                         {
-                            uint spellId = 24662;
+                            int spellId = 24662;
                             if (apply && caster != null)
                             {
                                 SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
@@ -4413,7 +4413,7 @@ namespace Game.Spells
                         case 30877:
                         {
                             // Tag/untag Blacksilt Scout
-                            target.SetEntry((uint)(apply ? 17654 : 17326));
+                            target.SetEntry(apply ? 17654 : 17326);
                             break;
                         }
                         case 57819: // Argent Champion
@@ -4424,7 +4424,7 @@ namespace Game.Spells
                             if (caster == null || !caster.IsTypeId(TypeId.Player))
                                 break;
 
-                            uint FactionID = 0;
+                            int FactionID = 0;
 
                             if (apply)
                             {
@@ -4564,7 +4564,7 @@ namespace Game.Spells
             if (player == null)
                 return;
 
-            uint factionId = (uint)GetMiscValue();
+            int factionId = GetMiscValue();
             ReputationRank factionRank = (ReputationRank)GetAmount();
 
             player.GetReputationMgr().ApplyForceReaction(factionId, factionRank, apply);
@@ -4608,7 +4608,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.SetFaction((uint)GetMiscValue());
+                target.SetFaction(GetMiscValue());
                 if (target.IsTypeId(TypeId.Player))
                     target.RemoveUnitFlag(UnitFlags.PlayerControlled);
             }
@@ -4631,9 +4631,9 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                player.LearnSpell((uint)GetMiscValue(), true, 0, true);
+                player.LearnSpell(GetMiscValue(), true, 0, true);
             else
-                player.RemoveSpell((uint)GetMiscValue(), false, false, true);
+                player.RemoveSpell(GetMiscValue(), false, false, true);
         }
 
         [AuraEffectHandler(AuraType.ComprehendLanguage)]
@@ -4679,7 +4679,7 @@ namespace Game.Spells
         {
             Unit target = aurApp.GetTarget();
 
-            uint triggeredSpellId = GetSpellEffectInfo().TriggerSpell;
+            int triggeredSpellId = GetSpellEffectInfo().TriggerSpell;
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggeredSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo == null)
                 return;
@@ -4723,7 +4723,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             int effectAmount = GetAmount();
-            uint triggerSpell = GetSpellEffectInfo().TriggerSpell;
+            int triggerSpell = GetSpellEffectInfo().TriggerSpell;
             float powerAmountPct = MathFunctions.GetPctOf(target.GetPower((PowerType)GetMiscValue()), target.GetMaxPower((PowerType)GetMiscValue()));
 
             switch ((AuraTriggerOnPowerChangeDirection)GetMiscValueB())
@@ -4752,7 +4752,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             int effectAmount = GetAmount();
-            uint triggerSpell = GetSpellEffectInfo().TriggerSpell;
+            int triggerSpell = GetSpellEffectInfo().TriggerSpell;
             float powerAmount = target.GetPower((PowerType)GetMiscValue());
 
             switch ((AuraTriggerOnPowerChangeDirection)GetMiscValueB())
@@ -4860,7 +4860,7 @@ namespace Game.Spells
             if (target == null || !target.IsInWorld)
                 return;
 
-            uint overrideId = (uint)GetMiscValue();
+            int overrideId = GetMiscValue();
 
             if (apply)
             {
@@ -4868,9 +4868,9 @@ namespace Game.Spells
                 OverrideSpellDataRecord overrideSpells = CliDB.OverrideSpellDataStorage.LookupByKey(overrideId);
                 if (overrideSpells != null)
                 {
-                    for (byte i = 0; i < SharedConst.MaxOverrideSpell; ++i)
+                    for (int i = 0; i < SharedConst.MaxOverrideSpell; ++i)
                     {
-                        uint spellId = overrideSpells.Spells[i];
+                        int spellId = overrideSpells.Spells[i];
                         if (spellId != 0)
                             target.AddTemporarySpell(spellId);
                     }
@@ -4882,9 +4882,9 @@ namespace Game.Spells
                 OverrideSpellDataRecord overrideSpells = CliDB.OverrideSpellDataStorage.LookupByKey(overrideId);
                 if (overrideSpells != null)
                 {
-                    for (byte i = 0; i < SharedConst.MaxOverrideSpell; ++i)
+                    for (int i = 0; i < SharedConst.MaxOverrideSpell; ++i)
                     {
-                        uint spellId = overrideSpells.Spells[i];
+                        int spellId = overrideSpells.Spells[i];
                         if (spellId != 0)
                             target.RemoveTemporarySpell(spellId);
                     }
@@ -4907,7 +4907,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                if (!target.CreateVehicleKit((uint)vehicleId, 0))
+                if (!target.CreateVehicleKit(vehicleId, 0))
                     return;
             }
             else if (target.GetVehicleKit() != null)
@@ -4951,7 +4951,7 @@ namespace Game.Spells
 
         void HandlePeriodicTriggerSpellAuraTick(Unit target, Unit caster)
         {
-            uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+            int triggerSpellId = GetSpellEffectInfo().TriggerSpell;
             if (triggerSpellId == 0)
             {
                 Log.outWarn(LogFilter.Spells, $"AuraEffect::HandlePeriodicTriggerSpellAuraTick: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
@@ -4974,7 +4974,7 @@ namespace Game.Spells
 
         void HandlePeriodicTriggerSpellWithValueAuraTick(Unit target, Unit caster)
         {
-            uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+            int triggerSpellId = GetSpellEffectInfo().TriggerSpell;
             if (triggerSpellId == 0)
             {
                 Log.outWarn(LogFilter.Spells, $"AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
@@ -5018,10 +5018,10 @@ namespace Game.Spells
 
             CleanDamage cleanDamage = new(0, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
 
-            uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
+            int stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1;
 
             // ignore non positive values (can be result apply spellmods to aura damage
-            uint damage = (uint)Math.Max(GetAmount(), 0);
+            int damage = Math.Max(GetAmount(), 0);
 
             // Script Hook For HandlePeriodicDamageAurasTick -- Allow scripts to change the Damage pre class mitigation calculations
             Global.ScriptMgr.ModifyPeriodicDamageAurasTick(target, caster, ref damage);
@@ -5031,9 +5031,9 @@ namespace Game.Spells
                 case AuraType.PeriodicDamage:
                 {
                     if (caster != null)
-                        damage = (uint)caster.SpellDamageBonusDone(target, GetSpellInfo(), (int)damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
+                        damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
 
-                    damage = (uint)target.SpellDamageBonusTaken(caster, GetSpellInfo(), (int)damage, DamageEffectType.DOT);
+                    damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
 
                     if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
                     {
@@ -5043,7 +5043,7 @@ namespace Game.Spells
                             case 72854: // Unbound Plague
                             case 72855: // Unbound Plague
                             case 72856: // Unbound Plague
-                                damage *= (uint)Math.Pow(1.25f, _ticksDone);
+                                damage *= (int)Math.Pow(1.25f, _ticksDone);
                                 break;
                             default:
                                 break;
@@ -5059,15 +5059,15 @@ namespace Game.Spells
 
                     // Add melee damage bonuses (also check for negative)
                     if (caster != null)
-                        damage = (uint)caster.MeleeDamageBonusDone(target, (int)damage, attackType, DamageEffectType.DOT, GetSpellInfo(), GetSpellEffectInfo().Mechanic, GetSpellInfo().GetSchoolMask(), null, this);
+                        damage = caster.MeleeDamageBonusDone(target, damage, attackType, DamageEffectType.DOT, GetSpellInfo(), GetSpellEffectInfo().Mechanic, GetSpellInfo().GetSchoolMask(), null, this);
 
-                    damage = (uint)target.MeleeDamageBonusTaken(caster, (int)damage, attackType, DamageEffectType.DOT, GetSpellInfo());
+                    damage = target.MeleeDamageBonusTaken(caster, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
                     break;
                 }
                 case AuraType.PeriodicDamagePercent:
                     // ceil obtained value, it may happen that 10 ticks for 10% damage may not kill owner
-                    damage = (uint)Math.Ceiling(MathFunctions.CalculatePct((float)target.GetMaxHealth(), (float)damage));
-                    damage = (uint)target.SpellDamageBonusTaken(caster, GetSpellInfo(), (int)damage, DamageEffectType.DOT);
+                    damage = (int)Math.Ceiling(MathFunctions.CalculatePct((float)target.GetMaxHealth(), damage));
+                    damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
                     break;
                 default:
                     break;
@@ -5080,7 +5080,7 @@ namespace Game.Spells
             // Calculate armor mitigation
             if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo()))
             {
-                uint damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
+                int damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
                 cleanDamage.mitigated_damage += damage - damageReducedArmor;
                 damage = damageReducedArmor;
             }
@@ -5088,20 +5088,20 @@ namespace Game.Spells
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
                 if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect))
-                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
+                    damage = target.CalculateAOEAvoidance(damage, m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
             }
 
-            int dmg = (int)damage;
+            int dmg = damage;
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers) && caster != null && caster.CanApplyResilience())
                 Unit.ApplyResilience(target, ref dmg);
-            damage = (uint)dmg;
+            damage = dmg;
 
             DamageInfo damageInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
             Unit.CalcAbsorbResist(damageInfo);
             damage = damageInfo.GetDamage();
 
-            uint absorb = damageInfo.GetAbsorb();
-            uint resist = damageInfo.GetResist();
+            int absorb = damageInfo.GetAbsorb();
+            int resist = damageInfo.GetResist();
             Unit.DealDamageMods(caster, target, ref damage, ref absorb);
 
             // Set trigger flag
@@ -5119,7 +5119,7 @@ namespace Game.Spells
             if (overkill < 0)
                 overkill = 0;
 
-            SpellPeriodicAuraLogInfo pInfo = new(this, damage, (uint)dmg, (uint)overkill, absorb, resist, 0.0f, crit);
+            SpellPeriodicAuraLogInfo pInfo = new(this, damage, dmg, overkill, absorb, resist, 0.0f, crit);
 
             Unit.DealDamage(caster, target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), true);
 
@@ -5145,15 +5145,15 @@ namespace Game.Spells
 
             CleanDamage cleanDamage = new(0, 0, GetSpellInfo().GetAttackType(), MeleeHitOutcome.Normal);
 
-            uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
+            int stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1;
 
             // ignore negative values (can be result apply spellmods to aura damage
-            uint damage = (uint)Math.Max(GetAmount(), 0);
+            int damage = Math.Max(GetAmount(), 0);
 
             if (caster != null)
-                damage = (uint)caster.SpellDamageBonusDone(target, GetSpellInfo(), (int)damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
+                damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
 
-            damage = (uint)target.SpellDamageBonusTaken(caster, GetSpellInfo(), (int)damage, DamageEffectType.DOT);
+            damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
 
             bool crit = RandomHelper.randChance(GetCritChanceFor(caster, target));
             if (crit)
@@ -5162,7 +5162,7 @@ namespace Game.Spells
             // Calculate armor mitigation
             if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo()))
             {
-                uint damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
+                int damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
                 cleanDamage.mitigated_damage += damage - damageReducedArmor;
                 damage = damageReducedArmor;
             }
@@ -5170,25 +5170,25 @@ namespace Game.Spells
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
                 if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect))
-                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
+                    damage = target.CalculateAOEAvoidance(damage, m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
             }
 
-            int dmg = (int)damage;
+            int dmg = damage;
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers) && caster != null && caster.CanApplyResilience())
                 Unit.ApplyResilience(target, ref dmg);
 
-            damage = (uint)dmg;
+            damage = dmg;
 
             DamageInfo damageInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, GetSpellInfo().GetAttackType());
             Unit.CalcAbsorbResist(damageInfo);
 
-            uint absorb = damageInfo.GetAbsorb();
-            uint resist = damageInfo.GetResist();
+            int absorb = damageInfo.GetAbsorb();
+            int resist = damageInfo.GetResist();
 
             // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted damage
             SpellNonMeleeDamage log = new(caster, target, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastId());
             log.damage = damage;
-            log.originalDamage = (uint)dmg;
+            log.originalDamage = dmg;
             log.absorb = absorb;
             log.resist = resist;
             log.periodicLog = true;
@@ -5206,7 +5206,7 @@ namespace Game.Spells
                 procVictim.Or(ProcFlags.TakeAnyDamage);
             }
 
-            int new_damage = (int)Unit.DealDamage(caster, target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), false);
+            int new_damage = Unit.DealDamage(caster, target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), false);
             Unit.ProcSkillsAndAuras(caster, target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, hitMask, null, damageInfo, null);
 
             // process caster heal from now on (must be in world)
@@ -5215,8 +5215,8 @@ namespace Game.Spells
 
             float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
-            uint heal = (uint)caster.SpellHealingBonusDone(caster, GetSpellInfo(), (int)(new_damage * gainMultiplier), DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
-            heal = (uint)caster.SpellHealingBonusTaken(caster, GetSpellInfo(), (int)heal, DamageEffectType.DOT);
+            int heal = caster.SpellHealingBonusDone(caster, GetSpellInfo(), (int)(new_damage * gainMultiplier), DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
+            heal = caster.SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DamageEffectType.DOT);
 
             HealInfo healInfo = new(caster, caster, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
             caster.HealBySpell(healInfo);
@@ -5238,19 +5238,19 @@ namespace Game.Spells
                 return;
             }
 
-            uint damage = (uint)Math.Max(GetAmount(), 0);
+            int damage = Math.Max(GetAmount(), 0);
             // do not kill health donator
             if (caster.GetHealth() < damage)
-                damage = (uint)caster.GetHealth() - 1;
+                damage = (int)caster.GetHealth() - 1;
             if (damage == 0)
                 return;
 
-            caster.ModifyHealth(-(int)damage);
+            caster.ModifyHealth(-damage);
             Log.outDebug(LogFilter.Spells, "PeriodicTick: donator {0} target {1} damage {2}.", caster.GetEntry(), target.GetEntry(), damage);
 
             float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
-            damage = (uint)(damage * gainMultiplier);
+            damage = (int)(damage * gainMultiplier);
 
             HealInfo healInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
             caster.HealBySpell(healInfo);
@@ -5272,32 +5272,32 @@ namespace Game.Spells
             if (GetBase().IsPermanent() && target.IsFullHealth())
                 return;
 
-            uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
+            int stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1;
 
             // ignore negative values (can be result apply spellmods to aura damage
-            uint damage = (uint)Math.Max(GetAmount(), 0);
+            int damage = Math.Max(GetAmount(), 0);
 
             if (GetAuraType() == AuraType.ObsModHealth)
-                damage = (uint)target.CountPctFromMaxHealth((int)damage);
+                damage = (int)target.CountPctFromMaxHealth(damage);
             else if (caster != null)
-                damage = (uint)caster.SpellHealingBonusDone(target, GetSpellInfo(), (int)damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
+                damage = caster.SpellHealingBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
 
-            damage = (uint)target.SpellHealingBonusTaken(caster, GetSpellInfo(), (int)damage, DamageEffectType.DOT);
+            damage = target.SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
 
             bool crit = RandomHelper.randChance(GetCritChanceFor(caster, target));
             if (crit)
-                damage = (uint)Unit.SpellCriticalHealingBonus(caster, m_spellInfo, (int)damage, target);
+                damage = Unit.SpellCriticalHealingBonus(caster, m_spellInfo, damage, target);
 
             Log.outDebug(LogFilter.Spells, "PeriodicTick: {0} (TypeId: {1}) heal of {2} (TypeId: {3}) for {4} health inflicted by {5}",
                 GetCasterGUID().ToString(), GetCaster().GetTypeId(), target.GetGUID().ToString(), target.GetTypeId(), damage, GetId());
 
-            uint heal = (uint)damage;
+            int heal = damage;
 
             HealInfo healInfo = new(caster, target, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
             Unit.CalcHealAbsorb(healInfo);
             Unit.DealHeal(healInfo);
 
-            SpellPeriodicAuraLogInfo pInfo = new(this, heal, (uint)damage, heal - healInfo.GetEffectiveHeal(), healInfo.GetAbsorb(), 0, 0.0f, crit);
+            SpellPeriodicAuraLogInfo pInfo = new(this, heal, damage, heal - healInfo.GetEffectiveHeal(), healInfo.GetAbsorb(), 0, 0.0f, crit);
             target.SendPeriodicAuraLog(pInfo);
 
             if (caster != null)
@@ -5338,7 +5338,7 @@ namespace Game.Spells
             int drainedAmount = -target.ModifyPower(powerType, -drainAmount);
             float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
-            SpellPeriodicAuraLogInfo pInfo = new(this, (uint)drainedAmount, (uint)drainAmount, 0, 0, 0, gainMultiplier, false);
+            SpellPeriodicAuraLogInfo pInfo = new(this, drainedAmount, drainAmount, 0, 0, 0, gainMultiplier, false);
 
             int gainAmount = (int)(drainedAmount * gainMultiplier);
             int gainedAmount = 0;
@@ -5395,7 +5395,7 @@ namespace Game.Spells
             // ignore negative values (can be result apply spellmods to aura damage
             int amount = Math.Max(GetAmount(), 0) * target.GetMaxPower(powerType) / 100;
 
-            SpellPeriodicAuraLogInfo pInfo = new(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
+            SpellPeriodicAuraLogInfo pInfo = new(this, amount, amount, 0, 0, 0, 0.0f, false);
 
             int gain = target.ModifyPower(powerType, amount);
 
@@ -5424,7 +5424,7 @@ namespace Game.Spells
             // ignore negative values (can be result apply spellmods to aura damage
             int amount = Math.Max(GetAmount(), 0);
 
-            SpellPeriodicAuraLogInfo pInfo = new(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
+            SpellPeriodicAuraLogInfo pInfo = new(this, amount, amount, 0, 0, 0, 0.0f, false);
             int gain = target.ModifyPower(powerType, amount);
 
             if (caster != null)
@@ -5520,7 +5520,7 @@ namespace Game.Spells
             Unit triggerCaster = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
 
-            uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+            int triggerSpellId = GetSpellEffectInfo().TriggerSpell;
             if (triggerSpellId == 0)
             {
                 Log.outWarn(LogFilter.Spells, $"AuraEffect::HandleProcTriggerSpellAuraProc: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
@@ -5542,7 +5542,7 @@ namespace Game.Spells
             Unit triggerCaster = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
 
-            uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+            int triggerSpellId = GetSpellEffectInfo().TriggerSpell;
             if (triggerSpellId == 0)
             {
                 Log.outWarn(LogFilter.Spells, $"AuraEffect::HandleProcTriggerSpellAuraProc: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
@@ -5671,7 +5671,7 @@ namespace Game.Spells
             if (currSpec == null)
                 return;
 
-            pet.SetSpecialization(Global.DB2Mgr.GetChrSpecializationByIndex(apply ? Class.Max : 0, (uint)currSpec.OrderIndex).Id);
+            pet.SetSpecialization(Global.DB2Mgr.GetChrSpecializationByIndex(apply ? Class.Max : 0, currSpec.OrderIndex).Id);
         }
 
         [AuraEffectHandler(AuraType.AllowUsingGameobjectsWhileMounted)]
@@ -5701,9 +5701,9 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                player.GetSceneMgr().PlayScene((uint)GetMiscValue());
+                player.GetSceneMgr().PlayScene(GetMiscValue());
             else
-                player.GetSceneMgr().CancelSceneBySceneId((uint)GetMiscValue());
+                player.GetSceneMgr().CancelSceneBySceneId(GetMiscValue());
         }
 
         [AuraEffectHandler(AuraType.AreaTrigger)]
@@ -5716,7 +5716,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                AreaTrigger.CreateAreaTrigger((uint)GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellVisual(), null, this);
+                AreaTrigger.CreateAreaTrigger(GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellVisual(), null, this);
             }
             else
             {
@@ -5766,9 +5766,9 @@ namespace Game.Spells
 
                 // we don't know if there can be multiple summons for the same effect, so consider only 1 summon for each effect
                 // most of the spells have multiple effects with the same summon spell id for multiple spawns, so right now it's safe to assume there's only 1 spawn per effect
-                foreach (uint summonEntry in summonedEntries)
+                foreach (int summonEntry in summonedEntries)
                 {
-                    List<Creature> nearbyEntries = target.GetCreatureListWithEntryInGrid(summonEntry);
+                    var nearbyEntries = target.GetCreatureListWithEntryInGrid(summonEntry);
                     foreach (var creature in nearbyEntries)
                     {
                         if (creature.GetOwnerGUID() == target.GetGUID())
@@ -5982,9 +5982,9 @@ namespace Game.Spells
                 return 0;
 
             // Ice Barrier
-            if (spellProtoA.GetCategory() == 471)
+            if ((int)spellProtoA.GetCategory() == 471)
                 return 1;
-            if (spellProtoB.GetCategory() == 471)
+            if ((int)spellProtoB.GetCategory() == 471)
                 return 0;
 
             // Sacrifice

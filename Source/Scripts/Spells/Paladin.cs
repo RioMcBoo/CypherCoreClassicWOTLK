@@ -17,78 +17,78 @@ namespace Scripts.Spells.Paladin
 {
     struct SpellIds
     {
-        public const uint ArdentDefenderHeal = 66235;
-        public const uint ArtOfWarTriggered = 231843;
-        public const uint AvengersShield = 31935;
-        public const uint AvengingWrath = 31884;
-        public const uint BeaconOfLight = 53563;
-        public const uint BeaconOfLightHeal = 53652;
-        public const uint BladeOfJustice = 184575;
-        public const uint BlindingLightEffect = 105421;
-        public const uint ConcentractionAura = 19746;
-        public const uint ConsecratedGroundPassive = 204054;
-        public const uint ConsecratedGroundSlow = 204242;
-        public const uint Consecration = 26573;
-        public const uint ConsecrationDamage = 81297;
-        public const uint ConsecrationProtectionAura = 188370;
-        public const uint CrusadingStrikesEnergize = 406834;
-        public const uint DivinePurposeTriggered = 223819;
-        public const uint DivineSteedHuman = 221883;
-        public const uint DivineSteedDwarf = 276111;
-        public const uint DivineSteedDraenei = 221887;
-        public const uint DivineSteedDarkIronDwarf = 276112;
-        public const uint DivineSteedBloodelf = 221886;
-        public const uint DivineSteedTauren = 221885;
-        public const uint DivineSteedZandalariTroll = 294133;
-        public const uint DivineSteedLfDraenei = 363608;
-        public const uint DivineStormDamage = 224239;
-        public const uint EnduringLight = 40471;
-        public const uint EnduringJudgement = 40472;
-        public const uint EyeForAnEyeTriggered = 205202;
-        public const uint FinalStand = 204077;
-        public const uint FinalStandEffect = 204079;
-        public const uint Forbearance = 25771;
-        public const uint GuardianOfAncientKings = 86659;
-        public const uint HammerOfJustice = 853;
-        public const uint HammerOfTheRighteousAoe = 88263;
-        public const uint HandOfSacrifice = 6940;
-        public const uint HolyMending = 64891;
-        public const uint HolyPowerArmor = 28790;
-        public const uint HolyPowerAttackPower = 28791;
-        public const uint HolyPowerSpellPower = 28793;
-        public const uint HolyPowerMp5 = 28795;
-        public const uint HolyPrismAreaBeamVisual = 121551;
-        public const uint HolyPrismTargetAlly = 114871;
-        public const uint HolyPrismTargetEnemy = 114852;
-        public const uint HolyPrismTargetBeamVisual = 114862;
-        public const uint HolyShock = 20473;
-        public const uint HolyShockDamage = 25912;
-        public const uint HolyShockHealing = 25914;
-        public const uint HolyLight = 82326;
-        public const uint InfusionOfLightEnergize = 356717;
-        public const uint ImmuneShieldMarker = 61988;
-        public const uint ItemHealingTrance = 37706;
-        public const uint JudgmentGainHolyPower = 220637;
-        public const uint JudgmentHolyR3 = 231644;
-        public const uint JudgmentHolyR3Debuff = 214222;
-        public const uint JudgmentProtRetR3 = 315867;
-        public const uint LightHammerCosmetic = 122257;
-        public const uint LightHammerDamage = 114919;
-        public const uint LightHammerHealing = 119952;
-        public const uint LightHammerPeriodic = 114918;
-        public const uint RighteousDefenseTaunt = 31790;
-        public const uint RighteousVerdictAura = 267611;
-        public const uint SealOfRighteousness = 25742;
-        public const uint ShieldOfVengeanceDamage = 184689;
-        public const uint TemplarVerdictDamage = 224266;
-        public const uint T302PHeartfireDamage = 408399;
-        public const uint T302PHeartfireHeal = 408400;
-        public const uint ZealAura = 269571;
+        public const int ArdentDefenderHeal = 66235;
+        public const int ArtOfWarTriggered = 231843;
+        public const int AvengersShield = 31935;
+        public const int AvengingWrath = 31884;
+        public const int BeaconOfLight = 53563;
+        public const int BeaconOfLightHeal = 53652;
+        public const int BladeOfJustice = 184575;
+        public const int BlindingLightEffect = 105421;
+        public const int ConcentractionAura = 19746;
+        public const int ConsecratedGroundPassive = 204054;
+        public const int ConsecratedGroundSlow = 204242;
+        public const int Consecration = 26573;
+        public const int ConsecrationDamage = 81297;
+        public const int ConsecrationProtectionAura = 188370;
+        public const int CrusadingStrikesEnergize = 406834;
+        public const int DivinePurposeTriggered = 223819;
+        public const int DivineSteedHuman = 221883;
+        public const int DivineSteedDwarf = 276111;
+        public const int DivineSteedDraenei = 221887;
+        public const int DivineSteedDarkIronDwarf = 276112;
+        public const int DivineSteedBloodelf = 221886;
+        public const int DivineSteedTauren = 221885;
+        public const int DivineSteedZandalariTroll = 294133;
+        public const int DivineSteedLfDraenei = 363608;
+        public const int DivineStormDamage = 224239;
+        public const int EnduringLight = 40471;
+        public const int EnduringJudgement = 40472;
+        public const int EyeForAnEyeTriggered = 205202;
+        public const int FinalStand = 204077;
+        public const int FinalStandEffect = 204079;
+        public const int Forbearance = 25771;
+        public const int GuardianOfAncientKings = 86659;
+        public const int HammerOfJustice = 853;
+        public const int HammerOfTheRighteousAoe = 88263;
+        public const int HandOfSacrifice = 6940;
+        public const int HolyMending = 64891;
+        public const int HolyPowerArmor = 28790;
+        public const int HolyPowerAttackPower = 28791;
+        public const int HolyPowerSpellPower = 28793;
+        public const int HolyPowerMp5 = 28795;
+        public const int HolyPrismAreaBeamVisual = 121551;
+        public const int HolyPrismTargetAlly = 114871;
+        public const int HolyPrismTargetEnemy = 114852;
+        public const int HolyPrismTargetBeamVisual = 114862;
+        public const int HolyShock = 20473;
+        public const int HolyShockDamage = 25912;
+        public const int HolyShockHealing = 25914;
+        public const int HolyLight = 82326;
+        public const int InfusionOfLightEnergize = 356717;
+        public const int ImmuneShieldMarker = 61988;
+        public const int ItemHealingTrance = 37706;
+        public const int JudgmentGainHolyPower = 220637;
+        public const int JudgmentHolyR3 = 231644;
+        public const int JudgmentHolyR3Debuff = 214222;
+        public const int JudgmentProtRetR3 = 315867;
+        public const int LightHammerCosmetic = 122257;
+        public const int LightHammerDamage = 114919;
+        public const int LightHammerHealing = 119952;
+        public const int LightHammerPeriodic = 114918;
+        public const int RighteousDefenseTaunt = 31790;
+        public const int RighteousVerdictAura = 267611;
+        public const int SealOfRighteousness = 25742;
+        public const int ShieldOfVengeanceDamage = 184689;
+        public const int TemplarVerdictDamage = 224266;
+        public const int T302PHeartfireDamage = 408399;
+        public const int T302PHeartfireHeal = 408400;
+        public const int ZealAura = 269571;
 
-        public const uint AshenHallow = 316958;
-        public const uint AshenHallowDamage = 317221;
-        public const uint AshenHallowHeal = 317223;
-        public const uint AshenHallowAllowHammer = 330382;
+        public const int AshenHallow = 316958;
+        public const int AshenHallowDamage = 317221;
+        public const int AshenHallowHeal = 317223;
+        public const int AshenHallowAllowHammer = 330382;
     }
 
     [Script] // 31850 - Ardent Defender
@@ -100,12 +100,12 @@ namespace Scripts.Spells.Paladin
             && ValidateSpellEffect((spellInfo.Id, 1));
         }
 
-        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
         {
             PreventDefaultAction();
 
             int targetHealthPercent = GetEffectInfo(1).CalcValue(GetTarget());
-            ulong targetHealth = (ulong)GetTarget().CountPctFromMaxHealth(targetHealthPercent);
+            long targetHealth = GetTarget().CountPctFromMaxHealth(targetHealthPercent);
             if (GetTarget().HealthBelowPct(targetHealthPercent))
             {
                 // we are currently below desired health
@@ -118,7 +118,7 @@ namespace Scripts.Spells.Paladin
             {
                 // we are currently above desired health
                 // just absorb enough to reach that percentage
-                absorbAmount = (uint)(dmgInfo.GetDamage() - (int)(GetTarget().GetHealth() - targetHealth));
+                absorbAmount = dmgInfo.GetDamage() - (int)(GetTarget().GetHealth() - targetHealth);
             }
 
             Remove();
@@ -297,7 +297,7 @@ namespace Scripts.Spells.Paladin
             return ValidateSpellInfo(SpellIds.BlindingLightEffect);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit target = GetHitUnit();
             if (target != null)
@@ -485,7 +485,7 @@ namespace Scripts.Spells.Paladin
         {
             Unit caster = GetCaster();
 
-            uint spellId = caster.GetRace() switch
+            int spellId = caster.GetRace() switch
             {
                 Race.Human => SpellIds.DivineSteedHuman,
                 Race.Dwarf => SpellIds.DivineSteedDwarf,
@@ -510,7 +510,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 53385 - Divine Storm
     class spell_pal_divine_storm : SpellScript
     {
-        const uint PaladinVisualKitDivineStorm = 73892;
+        const int PaladinVisualKitDivineStorm = 73892;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -598,7 +598,7 @@ namespace Scripts.Spells.Paladin
     {
         void FilterTargets(List<WorldObject> targets)
         {
-            uint maxTargets = GetSpellInfo().MaxAffectedTargets;
+            int maxTargets = GetSpellInfo().MaxAffectedTargets;
 
             if (targets.Count > maxTargets)
             {
@@ -621,7 +621,7 @@ namespace Scripts.Spells.Paladin
             return ValidateSpellInfo(SpellIds.ConsecrationProtectionAura, SpellIds.HammerOfTheRighteousAoe);
         }
 
-        void HandleAoEHit(uint effIndex)
+        void HandleAoEHit(int effIndex)
         {
             if (GetCaster().HasAura(SpellIds.ConsecrationProtectionAura))
                 GetCaster().CastSpell(GetHitUnit(), SpellIds.HammerOfTheRighteousAoe);
@@ -649,9 +649,9 @@ namespace Scripts.Spells.Paladin
             return false;
         }
 
-        void Split(AuraEffect aurEff, DamageInfo dmgInfo, uint splitAmount)
+        void Split(AuraEffect aurEff, DamageInfo dmgInfo, int splitAmount)
         {
-            remainingAmount -= (int)splitAmount;
+            remainingAmount -= splitAmount;
 
             if (remainingAmount <= 0)
             {
@@ -753,7 +753,7 @@ namespace Scripts.Spells.Paladin
             return ValidateSpellInfo(SpellIds.HolyPrismTargetAlly, SpellIds.HolyPrismTargetEnemy, SpellIds.HolyPrismTargetBeamVisual);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             if (GetCaster().IsFriendlyTo(GetHitUnit()))
                 GetCaster().CastSpell(GetHitUnit(), SpellIds.HolyPrismTargetAlly, true);
@@ -781,7 +781,7 @@ namespace Scripts.Spells.Paladin
             return ValidateSpellInfo(SpellIds.HolyPrismTargetAlly, SpellIds.HolyPrismAreaBeamVisual);
         }
 
-        void SaveTargetGuid(uint effIndex)
+        void SaveTargetGuid(int effIndex)
         {
             _targetGUID = GetHitUnit().GetGUID();
         }
@@ -810,7 +810,7 @@ namespace Scripts.Spells.Paladin
             targets.AddRange(_sharedTargets);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit initialTarget = ObjAccessor.GetUnit(GetCaster(), _targetGUID);
             if (initialTarget != null)
@@ -861,7 +861,7 @@ namespace Scripts.Spells.Paladin
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
 
@@ -885,8 +885,8 @@ namespace Scripts.Spells.Paladin
     [Script] // 25912 - Holy Shock
     class spell_pal_holy_shock_damage_visual : SpellScript
     {
-        const uint PaladinVisualSpellHolyShockDamage = 83731;
-        const uint PaladinVisualSpellHolyShockDamageCrit = 83881;
+        const int PaladinVisualSpellHolyShockDamage = 83731;
+        const int PaladinVisualSpellHolyShockDamageCrit = 83881;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -908,8 +908,8 @@ namespace Scripts.Spells.Paladin
     [Script] // 25914 - Holy Shock
     class spell_pal_holy_shock_heal_visual : SpellScript
     {
-        const uint PaladinVisualSpellHolyShockHeal = 83732;
-        const uint PaladinVisualSpellHolyShockHealCrit = 83880;
+        const int PaladinVisualSpellHolyShockHeal = 83732;
+        const int PaladinVisualSpellHolyShockHealCrit = 83880;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -963,7 +963,7 @@ namespace Scripts.Spells.Paladin
             if (spellInfo == null)
                 return;
 
-            uint spellId;
+            int spellId;
             int chance;
 
             // Holy Light & Flash of Light
@@ -1050,7 +1050,7 @@ namespace Scripts.Spells.Paladin
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return;
 
-            uint heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+            int heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 
             var auras = GetCaster().GetSingleCastAuras();
             foreach (var aura in auras)
@@ -1228,7 +1228,7 @@ namespace Scripts.Spells.Paladin
             return ValidateSpellInfo(SpellIds.TemplarVerdictDamage);
         }
 
-        void HandleHitTarget(uint effIndex)
+        void HandleHitTarget(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.TemplarVerdictDamage, true);
         }
@@ -1251,7 +1251,7 @@ namespace Scripts.Spells.Paladin
         {
             PreventDefaultAction();
 
-            uint spellId;
+            int spellId;
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
 
@@ -1336,8 +1336,8 @@ namespace Scripts.Spells.Paladin
             PreventDefaultAction();
 
             Unit caster = procInfo.GetActor();
-            uint ticks = SpellMgr.GetSpellInfo(SpellIds.T302PHeartfireDamage, Difficulty.None).GetMaxTicks();
-            uint damage = MathFunctions.CalculatePct(procInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
+            int ticks = SpellMgr.GetSpellInfo(SpellIds.T302PHeartfireDamage, Difficulty.None).GetMaxTicks();
+            int damage = MathFunctions.CalculatePct(procInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
 
             caster.CastSpell(procInfo.GetActionTarget(), SpellIds.T302PHeartfireDamage, new CastSpellExtraArgs(aurEff)
                 .SetTriggeringSpell(procInfo.GetProcSpell())
@@ -1353,7 +1353,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 408461 - Heartfire
     class spell_pal_t30_2p_protection_bonus_heal : AuraScript
     {
-        const uint SpellLabelPaladinT302PHeartfire = 2598;
+        const int SpellLabelPaladinT302PHeartfire = 2598;
 
         public override bool Validate(SpellInfo spellInfo)
         {

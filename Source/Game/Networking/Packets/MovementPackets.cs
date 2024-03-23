@@ -172,12 +172,12 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteInt32(SequenceIndex);
             _worldPacket.WriteFloat(Speed);
         }
 
         public ObjectGuid MoverGUID;
-        public uint SequenceIndex; // Unit movement packet index, incremented each time
+        public int SequenceIndex; // Unit movement packet index, incremented each time
         public float Speed = 1.0f;
     }
 
@@ -214,11 +214,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteInt32(SequenceIndex);
         }
 
         public ObjectGuid MoverGUID;
-        public uint SequenceIndex; // Unit movement packet index, incremented each time
+        public int SequenceIndex; // Unit movement packet index, incremented each time
     }
 
     public class TransferPending : ServerPacket
@@ -306,7 +306,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteInt32(SequenceIndex);
             _worldPacket.WriteXYZ(Pos);
             _worldPacket.WriteFloat(Facing);
             _worldPacket.WriteUInt8(PreloadWorld);
@@ -329,7 +329,7 @@ namespace Game.Networking.Packets
 
         public Position Pos;
         public VehicleTeleport? Vehicle;
-        public uint SequenceIndex;
+        public int SequenceIndex;
         public ObjectGuid MoverGUID;
         public ObjectGuid? TransportGUID;
         public float Facing;
@@ -562,7 +562,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteInt32(SequenceIndex);
             _worldPacket.WriteVector2(Direction);
             Speeds.Write(_worldPacket);
         }
@@ -570,7 +570,7 @@ namespace Game.Networking.Packets
         public ObjectGuid MoverGUID;
         public Vector2 Direction;
         public MoveKnockBackSpeeds Speeds = new();
-        public uint SequenceIndex;
+        public int SequenceIndex;
     }
 
     public class MoveUpdateKnockBack : ServerPacket
@@ -838,7 +838,7 @@ namespace Game.Networking.Packets
 
         public class MoveStateChange
         {
-            public MoveStateChange(ServerOpcodes messageId, uint sequenceIndex)
+            public MoveStateChange(ServerOpcodes messageId, int sequenceIndex)
             {
                 MessageID = messageId;
                 SequenceIndex = sequenceIndex;
@@ -847,7 +847,7 @@ namespace Game.Networking.Packets
             public void Write(WorldPacket data)
             {
                 data.WriteUInt16((ushort)MessageID);
-                data.WriteUInt32(SequenceIndex);
+                data.WriteInt32(SequenceIndex);
                 data.WriteBit(Speed.HasValue);
                 data.WriteBit(SpeedRange != null);
                 data.WriteBit(KnockBack.HasValue);
@@ -900,7 +900,7 @@ namespace Game.Networking.Packets
             }
 
             public ServerOpcodes MessageID;
-            public uint SequenceIndex;
+            public int SequenceIndex;
             public float? Speed;
             public SpeedRange SpeedRange;
             public KnockBackInfo? KnockBack;
@@ -980,16 +980,16 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(TargetGuid);
-            data.WriteUInt32(SpellVisualID);
-            data.WriteUInt32(ProgressCurveID);
-            data.WriteUInt32(ParabolicCurveID);
+            data.WriteInt32(SpellVisualID);
+            data.WriteInt32(ProgressCurveID);
+            data.WriteInt32(ParabolicCurveID);
             data.WriteFloat(JumpGravity);
         }
 
         public ObjectGuid TargetGuid;
-        public uint SpellVisualID;
-        public uint ProgressCurveID;
-        public uint ParabolicCurveID;
+        public int SpellVisualID;
+        public int ProgressCurveID;
+        public int ParabolicCurveID;
         public float JumpGravity;
     }
 
@@ -1122,7 +1122,7 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Id);
+            data.WriteInt32(Id);
             data.WriteVector3(Destination);
             data.WriteBit(CrzTeleport);
             data.WriteBits(StopDistanceTolerance, 3);
@@ -1130,7 +1130,7 @@ namespace Game.Networking.Packets
             Move.Write(data);
         }
 
-        public uint Id;
+        public int Id;
         public Vector3 Destination;
         public bool CrzTeleport;
         public byte StopDistanceTolerance;    // Determines how far from spline destination the mover is allowed to stop in place 0, 0, 3.0, 2.76, numeric_limits<float>::max, 1.1, float(INT_MAX); default before this field existed was distance 3.0 (index 2)

@@ -118,7 +118,7 @@ namespace Game.Networking.Packets
     public class TraitEntryPacket
     {
         public TraitEntryPacket() { }
-        public TraitEntryPacket(TraitEntryPacket ufEntry)
+        public TraitEntryPacket(TraitEntry ufEntry)
         {
             TraitNodeID = ufEntry.TraitNodeID;
             TraitNodeEntryID = ufEntry.TraitNodeEntryID;
@@ -155,12 +155,12 @@ namespace Game.Networking.Packets
         {
             ID = ufConfig.ID;
             Type = (TraitConfigType)(int)ufConfig.Type;
-            ChrSpecializationID = ufConfig.ChrSpecializationID;
+            ChrSpecializationID = (ChrSpecialization)ufConfig.ChrSpecializationID.GetValue();
             CombatConfigFlags = (TraitCombatConfigFlags)(int)ufConfig.CombatConfigFlags;
             LocalIdentifier = ufConfig.LocalIdentifier;
             SkillLineID = ufConfig.SkillLineID;
             TraitSystemID = ufConfig.TraitSystemID;
-            foreach (TraitEntryPacket ufEntry in ufConfig.Entries)
+            foreach (var ufEntry in ufConfig.Entries)
                 Entries.Add(new TraitEntryPacket(ufEntry));
             Name = ufConfig.Name;
         }
@@ -173,7 +173,7 @@ namespace Game.Networking.Packets
             switch (Type)
             {
                 case TraitConfigType.Combat:
-                    ChrSpecializationID = data.ReadInt32();
+                    ChrSpecializationID = (ChrSpecialization)data.ReadInt32();
                     CombatConfigFlags = (TraitCombatConfigFlags)data.ReadInt32();
                     LocalIdentifier = data.ReadInt32();
                     break;
@@ -206,7 +206,7 @@ namespace Game.Networking.Packets
             switch (Type)
             {
                 case TraitConfigType.Combat:
-                    data.WriteInt32(ChrSpecializationID);
+                    data.WriteInt32((int)ChrSpecializationID);
                     data.WriteInt32((int)CombatConfigFlags);
                     data.WriteInt32(LocalIdentifier);
                     break;
@@ -231,7 +231,7 @@ namespace Game.Networking.Packets
 
         public int ID;
         public TraitConfigType Type;
-        public int ChrSpecializationID = 0;
+        public ChrSpecialization ChrSpecializationID = 0;
         public TraitCombatConfigFlags CombatConfigFlags;
         public int LocalIdentifier;  // Local to specialization
         public int SkillLineID;

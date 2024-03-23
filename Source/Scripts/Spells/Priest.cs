@@ -19,139 +19,139 @@ namespace Scripts.Spells.Priest
 
     struct SpellIds
     {
-        public const uint AbyssalReverie = 373054;
-        public const uint AngelicFeatherAreatrigger = 158624;
-        public const uint AngelicFeatherAura = 121557;
-        public const uint AnsweredPrayers = 394289;
-        public const uint Apotheosis = 200183;
-        public const uint ArmorOfFaith = 28810;
-        public const uint Atonement = 81749;
-        public const uint AtonementEffect = 194384;
-        public const uint AtonementHeal = 81751;
-        public const uint Benediction = 193157;
-        public const uint Benevolence = 415416;
-        public const uint BlessedHealing = 70772;
-        public const uint BlessedLight = 196813;
-        public const uint BodyAndSoul = 64129;
-        public const uint BodyAndSoulSpeed = 65081;
-        public const uint CircleOfHealing = 204883;
-        public const uint DarkReprimand = 400169;
-        public const uint DarkReprimandChannelDamage = 373129;
-        public const uint DarkReprimandChannelHealing = 400171;
-        public const uint DarkReprimandDamage = 373130;
-        public const uint DarkReprimandHealing = 400187;
-        public const uint DazzlingLight = 196810;
-        public const uint DivineBlessing = 40440;
-        public const uint DivineHymnHeal = 64844;
-        public const uint DivineImageSummon = 392990;
-        public const uint DivineImageEmpower = 409387;
-        public const uint DivineImageEmpowerStack = 405963;
-        public const uint DivineService = 391233;
-        public const uint DivineStarHoly = 110744;
-        public const uint DivineStarShadow = 122121;
-        public const uint DivineStarHolyDamage = 122128;
-        public const uint DivineStarHolyHeal = 110745;
-        public const uint DivineStarShadowDamage = 390845;
-        public const uint DivineStarShadowHeal = 390981;
-        public const uint DivineWrath = 40441;
-        public const uint EmpoweredRenewHeal = 391359;
-        public const uint Epiphany = 414553;
-        public const uint EpiphanyHighlight = 414556;
-        public const uint EssenceDevourer = 415479;
-        public const uint EssenceDevourerShadowfiendHeal = 415673;
-        public const uint EssenceDevourerMindbenderHeal = 415676;
-        public const uint FlashHeal = 2061;
-        public const uint GreaterHeal = 289666;
-        public const uint FocusedMending = 372354;
-        public const uint GuardianSpiritHeal = 48153;
-        public const uint HaloHoly = 120517;
-        public const uint HaloShadow = 120644;
-        public const uint HaloHolyDamage = 120696;
-        public const uint HaloHolyHeal = 120692;
-        public const uint HaloShadowDamage = 390964;
-        public const uint HaloShadowHeal = 390971;
-        public const uint Heal = 2060;
-        public const uint HealingLight = 196809;
-        public const uint HolyFire = 14914;
-        public const uint HolyMendingHeal = 391156;
-        public const uint HolyNova = 132157;
-        public const uint HolyWordChastise = 88625;
-        public const uint HolyWordSalvation = 265202;
-        public const uint HolyWordSanctify = 34861;
-        public const uint HolyWordSerenity = 2050;
-        public const uint Holy101ClassSet2PChooser = 411097;
-        public const uint Holy101ClassSet4P = 405556;
-        public const uint Holy101ClassSet4PEffect = 409479;
-        public const uint ItemEfficiency = 37595;
-        public const uint LeapOfFaithEffect = 92832;
-        public const uint LevitateEffect = 111759;
-        public const uint LightEruption = 196812;
-        public const uint LightsWrathVisual = 215795;
-        public const uint MasochismTalent = 193063;
-        public const uint MasochismPeriodicHeal = 193065;
-        public const uint MasteryGrace = 271534;
-        public const uint MindbenderDisc = 123040;
-        public const uint MindbenderShadow = 200174;
-        public const uint Mindgames = 375901;
-        public const uint MindgamesVenthyr = 323673;
-        public const uint MindBombStun = 226943;
-        public const uint OracularHeal = 26170;
-        public const uint Penance = 47540;
-        public const uint PenanceChannelDamage = 47758;
-        public const uint PenanceChannelHealing = 47757;
-        public const uint PenanceDamage = 47666;
-        public const uint PenanceHealing = 47750;
-        public const uint PowerLeechMindbenderMana = 123051;
-        public const uint PowerLeechMindbenderInsanity = 200010;
-        public const uint PowerLeechShadowfiendMana = 343727;
-        public const uint PowerLeechShadowfiendInsanity = 262485;
-        public const uint PowerOfTheDarkSide = 198069;
-        public const uint PowerOfTheDarkSideTint = 225795;
-        public const uint PowerWordLife = 373481;
-        public const uint PowerWordRadiance = 194509;
-        public const uint PowerWordShield = 17;
-        public const uint PowerWordSolaceEnergize = 129253;
-        public const uint PrayerOfHealing = 596;
-        public const uint PrayerOfMending = 33076;
-        public const uint PrayerOfMendingAura = 41635;
-        public const uint PrayerOfMendingHeal = 33110;
-        public const uint PrayerOfMendingJump = 155793;
-        public const uint PurgeTheWicked = 204197;
-        public const uint PurgeTheWickedDummy = 204215;
-        public const uint PurgeTheWickedPeriodic = 204213;
-        public const uint Rapture = 47536;
-        public const uint Renew = 139;
-        public const uint RenewedHope = 197469;
-        public const uint RenewedHopeEffect = 197470;
-        public const uint RevelInPurity = 373003;
-        public const uint SayYourPrayers = 391186;
-        public const uint SearingLight = 196811;
-        public const uint ShadowMendDamage = 186439;
-        public const uint ShadowWordDeath = 32379;
-        public const uint ShadowMendPeriodicDummy = 187464;
-        public const uint ShadowWordPain = 589;
-        public const uint ShieldDiscipline = 197045;
-        public const uint ShieldDisciplineEffect = 47755;
-        public const uint SinsOfTheMany = 280398;
-        public const uint Smite = 585;
-        public const uint SpiritOfRedemption = 27827;
-        public const uint StrengthOfSoul = 197535;
-        public const uint StrengthOfSoulEffect = 197548;
-        public const uint TranquilLight = 196816;
-        public const uint ThePenitentAura = 200347;
-        public const uint TrailOfLightHeal = 234946;
-        public const uint Trinity = 214205;
-        public const uint TrinityEffect = 214206;
-        public const uint VapiricEmbraceHeal = 15290;
-        public const uint VapiricTouchDispel = 64085;
-        public const uint VoidShield = 199144;
-        public const uint VoidShieldEffect = 199145;
-        public const uint WeakenedSoul = 6788;
+        public const int AbyssalReverie = 373054;
+        public const int AngelicFeatherAreatrigger = 158624;
+        public const int AngelicFeatherAura = 121557;
+        public const int AnsweredPrayers = 394289;
+        public const int Apotheosis = 200183;
+        public const int ArmorOfFaith = 28810;
+        public const int Atonement = 81749;
+        public const int AtonementEffect = 194384;
+        public const int AtonementHeal = 81751;
+        public const int Benediction = 193157;
+        public const int Benevolence = 415416;
+        public const int BlessedHealing = 70772;
+        public const int BlessedLight = 196813;
+        public const int BodyAndSoul = 64129;
+        public const int BodyAndSoulSpeed = 65081;
+        public const int CircleOfHealing = 204883;
+        public const int DarkReprimand = 400169;
+        public const int DarkReprimandChannelDamage = 373129;
+        public const int DarkReprimandChannelHealing = 400171;
+        public const int DarkReprimandDamage = 373130;
+        public const int DarkReprimandHealing = 400187;
+        public const int DazzlingLight = 196810;
+        public const int DivineBlessing = 40440;
+        public const int DivineHymnHeal = 64844;
+        public const int DivineImageSummon = 392990;
+        public const int DivineImageEmpower = 409387;
+        public const int DivineImageEmpowerStack = 405963;
+        public const int DivineService = 391233;
+        public const int DivineStarHoly = 110744;
+        public const int DivineStarShadow = 122121;
+        public const int DivineStarHolyDamage = 122128;
+        public const int DivineStarHolyHeal = 110745;
+        public const int DivineStarShadowDamage = 390845;
+        public const int DivineStarShadowHeal = 390981;
+        public const int DivineWrath = 40441;
+        public const int EmpoweredRenewHeal = 391359;
+        public const int Epiphany = 414553;
+        public const int EpiphanyHighlight = 414556;
+        public const int EssenceDevourer = 415479;
+        public const int EssenceDevourerShadowfiendHeal = 415673;
+        public const int EssenceDevourerMindbenderHeal = 415676;
+        public const int FlashHeal = 2061;
+        public const int GreaterHeal = 289666;
+        public const int FocusedMending = 372354;
+        public const int GuardianSpiritHeal = 48153;
+        public const int HaloHoly = 120517;
+        public const int HaloShadow = 120644;
+        public const int HaloHolyDamage = 120696;
+        public const int HaloHolyHeal = 120692;
+        public const int HaloShadowDamage = 390964;
+        public const int HaloShadowHeal = 390971;
+        public const int Heal = 2060;
+        public const int HealingLight = 196809;
+        public const int HolyFire = 14914;
+        public const int HolyMendingHeal = 391156;
+        public const int HolyNova = 132157;
+        public const int HolyWordChastise = 88625;
+        public const int HolyWordSalvation = 265202;
+        public const int HolyWordSanctify = 34861;
+        public const int HolyWordSerenity = 2050;
+        public const int Holy101ClassSet2PChooser = 411097;
+        public const int Holy101ClassSet4P = 405556;
+        public const int Holy101ClassSet4PEffect = 409479;
+        public const int ItemEfficiency = 37595;
+        public const int LeapOfFaithEffect = 92832;
+        public const int LevitateEffect = 111759;
+        public const int LightEruption = 196812;
+        public const int LightsWrathVisual = 215795;
+        public const int MasochismTalent = 193063;
+        public const int MasochismPeriodicHeal = 193065;
+        public const int MasteryGrace = 271534;
+        public const int MindbenderDisc = 123040;
+        public const int MindbenderShadow = 200174;
+        public const int Mindgames = 375901;
+        public const int MindgamesVenthyr = 323673;
+        public const int MindBombStun = 226943;
+        public const int OracularHeal = 26170;
+        public const int Penance = 47540;
+        public const int PenanceChannelDamage = 47758;
+        public const int PenanceChannelHealing = 47757;
+        public const int PenanceDamage = 47666;
+        public const int PenanceHealing = 47750;
+        public const int PowerLeechMindbenderMana = 123051;
+        public const int PowerLeechMindbenderInsanity = 200010;
+        public const int PowerLeechShadowfiendMana = 343727;
+        public const int PowerLeechShadowfiendInsanity = 262485;
+        public const int PowerOfTheDarkSide = 198069;
+        public const int PowerOfTheDarkSideTint = 225795;
+        public const int PowerWordLife = 373481;
+        public const int PowerWordRadiance = 194509;
+        public const int PowerWordShield = 17;
+        public const int PowerWordSolaceEnergize = 129253;
+        public const int PrayerOfHealing = 596;
+        public const int PrayerOfMending = 33076;
+        public const int PrayerOfMendingAura = 41635;
+        public const int PrayerOfMendingHeal = 33110;
+        public const int PrayerOfMendingJump = 155793;
+        public const int PurgeTheWicked = 204197;
+        public const int PurgeTheWickedDummy = 204215;
+        public const int PurgeTheWickedPeriodic = 204213;
+        public const int Rapture = 47536;
+        public const int Renew = 139;
+        public const int RenewedHope = 197469;
+        public const int RenewedHopeEffect = 197470;
+        public const int RevelInPurity = 373003;
+        public const int SayYourPrayers = 391186;
+        public const int SearingLight = 196811;
+        public const int ShadowMendDamage = 186439;
+        public const int ShadowWordDeath = 32379;
+        public const int ShadowMendPeriodicDummy = 187464;
+        public const int ShadowWordPain = 589;
+        public const int ShieldDiscipline = 197045;
+        public const int ShieldDisciplineEffect = 47755;
+        public const int SinsOfTheMany = 280398;
+        public const int Smite = 585;
+        public const int SpiritOfRedemption = 27827;
+        public const int StrengthOfSoul = 197535;
+        public const int StrengthOfSoulEffect = 197548;
+        public const int TranquilLight = 196816;
+        public const int ThePenitentAura = 200347;
+        public const int TrailOfLightHeal = 234946;
+        public const int Trinity = 214205;
+        public const int TrinityEffect = 214206;
+        public const int VapiricEmbraceHeal = 15290;
+        public const int VapiricTouchDispel = 64085;
+        public const int VoidShield = 199144;
+        public const int VoidShieldEffect = 199145;
+        public const int WeakenedSoul = 6788;
 
-        public const uint PvpRulesEnabledHardcoded = 134735;
-        public const uint VisualPriestPowerWordRadiance = 52872;
-        public const uint VisualPriestPrayerOfMending = 38945;
-        public const uint GenReplenishment = 57669;
+        public const int PvpRulesEnabledHardcoded = 134735;
+        public const int VisualPriestPowerWordRadiance = 52872;
+        public const int VisualPriestPrayerOfMending = 38945;
+        public const int GenReplenishment = 57669;
     }
 
     [Script] // 121536 - Angelic Feather talent
@@ -162,7 +162,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.AngelicFeatherAreatrigger);
         }
 
-        void HandleEffectDummy(uint effIndex)
+        void HandleEffectDummy(int effIndex)
         {
             Position destPos = GetHitDest().GetPosition();
             float radius = GetEffectInfo().CalcRadius();
@@ -334,7 +334,7 @@ namespace Scripts.Spells.Priest
             // Note: the damage dimish starts at the 6th application as of 10.0.5.
             float[] damageByStack = { 40.0f, 40.0f, 40.0f, 40.0f, 40.0f, 35.0f, 30.0f, 25.0f, 20.0f, 15.0f, 11.0f, 8.0f, 5.0f, 4.0f, 3.0f, 2.5f, 2.0f, 1.5f, 1.25f, 1.0f };
 
-            foreach (uint effectIndex in new[] { 0, 1, 2 })
+            foreach (int effectIndex in new[] { 0, 1, 2 })
             {
                 AuraEffect sinOfTheMany = GetUnitOwner().GetAuraEffect(SpellIds.SinsOfTheMany, effectIndex);
                 if (sinOfTheMany != null)
@@ -374,7 +374,7 @@ namespace Scripts.Spells.Priest
     [Script] // 194509 - Power Word: Radiance
     class spell_pri_atonement_effect : SpellScript
     {
-        uint _effectSpellId = SpellIds.AtonementEffect;
+        int _effectSpellId = SpellIds.AtonementEffect;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -505,7 +505,7 @@ namespace Scripts.Spells.Priest
             && ValidateSpellEffect((SpellIds.Benediction, 0));
         }
 
-        void HandleEffectHitTarget(uint effIndex)
+        void HandleEffectHitTarget(int effIndex)
         {
             AuraEffect benediction = GetCaster().GetAuraEffect(SpellIds.Benediction, 0);
             if (benediction != null)
@@ -530,7 +530,7 @@ namespace Scripts.Spells.Priest
         void FilterTargets(List<WorldObject> targets)
         {
             // Note: we must Remove one Math.Since target is always chosen.
-            uint maxTargets = (uint)GetSpellInfo().GetEffect(1).CalcValue(GetCaster()) - 1;
+            int maxTargets = GetSpellInfo().GetEffect(1).CalcValue(GetCaster()) - 1;
 
             SelectRandomInjuredTargets(targets, maxTargets, true);
 
@@ -547,7 +547,7 @@ namespace Scripts.Spells.Priest
 
     struct DivineImageHelpers
     {
-        const uint NpcPriestDivineImage = 198236;
+        const int NpcPriestDivineImage = 198236;
 
         public static Unit GetSummon(Unit owner)
         {
@@ -558,7 +558,7 @@ namespace Scripts.Spells.Priest
             return null;
         }
 
-        public static uint? GetSpellToCast(uint spellId)
+        public static int? GetSpellToCast(int spellId)
         {
             switch (spellId)
             {
@@ -743,7 +743,7 @@ namespace Scripts.Spells.Priest
     [Script] // 122121 - Divine Star (Shadow)
     class spell_pri_divine_star_shadow : SpellScript
     {
-        void HandleHitTarget(uint effIndex)
+        void HandleHitTarget(int effIndex)
         {
             Unit caster = GetCaster();
 
@@ -956,7 +956,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.Trinity, SpellIds.AtonementEffect, SpellIds.TrinityEffect);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -1008,7 +1008,7 @@ namespace Scripts.Spells.Priest
     [Script] // 47788 - Guardian Spirit
     class spell_pri_guardian_spirit : AuraScript
     {
-        uint healPct;
+        int healPct;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1017,7 +1017,7 @@ namespace Scripts.Spells.Priest
 
         public override bool Load()
         {
-            healPct = (uint)GetEffectInfo(1).CalcValue();
+            healPct = GetEffectInfo(1).CalcValue();
             return true;
         }
 
@@ -1027,13 +1027,13 @@ namespace Scripts.Spells.Priest
             amount = -1;
         }
 
-        void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
         {
             Unit target = GetTarget();
             if (dmgInfo.GetDamage() < target.GetHealth())
                 return;
 
-            int healAmount = (int)target.CountPctFromMaxHealth((int)healPct);
+            int healAmount = (int)target.CountPctFromMaxHealth(healPct);
             // Remove the aura now, we don't want 40% healing bonus
             Remove(AuraRemoveMode.EnemySpell);
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
@@ -1052,7 +1052,7 @@ namespace Scripts.Spells.Priest
     [Script] // 120644 - Halo (Shadow)
     class spell_pri_halo_shadow : SpellScript
     {
-        void HandleHitTarget(uint effIndex)
+        void HandleHitTarget(int effIndex)
         {
             Unit caster = GetCaster();
 
@@ -1127,8 +1127,8 @@ namespace Scripts.Spells.Priest
             if (spellInfo == null)
                 return;
 
-            uint targetSpellId;
-            uint cdReductionEffIndex;
+            int targetSpellId;
+            int cdReductionEffIndex;
             switch (spellInfo.Id)
             {
                 case SpellIds.Heal:
@@ -1185,7 +1185,7 @@ namespace Scripts.Spells.Priest
             return true;
         }
 
-        void HandleApplyBuffs(uint effIndex)
+        void HandleApplyBuffs(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -1271,14 +1271,14 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.LeapOfFaithEffect);
         }
 
-        void HandleEffectDummy(uint effIndex)
+        void HandleEffectDummy(int effIndex)
         {
             Position destPos = GetHitDest().GetPosition();
 
             SpellCastTargets targets = new();
             targets.SetDst(destPos);
             targets.SetUnitTarget(GetCaster());
-            GetHitUnit().CastSpell(targets, (uint)GetEffectValue(), GetCastDifficulty());
+            GetHitUnit().CastSpell(targets, GetEffectValue(), GetCastDifficulty());
         }
 
         public override void Register()
@@ -1295,7 +1295,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.LevitateEffect);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.LevitateEffect, true);
         }
@@ -1413,10 +1413,10 @@ namespace Scripts.Spells.Priest
     [Script("spell_pri_dark_reprimand", SpellIds.DarkReprimandChannelDamage, SpellIds.DarkReprimandChannelHealing)] // 400169 - Dark Reprimand
     class spell_pri_penance : SpellScript
     {
-        uint _damageSpellId;
-        uint _healingSpellId;
+        int _damageSpellId;
+        int _healingSpellId;
 
-        public spell_pri_penance(uint damageSpellId, uint healingSpellId)
+        public spell_pri_penance(int damageSpellId, int healingSpellId)
         {
             _damageSpellId = damageSpellId;
             _healingSpellId = healingSpellId;
@@ -1447,7 +1447,7 @@ namespace Scripts.Spells.Priest
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
 
@@ -1643,7 +1643,7 @@ namespace Scripts.Spells.Priest
             Unit explTarget = GetExplTargetUnit();
 
             // we must add one Math.Since explicit target is always chosen.
-            uint maxTargets = (uint)GetEffectInfo(2).CalcValue(GetCaster()) + 1;
+            int maxTargets = GetEffectInfo(2).CalcValue(GetCaster()) + 1;
 
             if (targets.Count > maxTargets)
             {
@@ -1670,7 +1670,7 @@ namespace Scripts.Spells.Priest
             }
         }
 
-        void HandleEffectHitTarget(uint effIndex)
+        void HandleEffectHitTarget(int effIndex)
         {
             foreach (ObjectGuid guid in _visualTargets)
             {
@@ -1795,7 +1795,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.PowerWordSolaceEnergize);
         }
 
-        void RestoreMana(uint effIndex)
+        void RestoreMana(int effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.PowerWordSolaceEnergize,
                 new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell())
@@ -1827,7 +1827,7 @@ namespace Scripts.Spells.Priest
             return true;
         }
 
-        void HandleEffectDummy(uint effIndex)
+        void HandleEffectDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -1920,7 +1920,7 @@ namespace Scripts.Spells.Priest
     [Script]
     class spell_pri_prayer_of_mending : SpellScript
     {
-        void HandleEffectDummy(uint effIndex)
+        void HandleEffectDummy(int effIndex)
         {
             Aura aura = GetHitAura();
             if (aura == null)
@@ -1966,7 +1966,7 @@ namespace Scripts.Spells.Priest
             SelectRandomInjuredTargets(targets, 1, true);
         }
 
-        void HandleJump(uint effIndex)
+        void HandleJump(int effIndex)
         {
             Unit origCaster = GetOriginalCaster();
             if (origCaster != null)
@@ -2049,7 +2049,7 @@ namespace Scripts.Spells.Priest
             SelectRandomInjuredTargets(targets, 1, true);
         }
 
-        void HandleEffectDummy(uint effIndex)
+        void HandleEffectDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -2088,7 +2088,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.Holy101ClassSet4P, SpellIds.Holy101ClassSet4PEffect);
         }
 
-        void HandleEffectDummy(uint effIndex)
+        void HandleEffectDummy(int effIndex)
         {
             if (GetOriginalCaster().HasAura(SpellIds.Holy101ClassSet4P))
                 GetOriginalCaster().CastSpell(GetOriginalCaster(), SpellIds.Holy101ClassSet4PEffect, TriggerCastFlags.IgnoreGCD);
@@ -2132,7 +2132,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.PurgeTheWickedPeriodic, SpellIds.PurgeTheWickedDummy);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -2172,7 +2172,7 @@ namespace Scripts.Spells.Priest
                 return;
 
             // Note: there's no SpellEffectDummy with BasePoints 1 in any of the spells related to use as reference so we hardcode the value.
-            uint spreadCount = 1;
+            int spreadCount = 1;
 
             // Note: we must sort our list of targets whose priority is 1) aura, 2) distance, and 3) duration.
             targets.Sort((lhs, rhs) =>
@@ -2197,13 +2197,13 @@ namespace Scripts.Spells.Priest
 
             // Note: Revel in Purity talent.
             if (caster.HasAura(SpellIds.RevelInPurity))
-                spreadCount += (uint)SpellMgr.GetSpellInfo(SpellIds.RevelInPurity, Difficulty.None).GetEffect(1).CalcValue(GetCaster());
+                spreadCount += SpellMgr.GetSpellInfo(SpellIds.RevelInPurity, Difficulty.None).GetEffect(1).CalcValue(GetCaster());
 
             if (targets.Count > spreadCount)
                 targets.Resize(spreadCount);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -2228,7 +2228,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.PowerWordShield);
         }
 
-        void HandleEffectDummy(uint effIndex)
+        void HandleEffectDummy(int effIndex)
         {
             _raptureTarget = GetHitUnit().GetGUID();
         }
@@ -2284,7 +2284,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.SpiritOfRedemption);
         }
 
-        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
         {
             Unit target = GetTarget();
             target.CastSpell(target, SpellIds.SpiritOfRedemption, aurEff);
@@ -2311,7 +2311,7 @@ namespace Scripts.Spells.Priest
             targets.Remove(GetExplTargetWorldObject());
 
             // we must Remove one Math.Since explicit target is always added.
-            uint maxTargets = (uint)GetEffectInfo(2).CalcValue(GetCaster()) - 1;
+            int maxTargets = GetEffectInfo(2).CalcValue(GetCaster()) - 1;
 
             SelectRandomInjuredTargets(targets, maxTargets, true);
 
@@ -2388,7 +2388,7 @@ namespace Scripts.Spells.Priest
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            int newAmount = (int)(aurEff.GetAmount() - eventInfo.GetDamageInfo().GetDamage());
+            int newAmount = aurEff.GetAmount() - eventInfo.GetDamageInfo().GetDamage();
 
             aurEff.ChangeAmount(newAmount);
             if (newAmount < 0)
@@ -2537,9 +2537,9 @@ namespace Scripts.Spells.Priest
             if (!caster.IsWithinDist(oldTarget, healSpellInfo.GetMaxRange(true, caster)))
                 return;
 
-            uint healAmount = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
+            int healAmount = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
 
-            caster.CastSpell(oldTarget, SpellIds.TrailOfLightHeal, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, (int)healAmount));
+            caster.CastSpell(oldTarget, SpellIds.TrailOfLightHeal, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
         }
 
         public override void Register()

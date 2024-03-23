@@ -33,10 +33,10 @@ namespace Game.Maps
             i_gridExpiry = expiry;
             m_terrain = Global.TerrainMgr.LoadTerrain(id);
 
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
+            for (int x = 0; x < MapConst.MaxGrids; ++x)
             {
                 i_grids[x] = new Grid[MapConst.MaxGrids];
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                for (int y = 0; y < MapConst.MaxGrids; ++y)
                 {
                     //z code
                     SetGrid(null, x, y);
@@ -83,7 +83,7 @@ namespace Game.Maps
             }
 
             if (!m_scriptSchedule.Empty())
-                Global.MapMgr.DecreaseScheduledScriptCount((uint)m_scriptSchedule.Count);
+                Global.MapMgr.DecreaseScheduledScriptCount(m_scriptSchedule.Count);
 
             Global.OutdoorPvPMgr.DestroyOutdoorPvPForMap(this);
             Global.BattleFieldMgr.DestroyBattlefieldsForMap(this);
@@ -276,7 +276,7 @@ namespace Game.Maps
             loader.LoadN();
         }
 
-        void GridMarkNoUnload(uint x, uint y)
+        void GridMarkNoUnload(int x, int y)
         {
             // First make sure this grid is loaded
             float gX = (((float)x - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
@@ -289,7 +289,7 @@ namespace Game.Maps
             grid.SetUnloadExplicitLock(true);
         }
 
-        void GridUnmarkNoUnload(uint x, uint y)
+        void GridUnmarkNoUnload(int x, int y)
         {
             // If grid is loaded, clear unload lock
             if (IsGridLoaded(new GridCoord(x, y)))
@@ -380,7 +380,7 @@ namespace Game.Maps
 
             // Broadcast update to all players on the map
             UpdateWorldState updateWorldState = new();
-            updateWorldState.VariableID = (uint)worldStateId;
+            updateWorldState.VariableID = worldStateId;
             updateWorldState.Value = value;
             updateWorldState.Hidden = hidden;
             updateWorldState.Write();
@@ -485,7 +485,7 @@ namespace Game.Maps
             return true;
         }
 
-        public bool IsGridLoaded(uint gridId) { return IsGridLoaded(new GridCoord(gridId % MapConst.MaxGrids, gridId / MapConst.MaxGrids)); }
+        public bool IsGridLoaded(int gridId) { return IsGridLoaded(new GridCoord(gridId % MapConst.MaxGrids, gridId / MapConst.MaxGrids)); }
 
         public bool IsGridLoaded(float x, float y) { return IsGridLoaded(GridDefines.ComputeGridCoord(x, y)); }
 
@@ -505,13 +505,13 @@ namespace Game.Maps
             // Update mobs/objects in ALL visible cells around object!
             CellArea area = Cell.CalculateCellArea(obj.GetPositionX(), obj.GetPositionY(), obj.GetGridActivationRange());
 
-            for (uint x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
+            for (int x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
             {
-                for (uint y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
+                for (int y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
                 {
                     // marked cells are those that have been visited
                     // don't visit the same cell twice
-                    uint cell_id = (y * MapConst.TotalCellsPerMap) + x;
+                    int cell_id = (y * MapConst.TotalCellsPerMap) + x;
                     if (IsCellMarked(cell_id))
                         continue;
 
@@ -697,9 +697,9 @@ namespace Game.Maps
 
         void ProcessRelocationNotifies(uint diff)
         {
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
+            for (int x = 0; x < MapConst.MaxGrids; ++x)
             {
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                for (int y = 0; y < MapConst.MaxGrids; ++y)
                 {
                     Grid grid = GetGrid(x, y);
                     if (grid == null)
@@ -712,17 +712,17 @@ namespace Game.Maps
                     if (!grid.GetGridInfoRef().GetRelocationTimer().TPassed())
                         continue;
 
-                    uint gx = grid.GetX();
-                    uint gy = grid.GetY();
+                    int gx = grid.GetX();
+                    int gy = grid.GetY();
 
                     var cell_min = new CellCoord(gx * MapConst.MaxCells, gy * MapConst.MaxCells);
                     var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells, cell_min.Y_coord + MapConst.MaxCells);
 
-                    for (uint xx = cell_min.X_coord; xx < cell_max.X_coord; ++xx)
+                    for (int xx = cell_min.X_coord; xx < cell_max.X_coord; ++xx)
                     {
-                        for (uint yy = cell_min.Y_coord; yy < cell_max.Y_coord; ++yy)
+                        for (int yy = cell_min.Y_coord; yy < cell_max.Y_coord; ++yy)
                         {
-                            uint cell_id = (yy * MapConst.TotalCellsPerMap) + xx;
+                            int cell_id = (yy * MapConst.TotalCellsPerMap) + xx;
                             if (!IsCellMarked(cell_id))
                                 continue;
 
@@ -744,9 +744,9 @@ namespace Game.Maps
             var grid_notifier = new Visitor(reset, GridMapTypeMask.AllGrid);
             var world_notifier = new Visitor(reset, GridMapTypeMask.AllWorld);
 
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
+            for (int x = 0; x < MapConst.MaxGrids; ++x)
             {
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                for (int y = 0; y < MapConst.MaxGrids; ++y)
                 {
                     Grid grid = GetGrid(x, y);
                     if (grid == null)
@@ -760,18 +760,18 @@ namespace Game.Maps
 
                     grid.GetGridInfoRef().GetRelocationTimer().TReset((int)diff, m_VisibilityNotifyPeriod);
 
-                    uint gx = grid.GetX();
-                    uint gy = grid.GetY();
+                    int gx = grid.GetX();
+                    int gy = grid.GetY();
 
                     var cell_min = new CellCoord(gx * MapConst.MaxCells, gy * MapConst.MaxCells);
                     var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells,
                         cell_min.Y_coord + MapConst.MaxCells);
 
-                    for (uint xx = cell_min.X_coord; xx < cell_max.X_coord; ++xx)
+                    for (int xx = cell_min.X_coord; xx < cell_max.X_coord; ++xx)
                     {
-                        for (uint yy = cell_min.Y_coord; yy < cell_max.Y_coord; ++yy)
+                        for (int yy = cell_min.Y_coord; yy < cell_max.Y_coord; ++yy)
                         {
-                            uint cell_id = (yy * MapConst.TotalCellsPerMap) + xx;
+                            int cell_id = (yy * MapConst.TotalCellsPerMap) + xx;
                             if (!IsCellMarked(cell_id))
                                 continue;
 
@@ -1398,8 +1398,8 @@ namespace Game.Maps
 
         public bool UnloadGrid(Grid grid, bool unloadAll)
         {
-            uint x = grid.GetX();
-            uint y = grid.GetY();
+            int x = grid.GetX();
+            int y = grid.GetY();
 
             if (!unloadAll)
             {
@@ -1452,8 +1452,8 @@ namespace Game.Maps
             Cypher.Assert(i_objectsToRemove.Empty());
             SetGrid(null, x, y);
 
-            int gx = (int)((MapConst.MaxGrids - 1) - x);
-            int gy = (int)((MapConst.MaxGrids - 1) - y);
+            int gx = MapConst.MaxGrids - 1 - x;
+            int gy = MapConst.MaxGrids - 1 - y;
 
             m_terrain.UnloadMap(gx, gy);
 
@@ -1483,9 +1483,9 @@ namespace Game.Maps
             creaturesToMove.Clear();
             _gameObjectsToMove.Clear();
 
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
+            for (int x = 0; x < MapConst.MaxGrids; ++x)
             {
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                for (int y = 0; y < MapConst.MaxGrids; ++y)
                 {
                     var grid = GetGrid(x, y);
                     if (grid == null)
@@ -1537,22 +1537,22 @@ namespace Game.Maps
             return m_terrain.GetAreaInfo(phaseShift, GetId(), x, y, z, out mogpflags, out adtId, out rootId, out groupId, _dynamicTree);
         }
 
-        public uint GetAreaId(PhaseShift phaseShift, Position pos)
+        public int GetAreaId(PhaseShift phaseShift, Position pos)
         {
             return m_terrain.GetAreaId(phaseShift, GetId(), pos.posX, pos.posY, pos.posZ, _dynamicTree);
         }
 
-        public uint GetAreaId(PhaseShift phaseShift, float x, float y, float z)
+        public int GetAreaId(PhaseShift phaseShift, float x, float y, float z)
         {
             return m_terrain.GetAreaId(phaseShift, GetId(), x, y, z, _dynamicTree);
         }
 
-        public uint GetZoneId(PhaseShift phaseShift, Position pos)
+        public int GetZoneId(PhaseShift phaseShift, Position pos)
         {
             return m_terrain.GetZoneId(phaseShift, GetId(), pos.posX, pos.posY, pos.posZ, _dynamicTree);
         }
 
-        public uint GetZoneId(PhaseShift phaseShift, float x, float y, float z)
+        public int GetZoneId(PhaseShift phaseShift, float x, float y, float z)
         {
             return m_terrain.GetZoneId(phaseShift, GetId(), x, y, z, _dynamicTree);
         }
@@ -1792,7 +1792,7 @@ namespace Game.Maps
             player.SendPacket(packet);
         }
 
-        void SetGrid(Grid grid, uint x, uint y)
+        void SetGrid(Grid grid, int x, int y)
         {
             if (x >= MapConst.MaxGrids || y >= MapConst.MaxGrids)
             {
@@ -1896,7 +1896,7 @@ namespace Game.Maps
             return true;
         }
 
-        public void Respawn(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
+        public void Respawn(SpawnObjectType type, long spawnId, SQLTransaction dbTrans = null)
         {
             RespawnInfo info = GetRespawnInfo(type, spawnId);
             if (info != null)
@@ -2050,7 +2050,7 @@ namespace Game.Maps
             DeleteRespawnInfoFromDB(info.type, info.spawnId, dbTrans);
         }
 
-        void DeleteRespawnInfoFromDB(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
+        void DeleteRespawnInfoFromDB(SpawnObjectType type, long spawnId, SQLTransaction dbTrans = null)
         {
             if (Instanceable())
                 return;
@@ -2063,7 +2063,7 @@ namespace Game.Maps
             DB.Characters.ExecuteOrAppend(dbTrans, stmt);
         }
 
-        void DoRespawn(SpawnObjectType type, ulong spawnId, uint gridId)
+        void DoRespawn(SpawnObjectType type, long spawnId, int gridId)
         {
             if (!IsGridLoaded(gridId)) // if grid isn't loaded, this will be processed in grid load handler
                 return;
@@ -2099,7 +2099,7 @@ namespace Game.Maps
                 if (now < next.respawnTime) // done for this tick
                     break;
 
-                uint poolId = Global.PoolMgr.IsPartOfAPool(next.type, next.spawnId);
+                int poolId = Global.PoolMgr.IsPartOfAPool(next.type, next.spawnId);
                 if (poolId != 0) // is this part of a pool?
                 { // if yes, respawn will be handled by (external) pooling logic, just delete the respawn time
                     // step 1: remove entry from maps to avoid it being reachable by outside logic
@@ -2140,7 +2140,7 @@ namespace Game.Maps
             }
         }
 
-        public void ApplyDynamicModeRespawnScaling(WorldObject obj, ulong spawnId, ref uint respawnDelay, uint mode)
+        public void ApplyDynamicModeRespawnScaling(WorldObject obj, long spawnId, ref uint respawnDelay, uint mode)
         {
             Cypher.Assert(mode == 1);
             Cypher.Assert(obj.GetMap() == this);
@@ -2171,7 +2171,7 @@ namespace Game.Maps
             if (!_zonePlayerCountMap.ContainsKey(obj.GetZoneId()))
                 return;
 
-            uint playerCount = _zonePlayerCountMap[obj.GetZoneId()];
+            int playerCount = _zonePlayerCountMap[obj.GetZoneId()];
             if (playerCount == 0)
                 return;
 
@@ -2186,9 +2186,9 @@ namespace Game.Maps
             respawnDelay = (uint)Math.Max(Math.Ceiling(respawnDelay * adjustFactor), timeMinimum);
         }
 
-        public bool ShouldBeSpawnedOnGridLoad<T>(ulong spawnId) { return ShouldBeSpawnedOnGridLoad(SpawnData.TypeFor<T>(), spawnId); }
+        public bool ShouldBeSpawnedOnGridLoad<T>(long spawnId) { return ShouldBeSpawnedOnGridLoad(SpawnData.TypeFor<T>(), spawnId); }
 
-        bool ShouldBeSpawnedOnGridLoad(SpawnObjectType type, ulong spawnId)
+        bool ShouldBeSpawnedOnGridLoad(SpawnObjectType type, long spawnId)
         {
             Cypher.Assert(SpawnData.TypeHasData(type));
             // check if the object is on its respawn timer
@@ -2310,7 +2310,7 @@ namespace Game.Maps
             return true;
         }
 
-        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes = false)
+        public bool SpawnGroupDespawn(int groupId, bool deleteRespawnTimes = false)
         {
             return SpawnGroupDespawn(groupId, deleteRespawnTimes, out _);
         }
@@ -2418,9 +2418,9 @@ namespace Game.Maps
             // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
             if (!IsBattlegroundOrArena())
             {
-                for (uint x = 0; x < MapConst.MaxGrids; ++x)
+                for (int x = 0; x < MapConst.MaxGrids; ++x)
                 {
-                    for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                    for (int y = 0; y < MapConst.MaxGrids; ++y)
                     {
                         Grid grid = GetGrid(x, y);
                         if (grid != null)
@@ -2549,7 +2549,7 @@ namespace Game.Maps
 
             //we must find visible range in cells so we unload only non-visible cells...
             float viewDist = GetVisibilityRange();
-            uint cell_range = (uint)Math.Ceiling(viewDist / MapConst.SizeofCells) + 1;
+            int cell_range = (int)Math.Ceiling(viewDist / MapConst.SizeofCells) + 1;
 
             cell_min.Dec_x(cell_range);
             cell_min.Dec_y(cell_range);
@@ -2932,14 +2932,14 @@ namespace Game.Maps
                 bones.SetPartyGUID(corpse.m_corpseData.PartyGUID);
                 bones.SetGuildGUID(corpse.m_corpseData.GuildGUID);
                 bones.SetDisplayId(corpse.m_corpseData.DisplayID);
-                bones.SetRace(corpse.m_corpseData.RaceID);
-                bones.SetSex(corpse.m_corpseData.Sex);
-                bones.SetClass(corpse.m_corpseData.Class);
+                bones.SetRace((Race)corpse.m_corpseData.RaceID.GetValue());
+                bones.SetSex((Gender)corpse.m_corpseData.Sex.GetValue());
+                bones.SetClass((Class)corpse.m_corpseData.Class.GetValue());
                 bones.SetCustomizations(corpse.m_corpseData.Customizations);
                 bones.ReplaceAllFlags((CorpseFlags)(corpse.m_corpseData.Flags | (uint)CorpseFlags.Bones));
                 bones.SetFactionTemplate(corpse.m_corpseData.FactionTemplate);
                 for (int i = 0; i < EquipmentSlot.End; ++i)
-                    bones.SetItem((uint)i, corpse.m_corpseData.Items[i]);
+                    bones.SetItem(i, corpse.m_corpseData.Items[i]);
 
                 bones.SetCellCoord(corpse.GetCellCoord());
                 bones.Relocate(corpse.GetPositionX(), corpse.GetPositionY(), corpse.GetPositionZ(), corpse.GetOrientation());
@@ -3304,14 +3304,14 @@ namespace Game.Maps
             marked_cells.SetAll(false);
         }
 
-        private bool IsCellMarked(uint pCellId)
+        private bool IsCellMarked(int pCellId)
         {
-            return marked_cells.Get((int)pCellId);
+            return marked_cells.Get(pCellId);
         }
 
-        void MarkCell(uint pCellId)
+        void MarkCell(int pCellId)
         {
-            marked_cells.Set((int)pCellId, true);
+            marked_cells.Set(pCellId, true);
         }
 
         public bool HavePlayers()
@@ -3555,10 +3555,10 @@ namespace Game.Maps
 
         public void Visit(Cell cell, Visitor visitor)
         {
-            uint x = cell.GetGridX();
-            uint y = cell.GetGridY();
-            uint cell_x = cell.GetCellX();
-            uint cell_y = cell.GetCellY();
+            int x = cell.GetGridX();
+            int y = cell.GetGridY();
+            int cell_x = cell.GetCellX();
+            int cell_y = cell.GetCellY();
 
             if (!cell.NoCreate() || IsGridLoaded(new GridCoord(x, y)))
             {
@@ -3956,7 +3956,7 @@ namespace Game.Maps
         void _ScriptProcessDoor(WorldObject source, WorldObject target, ScriptInfo scriptInfo)
         {
             bool bOpen = false;
-            ulong guid = scriptInfo.ToggleDoor.GOGuid;
+            long guid = scriptInfo.ToggleDoor.GOGuid;
             int nTimeToToggle = Math.Max(15, (int)scriptInfo.ToggleDoor.ResetDelay);
             switch (scriptInfo.command)
             {
@@ -4003,7 +4003,7 @@ namespace Game.Maps
             }
         }
 
-        private GameObject _FindGameObject(WorldObject searchObject, ulong guid)
+        private GameObject _FindGameObject(WorldObject searchObject, long guid)
         {
             var bounds = searchObject.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(guid);
             if (bounds.Empty())
@@ -4679,7 +4679,7 @@ namespace Game.Maps
         SortedMultiMap<long, ScriptAction> m_scriptSchedule = new();
 
         BitSet marked_cells = new(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
-        public Dictionary<ulong, CreatureGroup> CreatureGroupHolder = new();
+        public Dictionary<long, CreatureGroup> CreatureGroupHolder = new();
         internal int i_InstanceId;
         long i_gridExpiry;
         bool i_scriptLock;
@@ -4885,7 +4885,7 @@ namespace Game.Maps
             }
 
             MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-            if (!entries.IsInstanceIdBound() || !IsRaid() || !entries.MapDifficulty.IsRestoringDungeonState() || i_owningGroupRef.IsValid())
+            if (!entries.IsInstanceIdBound() || !IsRaid() || !entries.MapDifficulty.IsRestoringDungeonState || i_owningGroupRef.IsValid())
             {
                 i_data.Create();
                 return;

@@ -2744,9 +2744,9 @@ namespace Game.Spells
             return (castTime > 0) ? castTime : 0;
         }
 
-        public uint GetMaxTicks()
+        public int GetMaxTicks()
         {
-            uint totalTicks = 0;
+            int totalTicks = 0;
             int DotDuration = GetDuration();
 
             foreach (var effectInfo in GetEffects())
@@ -2773,7 +2773,7 @@ namespace Game.Spells
                         // skip infinite periodics
                         if (effectInfo.ApplyAuraPeriod > 0 && DotDuration > 0)
                         {
-                            totalTicks = (uint)DotDuration / effectInfo.ApplyAuraPeriod;
+                            totalTicks = (int)(DotDuration / effectInfo.ApplyAuraPeriod);
                             if (HasAttribute(SpellAttr5.ExtraInitialPeriod))
                                 ++totalTicks;
                         }
@@ -3183,7 +3183,7 @@ namespace Game.Spells
             return ChainEntry.prev;
         }
 
-        public SpellInfo GetAuraRankForLevel(uint level)
+        public SpellInfo GetAuraRankForLevel(int level)
         {
             // ignore passive spells
             if (IsPassive())
@@ -3948,8 +3948,8 @@ namespace Game.Spells
         public SpellAttr13 AttributesEx13 { get; set; }
         public SpellCustomAttributes AttributesCu { get; set; }
         public BitSet NegativeEffects { get; set; } = new BitSet(SpellConst.MaxEffects);
-        public long Stances { get; set; }
-        public long StancesNot { get; set; }
+        public ulong Stances { get; set; }
+        public ulong StancesNot { get; set; }
         public SpellCastTargetFlags Targets { get; set; }
         public int TargetCreatureType { get; set; }
         public int RequiresSpellFocus { get; set; }

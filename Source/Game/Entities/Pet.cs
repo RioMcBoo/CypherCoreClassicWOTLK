@@ -132,7 +132,7 @@ namespace Game.Entities
                     return (stable.UnslottedPets.First(), PetSaveMode.NotInSlot);
             }
 
-            return (PetStable.PetInfo, PetSaveMode>(null, PetSaveMode.AsDeleted);
+            return (null, PetSaveMode.AsDeleted);
         }
 
         public bool LoadPetFromDB(Player owner, int petEntry = 0, int petnumber = 0, bool current = false, PetSaveMode? forcedSlot = null)
@@ -179,7 +179,7 @@ namespace Game.Entities
             owner.SetTemporaryUnsummonedPetNumber(0);
 
             Map map = owner.GetMap();
-            ulong guid = map.GenerateLowGuid(HighGuid.Pet);
+            long guid = map.GenerateLowGuid(HighGuid.Pet);
 
             if (!Create(guid, map, petInfo.CreatureId, petInfo.PetNumber))
                 return false;
@@ -210,8 +210,8 @@ namespace Game.Entities
             GetCharmInfo().SetPetNumber(petInfo.PetNumber, IsPermanentPetFor(owner));
 
             SetDisplayId(petInfo.DisplayId, true);
-            uint petlevel = petInfo.Level;
-            ReplaceAllNpcFlags(NPCFlags.None);
+            int petlevel = petInfo.Level;
+            ReplaceAllNpcFlags(NPCFlags1.None);
             ReplaceAllNpcFlags2(NPCFlags2.None);
             SetName(petInfo.Name);
 
@@ -260,14 +260,14 @@ namespace Game.Entities
                 SetFullPower(PowerType.Mana);
             else
             {
-                uint savedhealth = petInfo.Health;
-                uint savedmana = petInfo.Mana;
+                int savedhealth = petInfo.Health;
+                int savedmana = petInfo.Mana;
                 if (savedhealth == 0 && GetPetType() == PetType.Hunter)
                     SetDeathState(DeathState.JustDied);
                 else
                 {
                     SetHealth(savedhealth);
-                    SetPower(PowerType.Mana, (int)savedmana);
+                    SetPower(PowerType.Mana, savedmana);
                 }
             }
 
@@ -276,7 +276,7 @@ namespace Game.Entities
             // PET_SAVE_NOT_IN_SLOT(-1) = not stable slot (summoning))
             if (slot == PetSaveMode.NotInSlot)
             {
-                uint petInfoNumber = petInfo.PetNumber;
+                int petInfoNumber = petInfo.PetNumber;
                 if (petStable.CurrentPetIndex != 0)
                     owner.RemovePet(null, PetSaveMode.NotInSlot);
 
@@ -284,7 +284,7 @@ namespace Game.Entities
                 Cypher.Assert(!petStable.CurrentPetIndex.HasValue);
                 Cypher.Assert(unslottedPetIndex != -1);
 
-                petStable.SetCurrentUnslottedPetIndex((uint)unslottedPetIndex);
+                petStable.SetCurrentUnslottedPetIndex(unslottedPetIndex);
             }
             else if (PetSaveMode.FirstActiveSlot <= slot && slot <= PetSaveMode.LastActiveSlot)
             {
@@ -292,7 +292,7 @@ namespace Game.Entities
 
                 Cypher.Assert(activePetIndex != -1);
 
-                petStable.SetCurrentActivePetIndex((uint)activePetIndex);
+                petStable.SetCurrentActivePetIndex(activePetIndex);
             }
 
             // Send fake summon spell cast - this is needed for correct cooldown application for spells
@@ -354,12 +354,12 @@ namespace Game.Entities
 
                     Log.outDebug(LogFilter.Pet, $"New Pet has {GetGUID()}");
 
-                    ushort specId = specializationId;
-                    var petSpec = CliDB.ChrSpecializationStorage.LookupByKey(specId);
+                    var specId = specializationId;
+                    var petSpec = CliDB.ChrSpecializationStorage.LookupByKey((int)specId);
                     if (petSpec != null)
-                        specId = (ushort)Global.DB2Mgr.GetChrSpecializationByIndex(owner.HasAuraType(AuraType.OverridePetSpecs) ? Class.Max : 0, petSpec.OrderIndex).Id;
+                        specId = Global.DB2Mgr.GetChrSpecializationByIndex(owner.HasAuraType(AuraType.OverridePetSpecs) ? Class.Max : 0, petSpec.OrderIndex).Id;
 
-                    SetSpecialization(specId);
+                    SetSpecialization((ChrSpecialization)specId);
 
                     // The SetSpecialization function will run these functions if the pet's spec is not 0
                     if (GetSpecialization() == 0)
@@ -481,7 +481,7 @@ namespace Game.Entities
                 stmt.AddValue(13, GameTime.GetGameTime());
                 stmt.AddValue(14, m_unitData.CreatedBySpell);
                 stmt.AddValue(15, (byte)GetPetType());
-                stmt.AddValue(16, GetSpecialization());
+                stmt.AddValue(16, (ushort)GetSpecialization());
                 trans.Append(stmt);
 
                 DB.Characters.CommitTransaction(trans);
@@ -762,7 +762,7 @@ namespace Game.Entities
             SetPetNameTimestamp(0);
             SetPetExperience(0);
             SetPetNextLevelExperience((int)(Global.ObjectMgr.GetXPForLevel(GetLevel() + 1) * PetXPFactor));
-            ReplaceAllNpcFlags(NPCFlags.None);
+            ReplaceAllNpcFlags(NPCFlags1.None);
             ReplaceAllNpcFlags2(NPCFlags2.None);
 
             if (cinfo.CreatureType == CreatureType.Beast)
@@ -1390,11 +1390,11 @@ namespace Game.Entities
             if (cInfo == null)
                 return;
 
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cInfo.Family);
+            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey((int)cInfo.Family);
             if (cFamily == null)
                 return;
 
-            var petStore = Global.SpellMgr.PetFamilySpellsStorage.LookupByKey(cInfo.Family);
+            var petStore = Global.SpellMgr.PetFamilySpellsStorage.LookupByKey((int)cInfo.Family);
             if (petStore != null)
             {
                 // For general hunter pets skill 270
@@ -1423,7 +1423,7 @@ namespace Game.Entities
 
         public void CastPetAura(PetAura aura)
         {
-            uint auraId = aura.GetAura(GetEntry());
+            int auraId = aura.GetAura(GetEntry());
             if (auraId == 0)
                 return;
 
@@ -1447,10 +1447,10 @@ namespace Game.Entities
             return false;
         }
 
-        void LearnSpellHighRank(uint spellid)
+        void LearnSpellHighRank(int spellid)
         {
             LearnSpell(spellid);
-            uint next = Global.SpellMgr.GetNextSpellInChain(spellid);
+            int next = Global.SpellMgr.GetNextSpellInChain(spellid);
             if (next != 0)
                 LearnSpellHighRank(next);
         }
@@ -1466,7 +1466,7 @@ namespace Game.Entities
                 // always same level
                 case PetType.Summon:
                 case PetType.Hunter:
-                    GivePetLevel((int)owner.GetLevel());
+                    GivePetLevel(owner.GetLevel());
                     break;
                 default:
                     break;
@@ -1529,7 +1529,7 @@ namespace Game.Entities
         public void SetPetExperience(int xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetExperience), xp); }
         public void SetPetNextLevelExperience(int xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNextLevelExperience), xp); }
 
-        public ushort GetSpecialization() { return m_petSpecialization; }
+        public ChrSpecialization GetSpecialization() { return m_petSpecialization; }
 
         public GroupUpdatePetFlags GetGroupUpdateFlag() { return m_groupUpdateMask; }
         public void SetGroupUpdateFlag(GroupUpdatePetFlags flag)
@@ -1549,7 +1549,7 @@ namespace Game.Entities
 
         void LearnSpecializationSpells()
         {
-            List<uint> learnedSpells = new();
+            List<int> learnedSpells = new();
 
             List<SpecializationSpellsRecord> specSpells = Global.DB2Mgr.GetSpecializationSpells(m_petSpecialization);
             if (specSpells != null)
@@ -1571,7 +1571,7 @@ namespace Game.Entities
         {
             List<int> unlearnedSpells = new();
 
-            for (uint i = 0; i < PlayerConst.MaxSpecializations; ++i)
+            for (int i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
                 ChrSpecializationRecord specialization = Global.DB2Mgr.GetChrSpecializationByIndex(0, i);
                 if (specialization != null)
@@ -1599,7 +1599,7 @@ namespace Game.Entities
             UnlearnSpells(unlearnedSpells, true, clearActionBar);
         }
 
-        public void SetSpecialization(int spec)
+        public void SetSpecialization(ChrSpecialization spec)
         {
             if (m_petSpecialization == spec)
                 return;
@@ -1607,13 +1607,13 @@ namespace Game.Entities
             // remove all the old spec's specalization spells, set the new spec, then add the new spec's spells
             // clearActionBars is false because we'll be updating the pet actionbar later so we don't have to do it now
             RemoveSpecializationSpells(false);
-            if (!CliDB.ChrSpecializationStorage.ContainsKey(spec))
+            if (!CliDB.ChrSpecializationStorage.ContainsKey((int)spec))
             {
                 m_petSpecialization = 0;
                 return;
             }
 
-            m_petSpecialization = (ushort)spec;
+            m_petSpecialization = spec;
             LearnSpecializationSpells();
 
             // resend SMSG_PET_SPELLS_MESSAGE to remove old specialization spells from the pet action bar
@@ -1621,7 +1621,7 @@ namespace Game.Entities
             GetOwner().PetSpellInitialize();
 
             SetPetSpecialization setPetSpecialization = new();
-            setPetSpecialization.SpecID = m_petSpecialization;
+            setPetSpecialization.SpecID = (ushort)m_petSpecialization;
             GetOwner().SendPacket(setPetSpecialization);
         }
 
@@ -1655,7 +1655,7 @@ namespace Game.Entities
         GroupUpdatePetFlags m_groupUpdateMask;
 
         DeclinedName _declinedname;
-        ushort m_petSpecialization;
+        ChrSpecialization m_petSpecialization;
     }
     public class PetSpell
     {
@@ -1680,7 +1680,7 @@ namespace Game.Entities
             public int Mana;
             public uint LastSaveTime;
             public int CreatedBySpellId;
-            public ushort SpecializationId;
+            public ChrSpecialization SpecializationId;
             public byte Level = 0;
             public ReactStates ReactState;
             public PetType Type = PetType.Max;
@@ -1736,7 +1736,7 @@ namespace Game.Entities
 
     class PetLoadQueryHolder : SQLQueryHolder<PetLoginQueryLoad>
     {
-        public PetLoadQueryHolder(ulong ownerGuid, uint petNumber)
+        public PetLoadQueryHolder(long ownerGuid, int petNumber)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PET_DECLINED_NAME);
             stmt.AddValue(0, ownerGuid);

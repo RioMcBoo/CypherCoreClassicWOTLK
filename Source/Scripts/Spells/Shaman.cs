@@ -17,91 +17,91 @@ namespace Scripts.Spells.Shaman
 
     struct SpellIds
     {
-        public const uint AftershockEnergize = 210712;
-        public const uint AncestralGuidance = 108281;
-        public const uint AncestralGuidanceHeal = 114911;
-        public const uint AscendanceElemental = 114050;
-        public const uint AscendanceEnhancement = 114051;
-        public const uint AscendanceRestoration = 114052;
-        public const uint ChainLightning = 188443;
-        public const uint ChainLightningEnergize = 195897;
-        public const uint ChainLightningOverload = 45297;
-        public const uint ChainLightningOverloadEnergize = 218558;
-        public const uint ChainedHeal = 70809;
-        public const uint CrashLightningCleave = 187878;
-        public const uint DoomWindsLegendaryCooldown = 335904;
-        public const uint Earthquake = 61882;
-        public const uint EarthquakeKnockingDown = 77505;
-        public const uint EarthquakeTick = 77478;
-        public const uint EarthShieldHeal = 204290;
-        public const uint EarthenRagePassive = 170374;
-        public const uint EarthenRagePeriodic = 170377;
-        public const uint EarthenRageDamage = 170379;
-        public const uint EchoesOfGreatSunderingLegendary = 336217;
-        public const uint EchoesOfGreatSunderingTalent = 384088;
-        public const uint Electrified = 64930;
-        public const uint ElementalBlast = 117014;
-        public const uint ElementalBlastCrit = 118522;
-        public const uint ElementalBlastEnergize = 344645;
-        public const uint ElementalBlastHaste = 173183;
-        public const uint ElementalBlastMastery = 173184;
-        public const uint ElementalBlastOverload = 120588;
-        public const uint ElementalMastery = 16166;
-        public const uint EnergySurge = 40465;
-        public const uint FlameShock = 188389;
-        public const uint FlametongueAttack = 10444;
-        public const uint FlametongueWeaponEnchant = 334294;
-        public const uint FlametongueWeaponAura = 319778;
-        public const uint FrostShockEnergize = 289439;
-        public const uint GatheringStorms = 198299;
-        public const uint GatheringStormsBuff = 198300;
-        public const uint GhostWolf = 2645;
-        public const uint HealingRainVisual = 147490;
-        public const uint HealingRainHeal = 73921;
-        public const uint Icefury = 210714;
-        public const uint IcefuryOverload = 219271;
-        public const uint IgneousPotential = 279830;
-        public const uint ItemLightningShield = 23552;
-        public const uint ItemLightningShieldDamage = 27635;
-        public const uint ItemManaSurge = 23571;
-        public const uint LavaBeam = 114074;
-        public const uint LavaBeamOverload = 114738;
-        public const uint LavaBurst = 51505;
-        public const uint LavaBurstBonusDamage = 71824;
-        public const uint LavaBurstOverload = 77451;
-        public const uint LavaSurge = 77762;
-        public const uint LightningBolt = 188196;
-        public const uint LightningBoltEnergize = 214815;
-        public const uint LightningBoltOverload = 45284;
-        public const uint LightningBoltOverloadEnergize = 214816;
-        public const uint LiquidMagmaHit = 192231;
-        public const uint MaelstromController = 343725;
-        public const uint MasteryElementalOverload = 168534;
-        public const uint PathOfFlamesSpread = 210621;
-        public const uint PathOfFlamesTalent = 201909;
-        public const uint PowerSurge = 40466;
-        public const uint RestorativeMists = 114083;
-        public const uint RestorativeMistsInitial = 294020;
-        public const uint Riptide = 61295;
-        public const uint SpiritWolfTalent = 260878;
-        public const uint SpiritWolfPeriodic = 260882;
-        public const uint SpiritWolfAura = 260881;
-        public const uint Stormkeeper = 191634;
-        public const uint Stormstrike = 17364;
-        public const uint T292PElementalDamageBuff = 394651;
-        public const uint TidalWaves = 53390;
-        public const uint TotemicPowerArmor = 28827;
-        public const uint TotemicPowerAttackPower = 28826;
-        public const uint TotemicPowerMp5 = 28824;
-        public const uint TotemicPowerSpellPower = 28825;
-        public const uint UndulationProc = 216251;
-        public const uint UnlimitedPowerBuff = 272737;
-        public const uint VolcanicSurge = 408572;
-        public const uint WindfuryAttack = 25504;
-        public const uint WindfuryEnchantment = 334302;
-        public const uint WindRush = 192082;
+        public const int AftershockEnergize = 210712;
+        public const int AncestralGuidance = 108281;
+        public const int AncestralGuidanceHeal = 114911;
+        public const int AscendanceElemental = 114050;
+        public const int AscendanceEnhancement = 114051;
+        public const int AscendanceRestoration = 114052;
+        public const int ChainLightning = 188443;
+        public const int ChainLightningEnergize = 195897;
+        public const int ChainLightningOverload = 45297;
+        public const int ChainLightningOverloadEnergize = 218558;
+        public const int ChainedHeal = 70809;
+        public const int CrashLightningCleave = 187878;
+        public const int DoomWindsLegendaryCooldown = 335904;
+        public const int Earthquake = 61882;
+        public const int EarthquakeKnockingDown = 77505;
+        public const int EarthquakeTick = 77478;
+        public const int EarthShieldHeal = 204290;
+        public const int EarthenRagePassive = 170374;
+        public const int EarthenRagePeriodic = 170377;
+        public const int EarthenRageDamage = 170379;
+        public const int EchoesOfGreatSunderingLegendary = 336217;
+        public const int EchoesOfGreatSunderingTalent = 384088;
+        public const int Electrified = 64930;
+        public const int ElementalBlast = 117014;
+        public const int ElementalBlastCrit = 118522;
+        public const int ElementalBlastEnergize = 344645;
+        public const int ElementalBlastHaste = 173183;
+        public const int ElementalBlastMastery = 173184;
+        public const int ElementalBlastOverload = 120588;
+        public const int ElementalMastery = 16166;
+        public const int EnergySurge = 40465;
+        public const int FlameShock = 188389;
+        public const int FlametongueAttack = 10444;
+        public const int FlametongueWeaponEnchant = 334294;
+        public const int FlametongueWeaponAura = 319778;
+        public const int FrostShockEnergize = 289439;
+        public const int GatheringStorms = 198299;
+        public const int GatheringStormsBuff = 198300;
+        public const int GhostWolf = 2645;
+        public const int HealingRainVisual = 147490;
+        public const int HealingRainHeal = 73921;
+        public const int Icefury = 210714;
+        public const int IcefuryOverload = 219271;
+        public const int IgneousPotential = 279830;
+        public const int ItemLightningShield = 23552;
+        public const int ItemLightningShieldDamage = 27635;
+        public const int ItemManaSurge = 23571;
+        public const int LavaBeam = 114074;
+        public const int LavaBeamOverload = 114738;
+        public const int LavaBurst = 51505;
+        public const int LavaBurstBonusDamage = 71824;
+        public const int LavaBurstOverload = 77451;
+        public const int LavaSurge = 77762;
+        public const int LightningBolt = 188196;
+        public const int LightningBoltEnergize = 214815;
+        public const int LightningBoltOverload = 45284;
+        public const int LightningBoltOverloadEnergize = 214816;
+        public const int LiquidMagmaHit = 192231;
+        public const int MaelstromController = 343725;
+        public const int MasteryElementalOverload = 168534;
+        public const int PathOfFlamesSpread = 210621;
+        public const int PathOfFlamesTalent = 201909;
+        public const int PowerSurge = 40466;
+        public const int RestorativeMists = 114083;
+        public const int RestorativeMistsInitial = 294020;
+        public const int Riptide = 61295;
+        public const int SpiritWolfTalent = 260878;
+        public const int SpiritWolfPeriodic = 260882;
+        public const int SpiritWolfAura = 260881;
+        public const int Stormkeeper = 191634;
+        public const int Stormstrike = 17364;
+        public const int T292PElementalDamageBuff = 394651;
+        public const int TidalWaves = 53390;
+        public const int TotemicPowerArmor = 28827;
+        public const int TotemicPowerAttackPower = 28826;
+        public const int TotemicPowerMp5 = 28824;
+        public const int TotemicPowerSpellPower = 28825;
+        public const int UndulationProc = 216251;
+        public const int UnlimitedPowerBuff = 272737;
+        public const int VolcanicSurge = 408572;
+        public const int WindfuryAttack = 25504;
+        public const int WindfuryEnchantment = 334302;
+        public const int WindRush = 192082;
 
-        public const uint LabelShamanWindfuryTotem = 1038;
+        public const int LabelShamanWindfuryTotem = 1038;
     }
 
     [Script] // 273221 - Aftershock
@@ -188,7 +188,7 @@ namespace Scripts.Spells.Shaman
     [Script] // 114052 - Ascendance (Restoration)
     class spell_sha_ascendance_restoration : AuraScript
     {
-        uint _healToDistribute;
+        int _healToDistribute;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -211,7 +211,7 @@ namespace Scripts.Spells.Shaman
                 return;
 
             CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)_healToDistribute);
+            args.AddSpellMod(SpellValueMod.BasePoint0, _healToDistribute);
             GetTarget().CastSpell(null, SpellIds.RestorativeMists, args);
             _healToDistribute = 0;
         }
@@ -233,7 +233,7 @@ namespace Scripts.Spells.Shaman
             && ValidateSpellEffect((SpellIds.MaelstromController, 4));
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 4);
             if (energizeAmount != null)
@@ -256,7 +256,7 @@ namespace Scripts.Spells.Shaman
                 && ValidateSpellEffect((SpellIds.MaelstromController, 5));
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 5);
             if (energizeAmount != null)
@@ -309,8 +309,8 @@ namespace Scripts.Spells.Shaman
     [Script] // 378270 - Deeply Rooted Elements
     class spell_sha_deeply_rooted_elements : AuraScript
     {
-        uint requiredSpellId;
-        uint ascendanceSpellId;
+        int requiredSpellId;
+        int ascendanceSpellId;
         int _procAttempts;
 
         public override bool Validate(SpellInfo spellInfo)
@@ -621,7 +621,7 @@ namespace Scripts.Spells.Shaman
     [Script] // 61882 - Earthquake
     class spell_sha_earthquake : SpellScript
     {
-        (uint, uint)[] DamageBuffs =
+        (int, int)[] DamageBuffs =
         {
             (SpellIds.EchoesOfGreatSunderingLegendary, 1),
             (SpellIds.EchoesOfGreatSunderingTalent, 0),
@@ -633,7 +633,7 @@ namespace Scripts.Spells.Shaman
             return ValidateSpellEffect(DamageBuffs);
         }
 
-        void SnapshotDamageMultiplier(uint effIndex)
+        void SnapshotDamageMultiplier(int effIndex)
         {
             float damageMultiplier = 1.0f;
             foreach (var (spellId, effect) in DamageBuffs)
@@ -695,7 +695,7 @@ namespace Scripts.Spells.Shaman
     [Script] // 120588 - Elemental Blast Overload
     class spell_sha_elemental_blast : SpellScript
     {
-        uint[] BuffSpells = { SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery };
+        int[] BuffSpells = { SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery };
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -703,9 +703,9 @@ namespace Scripts.Spells.Shaman
                 && ValidateSpellEffect((SpellIds.MaelstromController, 10), (SpellIds.T292PElementalDamageBuff, 0));
         }
 
-        void HandleEnergize(uint effIndex)
+        void HandleEnergize(int effIndex)
         {
-            AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, GetSpellInfo().Id == SpellIds.ElementalBlast ? 9 : 10u);
+            AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, GetSpellInfo().Id == SpellIds.ElementalBlast ? 9 : 10);
             if (energizeAmount != null)
                 GetCaster().CastSpell(GetCaster(), SpellIds.ElementalBlastEnergize, new CastSpellExtraArgs(energizeAmount)
                     .AddSpellMod(SpellValueMod.BasePoint0, energizeAmount.GetAmount()));
@@ -714,7 +714,7 @@ namespace Scripts.Spells.Shaman
         void TriggerBuff()
         {
             Unit caster = GetCaster();
-            uint spellId = BuffSpells.SelectRandomElementByWeight(buffSpellId => !caster.HasAura(buffSpellId) ? 1.0f : 0.0f);
+            int spellId = BuffSpells.SelectRandomElementByWeight(buffSpellId => !caster.HasAura(buffSpellId) ? 1.0f : 0.0f);
 
             GetCaster().CastSpell(GetCaster(), spellId, TriggerCastFlags.FullMask);
         }
@@ -750,7 +750,7 @@ namespace Scripts.Spells.Shaman
             return GetCaster().IsPlayer();
         }
 
-        void HandleEffectHitTarget(uint effIndex)
+        void HandleEffectHitTarget(int effIndex)
         {
             Player player = GetCaster().ToPlayer();
             byte slot = EquipmentSlot.MainHand;
@@ -828,7 +828,7 @@ namespace Scripts.Spells.Shaman
     [Script] // 73920 - Healing Rain
     class spell_sha_healing_rain : SpellScript
     {
-        const uint NpcHealingRainInvisibleStalker = 73400;
+        const int NpcHealingRainInvisibleStalker = 73400;
 
         void InitializeVisualStalker()
         {
@@ -1000,7 +1000,7 @@ namespace Scripts.Spells.Shaman
             if (spellInfo == null)
                 return;
 
-            uint spellId;
+            int spellId;
             int chance;
 
             // Lesser Healing Wave
@@ -1081,7 +1081,7 @@ namespace Scripts.Spells.Shaman
             return ValidateSpellInfo(SpellIds.PathOfFlamesTalent, SpellIds.PathOfFlamesSpread, SpellIds.LavaSurge);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit caster = GetCaster();
             if (caster != null)
@@ -1098,7 +1098,7 @@ namespace Scripts.Spells.Shaman
             {
                 if (!GetSpell().m_appliedMods.Contains(lavaSurge))
                 {
-                    uint chargeCategoryId = GetSpellInfo().ChargeCategoryId;
+                    var chargeCategoryId = GetSpellInfo().ChargeCategoryId;
 
                     // Ensure we have at least 1 usable charge after cast to allow next cast immediately
                     if (!caster.GetSpellHistory().HasCharge(chargeCategoryId))
@@ -1205,7 +1205,7 @@ namespace Scripts.Spells.Shaman
             && ValidateSpellEffect((SpellIds.MaelstromController, 0));
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 0);
             if (energizeAmount != null)
@@ -1228,7 +1228,7 @@ namespace Scripts.Spells.Shaman
             && ValidateSpellEffect((SpellIds.MaelstromController, 1));
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             AuraEffect energizeAmount = GetCaster().GetAuraEffect(SpellIds.MaelstromController, 1);
             if (energizeAmount != null)
@@ -1250,7 +1250,7 @@ namespace Scripts.Spells.Shaman
             return ValidateSpellInfo(SpellIds.LiquidMagmaHit);
         }
 
-        void HandleEffectHitTarget(uint effIndex)
+        void HandleEffectHitTarget(int effIndex)
         {
             Unit hitUnit = GetHitUnit();
             if (hitUnit != null)
@@ -1334,7 +1334,7 @@ namespace Scripts.Spells.Shaman
             OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
 
-        uint GetTriggeredSpellId(uint triggeringSpellId)
+        int GetTriggeredSpellId(int triggeringSpellId)
         {
             switch (triggeringSpellId)
             {
@@ -1370,7 +1370,7 @@ namespace Scripts.Spells.Shaman
             return ValidateSpellInfo(SpellIds.MasteryElementalOverload);
         }
 
-        void ApplyDamageModifier(uint effIndex)
+        void ApplyDamageModifier(int effIndex)
         {
             AuraEffect elementalOverload = GetCaster().GetAuraEffect(SpellIds.MasteryElementalOverload, 1);
             if (elementalOverload != null)
@@ -1411,7 +1411,7 @@ namespace Scripts.Spells.Shaman
             targets.RandomResize(target => target.GetTypeId() == TypeId.Unit && !target.ToUnit().HasAura(SpellIds.FlameShock, GetCaster().GetGUID()), 1);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit mainTarget = GetExplTargetUnit();
             if (mainTarget != null)
@@ -1447,7 +1447,7 @@ namespace Scripts.Spells.Shaman
             _targetCount = targets.Count;
         }
 
-        void HandleHeal(uint effIndex)
+        void HandleHeal(int effIndex)
         {
             if (_targetCount != 0)
                 SetHitHeal(GetHitHeal() / _targetCount);
@@ -1525,7 +1525,7 @@ namespace Scripts.Spells.Shaman
         {
             PreventDefaultAction();
 
-            uint spellId;
+            int spellId;
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
 
@@ -1781,7 +1781,7 @@ namespace Scripts.Spells.Shaman
             return GetCaster().IsPlayer();
         }
 
-        void HandleEffect(uint effIndex)
+        void HandleEffect(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
@@ -1826,13 +1826,13 @@ namespace Scripts.Spells.Shaman
             return ValidateSpellInfo(SpellIds.VolcanicSurge);
         }
 
-        void PreventLavaSurge(uint effIndex)
+        void PreventLavaSurge(int effIndex)
         {
             if (GetCaster().HasAura(SpellIds.VolcanicSurge))
                 PreventHitDefaultEffect(effIndex);
         }
 
-        void PreventVolcanicSurge(uint effIndex)
+        void PreventVolcanicSurge(int effIndex)
         {
             if (!GetCaster().HasAura(SpellIds.VolcanicSurge))
                 PreventHitDefaultEffect(effIndex);

@@ -138,13 +138,13 @@ class DBAppender : Appender
         return AppenderType.DB;
     }
 
-    public override void setRealmId(uint _realmId)
+    public override void setRealmId(int _realmId)
     {
         enabled = true;
         realmId = _realmId;
     }
 
-    uint realmId;
+    int realmId;
     bool enabled;
 }
 

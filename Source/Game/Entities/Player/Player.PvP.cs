@@ -122,7 +122,7 @@ namespace Game.Entities
                     // count the number of playerkills in one day
                     ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TodayHonorableKills), (ushort)1, true);
                     // and those in a lifetime
-                    ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LifetimeHonorableKills), 1u, true);
+                    ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LifetimeHonorableKills), 1, true);
                     UpdateCriteria(CriteriaType.HonorableKills);
                     UpdateCriteria(CriteriaType.DeliverKillingBlowToClass, (uint)victim.GetClass());
                     UpdateCriteria(CriteriaType.DeliverKillingBlowToRace, (uint)victim.GetRace());
@@ -206,7 +206,7 @@ namespace Game.Entities
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TodayHonorableKills), (ushort)0);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.YesterdayHonorableKills), (ushort)0);
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LifetimeHonorableKills), 0u);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LifetimeHonorableKills), 0);
         }
 
         void _InitHonorLevelOnLoadFromDB(int honor, int honorLevel)

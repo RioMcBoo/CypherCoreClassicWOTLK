@@ -86,11 +86,11 @@ namespace System.Collections.Generic
             array[position2] = temp; // Assign to the first element
         }
 
-        public static void Resize<T>(this List<T> list, uint size)
+        public static void Resize<T>(this List<T> list, int size)
         {
             int cur = list.Count;
             if (size < cur)
-                list.RemoveRange((int)size, cur - (int)size);
+                list.RemoveRange(size, cur - size);
             else
             {
                 for (var i = list.Count; i < size; ++i)
@@ -98,7 +98,7 @@ namespace System.Collections.Generic
             }
         }
 
-        public static void RandomResize<T>(this IList<T> list, uint size)
+        public static void RandomResize<T>(this IList<T> list, int size)
         {
             int listSize = list.Count;
 
@@ -109,7 +109,7 @@ namespace System.Collections.Generic
             }
         }
 
-        public static void RandomResize<T>(this List<T> list, Predicate<T> predicate, uint size)
+        public static void RandomResize<T>(this List<T> list, Predicate<T> predicate, int size)
         {
             for (var i = 0; i < list.Count; ++i)
             {
@@ -139,7 +139,7 @@ namespace System.Collections.Generic
             return source.SelectRandom(1).Single();
         }
 
-        public static IEnumerable<T> SelectRandom<T>(this IEnumerable<T> source, uint count)
+        public static IEnumerable<T> SelectRandom<T>(this IEnumerable<T> source, int count)
         {
             return source.Shuffle().Take((int)count);
         }
@@ -169,9 +169,9 @@ namespace System.Collections.Generic
             return first.Where(x => second.Count(y => comparer(x, y)) == 1);
         }
 
-        public static uint[] ToBlockRange(this BitSet array)
+        public static int[] ToBlockRange(this BitSet array)
         {
-            uint[] blockValues = new uint[array.Length / 32 + 1];
+            int[] blockValues = new int[array.Length / 32 + 1];
             array.CopyTo(blockValues, 0);
             return blockValues;
         }

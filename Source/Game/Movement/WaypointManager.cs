@@ -41,7 +41,7 @@ namespace Game
                 GridDefines.NormalizeMapCoord(ref y);
 
                 WaypointNode waypoint = new();
-                waypoint.id = result.Read<uint>(1);
+                waypoint.id = result.Read<int>(1);
                 waypoint.x = x;
                 waypoint.y = y;
                 waypoint.z = z;
@@ -96,7 +96,7 @@ namespace Game
                 GridDefines.NormalizeMapCoord(ref y);
 
                 WaypointNode waypoint = new();
-                waypoint.id = result.Read<uint>(0);
+                waypoint.id = result.Read<int>(0);
                 waypoint.x = x;
                 waypoint.y = y;
                 waypoint.z = z;
@@ -131,7 +131,7 @@ namespace Game
     public class WaypointNode
     {
         public WaypointNode() { moveType = WaypointMoveType.Run; }
-        public WaypointNode(uint _id, float _x, float _y, float _z, float? _orientation = null, uint _delay = 0)
+        public WaypointNode(int _id, float _x, float _y, float _z, float? _orientation = null, uint _delay = 0)
         {
             id = _id;
             x = _x;
@@ -144,7 +144,7 @@ namespace Game
             eventChance = 100;
         }
 
-        public uint id;
+        public int id;
         public float x, y, z;
         public float? orientation;
         public uint delay;

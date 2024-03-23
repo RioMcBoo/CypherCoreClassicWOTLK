@@ -625,7 +625,7 @@ namespace Game.Loots
                         loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true, false, LootModes.Default, ItemContext.None);
                         if (!loot.AutoStore(player, true))
                         {
-                            for (uint i = 0; i < loot.items.Count; ++i)
+                            for (int i = 0; i < loot.items.Count; ++i)
                             {
                                 LootItem disenchantLoot = loot.LootItemInSlot(i, player);
                                 if (disenchantLoot != null)
@@ -736,7 +736,7 @@ namespace Game.Loots
         }
 
         // Calls processor of corresponding LootTemplate (which handles everything including references)
-        public bool FillLoot(int lootId, LootStore store, Player lootOwner, bool personal, bool noEmptyError = false, LootModes lootMode = LootModes.Default)
+        public bool FillLoot(int lootId, LootStore store, Player lootOwner, bool personal, bool noEmptyError, LootModes lootMode, ItemContext context)
         {
             // Must be provided
             if (lootOwner == null)
@@ -752,7 +752,7 @@ namespace Game.Loots
 
             _itemContext = context;
 
-            tab.Process(this, store.IsRatesAllowed(), (byte)lootMode, 0);          // Processing is done there, callback via Loot.AddItem()
+            tab.Process(this, store.IsRatesAllowed(), lootMode, 0);          // Processing is done there, callback via Loot.AddItem()
 
             // Setting access rights for group loot case
             Group group = lootOwner.GetGroup();

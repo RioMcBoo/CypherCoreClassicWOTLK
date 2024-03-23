@@ -60,19 +60,19 @@ namespace Framework.Algorithms
         }
         private void Relax(DirectedEdge edge)
         {
-            uint v = edge.From;
-            uint w = edge.To;
+            int v = edge.From;
+            int w = edge.To;
             if (_distanceTo[w] > _distanceTo[v] + edge.Weight)
             {
                 _distanceTo[w] = _distanceTo[v] + edge.Weight;
                 _edgeTo[w] = edge;
-                if (_priorityQueue.Contains((int)w))
+                if (_priorityQueue.Contains(w))
                 {
-                    _priorityQueue.DecreaseKey((int)w, _distanceTo[w]);
+                    _priorityQueue.DecreaseKey(w, _distanceTo[w]);
                 }
                 else
                 {
-                    _priorityQueue.Insert((int)w, _distanceTo[w]);
+                    _priorityQueue.Insert(w, _distanceTo[w]);
                 }
             }
         }
@@ -146,7 +146,7 @@ namespace Framework.Algorithms
             {
                 foreach (DirectedEdge edge in graph.Adjacent(v))
                 {
-                    uint w = edge.To;
+                    int w = edge.To;
                     if (_distanceTo[v] + edge.Weight < _distanceTo[w])
                     {
                         return false;
@@ -160,7 +160,7 @@ namespace Framework.Algorithms
                     continue;
                 }
                 DirectedEdge edge = _edgeTo[w];
-                uint v = edge.From;
+                int v = edge.From;
                 if (w != edge.To)
                 {
                     return false;

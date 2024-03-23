@@ -296,14 +296,14 @@ namespace Game.Networking.Packets
         {
             public void Write(WorldPacket data)
             {
-                data.WriteInt32(RaceID);
+                data.WriteInt32((int)RaceID);
                 data.WriteBit(HasExpansion);
                 data.WriteBit(HasAchievement);
                 data.WriteBit(HasHeritageArmor);
                 data.FlushBits();
             }
 
-            public int RaceID;
+            public Race RaceID;
             public bool HasExpansion;
             public bool HasAchievement;
             public bool HasHeritageArmor;
@@ -950,11 +950,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Index = _worldPacket.ReadUInt32();
+            Index = _worldPacket.ReadInt32();
             State = _worldPacket.HasBit();
         }
 
-        public uint Index;
+        public int Index;
         public bool State;
     }
 
@@ -964,10 +964,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            FactionIndex = _worldPacket.ReadUInt32();
+            FactionIndex = _worldPacket.ReadInt32();
         }
 
-        public uint FactionIndex;
+        public int FactionIndex;
     }
 
     class SetFactionVisible : ServerPacket

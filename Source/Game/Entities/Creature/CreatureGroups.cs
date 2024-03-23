@@ -12,9 +12,9 @@ namespace Game.Entities
 {
     public class FormationMgr
     {
-        static Dictionary<ulong, FormationInfo> _creatureGroupMap = new();
+        static Dictionary<long, FormationInfo> _creatureGroupMap = new();
 
-        public static void AddCreatureToGroup(ulong leaderSpawnId, Creature creature)
+        public static void AddCreatureToGroup(long leaderSpawnId, Creature creature)
         {
             Map map = creature.GetMap();
 
@@ -76,13 +76,13 @@ namespace Game.Entities
             }
 
             uint count = 0;
-            List<ulong> leaderSpawnIds = new();
+            List<long> leaderSpawnIds = new();
             do
             {
                 //Load group member data
                 FormationInfo member = new();
-                member.LeaderSpawnId = result.Read<ulong>(0);
-                ulong memberSpawnId = result.Read<ulong>(1);
+                member.LeaderSpawnId = result.Read<long>(0);
+                long memberSpawnId = result.Read<long>(1);
                 member.FollowDist = 0f;
                 member.FollowAngle = 0f;
 
@@ -93,7 +93,7 @@ namespace Game.Entities
                     member.FollowAngle = result.Read<float>(3) * MathFunctions.PI / 180;
                 }
 
-                member.GroupAI = result.Read<uint>(4);
+                member.GroupAI = result.Read<int>(4);
 
                 for (var i = 0; i < 2; ++i)
                     member.LeaderWaypointIDs[i] = result.Read<ushort>(5 + i);
@@ -120,7 +120,7 @@ namespace Game.Entities
             }
             while (result.NextRow());
 
-            foreach (ulong leaderSpawnId in leaderSpawnIds)
+            foreach (var leaderSpawnId in leaderSpawnIds)
             {
                 if (!_creatureGroupMap.ContainsKey(leaderSpawnId))
                 {
@@ -136,12 +136,12 @@ namespace Game.Entities
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creatures in formations in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public static FormationInfo GetFormationInfo(ulong spawnId)
+        public static FormationInfo GetFormationInfo(long spawnId)
         {
             return _creatureGroupMap.LookupByKey(spawnId);
         }
 
-        public static void AddFormationMember(ulong spawnId, float followAng, float followDist, ulong leaderSpawnId, uint groupAI)
+        public static void AddFormationMember(long spawnId, float followAng, float followDist, long leaderSpawnId, int groupAI)
         {
             FormationInfo member = new();
             member.LeaderSpawnId = leaderSpawnId;
@@ -157,11 +157,11 @@ namespace Game.Entities
 
     public class FormationInfo
     {
-        public ulong LeaderSpawnId;
+        public long LeaderSpawnId;
         public float FollowDist;
         public float FollowAngle;
-        public uint GroupAI;
-        public uint[] LeaderWaypointIDs = new uint[2];
+        public int GroupAI;
+        public int[] LeaderWaypointIDs = new int[2];
     }
 
     public class CreatureGroup
@@ -169,11 +169,11 @@ namespace Game.Entities
         Creature _leader;
         Dictionary<Creature, FormationInfo> _members = new();
 
-        ulong _leaderSpawnId;
+        long _leaderSpawnId;
         bool _formed;
         bool _engaging;
 
-        public CreatureGroup(ulong leaderSpawnId)
+        public CreatureGroup(long leaderSpawnId)
         {
             _leaderSpawnId = leaderSpawnId;
         }
@@ -261,7 +261,7 @@ namespace Game.Entities
             foreach (var pair in _members)
             {
                 Creature member = pair.Key;
-                if (member == _leader || !member.IsAlive() || member.IsEngaged() || !pair.Value.GroupAI.HasAnyFlag((uint)GroupAIFlags.IdleInFormation))
+                if (member == _leader || !member.IsAlive() || member.IsEngaged() || !pair.Value.GroupAI.HasAnyFlag((int)GroupAIFlags.IdleInFormation))
                     continue;
 
                 float angle = pair.Value.FollowAngle + MathF.PI; // for some reason, someone thought it was a great idea to invert relativ angles...
@@ -287,7 +287,7 @@ namespace Game.Entities
         }
 
         public Creature GetLeader() { return _leader; }
-        public ulong GetLeaderSpawnId() { return _leaderSpawnId; }
+        public long GetLeaderSpawnId() { return _leaderSpawnId; }
         public bool IsEmpty() { return _members.Empty(); }
         public bool IsFormed() { return _formed; }
         public bool IsLeader(Creature creature) { return _leader == creature; }

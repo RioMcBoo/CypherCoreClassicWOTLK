@@ -260,18 +260,18 @@ namespace Game.Entities
             return Shape.GetMaxSearchRadius();
         }
         
-        public uint Id;
+        public int Id;
         public AreaTriggerTemplate Template;
 
         public CurveInterpolationMode MoveCurveId;
         public CurveInterpolationMode ScaleCurveId;
         public CurveInterpolationMode MorphCurveId;
-        public uint FacingCurveId;
+        public CurveInterpolationMode FacingCurveId;
 
         public int AnimId;
-        public uint AnimKitId;
+        public int AnimKitId;
 
-        public uint DecalPropertiesId;
+        public int DecalPropertiesId;
 
         public uint TimeToTarget;
         public uint TimeToTargetScale;

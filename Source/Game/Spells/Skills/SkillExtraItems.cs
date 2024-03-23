@@ -28,7 +28,7 @@ namespace Game.Spells
             uint count = 0;
             do
             {
-                uint spellId = result.Read<uint>(0);
+                int spellId = result.Read<int>(0);
 
                 if (!Global.SpellMgr.HasSpellInfo(spellId, Framework.Constants.Difficulty.None))
                 {
@@ -36,7 +36,7 @@ namespace Game.Spells
                     continue;
                 }
 
-                uint requiredSpecialization = result.Read<uint>(1);
+                int requiredSpecialization = result.Read<int>(1);
                 if (!Global.SpellMgr.HasSpellInfo(requiredSpecialization, Framework.Constants.Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Skill specialization {0} have not existed required specialization spell id {1} in `skill_extra_item_template`!", spellId, requiredSpecialization);
@@ -89,12 +89,12 @@ namespace Game.Spells
             return true;
         }
 
-        static Dictionary<uint, SkillExtraItemEntry> SkillExtraItemStorage = new();
+        static Dictionary<int, SkillExtraItemEntry> SkillExtraItemStorage = new();
     }
 
     class SkillExtraItemEntry
     {
-        public SkillExtraItemEntry(uint rS = 0, float aCC = 0f, byte aMN = 0)
+        public SkillExtraItemEntry(int rS = 0, float aCC = 0f, byte aMN = 0)
         {
             requiredSpecialization = rS;
             additionalCreateChance = aCC;
@@ -102,7 +102,7 @@ namespace Game.Spells
         }
 
         // the spell id of the specialization required to create extra items
-        public uint requiredSpecialization;
+        public int requiredSpecialization;
         // the Chance to create one additional item
         public float additionalCreateChance;
         // maximum number of extra items created per crafting
@@ -129,14 +129,14 @@ namespace Game.Spells
             uint count = 0;
             do
             {
-                uint spellId = result.Read<uint>(0);
+                int spellId = result.Read<int>(0);
                 if (!Global.SpellMgr.HasSpellInfo(spellId, Framework.Constants.Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has non-existent spell id in `skill_perfect_item_template`!", spellId);
                     continue;
                 }
 
-                uint requiredSpecialization = result.Read<uint>(1);
+                int requiredSpecialization = result.Read<int>(1);
                 if (!Global.SpellMgr.HasSpellInfo(requiredSpecialization, Framework.Constants.Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has non-existent required specialization spell id {1} in `skill_perfect_item_template`!", spellId, requiredSpecialization);
@@ -150,7 +150,7 @@ namespace Game.Spells
                     continue;
                 }
 
-                uint perfectItemType = result.Read<uint>(3);
+                int perfectItemType = result.Read<int>(3);
                 if (Global.ObjectMgr.GetItemTemplate(perfectItemType) == null)
                 {
                     Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} references non-existent perfect item id {1} in `skill_perfect_item_template`!", spellId, perfectItemType);
@@ -185,14 +185,14 @@ namespace Game.Spells
             return true;
         }
 
-        static Dictionary<uint, SkillPerfectItemEntry> SkillPerfectItemStorage = new();
+        static Dictionary<int, SkillPerfectItemEntry> SkillPerfectItemStorage = new();
     }
 
     // struct to store information about perfection procs
     // one entry per spell
     class SkillPerfectItemEntry
     {
-        public SkillPerfectItemEntry(uint rS = 0, float pCC = 0f, uint pIT = 0)
+        public SkillPerfectItemEntry(int rS = 0, float pCC = 0f, int pIT = 0)
         {
             requiredSpecialization = rS;
             perfectCreateChance = pCC;
@@ -200,11 +200,11 @@ namespace Game.Spells
         }
 
         // the spell id of the spell required - it's named "specialization" to conform with SkillExtraItemEntry
-        public uint requiredSpecialization;
+        public int requiredSpecialization;
         // perfection proc Chance
         public float perfectCreateChance;
         // itemid of the resulting perfect item
-        public uint perfectItemType;
+        public int perfectItemType;
     }
 
 

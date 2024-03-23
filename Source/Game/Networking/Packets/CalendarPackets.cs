@@ -117,8 +117,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(InviteGuid);
-            _worldPacket.WriteUInt64(EventID);
-            _worldPacket.WriteUInt64(InviteID);
+            _worldPacket.WriteInt64(EventID);
+            _worldPacket.WriteInt64(InviteID);
             _worldPacket.WriteUInt8(Level);
             _worldPacket.WriteUInt8((byte)Status);
             _worldPacket.WriteUInt8(Type);
@@ -128,11 +128,11 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public ulong InviteID;
+        public long InviteID;
         public long ResponseTime;
         public byte Level = 100;
         public ObjectGuid InviteGuid;
-        public ulong EventID;
+        public long EventID;
         public byte Type;
         public bool ClearPending;
         public CalendarInviteStatus Status;
@@ -213,13 +213,13 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventID);
             _worldPacket.WritePackedTime32(Date);
             _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WriteUInt8((byte)EventType);
             _worldPacket.WriteInt32(TextureID);
-            _worldPacket.WriteUInt64(EventClubID);
-            _worldPacket.WriteUInt64(InviteID);
+            _worldPacket.WriteInt64(EventClubID);
+            _worldPacket.WriteInt64(InviteID);
             _worldPacket.WriteUInt8((byte)Status);
             _worldPacket.WriteUInt8((byte)ModeratorStatus);
 
@@ -233,10 +233,10 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid OwnerGuid;
-        public ulong EventClubID;
+        public long EventClubID;
         public ObjectGuid InvitedByGuid;
-        public ulong InviteID;
-        public ulong EventID;
+        public long InviteID;
+        public long EventID;
         public CalendarFlags Flags;
         public long Date;
         public int TextureID;
@@ -294,7 +294,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(InviteGuid);
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventID);
             _worldPacket.WritePackedTime32(Date);
             _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WriteUInt8((byte)Status);
@@ -305,7 +305,7 @@ namespace Game.Networking.Packets
         }
 
         public CalendarFlags Flags;
-        public ulong EventID;
+        public long EventID;
         public CalendarInviteStatus Status;
         public bool ClearPending;
         public long ResponseTime;
@@ -320,7 +320,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(InviteGuid);
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventID);
             _worldPacket.WriteUInt32(Flags);
 
             _worldPacket.WriteBit(ClearPending);
@@ -328,7 +328,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid InviteGuid;
-        public ulong EventID;
+        public long EventID;
         public uint Flags;
         public bool ClearPending;
     }
@@ -340,7 +340,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(InviteGuid);
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventID);
             _worldPacket.WriteUInt8((byte)Status);
 
             _worldPacket.WriteBit(ClearPending);
@@ -348,7 +348,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid InviteGuid;
-        public ulong EventID;
+        public long EventID;
         public CalendarInviteStatus Status;
         public bool ClearPending;
     }
@@ -384,8 +384,8 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(EventClubID);
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventClubID);
+            _worldPacket.WriteInt64(EventID);
 
             _worldPacket.WritePackedTime32(OriginalDate);
             _worldPacket.WritePackedTime32(Date);
@@ -403,8 +403,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(Description);
         }
 
-        public ulong EventClubID;
-        public ulong EventID;
+        public long EventClubID;
+        public long EventID;
         public long Date;
         public CalendarFlags Flags;
         public long LockDate;
@@ -422,14 +422,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(EventID);
+            _worldPacket.WriteInt64(EventID);
             _worldPacket.WritePackedTime32(Date);
 
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
         }
 
-        public ulong EventID;
+        public long EventID;
         public long Date;
         public bool ClearPending;
     }
@@ -883,7 +883,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(Guid);
-            data.WriteUInt64(InviteID);
+            data.WriteInt64(InviteID);
 
             data.WriteUInt8(Level);
             data.WriteUInt8((byte)Status);
@@ -898,7 +898,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Guid;
-        public ulong InviteID;
+        public long InviteID;
         public long ResponseTime;
         public byte Level = 1;
         public CalendarInviteStatus Status;

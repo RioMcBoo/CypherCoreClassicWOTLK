@@ -60,7 +60,7 @@ namespace Game
             return AccountOpResult.Ok;
         }
 
-        public AccountOpResult DeleteAccount(uint accountId)
+        public AccountOpResult DeleteAccount(int accountId)
         {
             // Check if accounts exists
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_ID);
@@ -241,12 +241,12 @@ namespace Game
             return AccountOpResult.Ok;
         }
 
-        public uint GetId(string username)
+        public int GetId(string username)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_ACCOUNT_ID_BY_USERNAME);
             stmt.AddValue(0, username);
             using var result = DB.Login.Query(stmt);
-            return !result.IsEmpty() ? result.Read<uint>(0) : 0;
+            return !result.IsEmpty() ? result.Read<int>(0) : 0;
         }
 
         public AccountTypes GetSecurity(int accountId, int realmId)

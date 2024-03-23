@@ -584,7 +584,7 @@ namespace Game.Entities
 
                 GameObject gameObject = ToGameObject();
 
-                data.WriteUInt32(gameObject.GetWorldEffectID());
+                data.WriteInt32(gameObject.GetWorldEffectID());
 
                 data.WriteBit(bit8);
                 data.FlushBits();

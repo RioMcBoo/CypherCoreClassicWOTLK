@@ -26,7 +26,8 @@ namespace Game.Entities
         public Expansion RequiredExpansion;
         public int VignetteID; // @todo Read Vignette.db2
         public int Faction;
-        public NPCFlags Npcflag;
+        public NPCFlags1 Npcflag;
+        public NPCFlags2 Npcflag2;
         public float SpeedWalk;
         public float SpeedRun;
         public float Scale;
@@ -298,7 +299,8 @@ namespace Game.Entities
         public int curhealth;
         public int curmana;
         public MovementGeneratorType movementType;
-        public NPCFlags? npcflag;
+        public NPCFlags1? npcflag;
+        public NPCFlags2? npcflag2;
         public UnitFlags? unit_flags;
         public UnitFlags2? unit_flags2;
         public UnitFlags3? unit_flags3;

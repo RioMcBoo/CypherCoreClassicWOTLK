@@ -9,7 +9,7 @@ namespace Game.Movement
 {
     public class PointMovementGenerator : MovementGenerator
     {
-        uint _movementId;
+        int _movementId;
         Position _destination;
         float? _speed;
         bool _generatePath;
@@ -20,7 +20,7 @@ namespace Game.Movement
         MovementWalkRunSpeedSelectionMode _speedSelectionMode;
         float? _closeEnoughDistance;
 
-        public PointMovementGenerator(uint id, float x, float y, float z, bool generatePath, float? speed = null, float? finalOrient = null, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null,
+        public PointMovementGenerator(int id, float x, float y, float z, bool generatePath, float? speed = null, float? finalOrient = null, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null,
             MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
         {
             _movementId = id;
@@ -193,7 +193,7 @@ namespace Game.Movement
         public void MovementInform(Unit owner)
         {
             // deliver EVENT_CHARGE to scripts, EVENT_CHARGE_PREPATH is just internal implementation detail of this movement generator
-            uint movementId = _movementId == EventId.ChargePrepath ? EventId.Charge : _movementId;
+            int movementId = _movementId == EventId.ChargePrepath ? EventId.Charge : _movementId;
             owner.ToCreature()?.GetAI()?.MovementInform(MovementGeneratorType.Point, movementId);
         }
 
@@ -202,7 +202,7 @@ namespace Game.Movement
             AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
         }
 
-        public uint GetId() { return _movementId; }
+        public int GetId() { return _movementId; }
         
         public override MovementGeneratorType GetMovementGeneratorType()
         {
@@ -212,7 +212,7 @@ namespace Game.Movement
 
     public class AssistanceMovementGenerator : PointMovementGenerator
     {
-        public AssistanceMovementGenerator(uint id, float x, float y, float z) : base(id, x, y, z, true) { }
+        public AssistanceMovementGenerator(int id, float x, float y, float z) : base(id, x, y, z, true) { }
 
         public override void Finalize(Unit owner, bool active, bool movementInform)
         {

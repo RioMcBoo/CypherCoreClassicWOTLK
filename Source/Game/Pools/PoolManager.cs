@@ -38,10 +38,10 @@ namespace Game
                 uint count = 0;
                 do
                 {
-                    uint pool_id = result.Read<uint>(0);
+                    int pool_id = result.Read<int>(0);
 
                     PoolTemplateData pPoolTemplate = new();
-                    pPoolTemplate.MaxLimit = result.Read<uint>(1);
+                    pPoolTemplate.MaxLimit = result.Read<int>(1);
                     pPoolTemplate.MapId = -1;
                     mPoolTemplate[pool_id] = pPoolTemplate;
                     ++count;
@@ -69,8 +69,8 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        ulong guid = result.Read<ulong>(0);
-                        uint pool_id = result.Read<uint>(1);
+                        long guid = result.Read<long>(0);
+                        int pool_id = result.Read<int>(1);
                         float chance = result.Read<float>(2);
 
                         CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
@@ -92,7 +92,7 @@ namespace Game
 
                         PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
                         if (pPoolTemplate.MapId == -1)
-                            pPoolTemplate.MapId = (int)data.MapId;
+                            pPoolTemplate.MapId = data.MapId;
 
                         if (pPoolTemplate.MapId != data.MapId)
                         {
@@ -136,8 +136,8 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        ulong guid = result.Read<ulong>(0);
-                        uint pool_id = result.Read<uint>(1);
+                        long guid = result.Read<long>(0);
+                        int pool_id = result.Read<int>(1);
                         float chance = result.Read<float>(2);
 
                         GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
@@ -161,7 +161,7 @@ namespace Game
 
                         PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
                         if (pPoolTemplate.MapId == -1)
-                            pPoolTemplate.MapId = (int)data.MapId;
+                            pPoolTemplate.MapId = data.MapId;
 
                         if (pPoolTemplate.MapId != data.MapId)
                         {
@@ -248,7 +248,7 @@ namespace Game
                     // All pool_ids are in pool_template
                     foreach (var (id, poolData) in mPoolTemplate)
                     {
-                        List<uint> checkedPools = new();
+                        List<int> checkedPools = new();
                         var poolItr = mPoolSearchMap.LookupByKey(id);
                         while (poolItr != 0)
                         {
@@ -417,7 +417,7 @@ namespace Game
 
         public void UpdatePool<T>(SpawnedPoolData spawnedPoolData, int pool_id, long db_guid_or_pool_id)
         {
-            uint motherpoolid = IsPartOfAPool<Pool>(pool_id);
+            int motherpoolid = IsPartOfAPool<Pool>(pool_id);
             if (motherpoolid != 0)
                 SpawnPool<Pool>(spawnedPoolData, motherpoolid, pool_id);
             else
@@ -442,7 +442,7 @@ namespace Game
             SpawnedPoolData spawnedPoolData = new(map);
             var poolIds = mAutoSpawnPoolsPerMap.LookupByKey(spawnedPoolData.GetMap().GetId());
             if (poolIds != null)
-                foreach (uint poolId in poolIds)
+                foreach (var poolId in poolIds)
                     SpawnPool(spawnedPoolData, poolId);
 
             return spawnedPoolData;
@@ -453,7 +453,7 @@ namespace Game
             return mPoolTemplate.LookupByKey(pool_id);
         }
         
-        public uint IsPartOfAPool<T>(long db_guid)
+        public int IsPartOfAPool<T>(long db_guid)
         {
             switch (typeof(T).Name)
             {
@@ -468,7 +468,7 @@ namespace Game
         }
 
         // Selects proper template overload to call based on passed Type
-        public uint IsPartOfAPool(SpawnObjectType type, ulong spawnId)
+        public int IsPartOfAPool(SpawnObjectType type, long spawnId)
         {
             switch (type)
             {
@@ -532,17 +532,17 @@ namespace Game
                 return IsEmpty();
 
             foreach (PoolObject explicitlyChanced in ExplicitlyChanced)
-                if (!Global.PoolMgr.IsEmpty((uint)explicitlyChanced.guid))
+                if (!Global.PoolMgr.IsEmpty((int)explicitlyChanced.guid))
                     return false;
 
             foreach (PoolObject equalChanced in EqualChanced)
-                if (!Global.PoolMgr.IsEmpty((uint)equalChanced.guid))
+                if (!Global.PoolMgr.IsEmpty((int)equalChanced.guid))
                     return false;
 
             return true;
         }
 
-        public void AddEntry(PoolObject poolitem, uint maxentries)
+        public void AddEntry(PoolObject poolitem, int maxentries)
         {
             if (poolitem.chance != 0 && maxentries == 1)
                 ExplicitlyChanced.Add(poolitem);
@@ -635,12 +635,12 @@ namespace Game
                     break;
                 }
                 case "Pool":
-                    Global.PoolMgr.DespawnPool(spawns, (uint)guid, alwaysDeleteRespawnTime);
+                    Global.PoolMgr.DespawnPool(spawns, (int)guid, alwaysDeleteRespawnTime);
                     break;
             }
         }
 
-        public void RemoveOneRelation(uint child_pool_id)
+        public void RemoveOneRelation(int child_pool_id)
         {
             if (typeof(T).Name != "Pool")
                 return;
@@ -663,9 +663,9 @@ namespace Game
             }
         }
 
-        public void SpawnObject(SpawnedPoolData spawns, uint limit, ulong triggerFrom)
+        public void SpawnObject(SpawnedPoolData spawns, int limit, long triggerFrom)
         {
-            int count = (int)(limit - spawns.GetSpawnedObjects(poolId));
+            int count = limit - spawns.GetSpawnedObjects(poolId);
 
             // If triggered from some object respawn this object is still marked as spawned
             // and also counted into m_SpawnedPoolAmount so we need increase count to be
@@ -699,7 +699,7 @@ namespace Game
                 if (!EqualChanced.Empty() && rolledObjects.Empty())
                 {
                     rolledObjects.AddRange(EqualChanced.Where(obj => obj.guid == triggerFrom || !spawns.IsSpawnedObject<T>(obj.guid)));
-                    rolledObjects.RandomResize((uint)count);
+                    rolledObjects.RandomResize(count);
                 }
 
                 // try to spawn rolled objects
@@ -757,7 +757,7 @@ namespace Game
                 }
                 break;
                 case "Pool":
-                    Global.PoolMgr.SpawnPool(spawns, obj.guid);
+                    Global.PoolMgr.SpawnPool(spawns, (int)obj.guid);
                     break;
             }
         }

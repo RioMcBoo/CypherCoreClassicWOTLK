@@ -435,7 +435,7 @@ namespace Game.Entities
             }
         }
 
-        public uint GetNotInCombat() => type switch
+        public int GetNotInCombat() => type switch
         {
             GameObjectTypes.Chest => Chest.notInCombat,
             GameObjectTypes.GatheringNode => GatheringNode.notInCombat,
@@ -610,14 +610,14 @@ namespace Game.Entities
             return eventSet;
         }
 
-        public uint GetTrivialSkillHigh() => type switch
+        public int GetTrivialSkillHigh() => type switch
         {
             GameObjectTypes.Chest => Chest.trivialSkillHigh,
             GameObjectTypes.GatheringNode => GatheringNode.trivialSkillHigh,
             _ => 0,
         };
 
-        public uint GetTrivialSkillLow() => type switch
+        public int GetTrivialSkillLow() => type switch
         {
             GameObjectTypes.Chest => Chest.trivialSkillLow,
             GameObjectTypes.GatheringNode => GatheringNode.trivialSkillLow,

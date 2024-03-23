@@ -187,7 +187,7 @@ namespace Game.Entities
             var spellid = talentInfo.SpellRank[requestedRank];
             if (spellid == 0)
             {
-                Log.outError(LogFilter.Player, $"Player::LearnTalent: Talent.dbc has no spellInfo for talent: {talentId} (spell id = 0)".);
+                Log.outError(LogFilter.Player, $"Player::LearnTalent: Talent.dbc has no spellInfo for talent: {talentId} (spell id = 0).");
                 return false;
             }
 
@@ -238,8 +238,9 @@ namespace Game.Entities
             }
         }
 
-    // Loot Spec
-    public void SetLootSpecId(ChrSpecialization id) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); }
+        // Loot Spec
+        public void SetLootSpecId(ChrSpecialization id) { SetLootSpecId((int)id); }
+        public void SetLootSpecId(int id) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); }
 
         public ChrSpecialization GetLootSpecId() { return (ChrSpecialization)m_activePlayerData.LootSpecID.GetValue(); }
 
@@ -382,7 +383,7 @@ namespace Game.Entities
         {
             uint traitConfigId = 0;
 
-            TraitConfig traitConfig = GetTraitConfig((int)(uint)m_activePlayerData.ActiveCombatTraitConfigID);
+            TraitConfig traitConfig = GetTraitConfig(m_activePlayerData.ActiveCombatTraitConfigID);
             if (traitConfig != null)
             {
                 int usedSavedTraitConfigIndex = m_activePlayerData.TraitConfigs.FindIndexIf(savedConfig =>
@@ -624,18 +625,18 @@ namespace Game.Entities
                 {
                     case Class.Deathknight:
                         {
-                            uint talentPointsForLevel = numTalentsAtLevel.NumTalentsDeathKnight;
+                            int talentPointsForLevel = numTalentsAtLevel.NumTalentsDeathKnight;
                             talentPointsForLevel += GetQuestRewardTalentCount();
 
                             if (talentPointsForLevel > numTalentsAtLevel.NumTalents)
                                 talentPointsForLevel = numTalentsAtLevel.NumTalents;
 
-                            return talentPointsForLevel * WorldConfig.GetUIntValue(WorldCfg.RateTalent);
+                            return talentPointsForLevel * WorldConfig.GetIntValue(WorldCfg.RateTalent);
                         }
                     case Class.DemonHunter:
                         return numTalentsAtLevel.NumTalentsDemonHunter;
                     default:
-                        return numTalentsAtLevel.NumTalents * WorldConfig.GetUIntValue(WorldCfg.RateTalent);
+                        return numTalentsAtLevel.NumTalents * WorldConfig.GetIntValue(WorldCfg.RateTalent);
                 }
             }
 
@@ -720,8 +721,8 @@ namespace Game.Entities
             setter.ModifyValue(setter.ID).SetValue(traitConfig.ID);
             setter.ModifyValue(setter.Name).SetValue(traitConfig.Name);
             setter.ModifyValue(setter.Type).SetValue((int)traitConfig.Type);
-            setter.ModifyValue(setter.SkillLineID).SetValue((int)traitConfig.SkillLineID);
-            setter.ModifyValue(setter.ChrSpecializationID).SetValue(traitConfig.ChrSpecializationID);
+            setter.ModifyValue(setter.SkillLineID).SetValue(traitConfig.SkillLineID);
+            setter.ModifyValue(setter.ChrSpecializationID).SetValue((int)traitConfig.ChrSpecializationID);
             setter.ModifyValue(setter.CombatConfigFlags).SetValue((int)traitConfig.CombatConfigFlags);
             setter.ModifyValue(setter.LocalIdentifier).SetValue(traitConfig.LocalIdentifier);
             setter.ModifyValue(setter.TraitSystemID).SetValue(traitConfig.TraitSystemID);
@@ -769,7 +770,7 @@ namespace Game.Entities
                     loadActionButtons = m_activePlayerData.TraitConfigs[index].LocalIdentifier != newConfig.LocalIdentifier;
                     break;
                 case TraitConfigType.Profession:
-                    isActiveConfig = HasSkill((uint)(int)m_activePlayerData.TraitConfigs[index].SkillLineID);
+                    isActiveConfig = HasSkill(m_activePlayerData.TraitConfigs[index].SkillLineID);
                     break;
                 default:
                     break;
@@ -886,13 +887,13 @@ namespace Game.Entities
                     if (traitCurrency == null)
                         continue;
 
-                    switch (traitCurrency.CurrencyType())
+                    switch (traitCurrency.CurrencyType)
                     {
                         case TraitCurrencyType.Gold:
                             ModifyMoney(-amount);
                             break;
                         case TraitCurrencyType.CurrencyTypesBased:
-                            RemoveCurrency((uint)traitCurrency.CurrencyTypesID, amount /* TODO: CurrencyDestroyReason */);
+                            RemoveCurrency(traitCurrency.CurrencyTypesID, amount /* TODO: CurrencyDestroyReason */);
                             break;
                         default:
                             break;

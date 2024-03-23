@@ -19,7 +19,7 @@ namespace Game
         CalendarManager()
         {
             _events = new List<CalendarEvent>();
-            _invites = new MultiMap<ulong,CalendarInvite>();
+            _invites = new MultiMap<long,CalendarInvite>();
         }
 
         public void LoadFromDB()
@@ -37,8 +37,8 @@ namespace Game
                 {
                     do
                     {
-                        ulong eventID = result.Read<ulong>(0);
-                        ObjectGuid ownerGUID = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1));
+                        long eventID = result.Read<long>(0);
+                        ObjectGuid ownerGUID = ObjectGuid.Create(HighGuid.Player, result.Read<long>(1));
                         string title = result.Read<string>(2);
                         string description = result.Read<string>(3);
                         CalendarEventType type = (CalendarEventType)result.Read<byte>(4);
@@ -46,7 +46,7 @@ namespace Game
                         long date = result.Read<long>(6);
                         CalendarFlags flags = (CalendarFlags)result.Read<uint>(7);
                         long lockDate = result.Read<long>(8);
-                        ulong guildID = 0;
+                        long guildID = 0;
 
                         if (flags.HasAnyFlag(CalendarFlags.GuildEvent) || flags.HasAnyFlag(CalendarFlags.WithoutInvites))
                             guildID = Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(ownerGUID);
@@ -177,7 +177,7 @@ namespace Game
             _events.Remove(calendarEvent);
         }
 
-        public void RemoveInvite(ulong inviteId, ulong eventId, ObjectGuid remover)
+        public void RemoveInvite(long inviteId, long eventId, ObjectGuid remover)
         {
             CalendarEvent calendarEvent = GetEvent(eventId);
 
@@ -351,7 +351,7 @@ namespace Game
             return result;
         }
 
-        public List<CalendarEvent> GetGuildEvents(ulong guildId)
+        public List<CalendarEvent> GetGuildEvents(long guildId)
         {
             List<CalendarEvent> result = new();
 
@@ -391,7 +391,7 @@ namespace Game
             return events;
         }
 
-        public List<CalendarInvite> GetEventInvites(ulong eventId)
+        public List<CalendarInvite> GetEventInvites(long eventId)
         {
             return _invites[eventId];
         }
@@ -438,7 +438,7 @@ namespace Game
             ObjectGuid invitee = invite.InviteeGuid;
             Player player = Global.ObjAccessor.FindPlayer(invitee);
 
-            uint level = player != null ? player.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(invitee);
+            int level = player != null ? player.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(invitee);
 
             CalendarInviteAdded packet = new();
             packet.EventID = calendarEvent != null ? calendarEvent.EventId : 0;
@@ -580,15 +580,15 @@ namespace Game
 
             Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
             packet.EventClubID = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
-            ulong g = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
+            long g = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
 
             foreach (var calendarInvite in eventInviteeList)
             {
                 ObjectGuid inviteeGuid = calendarInvite.InviteeGuid;
                 Player invitee = Global.ObjAccessor.FindPlayer(inviteeGuid);
 
-                uint inviteeLevel = invitee != null ? invitee.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(inviteeGuid);
-                ulong inviteeGuildId = invitee != null ? invitee.GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(inviteeGuid);
+                int inviteeLevel = invitee != null ? invitee.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(inviteeGuid);
+                long inviteeGuildId = invitee != null ? invitee.GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(inviteeGuid);
 
                 CalendarEventInviteInfo inviteInfo = new();
                 inviteInfo.Guid = inviteeGuid;

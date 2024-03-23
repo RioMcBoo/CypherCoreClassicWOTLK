@@ -1036,27 +1036,27 @@ namespace Game.Networking.Packets
     //Structs
     public struct PartyMemberPhase
     {
-        public PartyMemberPhase(uint flags, uint id)
+        public PartyMemberPhase(PhaseFlags flags, int id)
         {
             Flags = flags;
-            Id = (ushort)id;
+            Id = id;
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Flags);
-            data.WriteUInt16(Id);
+            data.WriteUInt32((uint)Flags);
+            data.WriteUInt16((ushort)Id);
         }
 
-        public uint Flags;
-        public ushort Id;
+        public PhaseFlags Flags;
+        public int Id;
     }
 
     public class PartyMemberPhaseStates
     {
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(PhaseShiftFlags);
+            data.WriteInt32((int)PhaseShiftFlags);
             data.WriteInt32(List.Count);
             data.WritePackedGuid(PersonalGUID);
 
@@ -1064,7 +1064,7 @@ namespace Game.Networking.Packets
                 phase.Write(data);
         }
 
-        public int PhaseShiftFlags;
+        public PhaseShiftFlags PhaseShiftFlags;
         public ObjectGuid PersonalGUID;
         public List<PartyMemberPhase> List = new();
     }

@@ -13,13 +13,13 @@ namespace Scripts.World.Items
     [Script]
     class item_only_for_flight : ItemScript
     {
-        const uint SpellArcaneCharges = 45072;
+        const int SpellArcaneCharges = 45072;
 
         public item_only_for_flight() : base("item_only_for_flight") { }
 
         public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            uint itemId = item.GetEntry();
+            int itemId = item.GetEntry();
             bool disabled = false;
 
             //for special scripts

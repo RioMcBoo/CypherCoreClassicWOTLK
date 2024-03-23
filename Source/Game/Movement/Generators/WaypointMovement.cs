@@ -271,7 +271,7 @@ namespace Game.Movement
         {
             CreatureAI ai = owner.GetAI();
             if (ai != null)
-                ai.MovementInform(MovementGeneratorType.Waypoint, (uint)_currentNode);
+                ai.MovementInform(MovementGeneratorType.Waypoint, _currentNode);
         }
 
         void OnArrived(Creature owner)
@@ -288,7 +288,7 @@ namespace Game.Movement
             }
 
             if (_waitTimeRangeAtPathEnd.HasValue && _followPathBackwardsFromEndToStart
-    && ((_isReturningToStart && _currentNode == 0) || (!_isReturningToStart && _currentNode == _path.nodes.Count - 1)))
+                && ((_isReturningToStart && _currentNode == 0) || (!_isReturningToStart && _currentNode == _path.nodes.Count - 1)))
             {
                 owner.ClearUnitState(UnitState.RoamingMove);
                 TimeSpan waitTime = RandomHelper.RandTime(_waitTimeRangeAtPathEnd.Value.min, _waitTimeRangeAtPathEnd.Value.max);
@@ -312,7 +312,7 @@ namespace Game.Movement
             CreatureAI ai = owner.GetAI();
             if (ai != null)
             {
-                ai.MovementInform(MovementGeneratorType.Waypoint, (uint)_currentNode);
+                ai.MovementInform(MovementGeneratorType.Waypoint, _currentNode);
                 ai.WaypointReached(waypoint.id, _path.id);
             }
 

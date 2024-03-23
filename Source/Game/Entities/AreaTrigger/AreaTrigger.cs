@@ -77,7 +77,7 @@ namespace Game.Entities
             }
         }
 
-        bool Create(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisual spellVisual, Spell spell, AuraEffect aurEff)
+        bool Create(int areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisual spellVisual, Spell spell, AuraEffect aurEff)
         {
             _targetGuid = target != null ? target.GetGUID() : ObjectGuid.Empty;
             _aurEff = aurEff;
@@ -127,7 +127,7 @@ namespace Game.Entities
             SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), GetCreateProperties().ExtraScale);
 
             VisualAnim visualAnim = areaTriggerData.ModifyValue(m_areaTriggerData.VisualAnim);
-            SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), (uint)GetCreateProperties().AnimId);
+            SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), GetCreateProperties().AnimId);
             SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimKitID), GetCreateProperties().AnimKitId);
             if (GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.Unk3))
                 SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.Field_C), true);
@@ -194,7 +194,7 @@ namespace Game.Entities
             return true;
         }
 
-        public static AreaTrigger CreateAreaTrigger(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisual spellVisual, Spell spell = null, AuraEffect aurEff = null)
+        public static AreaTrigger CreateAreaTrigger(int areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisual spellVisual, Spell spell = null, AuraEffect aurEff = null)
         {
             AreaTrigger at = new();
             if (!at.Create(areaTriggerCreatePropertiesId, caster, target, spellInfo, pos, duration, spellVisual, spell, aurEff))
@@ -203,12 +203,12 @@ namespace Game.Entities
             return at;
         }
 
-        public static ObjectGuid CreateNewMovementForceId(Map map, uint areaTriggerId)
+        public static ObjectGuid CreateNewMovementForceId(Map map, int areaTriggerId)
         {
             return ObjectGuid.Create(HighGuid.AreaTrigger, map.GetId(), areaTriggerId, map.GenerateLowGuid(HighGuid.AreaTrigger));
         }
 
-        public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
+        public override bool LoadFromDB(long spawnId, Map map, bool addToMap, bool allowDuplicate)
         {
             _spawnId = spawnId;
 
@@ -252,7 +252,7 @@ namespace Game.Entities
             }
 
             if (IsServerSide())
-                SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), 24u); // blue decal, for .debug areatrigger visibility
+                SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), 24); // blue decal, for .debug areatrigger visibility
 
             SetScaleCurve(m_areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), new AreaTriggerScaleCurveTemplate());
 
@@ -490,7 +490,7 @@ namespace Game.Entities
             {
                 if (GetCreateProperties().MorphCurveId != 0)
                 {
-                    radius = MathFunctions.Lerp(_shape.SphereDatas.Radius, _shape.SphereDatas.RadiusTarget, Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, GetProgress()));
+                    radius = MathFunctions.Lerp(_shape.SphereDatas.Radius, _shape.SphereDatas.RadiusTarget, Global.DB2Mgr.GetCurveValueAt((int)GetCreateProperties().MorphCurveId, GetProgress()));
                 }
             }
 
@@ -546,7 +546,7 @@ namespace Game.Entities
             {
                 float progress = GetProgress();
                 if (GetCreateProperties().MorphCurveId != 0)
-                    progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, progress);
+                    progress = Global.DB2Mgr.GetCurveValueAt((int)GetCreateProperties().MorphCurveId, progress);
 
                 innerRadius = MathFunctions.Lerp(_shape.DiskDatas.InnerRadius, _shape.DiskDatas.InnerRadiusTarget, progress);
                 outerRadius = MathFunctions.Lerp(_shape.DiskDatas.OuterRadius, _shape.DiskDatas.OuterRadiusTarget, progress);
@@ -1040,7 +1040,7 @@ namespace Game.Entities
 
             if (GetCreateProperties().MoveCurveId != 0)
             {
-                float progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MoveCurveId, currentTimePercent);
+                float progress = Global.DB2Mgr.GetCurveValueAt((int)GetCreateProperties().MoveCurveId, currentTimePercent);
                 if (progress < 0.0f || progress > 1.0f)
                 {
                     Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (Id: {GetEntry()}, AreaTriggerCreatePropertiesId: {GetCreateProperties().Id}) has wrong progress ({progress}) caused by curve calculation (MoveCurveId: {GetCreateProperties().MorphCurveId})");
@@ -1187,7 +1187,7 @@ namespace Game.Entities
         }
 
         public bool IsRemoved() { return _isRemoved; }
-        public uint GetSpellId() { return (uint)m_areaTriggerData.SpellID.GetValue(); }
+        public int GetSpellId() { return m_areaTriggerData.SpellID; }
         public AuraEffect GetAuraEffect() { return _aurEff; }
         public uint GetTimeSinceCreated() { return _timeSinceCreated; }
         public uint GetTimeToTarget() { return m_areaTriggerData.TimeToTarget; }
@@ -1217,7 +1217,7 @@ namespace Game.Entities
 
         AreaTriggerFieldData m_areaTriggerData;
 
-        ulong _spawnId;
+        long _spawnId;
 
         ObjectGuid _targetGuid;
 

@@ -25,14 +25,14 @@ namespace Game.Networking.Packets
                 PartyIndex = _worldPacket.ReadUInt8();
 
             for (var i = 0; i < slotsCount; ++i) // Slots
-                Slots.Add(_worldPacket.ReadUInt32());
+                Slots.Add(_worldPacket.ReadInt32());
         }
 
         public bool QueueAsGroup;
         public bool Unknown;       // Always false in 7.2.5
         public byte? PartyIndex;
         public LfgRoles Roles;
-        public List<uint> Slots = new();
+        public List<int> Slots = new();
     }
 
     class DFLeave : ClientPacket
@@ -54,14 +54,14 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Ticket.Read(_worldPacket);
-            InstanceID = _worldPacket.ReadUInt64();
-            ProposalID = _worldPacket.ReadUInt32();
+            InstanceID = _worldPacket.ReadInt64();
+            ProposalID = _worldPacket.ReadInt32();
             Accepted = _worldPacket.HasBit();
         }
 
         public RideTicket Ticket = new();
-        public ulong InstanceID;
-        public uint ProposalID;
+        public long InstanceID;
+        public int ProposalID;
         public bool Accepted;
     }
 
@@ -171,10 +171,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Slots.Count);
             _worldPacket.WriteUInt8(RequestedRoles);
             _worldPacket.WriteInt32(SuspendedPlayers.Count);
-            _worldPacket.WriteUInt32(QueueMapID);
+            _worldPacket.WriteInt32(QueueMapID);
 
             foreach (var slot in Slots)
-                _worldPacket.WriteUInt32(slot);
+                _worldPacket.WriteInt32(slot);
 
             foreach (var player in SuspendedPlayers)
                 _worldPacket.WritePackedGuid(player);
@@ -191,10 +191,10 @@ namespace Game.Networking.Packets
         public RideTicket Ticket = new();
         public byte SubType;
         public byte Reason;
-        public List<uint> Slots = new();
+        public List<int> Slots = new();
         public byte RequestedRoles;
         public List<ObjectGuid> SuspendedPlayers = new();
-        public uint QueueMapID;
+        public int QueueMapID;
         public bool NotifyUI;
         public bool IsParty;
         public bool Joined;
@@ -234,7 +234,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Members.Count);
 
             foreach (var slot in JoinSlots)
-                _worldPacket.WriteUInt32(slot);
+                _worldPacket.WriteInt32(slot);
 
             foreach (ulong bgQueueID in BgQueueIDs)
                 _worldPacket.WriteUInt64(bgQueueID);
@@ -249,7 +249,7 @@ namespace Game.Networking.Packets
 
         public byte PartyIndex;
         public byte RoleCheckStatus;
-        public List<uint> JoinSlots = new();
+        public List<int> JoinSlots = new();
         public List<ulong> BgQueueIDs = new();
         public int GroupFinderActivityID = 0;
         public List<LFGRoleCheckUpdateMember> Members = new();
@@ -361,10 +361,10 @@ namespace Game.Networking.Packets
         {
             Ticket.Write(_worldPacket);
 
-            _worldPacket.WriteUInt64(InstanceID);
-            _worldPacket.WriteUInt32(ProposalID);
-            _worldPacket.WriteUInt32(Slot);
-            _worldPacket.WriteInt8(State);
+            _worldPacket.WriteInt64(InstanceID);
+            _worldPacket.WriteInt32(ProposalID);
+            _worldPacket.WriteInt32(Slot);
+            _worldPacket.WriteInt8((sbyte)State);
             _worldPacket.WriteUInt32(CompletedMask);
             _worldPacket.WriteUInt32(EncounterMask);
             _worldPacket.WriteInt32(Players.Count);
@@ -379,10 +379,10 @@ namespace Game.Networking.Packets
         }
 
         public RideTicket Ticket;
-        public ulong InstanceID;
-        public uint ProposalID;
-        public uint Slot;
-        public sbyte State;
+        public long InstanceID;
+        public int ProposalID;
+        public int Slot;
+        public LfgProposalState State;
         public uint CompletedMask;
         public uint EncounterMask;
         public byte Unused;
@@ -401,17 +401,17 @@ namespace Game.Networking.Packets
 
     class LfgOfferContinue : ServerPacket
     {
-        public LfgOfferContinue(uint slot) : base(ServerOpcodes.LfgOfferContinue, ConnectionType.Instance)
+        public LfgOfferContinue(int slot) : base(ServerOpcodes.LfgOfferContinue, ConnectionType.Instance)
         {
             Slot = slot;
         }
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Slot);
+            _worldPacket.WriteInt32(Slot);
         }
 
-        public uint Slot;
+        public int Slot;
     }
 
     class LfgTeleportDenied : ServerPacket
@@ -433,13 +433,13 @@ namespace Game.Networking.Packets
     //Structs
     public class LFGBlackListSlot
     {   
-        public uint Slot;
-        public uint Reason;
+        public int Slot;
+        public LfgLockStatusType Reason;
         public int SubReason1;
         public int SubReason2;
-        public uint SoftLock;
+        public int SoftLock;
 
-        public LFGBlackListSlot(uint slot, uint reason, int subReason1, int subReason2, uint softLock)
+        public LFGBlackListSlot(int slot, LfgLockStatusType reason, int subReason1, int subReason2, int softLock)
         {
             Slot = slot;
             Reason = reason;
@@ -450,11 +450,11 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Slot);
-            data.WriteUInt32(Reason);
+            data.WriteInt32(Slot);
+            data.WriteInt32((int)Reason);
             data.WriteInt32(SubReason1);
             data.WriteInt32(SubReason2);
-            data.WriteUInt32(SoftLock);
+            data.WriteInt32(SoftLock);
         }
     }
 
@@ -477,26 +477,26 @@ namespace Game.Networking.Packets
 
     public struct LfgPlayerQuestRewardItem
     {
-        public LfgPlayerQuestRewardItem(uint itemId, uint quantity)
+        public LfgPlayerQuestRewardItem(int itemId, int quantity)
         {
             ItemID = itemId;
             Quantity = quantity;
         }
 
-        public uint ItemID;
-        public uint Quantity;
+        public int ItemID;
+        public int Quantity;
     }
 
     public struct LfgPlayerQuestRewardCurrency
     {
-        public LfgPlayerQuestRewardCurrency(uint currencyId, uint quantity)
+        public LfgPlayerQuestRewardCurrency(int currencyId, int quantity)
         {
             CurrencyID = currencyId;
             Quantity = quantity;
         }
 
-        public uint CurrencyID;
-        public uint Quantity;
+        public int CurrencyID;
+        public int Quantity;
     }
 
     public class LfgPlayerQuestReward
@@ -504,8 +504,8 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Mask);
-            data.WriteUInt32(RewardMoney);
-            data.WriteUInt32(RewardXP);
+            data.WriteInt32(RewardMoney);
+            data.WriteInt32(RewardXP);
             data.WriteInt32(Item.Count);
             data.WriteInt32(Currency.Count);
             data.WriteInt32(BonusCurrency.Count);
@@ -513,22 +513,22 @@ namespace Game.Networking.Packets
             // Item
             foreach (var item in Item)
             {
-                data.WriteUInt32(item.ItemID);
-                data.WriteUInt32(item.Quantity);
+                data.WriteInt32(item.ItemID);
+                data.WriteInt32(item.Quantity);
             }
 
             // Currency
             foreach (var currency in Currency)
             {
-                data.WriteUInt32(currency.CurrencyID);
-                data.WriteUInt32(currency.Quantity);
+                data.WriteInt32(currency.CurrencyID);
+                data.WriteInt32(currency.Quantity);
             }
 
             // BonusCurrency
             foreach (var bonusCurrency in BonusCurrency)
             {
-                data.WriteUInt32(bonusCurrency.CurrencyID);
-                data.WriteUInt32(bonusCurrency.Quantity);
+                data.WriteInt32(bonusCurrency.CurrencyID);
+                data.WriteInt32(bonusCurrency.Quantity);
             }
 
             data.WriteBit(RewardSpellID.HasValue);
@@ -551,8 +551,8 @@ namespace Game.Networking.Packets
         }
 
         public byte Mask;
-        public uint RewardMoney;
-        public uint RewardXP;
+        public int RewardMoney;
+        public int RewardXP;
         public List<LfgPlayerQuestRewardItem> Item = new();
         public List<LfgPlayerQuestRewardCurrency> Currency = new();
         public List<LfgPlayerQuestRewardCurrency> BonusCurrency = new();
@@ -566,7 +566,7 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Slot);
+            data.WriteInt32(Slot);
             data.WriteInt32(CompletionQuantity);
             data.WriteInt32(CompletionLimit);
             data.WriteInt32(CompletionCurrencyID);
@@ -591,7 +591,7 @@ namespace Game.Networking.Packets
                 shortageReward.Write(data);
         }
 
-        public uint Slot;
+        public int Slot;
         public int CompletionQuantity;
         public int CompletionLimit;
         public int CompletionCurrencyID;
@@ -657,7 +657,7 @@ namespace Game.Networking.Packets
 
     public struct LFGPlayerRewards
     {
-        public LFGPlayerRewards(int id, uint quantity, int bonusQuantity, bool isCurrency)
+        public LFGPlayerRewards(int id, int quantity, int bonusQuantity, bool isCurrency)
         {
             Quantity = quantity;
             BonusQuantity = bonusQuantity;
@@ -683,7 +683,7 @@ namespace Game.Networking.Packets
             if (RewardItem != null)
                 RewardItem.Write(data);
 
-            data.WriteUInt32(Quantity);
+            data.WriteInt32(Quantity);
             data.WriteInt32(BonusQuantity);
 
             if (RewardCurrency.HasValue)
@@ -692,7 +692,7 @@ namespace Game.Networking.Packets
 
         public ItemInstance RewardItem;
         public int? RewardCurrency;
-        public uint Quantity;
+        public int Quantity;
         public int BonusQuantity;
     }
 

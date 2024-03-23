@@ -51,10 +51,10 @@ namespace Game.DataStorage
 
     public sealed class CharTitlesRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public LocalizedString Name1;
-        public short MaskID;
+        public ushort MaskID;
         public sbyte Flags;
     }
 
@@ -244,9 +244,9 @@ namespace Game.DataStorage
     {
         private long _raceMask;
         public LocalizedString ReqSource;
-        public uint Id;
+        public int Id;
         private int _flags;
-        public int ClassMask;
+        private int _classMask;
         public int AchievementID;
         public int QuestID;
         /// <summary>
@@ -257,6 +257,7 @@ namespace Game.DataStorage
 
         #region Properties
         public RaceMask RaceMask => (RaceMask)_raceMask;
+        public ClassMask ClassMask => (ClassMask)_classMask;
         public ChrCustomizationReqFlag Flags => (ChrCustomizationReqFlag)_flags;
         #endregion
 

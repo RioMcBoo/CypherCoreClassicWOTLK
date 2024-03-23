@@ -363,7 +363,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(DifficultyID);
+            _worldPacket.WriteInt32((int)DifficultyID);
             _worldPacket.WriteBit(IsTournamentRealm);
             _worldPacket.WriteBit(XRealmPvpAlert);
             _worldPacket.WriteBit(RestrictedAccountMaxLevel.HasValue);
@@ -371,23 +371,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(InstanceGroupSize.HasValue);
 
             if (RestrictedAccountMaxLevel.HasValue)
-                _worldPacket.WriteUInt32(RestrictedAccountMaxLevel.Value);
+                _worldPacket.WriteInt32(RestrictedAccountMaxLevel.Value);
 
             if (RestrictedAccountMaxMoney.HasValue)
-                _worldPacket.WriteUInt64(RestrictedAccountMaxMoney.Value);
+                _worldPacket.WriteInt64(RestrictedAccountMaxMoney.Value);
 
             if (InstanceGroupSize.HasValue)
-                _worldPacket.WriteUInt32(InstanceGroupSize.Value);
+                _worldPacket.WriteInt32(InstanceGroupSize.Value);
 
             _worldPacket.FlushBits();
         }
 
-        public uint DifficultyID;
+        public Difficulty DifficultyID;
         public bool IsTournamentRealm;
         public bool XRealmPvpAlert;
-        public uint? RestrictedAccountMaxLevel;
-        public ulong? RestrictedAccountMaxMoney;
-        public uint? InstanceGroupSize;
+        public int? RestrictedAccountMaxLevel;
+        public long? RestrictedAccountMaxMoney;
+        public int? InstanceGroupSize;
     }
 
     public class SetDungeonDifficulty : ClientPacket
@@ -1163,7 +1163,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Heirlooms.Count);
 
             foreach (var item in Heirlooms)
-                _worldPacket.WriteUInt32(item.Key);
+                _worldPacket.WriteInt32(item.Key);
 
             foreach (var flags in Heirlooms)
                 _worldPacket.WriteUInt32((uint)flags.Value.flags);
@@ -1447,34 +1447,34 @@ namespace Game.Networking.Packets
     //Structs
     struct PhaseShiftDataPhase
     {
-        public PhaseShiftDataPhase(uint phaseFlags, uint id)
+        public PhaseShiftDataPhase(PhaseFlags phaseFlags, int id)
         {
-            PhaseFlags = (ushort)phaseFlags;
-            Id = (ushort)id;
+            PhaseFlags = phaseFlags;
+            Id = id;
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt16(PhaseFlags);
-            data.WriteUInt16(Id);
+            data.WriteUInt16((ushort)PhaseFlags);
+            data.WriteUInt16((ushort)Id);
         }
 
-        public ushort PhaseFlags;
-        public ushort Id;
+        public PhaseFlags PhaseFlags;
+        public int Id;
     }
 
     class PhaseShiftData
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(PhaseShiftFlags);
+            data.WriteUInt32((uint)PhaseShiftFlags);
             data.WriteInt32(Phases.Count);
             data.WritePackedGuid(PersonalGUID);
             foreach (PhaseShiftDataPhase phaseShiftDataPhase in Phases)
                 phaseShiftDataPhase.Write(data);
         }
 
-        public uint PhaseShiftFlags;
+        public PhaseShiftFlags PhaseShiftFlags;
         public List<PhaseShiftDataPhase> Phases = new();
         public ObjectGuid PersonalGUID;
     }

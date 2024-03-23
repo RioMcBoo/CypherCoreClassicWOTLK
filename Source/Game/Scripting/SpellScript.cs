@@ -925,28 +925,28 @@ namespace Game.Scripting
         // including other effect/hit scripts
         // will not work on aura/damage/heal
         // will not work if effects were already handled
-        public void PreventHitEffect(uint effIndex)
+        public void PreventHitEffect(int effIndex)
         {
             if (!IsInHitPhase() && !IsInEffectHook())
             {
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitEffect was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
                 return;
             }
-            m_hitPreventEffectMask |= (1u << (int)effIndex);
+            m_hitPreventEffectMask |= (1u << effIndex);
             PreventHitDefaultEffect(effIndex);
         }
 
         // prevents default effect execution on current spell hit target
         // will not work on aura/damage/heal effects
         // will not work if effects were already handled
-        public void PreventHitDefaultEffect(uint effIndex)
+        public void PreventHitDefaultEffect(int effIndex)
         {
             if (!IsInHitPhase() && !IsInEffectHook())
             {
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitDefaultEffect was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
                 return;
             }
-            m_hitPreventDefaultEffectMask |= (1u << (int)effIndex);
+            m_hitPreventDefaultEffectMask |= (1u << effIndex);
         }
 
         public SpellEffectInfo GetEffectInfo()
@@ -1004,7 +1004,7 @@ namespace Game.Scripting
         public Item GetCastItem() { return m_spell.m_CastItem; }
 
         // Creates item. Calls Spell.DoCreateItem method.
-        public void CreateItem(uint itemId, ItemContext context) { m_spell.DoCreateItem(itemId, context); }
+        public void CreateItem(int itemId, ItemContext context) { m_spell.DoCreateItem(itemId, context); }
 
         // Returns SpellInfo from the spell that triggered the current one
         public SpellInfo GetTriggeringSpell() { return m_spell.m_triggeredByAuraSpell; }
@@ -1027,7 +1027,7 @@ namespace Game.Scripting
             m_spell.m_customError = result;
         }
 
-        public void SelectRandomInjuredTargets(List<WorldObject> targets, uint maxTargets, bool prioritizePlayers, Unit prioritizeGroupMembersOf = null)
+        public void SelectRandomInjuredTargets(List<WorldObject> targets, int maxTargets, bool prioritizePlayers, Unit prioritizeGroupMembersOf = null)
         {
             if (targets.Count <= maxTargets)
                 return;

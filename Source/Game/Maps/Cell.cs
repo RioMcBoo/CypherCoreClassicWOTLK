@@ -33,15 +33,15 @@ namespace Game.Maps
             return data.cell_x < MapConst.MaxCells && data.cell_y < MapConst.MaxCells;
         }
 
-        public uint GetId()
+        public int GetId()
         {
             return data.grid_x * MapConst.MaxGrids + data.grid_y;
         }
 
-        public uint GetCellX() { return data.cell_x; }
-        public uint GetCellY() { return data.cell_y; }
-        public uint GetGridX() { return data.grid_x; }
-        public uint GetGridY() { return data.grid_y; }
+        public int GetCellX() { return data.cell_x; }
+        public int GetCellY() { return data.cell_y; }
+        public int GetGridX() { return data.grid_x; }
+        public int GetGridY() { return data.grid_y; }
         public bool NoCreate() { return data.nocreate; }
         public void SetNoCreate() { data.nocreate = true; }
 
@@ -65,7 +65,7 @@ namespace Game.Maps
 
         public override int GetHashCode()
         {
-            return (int)(data.cell_x ^ data.cell_y ^ data.grid_x ^ data.grid_y);
+            return data.cell_x ^ data.cell_y ^ data.grid_x ^ data.grid_y;
         }
 
         public override string ToString()
@@ -75,10 +75,10 @@ namespace Game.Maps
 
         public struct Data
         {
-            public uint grid_x;
-            public uint grid_y;
-            public uint cell_x;
-            public uint cell_y;
+            public int grid_x;
+            public int grid_y;
+            public int cell_x;
+            public int cell_y;
             public bool nocreate;
         }
         public Data data;
@@ -150,9 +150,9 @@ namespace Game.Maps
             map.Visit(this, visitor);
 
             // loop the cell range
-            for (uint x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
+            for (int x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
             {
-                for (uint y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
+                for (int y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
                 {
                     CellCoord cellCoord = new(x, y);
                     //lets skip standing cell since we already visited it
@@ -169,15 +169,15 @@ namespace Game.Maps
         void VisitCircle(Visitor visitor, Map map, ICoord begin_cell, ICoord end_cell)
         {
             //here is an algorithm for 'filling' circum-squared octagon
-            uint x_shift = (uint)Math.Ceiling((end_cell.X_coord - begin_cell.X_coord) * 0.3f - 0.5f);
+            int x_shift = (int)Math.Ceiling((end_cell.X_coord - begin_cell.X_coord) * 0.3f - 0.5f);
             //lets calculate x_start/x_end coords for central strip...
-            uint x_start = begin_cell.X_coord + x_shift;
-            uint x_end = end_cell.X_coord - x_shift;
+            int x_start = begin_cell.X_coord + x_shift;
+            int x_end = end_cell.X_coord - x_shift;
 
             //visit central strip with constant width...
-            for (uint x = x_start; x <= x_end; ++x)
+            for (int x = x_start; x <= x_end; ++x)
             {
-                for (uint y = begin_cell.Y_coord; y <= end_cell.Y_coord; ++y)
+                for (int y = begin_cell.Y_coord; y <= end_cell.Y_coord; ++y)
                 {
                     CellCoord cellCoord = new(x, y);
                     Cell r_zone = new(cellCoord);
@@ -191,15 +191,15 @@ namespace Game.Maps
             if (x_shift == 0)
                 return;
 
-            uint y_start = end_cell.Y_coord;
-            uint y_end = begin_cell.Y_coord;
+            int y_start = end_cell.Y_coord;
+            int y_end = begin_cell.Y_coord;
             //now we are visiting borders of an octagon...
-            for (uint step = 1; step <= (x_start - begin_cell.X_coord); ++step)
+            for (int step = 1; step <= (x_start - begin_cell.X_coord); ++step)
             {
                 //each step reduces strip height by 2 cells...
                 y_end += 1;
                 y_start -= 1;
-                for (uint y = y_start; y >= y_end; --y)
+                for (int y = y_start; y >= y_end; --y)
                 {
                     //we visit cells symmetrically from both sides, heading from center to sides and from up to bottom
                     //e.g. filling 2 trapezoids after filling central cell strip...

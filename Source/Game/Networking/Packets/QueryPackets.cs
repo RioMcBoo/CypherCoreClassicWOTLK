@@ -607,8 +607,8 @@ namespace Game.Networking.Packets
             }
             else
             {
-                uint accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
-                uint bnetAccountId = Global.BNetAccountMgr.GetIdByGameAccount(accountId);
+                int accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
+                int bnetAccountId = Global.BNetAccountMgr.GetIdByGameAccount(accountId);
 
                 AccountID = ObjectGuid.Create(HighGuid.WowAccount, accountId);
                 BnetAccountID = ObjectGuid.Create(HighGuid.BNetAccount, bnetAccountId);

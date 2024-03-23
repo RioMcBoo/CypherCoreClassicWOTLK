@@ -376,7 +376,7 @@ namespace Game.Entities
             if (spawnid != 0)
                 m_spawnId = spawnid;
 
-            uint linkedEntry = GetGoInfo().GetLinkedGameObjectEntry();
+            int linkedEntry = GetGoInfo().GetLinkedGameObjectEntry();
             if (linkedEntry != 0)
             {
                 GameObject linkedGo = CreateGameObject(linkedEntry, map, pos, rotation, 255, GameObjectState.Ready);
@@ -578,7 +578,7 @@ namespace Game.Entities
                                     GetAI().Reset();
 
                                 // respawn timer
-                                uint poolid = GetGameObjectData() != null ? GetGameObjectData().poolId : 0;
+                                int poolid = GetGameObjectData() != null ? GetGameObjectData().poolId : 0;
                                 if (poolid != 0)
                                     Global.PoolMgr.UpdatePool<GameObject>(GetMap().GetPoolData(), poolid, GetSpawnId());
                                 else
@@ -594,7 +594,7 @@ namespace Game.Entities
                     if (IsSpawned())
                     {
                         GameObjectTemplate goInfo = GetGoInfo();
-                        uint max_charges;
+                        int max_charges;
                         if (goInfo.type == GameObjectTypes.Trap)
                         {
                             if (GameTime.GetGameTimeMS() < m_cooldownTime)
@@ -771,7 +771,7 @@ namespace Game.Entities
                     //if Gameobject should cast spell, then this, but some GOs (Type = 10) should be destroyed
                     if (GetGoType() == GameObjectTypes.Goober)
                     {
-                        uint spellId = GetGoInfo().Goober.spell;
+                        int spellId = GetGoInfo().Goober.spell;
 
                         if (spellId != 0)
                         {
@@ -950,7 +950,7 @@ namespace Game.Entities
             if (goOverride != null)
                 ReplaceAllFlags(goOverride.Flags);
 
-            uint poolid = GetGameObjectData() != null ? GetGameObjectData().poolId : 0;
+            int poolid = GetGameObjectData() != null ? GetGameObjectData().poolId : 0;
             if (m_respawnCompatibilityMode && poolid != 0)
                 Global.PoolMgr.UpdatePool<GameObject>(GetMap().GetPoolData(), poolid, GetSpawnId());
             else
@@ -1158,7 +1158,7 @@ namespace Game.Entities
             return true;
         }
 
-        public static bool DeleteFromDB(ulong spawnId)
+        public static bool DeleteFromDB(long spawnId)
         {
             GameObjectData data = Global.ObjectMgr.GetGameObjectData(spawnId);
             if (data == null)
@@ -1383,7 +1383,7 @@ namespace Game.Entities
                     {
                         Battleground bg = target.GetBattleground();
                         if (bg != null)
-                            return bg.CanActivateGO((int)GetEntry(), (uint)bg.GetPlayerTeam(target.GetGUID()));
+                            return bg.CanActivateGO(GetEntry(), bg.GetPlayerTeam(target.GetGUID()));
                         return true;
                     }
                     break;
@@ -1456,7 +1456,7 @@ namespace Game.Entities
             m_cooldownTime = time_to_restore != 0 ? GameTime.GetGameTimeMS() + time_to_restore : 0;
         }
 
-        public void ActivateObject(GameObjectActions action, int param, WorldObject spellCaster = null, uint spellId = 0, int effectIndex = -1)
+        public void ActivateObject(GameObjectActions action, int param, WorldObject spellCaster = null, int spellId = 0, int effectIndex = -1)
         {
             Unit unitCaster = spellCaster != null ? spellCaster.ToUnit() : null;
 
@@ -1469,7 +1469,7 @@ namespace Game.Entities
                 case GameObjectActions.AnimateCustom1:
                 case GameObjectActions.AnimateCustom2:
                 case GameObjectActions.AnimateCustom3:
-                    SendCustomAnim((uint)(action - GameObjectActions.AnimateCustom0));
+                    SendCustomAnim(action - GameObjectActions.AnimateCustom0);
                     break;
                 case GameObjectActions.Disturb: // What's the difference with Open?
                     if (unitCaster != null)
@@ -1527,9 +1527,9 @@ namespace Game.Entities
                 {
                     GameObjectTemplateAddon templateAddon = GetTemplateAddon();
 
-                    uint artKitIndex = action != GameObjectActions.UseArtKit4 ? (uint)(action - GameObjectActions.UseArtKit0) : 4;
+                    int artKitIndex = action != GameObjectActions.UseArtKit4 ? (action - GameObjectActions.UseArtKit0) : 4;
 
-                    uint artKitValue = 0;
+                    int artKitValue = 0;
                     if (templateAddon != null)
                         artKitValue = templateAddon.ArtKits[artKitIndex];
 
@@ -1583,7 +1583,7 @@ namespace Game.Entities
                     SetAnimKitId(0, false);
                     break;
                 case GameObjectActions.PlaySpellVisual:
-                    SetSpellVisualId((uint)param, spellCaster.GetGUID());
+                    SetSpellVisualId(param, spellCaster.GetGUID());
                     break;
                 case GameObjectActions.StopSpellVisual:
                     SetSpellVisualId(0);
@@ -1594,7 +1594,7 @@ namespace Game.Entities
             }
         }
 
-        public void SetGoArtKit(uint kit)
+        public void SetGoArtKit(int kit)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ArtKit), kit);
             GameObjectData data = Global.ObjectMgr.GetGameObjectData(m_spawnId);
@@ -1602,7 +1602,7 @@ namespace Game.Entities
                 data.artKit = kit;
         }
 
-        public void SetGoArtKit(uint artkit, GameObject go, uint lowguid)
+        public void SetGoArtKit(int artkit, GameObject go, int lowguid)
         {
             GameObjectData data = null;
             if (go != null)
@@ -1737,7 +1737,7 @@ namespace Game.Entities
 
                                 m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(info.Chest.DungeonEncounter, info.Chest.chestPersonalLoot,
                                     LootStorage.Gameobject, LootType.Chest, this, addon != null ? addon.Mingold : 0, addon != null ? addon.Maxgold : 0,
-                                    (ushort)GetLootMode(), GetMap().GetMapDifficulty(), tappers);
+                                    GetLootMode(), GetMap().GetMapDifficulty(), tappers);
                             }
                             else
                             {
@@ -2018,7 +2018,7 @@ namespace Game.Entities
                             // Send loot
                             int areaFishingLevel = Global.ObjectMgr.GetFishingBaseSkillLevel(areaEntry);
 
-                            uint playerFishingSkill = player.GetProfessionSkillForExp(SkillType.Fishing, 0);
+                            var playerFishingSkill = player.GetProfessionSkillForExp(SkillType.Fishing, 0);
                             int playerFishingLevel = player.GetSkillValue(playerFishingSkill);
 
                             int roll = RandomHelper.IRand(1, 100);
@@ -2807,7 +2807,7 @@ namespace Game.Entities
             else if (m_goValue.Building.Health + change >= m_goValue.Building.MaxHealth)
                 m_goValue.Building.Health = m_goValue.Building.MaxHealth;
             else
-                m_goValue.Building.Health += (uint)change;
+                m_goValue.Building.Health += change;
 
             // Set the health bar, value = 255 * healthPct;
             SetGoAnimProgress(m_goValue.Building.Health * 255 / m_goValue.Building.MaxHealth);
@@ -2879,7 +2879,7 @@ namespace Game.Entities
                     if (setHealth)
                     {
                         m_goValue.Building.Health = 10000;//m_goInfo.DestructibleBuilding.damagedNumHits;
-                        uint maxHealth = m_goValue.Building.MaxHealth;
+                        int maxHealth = m_goValue.Building.MaxHealth;
                         // in this case current health is 0 anyway so just prevent crashing here
                         if (maxHealth == 0)
                             maxHealth = 1;
@@ -3669,7 +3669,7 @@ namespace Game.Entities
         public void SetFlag(GameObjectFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void RemoveFlag(GameObjectFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
         public void ReplaceAllFlags(GameObjectFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
-        public void SetLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), (int)level); }
+        public void SetLevel(int level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), level); }
 
         public GameObjectDynamicLowFlags GetDynamicFlags() { return (GameObjectDynamicLowFlags)(uint)m_objectData.DynamicFlags; }
         public bool HasDynamicFlag(GameObjectDynamicLowFlags flag) { return (m_objectData.DynamicFlags & (uint)flag) != 0; }
@@ -3680,9 +3680,9 @@ namespace Game.Entities
         public GameObjectTypes GetGoType() { return (GameObjectTypes)(sbyte)m_gameObjectData.TypeID; }
         public void SetGoType(GameObjectTypes type) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.TypeID), (sbyte)type); }
         public GameObjectState GetGoState() { return (GameObjectState)(sbyte)m_gameObjectData.State; }
-        uint GetGoArtKit() { return m_gameObjectData.ArtKit; }
+        int GetGoArtKit() { return m_gameObjectData.ArtKit; }
         byte GetGoAnimProgress() { return m_gameObjectData.PercentHealth; }
-        public void SetGoAnimProgress(uint animprogress) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.PercentHealth), (byte)animprogress); }
+        public void SetGoAnimProgress(int animprogress) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.PercentHealth), (byte)animprogress); }
 
         public LootState GetLootState() { return m_lootState; }
         public LootModes GetLootMode() { return m_LootMode; }
@@ -3936,8 +3936,8 @@ namespace Game.Entities
         //33 GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING
         public struct building
         {
-            public uint Health;
-            public uint MaxHealth;
+            public int Health;
+            public int MaxHealth;
         }
         //42 GAMEOBJECT_TYPE_CAPTURE_POINT
         public struct capturePoint
@@ -4034,18 +4034,18 @@ namespace Game.Entities
                     newProgress = now % period;
                 else
                 {
-                    int stopTargetTime = 0;
+                    uint stopTargetTime = 0;
                     if (_owner.GetGoState() == GameObjectState.TransportActive)
                         stopTargetTime = 0;
                     else
-                        stopTargetTime = (int)(_stopFrames[_owner.GetGoState() - GameObjectState.TransportStopped]);
+                        stopTargetTime = _stopFrames[_owner.GetGoState() - GameObjectState.TransportStopped];
 
                     if (now < _owner.m_gameObjectData.Level)
                     {
                         int timeToStop = (int)(_owner.m_gameObjectData.Level - _stateChangeTime);
-                        float stopSourcePathPct = (float)_stateChangeProgress / (float)period;
-                        float stopTargetPathPct = (float)stopTargetTime / (float)period;
-                        float timeSinceStopProgressPct = (float)(now - _stateChangeTime) / (float)timeToStop;
+                        float stopSourcePathPct = _stateChangeProgress / (float)period;
+                        float stopTargetPathPct = stopTargetTime / (float)period;
+                        float timeSinceStopProgressPct = (now - _stateChangeTime) / (float)timeToStop;
 
                         float progressPct;
                         if (!_owner.HasDynamicFlag(GameObjectDynamicLowFlags.InvertedMovement))
@@ -4075,11 +4075,11 @@ namespace Game.Entities
                         newProgress = (uint)((float)period * progressPct) % period;
                     }
                     else
-                        newProgress = (uint)stopTargetTime;
+                        newProgress = stopTargetTime;
 
                     if (newProgress == stopTargetTime && newProgress != _pathProgress)
                     {
-                        uint eventId;
+                        int eventId;
                         switch (_owner.GetGoState() - GameObjectState.TransportActive)
                         {
                             case 0:
@@ -4113,7 +4113,7 @@ namespace Game.Entities
                                 eventId = _owner.GetGoInfo().Transport.Reached10thfloor;
                                 break;
                             default:
-                                eventId = 0u;
+                                eventId = 0;
                                 break;
                         }
 
@@ -4217,7 +4217,7 @@ namespace Game.Entities
                 _stateChangeProgress = _pathProgress;
                 uint timeToStop = (uint)Math.Abs(_pathProgress - stopPathProgress);
                 _owner.SetLevel(GameTime.GetGameTimeMS() + timeToStop);
-                _owner.SetPathProgressForClient((float)_pathProgress / (float)GetTransportPeriod());
+                _owner.SetPathProgressForClient(_pathProgress / (float)GetTransportPeriod());
 
                 if (oldState == GameObjectState.Active || oldState == newState)
                 {

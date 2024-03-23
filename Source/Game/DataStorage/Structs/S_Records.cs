@@ -208,7 +208,7 @@ namespace Game.DataStorage
         public LocalizedString Description;
         public LocalizedString HordeDisplayName;
         public string OverrideSourceInfoDisplayName;
-        public int Id;
+        private int _id;
         private sbyte _categoryID;
         public int SpellIconFileID;
         public sbyte CanLink;
@@ -218,6 +218,7 @@ namespace Game.DataStorage
         public int SpellBookSpellID;
 
         #region Properties
+        public SkillType Id => (SkillType)_id;
         public SkillCategory CategoryID => (SkillCategory)_categoryID;
         public SkillType ParentSkillLineID => (SkillType)_parentSkillLineID;
         public SkillLineFlags Flags => (SkillLineFlags)_flags;
@@ -584,7 +585,7 @@ namespace Game.DataStorage
         public short[] EffectPointsMin = new short[ItemConst.MaxItemEnchantmentEffects];
         public ushort ItemVisual;
         private ushort _flags;
-        public ushort RequiredSkillID;
+        private ushort _requiredSkillID;
         public ushort RequiredSkillRank;
         public ushort ItemLevel;
         public byte Charges;
@@ -598,6 +599,7 @@ namespace Game.DataStorage
 
         #region Properties
         public SpellItemEnchantmentFlags Flags => (SpellItemEnchantmentFlags)_flags;
+        public SkillType RequiredSkillID => (SkillType)_requiredSkillID;
         public ItemEnchantmentType Effect(int index) => (ItemEnchantmentType)_effect[index];
         public ScalingClass ScalingClass => (ScalingClass)_scalingClass;
         public ScalingClass ScalingClassRestricted => (ScalingClass)_scalingClassRestricted;        

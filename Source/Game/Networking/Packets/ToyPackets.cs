@@ -47,7 +47,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Toys.Count);
 
             foreach (var pair in Toys)
-                _worldPacket.WriteUInt32(pair.Key);
+                _worldPacket.WriteInt32(pair.Key);
 
             foreach (var pair in Toys)
                 _worldPacket.WriteBit(pair.Value.HasAnyFlag(ToyFlags.Favorite));

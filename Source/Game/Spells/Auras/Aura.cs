@@ -2901,7 +2901,7 @@ namespace Game.Spells
             _mode = mode;
         }
 
-        public override bool Execute(ulong e_time, uint p_time)
+        public override bool Execute(long e_time, uint p_time)
         {
             // _base is always valid (look in Aura._Remove())
             _base.ModChargesDelayed(-1, _mode);

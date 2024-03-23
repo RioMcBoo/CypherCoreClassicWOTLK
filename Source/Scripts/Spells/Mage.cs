@@ -17,73 +17,73 @@ namespace Scripts.Spells.Mage
 {
     struct SpellIds
     {
-        public const uint AlterTimeAura = 110909;
-        public const uint AlterTimeVisual = 347402;
-        public const uint ArcaneAlterTimeAura = 342246;
-        public const uint ArcaneBarrageEnergize = 321529;
-        public const uint ArcaneBarrageR3 = 321526;
-        public const uint ArcaneCharge = 36032;
-        public const uint ArcaneMage = 137021;
-        public const uint BlazingBarrierTrigger = 235314;
-        public const uint Blink = 1953;
-        public const uint BlizzardDamage = 190357;
-        public const uint BlizzardSlow = 12486;
-        public const uint CauterizeDot = 87023;
-        public const uint Cauterized = 87024;
-        public const uint Chilled = 205708;
-        public const uint CometStormDamage = 153596;
-        public const uint CometStormVisual = 228601;
-        public const uint ConeOfCold = 120;
-        public const uint ConeOfColdSlow = 212792;
-        public const uint ConjureRefreshment = 116136;
-        public const uint ConjureRefreshmentTable = 167145;
-        public const uint DragonhawkForm = 32818;
-        public const uint EtherealBlink = 410939;
-        public const uint EverwarmSocks = 320913;
-        public const uint FeelTheBurn = 383391;
-        public const uint FingersOfFrost = 44544;
-        public const uint FireBlast = 108853;
-        public const uint FlurryDamage = 228596;
-        public const uint Firestarter = 205026;
-        public const uint FrostNova = 122;
-        public const uint GiraffeForm = 32816;
-        public const uint IceBarrier = 11426;
-        public const uint IceBlock = 45438;
-        public const uint Ignite = 12654;
-        public const uint IncantersFlow = 116267;
-        public const uint LivingBombExplosion = 44461;
-        public const uint LivingBombPeriodic = 217694;
-        public const uint ManaSurge = 37445;
-        public const uint MasterOfTime = 342249;
-        public const uint RadiantSparkProcBlocker = 376105;
-        public const uint RayOfFrostBonus = 208141;
-        public const uint RayOfFrostFingersOfFrost = 269748;
-        public const uint Reverberate = 281482;
-        public const uint RingOfFrostDummy = 91264;
-        public const uint RingOfFrostFreeze = 82691;
-        public const uint RingOfFrostSummon = 113724;
-        public const uint SerpentForm = 32817;
-        public const uint SheepForm = 32820;
-        public const uint Shimmer = 212653;
-        public const uint Slow = 31589;
-        public const uint SquirrelForm = 32813;
-        public const uint Supernova = 157980;
-        public const uint WorgenForm = 32819;
-        public const uint PetNetherwindsFatigued = 160455;
-        public const uint IceLanceTrigger = 228598;
-        public const uint ThermalVoid = 155149;
-        public const uint IcyVeins = 12472;
-        public const uint ChainReactionDummy = 278309;
-        public const uint ChainReaction = 278310;
-        public const uint TouchOfTheMagiExplode = 210833;
-        public const uint WintersChill = 228358;
+        public const int AlterTimeAura = 110909;
+        public const int AlterTimeVisual = 347402;
+        public const int ArcaneAlterTimeAura = 342246;
+        public const int ArcaneBarrageEnergize = 321529;
+        public const int ArcaneBarrageR3 = 321526;
+        public const int ArcaneCharge = 36032;
+        public const int ArcaneMage = 137021;
+        public const int BlazingBarrierTrigger = 235314;
+        public const int Blink = 1953;
+        public const int BlizzardDamage = 190357;
+        public const int BlizzardSlow = 12486;
+        public const int CauterizeDot = 87023;
+        public const int Cauterized = 87024;
+        public const int Chilled = 205708;
+        public const int CometStormDamage = 153596;
+        public const int CometStormVisual = 228601;
+        public const int ConeOfCold = 120;
+        public const int ConeOfColdSlow = 212792;
+        public const int ConjureRefreshment = 116136;
+        public const int ConjureRefreshmentTable = 167145;
+        public const int DragonhawkForm = 32818;
+        public const int EtherealBlink = 410939;
+        public const int EverwarmSocks = 320913;
+        public const int FeelTheBurn = 383391;
+        public const int FingersOfFrost = 44544;
+        public const int FireBlast = 108853;
+        public const int FlurryDamage = 228596;
+        public const int Firestarter = 205026;
+        public const int FrostNova = 122;
+        public const int GiraffeForm = 32816;
+        public const int IceBarrier = 11426;
+        public const int IceBlock = 45438;
+        public const int Ignite = 12654;
+        public const int IncantersFlow = 116267;
+        public const int LivingBombExplosion = 44461;
+        public const int LivingBombPeriodic = 217694;
+        public const int ManaSurge = 37445;
+        public const int MasterOfTime = 342249;
+        public const int RadiantSparkProcBlocker = 376105;
+        public const int RayOfFrostBonus = 208141;
+        public const int RayOfFrostFingersOfFrost = 269748;
+        public const int Reverberate = 281482;
+        public const int RingOfFrostDummy = 91264;
+        public const int RingOfFrostFreeze = 82691;
+        public const int RingOfFrostSummon = 113724;
+        public const int SerpentForm = 32817;
+        public const int SheepForm = 32820;
+        public const int Shimmer = 212653;
+        public const int Slow = 31589;
+        public const int SquirrelForm = 32813;
+        public const int Supernova = 157980;
+        public const int WorgenForm = 32819;
+        public const int PetNetherwindsFatigued = 160455;
+        public const int IceLanceTrigger = 228598;
+        public const int ThermalVoid = 155149;
+        public const int IcyVeins = 12472;
+        public const int ChainReactionDummy = 278309;
+        public const int ChainReaction = 278310;
+        public const int TouchOfTheMagiExplode = 210833;
+        public const int WintersChill = 228358;
     }
 
     // 110909 - Alter Time Aura
     [Script] // 342246 - Alter Time Aura
     class spell_mage_alter_time_AuraScript : AuraScript
     {
-        ulong _health;
+        long _health;
         Position _pos;
 
         public override bool Validate(SpellInfo spellInfo)
@@ -131,7 +131,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.AlterTimeAura, SpellIds.ArcaneAlterTimeAura);
         }
 
-        void RemoveAlterTimeAura(uint effIndex)
+        void RemoveAlterTimeAura(int effIndex)
         {
             Unit unit = GetCaster();
             unit.RemoveAura(SpellIds.AlterTimeAura, ObjectGuid.Empty, 0, AuraRemoveMode.Expire);
@@ -154,13 +154,13 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.ArcaneBarrageR3, SpellIds.ArcaneBarrageEnergize) && ValidateSpellEffect((spellInfo.Id, 1));
         }
 
-        void HandleEffectHitTarget(uint effIndex)
+        void HandleEffectHitTarget(int effIndex)
         {
             if (GetHitUnit().GetGUID() != _primaryTarget)
                 SetHitDamage(MathFunctions.CalculatePct(GetHitDamage(), GetEffectInfo(1).CalcValue(GetCaster())));
         }
 
-        void MarkPrimaryTarget(uint effIndex)
+        void MarkPrimaryTarget(int effIndex)
         {
             _primaryTarget = GetHitUnit().GetGUID();
         }
@@ -180,7 +180,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.ArcaneCharge);
         }
 
-        void RemoveArcaneCharge(uint effIndex)
+        void RemoveArcaneCharge(int effIndex)
         {
             GetHitUnit().RemoveAurasDueToSpell(SpellIds.ArcaneCharge);
         }
@@ -205,13 +205,13 @@ namespace Scripts.Spells.Mage
             return spellInfo.GetEffect(1).IsEffect(SpellEffectName.SchoolDamage);
         }
 
-        void CheckRequiredAuraForBaselineEnergize(uint effIndex)
+        void CheckRequiredAuraForBaselineEnergize(int effIndex)
         {
             if (GetUnitTargetCountForEffect(1) == 0 || !GetCaster().HasAura(SpellIds.ArcaneMage))
                 PreventHitDefaultEffect(effIndex);
         }
 
-        void HandleReverberate(uint effIndex)
+        void HandleReverberate(int effIndex)
         {
             bool procTriggered()
             {
@@ -307,7 +307,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.BlizzardSlow);
         }
 
-        void HandleSlow(uint effIndex)
+        void HandleSlow(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.BlizzardSlow, TriggerCastFlags.IgnoreCastInProgress);
         }
@@ -339,7 +339,7 @@ namespace Scripts.Spells.Mage
     [Script] // 86949 - Cauterize
     class spell_mage_cauterize : SpellScript
     {
-        void SuppressSpeedBuff(uint effIndex)
+        void SuppressSpeedBuff(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
         }
@@ -358,7 +358,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellEffect((spellInfo.Id, 2)) && ValidateSpellInfo(SpellIds.CauterizeDot, SpellIds.Cauterized, spellInfo.GetEffect(2).TriggerSpell);
         }
 
-        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
         {
             AuraEffect effect1 = GetEffect(1);
             if (effect1 == null ||
@@ -386,7 +386,7 @@ namespace Scripts.Spells.Mage
     [Script] // 235219 - Cold Snap
     class spell_mage_cold_snap : SpellScript
     {
-        uint[] SpellsToReset =
+        int[] SpellsToReset =
         {
             SpellIds.ConeOfCold,
             SpellIds.IceBarrier,
@@ -398,9 +398,9 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellsToReset) && ValidateSpellInfo(SpellIds.FrostNova);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
-            foreach (uint spellId in SpellsToReset)
+            foreach (var spellId in SpellsToReset)
                 GetCaster().GetSpellHistory().ResetCooldown(spellId, true);
 
             GetCaster().GetSpellHistory().RestoreCharge(SpellMgr.GetSpellInfo(SpellIds.FrostNova, GetCastDifficulty()).ChargeCategoryId);
@@ -426,7 +426,7 @@ namespace Scripts.Spells.Mage
             _dest = dest;
         }
 
-        public override bool Execute(ulong time, uint diff)
+        public override bool Execute(long time, uint diff)
         {
             Position destPosition = new(_dest.GetPositionX() + RandomHelper.FRand(-3.0f, 3.0f), _dest.GetPositionY() + RandomHelper.FRand(-3.0f, 3.0f), _dest.GetPositionZ());
             _caster.CastSpell(destPosition, SpellIds.CometStormVisual,
@@ -449,7 +449,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.CometStormVisual);
         }
 
-        void EffectHit(uint effIndex)
+        void EffectHit(int effIndex)
         {
             GetCaster().m_Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell().m_castId, GetHitDest()), RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
         }
@@ -468,7 +468,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.CometStormDamage);
         }
 
-        void HandleEffectHitTarget(uint effIndex)
+        void HandleEffectHitTarget(int effIndex)
         {
             GetCaster().CastSpell(GetHitDest(), SpellIds.CometStormDamage,
                 new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetOriginalCastId(GetSpell().m_originalCastId));
@@ -488,7 +488,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.ConeOfColdSlow);
         }
 
-        void HandleSlow(uint effIndex)
+        void HandleSlow(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.ConeOfColdSlow, true);
         }
@@ -507,7 +507,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.ConjureRefreshment, SpellIds.ConjureRefreshmentTable);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Player caster = GetCaster().ToPlayer();
             if (caster != null)
@@ -588,7 +588,7 @@ namespace Scripts.Spells.Mage
             }
         }
 
-        void TriggerSlow(uint effIndex)
+        void TriggerSlow(int effIndex)
         {
             int effectivenessPct = 100;
             AuraEffect effectivenessEffect = GetCaster().GetAuraEffect(SpellIds.EtherealBlink, 1);
@@ -719,14 +719,14 @@ namespace Scripts.Spells.Mage
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FireBlast)
-           && CliDB.SpellCategoryStorage.HasRecord(SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId)
+           && CliDB.SpellCategoryStorage.HasRecord((int)SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId)
            && ValidateSpellEffect((spellInfo.Id, 2));
         }
 
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
-            amount = -(int)MathFunctions.GetPctOf(GetEffectInfo(2).CalcValue() * Time.InMilliseconds, CliDB.SpellCategoryStorage.LookupByKey(SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId).ChargeRecoveryTime);
+            amount = -(int)MathFunctions.GetPctOf(GetEffectInfo(2).CalcValue() * Time.InMilliseconds, CliDB.SpellCategoryStorage.LookupByKey((int)SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId).ChargeRecoveryTime);
         }
 
         public override void Register()
@@ -753,7 +753,7 @@ namespace Scripts.Spells.Mage
                 _count = count;
             }
 
-            public override bool Execute(ulong time, uint diff)
+            public override bool Execute(long time, uint diff)
             {
                 Unit target = ObjAccessor.GetUnit(_caster, _target);
 
@@ -775,7 +775,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.FlurryDamage);
         }
 
-        void EffectHit(uint effIndex)
+        void EffectHit(int effIndex)
         {
             GetCaster().m_Events.AddEventAtOffset(new FlurryEvent(GetCaster(), GetHitUnit().GetGUID(), GetSpell().m_castId, GetEffectValue() - 1), RandomHelper.RandTime(TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(400)));
         }
@@ -794,7 +794,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.WintersChill);
         }
 
-        void HandleDamage(uint effIndex)
+        void HandleDamage(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.WintersChill, true);
         }
@@ -915,12 +915,12 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.IceLanceTrigger, SpellIds.ThermalVoid, SpellIds.IcyVeins, SpellIds.ChainReactionDummy, SpellIds.ChainReaction, SpellIds.FingersOfFrost);
         }
 
-        void IndexTarget(uint effIndex)
+        void IndexTarget(int effIndex)
         {
             _orderedTargets.Add(GetHitUnit().GetGUID());
         }
 
-        void HandleOnHit(uint effIndex)
+        void HandleOnHit(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -963,7 +963,7 @@ namespace Scripts.Spells.Mage
     [Script] // 228598 - Ice Lance
     class spell_mage_ice_lance_damage : SpellScript
     {
-        void ApplyDamageMultiplier(uint effIndex)
+        void ApplyDamageMultiplier(int effIndex)
         {
             SpellValue spellValue = GetSpellValue();
             if ((spellValue.CustomBasePointsMask & (1 << 1)) != 0)
@@ -1085,7 +1085,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(SpellIds.LivingBombPeriodic);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             GetCaster().CastSpell(GetHitUnit(), SpellIds.LivingBombPeriodic, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint2, 1));
@@ -1110,7 +1110,7 @@ namespace Scripts.Spells.Mage
             targets.Remove(GetExplTargetWorldObject());
         }
 
-        void HandleSpread(uint effIndex)
+        void HandleSpread(int effIndex)
         {
             if (GetSpellValue().EffectBasePoints[0] > 0)
                 GetCaster().CastSpell(GetHitUnit(), SpellIds.LivingBombPeriodic, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint2, 0));
@@ -1151,9 +1151,9 @@ namespace Scripts.Spells.Mage
     [Script] // 32826 - Polymorph (Visual)
     class spell_mage_polymorph_visual : SpellScript
     {
-        const uint NpcAurosalia = 18744;
+        const int NpcAurosalia = 18744;
 
-        uint[] PolymorhForms =
+        int[] PolymorhForms =
         {
             SpellIds.SquirrelForm,
             SpellIds.GiraffeForm,
@@ -1168,7 +1168,7 @@ namespace Scripts.Spells.Mage
             return ValidateSpellInfo(PolymorhForms);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit target = GetCaster().FindNearestCreature(NpcAurosalia, 30.0f);
             if (target != null)
@@ -1304,7 +1304,7 @@ namespace Scripts.Spells.Mage
         void Apply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             List<TempSummon> minions = new();
-            GetTarget().GetAllMinionsByEntry(minions, (uint)SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).MiscValue);
+            GetTarget().GetAllMinionsByEntry(minions, SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).MiscValue);
 
             // Get the last summoned RoF, save it and despawn older ones
             foreach (TempSummon summon in minions)
@@ -1394,7 +1394,7 @@ namespace Scripts.Spells.Mage
     [Script] // 157980 - Supernova
     class spell_mage_supernova : SpellScript
     {
-        void HandleDamage(uint effIndex)
+        void HandleDamage(int effIndex)
         {
             if (GetExplTargetUnit() == GetHitUnit())
             {
@@ -1425,7 +1425,7 @@ namespace Scripts.Spells.Mage
             {
                 if (damageInfo.GetAttacker() == GetCaster() && damageInfo.GetVictim() == GetTarget())
                 {
-                    uint extra = MathFunctions.CalculatePct(damageInfo.GetDamage(), 25);
+                    int extra = MathFunctions.CalculatePct(damageInfo.GetDamage(), 25);
                     if (extra > 0)
                         aurEff.ChangeAmount(aurEff.GetAmount() + (int)extra);
                 }

@@ -74,7 +74,7 @@ namespace Game.Entities
         {
             if (UpdateAccountToys(itemId, isFavourite, hasFanfare))
             {
-                _owner.GetPlayer().AddToy(itemId, (uint)GetToyFlags(isFavourite, hasFanfare));
+                _owner.GetPlayer().AddToy(itemId, GetToyFlags(isFavourite, hasFanfare));
                 return true;
             }
 
@@ -88,7 +88,7 @@ namespace Game.Entities
 
             do
             {
-                uint itemId = result.Read<uint>(0);
+                int itemId = result.Read<int>(0);
                 _toys.Add(itemId, GetToyFlags(result.Read<bool>(1), result.Read<bool>(2)));
             } while (result.NextRow());
         }
@@ -107,7 +107,7 @@ namespace Game.Entities
             }
         }
 
-        bool UpdateAccountToys(uint itemId, bool isFavourite, bool hasFanfare)
+        bool UpdateAccountToys(int itemId, bool isFavourite, bool hasFanfare)
         {
             if (_toys.ContainsKey(itemId))
                 return false;
@@ -116,7 +116,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void ToySetFavorite(uint itemId, bool favorite)
+        public void ToySetFavorite(int itemId, bool favorite)
         {
             if (!_toys.ContainsKey(itemId))
                 return;
@@ -127,7 +127,7 @@ namespace Game.Entities
                 _toys[itemId] &= ~ToyFlags.Favorite;
         }
 
-        public void ToyClearFanfare(uint itemId)
+        public void ToyClearFanfare(int itemId)
         {
             if (!_toys.ContainsKey(itemId))
                 return;
@@ -162,14 +162,14 @@ namespace Game.Entities
 
             do
             {
-                uint itemId = result.Read<uint>(0);
+                int itemId = result.Read<int>(0);
                 HeirloomPlayerFlags flags = (HeirloomPlayerFlags)result.Read<uint>(1);
 
                 HeirloomRecord heirloom = Global.DB2Mgr.GetHeirloomByItemId(itemId);
                 if (heirloom == null)
                     continue;
 
-                uint bonusId = 0;
+                int bonusId = 0;
 
                 for (int upgradeLevel = heirloom.UpgradeItemID.Length - 1; upgradeLevel >= 0; --upgradeLevel)
                 {
@@ -329,7 +329,7 @@ namespace Game.Entities
 
             do
             {
-                uint mountSpellId = result.Read<uint>(0);
+                int mountSpellId = result.Read<int>(0);
                 MountStatusFlags flags = (MountStatusFlags)result.Read<byte>(1);
 
                 if (Global.DB2Mgr.GetMount(mountSpellId) == null)
@@ -351,7 +351,7 @@ namespace Game.Entities
             }
         }
 
-        public bool AddMount(uint spellId, MountStatusFlags flags, bool factionMount = false, bool learned = false)
+        public bool AddMount(int spellId, MountStatusFlags flags, bool factionMount = false, bool learned = false)
         {
             Player player = _owner.GetPlayer();
             if (player == null)
@@ -386,7 +386,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void MountSetFavorite(uint spellId, bool favorite)
+        public void MountSetFavorite(int spellId, bool favorite)
         {
             if (!_mounts.ContainsKey(spellId))
                 return;
@@ -399,7 +399,7 @@ namespace Game.Entities
             SendSingleMountUpdate(spellId, _mounts[spellId]);
         }
 
-        void SendSingleMountUpdate(uint spellId, MountStatusFlags mountStatusFlags)
+        void SendSingleMountUpdate(int spellId, MountStatusFlags mountStatusFlags)
         {
             Player player = _owner.GetPlayer();
             if (player == null)
@@ -414,7 +414,7 @@ namespace Game.Entities
         public void LoadItemAppearances()
         {
             Player owner = _owner.GetPlayer();
-            foreach (uint blockValue in _appearances.ToBlockRange())
+            foreach (var blockValue in _appearances.ToBlockRange())
                 owner.AddTransmogBlock(blockValue);
 
             foreach (var value in _temporaryAppearances.Keys)
@@ -447,7 +447,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    _favoriteAppearances[favoriteAppearances.Read<uint>(0)] = FavoriteAppearanceState.Unchanged;
+                    _favoriteAppearances[favoriteAppearances.Read<int>(0)] = FavoriteAppearanceState.Unchanged;
                 } while (favoriteAppearances.NextRow());
             }
         }
@@ -495,20 +495,20 @@ namespace Game.Entities
             }
         }
 
-        uint[] PlayerClassByArmorSubclass =
+        ClassMask[] PlayerClassByArmorSubclass =
         {
-            (int)Class.ClassMaskAllPlayable,                                                                                        //ITEM_SUBCLASS_ARMOR_MISCELLANEOUS
-            (1 << ((int)Class.Priest - 1)) | (1 << ((int)Class.Mage - 1)) | (1 << ((int)Class.Warlock - 1)),                                       //ITEM_SUBCLASS_ARMOR_CLOTH
-            (1 << ((int)Class.Rogue - 1)) | (1 << ((int)Class.Monk - 1)) | (1 << ((int)Class.Druid - 1)) | (1 << ((int)Class.DemonHunter - 1)),        //ITEM_SUBCLASS_ARMOR_LEATHER
-            (1 << ((int)Class.Hunter - 1)) | (1 << ((int)Class.Shaman - 1)),                                                                  //ITEM_SUBCLASS_ARMOR_MAIL
-            (1 << ((int)Class.Warrior - 1)) | (1 << ((int)Class.Paladin - 1)) | (1 << ((int)Class.Deathknight - 1)),                              //ITEM_SUBCLASS_ARMOR_PLATE
-            (int)Class.ClassMaskAllPlayable,                                                                                                 //ITEM_SUBCLASS_ARMOR_BUCKLER
-            (1 << ((int)Class.Warrior - 1)) | (1 << ((int)Class.Paladin - 1)) | (1 << ((int)Class.Shaman - 1)),                                    //ITEM_SUBCLASS_ARMOR_SHIELD
-            1 << ((int)Class.Paladin - 1),                                                                                               //ITEM_SUBCLASS_ARMOR_LIBRAM
-            1 << ((int)Class.Druid - 1),                                                                                                 //ITEM_SUBCLASS_ARMOR_IDOL
-            1 << ((int)Class.Shaman - 1),                                                                                                //ITEM_SUBCLASS_ARMOR_TOTEM
-            1 << ((int)Class.Deathknight - 1),                                                                                          //ITEM_SUBCLASS_ARMOR_SIGIL
-            (1 << ((int)Class.Paladin - 1)) | (1 << ((int)Class.Deathknight - 1)) | (1 << ((int)Class.Shaman - 1)) | (1 << ((int)Class.Druid - 1)),    //ITEM_SUBCLASS_ARMOR_RELIC
+            ClassMask.Playable,                                                                //ITEM_SUBCLASS_ARMOR_MISCELLANEOUS
+            ClassMask.Priest | ClassMask.Mage | ClassMask.Warlock,                             //ITEM_SUBCLASS_ARMOR_CLOTH
+            ClassMask.Rogue | ClassMask.Monk | ClassMask.Druid | ClassMask.DemonHunter,        //ITEM_SUBCLASS_ARMOR_LEATHER
+            ClassMask.Hunter | ClassMask.Shaman,                                               //ITEM_SUBCLASS_ARMOR_MAIL
+            ClassMask.Warrior | ClassMask.Paladin | ClassMask.Deathknight,                     //ITEM_SUBCLASS_ARMOR_PLATE
+            ClassMask.Playable,                                                                //ITEM_SUBCLASS_ARMOR_BUCKLER
+            ClassMask.Warrior | ClassMask.Paladin | ClassMask.Shaman,                          //ITEM_SUBCLASS_ARMOR_SHIELD
+            ClassMask.Paladin,                                                                 //ITEM_SUBCLASS_ARMOR_LIBRAM
+            ClassMask.Druid,                                                                   //ITEM_SUBCLASS_ARMOR_IDOL
+            ClassMask.Shaman,                                                                  //ITEM_SUBCLASS_ARMOR_TOTEM
+            ClassMask.Deathknight,                                                             //ITEM_SUBCLASS_ARMOR_SIGIL
+            ClassMask.Paladin | ClassMask.Deathknight | ClassMask.Shaman | ClassMask.Druid,    //ITEM_SUBCLASS_ARMOR_RELIC
         };
 
         public void AddItemAppearance(Item item)
@@ -593,14 +593,14 @@ namespace Game.Entities
                         case InventoryType.Wrists:
                         case InventoryType.Hands:
                         case InventoryType.Robe:
-                            if ((ItemSubClassArmor)itemTemplate.GetSubClass() == ItemSubClassArmor.Miscellaneous)
+                            if (itemTemplate.GetSubClass().Armor == ItemSubClassArmor.Miscellaneous)
                                 return false;
                             break;
                         default:
                             return false;
                     }
                     if (itemTemplate.GetInventoryType() != InventoryType.Cloak)
-                        if (!Convert.ToBoolean(PlayerClassByArmorSubclass[itemTemplate.GetSubClass()] & _owner.GetPlayer().GetClassMask()))
+                        if (!PlayerClassByArmorSubclass[itemTemplate.GetSubClass().data].HasClass(_owner.GetPlayer().GetClass()))
                             return false;
                     break;
                 }
@@ -623,17 +623,17 @@ namespace Game.Entities
             Player owner = _owner.GetPlayer();
             if (_appearances.Count <= itemModifiedAppearance.Id)
             {
-                uint numBlocks = (uint)(_appearances.Count << 2);
-                _appearances.Length = (int)itemModifiedAppearance.Id + 1;
-                numBlocks = (uint)(_appearances.Count << 2) - numBlocks;
+                int numBlocks = _appearances.Count << 2;
+                _appearances.Length = itemModifiedAppearance.Id + 1;
+                numBlocks = (_appearances.Count << 2) - numBlocks;
                 while (numBlocks-- != 0)
                     owner.AddTransmogBlock(0);
             }
 
-            _appearances.Set((int)itemModifiedAppearance.Id, true);
-            uint blockIndex = itemModifiedAppearance.Id / 32;
-            uint bitIndex = itemModifiedAppearance.Id % 32;
-            owner.AddTransmogFlag((int)blockIndex, 1u << (int)bitIndex);
+            _appearances.Set(itemModifiedAppearance.Id, true);
+            int blockIndex = itemModifiedAppearance.Id / 32;
+            int bitIndex = itemModifiedAppearance.Id % 32;
+            owner.AddTransmogFlag(blockIndex, 1u << bitIndex);
             var temporaryAppearance = _temporaryAppearances.LookupByKey(itemModifiedAppearance.Id);
             if (!temporaryAppearance.Empty())
             {
@@ -644,9 +644,9 @@ namespace Game.Entities
             ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
             if (item != null)
             {
-                int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
+                int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.InventoryType];
                 if (transmogSlot >= 0)
-                    _owner.GetPlayer().UpdateCriteria(CriteriaType.LearnAnyTransmogInSlot, (ulong)transmogSlot, itemModifiedAppearance.Id);
+                    _owner.GetPlayer().UpdateCriteria(CriteriaType.LearnAnyTransmogInSlot, transmogSlot, itemModifiedAppearance.Id);
             }
 
             var sets = Global.DB2Mgr.GetTransmogSetsForItemModifiedAppearance(itemModifiedAppearance.Id);
@@ -750,7 +750,7 @@ namespace Game.Entities
             _owner.SendPacket(accountTransmogUpdate);
         }
 
-        public void AddTransmogSet(uint transmogSetId)
+        public void AddTransmogSet(int transmogSetId)
         {
             var items = Global.DB2Mgr.GetTransmogSetItems(transmogSetId);
             if (items.Empty())
@@ -766,7 +766,7 @@ namespace Game.Entities
             }
         }
 
-        bool IsSetCompleted(uint transmogSetId)
+        bool IsSetCompleted(int transmogSetId)
         {
             var transmogSetItems = Global.DB2Mgr.GetTransmogSetItems(transmogSetId);
             if (transmogSetItems.Empty())
@@ -786,7 +786,7 @@ namespace Game.Entities
                 if (item == null)
                     continue;
 
-                int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
+                int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.InventoryType];
                 if (transmogSlot < 0 || knownPieces[transmogSlot] == 1)
                     continue;
 

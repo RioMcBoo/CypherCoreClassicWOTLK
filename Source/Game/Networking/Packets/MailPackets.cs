@@ -45,11 +45,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
-            MailID = _worldPacket.ReadUInt64();
+            MailID = _worldPacket.ReadInt64();
         }
 
         public ObjectGuid Mailbox;
-        public ulong MailID;
+        public long MailID;
     }
 
     public class SendMail : ClientPacket
@@ -137,11 +137,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            MailID = _worldPacket.ReadUInt64();
+            MailID = _worldPacket.ReadInt64();
             SenderGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ulong MailID;
+        public long MailID;
         public ObjectGuid SenderGUID;
     }
 
@@ -152,11 +152,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
-            MailID = _worldPacket.ReadUInt64();
+            MailID = _worldPacket.ReadInt64();
         }
 
         public ObjectGuid Mailbox;
-        public ulong MailID;
+        public long MailID;
     }
 
     public class MailDelete : ClientPacket
@@ -165,11 +165,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            MailID = _worldPacket.ReadUInt64();
+            MailID = _worldPacket.ReadInt64();
             DeleteReason = _worldPacket.ReadInt32();
         }
 
-        public ulong MailID;
+        public long MailID;
         public int DeleteReason;
     }
 
@@ -180,13 +180,13 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
-            MailID = _worldPacket.ReadUInt64();
-            AttachID = _worldPacket.ReadUInt64();
+            MailID = _worldPacket.ReadInt64();
+            AttachID = _worldPacket.ReadInt64();
         }
 
         public ObjectGuid Mailbox;
-        public ulong MailID;
-        public ulong AttachID;
+        public long MailID;
+        public long AttachID;
     }
 
     public class MailTakeMoney : ClientPacket
@@ -196,13 +196,13 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
-            MailID = _worldPacket.ReadUInt64();
-            Money = _worldPacket.ReadUInt64();
+            MailID = _worldPacket.ReadInt64();
+            Money = _worldPacket.ReadInt64();
         }
 
         public ObjectGuid Mailbox;
-        public ulong MailID;
-        public ulong Money;
+        public long MailID;
+        public long Money;
     }
 
     public class MailQueryNextMailTime : ClientPacket

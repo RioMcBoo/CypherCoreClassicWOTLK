@@ -839,7 +839,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(ResurrectOffererGUID);
             _worldPacket.WriteUInt32(ResurrectOffererVirtualRealmAddress);
-            _worldPacket.WriteUInt32(PetNumber);
+            _worldPacket.WriteInt32(PetNumber);
             _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteBits(Name.GetByteCount(), 11);
             _worldPacket.WriteBit(UseTimer);
@@ -851,7 +851,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid ResurrectOffererGUID;
         public uint ResurrectOffererVirtualRealmAddress;
-        public uint PetNumber;
+        public int PetNumber;
         public int SpellID;
         public bool UseTimer;
         public bool Sickness;
@@ -864,10 +864,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            SkillLine = _worldPacket.ReadUInt32();
+            SkillLine = _worldPacket.ReadInt32();
         }
 
-        public uint SkillLine;
+        public int SkillLine;
     }
 
     class SelfRes : ClientPacket
@@ -1086,7 +1086,7 @@ namespace Game.Networking.Packets
 
     class CustomLoadScreen : ServerPacket
     {
-        public CustomLoadScreen(uint teleportSpellId, uint loadingScreenId) : base(ServerOpcodes.CustomLoadScreen)
+        public CustomLoadScreen(int teleportSpellId, int loadingScreenId) : base(ServerOpcodes.CustomLoadScreen)
         {
             TeleportSpellID = teleportSpellId;
             LoadingScreenID = loadingScreenId;
@@ -1094,12 +1094,12 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(TeleportSpellID);
-            _worldPacket.WriteUInt32(LoadingScreenID);
+            _worldPacket.WriteInt32(TeleportSpellID);
+            _worldPacket.WriteInt32(LoadingScreenID);
         }
 
-        uint TeleportSpellID;
-        uint LoadingScreenID;
+        int TeleportSpellID;
+        int LoadingScreenID;
     }
 
     class MountResultPacket : ServerPacket
@@ -1108,10 +1108,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(Result);
+            _worldPacket.WriteInt32((int)Result);
         }
 
-        public int Result;
+        public MountResult Result;
     }
 
     class MissileCancel : ServerPacket

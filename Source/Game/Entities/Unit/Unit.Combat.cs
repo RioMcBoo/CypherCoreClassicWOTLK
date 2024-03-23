@@ -197,7 +197,7 @@ namespace Game.Entities
                     AttackStop();
         }
 
-        public void StopAttackFaction(uint factionId)
+        public void StopAttackFaction(int factionId)
         {
             Unit victim = GetVictim();
             if (victim != null)
@@ -239,7 +239,7 @@ namespace Game.Entities
                 minion.StopAttackFaction(factionId);
         }
 
-        public void HandleProcExtraAttackFor(Unit victim, uint count)
+        public void HandleProcExtraAttackFor(Unit victim, int count)
         {
             while (count != 0)
             {
@@ -248,7 +248,7 @@ namespace Game.Entities
             }
         }
 
-        public void AddExtraAttacks(uint count)
+        public void AddExtraAttacks(int count)
         {
             ObjectGuid targetGUID = _lastDamagedTargetGuid;
             if (!targetGUID.IsEmpty())
@@ -442,9 +442,9 @@ namespace Game.Entities
             attackerList.Remove(pAttacker);
         }
 
-        public void SetLastExtraAttackSpell(uint spellId) { _lastExtraAttackSpell = spellId; }
+        public void SetLastExtraAttackSpell(int spellId) { _lastExtraAttackSpell = spellId; }
 
-        public uint GetLastExtraAttackSpell() { return _lastExtraAttackSpell; }
+        public int GetLastExtraAttackSpell() { return _lastExtraAttackSpell; }
 
         public void SetLastDamagedTargetGuid(ObjectGuid guid) { _lastDamagedTargetGuid = guid; }
 
@@ -564,7 +564,7 @@ namespace Game.Entities
                 victim = GetMeleeHitRedirectTarget(victim);
 
                 var meleeAttackOverrides = GetAuraEffectsByType(AuraType.OverrideAutoattackWithMeleeSpell);
-                uint meleeAttackSpellId = 0;
+                int meleeAttackSpellId = 0;
                 if (attType == WeaponAttackType.BaseAttack)
                 {
                     if (!meleeAttackOverrides.Empty())
@@ -578,7 +578,7 @@ namespace Game.Entities
                     });
 
                     if (auraEffect != null)
-                        meleeAttackSpellId = (uint)auraEffect.GetSpellEffectInfo().MiscValue;
+                        meleeAttackSpellId = auraEffect.GetSpellEffectInfo().MiscValue;
                 }
 
                 if (meleeAttackSpellId == 0)
@@ -640,7 +640,7 @@ namespace Game.Entities
             return victim;
         }
 
-        public void SendAttackStateUpdate(HitInfo HitInfo, Unit target, SpellSchoolMask damageSchoolMask, uint Damage, uint AbsorbDamage, uint Resist, VictimState TargetState, uint BlockedAmount)
+        public void SendAttackStateUpdate(HitInfo HitInfo, Unit target, SpellSchoolMask damageSchoolMask, int Damage, int AbsorbDamage, int Resist, VictimState TargetState, int BlockedAmount)
         {
             CalcDamageInfo dmgInfo = new();
             dmgInfo.HitInfo = HitInfo;
@@ -842,7 +842,7 @@ namespace Game.Entities
                             if (dungeonEncounter != null)
                                 loot.SetDungeonEncounterId(dungeonEncounter.Id);
 
-                            uint lootid = creature.GetLootId();
+                            int lootid = creature.GetLootId();
                             if (lootid != 0)
                                 loot.FillLoot(lootid, LootStorage.Creature, tapper, true, false, creature.GetLootMode());
 
@@ -1055,9 +1055,12 @@ namespace Game.Entities
 
         public void KillSelf(bool durabilityLoss = true, bool skipSettingDeathState = false) { Kill(this, this, durabilityLoss, skipSettingDeathState); }
 
-        public virtual bool CanUseAttackType(WeaponAttackType attacktype)
+        public virtual bool CanUseAttackType(WeaponAttackType? attacktype)
         {
-            switch (attacktype)
+            if (!attacktype.HasValue)
+                return true;
+
+            switch (attacktype.Value)
             {
                 case WeaponAttackType.BaseAttack:
                     return !HasUnitFlag(UnitFlags.Disarmed);
@@ -1078,7 +1081,7 @@ namespace Game.Entities
             damageInfo.Attacker = this;
             damageInfo.Target = victim;
 
-            damageInfo.DamageSchoolMask = (uint)SpellSchoolMask.Normal;
+            damageInfo.DamageSchoolMask = SpellSchoolMask.Normal;
             damageInfo.Damage = 0;
             damageInfo.OriginalDamage = 0;
             damageInfo.Absorb = 0;
@@ -1117,7 +1120,7 @@ namespace Game.Entities
             }
 
             // Physical Immune check
-            if (damageInfo.Target.IsImmunedToDamage((SpellSchoolMask)damageInfo.DamageSchoolMask))
+            if (damageInfo.Target.IsImmunedToDamage(damageInfo.DamageSchoolMask))
             {
                 damageInfo.HitInfo |= HitInfo.NormalSwing;
                 damageInfo.TargetState = VictimState.Immune;
@@ -1127,11 +1130,11 @@ namespace Game.Entities
                 return;
             }
 
-            uint damage = 0;
+            int damage = 0;
             damage += CalculateDamage(damageInfo.AttackType, false, true);
             // Add melee damage bonus
-            damage = (uint)MeleeDamageBonusDone(damageInfo.Target, (int)damage, damageInfo.AttackType, DamageEffectType.Direct, null, default, (SpellSchoolMask)damageInfo.DamageSchoolMask);
-            damage = (uint)damageInfo.Target.MeleeDamageBonusTaken(this, (int)damage, damageInfo.AttackType, DamageEffectType.Direct, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
+            damage = MeleeDamageBonusDone(damageInfo.Target, damage, damageInfo.AttackType, DamageEffectType.Direct, null, default, damageInfo.DamageSchoolMask);
+            damage = damageInfo.Target.MeleeDamageBonusTaken(this, damage, damageInfo.AttackType, DamageEffectType.Direct, null, damageInfo.DamageSchoolMask);
 
             // Script Hook For CalculateMeleeDamage -- Allow scripts to change the Damage pre class mitigation calculations
             Global.ScriptMgr.ModifyMeleeDamage(damageInfo.Target, damageInfo.Attacker, ref damage);
@@ -1176,7 +1179,7 @@ namespace Game.Entities
                     damageInfo.Damage *= 2;
 
                     // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
-                    float mod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, damageInfo.DamageSchoolMask) - 1.0f) * 100;
+                    float mod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)damageInfo.DamageSchoolMask) - 1.0f) * 100;
 
                     if (mod != 0)
                         MathFunctions.AddPct(ref damageInfo.Damage, mod);
@@ -1212,14 +1215,14 @@ namespace Game.Entities
                 case MeleeHitOutcome.Glancing:
                     damageInfo.HitInfo |= HitInfo.Glancing;
                     damageInfo.TargetState = VictimState.Hit;
-                    int leveldif = (int)victim.GetLevel() - (int)GetLevel();
+                    int leveldif = victim.GetLevel() - GetLevel();
                     if (leveldif > 3)
                         leveldif = 3;
 
                     damageInfo.OriginalDamage = damageInfo.Damage;
                     float reducePercent = 1.0f - leveldif * 0.1f;
-                    damageInfo.CleanDamage += damageInfo.Damage - (uint)(reducePercent * damageInfo.Damage);
-                    damageInfo.Damage = (uint)(reducePercent * damageInfo.Damage);
+                    damageInfo.CleanDamage += damageInfo.Damage - (int)(reducePercent * damageInfo.Damage);
+                    damageInfo.Damage = (int)(reducePercent * damageInfo.Damage);
                     break;
                 case MeleeHitOutcome.Crushing:
                     damageInfo.HitInfo |= HitInfo.Crushing;
@@ -1241,9 +1244,9 @@ namespace Game.Entities
             if (CanApplyResilience())
                 ApplyResilience(victim, ref resilienceReduction);
 
-            resilienceReduction = (int)damageInfo.Damage - resilienceReduction;
-            damageInfo.Damage -= (uint)resilienceReduction;
-            damageInfo.CleanDamage += (uint)resilienceReduction;
+            resilienceReduction = damageInfo.Damage - resilienceReduction;
+            damageInfo.Damage -= resilienceReduction;
+            damageInfo.CleanDamage += resilienceReduction;
 
             // Calculate absorb resist
             if (damageInfo.Damage > 0)
@@ -1290,8 +1293,8 @@ namespace Game.Entities
             int sum = 0;
             int roll = RandomHelper.IRand(0, 9999);
 
-            uint attackerLevel = GetLevelForTarget(victim);
-            uint victimLevel = GetLevelForTarget(this);
+            int attackerLevel = GetLevelForTarget(victim);
+            int victimLevel = GetLevelForTarget(this);
 
             // check if attack comes from behind, nobody can parry or block if attacker is behind
             bool canParryOrBlock = victim.HasInArc((float)Math.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection);
@@ -1379,7 +1382,7 @@ namespace Game.Entities
             return MeleeHitOutcome.Normal;
         }
 
-        public uint CalculateDamage(WeaponAttackType attType, bool normalized, bool addTotalPct)
+        public int CalculateDamage(WeaponAttackType attType, bool normalized, bool addTotalPct)
         {
             float minDamage;
             float maxDamage;
@@ -1428,7 +1431,7 @@ namespace Game.Entities
             if (minDamage > maxDamage)
                 Extensions.Swap(ref minDamage, ref maxDamage);
 
-            return RandomHelper.URand(minDamage, maxDamage);
+            return (int)RandomHelper.URand(minDamage, maxDamage);
         }
 
         public float GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange type)
@@ -1451,7 +1454,7 @@ namespace Game.Entities
             if (!normalized)
                 return weapon.GetTemplate().GetDelay() / 1000.0f;
 
-            switch ((ItemSubClassWeapon)weapon.GetTemplate().GetSubClass())
+            switch (weapon.GetTemplate().GetSubClass().Weapon)
             {
                 case ItemSubClassWeapon.Axe2:
                 case ItemSubClassWeapon.Mace2:

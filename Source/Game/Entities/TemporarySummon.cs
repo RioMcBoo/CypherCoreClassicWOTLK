@@ -215,19 +215,19 @@ namespace Game.Entities
                     unitSummoner.m_SummonSlot[slot] = GetGUID();
                 }
 
-                if (!m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseCreatureLevel))
+                if (!m_Properties.HasFlag(SummonPropertiesFlags.UseCreatureLevel))
                     SetLevel(unitSummoner.GetLevel());
             }
 
-            uint faction = m_Properties.Faction;
-            if (summoner != null && m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
+            int faction = m_Properties.Faction;
+            if (summoner != null && m_Properties.HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
                 faction = summoner.GetFaction();
 
             if (faction != 0)
                 SetFaction(faction);
 
-            if (m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
-                RemoveNpcFlag(NPCFlags.WildBattlePet);
+            if (m_Properties.HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
+                RemoveNpcFlag(NPCFlags1.WildBattlePet);
         }
 
         public virtual void InitSummon(WorldObject summoner)
@@ -416,7 +416,7 @@ namespace Game.Entities
             return $"{base.GetDebugInfo()}\nTempSummonType : {GetSummonType()} Summoner: {GetSummonerGUID()} Timer: {GetTimer()}";
         }
         
-        public override void SaveToDB(uint mapid, List<Difficulty> spawnDifficulties) { }
+        public override void SaveToDB(int mapid, List<Difficulty> spawnDifficulties) { }
 
         public ObjectGuid GetSummonerGUID() { return m_summonerGUID; }
 
@@ -434,7 +434,7 @@ namespace Game.Entities
 
         public int? GetCreatureIdVisibleToSummoner() { return m_creatureIdVisibleToSummoner; }
 
-        public uint? GetDisplayIdVisibleToSummoner() { return m_displayIdVisibleToSummoner; }
+        public int? GetDisplayIdVisibleToSummoner() { return m_displayIdVisibleToSummoner; }
         
         public bool CanFollowOwner() { return m_canFollowOwner; }
 
@@ -445,8 +445,8 @@ namespace Game.Entities
         TimeSpan m_timer;
         TimeSpan m_lifetime;
         ObjectGuid m_summonerGUID;
-        uint? m_creatureIdVisibleToSummoner;
-        uint? m_displayIdVisibleToSummoner;
+        int? m_creatureIdVisibleToSummoner;
+        int? m_displayIdVisibleToSummoner;
         bool m_canFollowOwner;
     }
 
@@ -1137,7 +1137,7 @@ namespace Game.Entities
             m_bonusSpellDamage = damage;
             Player playerOwner = GetOwner().ToPlayer();
             if (playerOwner != null)
-                playerOwner.SetPetSpellPower((uint)damage);
+                playerOwner.SetPetSpellPower(damage);
         }
 
         public int GetBonusDamage() { return m_bonusSpellDamage; }
@@ -1191,7 +1191,8 @@ namespace Game.Entities
         {
             m_owner = owner;
         }
-        public override bool Execute(ulong e_time, uint p_time)
+
+        public override bool Execute(long e_time, uint p_time)
         {
             m_owner.UnSummon();
             return true;

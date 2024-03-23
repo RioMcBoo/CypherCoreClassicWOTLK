@@ -7,7 +7,7 @@ namespace Framework.Constants
 {
     public class MapConst
     {
-        public const uint InvalidZone = 0xFFFFFFFF;
+        public const int InvalidZone = -1;
 
         //Grids
         public const int MaxGrids = 64;

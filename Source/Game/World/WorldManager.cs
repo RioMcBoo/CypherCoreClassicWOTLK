@@ -1916,7 +1916,7 @@ namespace Game
 
         public void UpdateSessions(uint diff)
         {
-            Tuple<WorldSocket, ulong> linkInfo;
+            Tuple<WorldSocket, long> linkInfo;
             while (_linkSocketQueue.TryDequeue(out linkInfo))
                 ProcessLinkInstanceSocket(linkInfo);
 

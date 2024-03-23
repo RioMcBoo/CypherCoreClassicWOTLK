@@ -1152,7 +1152,7 @@ namespace Game.BattleGrounds
             m_QueueId = queueId;
         }
 
-        public override bool Execute(ulong e_time, uint p_time)
+        public override bool Execute(long e_time, uint p_time)
         {
             Player player = Global.ObjAccessor.FindPlayer(m_PlayerGuid);
             // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
@@ -1179,7 +1179,7 @@ namespace Game.BattleGrounds
             return true;                                            //event will be deleted
         }
 
-        public override void Abort(ulong e_time) { }
+        public override void Abort(long e_time) { }
 
         ObjectGuid m_PlayerGuid;
         int m_BgInstanceGUID;
@@ -1203,7 +1203,7 @@ namespace Game.BattleGrounds
             m_BgQueueTypeId = bgQueueTypeId;
         }
 
-        public override bool Execute(ulong e_time, uint p_time)
+        public override bool Execute(long e_time, uint p_time)
         {
             Player player = Global.ObjAccessor.FindPlayer(m_PlayerGuid);
             if (player == null)
@@ -1239,7 +1239,7 @@ namespace Game.BattleGrounds
             return true;
         }
 
-        public override void Abort(ulong e_time) { }
+        public override void Abort(long e_time) { }
 
         ObjectGuid m_PlayerGuid;
         int m_BgInstanceGUID;

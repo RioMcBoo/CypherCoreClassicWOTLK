@@ -5,7 +5,7 @@ namespace Framework.Constants
 {
     public struct BlackMarketConst
     {
-        public const ulong MaxBid = 1000000UL* MoneyConstants.Gold;
+        public const long MaxBid = 1000000L* MoneyConstants.Gold;
     }
     public enum BlackMarketError
     {

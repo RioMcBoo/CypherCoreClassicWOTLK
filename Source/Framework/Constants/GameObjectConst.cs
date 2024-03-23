@@ -72,7 +72,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum GameObjectState : uint
+    public enum GameObjectState
     {
         Active = 0,
         Ready = 1,

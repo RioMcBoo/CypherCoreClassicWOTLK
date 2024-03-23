@@ -45,7 +45,7 @@ namespace Game
                 return;
             }
 
-            _player.SplitItem(src, dst, (uint)splitItem.Quantity);
+            _player.SplitItem(src, dst, splitItem.Quantity);
         }
 
         [WorldPacketHandler(ClientOpcodes.SwapInvItem, Processing = PacketProcessing.Inplace)]
@@ -288,7 +288,7 @@ namespace Game
 
             if (destroyItem.Count != 0)
             {
-                uint i_count = destroyItem.Count;
+                int i_count = destroyItem.Count;
                 _player.DestroyItemCount(pItem, ref i_count, true);
             }
             else
@@ -466,14 +466,14 @@ namespace Game
             Item pItem = _player.GetItemFromBuyBackSlot(packet.Slot);
             if (pItem != null)
             {
-                uint price = _player.m_activePlayerData.BuybackPrice[(int)(packet.Slot - InventorySlots.BuyBackStart)];
+                uint price = _player.m_activePlayerData.BuybackPrice[packet.Slot - InventorySlots.BuyBackStart];
                 if (!_player.HasEnoughMoney(price))
                 {
                     _player.SendBuyError(BuyResult.NotEnoughtMoney, creature, pItem.GetEntry());
                     return;
                 }
 
-                InventoryResult msg = _player.CanStoreItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, pItem);
+                InventoryResult msg = _player.CanStoreItem(ItemPos.Undefined, out var dest, pItem);
                 if (msg == InventoryResult.Ok)
                 {
                     _player.ModifyMoney(-price);
@@ -716,7 +716,7 @@ namespace Game
             }
             DB.Characters.CommitTransaction(trans);
 
-            uint count = 1;
+            int count = 1;
             GetPlayer().DestroyItemCount(gift, ref count, true);
         }
 

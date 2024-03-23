@@ -124,7 +124,7 @@ namespace Game.Movement
 
         public int Duration() { return spline.Length(); }
         public int CurrentSplineIdx() { return point_Idx; }
-        public uint GetId() { return m_Id; }
+        public int GetId() { return m_Id; }
         public bool Finalized() { return splineflags.HasFlag(SplineFlag.Done); }
         void _Finalize()
         {
@@ -347,7 +347,7 @@ namespace Game.Movement
         public MoveSplineFlag splineflags = new();
         public bool onTransport;
         public bool splineIsFacingOnly;
-        public uint m_Id;
+        public int m_Id;
         public int time_passed;
         public float vertical_acceleration;
         public float initialOrientation;

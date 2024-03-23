@@ -46,7 +46,7 @@ namespace Game.Chat
 
         static bool HandleResetStatsOrLevelHelper(Player player)
         {
-            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(player.GetClass());
+            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)player.GetClass());
             if (classEntry == null)
             {
                 Log.outError(LogFilter.Server, "Class {0} not found in DBC (Wrong DBC files?)", player.GetClass());
@@ -71,7 +71,7 @@ namespace Game.Chat
             player.ReplaceAllUnitFlags(UnitFlags.PlayerControlled);
 
             //-1 is default value
-            player.SetWatchedFactionIndex(0xFFFFFFFF);
+            player.SetWatchedFactionIndex(-1);
             return true;
         }
 
@@ -91,7 +91,7 @@ namespace Game.Chat
             byte oldLevel = (byte)target.GetLevel();
 
             // set starting level
-            uint startLevel = target.GetStartLevel(target.GetRace(), target.GetClass());
+            int startLevel = target.GetStartLevel(target.GetRace(), target.GetClass());
 
             target._ApplyAllLevelScaleItemMods(false);
             target.SetLevel(startLevel);

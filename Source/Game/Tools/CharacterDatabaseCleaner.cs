@@ -89,7 +89,7 @@ namespace Game
             }
         }
 
-        static bool AchievementProgressCheck(uint criteria)
+        static bool AchievementProgressCheck(int criteria)
         {
             return Global.CriteriaMgr.GetCriteria(criteria) != null;
         }
@@ -99,7 +99,7 @@ namespace Game
             CheckUnique("criteria", "character_achievement_progress", AchievementProgressCheck);
         }
 
-        static bool SkillCheck(uint skill)
+        static bool SkillCheck(int skill)
         {
             return CliDB.SkillLineStorage.ContainsKey(skill);
         }
@@ -109,7 +109,7 @@ namespace Game
             CheckUnique("skill", "character_skills", SkillCheck);
         }
 
-        static bool SpellCheck(uint spell_id)
+        static bool SpellCheck(int spell_id)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, Difficulty.None);
             return spellInfo != null && !spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
@@ -120,7 +120,7 @@ namespace Game
             CheckUnique("spell", "character_spell", SpellCheck);
         }
 
-        static bool TalentCheck(uint talent_id)
+        static bool TalentCheck(int talent_id)
         {
             TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(talent_id);
             if (talentInfo == null)

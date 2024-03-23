@@ -1811,7 +1811,7 @@ namespace Game.Entities
                     }
                 }
 
-                mSpellLinkedMap.Add((type, (uint)trigger), effect);
+                mSpellLinkedMap.Add((type, trigger), effect);
 
                 ++count;
             } while (result.NextRow());
@@ -2567,8 +2567,8 @@ namespace Game.Entities
                         spellInfo.AttributesEx11 = (SpellAttr11)spellsResult.Read<uint>(16);
                         spellInfo.AttributesEx12 = (SpellAttr12)spellsResult.Read<uint>(17);
                         spellInfo.AttributesEx13 = (SpellAttr13)spellsResult.Read<uint>(18);
-                        spellInfo.Stances = spellsResult.Read<long>(19);
-                        spellInfo.StancesNot = spellsResult.Read<long>(20);
+                        spellInfo.Stances = spellsResult.Read<ulong>(19);
+                        spellInfo.StancesNot = spellsResult.Read<ulong>(20);
                         spellInfo.Targets = (SpellCastTargetFlags)spellsResult.Read<uint>(21);
                         spellInfo.TargetCreatureType = spellsResult.Read<int>(22);
                         spellInfo.RequiresSpellFocus = spellsResult.Read<int>(23);

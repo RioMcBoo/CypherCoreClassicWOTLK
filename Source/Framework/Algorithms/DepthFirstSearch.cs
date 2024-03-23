@@ -18,7 +18,7 @@ namespace Framework.Algorithms
          * @param s the source vertex
          * @throws IllegalArgumentException unless {@code 0 <= s < V}
          */
-        public DepthFirstSearch(EdgeWeightedDigraph G, uint s, Action<uint> action)
+        public DepthFirstSearch(EdgeWeightedDigraph G, int s, Action<int> action)
         {
             marked = new bool[G.NumberOfVertices];
             //validateVertex(s);
@@ -26,11 +26,11 @@ namespace Framework.Algorithms
         }
 
         // depth first search from v
-        private void dfs(EdgeWeightedDigraph G, uint v, Action<uint> action)
+        private void dfs(EdgeWeightedDigraph G, int v, Action<int> action)
         {
             count++;
             marked[v] = true;
-            foreach (var w in G.Adjacent((int)v))
+            foreach (var w in G.Adjacent(v))
             {
                 if (!marked[w.To])
                 {

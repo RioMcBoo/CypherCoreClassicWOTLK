@@ -33,9 +33,9 @@ namespace Game
                 guild.SaveToDB();
         }
 
-        public int GenerateGuildId()
+        public long GenerateGuildId()
         {
-            if (NextGuildId >= 0xFFFFFFFE)
+            if (NextGuildId >= -2)
             {
                 Log.outError(LogFilter.Guild, "Guild ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();

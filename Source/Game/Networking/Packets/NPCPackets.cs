@@ -170,8 +170,8 @@ namespace Game.Networking.Packets
             {
                 _worldPacket.WriteInt32(spell.SpellID);
                 _worldPacket.WriteUInt32(spell.MoneyCost);
-                _worldPacket.WriteUInt32(spell.ReqSkillLine);
-                _worldPacket.WriteUInt32(spell.ReqSkillRank);
+                _worldPacket.WriteInt32(spell.ReqSkillLine);
+                _worldPacket.WriteInt32(spell.ReqSkillRank);
 
                 for (uint i = 0; i < SharedConst.MaxTrainerspellAbilityReqs; ++i)
                     _worldPacket.WriteInt32(spell.ReqAbility[i]);
@@ -294,13 +294,13 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PetNumber = _worldPacket.ReadUInt32();
+            PetNumber = _worldPacket.ReadInt32();
             DestSlot = _worldPacket.ReadUInt8();
             StableMaster = _worldPacket.ReadPackedGuid();
         }
 
         public ObjectGuid StableMaster;
-        public uint PetNumber;
+        public int PetNumber;
         public byte DestSlot;
     }
     
@@ -446,8 +446,8 @@ namespace Game.Networking.Packets
     {
         public int SpellID;
         public uint MoneyCost;
-        public uint ReqSkillLine;
-        public uint ReqSkillRank;
+        public int ReqSkillLine;
+        public int ReqSkillRank;
         public int[] ReqAbility = new int[SharedConst.MaxTrainerspellAbilityReqs];
         public TrainerSpellState Usable;
         public byte ReqLevel;

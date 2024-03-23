@@ -159,8 +159,8 @@ namespace Game
                 if (gain != 0 && creature != null)
                 {
                     // Players get only 10% xp for killing creatures of lower expansion levels than himself
-                    if ((creature.GetCreatureDifficulty().GetHealthScalingExpansion() < (int)GetExpansionForLevel(player.GetLevel())))
-                        gain = Math.Round(gain / 10.0);
+                    if ((creature.GetCreatureDifficulty().GetHealthScalingExpansion() < GetExpansionForLevel(player.GetLevel())))
+                        gain = (int)Math.Round(gain / 10.0);
 
                     if (creature.IsElite())
                     {
@@ -177,14 +177,14 @@ namespace Game
                 if (creature != null && creature.m_PlayerDamageReq != 0) // if players dealt less than 50% of the damage and were credited anyway (due to CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ), scale XP gained appropriately (linear scaling)
                     xpMod *= 1.0f - 2.0f * creature.m_PlayerDamageReq / creature.GetMaxHealth();
 
-                gain = (uint)(gain * xpMod);
+                gain = (int)(gain * xpMod);
             }
 
             Global.ScriptMgr.OnGainCalculation(gain, player, u);
             return gain;
         }
 
-        public static float XPInGroupRate(uint count, bool isRaid)
+        public static float XPInGroupRate(int count, bool isRaid)
         {
             float rate;
 
@@ -220,7 +220,7 @@ namespace Game
             return rate;
         }
 
-        static Expansion GetExpansionForLevel(uint level)
+        static Expansion GetExpansionForLevel(int level)
         {
             if (level < 60)
                 return Expansion.Classic;

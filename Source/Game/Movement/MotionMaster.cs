@@ -75,13 +75,13 @@ namespace Game.Movement
         public const double gravity = 19.29110527038574;
         public const float SPEED_CHARGE = 42.0f;
         static IdleMovementGenerator staticIdleMovement = new();
-        static uint splineId;
+        static int splineId;
 
         Unit _owner { get; }
         MovementGenerator _defaultGenerator { get; set; }
         SortedSet<MovementGenerator> _generators { get; } = new(new MovementGeneratorComparator());
 
-        MultiMap<uint, MovementGenerator> _baseUnitStatesMap { get; } = new();
+        MultiMap<UnitState, MovementGenerator> _baseUnitStatesMap { get; } = new();
         Queue<DelayedAction> _delayedActions { get; } = new();
         MotionMasterFlags _flags { get; set; }
 
@@ -597,18 +597,18 @@ namespace Game.Movement
                 Add(new FleeingMovementGenerator<Player>(enemy.GetGUID()));
         }
 
-        public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
+        public void MovePoint(int id, Position pos, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
         {
             MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath, finalOrient, speed, speedSelectionMode, closeEnoughDistance);
         }
 
-        public void MovePoint(uint id, float x, float y, float z, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
+        public void MovePoint(int id, float x, float y, float z, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePoint: '{_owner.GetGUID()}', targeted point Id: {id} (X: {x}, Y: {y}, Z: {z})");
             Add(new PointMovementGenerator(id, x, y, z, generatePath, speed, finalOrient, null, null, speedSelectionMode, closeEnoughDistance));
         }
 
-        public void MoveCloserAndStop(uint id, Unit target, float distance)
+        public void MoveCloserAndStop(int id, Unit target, float distance)
         {
             float distanceToTravel = _owner.GetExactDist2d(target) - distance;
             if (distanceToTravel > 0.0f)
@@ -632,7 +632,7 @@ namespace Game.Movement
             }
         }
 
-        public void MoveLand(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
+        public void MoveLand(int id, Position pos, int? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -657,7 +657,7 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id));
         }
 
-        public void MoveTakeoff(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
+        public void MoveTakeoff(int id, Position pos, int? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -682,7 +682,7 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id));
         }
 
-        public void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE, uint id = EventId.Charge, bool generatePath = false, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE, int id = EventId.Charge, bool generatePath = false, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             /*
             if (_slot[(int)MovementSlot.Controlled] != null && _slot[(int)MovementSlot.Controlled].GetMovementGeneratorType() != MovementGeneratorType.Distract)
@@ -762,12 +762,12 @@ namespace Game.Movement
             MoveJump(x, y, z, 0.0f, speedXY, speedZ);
         }
 
-        public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveJump(Position pos, float speedXY, float speedZ, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), speedXY, speedZ, id, hasOrientation, arrivalCast, spellEffectExtraData);
         }
 
-        public void MoveJump(float x, float y, float z, float o, float speedXY, float speedZ, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveJump(float x, float y, float z, float o, float speedXY, float speedZ, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             Log.outDebug(LogFilter.Server, "Unit ({0}) jump to point (X: {1} Y: {2} Z: {3})", _owner.GetGUID().ToString(), x, y, z);
             if (speedXY < 0.01f)
@@ -787,7 +787,7 @@ namespace Game.Movement
                     init.SetSpellEffectExtraData(spellEffectExtraData);
             };
 
-            uint arrivalSpellId = 0;
+            int arrivalSpellId = 0;
             ObjectGuid arrivalSpellTargetGuid = ObjectGuid.Empty;
             if (arrivalCast != null)
             {
@@ -801,7 +801,7 @@ namespace Game.Movement
             Add(movement);
         }
 
-        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, int id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', jumps to point Id: {id} ({pos})");
             if (speedXY < 0.01f)
@@ -820,7 +820,7 @@ namespace Game.Movement
                     init.SetSpellEffectExtraData(spellEffectExtraData);
             };
 
-            uint arrivalSpellId = 0;
+            int arrivalSpellId = 0;
             ObjectGuid arrivalSpellTargetGuid = default;
             if (arrivalCast != null)
             {
@@ -876,7 +876,7 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, 0));
         }
 
-        public void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
+        public void MoveSmoothPath(int pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -929,7 +929,7 @@ namespace Game.Movement
             Add(new SplineChainMovementGenerator(info));
         }
 
-        public void MoveFall(uint id = 0)
+        public void MoveFall(int id = 0)
         {
             // Use larger distance for vmap height search than in most other cases
             float tz = _owner.GetMapHeight(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), true, MapConst.MaxFallDistance);
@@ -988,7 +988,7 @@ namespace Game.Movement
                 Log.outError(LogFilter.Server, $"MotionMaster::MoveSeekAssistanceDistract: {_owner.GetGUID()} attempted to call distract after assistance");
         }
 
-        public void MoveTaxiFlight(uint path, uint pathnode)
+        public void MoveTaxiFlight(int path, int pathnode)
         {
             if (_owner.IsTypeId(TypeId.Player))
             {
@@ -1047,13 +1047,13 @@ namespace Game.Movement
             Add(new RotateMovementGenerator(id, time, direction));
         }
 
-        public void MoveFormation(Unit leader, float range, float angle, uint point1, uint point2)
+        public void MoveFormation(Unit leader, float range, float angle, int point1, int point2)
         {
             if (_owner.GetTypeId() == TypeId.Unit && leader != null)
                 Add(new FormationMovementGenerator(leader, range, angle, point1, point2), MovementSlot.Default);
         }
 
-        public void LaunchMoveSpline(Action<MoveSplineInit> initializer, uint id = 0, MovementGeneratorPriority priority = MovementGeneratorPriority.Normal, MovementGeneratorType type = MovementGeneratorType.Effect)
+        public void LaunchMoveSpline(Action<MoveSplineInit> initializer, int id = 0, MovementGeneratorPriority priority = MovementGeneratorPriority.Normal, MovementGeneratorType type = MovementGeneratorType.Effect)
         {
             if (IsInvalidMovementGeneratorType(type))
             {
@@ -1241,7 +1241,7 @@ namespace Game.Movement
             if (movement == null || movement.BaseUnitState == 0)
                 return;
 
-            _baseUnitStatesMap.Add((uint)movement.BaseUnitState, movement);
+            _baseUnitStatesMap.Add(movement.BaseUnitState, movement);
             _owner.AddUnitState(movement.BaseUnitState);
         }
 
@@ -1250,18 +1250,18 @@ namespace Game.Movement
             if (movement == null || movement.BaseUnitState == 0)
                 return;
 
-            _baseUnitStatesMap.Remove((uint)movement.BaseUnitState, movement);
+            _baseUnitStatesMap.Remove(movement.BaseUnitState, movement);
             if (!_baseUnitStatesMap.ContainsKey(movement.BaseUnitState))
                 _owner.ClearUnitState(movement.BaseUnitState);
         }
 
         void ClearBaseUnitStates()
         {
-            uint unitState = 0;
+            UnitState unitState = 0;
             foreach (var itr in _baseUnitStatesMap)
                 unitState |= itr.Key;
 
-            _owner.ClearUnitState((UnitState)unitState);
+            _owner.ClearUnitState(unitState);
             _baseUnitStatesMap.Clear();
         }
 
@@ -1282,7 +1282,7 @@ namespace Game.Movement
         public static bool IsInvalidMovementGeneratorType(MovementGeneratorType type) { return type == MovementGeneratorType.MaxDB || type >= MovementGeneratorType.Max; }
         public static bool IsInvalidMovementSlot(MovementSlot slot) { return slot >= MovementSlot.Max; }
 
-        public static uint SplineId
+        public static int SplineId
         {
             get { return splineId++; }
         }
@@ -1290,7 +1290,7 @@ namespace Game.Movement
 
     public class JumpArrivalCastArgs
     {
-        public uint SpellId;
+        public int SpellId;
         public ObjectGuid Target;
     }
 

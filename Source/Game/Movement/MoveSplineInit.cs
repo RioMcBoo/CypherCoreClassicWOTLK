@@ -314,7 +314,7 @@ namespace Game.Movement
             args.flags.EnableParabolic();
         }
 
-        public void SetAnimation(AnimTier anim, uint tierTransitionId = 0, TimeSpan transitionStartTime = default)
+        public void SetAnimation(AnimTier anim, int tierTransitionId = 0, TimeSpan transitionStartTime = default)
         {
             args.effect_start_time_percent = 0.0f;
             args.effect_start_time = transitionStartTime;

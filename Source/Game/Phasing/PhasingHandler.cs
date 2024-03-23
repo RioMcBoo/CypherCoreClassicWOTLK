@@ -98,13 +98,13 @@ namespace Game
             UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
         }
 
-        public static void RemovePhase(WorldObject obj, uint phaseId, bool updateVisibility)
+        public static void RemovePhase(WorldObject obj, int phaseId, bool updateVisibility)
         {
             ControlledUnitVisitor visitor = new(obj);
             RemovePhase(obj, phaseId, updateVisibility, visitor);
         }
 
-        static void RemovePhase(WorldObject obj, uint phaseId, bool updateVisibility, ControlledUnitVisitor visitor)
+        static void RemovePhase(WorldObject obj, int phaseId, bool updateVisibility, ControlledUnitVisitor visitor)
         {
             bool changed = obj.GetPhaseShift().RemovePhase(phaseId);
 
@@ -119,7 +119,7 @@ namespace Game
             UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
         }
 
-        public static void AddPhaseGroup(WorldObject obj, uint phaseGroupId, bool updateVisibility)
+        public static void AddPhaseGroup(WorldObject obj, int phaseGroupId, bool updateVisibility)
         {
             var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup(phaseGroupId);
             if (phasesInGroup.Empty())
@@ -128,10 +128,10 @@ namespace Game
             AddPhaseGroup(obj, phasesInGroup, obj.GetGUID(), updateVisibility, visitor);
         }
 
-        static void AddPhaseGroup(WorldObject obj, List<uint> phasesInGroup, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
+        static void AddPhaseGroup(WorldObject obj, List<int> phasesInGroup, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
         {
             bool changed = false;
-            foreach (uint phaseId in phasesInGroup)
+            foreach (var phaseId in phasesInGroup)
                 changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null) || changed;
 
             if (obj.GetPhaseShift().PersonalReferences != 0)
@@ -148,7 +148,7 @@ namespace Game
             UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
         }
 
-        public static void RemovePhaseGroup(WorldObject obj, uint phaseGroupId, bool updateVisibility)
+        public static void RemovePhaseGroup(WorldObject obj, int phaseGroupId, bool updateVisibility)
         {
             var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup(phaseGroupId);
             if (phasesInGroup.Empty())
@@ -158,10 +158,10 @@ namespace Game
             RemovePhaseGroup(obj, phasesInGroup, updateVisibility, visitor);
         }
 
-        static void RemovePhaseGroup(WorldObject obj, List<uint> phasesInGroup, bool updateVisibility, ControlledUnitVisitor visitor)
+        static void RemovePhaseGroup(WorldObject obj, List<int> phasesInGroup, bool updateVisibility, ControlledUnitVisitor visitor)
         {
             bool changed = false;
-            foreach (uint phaseId in phasesInGroup)
+            foreach (var phaseId in phasesInGroup)
                 changed = obj.GetPhaseShift().RemovePhase(phaseId) || changed;
 
             Unit unit = obj.ToUnit();
@@ -175,18 +175,18 @@ namespace Game
             UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
         }
 
-        public static void AddVisibleMapId(WorldObject obj, uint visibleMapId)
+        public static void AddVisibleMapId(WorldObject obj, int visibleMapId)
         {
             ControlledUnitVisitor visitor = new(obj);
             AddVisibleMapId(obj, visibleMapId, visitor);
         }
 
-        static void AddVisibleMapId(WorldObject obj, uint visibleMapId, ControlledUnitVisitor visitor)
+        static void AddVisibleMapId(WorldObject obj, int visibleMapId, ControlledUnitVisitor visitor)
         {
             TerrainSwapInfo terrainSwapInfo = Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId);
             bool changed = obj.GetPhaseShift().AddVisibleMapId(visibleMapId, terrainSwapInfo);
 
-            foreach (uint uiMapPhaseId in terrainSwapInfo.UiMapPhaseIDs)
+            foreach (var uiMapPhaseId in terrainSwapInfo.UiMapPhaseIDs)
                 changed = obj.GetPhaseShift().AddUiMapPhaseId(uiMapPhaseId) || changed;
 
             Unit unit = obj.ToUnit();
@@ -196,18 +196,18 @@ namespace Game
             UpdateVisibilityIfNeeded(obj, false, changed);
         }
 
-        public static void RemoveVisibleMapId(WorldObject obj, uint visibleMapId)
+        public static void RemoveVisibleMapId(WorldObject obj, int visibleMapId)
         {
             ControlledUnitVisitor visitor = new(obj);
             RemoveVisibleMapId(obj, visibleMapId, visitor);
         }
 
-        static void RemoveVisibleMapId(WorldObject obj, uint visibleMapId, ControlledUnitVisitor visitor)
+        static void RemoveVisibleMapId(WorldObject obj, int visibleMapId, ControlledUnitVisitor visitor)
         {
             TerrainSwapInfo terrainSwapInfo = Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId);
             bool changed = obj.GetPhaseShift().RemoveVisibleMapId(visibleMapId);
 
-            foreach (uint uiWorldMapAreaIDSwap in terrainSwapInfo.UiMapPhaseIDs)
+            foreach (var uiWorldMapAreaIDSwap in terrainSwapInfo.UiMapPhaseIDs)
                 changed = obj.GetPhaseShift().RemoveUiMapPhaseId(uiWorldMapAreaIDSwap) || changed;
 
             Unit unit = obj.ToUnit();
@@ -247,7 +247,7 @@ namespace Game
                         phaseShift.AddVisibleMapId(visibleMapInfo.Id, visibleMapInfo);
 
                     // ui map is visible on all maps
-                    foreach (uint uiMapPhaseId in visibleMapInfo.UiMapPhaseIDs)
+                    foreach (var uiMapPhaseId in visibleMapInfo.UiMapPhaseIDs)
                         phaseShift.AddUiMapPhaseId(uiMapPhaseId);
                 }
                 else if (mapId == obj.GetMapId())
@@ -267,7 +267,7 @@ namespace Game
             obj.GetPhaseShift().ClearPhases();
             obj.GetSuppressedPhaseShift().ClearPhases();
 
-            uint areaId = obj.GetAreaId();
+            int areaId = obj.GetAreaId();
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
             while (areaEntry != null)
             {
@@ -279,7 +279,7 @@ namespace Game
                         if (phaseArea.SubAreaExclusions.Contains(areaId))
                             continue;
 
-                        uint phaseId = phaseArea.PhaseInfo.Id;
+                        int phaseId = phaseArea.PhaseInfo.Id;
                         if (Global.ConditionMgr.IsObjectMeetToConditions(srcInfo, phaseArea.Conditions))
                             phaseShift.AddPhase(phaseId, GetPhaseFlags(phaseId), phaseArea.Conditions);
                         else
@@ -296,14 +296,14 @@ namespace Game
             {
                 foreach (AuraEffect aurEff in unit.GetAuraEffectsByType(AuraType.Phase))
                 {
-                    uint phaseId = (uint)aurEff.GetMiscValueB();
+                    int phaseId = aurEff.GetMiscValueB();
                     changed = phaseShift.AddPhase(phaseId, GetPhaseFlags(phaseId), null) || changed;
                 }
 
                 foreach (AuraEffect aurEff in unit.GetAuraEffectsByType(AuraType.PhaseGroup))
                 {
-                    var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup((uint)aurEff.GetMiscValueB());
-                    foreach (uint phaseId in phasesInGroup)
+                    var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup(aurEff.GetMiscValueB());
+                    foreach (var phaseId in phasesInGroup)
                         changed = phaseShift.AddPhase(phaseId, GetPhaseFlags(phaseId), null) || changed;
                 }
 
@@ -361,7 +361,7 @@ namespace Game
                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, pair.Key, srcInfo))
                 {
                     newSuppressions.AddVisibleMapId(pair.Key, pair.Value.VisibleMapInfo, pair.Value.References);
-                    foreach (uint uiMapPhaseId in pair.Value.VisibleMapInfo.UiMapPhaseIDs)
+                    foreach (var uiMapPhaseId in pair.Value.VisibleMapInfo.UiMapPhaseIDs)
                         changed = phaseShift.RemoveUiMapPhaseId(uiMapPhaseId) || changed;
 
                     phaseShift.VisibleMapIds.Remove(pair.Key);
@@ -373,7 +373,7 @@ namespace Game
                 if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, pair.Key, srcInfo))
                 {
                     changed = phaseShift.AddVisibleMapId(pair.Key, pair.Value.VisibleMapInfo, pair.Value.References) || changed;
-                    foreach (uint uiMapPhaseId in pair.Value.VisibleMapInfo.UiMapPhaseIDs)
+                    foreach (var uiMapPhaseId in pair.Value.VisibleMapInfo.UiMapPhaseIDs)
                         changed = phaseShift.AddUiMapPhaseId(uiMapPhaseId) || changed;
 
                     suppressedPhaseShift.VisibleMapIds.Remove(pair.Key);
@@ -385,7 +385,7 @@ namespace Game
             {
                 foreach (AuraEffect aurEff in unit.GetAuraEffectsByType(AuraType.Phase))
                 {
-                    uint phaseId = (uint)aurEff.GetMiscValueB();
+                    int phaseId = aurEff.GetMiscValueB();
                     // if condition was met previously there is nothing to erase
                     if (newSuppressions.RemovePhase(phaseId))
                         phaseShift.AddPhase(phaseId, GetPhaseFlags(phaseId), null);//todo needs checked
@@ -393,10 +393,10 @@ namespace Game
 
                 foreach (AuraEffect aurEff in unit.GetAuraEffectsByType(AuraType.PhaseGroup))
                 {
-                    var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup((uint)aurEff.GetMiscValueB());
+                    var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup(aurEff.GetMiscValueB());
                     if (!phasesInGroup.Empty())
                     {
-                        foreach (uint phaseId in phasesInGroup)
+                        foreach (var phaseId in phasesInGroup)
                         {
                             var eraseResult = newSuppressions.RemovePhase(phaseId);
                             // if condition was met previously there is nothing to erase
@@ -437,11 +437,11 @@ namespace Game
         {
             PhaseShiftChange phaseShiftChange = new();
             phaseShiftChange.Client = player.GetGUID();
-            phaseShiftChange.Phaseshift.PhaseShiftFlags = (uint)phaseShift.Flags;
+            phaseShiftChange.Phaseshift.PhaseShiftFlags = phaseShift.Flags;
             phaseShiftChange.Phaseshift.PersonalGUID = phaseShift.PersonalGuid;
 
             foreach (var pair in phaseShift.Phases)
-                phaseShiftChange.Phaseshift.Phases.Add(new PhaseShiftDataPhase((uint)pair.Value.Flags, pair.Key));
+                phaseShiftChange.Phaseshift.Phases.Add(new PhaseShiftDataPhase(pair.Value.Flags, pair.Key));
 
             foreach (var visibleMapId in phaseShift.VisibleMapIds)
                 phaseShiftChange.VisibleMapIDs.Add((ushort)visibleMapId.Key);
@@ -459,11 +459,11 @@ namespace Game
 
         public static void FillPartyMemberPhase(PartyMemberPhaseStates partyMemberPhases, PhaseShift phaseShift)
         {
-            partyMemberPhases.PhaseShiftFlags = (int)phaseShift.Flags;
+            partyMemberPhases.PhaseShiftFlags = phaseShift.Flags;
             partyMemberPhases.PersonalGUID = phaseShift.PersonalGuid;
 
             foreach (var pair in phaseShift.Phases)
-                partyMemberPhases.List.Add(new PartyMemberPhase((uint)pair.Value.Flags, pair.Key));
+                partyMemberPhases.List.Add(new PartyMemberPhase(pair.Value.Flags, pair.Key));
         }
 
         public static PhaseShift GetAlwaysVisiblePhaseShift()
@@ -487,7 +487,7 @@ namespace Game
             else
             {
                 var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup(phaseGroupId);
-                foreach (uint phaseInGroup in phasesInGroup)
+                foreach (var phaseInGroup in phasesInGroup)
                     phaseShift.AddPhase(phaseInGroup, GetPhaseFlags(phaseInGroup), null);
             }
 
@@ -516,7 +516,7 @@ namespace Game
                 phaseShift.AddVisibleMapId(visibleMapId, Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId));
         }
 
-        public static bool InDbPhaseShift(WorldObject obj, PhaseUseFlagsValues phaseUseFlags, ushort phaseId, int phaseGroupId)
+        public static bool InDbPhaseShift(WorldObject obj, PhaseUseFlagsValues phaseUseFlags, int phaseId, int phaseGroupId)
         {
             PhaseShift phaseShift = new();
             InitDbPhaseShift(phaseShift, phaseUseFlags, phaseId, phaseGroupId);

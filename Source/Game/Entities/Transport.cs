@@ -394,7 +394,7 @@ namespace Game.Entities
             return creature;
         }
 
-        GameObject CreateGOPassenger(ulong guid, GameObjectData data)
+        GameObject CreateGOPassenger(long guid, GameObjectData data)
         {
             Map map = GetMap();
             if (map.GetGORespawnTime(guid) != 0)
@@ -431,7 +431,7 @@ namespace Game.Entities
             return go;
         }
 
-        public TempSummon SummonPassenger(int entry, Position pos, TempSummonType summonType, SummonPropertiesRecord properties = null, TimeSpan duration = default, Unit summoner = null, uint spellId = 0, uint vehId = 0)
+        public TempSummon SummonPassenger(int entry, Position pos, TempSummonType summonType, SummonPropertiesRecord properties = null, TimeSpan duration = default, Unit summoner = null, int spellId = 0, int vehId = 0)
         {
             Map map = GetMap();
             if (map == null)
@@ -474,7 +474,7 @@ namespace Game.Entities
                                 mask = UnitTypeMask.Minion;
                                 break;
                             default:
-                                if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
+                                if (properties.HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
                                     mask = UnitTypeMask.Guardian;
                                 break;
                         }
@@ -513,7 +513,7 @@ namespace Game.Entities
                 return null;
 
             WorldObject phaseShiftOwner = this;
-            if (summoner != null && !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
+            if (summoner != null && !(properties != null && properties.HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
                 phaseShiftOwner = summoner;
 
             if (phaseShiftOwner != null)
@@ -764,7 +764,7 @@ namespace Game.Entities
         public float GetTransportOrientation() { return GetOrientation(); }
 
         public uint GetTransportPeriod() { return (uint)m_gameObjectData.Level.GetValue(); }
-        public void SetPeriod(uint period) { SetLevel(period); }
+        public void SetPeriod(uint period) { SetLevel((int)period); }
         public uint GetTimer() { return _pathProgress; }
 
         TransportTemplate _transportInfo;

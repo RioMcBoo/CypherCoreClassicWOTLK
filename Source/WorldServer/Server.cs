@@ -139,7 +139,7 @@ namespace WorldServer
                 return false;
 
             // Get the realm Id from the configuration file
-            Global.WorldMgr.GetRealm().Id.Index = ConfigMgr.GetDefaultValue("RealmID", 0u);
+            Global.WorldMgr.GetRealm().Id.Index = ConfigMgr.GetDefaultValue("RealmID", 0);
             if (Global.WorldMgr.GetRealm().Id.Index == 0)
             {
                 Log.outError(LogFilter.Server, "Realm ID not defined in configuration file");

@@ -426,10 +426,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            QuestID = _worldPacket.ReadUInt32();
+            QuestID = _worldPacket.ReadInt32();
         }
 
-        public uint QuestID;
+        public int QuestID;
     }
     
     public class QuestGiverQuestDetails : ServerPacket
@@ -823,10 +823,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            QuestID = _worldPacket.ReadUInt32();
+            QuestID = _worldPacket.ReadInt32();
         }
 
-        public uint QuestID;
+        public int QuestID;
     }
 
     class DailyQuestsReset : ServerPacket
@@ -1284,7 +1284,7 @@ namespace Game.Networking.Packets
         {
             data.WriteInt32(TitleID);
             data.WriteInt32(PackageID);
-            data.WriteInt32(SkillLineID);
+            data.WriteInt32((int)SkillLineID);
             data.WriteInt32(SkillPointCount);
             data.WriteInt32(ArenaPointCount);
             data.WriteInt32(HonorPointCount);
@@ -1311,7 +1311,7 @@ namespace Game.Networking.Packets
 
         public int TitleID;
         public int PackageID;
-        public int SkillLineID;
+        public SkillType SkillLineID;
         public int SkillPointCount;
         public int ArenaPointCount;
         public int HonorPointCount;
@@ -1376,7 +1376,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(ResponseID);
-            data.WriteUInt16(ResponseIdentifier);
+            data.WriteInt16(ResponseIdentifier);
             data.WriteInt32(ChoiceArtFileID);
             data.WriteInt32(Flags);
             data.WriteInt32(WidgetSetID);

@@ -31,13 +31,13 @@ namespace Game.Spells
             uint count = 0;
 
             StringBuilder ssNonDiscoverableEntries = new();
-            List<uint> reportedReqSpells = new();
+            List<int> reportedReqSpells = new();
 
             do
             {
-                uint spellId = result.Read<uint>(0);
-                int reqSkillOrSpell = result.Read<int>(1);
-                uint reqSkillValue = result.Read<uint>(2);
+                var spellId = result.Read<int>(0);
+                var reqSkillOrSpell = result.Read<int>(1);
+                int reqSkillValue = result.Read<int>(2);
                 float chance = result.Read<float>(3);
 
                 if (chance <= 0)                                    // Chance
@@ -48,7 +48,7 @@ namespace Game.Spells
 
                 if (reqSkillOrSpell > 0)                            // spell case
                 {
-                    uint absReqSkillOrSpell = (uint)reqSkillOrSpell;
+                    var absReqSkillOrSpell = reqSkillOrSpell;
                     SpellInfo reqSpellInfo = Global.SpellMgr.GetSpellInfo(absReqSkillOrSpell, Difficulty.None);
                     if (reqSpellInfo == null)
                     {
@@ -121,16 +121,16 @@ namespace Game.Spells
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skill discovery definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public static uint GetExplicitDiscoverySpell(uint spellId, Player player)
+        public static int GetExplicitDiscoverySpell(int spellId, Player player)
         {
             // explicit discovery spell chances (always success if case exist)
             // in this case we have both skill and spell
-            var tab = SkillDiscoveryStorage.LookupByKey((int)spellId);
+            var tab = SkillDiscoveryStorage.LookupByKey(spellId);
             if (tab.Empty())
                 return 0;
 
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spellId);
-            uint skillvalue = !bounds.Empty() ? (uint)player.GetSkillValue((SkillType)bounds.FirstOrDefault().SkillLine) : 0;
+            int skillvalue = !bounds.Empty() ? player.GetSkillValue(bounds.FirstOrDefault().SkillLine) : 0;
 
             float full_chance = 0;
             foreach (var item_iter in tab)
@@ -158,9 +158,9 @@ namespace Game.Spells
             return 0;
         }
 
-        public static bool HasDiscoveredAllSpells(uint spellId, Player player)
+        public static bool HasDiscoveredAllSpells(int spellId, Player player)
         {
-            var tab = SkillDiscoveryStorage.LookupByKey((int)spellId);
+            var tab = SkillDiscoveryStorage.LookupByKey(spellId);
             if (tab.Empty())
                 return true;
 
@@ -171,9 +171,9 @@ namespace Game.Spells
             return true;
         }
 
-        public static bool HasDiscoveredAnySpell(uint spellId, Player player)
+        public static bool HasDiscoveredAnySpell(int spellId, Player player)
         {
-            var tab = SkillDiscoveryStorage.LookupByKey((int)spellId);
+            var tab = SkillDiscoveryStorage.LookupByKey(spellId);
             if (tab.Empty())
                 return false;
 
@@ -184,12 +184,12 @@ namespace Game.Spells
             return false;
         }
 
-        public static uint GetSkillDiscoverySpell(uint skillId, uint spellId, Player player)
+        public static int GetSkillDiscoverySpell(int skillId, int spellId, Player player)
         {
-            uint skillvalue = skillId != 0 ? (uint)player.GetSkillValue((SkillType)skillId) : 0;
+            int skillvalue = skillId != 0 ? player.GetSkillValue(skillId) : 0;
 
             // check spell case
-            var tab = SkillDiscoveryStorage.LookupByKey((int)spellId);
+            var tab = SkillDiscoveryStorage.LookupByKey(spellId);
 
             if (!tab.Empty())
             {
@@ -208,7 +208,7 @@ namespace Game.Spells
                 return 0;
 
             // check skill line case
-            tab = SkillDiscoveryStorage.LookupByKey(-(int)skillId);
+            tab = SkillDiscoveryStorage.LookupByKey(-skillId);
             if (!tab.Empty())
             {
                 foreach (var item_iter in tab)
@@ -230,15 +230,15 @@ namespace Game.Spells
 
     public class SkillDiscoveryEntry
     {
-        public SkillDiscoveryEntry(uint _spellId = 0, uint req_skill_val = 0, float _chance = 0)
+        public SkillDiscoveryEntry(int _spellId = 0, int req_skill_val = 0, float _chance = 0)
         {
             spellId = _spellId;
             reqSkillValue = req_skill_val;
             chance = _chance;
         }
 
-        public uint spellId;                                        // discavered spell
-        public uint reqSkillValue;                                  // skill level limitation
+        public int spellId;                                        // discavered spell
+        public int reqSkillValue;                                  // skill level limitation
         public float chance;                                         // Chance
     }
 }

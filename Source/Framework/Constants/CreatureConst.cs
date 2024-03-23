@@ -173,7 +173,8 @@ namespace Framework.Constants
         Allowed = (0xffffffff & ~Disallowed) // Skip
     }
 
-    public enum NPCFlags : uint
+    [Flags]
+    public enum NPCFlags1 : uint
     {
         None = 0x00,
         Gossip = 0x01,     // 100%
@@ -210,7 +211,8 @@ namespace Framework.Constants
         BlackMarket = 0x80000000,     // Black Market
     }
 
-    public enum NPCFlags2
+    [Flags]
+    public enum NPCFlags2 : uint
     {
         None = 0x00,
         ItemUpgradeMaster = 0x01,

@@ -35,7 +35,7 @@ namespace Game
             }
             else if (guid.IsAnyTypeCreature())
             {
-                if (GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Mailbox, NPCFlags2.None) == null)
+                if (GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags1.Mailbox, NPCFlags2.None) == null)
                     return false;
             }
             else
@@ -127,7 +127,7 @@ namespace Game
                 return;
             }
 
-            void mailCountCheckContinuation(Team receiverTeam, ulong mailsCount, uint receiverLevel, uint receiverAccountId, uint receiverBnetAccountId)
+            void mailCountCheckContinuation(Team receiverTeam, long mailsCount, int receiverLevel, int receiverAccountId, int receiverBnetAccountId)
             {
                 if (_player != player)
                     return;
@@ -280,8 +280,8 @@ namespace Game
                     sendMail.Info.Cod = 0;
 
                 // will delete item or place to receiver mail list
-                draft.AddMoney((ulong)sendMail.Info.SendMoney)
-                    .AddCOD((uint)sendMail.Info.Cod)
+                draft.AddMoney(sendMail.Info.SendMoney)
+                    .AddCOD((int)sendMail.Info.Cod)
                     .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(receiverGuid), receiverGuid.GetCounter()), new MailSender(player), sendMail.Info.Body.IsEmpty() ? MailCheckFlags.Copied : MailCheckFlags.HasBody, deliver_delay);
 
                 player.SaveInventoryAndGoldToDB(trans);
@@ -304,8 +304,8 @@ namespace Game
                     if (characterInfo != null)
                         queryCallback.WithCallback(bnetAccountResult =>
                         {
-                            mailCountCheckContinuation(Player.TeamForRace(characterInfo.RaceId), !mailCountResult.IsEmpty() ? mailCountResult.Read<ulong>(0) : 0,
-                                characterInfo.Level, characterInfo.AccountId, !bnetAccountResult.IsEmpty() ? bnetAccountResult.Read<uint>(0) : 0);
+                            mailCountCheckContinuation(Player.TeamForRace(characterInfo.RaceId), !mailCountResult.IsEmpty() ? mailCountResult.Read<long>(0) : 0,
+                                characterInfo.Level, characterInfo.AccountId, !bnetAccountResult.IsEmpty() ? bnetAccountResult.Read<int>(0) : 0);
                         }).SetNextQuery(Global.BNetAccountMgr.GetIdByGameAccountAsync(characterInfo.AccountId));
                 }));
             }
@@ -406,7 +406,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MailTakeItem)]
         void HandleMailTakeItem(MailTakeItem takeItem)
         {
-            ulong AttachID = takeItem.AttachID;
+            long AttachID = takeItem.AttachID;
 
             if (!CanOpenMailBox(takeItem.Mailbox))
                 return;
@@ -448,7 +448,7 @@ namespace Game
                     ObjectGuid sender_guid = ObjectGuid.Create(HighGuid.Player, m.sender);
                     Player receiver = Global.ObjAccessor.FindPlayer(sender_guid);
 
-                    uint sender_accId = 0;
+                    int sender_accId = 0;
 
                     if (HasPermission(RBACPermissions.LogGmTrade))
                     {
@@ -487,7 +487,7 @@ namespace Game
                 player.m_mailsUpdated = true;
                 player.RemoveMItem(it.GetGUID().GetCounter());
 
-                uint count = it.GetCount();                      // save counts before store and possible merge with deleting
+                int count = it.GetCount();                      // save counts before store and possible merge with deleting
                 it.SetState(ItemUpdateState.Unchanged);                       // need to set this state, otherwise item cannot be removed later, if neccessary
                 player.MoveItemToInventory(dest, it, true);
 
@@ -511,13 +511,13 @@ namespace Game
 
             Mail m = player.GetMail(takeMoney.MailID);
             if ((m == null || m.state == MailState.Deleted || m.deliver_time > GameTime.GetGameTime()) ||
-                (takeMoney.Money > 0 && m.money != (ulong)takeMoney.Money))
+                (takeMoney.Money > 0 && m.money != takeMoney.Money))
             {
                 player.SendMailResult(takeMoney.MailID, MailResponseType.MoneyTaken, MailResponseResult.InternalError);
                 return;
             }
 
-            if (!player.ModifyMoney((long)m.money, false))
+            if (!player.ModifyMoney(m.money, false))
             {
                 player.SendMailResult(takeMoney.MailID, MailResponseType.MoneyTaken, MailResponseResult.EquipError, InventoryResult.TooMuchGold);
                 return;
@@ -635,7 +635,7 @@ namespace Game
                 result.NextMailTime = 0.0f;
 
                 long now = GameTime.GetGameTime();
-                List<ulong> sentSenders = new();
+                List<long> sentSenders = new();
 
                 foreach (Mail mail in GetPlayer().GetMails())
                 {

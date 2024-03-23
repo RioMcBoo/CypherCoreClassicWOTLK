@@ -72,7 +72,7 @@ namespace Game
                     {
                         foreach (string areaIdToken in new StringArray(areaIds, ','))
                         {
-                            if (!uint.TryParse(areaIdToken, out uint areaId))
+                            if (!int.TryParse(areaIdToken, out int areaId))
                             {
                                 Log.outError(LogFilter.Sql, $"Table `world_state` contains a world state {id} with non-integer AreaID ({areaIdToken}), area ignored");
                                 continue;
@@ -220,7 +220,7 @@ namespace Game
 
                 // Broadcast update to all players on the server
                 UpdateWorldState updateWorldState = new();
-                updateWorldState.VariableID = (uint)worldStateId;
+                updateWorldState.VariableID = worldStateId;
                 updateWorldState.Value = value;
                 updateWorldState.Hidden = hidden;
                 Global.WorldMgr.SendGlobalMessage(updateWorldState);
@@ -274,7 +274,7 @@ namespace Game
             return initialValues;
         }
 
-        public void FillInitialWorldStates(InitWorldStates initWorldStates, Map map, uint playerAreaId)
+        public void FillInitialWorldStates(InitWorldStates initWorldStates, Map map, int playerAreaId)
         {
             foreach (var (worldStateId, value) in _realmWorldStateValues)
                 initWorldStates.AddState(worldStateId, value);

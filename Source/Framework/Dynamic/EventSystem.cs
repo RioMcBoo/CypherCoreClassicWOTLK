@@ -20,7 +20,7 @@ namespace Framework.Dynamic
             m_time += p_time;
 
             // main event loop
-            KeyValuePair<ulong, BasicEvent> i;
+            KeyValuePair<long, BasicEvent> i;
             while ((i = m_events.FirstOrDefault()).Value != null && i.Key <= m_time)
             {
                 var Event = i.Value;
@@ -78,8 +78,8 @@ namespace Framework.Dynamic
             if (set_addtime)
                 Event.m_addTime = m_time;
 
-            Event.m_execTime = (ulong)e_time.TotalMilliseconds;
-            m_events.Add((ulong)e_time.TotalMilliseconds, Event);
+            Event.m_execTime = (long)e_time.TotalMilliseconds;
+            m_events.Add((long)e_time.TotalMilliseconds, Event);
         }
 
         public void AddEvent(Action action, TimeSpan e_time, bool set_addtime = true) { AddEvent(new LambdaBasicEvent(action), e_time, set_addtime); }
@@ -97,9 +97,9 @@ namespace Framework.Dynamic
                 if (pair.Value != Event)
                     continue;
 
-                Event.m_execTime = (ulong)newTime.TotalMilliseconds;
+                Event.m_execTime = (long)newTime.TotalMilliseconds;
                 m_events.Remove(pair);
-                m_events.Add((ulong)newTime.TotalMilliseconds, Event);
+                m_events.Add((long)newTime.TotalMilliseconds, Event);
                 break;
             }
         }
@@ -109,10 +109,10 @@ namespace Framework.Dynamic
             return TimeSpan.FromMilliseconds(m_time) + t_offset;
         }
 
-        public SortedMultiMap<ulong, BasicEvent> GetEvents() { return m_events; }
+        public SortedMultiMap<long, BasicEvent> GetEvents() { return m_events; }
 
-        ulong m_time;
-        SortedMultiMap<ulong, BasicEvent> m_events = new();
+        long m_time;
+        SortedMultiMap<long, BasicEvent> m_events = new();
     }
 
     public class BasicEvent
@@ -134,19 +134,19 @@ namespace Framework.Dynamic
         // this method executes when the event is triggered
         // return false if event does not want to be deleted
         // e_time is execution time, p_time is update interval
-        public virtual bool Execute(ulong e_time, uint p_time) { return true; }
+        public virtual bool Execute(long e_time, uint p_time) { return true; }
 
         public virtual bool IsDeletable() { return true; }   // this event can be safely deleted
 
-        public virtual void Abort(ulong e_time) { } // this method executes when the event is aborted
+        public virtual void Abort(long e_time) { } // this method executes when the event is aborted
 
         public bool IsRunning() { return m_abortState == AbortState.Running; }
         public bool IsAbortScheduled() { return m_abortState == AbortState.Scheduled; }
         public bool IsAborted() { return m_abortState == AbortState.Aborted; }
 
         AbortState m_abortState; // set by externals when the event is aborted, aborted events don't execute
-        public ulong m_addTime; // time when the event was added to queue, filled by event handler
-        public ulong m_execTime; // planned time of next execution, filled by event handler
+        public long m_addTime; // time when the event was added to queue, filled by event handler
+        public long m_execTime; // planned time of next execution, filled by event handler
     }
 
     class LambdaBasicEvent : BasicEvent
@@ -158,7 +158,7 @@ namespace Framework.Dynamic
             _callback = callback;
         }
 
-        public override bool Execute(ulong e_time, uint p_time)
+        public override bool Execute(long e_time, uint p_time)
         {
             _callback();
             return true;

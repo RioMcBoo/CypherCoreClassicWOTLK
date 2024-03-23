@@ -405,7 +405,7 @@ namespace Game
         {
             if (packet.Entry < SharedConst.MaxQuestLogSize)
             {
-                uint questId = GetPlayer().GetQuestSlotQuestId(packet.Entry);
+                int questId = GetPlayer().GetQuestSlotQuestId(packet.Entry);
                 if (questId != 0)
                 {
                     if (!GetPlayer().TakeQuestSourceItem(questId, true))

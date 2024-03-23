@@ -214,7 +214,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("damage", RBACPermissions.CommandDamage)]
-        static bool HandleDamageCommand(CommandHandler handler, uint damage, SpellSchools? school, [OptionalArg]SpellInfo spellInfo)
+        static bool HandleDamageCommand(CommandHandler handler, int damage, SpellSchools? school, [OptionalArg]SpellInfo spellInfo)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
@@ -257,8 +257,8 @@ namespace Game.Chat
 
                 damage = dmgInfo.GetDamage();
 
-                uint absorb = dmgInfo.GetAbsorb();
-                uint resist = dmgInfo.GetResist();
+                int absorb = dmgInfo.GetAbsorb();
+                int resist = dmgInfo.GetResist();
                 Unit.DealDamageMods(attacker, target, ref damage, ref absorb);
                 Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, schoolmask, null, false);
                 attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage, absorb, resist, VictimState.Hit, 0);
@@ -276,7 +276,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("damage go", RBACPermissions.CommandDamage)]
-        static bool HandleDamageGoCommand(CommandHandler handler, ulong spawnId, int damage)
+        static bool HandleDamageGoCommand(CommandHandler handler, long spawnId, int damage)
         {
             GameObject go = handler.GetObjectFromPlayerMapByDbGuid(spawnId);
             if (go == null)
@@ -373,7 +373,7 @@ namespace Game.Chat
             if (!args.Empty())
             {
                 HighGuid guidHigh = 0;
-                ulong guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
+                long guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
                 if (guidLow == 0)
                     return false;
                 switch (guidHigh)
@@ -525,7 +525,7 @@ namespace Game.Chat
             if (!args.Empty())
             {
                 HighGuid guidHigh = 0;
-                ulong guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
+                long guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
                 if (guidLow == 0)
                     return false;
                 switch (guidHigh)
@@ -577,9 +577,9 @@ namespace Game.Chat
             CellCoord cellCoord = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
             Cell cell = new(cellCoord);
 
-            uint zoneId, areaId;
+            int zoneId, areaId;
             obj.GetZoneAndAreaId(out zoneId, out areaId);
-            uint mapId = obj.GetMapId();
+            int mapId = obj.GetMapId();
 
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
             AreaTableRecord zoneEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
@@ -588,7 +588,7 @@ namespace Game.Chat
             float zoneX = obj.GetPositionX();
             float zoneY = obj.GetPositionY();
 
-            Global.DB2Mgr.Map2ZoneCoordinates((int)zoneId, ref zoneX, ref zoneY);
+            Global.DB2Mgr.Map2ZoneCoordinates(zoneId, ref zoneX, ref zoneY);
 
             Map map = obj.GetMap();
             float groundZ = obj.GetMapHeight(obj.GetPositionX(), obj.GetPositionY(), MapConst.MaxHeight);
@@ -597,8 +597,8 @@ namespace Game.Chat
             GridCoord gridCoord = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
 
             // 63? WHY?
-            int gridX = (int)((MapConst.MaxGrids - 1) - gridCoord.X_coord);
-            int gridY = (int)((MapConst.MaxGrids - 1) - gridCoord.Y_coord);
+            int gridX = ((MapConst.MaxGrids - 1) - gridCoord.X_coord);
+            int gridY = ((MapConst.MaxGrids - 1) - gridCoord.Y_coord);
 
             bool haveMap = TerrainInfo.ExistMap(mapId, gridX, gridY);
             bool haveVMap = TerrainInfo.ExistVMap(mapId, gridX, gridY);
@@ -669,7 +669,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("hidearea", RBACPermissions.CommandHidearea)]
-        static bool HandleHideAreaCommand(CommandHandler handler, uint areaId)
+        static bool HandleHideAreaCommand(CommandHandler handler, int areaId)
         {
             Player playerTarget = handler.GetSelectedPlayer();
             if (playerTarget == null)
@@ -758,7 +758,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("linkgrave", RBACPermissions.CommandLinkgrave)]
-        static bool HandleLinkGraveCommand(CommandHandler handler, uint graveyardId, [OptionalArg] string teamArg)
+        static bool HandleLinkGraveCommand(CommandHandler handler, int graveyardId, [OptionalArg] string teamArg)
         {
             Team team;
             if (teamArg.IsEmpty())
@@ -779,7 +779,7 @@ namespace Game.Chat
 
             Player player = handler.GetSession().GetPlayer();
 
-            uint zoneId = player.GetZoneId();
+            int zoneId = player.GetZoneId();
 
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
             if (areaEntry == null || areaEntry.ParentAreaID != 0)
@@ -943,7 +943,7 @@ namespace Game.Chat
             }
 
             Player target = player.GetConnectedPlayer();
-            uint accountId = target != null ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.GetGUID());
+            int accountId = target != null ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.GetGUID());
 
             // find only player from same account if any
             if (target == null)
@@ -1056,12 +1056,12 @@ namespace Game.Chat
                 return false;
 
             Player player = handler.GetSession().GetPlayer();
-            uint zoneId = player.GetZoneId();
+            int zoneId = player.GetZoneId();
 
             WorldSafeLocsEntry graveyard = Global.ObjectMgr.GetClosestGraveyard(player, team, null);
             if (graveyard != null)
             {
-                uint graveyardId = graveyard.Id;
+                int graveyardId = graveyard.Id;
 
                 GraveyardData data = Global.ObjectMgr.FindGraveyardData(graveyardId, zoneId);
                 if (data == null)
@@ -1148,8 +1148,8 @@ namespace Game.Chat
 
             // Account data print variables
             string userName = handler.GetCypherString(CypherStrings.Error);
-            uint accId;
-            ulong lowguid = targetGuid.GetCounter();
+            int accId;
+            long lowguid = targetGuid.GetCounter();
             string eMail = handler.GetCypherString(CypherStrings.Error);
             string regMail = handler.GetCypherString(CypherStrings.Error);
             uint security = 0;
@@ -1177,20 +1177,20 @@ namespace Game.Chat
             Gender gender;
             Locale locale = handler.GetSessionDbcLocale();
             uint totalPlayerTime;
-            uint level;
+            int level;
             string alive;
-            ulong money;
-            uint xp = 0;
-            uint xptotal = 0;
+            long money;
+            int xp = 0;
+            int xptotal = 0;
 
             // Position data print
-            uint mapId;
-            uint areaId;
+            int mapId;
+            int areaId;
             string areaName = null;
             string zoneName = null;
 
             // Guild data print variables defined so that they exist, but are not necessarily used
-            ulong guildId = 0;
+            long guildId = 0;
             byte guildRankId = 0;
             string guildName = "";
             string guildRank = "";
@@ -1236,8 +1236,8 @@ namespace Game.Chat
 
                     totalPlayerTime = result.Read<uint>(0);
                     level = result.Read<byte>(1);
-                    money = result.Read<ulong>(2);
-                    accId = result.Read<uint>(3);
+                    money = result.Read<long>(2);
+                    accId = result.Read<int>(3);
                     raceid = (Race)result.Read<byte>(4);
                     classid = (Class)result.Read<byte>(5);
                     mapId = result.Read<ushort>(6);
@@ -1334,8 +1334,8 @@ namespace Game.Chat
             {
                 if (!result4.IsEmpty())
                 {
-                    xp = result4.Read<uint>(0); // Used for "current xp" output and "%u XP Left" calculation
-                    ulong gguid = result4.Read<ulong>(1); // We check if have a guild for the person, so we might not require to query it at all
+                    xp = result4.Read<int>(0); // Used for "current xp" output and "%u XP Left" calculation
+                    long gguid = result4.Read<long>(1); // We check if have a guild for the person, so we might not require to query it at all
                     xptotal = Global.ObjectMgr.GetXPForLevel(level);
 
                     if (gguid != 0)
@@ -1347,7 +1347,7 @@ namespace Game.Chat
                         {
                             if (!result5.IsEmpty())
                             {
-                                guildId = result5.Read<ulong>(0);
+                                guildId = result5.Read<long>(0);
                                 guildName = result5.Read<string>(1);
                                 guildRank = result5.Read<string>(2);
                                 guildRankId = result5.Read<byte>(3);
@@ -1408,9 +1408,9 @@ namespace Game.Chat
                 PhasingHandler.PrintToChat(handler, target);
 
             // Output XIV. LANG_PINFO_CHR_MONEY
-            ulong gold = money / MoneyConstants.Gold;
-            ulong silv = (money % MoneyConstants.Gold) / MoneyConstants.Silver;
-            ulong copp = (money % MoneyConstants.Gold) % MoneyConstants.Silver;
+            long gold = money / MoneyConstants.Gold;
+            long silv = (money % MoneyConstants.Gold) / MoneyConstants.Silver;
+            long copp = (money % MoneyConstants.Gold) % MoneyConstants.Silver;
             handler.SendSysMessage(CypherStrings.PinfoChrMoney, gold, silv, copp);
 
             // Position data
@@ -1471,7 +1471,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("playall", RBACPermissions.CommandPlayall)]
-        static bool HandlePlayAllCommand(CommandHandler handler, uint soundId, uint? broadcastTextId)
+        static bool HandlePlayAllCommand(CommandHandler handler, int soundId, int? broadcastTextId)
         {
             if (!CliDB.SoundKitStorage.ContainsKey(soundId))
             {
@@ -1600,7 +1600,7 @@ namespace Game.Chat
             player.GetMap().GetRespawnInfo(data, SpawnObjectTypeMask.All);
             if (!data.Empty())
             {
-                uint gridId = GridDefines.ComputeGridCoord(player.GetPositionX(), player.GetPositionY()).GetId();
+                int gridId = GridDefines.ComputeGridCoord(player.GetPositionX(), player.GetPositionY()).GetId();
                 foreach (RespawnInfo info in data)
                     if (info.gridId == gridId)
                         player.GetMap().RemoveRespawnTime(info.type, info.spawnId);
@@ -1664,7 +1664,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("showarea", RBACPermissions.CommandShowarea)]
-        static bool HandleShowAreaCommand(CommandHandler handler, uint areaId)
+        static bool HandleShowAreaCommand(CommandHandler handler, int areaId)
         {
             Player playerTarget = handler.GetSelectedPlayer();
             if (playerTarget == null)

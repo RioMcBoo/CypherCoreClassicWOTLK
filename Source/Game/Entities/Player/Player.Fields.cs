@@ -109,7 +109,7 @@ namespace Game.Entities
         MultiMap<int, int> m_overrideSpells = new();
         public Spell m_spellModTakingSpell;
         int m_oldpetspell;
-        Dictionary<uint, StoredAuraTeleportLocation> m_storedAuraTeleportLocations = new();
+        Dictionary<int, StoredAuraTeleportLocation> m_storedAuraTeleportLocations = new();
 
         //Mail
         List<Mail> m_mail = new();
@@ -128,7 +128,7 @@ namespace Game.Entities
         // Player summoning
         long m_summon_expire;
         WorldLocation m_summon_location;
-        uint m_summon_instanceId;
+        int m_summon_instanceId;
 
         RestMgr _restMgr;
 
@@ -140,7 +140,7 @@ namespace Game.Entities
         bool m_canParry;
         bool m_canBlock;
         bool m_canTitanGrip;
-        uint m_titanGripPenaltySpellId;
+        int m_titanGripPenaltySpellId;
         uint m_deathTimer;
         long m_deathExpireTime;
         byte m_swingErrorMsg;
@@ -170,8 +170,8 @@ namespace Game.Entities
         CinematicManager _cinematicMgr;
 
         // variables to save health and mana before duel and restore them after duel
-        ulong healthBeforeDuel;
-        uint manaBeforeDuel;
+        long healthBeforeDuel;
+        int manaBeforeDuel;
 
         bool _advancedCombatLoggingEnabled;
 
@@ -308,7 +308,7 @@ namespace Game.Entities
         public struct CreatePosition
         {
             public WorldLocation Loc;
-            public ulong? TransportGuid;
+            public long? TransportGuid;
         }
     }
 
@@ -327,7 +327,7 @@ namespace Game.Entities
     public class PlayerCreateInfoAction
     {
         public PlayerCreateInfoAction() : this(0, 0, 0) { }
-        public PlayerCreateInfoAction(byte _button, uint _action, byte _type)
+        public PlayerCreateInfoAction(byte _button, int _action, byte _type)
         {
             button = _button;
             type = _type;
@@ -336,7 +336,7 @@ namespace Game.Entities
 
         public byte button;
         public byte type;
-        public uint action;
+        public int action;
     }
 
     public class PlayerLevelInfo
@@ -430,9 +430,9 @@ namespace Game.Entities
     {
         public ObjectGuid GUID;
         public WorldLocation Location = new();
-        public uint Health;
-        public uint Mana;
-        public uint Aura;
+        public int Health;
+        public int Mana;
+        public int Aura;
     }
 
     public struct PvPInfo

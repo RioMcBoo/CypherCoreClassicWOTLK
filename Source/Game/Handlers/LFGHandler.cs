@@ -29,10 +29,10 @@ namespace Game
                 return;
             }
 
-            List<uint> newDungeons = new();
-            foreach (uint slot in dfJoin.Slots)
+            List<int> newDungeons = new();
+            foreach (var slot in dfJoin.Slots)
             {
-                uint dungeon = slot & 0x00FFFFFF;
+                int dungeon = slot & 0x00FFFFFF;
                 if (CliDB.LFGDungeonsStorage.ContainsKey(dungeon))
                     newDungeons.Add(dungeon);
             }
@@ -129,14 +129,14 @@ namespace Game
         public void SendLfgPlayerLockInfo()
         {
             // Get Random dungeons that can be done at a certain level and expansion
-            uint level = GetPlayer().GetLevel();
-            var randomDungeons = Global.LFGMgr.GetRandomAndSeasonalDungeons(level, (uint)GetExpansion(), 0);
+            int level = GetPlayer().GetLevel();
+            var randomDungeons = Global.LFGMgr.GetRandomAndSeasonalDungeons(level, GetExpansion(), 0);
 
             LfgPlayerInfo lfgPlayerInfo = new();
 
             // Get player locked Dungeons
             foreach (var locked in Global.LFGMgr.GetLockedDungeons(_player.GetGUID()))
-                lfgPlayerInfo.BlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.lockStatus, locked.Value.requiredItemLevel, (int)locked.Value.currentItemLevel, 0));
+                lfgPlayerInfo.BlackList.Slot.Add(new LFGBlackListSlot(locked.Key, locked.Value.lockStatus, locked.Value.requiredItemLevel, locked.Value.currentItemLevel, 0));
 
             foreach (var slot in randomDungeons)
             {
@@ -173,14 +173,14 @@ namespace Game
                             playerDungeonInfo.Rewards.RewardXP = _player.GetQuestXPReward(quest);
                             for (byte i = 0; i < SharedConst.QuestRewardItemCount; ++i)
                             {
-                                uint itemId = quest.RewardItemId[i];
+                                int itemId = quest.RewardItemId[i];
                                 if (itemId != 0)
                                     playerDungeonInfo.Rewards.Item.Add(new LfgPlayerQuestRewardItem(itemId, quest.RewardItemCount[i]));
                             }
 
                             for (byte i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
                             {
-                                uint curencyId = quest.RewardCurrencyId[i];
+                                int curencyId = quest.RewardCurrencyId[i];
                                 if (curencyId != 0)
                                     playerDungeonInfo.Rewards.Currency.Add(new LfgPlayerQuestRewardCurrency(curencyId, quest.RewardCurrencyCount[i]));
                             }
@@ -217,7 +217,7 @@ namespace Game
                 LFGBlackList lfgBlackList = new();
                 lfgBlackList.PlayerGuid = pguid;
                 foreach (var locked in Global.LFGMgr.GetLockedDungeons(pguid))
-                    lfgBlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.lockStatus, locked.Value.requiredItemLevel, (int)locked.Value.currentItemLevel, 0));
+                    lfgBlackList.Slot.Add(new LFGBlackListSlot(locked.Key, locked.Value.lockStatus, locked.Value.requiredItemLevel, locked.Value.currentItemLevel, 0));
 
                 lfgPartyInfo.Player.Add(lfgBlackList);
             }
@@ -287,7 +287,7 @@ namespace Game
 
         public void SendLfgRoleCheckUpdate(LfgRoleCheck roleCheck)
         {
-            List<uint> dungeons = new();
+            List<int> dungeons = new();
             if (roleCheck.rDungeonId != 0)
                 dungeons.Add(roleCheck.rDungeonId);
             else
@@ -347,7 +347,7 @@ namespace Game
                     Log.outTrace(LogFilter.Lfg, "SendLfgJoinResult:: {0} DungeonID: {1} Lock status: {2} Required itemLevel: {3} Current itemLevel: {4}",
                         it.Key.ToString(), (lockInfo.Key & 0x00FFFFFF), lockInfo.Value.lockStatus, lockInfo.Value.requiredItemLevel, lockInfo.Value.currentItemLevel);
 
-                    blackList.Slot.Add(new LFGBlackListSlot(lockInfo.Key, (uint)lockInfo.Value.lockStatus, lockInfo.Value.requiredItemLevel, (int)lockInfo.Value.currentItemLevel, 0));
+                    blackList.Slot.Add(new LFGBlackListSlot(lockInfo.Key, lockInfo.Value.lockStatus, lockInfo.Value.requiredItemLevel, lockInfo.Value.currentItemLevel, 0));
                 }
 
                 lfgJoinResult.BlackList.Add(blackList);
@@ -398,14 +398,14 @@ namespace Game
 
             for (byte i = 0; i < SharedConst.QuestRewardItemCount; ++i)
             {
-                uint itemId = rewardData.quest.RewardItemId[i];
+                int itemId = rewardData.quest.RewardItemId[i];
                 if (itemId != 0)
                     lfgPlayerReward.Rewards.Add(new LFGPlayerRewards(itemId, rewardData.quest.RewardItemCount[i], 0, false));
             }
 
             for (byte i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
-                uint currencyId = rewardData.quest.RewardCurrencyId[i];
+                int currencyId = rewardData.quest.RewardCurrencyId[i];
                 if (currencyId != 0)
                     lfgPlayerReward.Rewards.Add(new LFGPlayerRewards(currencyId, rewardData.quest.RewardCurrencyCount[i], 0, true));
             }
@@ -418,7 +418,7 @@ namespace Game
             LfgAnswer playerVote = boot.votes.LookupByKey(GetPlayer().GetGUID());
             byte votesNum = 0;
             byte agreeNum = 0;
-            uint secsleft = (uint)((boot.cancelTime - GameTime.GetGameTime()) / 1000);
+            int secsleft = (int)((boot.cancelTime - GameTime.GetGameTime()) / 1000);
             foreach (var it in boot.votes)
             {
                 if (it.Value != LfgAnswer.Pending)
@@ -450,14 +450,14 @@ namespace Game
             ObjectGuid playerGuid = GetPlayer().GetGUID();
             ObjectGuid guildGuid = proposal.players.LookupByKey(playerGuid).group;
             bool silent = !proposal.isNew && guildGuid == proposal.group;
-            uint dungeonEntry = proposal.dungeonId;
+            int dungeonEntry = proposal.dungeonId;
 
             Log.outDebug(LogFilter.Lfg, "SMSG_LFG_PROPOSAL_UPDATE {0} state: {1}", GetPlayerInfo(), proposal.state);
 
             // show random dungeon if player selected random dungeon and it's not lfg group
             if (!silent)
             {
-                List<uint> playerDungeons = Global.LFGMgr.GetSelectedDungeons(playerGuid);
+                List<int> playerDungeons = Global.LFGMgr.GetSelectedDungeons(playerGuid);
                 if (!playerDungeons.Contains(proposal.dungeonId))
                     dungeonEntry = playerDungeons.First();
             }
@@ -470,7 +470,7 @@ namespace Game
             lfgProposalUpdate.InstanceID = 0;
             lfgProposalUpdate.ProposalID = proposal.id;
             lfgProposalUpdate.Slot = Global.LFGMgr.GetLFGDungeonEntry(dungeonEntry);
-            lfgProposalUpdate.State = (byte)proposal.state;
+            lfgProposalUpdate.State = proposal.state;
             lfgProposalUpdate.CompletedMask = proposal.encounters;
             lfgProposalUpdate.ValidCompletedMask = true;
             lfgProposalUpdate.ProposalSilent = silent;
@@ -497,7 +497,7 @@ namespace Game
             SendPacket(new LfgDisabled());
         }
 
-        public void SendLfgOfferContinue(uint dungeonEntry)
+        public void SendLfgOfferContinue(int dungeonEntry)
         {
             Log.outDebug(LogFilter.Lfg, "SMSG_LFG_OFFER_CONTINUE {0} dungeon entry: {1}", GetPlayerInfo(), dungeonEntry);
             SendPacket(new LfgOfferContinue(Global.LFGMgr.GetLFGDungeonEntry(dungeonEntry)));

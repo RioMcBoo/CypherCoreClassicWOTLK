@@ -20,10 +20,10 @@ namespace Game.DataStorage
         {
             for (uint i = 0; i < (int)Class.Max; ++i)
             {
-                _powersByClass[i] = new uint[(int)PowerType.Max];
+                _powersByClass[i] = new int[(int)PowerType.Max];
 
-                for (uint j = 0; j < (int)PowerType.Max; ++j)
-                    _powersByClass[i][j] = (uint)PowerType.Max;
+                for (int j = 0; j < (int)PowerType.Max; ++j)
+                    _powersByClass[i][j] = (int)PowerType.Max;
             }
 
             for (uint i = 0; i < (int)Locale.Total + 1; ++i)
@@ -1686,7 +1686,7 @@ namespace Game.DataStorage
             return requireAllTotems ? sharedMask == reqEntry.TotemCategoryMask : sharedMask != 0;
         }
 
-        public bool IsToyItem(uint toy)
+        public bool IsToyItem(int toy)
         {
             return _toys.Contains(toy);
         }
@@ -2110,7 +2110,7 @@ namespace Game.DataStorage
         MultiMap<int, SpellVisualMissileRecord> _spellVisualMissilesBySet = new();
         Dictionary<int, ScalingStatValuesRecord> _scalingStatValuesByLevel = new();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
-        List<uint> _toys = new();
+        List<int> _toys = new();
         MultiMap<int, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new();
         MultiMap<int, TransmogSetItemRecord> _transmogSetItemsByTransmogSet = new();
         Dictionary<int, UiMapBounds> _uiMapBounds = new();

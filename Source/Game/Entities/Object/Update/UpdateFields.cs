@@ -1975,7 +1975,7 @@ namespace Game.Entities
         {
             uint npcFlag = unitData.NpcFlags[i];
             if (i == 0 && unit.IsCreature() && !receiver.CanSeeSpellClickOn(unit.ToCreature()))
-                npcFlag &= ~(uint)NPCFlags.SpellClick;
+                npcFlag &= ~(uint)NPCFlags1.SpellClick;
 
             return npcFlag;
         }
@@ -3500,7 +3500,7 @@ namespace Game.Entities
         public DynamicUpdateField<int> Heirlooms = new(0, 7);
         public DynamicUpdateField<uint> HeirloomFlags = new(0, 8);
         public DynamicUpdateField<int> Toys = new(0, 9);
-        public DynamicUpdateField<uint> Transmog = new(0, 10);
+        public DynamicUpdateField<int> Transmog = new(0, 10);
         public DynamicUpdateField<int> ConditionalTransmog = new(0, 11);
         public DynamicUpdateField<int> SelfResSpells = new(0, 12);
         public DynamicUpdateField<SpellPctModByLabel> SpellPctModByLabel = new(0, 14);
@@ -3863,7 +3863,7 @@ namespace Game.Entities
             }
             for (int i = 0; i < Transmog.Size(); ++i)
             {
-                data.WriteUInt32(Transmog[i]);
+                data.WriteInt32(Transmog[i]);
             }
             for (int i = 0; i < ConditionalTransmog.Size(); ++i)
             {
@@ -4233,7 +4233,7 @@ namespace Game.Entities
                     {
                         if (Transmog.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            data.WriteUInt32(Transmog[i]);
+                            data.WriteInt32(Transmog[i]);
                         }
                     }
                 }
@@ -5063,12 +5063,12 @@ namespace Game.Entities
 
     public class GameObjectFieldData : HasChangesMask
     {
-        public UpdateField<List<uint>> StateWorldEffectIDs = new(0, 1);
+        public UpdateField<List<int>> StateWorldEffectIDs = new(0, 1);
         public DynamicUpdateField<int> EnableDoodadSets = new(0, 2);
         public DynamicUpdateField<int> WorldEffects = new(0, 3);
         public UpdateField<int> DisplayID = new(0, 4);
         public UpdateField<int> SpellVisualID = new(0, 5);
-        public UpdateField<uint> StateSpellVisualID = new(0, 6);
+        public UpdateField<int> StateSpellVisualID = new(0, 6);
         public UpdateField<int> SpawnTrackingStateAnimID = new(0, 7);
         public UpdateField<int> SpawnTrackingStateAnimKitID = new(0, 8);
         public UpdateField<ObjectGuid> CreatedBy = new(0, 9);
@@ -5080,8 +5080,8 @@ namespace Game.Entities
         public UpdateField<sbyte> State = new(0, 15);
         public UpdateField<sbyte> TypeID = new(0, 16);
         public UpdateField<byte> PercentHealth = new(0, 17);
-        public UpdateField<uint> ArtKit = new(0, 18);
-        public UpdateField<uint> CustomParam = new(0, 19);
+        public UpdateField<int> ArtKit = new(0, 18);
+        public UpdateField<int> CustomParam = new(0, 19);
         static int changeMaskLength = 20;
 
         public GameObjectFieldData() : base(0, TypeId.GameObject, changeMaskLength) { }
@@ -5090,13 +5090,13 @@ namespace Game.Entities
         {
             data.WriteInt32(DisplayID);
             data.WriteInt32(SpellVisualID);
-            data.WriteUInt32(StateSpellVisualID);
+            data.WriteInt32(StateSpellVisualID);
             data.WriteInt32(SpawnTrackingStateAnimID);
             data.WriteInt32(SpawnTrackingStateAnimKitID);
             data.WriteInt32(StateWorldEffectIDs.GetValue().Count);
             for (int i = 0; i < StateWorldEffectIDs.GetValue().Count; ++i)
             {
-                data.WriteUInt32(StateWorldEffectIDs.GetValue()[i]);
+                data.WriteInt32(StateWorldEffectIDs.GetValue()[i]);
             }
             data.WritePackedGuid(CreatedBy);
             data.WritePackedGuid(GuildGUID);
@@ -5107,9 +5107,9 @@ namespace Game.Entities
             data.WriteInt8(GetViewerGameObjectState(this, owner, receiver));
             data.WriteInt8(TypeID);
             data.WriteUInt8(PercentHealth);
-            data.WriteUInt32(ArtKit);
+            data.WriteInt32(ArtKit);
             data.WriteInt32(EnableDoodadSets.Size());
-            data.WriteUInt32(CustomParam);
+            data.WriteInt32(CustomParam);
             data.WriteInt32(WorldEffects.Size());
             
             for (int i = 0; i < EnableDoodadSets.Size(); ++i)
@@ -5138,7 +5138,7 @@ namespace Game.Entities
                     data.WriteBits(StateWorldEffectIDs.GetValue().Count, 32);
                     for (int i = 0; i < StateWorldEffectIDs.GetValue().Count; ++i)
                     {
-                        data.WriteUInt32(StateWorldEffectIDs.GetValue()[i]);
+                        data.WriteInt32(StateWorldEffectIDs.GetValue()[i]);
                     }
                 }
             }
@@ -5193,7 +5193,7 @@ namespace Game.Entities
                 }
                 if (changesMask[6])
                 {
-                    data.WriteUInt32(StateSpellVisualID);
+                    data.WriteInt32(StateSpellVisualID);
                 }
                 if (changesMask[7])
                 {
@@ -5241,11 +5241,11 @@ namespace Game.Entities
                 }
                 if (changesMask[18])
                 {
-                    data.WriteUInt32(ArtKit);
+                    data.WriteInt32(ArtKit);
                 }
                 if (changesMask[19])
                 {
-                    data.WriteUInt32(CustomParam);
+                    data.WriteInt32(CustomParam);
                 }
             }
         }
@@ -5370,13 +5370,13 @@ namespace Game.Entities
         public UpdateField<ObjectGuid> Owner = new(0, 3);
         public UpdateField<ObjectGuid> PartyGUID = new(0, 4);
         public UpdateField<ObjectGuid> GuildGUID = new(0, 5);
-        public UpdateField<uint> DisplayID = new(0, 6);
+        public UpdateField<int> DisplayID = new(0, 6);
         public UpdateField<byte> RaceID = new(0, 7);
         public UpdateField<byte> Sex = new(0, 8);
         public UpdateField<byte> Class = new(0, 9);
         public UpdateField<uint> Flags = new(0, 10);
         public UpdateField<int> FactionTemplate = new(0, 11);
-        public UpdateFieldArray<uint> Items = new(19, 12, 13);
+        public UpdateFieldArray<int> Items = new(19, 12, 13);
         static int changeMaskLength = 32;
 
         public CorpseData() : base(0, TypeId.Corpse, changeMaskLength) { }
@@ -5387,10 +5387,10 @@ namespace Game.Entities
             data.WritePackedGuid(Owner);
             data.WritePackedGuid(PartyGUID);
             data.WritePackedGuid(GuildGUID);
-            data.WriteUInt32(DisplayID);
+            data.WriteInt32(DisplayID);
             for (int i = 0; i < 19; ++i)
             {
-                data.WriteUInt32(Items[i]);
+                data.WriteInt32(Items[i]);
             }
             data.WriteUInt8(RaceID);
             data.WriteUInt8(Sex);
@@ -5454,7 +5454,7 @@ namespace Game.Entities
                 }
                 if (changesMask[6])
                 {
-                    data.WriteUInt32(DisplayID);
+                    data.WriteInt32(DisplayID);
                 }
                 if (changesMask[7])
                 {
@@ -5483,7 +5483,7 @@ namespace Game.Entities
                 {
                     if (changesMask[13 + i])
                     {
-                        data.WriteUInt32(Items[i]);
+                        data.WriteInt32(Items[i]);
                     }
                 }
             }
@@ -5584,7 +5584,7 @@ namespace Game.Entities
     {
         public UpdateField<bool> Field_C = new(0, 1);
         public UpdateField<int> AnimationDataID = new(0, 2);
-        public UpdateField<uint> AnimKitID = new(0, 3);
+        public UpdateField<int> AnimKitID = new(0, 3);
         public UpdateField<uint> AnimProgress = new(0, 4);
         static int changeMaskLength = 5;
 
@@ -5593,7 +5593,7 @@ namespace Game.Entities
         public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
         {
             data.WriteInt32(AnimationDataID);
-            data.WriteUInt32(AnimKitID);
+            data.WriteInt32(AnimKitID);
             data.WriteUInt32(AnimProgress);
             data.WriteBit(Field_C);
             data.FlushBits();
@@ -5623,7 +5623,7 @@ namespace Game.Entities
                 }
                 if (changesMask[3])
                 {
-                    data.WriteUInt32(AnimKitID);
+                    data.WriteInt32(AnimKitID);
                 }
                 if (changesMask[4])
                 {
@@ -5660,7 +5660,7 @@ namespace Game.Entities
         public UpdateField<int> SpellForVisuals = new(0, 13);
         public UpdateField<int> SpellXSpellVisualID = new(0, 14);
         public UpdateField<float> BoundsRadius2D = new(0, 15);
-        public UpdateField<uint> DecalPropertiesID = new(0, 16);
+        public UpdateField<int> DecalPropertiesID = new(0, 16);
         public UpdateField<ObjectGuid> CreatingEffectGUID = new(0, 17);
         public UpdateField<ObjectGuid> OrbitPathTarget = new(0, 18);
         public UpdateField<VisualAnim> VisualAnim = new(0, 19);
@@ -5680,7 +5680,7 @@ namespace Game.Entities
             data.WriteInt32(SpellID);
             data.WriteInt32(SpellForVisuals);
             data.WriteFloat(BoundsRadius2D);
-            data.WriteUInt32(DecalPropertiesID);
+            data.WriteInt32(DecalPropertiesID);
             data.WritePackedGuid(CreatingEffectGUID);
             data.WritePackedGuid(OrbitPathTarget);
             ExtraScaleCurve.GetValue().WriteCreate(data, owner, receiver);
@@ -5748,7 +5748,7 @@ namespace Game.Entities
                 }
                 if (_changesMask[16])
                 {
-                    data.WriteUInt32(DecalPropertiesID);
+                    data.WriteInt32(DecalPropertiesID);
                 }
                 if (_changesMask[17])
                 {

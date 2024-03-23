@@ -129,12 +129,12 @@ namespace Game.BlackMarket
                 templates.Add(pair.Value);
             }
 
-            templates.RandomResize(WorldConfig.GetUIntValue(WorldCfg.BlackmarketMaxAuctions));
+            templates.RandomResize(WorldConfig.GetIntValue(WorldCfg.BlackmarketMaxAuctions));
 
             foreach (BlackMarketTemplate templat in templates)
             {
                 BlackMarketEntry entry = new();
-                entry.Initialize(templat.MarketID, (uint)templat.Duration);
+                entry.Initialize(templat.MarketID, templat.Duration);
                 entry.SaveToDB(trans);
                 AddAuction(entry);
             }
@@ -254,7 +254,7 @@ namespace Game.BlackMarket
             ObjectGuid oldBidder_guid = ObjectGuid.Create(HighGuid.Player, entry.GetBidder());
             Player oldBidder = Global.ObjAccessor.FindConnectedPlayer(oldBidder_guid);
 
-            uint oldBidder_accId = 0;
+            int oldBidder_accId = 0;
             if (oldBidder == null)
                 oldBidder_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(oldBidder_guid);
 
@@ -270,20 +270,20 @@ namespace Game.BlackMarket
                 .SendMailTo(trans, new MailReceiver(oldBidder, entry.GetBidder()), new MailSender(entry), MailCheckFlags.Copied);
         }
 
-        public BlackMarketEntry GetAuctionByID(uint marketId)
+        public BlackMarketEntry GetAuctionByID(int marketId)
         {
             return _auctions.LookupByKey(marketId);
         }
 
-        public BlackMarketTemplate GetTemplateByID(uint marketId)
+        public BlackMarketTemplate GetTemplateByID(int marketId)
         {
             return _templates.LookupByKey(marketId);
         }
 
         public long GetLastUpdate() { return _lastUpdate; }
 
-        Dictionary<uint, BlackMarketEntry> _auctions = new();
-        Dictionary<uint, BlackMarketTemplate> _templates = new();
+        Dictionary<int, BlackMarketEntry> _auctions = new();
+        Dictionary<int, BlackMarketTemplate> _templates = new();
         long _lastUpdate;
     }
 }

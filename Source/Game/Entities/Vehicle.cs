@@ -41,9 +41,9 @@ namespace Game.Entities
 
             // Set or remove correct flags based on available seats. Will overwrite db data (if wrong).
             if (UsableSeatNum != 0)
-                _me.SetNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
+                _me.SetNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags1.PlayerVehicle : NPCFlags1.SpellClick);
             else
-                _me.RemoveNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
+                _me.RemoveNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags1.PlayerVehicle : NPCFlags1.SpellClick);
 
             InitMovementInfoForBase();
         }
@@ -366,7 +366,7 @@ namespace Game.Entities
                 unit.GetName(), _me.GetEntry(), _vehicleInfo.Id, _me.GetGUID().ToString(), seat.Key);
 
             if (seat.Value.SeatInfo.CanEnterOrExit && ++UsableSeatNum != 0)
-                _me.SetNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
+                _me.SetNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags1.PlayerVehicle : NPCFlags1.SpellClick);
 
             // Enable gravity for passenger when he did not have it active before entering the vehicle
             if (seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.DisableGravity) && !seat.Value.Passenger.IsGravityDisabled)
@@ -617,7 +617,7 @@ namespace Game.Entities
             Seat = Target.Seats.Last();
         }
 
-        public override bool Execute(ulong e_time, uint p_time)
+        public override bool Execute(long e_time, uint p_time)
         {
             Cypher.Assert(Passenger.IsInWorld);
             Cypher.Assert(Target != null && Target.GetBase().IsInWorld);
@@ -655,9 +655,9 @@ namespace Game.Entities
                 if (Target.UsableSeatNum == 0)
                 {
                     if (Target.GetBase().IsTypeId(TypeId.Player))
-                        Target.GetBase().RemoveNpcFlag(NPCFlags.PlayerVehicle);
+                        Target.GetBase().RemoveNpcFlag(NPCFlags1.PlayerVehicle);
                     else
-                        Target.GetBase().RemoveNpcFlag(NPCFlags.SpellClick);
+                        Target.GetBase().RemoveNpcFlag(NPCFlags1.SpellClick);
                 }
             }
 
@@ -739,7 +739,7 @@ namespace Game.Entities
             return true;
         }
 
-        public override void Abort(ulong e_time)
+        public override void Abort(long e_time)
         {
             // Check if the Vehicle was already uninstalled, in which case all auras were removed already
             if (Target != null)

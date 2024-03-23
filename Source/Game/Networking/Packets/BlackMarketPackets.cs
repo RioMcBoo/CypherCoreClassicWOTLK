@@ -123,10 +123,10 @@ namespace Game.Networking.Packets
             MarketID = data.ReadInt32();
             SellerNPC = data.ReadInt32();
             Item.Read(data);
-            Quantity = data.ReadUInt32();
-            MinBid = data.ReadUInt64();
-            MinIncrement = data.ReadUInt64();
-            CurrentBid = data.ReadUInt64();
+            Quantity = data.ReadInt32();
+            MinBid = data.ReadInt64();
+            MinIncrement = data.ReadInt64();
+            CurrentBid = data.ReadInt64();
             SecondsRemaining = data.ReadInt32();
             NumBids = data.ReadInt32();
             HighBid = data.HasBit();
@@ -136,10 +136,10 @@ namespace Game.Networking.Packets
         {
             data.WriteInt32(MarketID);
             data.WriteInt32(SellerNPC);
-            data.WriteUInt32(Quantity);
-            data.WriteUInt64(MinBid);
-            data.WriteUInt64(MinIncrement);
-            data.WriteUInt64(CurrentBid);
+            data.WriteInt32(Quantity);
+            data.WriteInt64(MinBid);
+            data.WriteInt64(MinIncrement);
+            data.WriteInt64(CurrentBid);
             data.WriteInt32(SecondsRemaining);
             data.WriteInt32(NumBids);
             Item.Write(data);
@@ -150,10 +150,10 @@ namespace Game.Networking.Packets
         public int MarketID;
         public int SellerNPC;
         public ItemInstance Item;
-        public uint Quantity;
-        public ulong MinBid;
-        public ulong MinIncrement;
-        public ulong CurrentBid;
+        public int Quantity;
+        public long MinBid;
+        public long MinIncrement;
+        public long CurrentBid;
         public int SecondsRemaining;
         public int NumBids;
         public bool HighBid;

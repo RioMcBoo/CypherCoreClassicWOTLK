@@ -51,7 +51,7 @@ namespace Game.Mails
             // can be empty
             mailLoot.FillLoot(m_mailTemplateId, LootStorage.Mail, receiver, true, true, LootModes.Default, ItemContext.None);
 
-            for (uint i = 0; m_items.Count < SharedConst.MaxMailItems && i < mailLoot.items.Count; ++i)
+            for (int i = 0; m_items.Count < SharedConst.MaxMailItems && i < mailLoot.items.Count; ++i)
             {
                 LootItem lootitem = mailLoot.LootItemInSlot(i, receiver);
                 if (lootitem != null)
@@ -82,7 +82,7 @@ namespace Game.Mails
             ObjectGuid receiverGuid = ObjectGuid.Create(HighGuid.Player, receiver_guid);
             Player receiver = Global.ObjAccessor.FindPlayer(receiverGuid);
 
-            uint rc_account = 0;
+            int rc_account = 0;
             if (receiver == null)
                 rc_account = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(receiverGuid);
 
@@ -131,7 +131,7 @@ namespace Game.Mails
             if (pReceiver != null)
                 PrepareItems(pReceiver, trans);                            // generate mail template items
 
-            ulong mailId = Global.ObjectMgr.GenerateMailID();
+            long mailId = Global.ObjectMgr.GenerateMailID();
 
             long deliver_time = GameTime.GetGameTime() + deliver_delay;
 
@@ -218,8 +218,8 @@ namespace Game.Mails
 
         int GetMailTemplateId() { return m_mailTemplateId; }
         string GetSubject() { return m_subject; }
-        ulong GetMoney() { return m_money; }
-        ulong GetCOD() { return m_COD; }
+        long GetMoney() { return m_money; }
+        long GetCOD() { return m_COD; }
         string GetBody() { return m_body; }
 
         public MailDraft AddMoney(long money)

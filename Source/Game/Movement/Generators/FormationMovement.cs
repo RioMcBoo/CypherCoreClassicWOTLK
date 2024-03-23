@@ -14,15 +14,15 @@ namespace Game.Movement
         static uint FORMATION_MOVEMENT_INTERVAL = 1200; // sniffed (3 batch update cycles)
         float _range;
         float _angle;
-        uint _point1;
-        uint _point2;
-        uint _lastLeaderSplineID;
+        int _point1;
+        int _point2;
+        int _lastLeaderSplineID;
         bool _hasPredictedDestination;
 
         Position _lastLeaderPosition;
         TimeTracker _nextMoveTimer = new();
 
-        public FormationMovementGenerator(Unit leader, float range, float angle, uint point1, uint point2)
+        public FormationMovementGenerator(Unit leader, float range, float angle, int point1, int point2)
         {
             _abstractFollower = new(leader);
             _range = range;
@@ -102,7 +102,7 @@ namespace Game.Movement
                         Creature leader = formation.GetLeader();
                         if (leader != null)
                         {
-                            uint currentWaypoint = leader.GetCurrentWaypointInfo().nodeId;
+                            int currentWaypoint = leader.GetCurrentWaypointInfo().nodeId;
                             if (currentWaypoint == _point1 || currentWaypoint == _point2)
                                 _angle = MathF.PI * 2 - _angle;
                         }

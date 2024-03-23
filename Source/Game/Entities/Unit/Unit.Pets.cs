@@ -153,7 +153,7 @@ namespace Game.Entities
                                 minion.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
                                 minion.SetWildBattlePetLevel(pet.PacketInfo.Level);
 
-                                uint display = pet.PacketInfo.DisplayID;
+                                int display = pet.PacketInfo.DisplayID;
                                 if (display != 0)
                                     minion.SetDisplayId(display, true);
                             }
@@ -170,7 +170,7 @@ namespace Game.Entities
                         minion.SetSpeedRate(i, m_speed_rate[(int)i]);
 
                 // Send infinity cooldown - client does that automatically but after relog cooldown needs to be set again
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)minion.m_unitData.CreatedBySpell.GetValue(), Difficulty.None);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell, Difficulty.None);
                 if (spellInfo != null && spellInfo.IsCooldownStartedOnEvent())
                     GetSpellHistory().StartCooldown(spellInfo, 0, null, true);
             }
@@ -206,12 +206,12 @@ namespace Game.Entities
                             if (spellEffectInfo == null || !spellEffectInfo.IsEffect(SpellEffectName.Summon))
                                 continue;
 
-                            RemoveAllMinionsByEntry((uint)spellEffectInfo.MiscValue);
+                            RemoveAllMinionsByEntry(spellEffectInfo.MiscValue);
                         }
                     }
                 }
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)minion.m_unitData.CreatedBySpell.GetValue(), Difficulty.None);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell, Difficulty.None);
                 // Remove infinity cooldown
                 if (spellInfo != null && spellInfo.IsCooldownStartedOnEvent())
                     GetSpellHistory().SendCooldownEvent(spellInfo);
@@ -529,7 +529,7 @@ namespace Game.Entities
             }
         }
 
-        public void GetAllMinionsByEntry(List<TempSummon> Minions, uint entry)
+        public void GetAllMinionsByEntry(List<TempSummon> Minions, int entry)
         {
             for (var i = 0; i < m_Controlled.Count; ++i)
             {
@@ -539,7 +539,7 @@ namespace Game.Entities
             }
         }
 
-        public void RemoveAllMinionsByEntry(uint entry)
+        public void RemoveAllMinionsByEntry(int entry)
         {
             for (var i = 0; i < m_Controlled.Count; ++i)
             {
@@ -679,7 +679,7 @@ namespace Game.Entities
                 RemoveUnitFlag(UnitFlags.PetInCombat); // m_controlled is now empty, so we know none of our minions are in combat
         }
 
-        public void SendPetActionFeedback(PetActionFeedback msg, uint spellId)
+        public void SendPetActionFeedback(PetActionFeedback msg, int spellId)
         {
             Unit owner = GetOwner();
             if (owner == null || !owner.IsTypeId(TypeId.Player))
@@ -718,7 +718,7 @@ namespace Game.Entities
 
         public void SetLastManaUse(uint spellCastTime) { m_lastManaUseTime = spellCastTime; }        
 
-        public Pet CreateTamedPetFrom(Creature creatureTarget, uint spell_id = 0)
+        public Pet CreateTamedPetFrom(Creature creatureTarget, int spell_id = 0)
         {
             if (!IsTypeId(TypeId.Player))
                 return null;
@@ -728,7 +728,7 @@ namespace Game.Entities
             if (!pet.CreateBaseAtCreature(creatureTarget))
                 return null;
 
-            uint level = creatureTarget.GetLevelForTarget(this) + 5 < GetLevel() ? (GetLevel() - 5) : creatureTarget.GetLevelForTarget(this);
+            int level = creatureTarget.GetLevelForTarget(this) + 5 < GetLevel() ? (GetLevel() - 5) : creatureTarget.GetLevelForTarget(this);
 
             if (!InitTamedPet(pet, level, spell_id))
             {
@@ -739,7 +739,7 @@ namespace Game.Entities
             return pet;
         }
 
-        public Pet CreateTamedPetFrom(uint creatureEntry, uint spell_id = 0)
+        public Pet CreateTamedPetFrom(int creatureEntry, int spell_id = 0)
         {
             if (!IsTypeId(TypeId.Player))
                 return null;
@@ -756,7 +756,7 @@ namespace Game.Entities
             return pet;
         }
 
-        bool InitTamedPet(Pet pet, uint level, uint spell_id)
+        bool InitTamedPet(Pet pet, int level, int spell_id)
         {
             Player player = ToPlayer();
             PetStable petStable = player.GetOrInitPetStable();
@@ -783,7 +783,7 @@ namespace Game.Entities
             pet.InitPetCreateSpells();
             pet.SetFullHealth();
 
-            petStable.SetCurrentActivePetIndex((uint)freeActiveSlot);
+            petStable.SetCurrentActivePetIndex(freeActiveSlot);
 
             PetStable.PetInfo petInfo = new();
             pet.FillPetInfo(petInfo);

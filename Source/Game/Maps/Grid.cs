@@ -79,7 +79,7 @@ namespace Game.Maps
 
     public class Grid
     {
-        public Grid(uint id, uint x, uint y, long expiry, bool unload = true)
+        public Grid(int id, int x, int y, long expiry, bool unload = true)
         {
             gridId = id;
             gridX = x;
@@ -91,24 +91,24 @@ namespace Game.Maps
             for (uint xx = 0; xx < MapConst.MaxCells; ++xx)
             {
                 i_cells[xx] = new GridCell[MapConst.MaxCells];
-                for (uint yy = 0; yy < MapConst.MaxCells; ++yy)
+                for (int yy = 0; yy < MapConst.MaxCells; ++yy)
                     i_cells[xx][yy] = new GridCell();
             }
         }
 
         public Grid(Cell cell, uint expiry, bool unload = true) : this(cell.GetId(), cell.GetGridX(), cell.GetGridY(), expiry, unload) { }
 
-        public GridCell GetGridCell(uint x, uint y)
+        public GridCell GetGridCell(int x, int y)
         {
             return i_cells[x][y];
         }
 
-        public uint GetGridId()
+        public int GetGridId()
         {
             return gridId;
         }
 
-        private void SetGridId(uint id)
+        private void SetGridId(int id)
         {
             gridId = id;
         }
@@ -123,12 +123,12 @@ namespace Game.Maps
             gridState = s;
         }
 
-        public uint GetX()
+        public int GetX()
         {
             return gridX;
         }
 
-        public uint GetY()
+        public int GetY()
         {
             return gridY;
         }
@@ -232,28 +232,28 @@ namespace Game.Maps
 
         public void VisitAllGrids(Visitor visitor)
         {
-            for (uint x = 0; x < MapConst.MaxCells; ++x)
-                for (uint y = 0; y < MapConst.MaxCells; ++y)
+            for (int x = 0; x < MapConst.MaxCells; ++x)
+                for (int y = 0; y < MapConst.MaxCells; ++y)
                     GetGridCell(x, y).Visit(visitor);
         }
 
-        public void VisitGrid(uint x, uint y, Visitor visitor)
+        public void VisitGrid(int x, int y, Visitor visitor)
         {
             GetGridCell(x, y).Visit(visitor);
         }
 
-        public uint GetWorldObjectCountInNGrid<T>() where T : WorldObject
+        public int GetWorldObjectCountInNGrid<T>() where T : WorldObject
         {
-            uint count = 0;
-            for (uint x = 0; x < MapConst.MaxCells; ++x)
-                for (uint y = 0; y < MapConst.MaxCells; ++y)
+            int count = 0;
+            for (int x = 0; x < MapConst.MaxCells; ++x)
+                for (int y = 0; y < MapConst.MaxCells; ++y)
                     count += i_cells[x][y].GetWorldObjectCountInGrid<T>();
             return count;
         }
 
-        uint gridId;
-        uint gridX;
-        uint gridY;
+        int gridId;
+        int gridX;
+        int gridY;
         GridInfo gridInfo;
         GridState gridState;
         bool gridObjectDataLoaded;
@@ -295,9 +295,9 @@ namespace Game.Maps
             }
         }
 
-        public uint GetWorldObjectCountInGrid<T>() where T : WorldObject
+        public int GetWorldObjectCountInGrid<T>() where T : WorldObject
         {
-            return (uint)_objects.GetCount<T>();
+            return _objects.GetCount<T>();
         }
 
         public void AddWorldObject(WorldObject obj)

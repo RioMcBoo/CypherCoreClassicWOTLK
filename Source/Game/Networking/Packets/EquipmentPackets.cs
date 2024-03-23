@@ -60,10 +60,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            ID = _worldPacket.ReadUInt64();
+            ID = _worldPacket.ReadInt64();
         }
 
-        public ulong ID;
+        public long ID;
     }
 
     class UseEquipmentSet : ClientPacket

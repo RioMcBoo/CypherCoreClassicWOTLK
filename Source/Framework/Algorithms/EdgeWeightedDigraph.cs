@@ -119,7 +119,7 @@ namespace Framework.Collections
         /// <param name="from">The start vertex</param>
         /// <param name="to">The destination vertex</param>
         /// <param name="weight">The weight of the DirectedEdge</param>
-        public DirectedEdge(uint from, uint to, double weight)
+        public DirectedEdge(int from, int to, double weight)
         {
             From = from;
             To = to;
@@ -128,11 +128,11 @@ namespace Framework.Collections
         /// <summary>
         /// Returns the destination vertex of the DirectedEdge
         /// </summary>
-        public uint From { get; private set; }
+        public int From { get; private set; }
         /// <summary>
         /// Returns the start vertex of the DirectedEdge
         /// </summary>
-        public uint To { get; private set; }
+        public int To { get; private set; }
         /// <summary>
         /// Returns the weight of the DirectedEdge
         /// </summary>

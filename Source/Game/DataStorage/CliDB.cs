@@ -379,7 +379,7 @@ namespace Game.DataStorage
             foreach (var entry in TaxiPathStorage.Values)
             {
                 if (!TaxiPathSetBySource.ContainsKey(entry.FromTaxiNode))
-                    TaxiPathSetBySource.Add(entry.FromTaxiNode, new Dictionary<uint, TaxiPathBySourceAndDestination>());
+                    TaxiPathSetBySource.Add(entry.FromTaxiNode, new Dictionary<int, TaxiPathBySourceAndDestination>());
                 TaxiPathSetBySource[entry.FromTaxiNode][entry.ToTaxiNode] = new TaxiPathBySourceAndDestination(entry.Id, entry.Cost);
             }
 
@@ -392,7 +392,7 @@ namespace Game.DataStorage
                     pathLength[entry.PathID] = (uint)entry.NodeIndex + 1u;
 
             // Set path length
-            for (uint i = 0; i < pathCount; ++i)
+            for (int i = 0; i < pathCount; ++i)
                 TaxiPathNodesByPath[i] = new TaxiPathNodeRecord[pathLength[i]];
 
             // fill data
@@ -411,8 +411,8 @@ namespace Game.DataStorage
                     continue;
 
                 // valid taxi network node
-                uint field = (node.Id - 1) / 8;
-                byte submask = (byte)(1 << (int)((node.Id - 1) % 8));
+                int field = (node.Id - 1) / 8;
+                byte submask = (byte)(1 << (node.Id - 1) % 8);
 
                 TaxiNodesMask[field] |= submask;
                 if (node.HasAnyFlag(TaxiNodeFlags.ShowOnHordeMap))

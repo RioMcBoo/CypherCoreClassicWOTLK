@@ -39,7 +39,7 @@ namespace Game.Networking.Packets
             uint knownPetSize = _worldPacket.ReadUInt32();
             MaxPetLevel = _worldPacket.ReadInt8();
 
-            uint sizeLimit = CliDB.BattlePetSpeciesStorage.GetNumRows() / 8 + 1;
+            int sizeLimit = CliDB.BattlePetSpeciesStorage.GetNumRows() / 8 + 1;
             if (knownPetSize >= sizeLimit)
                 throw new System.Exception($"Attempted to read more array elements from packet {knownPetSize} than allowed {sizeLimit}");
 
@@ -609,7 +609,7 @@ namespace Game.Networking.Packets
     {
         public List<AuctionItem> Items = new();
         public uint Unknown830;
-        public uint TotalCount;
+        public int TotalCount;
         public uint DesiredDelay;
         public AuctionHouseListType ListType;
         public bool HasMoreResults;
@@ -621,7 +621,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Items.Count);
             _worldPacket.WriteUInt32(Unknown830);
-            _worldPacket.WriteUInt32(TotalCount);
+            _worldPacket.WriteInt32(TotalCount);
             _worldPacket.WriteUInt32(DesiredDelay);
             _worldPacket.WriteBits((int)ListType, 2);
             _worldPacket.WriteBit(HasMoreResults);
@@ -662,16 +662,16 @@ namespace Game.Networking.Packets
     class AuctionOutbidNotification : ServerPacket
     {    
         public AuctionBidderNotification Info;
-        public ulong BidAmount;
-        public ulong MinIncrement;
+        public long BidAmount;
+        public long MinIncrement;
 
         public AuctionOutbidNotification() : base(ServerOpcodes.AuctionOutbidNotification) { }
 
         public override void Write()
         {
             Info.Write(_worldPacket);
-            _worldPacket.WriteUInt64(BidAmount);
-            _worldPacket.WriteUInt64(MinIncrement);
+            _worldPacket.WriteInt64(BidAmount);
+            _worldPacket.WriteInt64(MinIncrement);
         }
     }
 
@@ -693,22 +693,22 @@ namespace Game.Networking.Packets
 
     public class AuctionReplicateResponse : ServerPacket
     { 
-        public uint ChangeNumberCursor;
-        public uint ChangeNumberGlobal;
-        public uint DesiredDelay;
-        public uint ChangeNumberTombstone;
-        public uint Result;
+        public int ChangeNumberCursor;
+        public int ChangeNumberGlobal;
+        public int DesiredDelay;
+        public int ChangeNumberTombstone;
+        public int Result;
         public List<AuctionItem> Items = new();
 
         public AuctionReplicateResponse() : base(ServerOpcodes.AuctionReplicateResponse) { }
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Result);
-            _worldPacket.WriteUInt32(DesiredDelay);
-            _worldPacket.WriteUInt32(ChangeNumberGlobal);
-            _worldPacket.WriteUInt32(ChangeNumberCursor);
-            _worldPacket.WriteUInt32(ChangeNumberTombstone);
+            _worldPacket.WriteInt32(Result);
+            _worldPacket.WriteInt32(DesiredDelay);
+            _worldPacket.WriteInt32(ChangeNumberGlobal);
+            _worldPacket.WriteInt32(ChangeNumberCursor);
+            _worldPacket.WriteInt32(ChangeNumberTombstone);
             _worldPacket.WriteInt32(Items.Count);
 
             foreach (AuctionItem item in Items)
@@ -753,7 +753,7 @@ namespace Game.Networking.Packets
         public AuctionBucketKey(WorldPacket data)
         {
             data.ResetBitPos();
-            ItemID = data.ReadBits<uint>(20);
+            ItemID = data.ReadBits<int>(20);
             bool hasBattlePetSpeciesId = data.HasBit();
             ItemLevel = data.ReadBits<ushort>(11);
             bool hasSuffixItemNameDescriptionId = data.HasBit();
@@ -869,7 +869,7 @@ namespace Game.Networking.Packets
     public struct AuctionOwnerNotification
     {
         public int AuctionID;
-        public ulong BidAmount;
+        public long BidAmount;
         public ItemInstance Item;
 
         public void Initialize(AuctionPosting auction)
@@ -882,7 +882,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(AuctionID);
-            data.WriteUInt64(BidAmount);
+            data.WriteInt64(BidAmount);
             Item.Write(data);
         }
     }
@@ -891,9 +891,9 @@ namespace Game.Networking.Packets
     {
         public AuctionBucketKey Key;
         public int TotalQuantity;
-        public ulong MinPrice;
+        public long MinPrice;
         public int RequiredLevel;
-        public List<uint> ItemModifiedAppearanceIDs = new();
+        public List<int> ItemModifiedAppearanceIDs = new();
         public byte? MaxBattlePetQuality;
         public byte? MaxBattlePetLevel;
         public byte? BattlePetBreedID;
@@ -906,7 +906,7 @@ namespace Game.Networking.Packets
             Key.Write(data);
             data.WriteInt32(TotalQuantity);
             data.WriteInt32(RequiredLevel);
-            data.WriteUInt64(MinPrice);
+            data.WriteInt64(MinPrice);
             data.WriteInt32(ItemModifiedAppearanceIDs.Count);
             if (!ItemModifiedAppearanceIDs.Empty())
             {
@@ -945,10 +945,10 @@ namespace Game.Networking.Packets
         public uint Flags;
         public int AuctionID;
         public ObjectGuid Owner;
-        public ulong? MinBid;
-        public ulong? MinIncrement;
-        public ulong? BuyoutPrice;
-        public ulong? UnitPrice;
+        public long? MinBid;
+        public long? MinIncrement;
+        public long? BuyoutPrice;
+        public long? UnitPrice;
         public int DurationLeft;
         public byte DeleteReason;
         public bool CensorServerSideInfo;
@@ -957,7 +957,7 @@ namespace Game.Networking.Packets
         public ObjectGuid OwnerAccountID;
         public uint EndTime;
         public ObjectGuid? Bidder;
-        public ulong? BidAmount;
+        public long? BidAmount;
         public List<ItemGemData> Gems = new();
         public AuctionBucketKey AuctionBucketKey;
         public ObjectGuid? Creator;
@@ -998,16 +998,16 @@ namespace Game.Networking.Packets
                 enchant.Write(data);
 
             if (MinBid.HasValue)
-                data.WriteUInt64(MinBid.Value);
+                data.WriteInt64(MinBid.Value);
 
             if (MinIncrement.HasValue)
-                data.WriteUInt64(MinIncrement.Value);
+                data.WriteInt64(MinIncrement.Value);
 
             if (BuyoutPrice.HasValue)
-                data.WriteUInt64(BuyoutPrice.Value);
+                data.WriteInt64(BuyoutPrice.Value);
 
             if (UnitPrice.HasValue)
-                data.WriteUInt64(UnitPrice.Value);
+                data.WriteInt64(UnitPrice.Value);
 
             if (!CensorServerSideInfo)
             {
@@ -1025,7 +1025,7 @@ namespace Game.Networking.Packets
                     data.WritePackedGuid(Bidder.Value);
 
                 if (BidAmount.HasValue)
-                    data.WriteUInt64(BidAmount.Value);
+                    data.WriteInt64(BidAmount.Value);
             }
 
             foreach (ItemGemData gem in Gems)

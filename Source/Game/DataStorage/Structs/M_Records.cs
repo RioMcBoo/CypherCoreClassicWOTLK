@@ -10,7 +10,7 @@ namespace Game.DataStorage
 {
     public sealed class MailTemplateRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Body;
     }
 

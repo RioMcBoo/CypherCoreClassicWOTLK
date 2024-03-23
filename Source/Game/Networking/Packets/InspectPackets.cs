@@ -37,7 +37,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(LifetimeMaxRank);
             _worldPacket.WriteUInt16(TodayHK);
             _worldPacket.WriteUInt16(YesterdayHK);
-            _worldPacket.WriteUInt32(LifetimeHK);
+            _worldPacket.WriteInt32(LifetimeHK);
             _worldPacket.WriteInt32(HonorLevel);
 
             for (int i = 0; i < Glyphs.Count; ++i)
@@ -69,7 +69,7 @@ namespace Game.Networking.Packets
         public Array<PVPBracketData> Bracket = new(7, default);
         public uint? AzeriteLevel;
         public int ItemLevel;
-        public uint LifetimeHK;
+        public int LifetimeHK;
         public int HonorLevel;
         public ushort TodayHK;
         public ushort YesterdayHK;
@@ -95,7 +95,7 @@ namespace Game.Networking.Packets
     //Structs
     public struct InspectEnchantData
     {
-        public InspectEnchantData(uint id, byte index)
+        public InspectEnchantData(int id, EnchantmentSlot index)
         {
             Id = id;
             Index = index;
@@ -103,12 +103,12 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Id);
-            data.WriteUInt8(Index);
+            data.WriteInt32(Id);
+            data.WriteUInt8((byte)Index);
         }
 
-        public uint Id;
-        public byte Index;
+        public int Id;
+        public EnchantmentSlot Index;
     }
 
     public class InspectItemData
@@ -123,9 +123,9 @@ namespace Game.Networking.Packets
 
             for (EnchantmentSlot enchant = 0; enchant < EnchantmentSlot.Max; ++enchant)
             {
-                uint enchId = item.GetEnchantmentId(enchant);
+                int enchId = item.GetEnchantmentId(enchant);
                 if (enchId != 0)
-                    Enchants.Add(new InspectEnchantData(enchId, (byte)enchant));
+                    Enchants.Add(new InspectEnchantData(enchId, enchant));
             }
 
             byte i = 0;

@@ -50,7 +50,7 @@ namespace Game
                 return index;
             }
 
-            classTalentsRequestNewConfig.Config.ChrSpecializationID = (int)_player.GetPrimarySpecialization();
+            classTalentsRequestNewConfig.Config.ChrSpecializationID = _player.GetPrimarySpecialization();
             classTalentsRequestNewConfig.Config.LocalIdentifier = findFreeLocalIdentifier();
 
             foreach (TraitEntry grantedEntry in TraitMgr.GetGrantedTraitEntriesForConfig(classTalentsRequestNewConfig.Config, _player))

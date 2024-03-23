@@ -51,16 +51,16 @@ namespace Game
             if (!charResult.IsDeletedCharacters)
                 _legitCharacters.Clear();
 
-            MultiMap<ulong, ChrCustomizationChoice> customizations = new();
+            MultiMap<long, ChrCustomizationChoice> customizations = new();
             SQLResult customizationsResult = holder.GetResult(EnumCharacterQueryLoad.Customizations);
             if (!customizationsResult.IsEmpty())
             {
                 do
                 {
                     ChrCustomizationChoice choice = new();
-                    choice.ChrCustomizationOptionID = customizationsResult.Read<uint>(1);
-                    choice.ChrCustomizationChoiceID = customizationsResult.Read<uint>(2);
-                    customizations.Add(customizationsResult.Read<ulong>(0), choice);
+                    choice.ChrCustomizationOptionID = customizationsResult.Read<int>(1);
+                    choice.ChrCustomizationChoiceID = customizationsResult.Read<int>(2);
+                    customizations.Add(customizationsResult.Read<long>(0), choice);
 
                 } while (customizationsResult.NextRow());
             }
@@ -117,7 +117,7 @@ namespace Game
             {
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
                 raceUnlock.RaceID = requirement.Key;
-                raceUnlock.HasExpansion = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
+                raceUnlock.HasExpansion = GetAccountExpansion() >= requirement.Value.Expansion;
                 raceUnlock.HasAchievement = requirement.Value.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
                     /* || HasAccountAchievement(requirement.second.AchievementId)*/);
                 charResult.RaceUnlockData.Add(raceUnlock);
@@ -168,14 +168,14 @@ namespace Game
 
         public bool MeetsChrCustomizationReq(ChrCustomizationReqRecord req, Race race, Class playerClass, bool checkRequiredDependentChoices, List<ChrCustomizationChoice> selectedChoices)
         {
-            if (!req.GetFlags().HasFlag(ChrCustomizationReqFlag.HasRequirements))
+            if (!req.HasFlag(ChrCustomizationReqFlag.HasRequirements))
                 return true;
 
-            if (req.ClassMask != 0 && (req.ClassMask & (1 << ((int)playerClass - 1))) == 0)
+            if (req.ClassMask != 0 && !req.ClassMask.HasClass(playerClass))
                 return false;
 
-            var raceMask = new RaceMask<long>(req.RaceMask);
-            if (race != Race.None && !raceMask.IsEmpty() && raceMask.RawValue != -1 && !raceMask.HasRace(race))
+            var raceMask = req.RaceMask;
+            if (race != Race.None && raceMask != RaceMask.None && raceMask != RaceMask.All_FixME && !raceMask.HasRace(race))
                 return false;
 
             if (req.AchievementID != 0 /*&& !HasAchieved(req->AchievementID)*/)
@@ -189,7 +189,7 @@ namespace Game
                 if (_player == null)
                     return false;
 
-                if (!_player.IsQuestRewarded((uint)req.QuestID))
+                if (!_player.IsQuestRewarded(req.QuestID))
                     return false;
             }
 
@@ -226,7 +226,7 @@ namespace Game
             if (options.Empty())
                 return false;
 
-            uint previousOption = 0;
+            int previousOption = 0;
 
             foreach (var playerChoice in customizations)
             {
@@ -277,7 +277,7 @@ namespace Game
                 {
                     bool disabled = false;
 
-                    uint team = Player.TeamIdForRace(charCreate.CreateInfo.RaceId);
+                    var team = Player.TeamIdForRace(charCreate.CreateInfo.RaceId);
                     switch (team)
                     {
                         case TeamId.Alliance:
@@ -299,7 +299,7 @@ namespace Game
                 }
             }
 
-            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(charCreate.CreateInfo.ClassId);
+            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)charCreate.CreateInfo.ClassId);
             if (classEntry == null)
             {
                 Log.outError(LogFilter.Network, "Class ({0}) not found in DBC while creating new char for account (ID: {1}): wrong DBC files or cheater?", charCreate.CreateInfo.ClassId, GetAccountId());
@@ -307,7 +307,7 @@ namespace Game
                 return;
             }
 
-            ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(charCreate.CreateInfo.RaceId);
+            ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey((int)charCreate.CreateInfo.RaceId);
             if (raceEntry == null)
             {
                 Log.outError(LogFilter.Network, "Race ({0}) not found in DBC while creating new char for account (ID: {1}): wrong DBC files or cheater?", charCreate.CreateInfo.RaceId, GetAccountId());
@@ -324,7 +324,7 @@ namespace Game
                 return;
             }
 
-            if (raceExpansionRequirement.Expansion > (byte)GetAccountExpansion())
+            if (raceExpansionRequirement.Expansion > GetAccountExpansion())
             {
                 Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansion);
@@ -343,7 +343,7 @@ namespace Game
             ClassAvailability raceClassExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.RaceId, charCreate.CreateInfo.ClassId);
             if (raceClassExpansionRequirement != null)
             {
-                if (raceClassExpansionRequirement.ActiveExpansionLevel > (byte)GetExpansion() || raceClassExpansionRequirement.AccountExpansionLevel > (byte)GetAccountExpansion())
+                if (raceClassExpansionRequirement.ActiveExpansionLevel > GetExpansion() || raceClassExpansionRequirement.AccountExpansionLevel > GetAccountExpansion())
                 {
                     Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
                         $"(had {GetExpansion()}/{GetAccountExpansion()}, required {raceClassExpansionRequirement.ActiveExpansionLevel}/{raceClassExpansionRequirement.AccountExpansionLevel})");
@@ -353,10 +353,10 @@ namespace Game
             }
             else
             {
-                ClassAvailability classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirementFallback((byte)charCreate.CreateInfo.ClassId);
+                ClassAvailability classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirementFallback(charCreate.CreateInfo.ClassId);
                 if (classExpansionRequirement != null)
                 {
-                    if (classExpansionRequirement.MinActiveExpansionLevel > (byte)GetExpansion() || classExpansionRequirement.AccountExpansionLevel > (byte)GetAccountExpansion())
+                    if (classExpansionRequirement.MinActiveExpansionLevel > GetExpansion() || classExpansionRequirement.AccountExpansionLevel > GetAccountExpansion())
                     {
                         Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
                             $"(had {GetExpansion()}/{GetAccountExpansion()}, required {classExpansionRequirement.ActiveExpansionLevel}/{classExpansionRequirement.AccountExpansionLevel})");
@@ -372,14 +372,14 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
-                if (raceEntry.GetFlags().HasFlag(ChrRacesFlag.NPCOnly))
+                if (raceEntry.HasFlag(ChrRacesFlag.NPCOnly))
                 {
                     Log.outError(LogFilter.Network, $"Race ({charCreate.CreateInfo.RaceId}) was not playable but requested while creating new char for account (ID: {GetAccountId()}): wrong DBC files or cheater?");
                     SendCharCreate(ResponseCodes.CharCreateDisabled);
                     return;
                 }
 
-                RaceMask<ulong> raceMaskDisabled = new(WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask));
+                RaceMask raceMaskDisabled = (RaceMask)WorldConfig.GetInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
                 if (raceMaskDisabled.HasRace(charCreate.CreateInfo.RaceId))
                 {
                     SendCharCreate(ResponseCodes.CharCreateDisabled);
@@ -644,7 +644,7 @@ namespace Game
         void HandleCharDelete(CharDelete charDelete)
         {
             // Initiating
-            uint initAccountId = GetAccountId();
+            int initAccountId = GetAccountId();
 
             // can't delete loaded character
             if (Global.ObjAccessor.FindPlayer(charDelete.Guid) != null)
@@ -676,7 +676,7 @@ namespace Game
                 return;
             }
 
-            uint accountId = characterInfo.AccountId;
+            int accountId = characterInfo.AccountId;
             string name = characterInfo.Name;
             byte level = characterInfo.Level;
 
@@ -862,10 +862,10 @@ namespace Game
                                 pCurrChar.SendMovieStart(playerInfo.introMovieId.Value);
                             else if (playerInfo.introSceneId.HasValue)
                                 pCurrChar.GetSceneMgr().PlayScene(playerInfo.introSceneId.Value);
-                            else if (CliDB.ChrClassesStorage.TryGetValue((uint)pCurrChar.GetClass(), out ChrClassesRecord chrClassesRecord) && chrClassesRecord.CinematicSequenceID != 0)
+                            else if (CliDB.ChrClassesStorage.TryGetValue((int)pCurrChar.GetClass(), out ChrClassesRecord chrClassesRecord) && chrClassesRecord.CinematicSequenceID != 0)
                                 pCurrChar.SendCinematicStart(chrClassesRecord.CinematicSequenceID);
-                            else if (CliDB.ChrRacesStorage.TryGetValue((uint)pCurrChar.GetRace(), out ChrRacesRecord chrRacesRecord) && chrRacesRecord.CinematicSequenceID != 0)
-                                pCurrChar.SendCinematicStart((uint)chrRacesRecord.CinematicSequenceID);
+                            else if (CliDB.ChrRacesStorage.TryGetValue((int)pCurrChar.GetRace(), out ChrRacesRecord chrRacesRecord) && chrRacesRecord.CinematicSequenceID != 0)
+                                pCurrChar.SendCinematicStart(chrRacesRecord.CinematicSequenceID);
                             break;
                         case PlayerCreateMode.NPE:
                             if (playerInfo.introSceneIdNPE.HasValue)
@@ -1303,7 +1303,7 @@ namespace Game
             atLoginFlags &= ~AtLoginFlags.Rename;
 
             SQLTransaction trans = new();
-            ulong lowGuid = renameInfo.Guid.GetCounter();
+            long lowGuid = renameInfo.Guid.GetCounter();
 
             // Update name and at_login flag in the db
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
@@ -1426,7 +1426,7 @@ namespace Game
             SendPacket(new BarberShopResult(BarberShopResult.ResultEnum.Success));
 
             _player.ModifyMoney(-cost);
-            _player.UpdateCriteria(CriteriaType.MoneySpentAtBarberShop, (ulong)cost);
+            _player.UpdateCriteria(CriteriaType.MoneySpentAtBarberShop, cost);
 
             if (_player.GetNativeGender() != (Gender)packet.NewSex)
             {
@@ -1531,7 +1531,7 @@ namespace Game
 
             PreparedStatement stmt;
             SQLTransaction trans = new();
-            ulong lowGuid = customizeInfo.CharGUID.GetCounter();
+            long lowGuid = customizeInfo.CharGUID.GetCounter();
 
             // Customize
             Player.SaveCustomizations(trans, lowGuid, customizeInfo.Customizations);
@@ -1601,7 +1601,7 @@ namespace Game
                             if (!CliDB.ItemModifiedAppearanceStorage.ContainsKey(saveEquipmentSet.Set.Appearances[i]))
                                 return;
 
-                            (bool hasAppearance, _) = GetCollectionMgr().HasItemAppearance((uint)saveEquipmentSet.Set.Appearances[i]);
+                            (bool hasAppearance, _) = GetCollectionMgr().HasItemAppearance(saveEquipmentSet.Set.Appearances[i]);
                             if (!hasAppearance)
                                 return;
                         }
@@ -1623,25 +1623,25 @@ namespace Game
             }
             else
             {
-                var validateIllusion = new Func<uint, bool>(enchantId =>
+                var validateIllusion = new Func<int, bool>(enchantId =>
                 {
                     SpellItemEnchantmentRecord illusion = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
                     if (illusion == null)
                         return false;
 
-                    if (illusion.ItemVisual == 0 || !illusion.GetFlags().HasFlag(SpellItemEnchantmentFlags.AllowTransmog))
+                    if (illusion.ItemVisual == 0 || !illusion.HasFlag(SpellItemEnchantmentFlags.AllowTransmog))
                         return false;
 
-                    if (illusion.ScalingClassRestricted > 0 && illusion.ScalingClassRestricted != (byte)_player.GetClass())
+                    if (illusion.ScalingClassRestricted > 0 && (Class)illusion.ScalingClassRestricted != _player.GetClass())
                         return false;
 
                     return true;
                 });
 
-                if (saveEquipmentSet.Set.Enchants[0] != 0 && !validateIllusion((uint)saveEquipmentSet.Set.Enchants[0]))
+                if (saveEquipmentSet.Set.Enchants[0] != 0 && !validateIllusion(saveEquipmentSet.Set.Enchants[0]))
                     return;
 
-                if (saveEquipmentSet.Set.Enchants[1] != 0 && !validateIllusion((uint)saveEquipmentSet.Set.Enchants[1]))
+                if (saveEquipmentSet.Set.Enchants[1] != 0 && !validateIllusion(saveEquipmentSet.Set.Enchants[1]))
                     return;
             }
 
@@ -1657,7 +1657,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UseEquipmentSet, Processing = PacketProcessing.Inplace)]
         void HandleUseEquipmentSet(UseEquipmentSet useEquipmentSet)
         {
-            ObjectGuid ignoredItemGuid = new(0x0C00040000000000, 0xFFFFFFFFFFFFFFFF);
+            ObjectGuid ignoredItemGuid = new(0x0C00040000000000, -1);
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
                 Log.outDebug(LogFilter.Player, $"{useEquipmentSet.Items[i].Item}: BagSlot: {useEquipmentSet.Items[i].ContainerSlot}, Slot: {useEquipmentSet.Items[i].Slot}");
@@ -1673,7 +1673,7 @@ namespace Game
                 Item item = GetPlayer().GetItemByGuid(useEquipmentSet.Items[i].Item);
 
                 ItemPos dstPos = i;
-                if (!item)
+                if (item == null)
                 {
                     Item uItem = GetPlayer().GetItemByPos(i);
                     if (uItem == null)
@@ -1755,7 +1755,7 @@ namespace Game
 
             AtLoginFlags atLoginFlags = (AtLoginFlags)result.Read<ushort>(0);
             string knownTitlesStr = result.Read<string>(1);
-            uint groupId = !result.IsNull(2) ? result.Read<uint>(2) : 0;
+            int groupId = !result.IsNull(2) ? result.Read<int>(2) : 0;
 
             AtLoginFlags usedLoginFlag = (factionChangeInfo.FactionChange ? AtLoginFlags.ChangeFaction : AtLoginFlags.ChangeRace);
             if (!atLoginFlags.HasAnyFlag(usedLoginFlag))
@@ -1764,7 +1764,7 @@ namespace Game
                 return;
             }
 
-            uint newTeamId = Player.TeamIdForRace(factionChangeInfo.RaceID);
+            var newTeamId = Player.TeamIdForRace(factionChangeInfo.RaceID);
             if (newTeamId == TeamId.Neutral)
             {
                 SendCharFactionChange(ResponseCodes.CharCreateRestrictedRaceclass, factionChangeInfo);
@@ -1779,7 +1779,7 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
-                RaceMask raceMaskDisabled = (RaceMask)WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
+                RaceMask raceMaskDisabled = (RaceMask)WorldConfig.GetInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
                 if (raceMaskDisabled.HasRace(factionChangeInfo.RaceID))
                 {
                     SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
@@ -1833,7 +1833,7 @@ namespace Game
             }
 
             // All checks are fine, deal with race change now
-            ulong lowGuid = factionChangeInfo.Guid.GetCounter();
+            long lowGuid = factionChangeInfo.Guid.GetCounter();
 
             PreparedStatement stmt;
             SQLTransaction trans = new();
@@ -2036,8 +2036,8 @@ namespace Game
                     // Achievement conversion
                     foreach (var it in Global.ObjectMgr.FactionChangeAchievements)
                     {
-                        uint achiev_alliance = it.Key;
-                        uint achiev_horde = it.Value;
+                        int achiev_alliance = it.Key;
+                        int achiev_horde = it.Value;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENT_BY_ACHIEVEMENT);
                         stmt.AddValue(0, (ushort)(newTeamId == TeamId.Alliance ? achiev_alliance : achiev_horde));
@@ -2055,8 +2055,8 @@ namespace Game
                     var itemConversionMap = newTeamId == TeamId.Alliance ? Global.ObjectMgr.FactionChangeItemsHordeToAlliance : Global.ObjectMgr.FactionChangeItemsAllianceToHorde;
                     foreach (var it in itemConversionMap)
                     {
-                        uint oldItemId = it.Key;
-                        uint newItemId = it.Value;
+                        int oldItemId = it.Key;
+                        int newItemId = it.Value;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_INVENTORY_FACTION_CHANGE);
                         stmt.AddValue(0, newItemId);
@@ -2073,8 +2073,8 @@ namespace Game
                     // Quest conversion
                     foreach (var it in Global.ObjectMgr.FactionChangeQuests)
                     {
-                        uint quest_alliance = it.Key;
-                        uint quest_horde = it.Value;
+                        int quest_alliance = it.Key;
+                        int quest_horde = it.Value;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_REWARDED_BY_QUEST);
                         stmt.AddValue(0, lowGuid);
@@ -2099,7 +2099,7 @@ namespace Game
                         foreach (Quest quest in questTemplates.Values)
                         {
                             RaceMask newRaceMask = newTeamId == TeamId.Alliance ? RaceMask.Alliance : RaceMask.Horde;
-                            if (quest.AllowableRaces.RawValue != unchecked((ulong)-1) && (quest.AllowableRaces & newRaceMask).IsEmpty())
+                            if (quest.AllowableRaces != (RaceMask)(-1) && !quest.AllowableRaces.HasAnyFlag(newRaceMask))
                             {
                                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);
                                 stmt.AddValue(0, lowGuid);
@@ -2112,8 +2112,8 @@ namespace Game
                     // Spell conversion
                     foreach (var it in Global.ObjectMgr.FactionChangeSpells)
                     {
-                        uint spell_alliance = it.Key;
-                        uint spell_horde = it.Value;
+                        int spell_alliance = it.Key;
+                        int spell_horde = it.Value;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_BY_SPELL);
                         stmt.AddValue(0, (newTeamId == TeamId.Alliance ? spell_alliance : spell_horde));
@@ -2130,10 +2130,10 @@ namespace Game
                     // Reputation conversion
                     foreach (var it in Global.ObjectMgr.FactionChangeReputation)
                     {
-                        uint reputation_alliance = it.Key;
-                        uint reputation_horde = it.Value;
-                        uint newReputation = (newTeamId == TeamId.Alliance) ? reputation_alliance : reputation_horde;
-                        uint oldReputation = (newTeamId == TeamId.Alliance) ? reputation_horde : reputation_alliance;
+                        int reputation_alliance = it.Key;
+                        int reputation_horde = it.Value;
+                        int newReputation = (newTeamId == TeamId.Alliance) ? reputation_alliance : reputation_horde;
+                        int oldReputation = (newTeamId == TeamId.Alliance) ? reputation_horde : reputation_alliance;
 
                         // select old standing set in db
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_REP_BY_FACTION);
@@ -2184,8 +2184,8 @@ namespace Game
 
                         foreach (var it in Global.ObjectMgr.FactionChangeTitles)
                         {
-                            uint title_alliance = it.Key;
-                            uint title_horde = it.Value;
+                            int title_alliance = it.Key;
+                            int title_horde = it.Value;
 
                             CharTitlesRecord atitleInfo = CliDB.CharTitlesStorage.LookupByKey(title_alliance);
                             CharTitlesRecord htitleInfo = CliDB.CharTitlesStorage.LookupByKey(title_horde);
@@ -2255,14 +2255,14 @@ namespace Game
             if (GetPlayer().m_activePlayerData.XP != 0)
                 return;
 
-            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(GetPlayer().GetClass());
+            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)GetPlayer().GetClass());
             if (classEntry != null)
             {
-                ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(GetPlayer().GetRace());
+                ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey((int)GetPlayer().GetRace());
                 if (classEntry.CinematicSequenceID != 0)
                     GetPlayer().SendCinematicStart(classEntry.CinematicSequenceID);
                 else if (raceEntry != null)
-                    GetPlayer().SendCinematicStart((uint)raceEntry.CinematicSequenceID);
+                    GetPlayer().SendCinematicStart(raceEntry.CinematicSequenceID);
             }
         }
 
@@ -2420,15 +2420,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestCemeteryList, Processing = PacketProcessing.Inplace)]
         void HandleRequestCemeteryList(RequestCemeteryList requestCemeteryList)
         {
-            uint zoneId = GetPlayer().GetZoneId();
-            uint team = (uint)GetPlayer().GetTeam();
+            var zoneId = GetPlayer().GetZoneId();
+            var team = GetPlayer().GetTeam();
 
-            List<uint> graveyardIds = new();
+            List<int> graveyardIds = new();
             var range = Global.ObjectMgr.GraveyardStorage.LookupByKey(zoneId);
 
-            for (uint i = 0; i < range.Count && graveyardIds.Count < 16; ++i) // client max
+            for (int i = 0; i < range.Count && graveyardIds.Count < 16; ++i) // client max
             {
-                var gYard = range[(int)i];
+                var gYard = range[i];
                 ConditionSourceInfo conditionSource = new(_player);
                 if (!Global.ConditionMgr.IsObjectMeetToConditions(conditionSource, gYard.Conditions))
                     continue;
@@ -2589,9 +2589,9 @@ namespace Game
             {
                 packet.Display = new();
                 packet.Display.Name = factionChangeInfo.Name;
-                packet.Display.SexID = (byte)factionChangeInfo.SexID;
+                packet.Display.SexID = factionChangeInfo.SexID;
                 packet.Display.Customizations = factionChangeInfo.Customizations;
-                packet.Display.RaceID = (byte)factionChangeInfo.RaceID;
+                packet.Display.RaceID = factionChangeInfo.RaceID;
             }
 
             SendPacket(packet);
@@ -2628,7 +2628,7 @@ namespace Game
 
     public class LoginQueryHolder : SQLQueryHolder<PlayerLoginQueryLoad>
     {
-        public LoginQueryHolder(uint accountId, ObjectGuid guid)
+        public LoginQueryHolder(int accountId, ObjectGuid guid)
         {
             m_accountId = accountId;
             m_guid = guid;
@@ -2821,26 +2821,6 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.PetSlots, stmt);
 
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_GARRISON);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.Garrison, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_GARRISON_BLUEPRINTS);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.GarrisonBlueprints, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_GARRISON_BUILDINGS);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.GarrisonBuildings, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_GARRISON_FOLLOWERS);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.GarrisonFollowers, stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_GARRISON_FOLLOWER_ABILITIES);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.GarrisonFollowerAbilities, stmt);
-
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_TRAIT_ENTRIES);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.TraitEntries, stmt);
@@ -2860,7 +2840,7 @@ namespace Game
 
     class EnumCharactersQueryHolder : SQLQueryHolder<EnumCharacterQueryLoad>
     {
-        public bool Initialize(uint accountId, bool withDeclinedNames, bool isDeletedCharacters)
+        public bool Initialize(int accountId, bool withDeclinedNames, bool isDeletedCharacters)
         {
             _isDeletedCharacters = isDeletedCharacters;
 

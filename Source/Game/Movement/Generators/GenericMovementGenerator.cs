@@ -11,13 +11,13 @@ namespace Game.Movement
     {
         Action<MoveSplineInit> _splineInit;
         MovementGeneratorType _type;
-        uint _pointId;
+        int _pointId;
         TimeTracker _duration;
 
-        uint _arrivalSpellId;
+        int _arrivalSpellId;
         ObjectGuid _arrivalSpellTargetGuid;
 
-        public GenericMovementGenerator(Action<MoveSplineInit> initializer, MovementGeneratorType type, uint id, uint arrivalSpellId = 0, ObjectGuid arrivalSpellTargetGuid = default)
+        public GenericMovementGenerator(Action<MoveSplineInit> initializer, MovementGeneratorType type, int id, int arrivalSpellId = 0, ObjectGuid arrivalSpellTargetGuid = default)
         {
             _splineInit = initializer;
             _type = type;

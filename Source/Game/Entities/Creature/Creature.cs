@@ -100,7 +100,7 @@ namespace Game.Entities
             if (IsSummon())
                 return;
 
-            ulong lowguid = GetSpawnId();
+            long lowguid = GetSpawnId();
             if (lowguid == 0)
                 return;
 
@@ -304,22 +304,26 @@ namespace Game.Entities
 
             SetFaction(cInfo.Faction);
 
-            ObjectManager.ChooseCreatureFlags(cInfo, out NPCFlags npcFlags, out UnitFlags unitFlags, out UnitFlags2 unitFlags2, out UnitFlags3 unitFlags3, data);
+            ObjectManager.ChooseCreatureFlags(cInfo, out var npcFlags1, out var npcFlags2, out var unitFlags1, out var unitFlags2, out var unitFlags3, data);
 
             if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
-                npcFlags |= Global.GameEventMgr.GetNPCFlag(this);
+            {
+                var npcFlags =  Global.GameEventMgr.GetNPCFlag(this);
+                npcFlags1 |= npcFlags.Item1;
+                npcFlags2 |= npcFlags.Item2;
+            }
 
-            ReplaceAllNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
-            ReplaceAllNpcFlags2((NPCFlags2)(npcFlags >> 32));
+            ReplaceAllNpcFlags(npcFlags1);
+            ReplaceAllNpcFlags2(npcFlags2);
 
             // if unit is in combat, keep this flag
-            unitFlags &= ~(uint)UnitFlags.InCombat;
+            unitFlags1 &= ~UnitFlags.InCombat;
             if (IsInCombat())
-                unitFlags |= (uint)UnitFlags.InCombat;
+                unitFlags1 |= UnitFlags.InCombat;
 
-            ReplaceAllUnitFlags((UnitFlags)unitFlags);
-            ReplaceAllUnitFlags2((UnitFlags2)unitFlags2);
-            ReplaceAllUnitFlags3((UnitFlags3)unitFlags3);
+            ReplaceAllUnitFlags(unitFlags1);
+            ReplaceAllUnitFlags2(unitFlags2);
+            ReplaceAllUnitFlags3(unitFlags3);
 
             ReplaceAllDynamicFlags(UnitDynFlags.None);
 
@@ -337,7 +341,7 @@ namespace Game.Entities
             // Do not update guardian stats here - they are handled in Guardian::InitStatsForLevel()
             if (!IsGuardian())
             {
-                ulong previousHealth = GetHealth();
+                long previousHealth = GetHealth();
                 UpdateLevelDependantStats(); // We still re-initialize level dependant stats on entry update
                 if (previousHealth > 0)
                     SetHealth(previousHealth);
@@ -753,7 +757,7 @@ namespace Game.Entities
             GetMotionMaster().Initialize();
         }
 
-        public static Creature CreateCreature(int entry, Map map, Position pos, uint vehId = 0)
+        public static Creature CreateCreature(int entry, Map map, Position pos, int vehId = 0)
         {
             CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (cInfo == null)
@@ -1306,16 +1310,16 @@ namespace Game.Entities
                 return;
             }
 
-            uint mapId = GetMapId();
+            int mapId = GetMapId();
             ITransport transport = GetTransport();
             if (transport != null)
                 if (transport.GetMapIdForSpawning() >= 0)
-                    mapId = (uint)transport.GetMapIdForSpawning();
+                    mapId = transport.GetMapIdForSpawning();
 
             SaveToDB(mapId, data.SpawnDifficulties);
         }
 
-        public virtual void SaveToDB(uint mapid, List<Difficulty> spawnDifficulties)
+        public virtual void SaveToDB(int mapid, List<Difficulty> spawnDifficulties)
         {
             // update in loaded data
             if (m_spawnId == 0)
@@ -1323,12 +1327,16 @@ namespace Game.Entities
 
             CreatureData data = Global.ObjectMgr.NewOrExistCreatureData(m_spawnId);
 
-            uint displayId = GetNativeDisplayId();
-            ulong spawnNpcFlags = ((ulong)m_unitData.NpcFlags[1] << 32) | m_unitData.NpcFlags[0];
-            ulong? npcflag = null;
-            uint? unitFlags = null;
-            uint? unitFlags2 = null;
-            uint? unitFlags3 = null;
+            int displayId = GetNativeDisplayId();
+            //ulong spawnNpcFlags = ((ulong)m_unitData.NpcFlags[1] << 32) | m_unitData.NpcFlags[0];
+            var spawnNpcFlags = (NPCFlags1)m_unitData.NpcFlags[0];
+            var spawnNpcFlags2 = (NPCFlags2)m_unitData.NpcFlags[1];
+
+            NPCFlags1? npcflag = null;
+            NPCFlags2? npcflag2 = null;
+            UnitFlags? unitFlags = null;
+            UnitFlags2? unitFlags2 = null;
+            UnitFlags3? unitFlags3 = null;
 
             // check if it's a custom model and if not, use 0 for displayId
             CreatureTemplate cinfo = GetCreatureTemplate();
@@ -1338,17 +1346,20 @@ namespace Game.Entities
                     if (displayId != 0 && displayId == model.CreatureDisplayID)
                         displayId = 0;
 
-                if (spawnNpcFlags != cinfo.Npcflag)
+                if ((spawnNpcFlags != cinfo.Npcflag) && (spawnNpcFlags2 != cinfo.Npcflag2))
+                {
                     npcflag = spawnNpcFlags;
+                    npcflag2 = spawnNpcFlags2;
+                }
 
-                if (m_unitData.Flags == (uint)cinfo.UnitFlags)
-                    unitFlags = m_unitData.Flags;
+                if ((UnitFlags)m_unitData.Flags.GetValue() == cinfo.UnitFlags)
+                    unitFlags = (UnitFlags)m_unitData.Flags.GetValue();
 
-                if (m_unitData.Flags2 == cinfo.UnitFlags2)
-                    unitFlags2 = m_unitData.Flags2;
+                if ((UnitFlags2)m_unitData.Flags2.GetValue() == cinfo.UnitFlags2)
+                    unitFlags2 = (UnitFlags2)m_unitData.Flags2.GetValue();
 
-                if (m_unitData.Flags3 == cinfo.UnitFlags3)
-                    unitFlags3 = m_unitData.Flags3;
+                if ((UnitFlags3)m_unitData.Flags3.GetValue() == cinfo.UnitFlags3)
+                    unitFlags3 = (UnitFlags3)m_unitData.Flags3.GetValue();
             }
 
             if (data.SpawnId == 0)
@@ -1374,10 +1385,10 @@ namespace Game.Entities
             // prevent add data integrity problems
             data.WanderDistance = GetDefaultMovementType() == MovementGeneratorType.Idle ? 0.0f : m_wanderDistance;
             data.currentwaypoint = 0;
-            data.curhealth = (uint)GetHealth();
-            data.curmana = (uint)GetPower(PowerType.Mana);
+            data.curhealth = (int)GetHealth();
+            data.curmana = GetPower(PowerType.Mana);
             // prevent add data integrity problems
-            data.movementType = (byte)(m_wanderDistance == 0 && GetDefaultMovementType() == MovementGeneratorType.Random
+            data.movementType = (m_wanderDistance == 0 && GetDefaultMovementType() == MovementGeneratorType.Random
                 ? MovementGeneratorType.Idle : GetDefaultMovementType());
             data.SpawnDifficulties = spawnDifficulties;
             data.npcflag = npcflag;
@@ -1387,8 +1398,8 @@ namespace Game.Entities
             if (data.spawnGroupData == null)
                 data.spawnGroupData = Global.ObjectMgr.GetDefaultSpawnGroup();
 
-            data.PhaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.PhaseId;
-            data.PhaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.PhaseGroup;
+            data.PhaseId = GetDBPhase() > 0 ? GetDBPhase() : data.PhaseId;
+            data.PhaseGroup = GetDBPhase() < 0 ? -GetDBPhase() : data.PhaseGroup;
 
             // update in DB
             SQLTransaction trans = new();
@@ -1418,23 +1429,23 @@ namespace Game.Entities
             stmt.AddValue(index++, GetHealth());
             stmt.AddValue(index++, GetPower(PowerType.Mana));
             stmt.AddValue(index++, (byte)GetDefaultMovementType());
-            if (npcflag.HasValue)
-                stmt.AddValue(index++, npcflag.Value);
+            if (npcflag.HasValue || npcflag2.HasValue)
+                stmt.AddValue(index++, ((ulong)npcflag2 << 32) | (ulong)npcflag);
             else
                 stmt.AddNull(index++);
 
             if (unitFlags.HasValue)
-                stmt.AddValue(index++, unitFlags.Value);
+                stmt.AddValue(index++, (uint)unitFlags.Value);
             else
                 stmt.AddNull(index++);
 
             if (unitFlags2.HasValue)
-                stmt.AddValue(index++, unitFlags2.Value);
+                stmt.AddValue(index++, (uint)unitFlags2.Value);
             else
                 stmt.AddNull(index++);
 
             if (unitFlags3.HasValue)
-                stmt.AddValue(index++, unitFlags3.Value);
+                stmt.AddValue(index++, (uint)unitFlags3.Value);
             else
                 stmt.AddNull(index++);
             trans.Append(stmt);
@@ -1480,7 +1491,7 @@ namespace Game.Entities
             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
             if (powerTypeEntry != null)
             {
-                if (powerTypeEntry.GetFlags().HasFlag(PowerTypeFlags.UnitsUseDefaultPowerOnInit))
+                if (powerTypeEntry.HasFlag(PowerTypeFlags.UnitsUseDefaultPowerOnInit))
                     SetPower(powerType, powerTypeEntry.DefaultPower);
                 else
                     SetFullPower(powerType);
@@ -1967,7 +1978,7 @@ namespace Game.Entities
                 DoNotReacquireSpellFocusTarget();  // cancel delayed re-target
                 SetTarget(ObjectGuid.Empty);      // drop target - dead mobs shouldn't ever target things
 
-                ReplaceAllNpcFlags(NPCFlags.None);
+                ReplaceAllNpcFlags(NPCFlags1.None);
                 ReplaceAllNpcFlags2(NPCFlags2.None);
 
                 SetMountDisplayId(0); // if creature is mounted on a virtual mount, remove it at death
@@ -2008,22 +2019,26 @@ namespace Game.Entities
                     CreatureData creatureData = GetCreatureData();
                     CreatureTemplate cInfo = GetCreatureTemplate();
 
-                    ObjectManager.ChooseCreatureFlags(cInfo, out ulong npcFlags, out uint unitFlags, out uint unitFlags2, out uint unitFlags3, creatureData);
+                    ObjectManager.ChooseCreatureFlags(cInfo, out var npcFlags1, out var npcFlags2, out var unitFlags1, out var unitFlags2, out var unitFlags3, creatureData);
 
                     if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
-                        npcFlags |= Global.GameEventMgr.GetNPCFlag(this);
+                    {
+                        var npcFlags = Global.GameEventMgr.GetNPCFlag(this);
+                        npcFlags1 |= npcFlags.Item1;
+                        npcFlags2 |= npcFlags.Item2;
+                    }
 
-                    ReplaceAllNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
-                    ReplaceAllNpcFlags2((NPCFlags2)(npcFlags >> 32));
+                    ReplaceAllNpcFlags(npcFlags1);
+                    ReplaceAllNpcFlags2(npcFlags2);
 
-                    ReplaceAllUnitFlags((UnitFlags)unitFlags);
-                    ReplaceAllUnitFlags2((UnitFlags2)unitFlags2);
-                    ReplaceAllUnitFlags3((UnitFlags3)unitFlags3);
+                    ReplaceAllUnitFlags(unitFlags1);
+                    ReplaceAllUnitFlags2(unitFlags2);
+                    ReplaceAllUnitFlags3(unitFlags3);
                     ReplaceAllDynamicFlags(UnitDynFlags.None);
 
                     RemoveUnitFlag(UnitFlags.InCombat);
 
-                    SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
+                    SetMeleeDamageSchool(cInfo.DmgSchool);
                 }
 
                 InitializeMovementAI();
@@ -2077,7 +2092,7 @@ namespace Game.Entities
 
                     triggerJustAppeared = true;
 
-                    uint poolid = GetCreatureData() != null ? GetCreatureData().poolId : 0;
+                    int poolid = GetCreatureData() != null ? GetCreatureData().poolId : 0;
                     if (poolid != 0)
                         Global.PoolMgr.UpdatePool<Creature>(GetMap().GetPoolData(), poolid, GetSpawnId());
                 }
@@ -2158,14 +2173,14 @@ namespace Game.Entities
         {
             // uint32 max used for "spell id", the immunity system will not perform SpellInfo checks against invalid spells
             // used so we know which immunities were loaded from template
-            uint placeholderSpellId = uint.MaxValue;
+            int placeholderSpellId = -1;
 
             // unapply template immunities (in case we're updating entry)
-            for (uint i = 0; i < (int)Mechanics.Max; ++i)
+            for (var i = 0; i < (int)Mechanics.Max; ++i)
                 ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, i, false);
 
             for (var i = (int)SpellSchools.Normal; i < (int)SpellSchools.Max; ++i)
-                ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, false);
+                ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1 << i, false);
 
             // don't inherit immunities for hunter pets
             if (GetOwnerGUID().IsPlayer() && IsHunterPet())
@@ -2174,18 +2189,18 @@ namespace Game.Entities
             ulong mechanicMask = GetCreatureTemplate().MechanicImmuneMask;
             if (mechanicMask != 0)
             {
-                for (uint i = 0 + 1; i < (int)Mechanics.Max; ++i)
+                for (int i = 0 + 1; i < (int)Mechanics.Max; ++i)
                 {
-                    if ((mechanicMask & (1ul << ((int)i - 1))) != 0)
+                    if ((mechanicMask & (1ul << (i - 1))) != 0)
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, i, true);
                 }
             }
 
-            uint schoolMask = GetCreatureTemplate().SpellSchoolImmuneMask;
+            var schoolMask = GetCreatureTemplate().SpellSchoolImmuneMask;
             if (schoolMask != 0)
-                for (var i = (int)SpellSchools.Normal; i <= (int)SpellSchools.Max; ++i)
-                    if ((schoolMask & (1 << i)) != 0)
-                        ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, true);
+                for (var i = SpellSchools.Normal; i <= SpellSchools.Max; ++i)
+                    if ((schoolMask.HasSchool(i)))
+                        ApplySpellImmune(placeholderSpellId, SpellImmunity.School, i.GetSpellSchoolMask(), true);
         }
 
         public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
@@ -3441,7 +3456,7 @@ namespace Game.Entities
             m_owner = owner;
         }
 
-        public override bool Execute(ulong e_time, uint p_time)
+        public override bool Execute(long e_time, uint p_time)
         {
             Unit victim = Global.ObjAccessor.GetUnit(m_owner, m_victim);
             if (victim != null)
@@ -3475,7 +3490,7 @@ namespace Game.Entities
             m_owner = owner;
             m_respawnTimer = respawnTimer;
         }
-        public override bool Execute(ulong e_time, uint p_time)
+        public override bool Execute(long e_time, uint p_time)
         {
             m_owner.DespawnOrUnsummon(TimeSpan.Zero, m_respawnTimer);    // since we are here, we are not TempSummon as object Type cannot change during runtime
             return true;

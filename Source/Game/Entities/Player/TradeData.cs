@@ -73,9 +73,9 @@ namespace Game.Entities
             SetSpell(0);
         }
 
-        public uint GetSpell() { return m_spell; }
+        public int GetSpell() { return m_spell; }
 
-        public void SetSpell(uint spell_id, Item castItem = null)
+        public void SetSpell(int spell_id, Item castItem = null)
         {
             ObjectGuid itemGuid = castItem != null ? castItem.GetGUID() : ObjectGuid.Empty;
 
@@ -94,7 +94,7 @@ namespace Game.Entities
             Update(false);                                          // send spell info to caster self
         }
 
-        public void SetMoney(ulong money)
+        public void SetMoney(long money)
         {
             if (m_money == money)
                 return;
@@ -144,7 +144,7 @@ namespace Game.Entities
 
         public bool HasSpellCastItem() { return !m_spellCastItem.IsEmpty(); }
 
-        public ulong GetMoney() { return m_money; }
+        public long GetMoney() { return m_money; }
 
         public bool IsAccepted() { return m_accepted; }
 
@@ -152,21 +152,21 @@ namespace Game.Entities
 
         public void SetInAcceptProcess(bool state) { m_acceptProccess = state; }
 
-        public uint GetClientStateIndex() { return m_clientStateIndex; }
+        public int GetClientStateIndex() { return m_clientStateIndex; }
         public void UpdateClientStateIndex() { ++m_clientStateIndex; }
 
-        public uint GetServerStateIndex() { return m_serverStateIndex; }
+        public int GetServerStateIndex() { return m_serverStateIndex; }
         public void UpdateServerStateIndex() { m_serverStateIndex = RandomHelper.Rand32(); }
 
         Player m_player;
         Player m_trader;
         bool m_accepted;
         bool m_acceptProccess;
-        ulong m_money;
-        uint m_spell;
+        long m_money;
+        int m_spell;
         ObjectGuid m_spellCastItem;
         ObjectGuid[] m_items = new ObjectGuid[(int)TradeSlots.Count];
-        uint m_clientStateIndex;
-        uint m_serverStateIndex;
+        int m_clientStateIndex;
+        int m_serverStateIndex;
     }
 }

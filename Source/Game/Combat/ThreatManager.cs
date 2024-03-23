@@ -31,8 +31,8 @@ namespace Game.Combat
         public float[] _singleSchoolModifiers = new float[(int)SpellSchools.Max]; // most spells are single school - we pre-calculate these and store them
         public volatile Dictionary<SpellSchoolMask, float> _multiSchoolModifiers = new(); // these are calculated on demand
 
-        public List<Tuple<ObjectGuid, uint>> _redirectInfo = new(); // current redirection targets and percentages (updated from registry in ThreatManager::UpdateRedirectInfo)
-        public Dictionary<uint, Dictionary<ObjectGuid, uint>> _redirectRegistry = new(); // spellid . (victim . pct); all redirection effects on us (removal individually managed by spell scripts because blizzard is dumb)
+        public List<(ObjectGuid, int)> _redirectInfo = new(); // current redirection targets and percentages (updated from registry in ThreatManager::UpdateRedirectInfo)
+        public Dictionary<int, Dictionary<ObjectGuid, int>> _redirectRegistry = new(); // spellid . (victim . pct); all redirection effects on us (removal individually managed by spell scripts because blizzard is dumb)
 
         public static bool CanHaveThreatList(Unit who)
         {
@@ -642,7 +642,7 @@ namespace Game.Combat
             _multiSchoolModifiers.Clear();
         }
 
-        public void RegisterRedirectThreat(uint spellId, ObjectGuid victim, uint pct)
+        public void RegisterRedirectThreat(int spellId, ObjectGuid victim, int pct)
         {
             if (!_redirectRegistry.ContainsKey(spellId))
                 _redirectRegistry[spellId] = new();
@@ -651,13 +651,13 @@ namespace Game.Combat
             UpdateRedirectInfo();
         }
 
-        public void UnregisterRedirectThreat(uint spellId)
+        public void UnregisterRedirectThreat(int spellId)
         {
             if (_redirectRegistry.Remove(spellId))
                 UpdateRedirectInfo();
         }
 
-        void UnregisterRedirectThreat(uint spellId, ObjectGuid victim)
+        void UnregisterRedirectThreat(int spellId, ObjectGuid victim)
         {
             var victimMap = _redirectRegistry.LookupByKey(spellId);
             if (victimMap == null)
@@ -753,15 +753,15 @@ namespace Game.Combat
         void UpdateRedirectInfo()
         {
             _redirectInfo.Clear();
-            uint totalPct = 0;
+            int totalPct = 0;
             foreach (var pair in _redirectRegistry) // (spellid, victim . pct)
             {
                 foreach (var victimPair in pair.Value) // (victim,pct)
                 {
-                    uint thisPct = Math.Min(100 - totalPct, victimPair.Value);
+                    int thisPct = Math.Min(100 - totalPct, victimPair.Value);
                     if (thisPct > 0)
                     {
-                        _redirectInfo.Add(Tuple.Create(victimPair.Key, thisPct));
+                        _redirectInfo.Add((victimPair.Key, thisPct));
                         totalPct += thisPct;
                         Cypher.Assert(totalPct <= 100);
                         if (totalPct == 100)

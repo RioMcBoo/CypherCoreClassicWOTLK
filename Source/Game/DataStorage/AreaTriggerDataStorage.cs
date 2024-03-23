@@ -17,9 +17,9 @@ namespace Game.DataStorage
         public void LoadAreaTriggerTemplates()
         {
             uint oldMSTime = Time.GetMSTime();
-            MultiMap<uint, Vector2> verticesByCreateProperties = new();
-            MultiMap<uint, Vector2> verticesTargetByCreateProperties = new();
-            MultiMap<uint, Vector3> splinesByCreateProperties = new();
+            MultiMap<int, Vector2> verticesByCreateProperties = new();
+            MultiMap<int, Vector2> verticesTargetByCreateProperties = new();
+            MultiMap<int, Vector3> splinesByCreateProperties = new();
             MultiMap<AreaTriggerId, AreaTriggerAction> actionsByAreaTrigger = new();
 
             {
@@ -29,10 +29,10 @@ namespace Game.DataStorage
                 {
                     do
                     {
-                        AreaTriggerId areaTriggerId = new(templateActions.Read<uint>(0), templateActions.Read<byte>(1) == 1);
+                        AreaTriggerId areaTriggerId = new(templateActions.Read<int>(0), templateActions.Read<byte>(1) == 1);
 
                         AreaTriggerAction action;
-                        action.Param = templateActions.Read<uint>(3);
+                        action.Param = templateActions.Read<int>(3);
                         action.ActionType = (AreaTriggerActionTypes)templateActions.Read<uint>(2);
                         action.TargetType = (AreaTriggerActionUserTypes)templateActions.Read<uint>(4);
 
@@ -75,7 +75,7 @@ namespace Game.DataStorage
                 {
                     do
                     {
-                        uint areaTriggerCreatePropertiesId = vertices.Read<uint>(0);
+                        int areaTriggerCreatePropertiesId = vertices.Read<int>(0);
 
                         verticesByCreateProperties.Add(areaTriggerCreatePropertiesId, new Vector2(vertices.Read<float>(2), vertices.Read<float>(3)));
 
@@ -99,7 +99,7 @@ namespace Game.DataStorage
                 {
                     do
                     {
-                        uint areaTriggerCreatePropertiesId = splines.Read<uint>(0);
+                        int areaTriggerCreatePropertiesId = splines.Read<int>(0);
                         Vector3 spline = new(splines.Read<float>(1), splines.Read<float>(2), splines.Read<float>(3));
 
                         splinesByCreateProperties.Add(areaTriggerCreatePropertiesId, spline);
@@ -120,7 +120,7 @@ namespace Game.DataStorage
                     do
                     {
                         AreaTriggerTemplate areaTriggerTemplate = new();
-                        areaTriggerTemplate.Id = new(templates.Read<uint>(0), templates.Read<byte>(1) == 1);
+                        areaTriggerTemplate.Id = new(templates.Read<int>(0), templates.Read<byte>(1) == 1);
 
                         areaTriggerTemplate.Flags = (AreaTriggerFlags)templates.Read<uint>(2);
 
@@ -148,9 +148,9 @@ namespace Game.DataStorage
                     do
                     {
                         AreaTriggerCreateProperties createProperties = new();
-                        createProperties.Id = areatriggerCreateProperties.Read<uint>(0);
+                        createProperties.Id = areatriggerCreateProperties.Read<int>(0);
 
-                        uint areatriggerId = areatriggerCreateProperties.Read<uint>(1);
+                        int areatriggerId = areatriggerCreateProperties.Read<int>(1);
                         createProperties.Template = GetAreaTriggerTemplate(new AreaTriggerId(areatriggerId, false));
 
                         AreaTriggerTypes shape = (AreaTriggerTypes)areatriggerCreateProperties.Read<byte>(11);
@@ -167,7 +167,7 @@ namespace Game.DataStorage
                             continue;
                         }
 
-                        uint ValidateAndSetCurve(uint value)
+                        int ValidateAndSetCurve(int value)
                         {
                             if (value != 0 && !CliDB.CurveStorage.ContainsKey(value))
                             {
@@ -178,14 +178,14 @@ namespace Game.DataStorage
                             return value;
                         }
 
-                        createProperties.MoveCurveId = ValidateAndSetCurve(areatriggerCreateProperties.Read<uint>(2));
-                        createProperties.ScaleCurveId = ValidateAndSetCurve(areatriggerCreateProperties.Read<uint>(3));
-                        createProperties.MorphCurveId = ValidateAndSetCurve(areatriggerCreateProperties.Read<uint>(4));
-                        createProperties.FacingCurveId = ValidateAndSetCurve(areatriggerCreateProperties.Read<uint>(5));
+                        createProperties.MoveCurveId = (CurveInterpolationMode)ValidateAndSetCurve(areatriggerCreateProperties.Read<int>(2));
+                        createProperties.ScaleCurveId = (CurveInterpolationMode)ValidateAndSetCurve(areatriggerCreateProperties.Read<int>(3));
+                        createProperties.MorphCurveId = (CurveInterpolationMode)ValidateAndSetCurve(areatriggerCreateProperties.Read<int>(4));
+                        createProperties.FacingCurveId = (CurveInterpolationMode)ValidateAndSetCurve(areatriggerCreateProperties.Read<int>(5));
 
                         createProperties.AnimId = areatriggerCreateProperties.Read<int>(6);
-                        createProperties.AnimKitId = areatriggerCreateProperties.Read<uint>(7);
-                        createProperties.DecalPropertiesId = areatriggerCreateProperties.Read<uint>(8);
+                        createProperties.AnimKitId = areatriggerCreateProperties.Read<int>(7);
+                        createProperties.DecalPropertiesId = areatriggerCreateProperties.Read<int>(8);
 
                         createProperties.TimeToTarget = areatriggerCreateProperties.Read<uint>(9);
                         createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(10);
@@ -224,7 +224,7 @@ namespace Game.DataStorage
                 {
                     do
                     {
-                        uint areaTriggerCreatePropertiesId = circularMovementInfos.Read<uint>(0);
+                        int areaTriggerCreatePropertiesId = circularMovementInfos.Read<int>(0);
 
                         var createProperties = _areaTriggerCreateProperties.LookupByKey(areaTriggerCreatePropertiesId);
                         if (createProperties == null)
@@ -283,7 +283,7 @@ namespace Game.DataStorage
         public void LoadAreaTriggerSpawns()
         {
             // build single time for check spawnmask
-            MultiMap<uint, Difficulty> spawnMasks = new();
+            MultiMap<int, Difficulty> spawnMasks = new();
             foreach (var mapDifficulty in CliDB.MapDifficultyStorage.Values)
                 spawnMasks.Add(mapDifficulty.MapID, mapDifficulty.DifficultyID);
 
@@ -297,9 +297,9 @@ namespace Game.DataStorage
             {
                 do
                 {
-                    ulong spawnId = result.Read<ulong>(0);
-                    AreaTriggerId areaTriggerId = new(result.Read<uint>(1), result.Read<byte>(2) == 1);
-                    WorldLocation location = new(result.Read<uint>(3), result.Read<float>(5), result.Read<float>(6), result.Read<float>(7), result.Read<float>(8));
+                    long spawnId = result.Read<long>(0);
+                    AreaTriggerId areaTriggerId = new(result.Read<int>(1), result.Read<byte>(2) == 1);
+                    WorldLocation location = new(result.Read<int>(3), result.Read<float>(5), result.Read<float>(6), result.Read<float>(7), result.Read<float>(8));
                     AreaTriggerTypes shape = (AreaTriggerTypes)result.Read<byte>(12);
 
                     if (GetAreaTriggerTemplate(areaTriggerId) == null)
@@ -334,8 +334,8 @@ namespace Game.DataStorage
                     spawn.SpawnPoint = new Position(location);
 
                     spawn.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(9);
-                    spawn.PhaseId = result.Read<uint>(10);
-                    spawn.PhaseGroup = result.Read<uint>(11);
+                    spawn.PhaseId = result.Read<int>(10);
+                    spawn.PhaseGroup = result.Read<int>(11);
 
                     spawn.Shape.TriggerType = shape;
                     unsafe
@@ -346,7 +346,7 @@ namespace Game.DataStorage
 
                     if (!result.IsNull(21))
                     {
-                        spawn.SpellForVisuals = result.Read<uint>(21);
+                        spawn.SpellForVisuals = result.Read<int>(21);
                         if (!Global.SpellMgr.HasSpellInfo(spawn.SpellForVisuals.Value, Difficulty.None))
                         {
                             Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed areatrigger SpawnId: {spawnId} with invalid SpellForVisual {spawn.SpellForVisuals}, set to none.");
@@ -360,13 +360,13 @@ namespace Game.DataStorage
                     // Add the trigger to a map::cell map, which is later used by GridLoader to query
                     CellCoord cellCoord = GridDefines.ComputeCellCoord(spawn.SpawnPoint.GetPositionX(), spawn.SpawnPoint.GetPositionY());
 
-                    foreach (Difficulty difficulty in difficulties)
+                    foreach (var difficulty in difficulties)
                     {
                         if (!_areaTriggerSpawnsByLocation.ContainsKey((spawn.MapId, difficulty)))
-                            _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)] = new Dictionary<uint, SortedSet<ulong>>();
+                            _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)] = new();
 
                         if (!_areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)].ContainsKey(cellCoord.GetId()))
-                            _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)][cellCoord.GetId()] = new SortedSet<ulong>();
+                            _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)][cellCoord.GetId()] = new();
 
                         _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)][cellCoord.GetId()].Add(spawnId);
                     }
@@ -384,12 +384,12 @@ namespace Game.DataStorage
            return _areaTriggerTemplateStore.LookupByKey(areaTriggerId);
         }
 
-        public AreaTriggerCreateProperties GetAreaTriggerCreateProperties(uint spellMiscValue)
+        public AreaTriggerCreateProperties GetAreaTriggerCreateProperties(int spellMiscValue)
         {
             return _areaTriggerCreateProperties.LookupByKey(spellMiscValue);
         }
 
-        public SortedSet<ulong> GetAreaTriggersForMapAndCell(uint mapId, Difficulty difficulty, uint cellId)
+        public SortedSet<long> GetAreaTriggersForMapAndCell(int mapId, Difficulty difficulty, int cellId)
         {
             var atForMapAndDifficulty = _areaTriggerSpawnsByLocation.LookupByKey((mapId, difficulty));
             if (atForMapAndDifficulty != null)
@@ -403,9 +403,9 @@ namespace Game.DataStorage
             return _areaTriggerSpawnsBySpawnId.LookupByKey(spawnId);
         }
 
-        Dictionary<(uint, Difficulty), Dictionary<uint, SortedSet<ulong>>> _areaTriggerSpawnsByLocation = new();
+        Dictionary<(int, Difficulty), Dictionary<int, SortedSet<long>>> _areaTriggerSpawnsByLocation = new();
         Dictionary<long, AreaTriggerSpawn> _areaTriggerSpawnsBySpawnId = new();
         Dictionary<AreaTriggerId, AreaTriggerTemplate> _areaTriggerTemplateStore = new();
-        Dictionary<uint, AreaTriggerCreateProperties> _areaTriggerCreateProperties = new();
+        Dictionary<int, AreaTriggerCreateProperties> _areaTriggerCreateProperties = new();
     }
 }

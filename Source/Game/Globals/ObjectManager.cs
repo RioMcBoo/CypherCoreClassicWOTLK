@@ -86,9 +86,10 @@ namespace Game
             return cinfo.GetFirstInvisibleModel();
         }
 
-        public static void ChooseCreatureFlags(CreatureTemplate cInfo, out NPCFlags npcFlag, out UnitFlags unitFlags, out UnitFlags2 unitFlags2, out UnitFlags3 unitFlags3, CreatureData data = null)
+        public static void ChooseCreatureFlags(CreatureTemplate cInfo, out NPCFlags1 npcFlag, out NPCFlags2 npcFlag2, out UnitFlags unitFlags, out UnitFlags2 unitFlags2, out UnitFlags3 unitFlags3, CreatureData data = null)
         {
             npcFlag = data != null && data.npcflag.HasValue ? data.npcflag.Value : cInfo.Npcflag;
+            npcFlag2 = data != null && data.npcflag2.HasValue ? data.npcflag2.Value : cInfo.Npcflag2;
             unitFlags = data != null && data.unit_flags.HasValue ? data.unit_flags.Value : cInfo.UnitFlags;
             unitFlags2 = data != null && data.unit_flags2.HasValue ? data.unit_flags2.Value : cInfo.UnitFlags2;
             unitFlags3 = data != null && data.unit_flags3.HasValue ? data.unit_flags3.Value : cInfo.UnitFlags3;
@@ -353,15 +354,15 @@ namespace Game
             {
                 if (!result.IsEmpty())
                 {
-                    Dictionary<Race, Dictionary<Class, (byte activeExpansionLevel, byte accountExpansionLevel)>> temp = new();
-                    Dictionary<Class, byte> minRequirementForClass = new((int)Expansion.MaxAccountExpansions);
+                    Dictionary<Race, Dictionary<Class, (Expansion activeExpansionLevel, Expansion accountExpansionLevel)>> temp = new();
+                    Dictionary<Class, Expansion> minRequirementForClass = new((int)Expansion.MaxAccountExpansions);
                     uint count = 0;
                     do
                     {
                         Class classID = (Class)result.Read<byte>(0);
                         Race raceID = (Race)result.Read<byte>(1);
-                        byte activeExpansionLevel = result.Read<byte>(2);
-                        byte accountExpansionLevel = result.Read<byte>(3);
+                        Expansion activeExpansionLevel = (Expansion)result.Read<byte>(2);
+                        Expansion accountExpansionLevel = (Expansion)result.Read<byte>(3);
 
                         ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)classID);
                         if (classEntry == null)
@@ -377,14 +378,14 @@ namespace Game
                             continue;
                         }
 
-                        if (activeExpansionLevel >= (int)Expansion.Max)
+                        if (activeExpansionLevel >= Expansion.Max)
                         {
                             Log.outError(LogFilter.Sql,
                                 $"Class {classID} Race {raceID} defined in `class_expansion_requirement` has incorrect ActiveExpansionLevel {activeExpansionLevel}, skipped.");
                             continue;
                         }
 
-                        if (accountExpansionLevel >= (int)Expansion.MaxAccountExpansions)
+                        if (accountExpansionLevel >= Expansion.MaxAccountExpansions)
                         {
                             Log.outError(LogFilter.Sql,
                                 $"Class {classID} Race {raceID} defined in `class_expansion_requirement` has incorrect AccountExpansionLevel {accountExpansionLevel}, skipped.");
@@ -392,10 +393,10 @@ namespace Game
                         }
 
                         if (!temp.ContainsKey(raceID))
-                            temp[raceID] = new Dictionary<Class, (byte, byte)>();
+                            temp[raceID] = new();
 
                         temp[raceID][classID] = (activeExpansionLevel, accountExpansionLevel);
-                        minRequirementForClass[classID] = Math.Min(minRequirementForClass[classID], activeExpansionLevel);
+                        minRequirementForClass[classID] = (Expansion)Math.Min((int)minRequirementForClass[classID], (int)activeExpansionLevel);
 
                         ++count;
                     }
@@ -729,11 +730,11 @@ namespace Game
                 PointOfInterest POI = new();
                 POI.Id = id;
                 POI.Pos = new Vector3(result.Read<float>(1), result.Read<float>(2), result.Read<float>(3));
-                POI.Icon = result.Read<uint>(4);
+                POI.Icon = result.Read<int>(4);
                 POI.Flags = result.Read<uint>(5);
-                POI.Importance = result.Read<uint>(6);
+                POI.Importance = result.Read<int>(6);
                 POI.Name = result.Read<string>(7);
-                POI.WMOGroupID = result.Read<uint>(8);
+                POI.WMOGroupID = result.Read<int>(8);
 
                 if (!GridDefines.IsValidMapCoord(POI.Pos.X, POI.Pos.Y, POI.Pos.Z))
                 {
@@ -1864,7 +1865,8 @@ namespace Game
             creature.RequiredExpansion = (Expansion)fields.Read<int>(8);
             creature.VignetteID = fields.Read<int>(9);
             creature.Faction = fields.Read<int>(10);
-            creature.Npcflag = (NPCFlags)fields.Read<long>(11);
+            creature.Npcflag = (NPCFlags1)(fields.Read<long>(11) & 0xFFFFFFFF);
+            creature.Npcflag2 = (NPCFlags2)(fields.Read<long>(11) >> 32);
             creature.SpeedWalk = fields.Read<float>(12);
             creature.SpeedRun = fields.Read<float>(13);
             creature.Scale = fields.Read<float>(14);
@@ -2186,7 +2188,7 @@ namespace Game
                 }
 
                 CreatureAddon creatureAddon = new();
-                creatureAddon.path_id = result.Read<uint>(1);
+                creatureAddon.path_id = result.Read<int>(1);
                 creatureAddon.mount = result.Read<int>(2);
                 creatureAddon.standState = (UnitStandStateType)result.Read<byte>(3);
                 creatureAddon.animTier = (AnimTier)result.Read<byte>(4);
@@ -2328,7 +2330,7 @@ namespace Game
 
                 CreatureAddon creatureAddon = new();
 
-                creatureAddon.path_id = result.Read<uint>(1);
+                creatureAddon.path_id = result.Read<int>(1);
                 if (creData.movementType == MovementGeneratorType.Waypoint && creatureAddon.path_id == 0)
                 {
                     creData.movementType = MovementGeneratorType.Idle;
@@ -2855,11 +2857,11 @@ namespace Game
                 creatureDifficulty.CreatureDifficultyID = result.Read<int>(9);
                 creatureDifficulty.TypeFlags = (CreatureTypeFlags)result.Read<uint>(10);
                 creatureDifficulty.TypeFlags2 = result.Read<uint>(11);
-                creatureDifficulty.LootID = result.Read<uint>(12);
-                creatureDifficulty.PickPocketLootID = result.Read<uint>(13);
-                creatureDifficulty.SkinLootID = result.Read<uint>(14);
-                creatureDifficulty.GoldMin = result.Read<uint>(15);
-                creatureDifficulty.GoldMax = result.Read<uint>(16);
+                creatureDifficulty.LootID = result.Read<int>(12);
+                creatureDifficulty.PickPocketLootID = result.Read<int>(13);
+                creatureDifficulty.SkinLootID = result.Read<int>(14);
+                creatureDifficulty.GoldMin = result.Read<int>(15);
+                creatureDifficulty.GoldMax = result.Read<int>(16);
                 creatureDifficulty.StaticFlags = new(
                     result.Read<uint>(17),
                     result.Read<uint>(18),
@@ -3076,9 +3078,9 @@ namespace Game
                 cInfo.UnitFlags3 &= UnitFlags3.Allowed;
             }
 
-            if (!cInfo.GossipMenuIds.Empty() && !cInfo.Npcflag.HasFlag(NPCFlags.Gossip))
+            if (!cInfo.GossipMenuIds.Empty() && !cInfo.Npcflag.HasFlag(NPCFlags1.Gossip))
                 Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has assigned gossip menu, but npcflag does not include UNIT_NPC_FLAG_GOSSIP.");
-            else if (cInfo.GossipMenuIds.Empty() && cInfo.Npcflag.HasFlag(NPCFlags.Gossip))
+            else if (cInfo.GossipMenuIds.Empty() && cInfo.Npcflag.HasFlag(NPCFlags1.Gossip))
                 Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has npcflag UNIT_NPC_FLAG_GOSSIP, but gossip menu is unassigned.");
         }
 
@@ -3671,7 +3673,7 @@ namespace Game
                     if (!spawnMasks.ContainsKey(mapDifficultyPair.Key))
                         spawnMasks[mapDifficultyPair.Key] = new List<Difficulty>();
 
-                    spawnMasks[mapDifficultyPair.Key].Add((Difficulty)difficultyPair.Key);
+                    spawnMasks[mapDifficultyPair.Key].Add(difficultyPair.Key);
                 }
             }
 
@@ -3708,7 +3710,10 @@ namespace Game
                 data.poolId = result.Read<int>(17);
 
                 if (!result.IsNull(18))
-                    data.npcflag = (NPCFlags)result.Read<ulong>(18);
+                {
+                    data.npcflag = (NPCFlags1)(result.Read<ulong>(18) & 0xFFFFFFFF);
+                    data.npcflag2 = (NPCFlags2)(result.Read<ulong>(18) >> 32);
+                }
                 if (!result.IsNull(19))
                     data.unit_flags = (UnitFlags)result.Read<uint>(19);
                 if (!result.IsNull(20))
@@ -4613,7 +4618,7 @@ namespace Game
                         "but the gameobejct is marked as despawnable at action.");
                 }
 
-                data.animprogress = result.Read<uint>(12);
+                data.animprogress = result.Read<int>(12);
                 data.artKit = 0;
 
                 GameObjectState gostate = (GameObjectState)result.Read<uint>(13);
@@ -5401,7 +5406,7 @@ namespace Game
             return true;
         }
 
-        public bool IsVendorItemValid(int vendorentry, VendorItem vItem, Player player = null, List<int> skipvendors = null, NPCFlags ORnpcflag = 0)
+        public bool IsVendorItemValid(int vendorentry, VendorItem vItem, Player player = null, List<int> skipvendors = null, NPCFlags1 ORnpcflag = 0)
         {
             CreatureTemplate cInfo = GetCreatureTemplate(vendorentry);
             if (cInfo == null)
@@ -5413,7 +5418,7 @@ namespace Game
                 return false;
             }
 
-            if (!(cInfo.Npcflag | ORnpcflag).HasAnyFlag(NPCFlags.Vendor))
+            if (!(cInfo.Npcflag | ORnpcflag).HasAnyFlag(NPCFlags1.Vendor))
             {
                 if (skipvendors == null || skipvendors.Count == 0)
                 {
@@ -6278,7 +6283,7 @@ namespace Game
 
                         createPosition.Loc = new WorldLocation(result.Read<int>(7), result.Read<float>(8), result.Read<float>(9), result.Read<float>(10), result.Read<float>(11));
                         if (!result.IsNull(12))
-                            createPosition.TransportGuid = result.Read<ulong>(12);
+                            createPosition.TransportGuid = result.Read<long>(12);
 
                         info.createPositionNPE = createPosition;
 
@@ -6645,7 +6650,7 @@ namespace Game
                         }
 
                         if (_playerInfo.LookupByKey((currentrace, currentclass)) is PlayerInfo info)
-                            info.action.Add(new PlayerCreateInfoAction(result.Read<byte>(2), result.Read<uint>(3), result.Read<byte>(4)));
+                            info.action.Add(new PlayerCreateInfoAction(result.Read<byte>(2), result.Read<int>(3), result.Read<byte>(4)));
 
                         ++count;
                     } while (result.NextRow());
@@ -8480,7 +8485,7 @@ namespace Game
                 CreatureTemplate cInfo = GetCreatureTemplate(pair.Key);
                 if (cInfo == null)
                     Log.outError(LogFilter.Sql, $"Table `creature_queststarter` have data for not existed creature entry ({pair.Key}) and existed quest {pair.Value}.");
-                else if (!cInfo.Npcflag.HasAnyFlag(NPCFlags.QuestGiver))
+                else if (!cInfo.Npcflag.HasAnyFlag(NPCFlags1.QuestGiver))
                     Log.outError(LogFilter.Sql,
                         $"Table `creature_queststarter` has creature entry ({pair.Key}) for quest {pair.Value}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER.");
             }
@@ -8495,7 +8500,7 @@ namespace Game
                 CreatureTemplate cInfo = GetCreatureTemplate(pair.Key);
                 if (cInfo == null)
                     Log.outError(LogFilter.Sql, $"Table `creature_questender` have data for not existed creature entry ({pair.Key}) and existed quest {pair.Value}.");
-                else if (!cInfo.Npcflag.HasAnyFlag(NPCFlags.QuestGiver))
+                else if (!cInfo.Npcflag.HasAnyFlag(NPCFlags1.QuestGiver))
                     Log.outError(LogFilter.Sql, 
                         $"Table `creature_questender` has creature entry ({pair.Key}) for quest {pair.Value}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER.");
             }
@@ -9049,11 +9054,11 @@ namespace Game
             var ctc = GetCreatureTemplates();
             foreach (var creature in ctc.Values)
             {
-                if (creature.Npcflag.HasAnyFlag(NPCFlags.SpellClick) && !_spellClickInfoStorage.ContainsKey(creature.Entry))
+                if (creature.Npcflag.HasAnyFlag(NPCFlags1.SpellClick) && !_spellClickInfoStorage.ContainsKey(creature.Entry))
                 {
                     Log.outError(LogFilter.Sql,
                         $"npc_spellclick_spells: Creature template {creature.Entry} has UNIT_NPC_FLAG_SPELLCLICK but no data in spellclick table! Removing flag.");
-                    creature.Npcflag &= ~NPCFlags.SpellClick;
+                    creature.Npcflag &= ~NPCFlags1.SpellClick;
                 }
             }
 
@@ -10122,7 +10127,7 @@ namespace Game
                     bool has_items = result.Read<bool>(4);
                     m.expire_time = result.Read<long>(5);
                     m.deliver_time = 0;
-                    m.COD = result.Read<ulong>(6);
+                    m.COD = result.Read<long>(6);
                     m.checkMask = (MailCheckFlags)result.Read<byte>(7);
                     m.mailTemplateId = result.Read<ushort>(8);
 
@@ -10324,7 +10329,7 @@ namespace Game
                     PlayerChoiceResponseReward reward = new();
                     reward.TitleId = rewards.Read<int>(2);
                     reward.PackageId = rewards.Read<int>(3);
-                    reward.SkillLineId = rewards.Read<int>(4);
+                    reward.SkillLineId = (SkillType)rewards.Read<int>(4);
                     reward.SkillPointCount = rewards.Read<int>(5);
                     reward.ArenaPointCount = rewards.Read<int>(6);
                     reward.HonorPointCount = rewards.Read<int>(7);
@@ -10345,7 +10350,7 @@ namespace Game
                         reward.PackageId = 0;
                     }
 
-                    if (reward.SkillLineId != 0 && !CliDB.SkillLineStorage.ContainsKey(reward.SkillLineId))
+                    if (reward.SkillLineId != 0 && !CliDB.SkillLineStorage.ContainsKey((int)reward.SkillLineId))
                     {
                         Log.outError(LogFilter.Sql,
                             $"Table `playerchoice_response_reward` references non-existing SkillLine {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0.");
@@ -11650,7 +11655,7 @@ namespace Game
         //Vehicles
         Dictionary<int, VehicleTemplate> _vehicleTemplateStore = new();
         MultiMap<int, VehicleAccessory> _vehicleTemplateAccessoryStore = new();
-        MultiMap<ulong, VehicleAccessory> _vehicleAccessoryStore = new();
+        MultiMap<long, VehicleAccessory> _vehicleAccessoryStore = new();
         Dictionary<int, VehicleSeatAddon> _vehicleSeatAddonStore = new();
 
         //Locales
@@ -12257,11 +12262,11 @@ namespace Game
 
     public class LanguageDesc
     {
-        public uint SpellId;
-        public uint SkillId;
+        public int SpellId;
+        public int SkillId;
 
         public LanguageDesc() { }
-        public LanguageDesc(uint spellId, uint skillId)
+        public LanguageDesc(int spellId, int skillId)
         {
             SpellId = spellId;
             SkillId = skillId;
@@ -12676,9 +12681,9 @@ namespace Game
     public class ClassAvailability
     {
         public Class ClassID;
-        public byte ActiveExpansionLevel;
-        public byte AccountExpansionLevel;
-        public byte MinActiveExpansionLevel;
+        public Expansion ActiveExpansionLevel;
+        public Expansion AccountExpansionLevel;
+        public Expansion MinActiveExpansionLevel;
     }
 
     public class RaceClassAvailability

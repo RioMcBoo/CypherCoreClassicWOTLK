@@ -64,7 +64,7 @@ namespace Game.DungeonFinding
             m_Leader = guid;
         }
 
-        public void SetDungeon(uint dungeon)
+        public void SetDungeon(int dungeon)
         {
             m_Dungeon = dungeon;
         }
@@ -129,7 +129,7 @@ namespace Game.DungeonFinding
         ObjectGuid m_Leader;
         List<ObjectGuid> m_Players = new();
         // Dungeon
-        uint m_Dungeon;
+        int m_Dungeon;
         // Vote Kick
         byte m_KicksLeft;
         bool m_VoteKickActive;

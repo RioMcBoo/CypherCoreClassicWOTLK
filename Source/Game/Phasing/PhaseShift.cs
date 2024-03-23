@@ -19,9 +19,9 @@ namespace Game
         {
             Flags = copy.Flags;
             PersonalGuid = copy.PersonalGuid;
-            Phases = new Dictionary<uint, PhaseRef>(copy.Phases);
-            VisibleMapIds = new Dictionary<uint, VisibleMapIdRef>(copy.VisibleMapIds);
-            UiMapPhaseIds = new Dictionary<uint, UiMapPhaseIdRef>(copy.UiMapPhaseIds);
+            Phases = new Dictionary<int, PhaseRef>(copy.Phases);
+            VisibleMapIds = new Dictionary<int, VisibleMapIdRef>(copy.VisibleMapIds);
+            UiMapPhaseIds = new Dictionary<int, UiMapPhaseIdRef>(copy.UiMapPhaseIds);
 
             NonCosmeticReferences = copy.NonCosmeticReferences;
             CosmeticReferences = copy.CosmeticReferences;
@@ -63,7 +63,7 @@ namespace Game
             return false;
         }
 
-        public bool AddVisibleMapId(uint visibleMapId, TerrainSwapInfo visibleMapInfo, int references = 1)
+        public bool AddVisibleMapId(int visibleMapId, TerrainSwapInfo visibleMapInfo, int references = 1)
         {
             if (VisibleMapIds.ContainsKey(visibleMapId))
                 return false;
@@ -72,7 +72,7 @@ namespace Game
             return true;
         }
 
-        public bool RemoveVisibleMapId(uint visibleMapId)
+        public bool RemoveVisibleMapId(int visibleMapId)
         {
             if (VisibleMapIds.ContainsKey(visibleMapId))
             {
@@ -87,7 +87,7 @@ namespace Game
             return false;
         }
 
-        public bool AddUiMapPhaseId(uint uiMapPhaseId, int references = 1)
+        public bool AddUiMapPhaseId(int uiMapPhaseId, int references = 1)
         {
             if (UiMapPhaseIds.ContainsKey(uiMapPhaseId))
                 return false;
@@ -96,7 +96,7 @@ namespace Game
             return true;
         }
 
-        public bool RemoveUiMapPhaseId(uint uiWorldMapAreaId)
+        public bool RemoveUiMapPhaseId(int uiWorldMapAreaId)
         {
             if (UiMapPhaseIds.ContainsKey(uiWorldMapAreaId))
             {
@@ -180,7 +180,7 @@ namespace Game
             return checkInversePhaseShift(other, this);
         }
 
-        public void ModifyPhasesReferences(uint phaseId, PhaseRef phaseRef, int references)
+        public void ModifyPhasesReferences(int phaseId, PhaseRef phaseRef, int references)
         {
             phaseRef.References += references;
 

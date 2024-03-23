@@ -3077,9 +3077,9 @@ namespace Game.Entities
             if (updateItemAuras)
             {
                 ApplyItemDependentAuras(item, apply);
-                WeaponAttackType attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
-                if (attackType != WeaponAttackType.Max)
-                    UpdateWeaponDependentAuras(attackType);
+                var attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
+                if (attackType.HasValue)
+                    UpdateWeaponDependentAuras(attackType.Value);
             }
 
             ApplyEnchantment(item, apply);
@@ -3087,7 +3087,7 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, "Player._ApplyItemMods: complete.");
         }
 
-        public void _ApplyItemBonuses(Item item, byte slot, bool apply, bool onlyForScalingItems)
+        public void _ApplyItemBonuses(Item item, byte slot, bool apply, bool onlyForScalingItems = false)
         {
             ItemTemplate proto = item.GetTemplate();
             if (slot >= InventorySlots.BagEnd || proto == null)
@@ -3526,9 +3526,9 @@ namespace Game.Entities
                     ApplyItemDependentAuras(m_items[i], true);
                     _ApplyItemBonuses(m_items[i], i, true);
 
-                    WeaponAttackType attackType = Player.GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType());
-                    if (attackType != WeaponAttackType.Max)
-                        UpdateWeaponDependentAuras(attackType);
+                    var attackType = Player.GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType());
+                    if (attackType.HasValue)
+                        UpdateWeaponDependentAuras(attackType.Value);
                 }
             }
 
@@ -4066,9 +4066,9 @@ namespace Game.Entities
             return freeSlotCount;
         }
 
-        public uint GetFreeInventorySpace()
+        public int GetFreeInventorySpace()
         {
-            uint freeSpace = 0;
+            int freeSpace = 0;
 
             // Check backpack
             for (byte slot = InventorySlots.ItemStart; slot < InventorySlots.ItemEnd; ++slot)
@@ -4263,7 +4263,7 @@ namespace Game.Entities
                         return ItemSlot.Null;
 
                     // Check if player has profession skill
-                    uint itemSkill = (uint)item.GetTemplate().GetSkill();
+                    var itemSkill = item.GetTemplate().GetSkill();
                     if (!HasSkill(itemSkill))
                         return ItemSlot.Null;
 
@@ -5149,7 +5149,7 @@ namespace Game.Entities
         public void AutoStoreLoot(int loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool createdByPlayer = false)
         {
             Loot loot = new(null, ObjectGuid.Empty, LootType.None, null);
-            loot.FillLoot(loot_id, store, this, true, false, LootModes.Default, context);
+            loot.FillLoot(loot_id, store, this, true, false, LootModes.Default);
 
             loot.AutoStore(this, broadcast, createdByPlayer);
             Unit.ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.Looted), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);

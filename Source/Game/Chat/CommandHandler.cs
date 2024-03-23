@@ -73,10 +73,12 @@ namespace Game.Chat
         {
             return ExtractKeyFromLink(args, linkType, out _);
         }
+
         public string ExtractKeyFromLink(StringArguments args, string[] linkType, out int found_idx)
         {
             return ExtractKeyFromLink(args, linkType, out found_idx, out _);
         }
+
         public string ExtractKeyFromLink(StringArguments args, string[] linkType, out int found_idx, out string something1)
         {
             found_idx = 0;
@@ -133,6 +135,7 @@ namespace Game.Chat
 
             return str.Replace("\"", String.Empty);
         }
+
         string ExtractPlayerNameFromLink(StringArguments args)
         {
             // |color|Hplayer:name|h[name]|h|r
@@ -145,10 +148,12 @@ namespace Game.Chat
 
             return name;
         }
+
         public bool ExtractPlayerTarget(StringArguments args, out Player player)
         {
             return ExtractPlayerTarget(args, out player, out _, out _);
         }
+
         public bool ExtractPlayerTarget(StringArguments args, out Player player, out ObjectGuid playerGuid)
         {
             return ExtractPlayerTarget(args, out player, out playerGuid, out _);
@@ -192,7 +197,8 @@ namespace Game.Chat
 
             return true;
         }
-        public ulong ExtractLowGuidFromLink(StringArguments args, ref HighGuid guidHigh)
+
+        public long ExtractLowGuidFromLink(StringArguments args, ref HighGuid guidHigh)
         {
             int type;
 
@@ -230,14 +236,14 @@ namespace Game.Chat
                 case 1:
                     {
                         guidHigh = HighGuid.Creature;
-                        if (!ulong.TryParse(idS, out ulong lowguid))
+                        if (!long.TryParse(idS, out long lowguid))
                             return 0;
                         return lowguid;
                     }
                 case 2:
                     {
                         guidHigh = HighGuid.GameObject;
-                        if (!ulong.TryParse(idS, out ulong lowguid))
+                        if (!long.TryParse(idS, out long lowguid))
                             return 0;
                         return lowguid;
                     }
@@ -255,7 +261,7 @@ namespace Game.Chat
             "Htrade",                                               // profession/skill spell
             "Hglyph",                                               // glyph
         };
-        public uint ExtractSpellIdFromLink(StringArguments args)
+        public int ExtractSpellIdFromLink(StringArguments args)
         {
             // number or [name] Shift-click form |color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r
             // number or [name] Shift-click form |color|Hglyph:glyph_slot_id:glyph_prop_id|h[value]|h|r
@@ -266,7 +272,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(idS))
                 return 0;
 
-            if (!uint.TryParse(idS, out uint id))
+            if (!int.TryParse(idS, out int id))
                 return 0;               
 
             switch (type)
@@ -280,14 +286,14 @@ namespace Game.Chat
                         if (talentEntry == null)
                             return 0;
 
-                        return (uint)talentEntry.SpellID;
+                        return talentEntry.SpellID;
                     }
                 case 2:
                 case 3:
                     return id;
                 case 4:
                     {
-                        if (!uint.TryParse(param1Str, out uint glyph_prop_id))
+                        if (!int.TryParse(param1Str, out int glyph_prop_id))
                             glyph_prop_id = 0;
 
                         GlyphPropertiesRecord glyphPropEntry = CliDB.GlyphPropertiesStorage.LookupByKey(glyph_prop_id);
@@ -314,6 +320,7 @@ namespace Game.Chat
 
             return Global.ObjAccessor.FindConnectedPlayer(selected);
         }
+
         public Unit GetSelectedUnit()
         {
             if (_session == null)
@@ -325,6 +332,7 @@ namespace Game.Chat
 
             return _session.GetPlayer();
         }
+
         public WorldObject GetSelectedObject()
         {
             if (_session == null)
@@ -337,6 +345,7 @@ namespace Game.Chat
 
             return Global.ObjAccessor.GetUnit(_session.GetPlayer(), selected);
         }
+
         public Creature GetSelectedCreature()
         {
             if (_session == null)
@@ -344,6 +353,7 @@ namespace Game.Chat
 
             return ObjectAccessor.GetCreatureOrPetOrVehicle(_session.GetPlayer(), _session.GetPlayer().GetTarget());
         }
+
         public Player GetSelectedPlayerOrSelf()
         {
             if (_session == null)
@@ -362,7 +372,7 @@ namespace Game.Chat
             return targetPlayer;
         }
 
-        public GameObject GetObjectFromPlayerMapByDbGuid(ulong lowguid)
+        public GameObject GetObjectFromPlayerMapByDbGuid(long lowguid)
         {
             if (_session == null)
                 return null;
@@ -374,7 +384,7 @@ namespace Game.Chat
             return null;
         }
 
-        public Creature GetCreatureFromPlayerMapByDbGuid(ulong lowguid)
+        public Creature GetCreatureFromPlayerMapByDbGuid(long lowguid)
         {
             if (_session == null)
                 return null;
@@ -391,6 +401,7 @@ namespace Game.Chat
 
             return creature;
         }
+
         GameObject GetNearbyGameObject()
         {
             if (_session == null)
@@ -407,23 +418,27 @@ namespace Game.Chat
         {
             return _session != null ? "|cffffffff|Hplayer:" + name + "|h[" + name + "]|h|r" : name;
         }
+
         public virtual string GetNameLink()
         {
             return GetNameLink(_session.GetPlayer());
         }
+
         public string GetNameLink(Player obj)
         {
             return PlayerLink(obj.GetName());
         }
+
         public virtual bool NeedReportToTarget(Player chr)
         {
             Player pl = _session.GetPlayer();
             return pl != chr && pl.IsVisibleGloballyFor(chr);
         }
+
         public bool HasLowerSecurity(Player target, ObjectGuid guid, bool strong = false)
         {
             WorldSession target_session = null;
-            uint target_account = 0;
+            int target_account = 0;
 
             if (target != null)
                 target_session = target.GetSession();
@@ -439,7 +454,8 @@ namespace Game.Chat
 
             return HasLowerSecurityAccount(target_session, target_account, strong);
         }
-        public bool HasLowerSecurityAccount(WorldSession target, uint target_account, bool strong = false)
+
+        public bool HasLowerSecurityAccount(WorldSession target, int target_account, bool strong = false)
         {
             AccountTypes target_ac_sec;
 
@@ -454,7 +470,7 @@ namespace Game.Chat
             if (target != null)
                 target_ac_sec = target.GetSecurity();
             else if (target_account != 0)
-                target_ac_sec = Global.AccountMgr.GetSecurity(target_account, (int)Global.WorldMgr.GetRealmId().Index);
+                target_ac_sec = Global.AccountMgr.GetSecurity(target_account, Global.WorldMgr.GetRealmId().Index);
             else
                 return true;                                        // caller must report error for (target == NULL && target_account == 0)
 

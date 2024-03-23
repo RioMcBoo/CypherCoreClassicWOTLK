@@ -73,7 +73,7 @@ namespace Game
                 {
                     player.SendNewItem(resultValue.item, resultValue.count, false, false, true, resultValue.dungeonEncounterId);
                     player.UpdateCriteria(CriteriaType.LootItem, resultValue.item.GetEntry(), resultValue.count);
-                    player.UpdateCriteria(CriteriaType.GetLootByType, resultValue.item.GetEntry(), resultValue.count, (ulong)resultValue.lootType);
+                    player.UpdateCriteria(CriteriaType.GetLootByType, resultValue.item.GetEntry(), resultValue.count, (long)resultValue.lootType);
                     player.UpdateCriteria(CriteriaType.LootAnyItem, resultValue.item.GetEntry(), resultValue.count);
                 }
             }
@@ -112,13 +112,13 @@ namespace Game
                             playersNear.Add(member);
                     }
 
-                    ulong goldPerPlayer = (ulong)(loot.gold / playersNear.Count);
+                    long goldPerPlayer = loot.gold / playersNear.Count;
 
                     foreach (var pl in playersNear)
                     {
-                        ulong goldMod = MathFunctions.CalculatePct(goldPerPlayer, pl.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
+                        long goldMod = MathFunctions.CalculatePct(goldPerPlayer, pl.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
 
-                        pl.ModifyMoney((long)(goldPerPlayer + goldMod));
+                        pl.ModifyMoney((goldPerPlayer + goldMod));
                         pl.UpdateCriteria(CriteriaType.MoneyLootedFromCreatures, goldPerPlayer);
 
                         LootMoneyNotify packet = new();
@@ -130,7 +130,7 @@ namespace Game
                 }
                 else
                 {
-                    ulong goldMod = MathFunctions.CalculatePct(loot.gold, player.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
+                    long goldMod = MathFunctions.CalculatePct(loot.gold, player.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
 
                     player.ModifyMoney((long)(loot.gold + goldMod));
                     player.UpdateCriteria(CriteriaType.MoneyLootedFromCreatures, loot.gold);
@@ -331,7 +331,7 @@ namespace Game
                     pItem.m_lootGenerated = false;
                     pItem.loot = null;
 
-                    uint count = pItem.GetCount();
+                    int count = pItem.GetCount();
 
                     // >=5 checked in spell code, but will work for cheating cases also with removing from another stacks.
                     if (count > 5)
@@ -488,7 +488,7 @@ namespace Game
                 ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(packet.SpecID);
                 if (chrSpec != null)
                 {
-                    if (chrSpec.ClassID == (uint)GetPlayer().GetClass())
+                    if (chrSpec.ClassID == GetPlayer().GetClass())
                         GetPlayer().SetLootSpecId(packet.SpecID);
                 }
             }

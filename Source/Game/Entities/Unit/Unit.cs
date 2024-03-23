@@ -845,11 +845,11 @@ namespace Game.Entities
                 m_areaTrigger[0].Remove();
         }
 
-        public NPCFlags GetNpcFlags() { return (NPCFlags)m_unitData.NpcFlags[0]; }
-        public bool HasNpcFlag(NPCFlags flags) { return (m_unitData.NpcFlags[0] & (uint)flags) != 0; }
-        public void SetNpcFlag(NPCFlags flags) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
-        public void RemoveNpcFlag(NPCFlags flags) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
-        public void ReplaceAllNpcFlags(NPCFlags flags) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
+        public NPCFlags1 GetNpcFlags() { return (NPCFlags1)m_unitData.NpcFlags[0]; }
+        public bool HasNpcFlag(NPCFlags1 flags) { return (m_unitData.NpcFlags[0] & (uint)flags) != 0; }
+        public void SetNpcFlag(NPCFlags1 flags) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
+        public void RemoveNpcFlag(NPCFlags1 flags) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
+        public void ReplaceAllNpcFlags(NPCFlags1 flags) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
 
         public NPCFlags2 GetNpcFlags2() { return (NPCFlags2)m_unitData.NpcFlags[1]; }
         public bool HasNpcFlag2(NPCFlags2 flags) { return (m_unitData.NpcFlags[1] & (uint)flags) != 0; }
@@ -857,29 +857,29 @@ namespace Game.Entities
         public void RemoveNpcFlag2(NPCFlags2 flags) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 1), (uint)flags); }
         public void ReplaceAllNpcFlags2(NPCFlags2 flags) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 1), (uint)flags); }
 
-        public bool IsVendor() { return HasNpcFlag(NPCFlags.Vendor); }
-        public bool IsTrainer() { return HasNpcFlag(NPCFlags.Trainer); }
-        public bool IsQuestGiver() { return HasNpcFlag(NPCFlags.QuestGiver); }
-        public bool IsGossip() { return HasNpcFlag(NPCFlags.Gossip); }
-        public bool IsTaxi() { return HasNpcFlag(NPCFlags.FlightMaster); }
-        public bool IsGuildMaster() { return HasNpcFlag(NPCFlags.Petitioner); }
-        public bool IsBattleMaster() { return HasNpcFlag(NPCFlags.BattleMaster); }
-        public bool IsBanker() { return HasNpcFlag(NPCFlags.Banker); }
-        public bool IsInnkeeper() { return HasNpcFlag(NPCFlags.Innkeeper); }
-        public bool IsSpiritHealer() { return HasNpcFlag(NPCFlags.SpiritHealer); }
-        public bool IsAreaSpiritHealer() { return HasNpcFlag(NPCFlags.AreaSpiritHealer); }
-        public bool IsTabardDesigner() { return HasNpcFlag(NPCFlags.TabardDesigner); }
-        public bool IsAuctioner() { return HasNpcFlag(NPCFlags.Auctioneer); }
-        public bool IsArmorer() { return HasNpcFlag(NPCFlags.Repair); }
-        public bool IsWildBattlePet() { return HasNpcFlag(NPCFlags.WildBattlePet); }
+        public bool IsVendor() { return HasNpcFlag(NPCFlags1.Vendor); }
+        public bool IsTrainer() { return HasNpcFlag(NPCFlags1.Trainer); }
+        public bool IsQuestGiver() { return HasNpcFlag(NPCFlags1.QuestGiver); }
+        public bool IsGossip() { return HasNpcFlag(NPCFlags1.Gossip); }
+        public bool IsTaxi() { return HasNpcFlag(NPCFlags1.FlightMaster); }
+        public bool IsGuildMaster() { return HasNpcFlag(NPCFlags1.Petitioner); }
+        public bool IsBattleMaster() { return HasNpcFlag(NPCFlags1.BattleMaster); }
+        public bool IsBanker() { return HasNpcFlag(NPCFlags1.Banker); }
+        public bool IsInnkeeper() { return HasNpcFlag(NPCFlags1.Innkeeper); }
+        public bool IsSpiritHealer() { return HasNpcFlag(NPCFlags1.SpiritHealer); }
+        public bool IsAreaSpiritHealer() { return HasNpcFlag(NPCFlags1.AreaSpiritHealer); }
+        public bool IsTabardDesigner() { return HasNpcFlag(NPCFlags1.TabardDesigner); }
+        public bool IsAuctioner() { return HasNpcFlag(NPCFlags1.Auctioneer); }
+        public bool IsArmorer() { return HasNpcFlag(NPCFlags1.Repair); }
+        public bool IsWildBattlePet() { return HasNpcFlag(NPCFlags1.WildBattlePet); }
         public bool IsServiceProvider()
         {
-            return HasNpcFlag(NPCFlags.Vendor | NPCFlags.Trainer | NPCFlags.FlightMaster |
-                NPCFlags.Petitioner | NPCFlags.BattleMaster | NPCFlags.Banker |
-                NPCFlags.Innkeeper | NPCFlags.SpiritHealer |
-                NPCFlags.AreaSpiritHealer | NPCFlags.TabardDesigner | NPCFlags.Auctioneer);
+            return HasNpcFlag(NPCFlags1.Vendor | NPCFlags1.Trainer | NPCFlags1.FlightMaster |
+                NPCFlags1.Petitioner | NPCFlags1.BattleMaster | NPCFlags1.Banker |
+                NPCFlags1.Innkeeper | NPCFlags1.SpiritHealer |
+                NPCFlags1.AreaSpiritHealer | NPCFlags1.TabardDesigner | NPCFlags1.Auctioneer);
         }
-        public bool IsSpiritService() { return HasNpcFlag(NPCFlags.SpiritHealer | NPCFlags.AreaSpiritHealer); }
+        public bool IsSpiritService() { return HasNpcFlag(NPCFlags1.SpiritHealer | NPCFlags1.AreaSpiritHealer); }
         public bool IsAreaSpiritHealerIndividual() { return HasNpcFlag2(NPCFlags2.AreaSpiritHealerIndividual); }
         public bool IsCritter() { return GetCreatureType() == CreatureType.Critter; }
         public bool IsInFlight() { return HasUnitState(UnitState.InFlight); }
@@ -1846,20 +1846,20 @@ namespace Game.Entities
 
         public override ushort GetMeleeAnimKitId() { return _meleeAnimKitId; }
 
-        public uint GetVirtualItemId(int slot)
+        public int GetVirtualItemId(int slot)
         {
             if (slot >= SharedConst.MaxEquipmentItems)
                 return 0;
 
-            return (uint)m_unitData.VirtualItems[slot].ItemID.GetValue();
+            return m_unitData.VirtualItems[slot].ItemID;
         }
 
-        public ushort GetVirtualItemAppearanceMod(uint slot)
+        public ushort GetVirtualItemAppearanceMod(int slot)
         {
             if (slot >= SharedConst.MaxEquipmentItems)
                 return 0;
 
-            return m_unitData.VirtualItems[(int)slot].ItemAppearanceModID;
+            return m_unitData.VirtualItems[slot].ItemAppearanceModID;
         }
 
         public void SetVirtualItem(int slot, int itemId, ushort appearanceModId = 0, ushort itemVisual = 0)
@@ -2366,16 +2366,16 @@ namespace Game.Entities
             }
         }
 
-        public uint GetChannelSpellId() { return (uint)((UnitChannel)m_unitData.ChannelData).SpellID; }
-        public void SetChannelSpellId(uint channelSpellId)
+        public int GetChannelSpellId() { return m_unitData.ChannelData.GetValue().SpellID; }
+        public void SetChannelSpellId(int channelSpellId)
         {
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, (int)channelSpellId);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, channelSpellId);
         }
 
-        public void SetChannelSpellXSpellVisual(uint spellXSpellVisualId)
+        public void SetChannelSpellXSpellVisual(int spellXSpellVisualId)
         {
             UnitChannel unitChannel = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData);
-            SetUpdateFieldValue(ref unitChannel.SpellXSpellVisualID, (int)spellXSpellVisualId);
+            SetUpdateFieldValue(ref unitChannel.SpellXSpellVisualID, spellXSpellVisualId);
         }
         public void AddChannelObject(ObjectGuid guid) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), guid); }
         public void SetChannelObject(int slot, ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects, slot), guid); }
@@ -3240,7 +3240,7 @@ namespace Game.Entities
                 RemoveUnitFlag(UnitFlags.Uninteractible);
         }
 
-        public virtual float GetBlockPercent(uint attackerLevel) { return 30.0f; }
+        public virtual float GetBlockPercent(int attackerLevel) { return 30.0f; }
 
         void UpdateReactives(uint p_time)
         {

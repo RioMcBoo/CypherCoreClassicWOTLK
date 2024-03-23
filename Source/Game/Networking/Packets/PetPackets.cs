@@ -76,7 +76,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(PetGUID);
             _worldPacket.WriteUInt16(CreatureFamily);
-            _worldPacket.WriteUInt16(Specialization);
+            _worldPacket.WriteUInt16((ushort)Specialization);
             _worldPacket.WriteUInt32(TimeLimit);
             _worldPacket.WriteUInt16((ushort)((byte)CommandState | (Flag << 16)));
             _worldPacket.WriteUInt8((byte)ReactState);
@@ -111,7 +111,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid PetGUID;
         public ushort CreatureFamily;
-        public ushort Specialization;
+        public ChrSpecialization Specialization;
         public uint TimeLimit;
         public ReactStates ReactState;
         public CommandStates CommandState;

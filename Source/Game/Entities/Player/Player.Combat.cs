@@ -164,7 +164,7 @@ namespace Game.Entities
             return !IsInFeralForm() && (!mainhand || !HasUnitFlag(UnitFlags.Disarmed));
         }
 
-        public void SetCanTitanGrip(bool value, uint penaltySpellId = 0)
+        public void SetCanTitanGrip(bool value, int penaltySpellId = 0)
         {
             if (value == m_canTitanGrip)
                 return;
@@ -197,7 +197,7 @@ namespace Game.Entities
             ItemTemplate itemTemplate = mainItem.GetTemplate();
             return (itemTemplate.GetInventoryType() == InventoryType.Weapon2Hand && !CanTitanGrip()) ||
                 itemTemplate.GetInventoryType() == InventoryType.Ranged ||
-                (itemTemplate.GetInventoryType() == InventoryType.RangedRight && itemTemplate.GetClass() == ItemClass.Weapon && (ItemSubClassWeapon)itemTemplate.GetSubClass() != ItemSubClassWeapon.Wand);
+                (itemTemplate.GetInventoryType() == InventoryType.RangedRight && itemTemplate.GetClass() == ItemClass.Weapon && itemTemplate.GetSubClass().Weapon != ItemSubClassWeapon.Wand);
         }
 
         bool IsUsingTwoHandedWeaponInOneHand()
@@ -219,7 +219,7 @@ namespace Game.Entities
         public void _ApplyWeaponDamage(byte slot, Item item, bool apply)
         {
             ItemTemplate proto = item.GetTemplate();
-            WeaponAttackType attType = GetAttackBySlot(slot, proto.GetInventoryType());
+            var attType = GetAttackBySlot(slot, proto.GetInventoryType());
             if (!IsInFeralForm() && apply && !CanUseAttackType(attType))
                 return;
 
@@ -251,22 +251,22 @@ namespace Game.Entities
                 if (minDamage > 0)
                 {
                     damage = apply ? minDamage : SharedConst.BaseMinDamage;
-                    SetBaseWeaponDamage(attType, WeaponDamageRange.MinDamage, damage);
+                    SetBaseWeaponDamage(attType.Value, WeaponDamageRange.MinDamage, damage);
                 }
 
                 if (maxDamage > 0)
                 {
                     damage = apply ? maxDamage : SharedConst.BaseMaxDamage;
-                    SetBaseWeaponDamage(attType, WeaponDamageRange.MaxDamage, damage);
+                    SetBaseWeaponDamage(attType.Value, WeaponDamageRange.MaxDamage, damage);
                 }
             }
 
             SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey((int)GetShapeshiftForm());
             if (proto.GetDelay() != 0 && !(shapeshift != null && shapeshift.CombatRoundTime != 0))
-                SetBaseAttackTime(attType, apply ? proto.GetDelay() : SharedConst.BaseAttackTime);
+                SetBaseAttackTime(attType.Value, apply ? proto.GetDelay() : SharedConst.BaseAttackTime);
 
             if (CanModifyStats() && (damage != 0 || proto.GetDelay() != 0))
-                UpdateDamagePhysical(attType);
+                UpdateDamagePhysical(attType.Value);
         }
 
         public override void AtEnterCombat()
@@ -283,7 +283,7 @@ namespace Game.Entities
             m_regenInterruptTimestamp = GameTime.Now();
         }
 
-        public override float GetBlockPercent(uint attackerLevel)
+        public override float GetBlockPercent(int attackerLevel)
         {
             float blockArmor = (float)m_activePlayerData.ShieldBlock;
             float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, Class.None, 0);
@@ -313,10 +313,10 @@ namespace Game.Entities
         }
 
         // duel health and mana reset methods
-        public void SaveHealthBeforeDuel() { healthBeforeDuel = (uint)GetHealth(); }
-        public void SaveManaBeforeDuel() { manaBeforeDuel = (uint)GetPower(PowerType.Mana); }
+        public void SaveHealthBeforeDuel() { healthBeforeDuel = (int)GetHealth(); }
+        public void SaveManaBeforeDuel() { manaBeforeDuel = GetPower(PowerType.Mana); }
         public void RestoreHealthAfterDuel() { SetHealth(healthBeforeDuel); }
-        public void RestoreManaAfterDuel() { SetPower(PowerType.Mana, (int)manaBeforeDuel); }
+        public void RestoreManaAfterDuel() { SetPower(PowerType.Mana, manaBeforeDuel); }
 
         void UpdateDuelFlag(long currTime)
         {

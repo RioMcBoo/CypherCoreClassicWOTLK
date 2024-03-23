@@ -58,7 +58,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Damage);
             _worldPacket.WriteInt32(OriginalDamage);
             _worldPacket.WriteInt32(Overkill);
-            _worldPacket.WriteUInt8(SchoolMask);
+            _worldPacket.WriteUInt8((byte)SchoolMask);
             _worldPacket.WriteInt32(Absorbed);
             _worldPacket.WriteInt32(Resisted);
             _worldPacket.WriteInt32(ShieldBlock);
@@ -69,7 +69,7 @@ namespace Game.Networking.Packets
                 supportInfo.Write(_worldPacket);
 
             _worldPacket.WriteBit(Periodic);
-            _worldPacket.WriteBits(Flags, 7);
+            _worldPacket.WriteBits((uint)Flags, 7);
             _worldPacket.WriteBit(false); // Debug info
             WriteLogDataBit();
             _worldPacket.WriteBit(ContentTuning != null);
@@ -91,12 +91,12 @@ namespace Game.Networking.Packets
         public int Damage;
         public int OriginalDamage;
         public int Overkill = -1;
-        public byte SchoolMask;
+        public SpellSchoolMask SchoolMask;
         public int ShieldBlock;
         public int Resisted;
         public bool Periodic;
         public int Absorbed;
-        public int Flags;
+        public HitInfo Flags;
         // Optional<SpellNonMeleeDamageLogDebugInfo> DebugInfo;
         public ContentTuningParams ContentTuning;
         public List<CombatWorldTextViewerInfo> WorldTextViewers = new();
@@ -159,7 +159,7 @@ namespace Game.Networking.Packets
                 foreach (SpellLogEffectExtraAttacksParams extraAttacksTarget in effect.ExtraAttacksTargets)
                 {
                     _worldPacket.WritePackedGuid(extraAttacksTarget.Victim);
-                    _worldPacket.WriteUInt32(extraAttacksTarget.NumAttacks);
+                    _worldPacket.WriteInt32(extraAttacksTarget.NumAttacks);
                 }
 
                 foreach (SpellLogEffectDurabilityDamageParams durabilityDamageTarget in effect.DurabilityDamageTargets)
@@ -680,7 +680,7 @@ namespace Game.Networking.Packets
     public struct SpellLogEffectExtraAttacksParams
     {
         public ObjectGuid Victim;
-        public uint NumAttacks;
+        public int NumAttacks;
     }
 
     public struct SpellLogEffectDurabilityDamageParams

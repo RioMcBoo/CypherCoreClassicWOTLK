@@ -93,8 +93,8 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet, lootIdSetUsed = new();
-            uint count = Creature.LoadAndCollectLootIds(out lootIdSet);
+            List<int> lootIdSet, lootIdSetUsed = new();
+            int count = Creature.LoadAndCollectLootIds(out lootIdSet);
 
             // Remove real entries and check loot existence
             var templates = Global.ObjectMgr.GetCreatureTemplates();
@@ -133,12 +133,12 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet, lootIdSetUsed = new();
-            uint count = Disenchant.LoadAndCollectLootIds(out lootIdSet);
+            List<int> lootIdSet, lootIdSetUsed = new();
+            int count = Disenchant.LoadAndCollectLootIds(out lootIdSet);
 
             foreach (var disenchant in CliDB.ItemDisenchantLootStorage.Values)
             {
-                uint lootid = disenchant.Id;
+                int lootid = disenchant.Id;
                 if (!lootIdSet.Contains(lootid))
                     Disenchant.ReportNonExistingId(lootid, disenchant.Id);
                 else
@@ -163,8 +163,8 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet;
-            uint count = Fishing.LoadAndCollectLootIds(out lootIdSet);
+            List<int> lootIdSet;
+            int count = Fishing.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             foreach (var areaEntry in CliDB.AreaTableStorage.Values)
@@ -186,10 +186,10 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet, lootIdSetUsed = new();
-            uint count = Gameobject.LoadAndCollectLootIds(out lootIdSet);
+            List<int> lootIdSet, lootIdSetUsed = new();
+            int count = Gameobject.LoadAndCollectLootIds(out lootIdSet);
 
-            void checkLootId(uint lootId, uint gameObjectId)
+            void checkLootId(int lootId, int gameObjectId)
             {
                 if (!lootIdSet.Contains(lootId))
                     Gameobject.ReportNonExistingId(lootId, gameObjectId);
@@ -201,7 +201,7 @@ namespace Game.Loots
             var gotc = Global.ObjectMgr.GetGameObjectTemplates();
             foreach (var (gameObjectId, gameObjectTemplate) in gotc)
             {
-                uint lootid = gameObjectTemplate.GetLootId();
+                int lootid = gameObjectTemplate.GetLootId();
                 if (lootid != 0)
                     checkLootId(lootid, gameObjectId);
 
@@ -233,8 +233,8 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet;
-            uint count = Items.LoadAndCollectLootIds(out lootIdSet);
+            List<int> lootIdSet;
+            int count = Items.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
@@ -257,8 +257,8 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet;
-            uint count = Milling.LoadAndCollectLootIds(out lootIdSet);
+            List<int> lootIdSet;
+            int count = Milling.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
@@ -286,9 +286,9 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet;
-            List<uint> lootIdSetUsed = new();
-            uint count = Pickpocketing.LoadAndCollectLootIds(out lootIdSet);
+            List<int> lootIdSet;
+            List<int> lootIdSetUsed = new();
+            int count = Pickpocketing.LoadAndCollectLootIds(out lootIdSet);
 
             // Remove real entries and check loot existence
             var templates = Global.ObjectMgr.GetCreatureTemplates();
@@ -324,8 +324,8 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet;
-            uint count = Prospecting.LoadAndCollectLootIds(out lootIdSet);
+            List<int> lootIdSet;
+            int count = Prospecting.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
@@ -353,8 +353,8 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet;
-            uint count = Mail.LoadAndCollectLootIds(out lootIdSet);
+            List<int> lootIdSet;
+            int count = Mail.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             foreach (var mail in CliDB.MailTemplateStorage.Values)
@@ -376,9 +376,9 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet;
-            List<uint> lootIdSetUsed = new();
-            uint count = Skinning.LoadAndCollectLootIds(out lootIdSet);
+            List<int> lootIdSet;
+            List<int> lootIdSetUsed = new();
+            int count = Skinning.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             var templates = Global.ObjectMgr.GetCreatureTemplates();
@@ -416,7 +416,7 @@ namespace Game.Loots
             uint oldMSTime = Time.GetMSTime();
 
             List<int> lootIdSet;
-            uint count = Spell.LoadAndCollectLootIds(out lootIdSet);
+            int count = Spell.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
@@ -457,7 +457,7 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet;
+            List<int> lootIdSet;
             Reference.LoadAndCollectLootIds(out lootIdSet);
 
             // check references and remove used
@@ -605,12 +605,12 @@ namespace Game.Loots
 
             return count;
         }
-        public void CheckLootRefs(List<uint> ref_set = null)
+        public void CheckLootRefs(List<int> ref_set = null)
         {
             foreach (var pair in m_LootTemplates)
                 pair.Value.CheckLootRefs(m_LootTemplates, ref_set);
         }
-        public void ReportUnusedIds(List<uint> lootIdSet)
+        public void ReportUnusedIds(List<int> lootIdSet)
         {
             // all still listed ids isn't referenced
             foreach (var id in lootIdSet)
@@ -687,7 +687,7 @@ namespace Game.Loots
             if (result.IsEmpty())
                 return 0;
 
-            uint count = 0;
+            int count = 0;
             do
             {
                 int entry = result.Read<int>(0);
@@ -695,7 +695,7 @@ namespace Game.Loots
                 int reference = result.Read<int>(2);
                 float chance = result.Read<float>(3);
                 bool needsquest = result.Read<bool>(4);
-                ushort lootmode = result.Read<ushort>(5);
+                var lootmode = (LootModes)result.Read<ushort>(5);
                 byte groupid = result.Read<byte>(6);
                 byte mincount = result.Read<byte>(7);
                 byte maxcount = result.Read<byte>(8);
@@ -1034,7 +1034,7 @@ namespace Game.Loots
 
             // @todo References validity checks
         }
-        public void CheckLootRefs(LootTemplateMap store, List<uint> ref_set)
+        public void CheckLootRefs(LootTemplateMap store, List<int> ref_set)
         {
             foreach (var item in Entries)
             {
@@ -1230,7 +1230,7 @@ namespace Game.Loots
             LootStoreItemList ExplicitlyChanced = new();                // Entries with chances defined in DB
             LootStoreItemList EqualChanced = new();                     // Zero chances - every entry takes the same Chance
 
-            LootStoreItem Roll(ushort lootMode, Player personalLooter = null)
+            LootStoreItem Roll(LootModes lootMode, Player personalLooter = null)
             {
                 LootStoreItemList possibleLoot = ExplicitlyChanced;
                 possibleLoot.RemoveAll(new LootGroupInvalidSelector(lootMode, personalLooter).Check);
@@ -1279,7 +1279,7 @@ namespace Game.Loots
 
     public struct LootGroupInvalidSelector
     {
-        public LootGroupInvalidSelector(ushort lootMode, Player personalLooter)
+        public LootGroupInvalidSelector(LootModes lootMode, Player personalLooter)
         {
             _lootMode = lootMode;
             _personalLooter = personalLooter;
@@ -1298,7 +1298,7 @@ namespace Game.Loots
             return false;
         }
 
-        ushort _lootMode;
+        LootModes _lootMode;
         Player _personalLooter;
     }
 }

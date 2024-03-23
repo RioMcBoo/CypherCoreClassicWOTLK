@@ -44,17 +44,17 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(FavoriteAppearances.Count);
             _worldPacket.WriteInt32(NewAppearances.Count);
 
-            foreach (uint itemModifiedAppearanceId in FavoriteAppearances)
-                _worldPacket.WriteUInt32(itemModifiedAppearanceId);
+            foreach (var itemModifiedAppearanceId in FavoriteAppearances)
+                _worldPacket.WriteInt32(itemModifiedAppearanceId);
 
-            foreach (uint newAppearance in NewAppearances)
-                _worldPacket.WriteUInt32(newAppearance);
+            foreach (var newAppearance in NewAppearances)
+                _worldPacket.WriteInt32(newAppearance);
         }
 
         public bool IsFullUpdate;
         public bool IsSetFavorite;
-        public List<uint> FavoriteAppearances = new();
-        public List<uint> NewAppearances = new();
+        public List<int> FavoriteAppearances = new();
+        public List<int> NewAppearances = new();
     }
 
     struct TransmogrifyItem

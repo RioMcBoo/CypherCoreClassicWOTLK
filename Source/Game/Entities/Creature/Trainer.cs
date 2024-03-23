@@ -12,7 +12,7 @@ namespace Game.Entities
         public int SpellId;
         public uint MoneyCost;
         public int ReqSkillLine;
-        public uint ReqSkillRank;
+        public int ReqSkillRank;
         public Array<int> ReqAbility = new(3);
         public byte ReqLevel;
 
@@ -65,7 +65,7 @@ namespace Game.Entities
             player.SendPacket(trainerList);
         }
 
-        public void TeachSpell(Creature npc, Player player, uint spellId)
+        public void TeachSpell(Creature npc, Player player, int spellId)
         {
             TrainerSpell trainerSpell = GetSpell(spellId);
             if (trainerSpell == null || !CanTeachSpell(player, trainerSpell))
@@ -122,7 +122,7 @@ namespace Game.Entities
             }
         }
 
-        TrainerSpell GetSpell(uint spellId)
+        TrainerSpell GetSpell(int spellId)
         {
             return _spells.Find(trainerSpell => trainerSpell.SpellId == spellId);
         }
@@ -163,7 +163,7 @@ namespace Game.Entities
             if (trainerSpell.ReqSkillLine != 0 && player.GetBaseSkillValue((SkillType)trainerSpell.ReqSkillLine) < trainerSpell.ReqSkillRank)
                 return TrainerSpellState.Unavailable;
 
-            foreach (uint reqAbility in trainerSpell.ReqAbility)
+            foreach (var reqAbility in trainerSpell.ReqAbility)
                 if (reqAbility != 0 && !player.HasSpell(reqAbility))
                     return TrainerSpellState.Unavailable;
 
@@ -190,7 +190,7 @@ namespace Game.Entities
             return TrainerSpellState.Available;
         }
 
-        void SendTeachFailure(Creature npc, Player player, uint spellId, TrainerFailReason reason)
+        void SendTeachFailure(Creature npc, Player player, int spellId, TrainerFailReason reason)
         {
             TrainerBuyFailed trainerBuyFailed = new();
             trainerBuyFailed.TrainerGUID = npc.GetGUID();
@@ -212,7 +212,7 @@ namespace Game.Entities
             _greeting[(int)locale] = greeting;
         }
 
-        uint _id;
+        int _id;
         TrainerType _type;
         List<TrainerSpell> _spells;
         string[] _greeting = new string[(int)Locale.Total];

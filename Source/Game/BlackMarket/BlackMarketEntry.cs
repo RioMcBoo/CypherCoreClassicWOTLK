@@ -14,13 +14,13 @@ namespace Game.BlackMarket
     {
         public bool LoadFromDB(SQLFields fields)
         {
-            MarketID = fields.Read<uint>(0);
-            SellerNPC = fields.Read<uint>(1);
+            MarketID = fields.Read<int>(0);
+            SellerNPC = fields.Read<int>(1);
             Item = new ItemInstance();
-            Item.ItemID = fields.Read<uint>(2);
-            Quantity = fields.Read<uint>(3);
-            MinBid = fields.Read<ulong>(4);
-            Duration = fields.Read<uint>(5);
+            Item.ItemID = fields.Read<int>(2);
+            Quantity = fields.Read<int>(3);
+            MinBid = fields.Read<long>(4);
+            Duration = fields.Read<long>(5);
             Chance = fields.Read<float>(6);
 
             var bonusListIDsTok = new StringArray(fields.Read<string>(7), ' ');
@@ -66,7 +66,7 @@ namespace Game.BlackMarket
 
     public class BlackMarketEntry
     {
-        public void Initialize(uint marketId, uint duration)
+        public void Initialize(int marketId, long duration)
         {
             _marketId = marketId;
             _secondsRemaining = duration;
@@ -74,7 +74,7 @@ namespace Game.BlackMarket
 
         public void Update(long newTimeOfUpdate)
         {
-            _secondsRemaining = (uint)(_secondsRemaining - (newTimeOfUpdate - Global.BlackMarketMgr.GetLastUpdate()));
+            _secondsRemaining = _secondsRemaining - (newTimeOfUpdate - Global.BlackMarketMgr.GetLastUpdate());
         }
 
         public BlackMarketTemplate GetTemplate()
@@ -82,9 +82,11 @@ namespace Game.BlackMarket
             return Global.BlackMarketMgr.GetTemplateByID(_marketId);
         }
 
-        public uint GetSecondsRemaining()
+        public int GetSecondsRemaining()
         {
-            return (uint)(_secondsRemaining - (GameTime.GetGameTime() - Global.BlackMarketMgr.GetLastUpdate()));
+            var secondsRemaining = _secondsRemaining - (GameTime.GetGameTime() - Global.BlackMarketMgr.GetLastUpdate());
+            Cypher.Assert(secondsRemaining <= int.MaxValue);
+            return (int)secondsRemaining;
         }
 
         long GetExpirationTime()
@@ -99,7 +101,7 @@ namespace Game.BlackMarket
 
         public bool LoadFromDB(SQLFields fields)
         {
-            _marketId = fields.Read<uint>(0);
+            _marketId = fields.Read<int>(0);
 
             // Invalid MarketID
             BlackMarketTemplate templ = Global.BlackMarketMgr.GetTemplateByID(_marketId);
@@ -109,10 +111,10 @@ namespace Game.BlackMarket
                 return false;
             }
 
-            _currentBid = fields.Read<ulong>(1);
-            _secondsRemaining = (uint)(fields.Read<long>(2) - Global.BlackMarketMgr.GetLastUpdate());
-            _numBids = fields.Read<uint>(3);
-            _bidder = fields.Read<ulong>(4);
+            _currentBid = fields.Read<long>(1);
+            _secondsRemaining = (fields.Read<long>(2) - Global.BlackMarketMgr.GetLastUpdate());
+            _numBids = fields.Read<int>(3);
+            _bidder = fields.Read<long>(4);
 
             // Either no bidder or existing player
             if (_bidder != 0 && Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ObjectGuid.Create(HighGuid.Player, _bidder)) == 0) // Probably a better way to check if player exists
@@ -144,7 +146,7 @@ namespace Game.BlackMarket
             trans.Append(stmt);
         }
 
-        public bool ValidateBid(ulong bid)
+        public bool ValidateBid(long bid)
         {
             if (bid <= _currentBid)
                 return false;
@@ -158,7 +160,7 @@ namespace Game.BlackMarket
             return true;
         }
 
-        public void PlaceBid(ulong bid, Player player, SQLTransaction trans)   //Updated
+        public void PlaceBid(long bid, Player player, SQLTransaction trans)   //Updated
         {
             if (bid < _currentBid)
                 return;
@@ -198,27 +200,27 @@ namespace Game.BlackMarket
         }
 
 
-        public uint GetMarketId() { return _marketId; }
+        public int GetMarketId() { return _marketId; }
 
-        public ulong GetCurrentBid() { return _currentBid; }
-        void SetCurrentBid(ulong bid) { _currentBid = bid; }
+        public long GetCurrentBid() { return _currentBid; }
+        void SetCurrentBid(long bid) { _currentBid = bid; }
 
-        public uint GetNumBids() { return _numBids; }
-        void SetNumBids(uint numBids) { _numBids = numBids; }
+        public int GetNumBids() { return _numBids; }
+        void SetNumBids(int numBids) { _numBids = numBids; }
 
         public long GetBidder() { return _bidder; }
-        void SetBidder(ulong bidder) { _bidder = bidder; }
+        void SetBidder(long bidder) { _bidder = bidder; }
 
-        public ulong GetMinIncrement() { return (_currentBid / 20) - ((_currentBid / 20) % MoneyConstants.Gold); } //5% increase every bid (has to be round gold value)
+        public long GetMinIncrement() { return (_currentBid / 20) - ((_currentBid / 20) % MoneyConstants.Gold); } //5% increase every bid (has to be round gold value)
 
         public void MailSent() { _mailSent = true; } // Set when mail has been sent
         public bool GetMailSent() { return _mailSent; }
 
-        uint _marketId;
-        ulong _currentBid;
-        uint _numBids;
+        int _marketId;
+        long _currentBid;
+        int _numBids;
         long _bidder;
-        uint _secondsRemaining;
+        long _secondsRemaining;
         bool _mailSent;
     }
 }

@@ -25,9 +25,9 @@ public class RandomHelper
     /// Returns a nonnegative random number.
     /// </summary>
     /// <returns></returns>
-    public static uint Rand32()
+    public static int Rand32()
     {
-        return (uint)rand.Next();
+        return rand.Next();
     }
 
     /// <summary>
@@ -35,9 +35,9 @@ public class RandomHelper
     /// </summary>
     /// <param name="maxValue"></param>
     /// <returns></returns>
-    public static uint Rand32(dynamic maxValue)
+    public static int Rand32(dynamic maxValue)
     {
-        return (uint)rand.Next(maxValue);
+        return rand.Next(maxValue);
     }
 
     /// <summary>

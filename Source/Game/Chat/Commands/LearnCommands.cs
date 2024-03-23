@@ -15,7 +15,7 @@ namespace Game.Chat.Commands
     class LearnCommands
     {
         [Command("", CypherStrings.CommandLearnHelp, RBACPermissions.CommandLearn)]
-        static bool HandleLearnCommand(CommandHandler handler, uint spellId, [OptionalArg] string allRanksStr)
+        static bool HandleLearnCommand(CommandHandler handler, int spellId, [OptionalArg] string allRanksStr)
         {
             Player targetPlayer = handler.GetSelectedPlayerOrSelf();
             if (targetPlayer == null)
@@ -58,7 +58,7 @@ namespace Game.Chat.Commands
             [Command("blizzard", CypherStrings.CommandLearnAllBlizzardHelp, RBACPermissions.CommandLearnAllGm)]
             static bool HandleLearnAllGMCommand(CommandHandler handler)
             {
-                foreach (var skillSpell in Global.SpellMgr.GetSkillLineAbilityMapBounds((uint)SkillType.Internal))
+                foreach (var skillSpell in Global.SpellMgr.GetSkillLineAbilityMapBounds((int)SkillType.Internal))
                 {
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillSpell.Spell, Difficulty.None);
                     if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
@@ -240,7 +240,7 @@ namespace Game.Chat.Commands
 
             static void HandleLearnSkillRecipesHelper(Player player, SkillType skillId)
             {
-                uint classmask = player.GetClassMask();
+                var classId = player.GetClass();
 
                 var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
                 if (skillLineAbilities == null)
@@ -257,7 +257,7 @@ namespace Game.Chat.Commands
                         continue;
 
                     // skip wrong class skills
-                    if (skillLine.ClassMask != 0 && (skillLine.ClassMask & classmask) == 0)
+                    if (skillLine.ClassMask != 0 && !skillLine.ClassMask.HasClass(classId))
                         continue;
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillLine.Spell, Difficulty.None);
@@ -287,7 +287,7 @@ namespace Game.Chat.Commands
             [Command("trainer", CypherStrings.CommandLearnMyTrainerHelp, RBACPermissions.CommandLearnAllMySpells)]
             static bool HandleLearnMySpellsCommand(CommandHandler handler)
             {
-                ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(handler.GetPlayer().GetClass());
+                ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey((int)handler.GetPlayer().GetClass());
                 if (classEntry == null)
                     return true;
 
@@ -324,7 +324,7 @@ namespace Game.Chat.Commands
         }
 
         [CommandNonGroup("unlearn", CypherStrings.CommandUnlearnHelp, RBACPermissions.CommandUnlearn)]
-        static bool HandleUnLearnCommand(CommandHandler handler, uint spellId, [OptionalArg] string allRanksStr)
+        static bool HandleUnLearnCommand(CommandHandler handler, int spellId, [OptionalArg] string allRanksStr)
         {
             Player target = handler.GetSelectedPlayer();
             if (target == null)

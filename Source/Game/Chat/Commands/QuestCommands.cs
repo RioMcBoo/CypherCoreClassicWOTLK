@@ -89,7 +89,7 @@ namespace Game.Chat
                 // remove all quest entries for 'entry' from quest log
                 for (byte slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
                 {
-                    uint logQuest = player.GetQuestSlotQuestId(slot);
+                    int logQuest = player.GetQuestSlotQuestId(slot);
                     if (logQuest == quest.Id)
                     {
                         player.SetQuestSlot(slot, 0);
@@ -146,7 +146,7 @@ namespace Game.Chat
         class ObjectiveCommands
         {
             [Command("complete", RBACPermissions.CommandQuestObjectiveComplete)]
-            static bool HandleQuestObjectiveComplete(CommandHandler handler, uint objectiveId)
+            static bool HandleQuestObjectiveComplete(CommandHandler handler, int objectiveId)
             {
                 Player player = handler.GetSelectedPlayerOrSelf();
                 if (player == null)
@@ -179,7 +179,7 @@ namespace Game.Chat
 
                     var curItemCount = player.GetItemCount(itemTemplate.GetId(), true);   
 
-                    var msg = player.CanStoreNewItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, itemTemplate, obj.Amount - curItemCount, out _);
+                    var msg = player.CanStoreNewItem(ItemPos.Undefined, out var dest, itemTemplate, obj.Amount - curItemCount, out _);
                     if (msg == InventoryResult.Ok)
                     {
                         Item item = player.StoreNewItem(dest, obj.ObjectID, true);

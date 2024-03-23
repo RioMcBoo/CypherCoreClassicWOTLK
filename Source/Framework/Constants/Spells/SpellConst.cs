@@ -24,8 +24,8 @@ namespace Framework.Constants
 
         public const int MaxPowersPerSpell = 5;
 
-        public const uint VisualKitFood = 406;
-        public const uint VisualKitDrink = 438;
+        public const int VisualKitFood = 406;
+        public const int VisualKitDrink = 438;
     }
 
 

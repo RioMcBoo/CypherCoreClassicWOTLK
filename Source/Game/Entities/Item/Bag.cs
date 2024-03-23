@@ -263,7 +263,7 @@ namespace Game.Entities
 
         public byte GetBagSize() { return (byte)m_containerData.NumSlots; }
         public bool IsValidSlot(ItemSlot slotInThisBag) => slotInThisBag < GetBagSize();
-        void SetBagSize(uint numSlots) { SetUpdateFieldValue(m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.NumSlots), numSlots); }
+        void SetBagSize(int numSlots) { SetUpdateFieldValue(m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.NumSlots), numSlots); }
 
         void SetSlot(int slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.Slots, slot), guid); }
 

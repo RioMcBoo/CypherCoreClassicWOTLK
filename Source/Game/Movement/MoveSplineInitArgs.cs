@@ -32,7 +32,7 @@ namespace Game.Movement
         public float vertical_acceleration;
         public float effect_start_time_percent; // fraction of total spline duration
         public TimeSpan effect_start_time;  // absolute value
-        public uint splineId;
+        public int splineId;
         public float initialOrientation;
         public SpellEffectExtraData spellEffectExtra;
         public AnimTierTransition animTier;
@@ -91,14 +91,14 @@ namespace Game.Movement
     public class SpellEffectExtraData
     {
         public ObjectGuid Target;
-        public uint SpellVisualId;
-        public uint ProgressCurveId;
-        public uint ParabolicCurveId;
+        public int SpellVisualId;
+        public int ProgressCurveId;
+        public int ParabolicCurveId;
     }
 
     public class AnimTierTransition
     {
-        public uint TierTransitionId;
+        public int TierTransitionId;
         public byte AnimTier;
     }
 }

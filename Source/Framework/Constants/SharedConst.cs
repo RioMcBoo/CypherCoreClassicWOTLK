@@ -201,7 +201,7 @@ namespace Framework.Constants
         /// GameObject Const
         /// </summary>
         public const int MaxGOData = 35;
-        public const uint MaxTransportStopFrames = 9;
+        public const int MaxTransportStopFrames = 9;
 
         /// <summary>
         /// AreaTrigger Const
@@ -214,8 +214,8 @@ namespace Framework.Constants
         /// </summary>
         public const int MaxActivePets = 5;
         public const int MaxPetStables = 200;
-        public const uint CallPetSpellId = 883;
-        public const uint SpellPetSummoningDisorientation = 32752;
+        public const int CallPetSpellId = 883;
+        public const int SpellPetSummoningDisorientation = 32752;
         public const float PetFollowDist = 1.0f;
         public const float PetFollowAngle = MathF.PI;
         public const int MaxSpellCharm = 4;
@@ -256,7 +256,7 @@ namespace Framework.Constants
 
         public const int WorldTrigger = 12999;
 
-        public const uint DisplayIdHiddenMount = 73200;
+        public const int DisplayIdHiddenMount = 73200;
 
         public static float[] baseMoveSpeed =
         {
@@ -786,6 +786,7 @@ namespace Framework.Constants
     [Flags]
     public enum RaceMask : int
     {
+        All_FixME = -1,
         None = 0,
         Human = 1 << (Race.Human - 1),
         Orc = 1 << (Race.Orc - 1),

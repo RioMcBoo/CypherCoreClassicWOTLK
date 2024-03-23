@@ -1496,7 +1496,7 @@ namespace Game.Entities
 
             m_updateFlag.Vehicle = false;
             UnitTypeMask &= ~UnitTypeMask.Vehicle;
-            RemoveNpcFlag(NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
+            RemoveNpcFlag(NPCFlags1.SpellClick | NPCFlags1.PlayerVehicle);
         }
 
         void SendSetVehicleRecId(int vehicleId)

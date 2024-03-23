@@ -159,14 +159,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(Money);
-            _worldPacket.WriteUInt64(MoneyMod);
+            _worldPacket.WriteInt64(Money);
+            _worldPacket.WriteInt64(MoneyMod);
             _worldPacket.WriteBit(SoleLooter);
             _worldPacket.FlushBits();
         }
 
-        public ulong Money;
-        public ulong MoneyMod;
+        public long Money;
+        public long MoneyMod;
         public bool SoleLooter;
     }
 
@@ -251,10 +251,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            SpecID = _worldPacket.ReadUInt32();
+            SpecID = _worldPacket.ReadInt32();
         }
 
-        public uint SpecID;
+        public int SpecID;
     }
 
     class StartLootRoll : ServerPacket

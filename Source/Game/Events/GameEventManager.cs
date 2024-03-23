@@ -238,7 +238,7 @@ namespace Game
 
                         if (pGameEvent.holiday_id != HolidayIds.None)
                         {
-                            if (!CliDB.HolidaysStorage.ContainsKey((uint)pGameEvent.holiday_id))
+                            if (!CliDB.HolidaysStorage.ContainsKey((int)pGameEvent.holiday_id))
                             {
                                 Log.outError(LogFilter.Sql, $"`game_event` game event id ({event_id}) contains nonexisting holiday id {pGameEvent.holiday_id}.");
                                 pGameEvent.holiday_id = HolidayIds.None;
@@ -367,7 +367,7 @@ namespace Game
 
                         do
                         {
-                            ulong guid = result.Read<ulong>(0);
+                            long guid = result.Read<long>(0);
                             short event_id = result.Read<sbyte>(1);
                             int internal_event_id = mGameEvent.Length + event_id - 1;
 
@@ -413,7 +413,7 @@ namespace Game
                     {
                         do
                         {
-                            ulong guid = result.Read<ulong>(0);
+                            long guid = result.Read<long>(0);
                             short event_id = result.Read<byte>(1);
                             int internal_event_id = mGameEvent.Length + event_id - 1;
 
@@ -460,8 +460,8 @@ namespace Game
                     {
                         do
                         {
-                            ulong guid = result.Read<ulong>(0);
-                            uint entry = result.Read<uint>(1);
+                            long guid = result.Read<long>(0);
+                            int entry = result.Read<int>(1);
                             ushort event_id = result.Read<byte>(2);
 
                             if (event_id >= mGameEventModelEquip.Length)
@@ -487,7 +487,7 @@ namespace Game
                                 }
                             }
 
-                            mGameEventModelEquip[event_id].Add(Tuple.Create(guid, newModelEquipSet));
+                            mGameEventModelEquip[event_id].Add((guid, newModelEquipSet));
 
                             ++count;
                         }
@@ -513,8 +513,8 @@ namespace Game
 
                         do
                         {
-                            uint id = result.Read<uint>(0);
-                            uint quest = result.Read<uint>(1);
+                            int id = result.Read<int>(0);
+                            int quest = result.Read<int>(1);
                             ushort event_id = result.Read<byte>(2);
 
                             if (event_id >= mGameEventCreatureQuests.Length)
@@ -523,7 +523,7 @@ namespace Game
                                 continue;
                             }
 
-                            mGameEventCreatureQuests[event_id].Add(Tuple.Create(id, quest));
+                            mGameEventCreatureQuests[event_id].Add((id, quest));
 
                             ++count;
                         }
@@ -549,8 +549,8 @@ namespace Game
 
                         do
                         {
-                            uint id = result.Read<uint>(0);
-                            uint quest = result.Read<uint>(1);
+                            int id = result.Read<int>(0);
+                            int quest = result.Read<int>(1);
                             ushort event_id = result.Read<byte>(2);
 
                             if (event_id >= mGameEventGameObjectQuests.Length)
@@ -559,7 +559,7 @@ namespace Game
                                 continue;
                             }
 
-                            mGameEventGameObjectQuests[event_id].Add(Tuple.Create(id, quest));
+                            mGameEventGameObjectQuests[event_id].Add((id, quest));
 
                             ++count;
                         }
@@ -584,9 +584,9 @@ namespace Game
                     {
                         do
                         {
-                            uint quest = result.Read<uint>(0);
+                            int quest = result.Read<int>(0);
                             ushort event_id = result.Read<byte>(1);
-                            uint condition = result.Read<uint>(2);
+                            int condition = result.Read<int>(2);
                             float num = result.Read<float>(3);
 
                             if (event_id >= mGameEvent.Length)
@@ -627,7 +627,7 @@ namespace Game
                         do
                         {
                             ushort event_id = result.Read<byte>(0);
-                            uint condition = result.Read<uint>(1);
+                            int condition = result.Read<int>(1);
 
                             if (event_id >= mGameEvent.Length)
                             {
@@ -664,7 +664,7 @@ namespace Game
                         do
                         {
                             ushort event_id = result.Read<byte>(0);
-                            uint condition = result.Read<uint>(1);
+                            int condition = result.Read<int>(1);
 
                             if (event_id >= mGameEvent.Length)
                             {
@@ -674,7 +674,7 @@ namespace Game
 
                             if (mGameEvent[event_id].conditions.ContainsKey(condition))
                             {
-                                mGameEvent[event_id].conditions[condition].done = result.Read<uint>(2);
+                                mGameEvent[event_id].conditions[condition].done = result.Read<int>(2);
                             }
                             else
                             {
@@ -705,9 +705,10 @@ namespace Game
                     {
                         do
                         {
-                            ulong guid = result.Read<ulong>(0);
+                            long guid = result.Read<long>(0);
                             ushort event_id = result.Read<byte>(1);
-                            ulong npcflag = result.Read<ulong>(2);
+                            NPCFlags1 npcflag1 = (NPCFlags1)(result.Read<ulong>(2) & 0xFFFFFFFF);
+                            NPCFlags2 npcflag2 = (NPCFlags2)(result.Read<ulong>(2) >> 32);
 
                             if (event_id >= mGameEvent.Length)
                             {
@@ -715,7 +716,7 @@ namespace Game
                                 continue;
                             }
 
-                            mGameEventNPCFlags[event_id].Add((guid, npcflag));
+                            mGameEventNPCFlags[event_id].Add((guid, (npcflag1, npcflag2)));
 
                             ++count;
                         }
@@ -740,7 +741,7 @@ namespace Game
                     {
                         do
                         {
-                            uint questId = result.Read<uint>(0);
+                            int questId = result.Read<int>(0);
                             ushort eventEntry = result.Read<byte>(1); // @todo Change to byte
 
                             Quest questTemplate = Global.ObjectMgr.GetQuestTemplate(questId);
@@ -781,7 +782,7 @@ namespace Game
                         do
                         {
                             byte event_id = result.Read<byte>(0);
-                            ulong guid = result.Read<ulong>(1);
+                            long guid = result.Read<long>(1);
 
                             if (event_id >= mGameEventVendors.Length)
                             {
@@ -790,29 +791,29 @@ namespace Game
                             }
 
                             // get the event npc flag for checking if the npc will be vendor during the event or not
-                            ulong event_npc_flag = 0;
+                            NPCFlags1 event_npc_flag = 0;
                             var flist = mGameEventNPCFlags[event_id];
                             foreach (var pair in flist)
                             {
                                 if (pair.guid == guid)
                                 {
-                                    event_npc_flag = pair.npcflag;
+                                    event_npc_flag = pair.Item2.npcflag;
                                     break;
                                 }
                             }
                             // get creature entry
-                            uint entry = 0;
+                            int entry = 0;
                             CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                             if (data != null)
                                 entry = data.Id;
 
                             VendorItem vItem = new();
-                            vItem.item = result.Read<uint>(2);
-                            vItem.maxcount = result.Read<uint>(3);
+                            vItem.item = result.Read<int>(2);
+                            vItem.maxcount = result.Read<int>(3);
                             vItem.incrtime = result.Read<uint>(4);
-                            vItem.ExtendedCost = result.Read<uint>(5);
+                            vItem.ExtendedCost = result.Read<int>(5);
                             vItem.Type = (ItemVendorType)result.Read<byte>(6);
-                            vItem.PlayerConditionId = result.Read<uint>(8);
+                            vItem.PlayerConditionId = result.Read<int>(8);
                             vItem.IgnoreFiltering = result.Read<bool>(9);
 
                             var bonusListIDsTok = new StringArray(result.Read<string>(7), ' ');
@@ -879,19 +880,23 @@ namespace Game
             }
         }
 
-        public NPCFlags GetNPCFlag(Creature cr)
+        public (NPCFlags1, NPCFlags2) GetNPCFlag(Creature cr)
         {
-            NPCFlags mask = 0;
+            NPCFlags1 mask1 = 0;
+            NPCFlags2 mask2 = 0;
             var guid = cr.GetSpawnId();
 
             foreach (var id in m_ActiveEvents)
             {
                 foreach (var pair in mGameEventNPCFlags[id])
                     if (pair.guid == guid)
-                        mask |= pair.npcflag;
+                    {
+                        mask1 |= pair.Item2.npcflag;
+                        mask2 |= pair.Item2.npcflag2;
+                    }
             }
 
-            return mask;
+            return (mask1, mask2);
         }
 
         public void Initialize()
@@ -919,7 +924,7 @@ namespace Game
                 mGameEventCreatureQuests = new List<(int, int)>[maxEventId];
                 mGameEventGameObjectQuests = new List<(int, int)>[maxEventId];
                 mGameEventVendors = new Dictionary<int, VendorItem>[maxEventId];
-                mGameEventNPCFlags = new List<(long guid, NPCFlags npcflag)>[maxEventId];
+                mGameEventNPCFlags = new List<(long guid, (NPCFlags1, NPCFlags2))>[maxEventId];
                 mGameEventModelEquip = new List<(long, ModelEquip)>[maxEventId];
                 for (var i = 0; i < maxEventId; ++i)
                 {
@@ -1090,7 +1095,7 @@ namespace Game
 
         void UpdateEventNPCFlags(ushort event_id)
         {
-            MultiMap<uint, ulong> creaturesByMap = new();
+            MultiMap<int, long> creaturesByMap = new();
 
             // go through the creatures whose npcflags are changed in the event
             foreach (var (guid, npcflag) in mGameEventNPCFlags[event_id])
@@ -1110,13 +1115,16 @@ namespace Game
                         var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(spawnId);
                         foreach (var creature in creatureBounds)
                         {
-                            ulong npcflag = GetNPCFlag(creature);
+                            var npcflag = GetNPCFlag(creature);
                             CreatureTemplate creatureTemplate = creature.GetCreatureTemplate();
                             if (creatureTemplate != null)
-                                npcflag |= (ulong)creatureTemplate.Npcflag;
+                            {
+                                npcflag.Item1 |= creatureTemplate.Npcflag;
+                                npcflag.Item2 |= creatureTemplate.Npcflag2;
+                            }
 
-                            creature.ReplaceAllNpcFlags((NPCFlags)(npcflag & 0xFFFFFFFF));
-                            creature.ReplaceAllNpcFlags2((NPCFlags2)(npcflag >> 32));
+                            creature.ReplaceAllNpcFlags(npcflag.Item1);
+                            creature.ReplaceAllNpcFlags2(npcflag.Item2);
                             // reset gossip options, since the flag change might have added / removed some
                             //cr.ResetGossipOptions();
                         }
@@ -1216,7 +1224,7 @@ namespace Game
                 PoolTemplateData poolTemplate = Global.PoolMgr.GetPoolTemplate(id);
                 if (poolTemplate != null)
                 {
-                    Global.MapMgr.DoForAllMapsWithMapId((uint)poolTemplate.MapId, map =>
+                    Global.MapMgr.DoForAllMapsWithMapId(poolTemplate.MapId, map =>
                     {
                         Global.PoolMgr.SpawnPool(map.GetPoolData(), id);
                     });
@@ -1297,7 +1305,7 @@ namespace Game
                 PoolTemplateData poolTemplate = Global.PoolMgr.GetPoolTemplate(poolId);
                 if (poolTemplate != null)
                 {
-                    Global.MapMgr.DoForAllMapsWithMapId((uint)poolTemplate.MapId, map =>
+                    Global.MapMgr.DoForAllMapsWithMapId(poolTemplate.MapId, map =>
                     {
                         Global.PoolMgr.DespawnPool(map.GetPoolData(), poolId, true);
                     });
@@ -1354,7 +1362,7 @@ namespace Game
             }
         }
 
-        bool HasCreatureQuestActiveEventExcept(uint questId, ushort eventId)
+        bool HasCreatureQuestActiveEventExcept(int questId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1366,7 +1374,7 @@ namespace Game
             return false;
         }
 
-        bool HasGameObjectQuestActiveEventExcept(uint questId, ushort eventId)
+        bool HasGameObjectQuestActiveEventExcept(int questId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1377,7 +1385,7 @@ namespace Game
             }
             return false;
         }
-        bool HasCreatureActiveEventExcept(ulong creatureId, ushort eventId)
+        bool HasCreatureActiveEventExcept(long creatureId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1391,7 +1399,7 @@ namespace Game
             }
             return false;
         }
-        bool HasGameObjectActiveEventExcept(ulong goId, ushort eventId)
+        bool HasGameObjectActiveEventExcept(long goId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1462,7 +1470,7 @@ namespace Game
             if (questToEvent != null)
             {
                 ushort event_id = questToEvent.event_id;
-                uint condition = questToEvent.condition;
+                int condition = questToEvent.condition;
                 float num = questToEvent.num;
 
                 // the event is not active, so return, don't increase condition finishes
@@ -1547,9 +1555,9 @@ namespace Game
             foreach (var pair in mGameEvent[event_id].conditions)
             {
                 if (pair.Value.done_world_state != 0)
-                    player.SendUpdateWorldState(pair.Value.done_world_state, (uint)(pair.Value.done));
+                    player.SendUpdateWorldState(pair.Value.done_world_state, (int)pair.Value.done);
                 if (pair.Value.max_world_state != 0)
-                    player.SendUpdateWorldState(pair.Value.max_world_state, (uint)(pair.Value.reqNum));
+                    player.SendUpdateWorldState(pair.Value.max_world_state, (int)pair.Value.reqNum);
             }
         }
 
@@ -1690,7 +1698,7 @@ namespace Game
         List<int>[] mGameEventPoolIds;
         GameEventData[] mGameEvent;
         Dictionary<int, GameEventQuestToEventConditionNum> mQuestToEventConditions = new();
-        List<(long guid, NPCFlags npcflag)>[] mGameEventNPCFlags;
+        List<(long guid, (NPCFlags1 npcflag, NPCFlags2 npcflag2))>[] mGameEventNPCFlags;
         List<ushort> m_ActiveEvents = new();
         bool isSystemInit;
 
@@ -1738,8 +1746,8 @@ namespace Game
 
     public class ModelEquip
     {
-        public uint modelid;
-        public uint modelid_prev;
+        public int modelid;
+        public int modelid_prev;
         public byte equipment_id;
         public byte equipement_id_prev;
     }

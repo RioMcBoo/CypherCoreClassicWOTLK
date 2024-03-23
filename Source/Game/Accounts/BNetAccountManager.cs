@@ -75,11 +75,11 @@ namespace Game
 
         public AccountOpResult LinkWithGameAccount(string email, string gameAccountName)
         {
-            uint bnetAccountId = GetId(email);
+            int bnetAccountId = GetId(email);
             if (bnetAccountId == 0)
                 return AccountOpResult.NameNotExist;
 
-            uint gameAccountId = Global.AccountMgr.GetId(gameAccountName);
+            int gameAccountId = Global.AccountMgr.GetId(gameAccountName);
             if (gameAccountId == 0)
                 return AccountOpResult.NameNotExist;
 
@@ -96,7 +96,7 @@ namespace Game
 
         public AccountOpResult UnlinkGameAccount(string gameAccountName)
         {
-            uint gameAccountId = Global.AccountMgr.GetId(gameAccountName);
+            int gameAccountId = Global.AccountMgr.GetId(gameAccountName);
             if (gameAccountId == 0)
                 return AccountOpResult.NameNotExist;
 
@@ -111,18 +111,18 @@ namespace Game
             return AccountOpResult.Ok;
         }
 
-        public uint GetId(string username)
+        public int GetId(string username)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_EMAIL);
             stmt.AddValue(0, username);
             using var result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
-                return result.Read<uint>(0);
+                return result.Read<int>(0);
 
             return 0;
         }
 
-        public bool GetName(uint accountId, out string name)
+        public bool GetName(int accountId, out string name)
         {
             name = "";
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_EMAIL_BY_ID);
@@ -137,25 +137,25 @@ namespace Game
             return false;
         }
 
-        public uint GetIdByGameAccount(uint gameAccountId)
+        public int GetIdByGameAccount(int gameAccountId)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_GAME_ACCOUNT);
             stmt.AddValue(0, gameAccountId);
             using var result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
-                return result.Read<uint>(0);
+                return result.Read<int>(0);
 
             return 0;
         }
 
-        public QueryCallback GetIdByGameAccountAsync(uint gameAccountId)
+        public QueryCallback GetIdByGameAccountAsync(int gameAccountId)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_GAME_ACCOUNT);
             stmt.AddValue(0, gameAccountId);
             return DB.Login.AsyncQuery(stmt);
         }
 
-        public byte GetMaxIndex(uint accountId)
+        public byte GetMaxIndex(int accountId)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_MAX_ACCOUNT_INDEX);
             stmt.AddValue(0, accountId);
