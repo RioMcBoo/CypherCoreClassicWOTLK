@@ -1495,33 +1495,18 @@ namespace Game
                 _eventStorage.AddRange(go.Value.GetEventScriptSet());
 
             // Load all possible event ids from spells
-            foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
-            {
-                SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
-                if (spell != null)
-                {
-                    foreach (var spellEffectInfo in spell.GetEffects())
-                    {
-                        if (spellEffectInfo.IsEffect(SpellEffectName.SendEvent))
-                            if (spellEffectInfo.MiscValue != 0)
-                                _eventStorage.Add(spellEffectInfo.MiscValue);
-                    }
-                }
-            }
+            foreach (var spellEffect in CliDB.SpellEffectStorage.Values)            
+                if (spellEffect.Effect == SpellEffectName.SendEvent && spellEffect.EffectMiscValue[0] != 0)
+                    _eventStorage.Add(spellEffect.EffectMiscValue[0]);
 
             // Load all possible event ids from taxi path nodes
-            foreach (var path_idx in CliDB.TaxiPathNodesByPath)
+            foreach (var node in CliDB.TaxiPathNodeStorage.Values)
             {
-                for (uint node_idx = 0; node_idx < path_idx.Value.Length; ++node_idx)
-                {
-                    TaxiPathNodeRecord node = path_idx.Value[node_idx];
+                if (node.ArrivalEventID != 0)
+                    _eventStorage.Add(node.ArrivalEventID);
 
-                    if (node.ArrivalEventID != 0)
-                        _eventStorage.Add(node.ArrivalEventID);
-
-                    if (node.DepartureEventID != 0)
-                        _eventStorage.Add(node.DepartureEventID);
-                }
+                if (node.DepartureEventID != 0)
+                    _eventStorage.Add(node.DepartureEventID);
             }
 
             // Load all possible event ids from criterias
@@ -1844,7 +1829,7 @@ namespace Game
             foreach (var template in creatureTemplateStorage.Values)
                 CheckCreatureTemplate(template);
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {creatureTemplateStorage.Count} creature definitions in {Time.GetMSTimeDiffToNow(time)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {creatureTemplateStorage.Count} creature definitions in {Time.GetMSTimeDiffToNow(time)} ms.");
         }
 
         public void LoadCreatureTemplate(SQLFields fields)
