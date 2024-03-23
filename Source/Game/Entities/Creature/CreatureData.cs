@@ -173,7 +173,7 @@ namespace Game.Entities
             stats.Classification = Rank;
             stats.PetSpellDataId = PetSpellDataId;
 
-            for (uint i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
+            for (int i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
                 stats.ProxyCreatureID[i] = KillCredit[i];
 
             foreach (var model in Models)

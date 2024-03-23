@@ -3368,7 +3368,7 @@ namespace Game
                         spell.SpellId = trainerSpellsResult.Read<int>(1);
                         spell.MoneyCost = trainerSpellsResult.Read<uint>(2);
                         spell.ReqSkillLine = trainerSpellsResult.Read<int>(3);
-                        spell.ReqSkillRank = trainerSpellsResult.Read<uint>(4);
+                        spell.ReqSkillRank = trainerSpellsResult.Read<int>(4);
                         spell.ReqAbility[0] = trainerSpellsResult.Read<int>(5);
                         spell.ReqAbility[1] = trainerSpellsResult.Read<int>(6);
                         spell.ReqAbility[2] = trainerSpellsResult.Read<int>(7);

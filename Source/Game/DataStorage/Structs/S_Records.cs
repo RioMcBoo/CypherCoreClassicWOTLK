@@ -506,7 +506,7 @@ namespace Game.DataStorage
         public int Id;
         private int _difficultyID;
         public int EffectIndex;
-        public int Effect;
+        private int _effect;
         public float EffectAmplitude;
         private int _effectAttributes;
         public short EffectAura;
@@ -536,6 +536,7 @@ namespace Game.DataStorage
 
         #region Properties
         public Difficulty DifficultyID { get => (Difficulty)_difficultyID; /*set => _difficultyID = (int)value; */}
+        public SpellEffectName Effect => (SpellEffectName)_effect;
         public SpellEffectAttributes EffectAttributes { get => (SpellEffectAttributes)_effectAttributes; set => _effectAttributes = (int)value; }
         #endregion
     }
