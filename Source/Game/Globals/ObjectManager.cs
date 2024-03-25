@@ -148,8 +148,10 @@ namespace Game
 
         public static void AddLocaleString(string value, Locale locale, StringArray data)
         {
-            if (!string.IsNullOrEmpty(value))
-                data[(int)locale] = value;
+            if (value == null)
+                value = string.Empty;
+
+            data[(int)locale] = value;
         }
 
         public static void GetLocaleString(StringArray data, Locale locale, ref string value)
