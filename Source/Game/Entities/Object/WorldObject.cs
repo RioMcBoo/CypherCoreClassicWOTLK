@@ -3089,6 +3089,16 @@ namespace Game.Entities
         public Conversation ToConversation() { return IsConversation() ? (this as Conversation) : null; }
         public SceneObject ToSceneObject() { return IsSceneObject() ? (this as SceneObject) : null; }
 
+        public static Creature ToCreature(WorldObject o) { return o != null ? o.ToCreature() : null; }
+        public static Player ToPlayer(WorldObject o) { return o != null ? o.ToPlayer() : null; }
+        public static GameObject ToGameObject(WorldObject o) { return o != null ? o.ToGameObject() : null; }
+        public static Unit ToUnit(WorldObject o) { return o != null ? o.ToUnit() : null; }
+        public static Corpse ToCorpse(WorldObject o) { return o != null ? o.ToCorpse() : null; }
+        public static DynamicObject ToDynamicObject(WorldObject o) { return o != null ? o.ToDynamicObject() : null; }
+        public static AreaTrigger ToAreaTrigger(WorldObject o) { return o != null ? o.ToAreaTrigger() : null; }
+        public static Conversation ToConversation(WorldObject o) { return o != null ? o.ToConversation() : null; }
+        public static SceneObject ToSceneObject(WorldObject o) { return o != null ? o.ToSceneObject() : null; }
+
         public virtual int GetLevelForTarget(WorldObject target) { return 1; }
 
         public ZoneScript GetZoneScript() { return m_zoneScript; }

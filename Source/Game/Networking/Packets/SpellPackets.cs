@@ -1322,8 +1322,8 @@ namespace Game.Networking.Packets
 
         public bool GenerateDataForUnits(Unit attacker, Unit target)
         {
-            if (attacker.ToPlayer() is Player playerAttacker)
-                if (target.ToPlayer() is Player playerTarget)
+            if (WorldObject.ToPlayer(attacker) is Player playerAttacker)
+                if (WorldObject.ToPlayer(target) is Player playerTarget)
                     return GenerateDataPlayerToPlayer(playerAttacker, playerTarget);
 
             return false;
