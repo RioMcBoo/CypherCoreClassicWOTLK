@@ -2937,11 +2937,6 @@ namespace Game
         CufProfiles,
         CorpseLocation,
         PetSlots,
-        Garrison,
-        GarrisonBlueprints,
-        GarrisonBuildings,
-        GarrisonFollowers,
-        GarrisonFollowerAbilities,
         TraitEntries,
         TraitConfigs,
         Max

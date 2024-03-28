@@ -1921,94 +1921,31 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.GarrisonTierEqualOrGreaterThan: // 126
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowersWithLevelEqualOrGreaterThan: // 127
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowersWithQualityEqualOrGreaterThan: // 128
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowerWithAbilityAtLevelEqualOrGreaterThan: // 129
-                {
-                        break;
-                }
                 case ModifierTreeType.GarrisonFollowerWithTraitAtLevelEqualOrGreaterThan: // 130
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowerWithAbilityAssignedToBuilding: // 131
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowerWithTraitAssignedToBuilding: // 132
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowerWithLevelAssignedToBuilding: // 133
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonBuildingWithLevelEqualOrGreaterThan: // 134
-                {
-                    break;
-                }
                 case ModifierTreeType.HasBlueprintForGarrisonBuilding: // 135
-                {
-                    break;
-                }
                 case ModifierTreeType.HasGarrisonBuildingSpecialization: // 136
-                    return false; // OBSOLETE
                 case ModifierTreeType.AllGarrisonPlotsAreFull: // 137
-                {
-                    break;
-                }
                 case ModifierTreeType.PlayerIsInOwnGarrison: // 138
-                    if (!referencePlayer.GetMap().IsGarrison() || referencePlayer.GetMap().GetInstanceId() != referencePlayer.GetGUID().GetCounter())
-                        return false;
-                    break;
-                case ModifierTreeType.GarrisonShipmentOfTypeIsPending: // 139 NYI
-                    return false;
+                case ModifierTreeType.GarrisonShipmentOfTypeIsPending: // 139
                 case ModifierTreeType.GarrisonBuildingIsUnderConstruction: // 140
-                {
-                        break;
-                }
-                case ModifierTreeType.GarrisonMissionHasBeenCompleted: // 141 NYI
-                    return false;
+                case ModifierTreeType.GarrisonMissionHasBeenCompleted: // 141
                 case ModifierTreeType.GarrisonBuildingLevelEqual: // 142
-                {
-                        break;
-                }
                 case ModifierTreeType.GarrisonFollowerHasAbility: // 143
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowerHasTrait: // 144
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowerQualityEqual: // 145
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowerLevelEqual: // 146
-                {
-                    break;
-                }
-                case ModifierTreeType.GarrisonMissionIsRare: // 147 NYI
-                case ModifierTreeType.GarrisonMissionIsElite: // 148 NYI
-                    return false;
+                case ModifierTreeType.GarrisonMissionIsRare: // 147
+                case ModifierTreeType.GarrisonMissionIsElite: // 148
                 case ModifierTreeType.CurrentGarrisonBuildingLevelEqual: // 149
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonPlotInstanceHasBuildingThatIsReadyToActivate: // 150
-                {
-                        break;
-                }
+                    return false;
                 case ModifierTreeType.BattlePetTeamWithSpeciesEqualOrGreaterThan: // 151
                 {
                     uint count = 0;
@@ -2050,11 +1987,8 @@ namespace Game.Achievements
                     break;
                 }
                 case ModifierTreeType.HasGarrisonBuildingActiveSpecialization: // 156
-                    return false; // OBSOLETE
                 case ModifierTreeType.HasGarrisonFollower: // 157
-                {
-                    break;
-                }
+                    return false;
                 case ModifierTreeType.PlayerQuestObjectiveProgressEqual: // 158
                 {
                     QuestObjective objective = Global.ObjectMgr.GetQuestObjective(reqValue);
@@ -2088,23 +2022,11 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.AllGarrisonPlotsFilledWithBuildingsWithLevelEqualOrGreater: // 166
-                {
-                    break;
-                }
-                case ModifierTreeType.GarrisonMissionType: // 167 NYI
-                    return false;
+                case ModifierTreeType.GarrisonMissionType: // 167
                 case ModifierTreeType.GarrisonFollowerItemLevelEqualOrGreaterThan: // 168
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowerCountWithItemLevelEqualOrGreaterThan: // 169
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonTierEqual: // 170
-                {
-                    break;
-                }
+                    return false;
                 case ModifierTreeType.InstancePlayerCountEqual: // 171
                     if (referencePlayer.GetMap().GetPlayers().Count != reqValue)
                         return false;
@@ -2128,30 +2050,13 @@ namespace Game.Achievements
                     break;
                 }
                 case ModifierTreeType.GarrisonFollowerCountWithLevelEqualOrGreaterThan: // 175
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowerIsInBuilding: // 176
-                {
-                    break;
-                }
-                case ModifierTreeType.GarrisonMissionCountLessThan: // 177 NYI
-                    return false;
+                case ModifierTreeType.GarrisonMissionCountLessThan: // 177
                 case ModifierTreeType.GarrisonPlotInstanceCountEqualOrGreaterThan: // 178
-                {
-                    break;
-                }
                 case ModifierTreeType.CurrencySource: // 179 NYI
-                    return false;
                 case ModifierTreeType.PlayerIsInNotOwnGarrison: // 180
-                    if (!referencePlayer.GetMap().IsGarrison() || referencePlayer.GetMap().GetInstanceId() == referencePlayer.GetGUID().GetCounter())
-                        return false;
-                    break;
                 case ModifierTreeType.HasActiveGarrisonFollower: // 181
-                {
-                    break;
-                }
-                case ModifierTreeType.PlayerDailyRandomValueMod_X_Equals: // 182 NYI
+                case ModifierTreeType.PlayerDailyRandomValueMod_X_Equals: // 182
                     return false;
                 case ModifierTreeType.PlayerHasMount: // 183
                 {
@@ -2167,22 +2072,9 @@ namespace Game.Achievements
                     return false;
                 }
                 case ModifierTreeType.GarrisonFollowerCountWithInactiveWithItemLevelEqualOrGreaterThan: // 184
-                {
-                    break;
-                }
                 case ModifierTreeType.GarrisonFollowerIsOnAMission: // 185
-                {
-                    break;
-                }
-                case ModifierTreeType.GarrisonMissionCountInSetLessThan: // 186 NYI
-                    return false;
+                case ModifierTreeType.GarrisonMissionCountInSetLessThan: // 186
                 case ModifierTreeType.GarrisonFollowerType: // 187
-                {
-                    var garrFollower = CliDB.GarrFollowerStorage.LookupByKey((int)miscValue1);
-                    if (garrFollower == null || garrFollower.GarrFollowerTypeID != reqValue)
-                        return false;
-                    break;
-                }
                 case ModifierTreeType.PlayerUsedBoostLessThanHoursAgoRealTime: // 188 NYI
                 case ModifierTreeType.PlayerUsedBoostLessThanHoursAgoGameTime: // 189 NYI
                     return false;

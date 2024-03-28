@@ -5145,11 +5145,6 @@ namespace Game.Spells
                 player.DestroyItem(item.InventoryPosition, true);
         }
 
-        [SpellEffectHandler(SpellEffectName.LearnGarrisonBuilding)]
-        void EffectLearnGarrisonBuilding()
-        {
-        }
-
         [SpellEffectHandler(SpellEffectName.RemoveAuraBySApellLabel)]
         void EffectRemoveAuraBySpellLabel()
         {
@@ -5160,11 +5155,6 @@ namespace Game.Spells
                 return;
 
             unitTarget.RemoveAppliedAuras(aurApp => aurApp.GetBase().GetSpellInfo().HasLabel(effectInfo.MiscValue));
-        }
-
-        [SpellEffectHandler(SpellEffectName.CreateGarrison)]
-        void EffectCreateGarrison()
-        {
         }
 
         [SpellEffectHandler(SpellEffectName.CreateConversation)]
@@ -5202,11 +5192,6 @@ namespace Game.Spells
             }
         }
 
-        [SpellEffectHandler(SpellEffectName.AddGarrisonFollower)]
-        void EffectAddGarrisonFollower()
-        {
-        }
-
         [SpellEffectHandler(SpellEffectName.CreateHeirloomItem)]
         void EffectCreateHeirloomItem()
         {
@@ -5223,11 +5208,6 @@ namespace Game.Spells
 
             DoCreateItem(m_misc.Data0, ItemContext.None);
             ExecuteLogEffectCreateItem(effectInfo.Effect, m_misc.Data0);
-        }
-
-        [SpellEffectHandler(SpellEffectName.ActivateGarrisonBuilding)]
-        void EffectActivateGarrisonBuilding()
-        {
         }
 
         [SpellEffectHandler(SpellEffectName.GrantBattlepetLevel)]

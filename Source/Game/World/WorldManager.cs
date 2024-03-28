@@ -2004,11 +2004,7 @@ namespace Game
             // reset all saved quest status
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_DAILY);
             DB.Characters.Execute(stmt);
-
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_GARRISON_FOLLOWER_ACTIVATIONS);
-            stmt.AddValue(0, 1);
-            DB.Characters.Execute(stmt);
-
+                        
             // reset all quest status in memory
             foreach (var itr in m_sessions)
             {

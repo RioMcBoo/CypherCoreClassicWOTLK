@@ -1344,7 +1344,6 @@ namespace Game.Entities
             bool isGainOnRefund = false;
 
             if (gainSource == CurrencyGainSource.ItemRefund ||
-                gainSource == CurrencyGainSource.GarrisonBuildingRefund ||
                 gainSource == CurrencyGainSource.PlayerTraitRefund)
                 isGainOnRefund = true;
 
@@ -1380,17 +1379,17 @@ namespace Game.Entities
             {
                 // Weekly cap
                 if (weeklyCap != 0 && amount > 0 && (playerCurrency.WeeklyQuantity + amount) > weeklyCap)
-                    amount = (int)(weeklyCap - playerCurrency.WeeklyQuantity);
+                    amount = weeklyCap - playerCurrency.WeeklyQuantity;
 
                 // Max cap
                 int maxCap = GetCurrencyMaxQuantity(currency, false, gainSource == CurrencyGainSource.UpdatingVersion);
                 if (maxCap != 0 && amount > 0 && (playerCurrency.Quantity + amount) > maxCap)
-                    amount = (int)(maxCap - playerCurrency.Quantity);
+                    amount = maxCap - playerCurrency.Quantity;
             }
 
             // Underflow protection
             if (amount < 0 && Math.Abs(amount) > playerCurrency.Quantity)
-                amount = (int)(playerCurrency.Quantity * -1);
+                amount = -playerCurrency.Quantity;
 
             if (amount == 0)
                 return;
@@ -1423,7 +1422,7 @@ namespace Game.Entities
             packet.Flags = CurrencyGainFlags.None; // TODO: Check when flags are applied
 
             if ((playerCurrency.WeeklyQuantity / currency.Scaler) > 0)
-                packet.WeeklyQuantity = (int)playerCurrency.WeeklyQuantity;
+                packet.WeeklyQuantity = playerCurrency.WeeklyQuantity;
 
             if (currency.HasMaxQuantity(false, gainSource == CurrencyGainSource.UpdatingVersion))
                 packet.MaxQuantity = GetCurrencyMaxQuantity(currency);
@@ -5688,15 +5687,15 @@ namespace Game.Entities
             SendEnchantmentDurations();                             // must be after add to map
             SendItemDurations();                                    // must be after add to map
 
-            // raid downscaling - send difficulty to player
-            //if (GetMap().IsRaid())
-            //{
-            //    Difficulty mapDifficulty = GetMap().GetDifficultyID();
-            //    var difficulty = CliDB.DifficultyStorage.LookupByKey(mapDifficulty);
-            //    SendRaidDifficulty((difficulty.Flags & DifficultyFlags.Legacy) != 0, (int)mapDifficulty);
-            //}
-            //else if (GetMap().IsNonRaidDungeon())
-            //    SendDungeonDifficulty((int)GetMap().GetDifficultyID());
+            //raid downscaling -send difficulty to player
+            if (GetMap().IsRaid())
+            {
+                Difficulty mapDifficulty = GetMap().GetDifficultyID();
+                var difficulty = CliDB.DifficultyStorage.LookupByKey((int)mapDifficulty);
+                SendRaidDifficulty((difficulty.Flags & DifficultyFlags.Legacy) != 0, (int)mapDifficulty);
+            }
+            else if (GetMap().IsNonRaidDungeon())
+                SendDungeonDifficulty((int)GetMap().GetDifficultyID());
 
             PhasingHandler.OnMapChange(this);
 
