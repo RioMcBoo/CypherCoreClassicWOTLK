@@ -211,7 +211,7 @@ namespace BNetServer.Networking
         {
             Variant realmAddress = Params.LookupByKey("Param_RealmAddress");
             if (realmAddress != null)
-                return Global.RealmMgr.JoinRealm((uint)realmAddress.UintValue, build, GetRemoteIpEndPoint().Address, clientSecret, (Locale)Enum.Parse(typeof(Locale), locale), os, gameAccountInfo.Name, response);
+                return Global.RealmMgr.JoinRealm((uint)realmAddress.UintValue, build, GetRemoteIpEndPoint().Address, clientSecret, (Locale)Enum.Parse(typeof(Locale), locale), os, _timezoneOffset, gameAccountInfo.Name, response);
 
             return BattlenetRpcErrorCode.WowServicesInvalidJoinTicket;
         }

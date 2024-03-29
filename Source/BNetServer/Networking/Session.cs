@@ -23,6 +23,7 @@ namespace BNetServer.Networking
         string locale;
         string os;
         uint build;
+        TimeSpan _timezoneOffset;
         string ipCountry;
 
         byte[] clientSecret;

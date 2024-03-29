@@ -272,7 +272,7 @@ public RealmBuildInfo GetBuildInfo(uint build)
         return Json.Deflate("JSONRealmListUpdates", realmList);
     }
 
-    public BattlenetRpcErrorCode JoinRealm(uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
+    public BattlenetRpcErrorCode JoinRealm(uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, TimeSpan timezoneOffset, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
     {
         Realm realm = GetRealm(new RealmId(realmAddress));
         if (realm != null)
@@ -300,7 +300,8 @@ public RealmBuildInfo GetBuildInfo(uint build)
             stmt.AddValue(1, clientAddress.ToString());
             stmt.AddValue(2, (byte)locale);
             stmt.AddValue(3, os);
-            stmt.AddValue(4, accountName);
+            stmt.AddValue(4, (short)timezoneOffset.TotalMinutes);
+            stmt.AddValue(5, accountName);
             DB.Login.DirectExecute(stmt);
 
             Bgs.Protocol.Attribute attribute = new();
