@@ -262,10 +262,7 @@ namespace Game.Entities
             _shape = position.Shape;
 
             if (position.SpellForVisuals.HasValue)
-            {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(position.SpellForVisuals.Value, Difficulty.None);
                 SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), position.SpellForVisuals.Value);
-            }
 
             SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), _shape.GetMaxSearchRadius());
             if (IsServerSide())
@@ -697,8 +694,7 @@ namespace Game.Entities
             float scale = CalcCurrentScale();
             float radius = MathFunctions.Lerp(_shape.CylinderDatas.Radius, _shape.CylinderDatas.RadiusTarget, progress) * scale;
             float height = MathFunctions.Lerp(_shape.CylinderDatas.Height, _shape.CylinderDatas.HeightTarget, progress);
-            if (!m_areaTriggerData.HeightIgnoresScale)
-                height *= scale;
+            height *= scale;
 
             float minZ = GetPositionZ() - height;
             float maxZ = GetPositionZ() + height;
@@ -719,8 +715,7 @@ namespace Game.Entities
             float innerRadius = MathFunctions.Lerp(_shape.DiskDatas.InnerRadius, _shape.DiskDatas.InnerRadiusTarget, progress) * scale;
             float outerRadius = MathFunctions.Lerp(_shape.DiskDatas.OuterRadius, _shape.DiskDatas.OuterRadiusTarget, progress) * scale;
             float height = MathFunctions.Lerp(_shape.DiskDatas.Height, _shape.DiskDatas.HeightTarget, progress);
-            if (!m_areaTriggerData.HeightIgnoresScale)
-                height *= scale;
+            height *= scale;
 
             float minZ = GetPositionZ() - height;
             float maxZ = GetPositionZ() + height;
@@ -1432,8 +1427,6 @@ namespace Game.Entities
         public int GetSpellId() { return m_areaTriggerData.SpellID; }
         public AuraEffect GetAuraEffect() { return _aurEff; }
         public uint GetTimeSinceCreated() { return _timeSinceCreated; }
-
-        public void SetHeightIgnoresScale(bool heightIgnoresScale) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.HeightIgnoresScale), heightIgnoresScale); }
 
         public uint GetTimeToTarget() { return m_areaTriggerData.TimeToTarget; }
         public void SetTimeToTarget(uint timeToTarget) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget); }

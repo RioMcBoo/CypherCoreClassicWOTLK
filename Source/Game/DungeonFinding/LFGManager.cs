@@ -2100,7 +2100,7 @@ namespace Game.DungeonFinding
             return 0;
         }
 
-        public List<int> GetRandomAndSeasonalDungeons(int level, Expansion expansion, uint contentTuningReplacementConditionMask)
+        public List<int> GetRandomAndSeasonalDungeons(int level, Expansion expansion)
         {
             List<int> randomDungeons = new();
             foreach (var dungeon in LfgDungeonStore.Values)
@@ -2217,8 +2217,8 @@ namespace Game.DungeonFinding
             quest = _quest;
         }
 
-        public uint rdungeonEntry;
-        public uint sdungeonEntry;
+        public int rdungeonEntry;
+        public int sdungeonEntry;
         public bool done;
         public Quest quest;
     }
@@ -2311,10 +2311,6 @@ namespace Game.DungeonFinding
             maxlevel = (byte)dbc.MaxLevel;
             difficulty = dbc.DifficultyID;
             seasonal = dbc.HasAnyFlag(LfgFlags.Seasonal);
-
-            var journalEncounter = CliDB.JournalEncounterStorage.LookupByKey(dbc.FinalEncounterID);
-            if (journalEncounter != null)
-                finalDungeonEncounterId = journalEncounter.DungeonEncounterID;
         }
 
         public int id;
@@ -2329,10 +2325,10 @@ namespace Game.DungeonFinding
         public bool seasonal;
         public float x, y, z, o;
         public ushort requiredItemLevel;
-        public uint finalDungeonEncounterId;
+        public int finalDungeonEncounterId;
 
         // Helpers
-        public int Entry() { return (int)(id + ((int)type << 24)); }
+        public int Entry() { return id + ((int)type << 24); }
     }
 
     public class LfgLockInfoData

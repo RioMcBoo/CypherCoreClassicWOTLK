@@ -1161,7 +1161,7 @@ namespace Game.DataStorage
             return null;
         }
 
-        float EvaluateExpectedStat(ExpectedStatType stat, int level, Expansion expansion, int contentTuningId, Class unitClass)
+        public float EvaluateExpectedStat(ExpectedStatType stat, int level, Expansion expansion, int contentTuningId, Class unitClass)
         {
             var expectedStatRecord = _expectedStatsByLevel.LookupByKey((level, expansion));
             if (expectedStatRecord == null)

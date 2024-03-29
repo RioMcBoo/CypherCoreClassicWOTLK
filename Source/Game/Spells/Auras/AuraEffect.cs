@@ -5734,11 +5734,6 @@ namespace Game.Spells
             }
         }
 
-        [AuraEffectHandler(AuraType.PvpTalents)]
-        void HandleAuraPvpTalents(AuraApplication auraApp, AuraEffectHandleModes mode, bool apply)
-        {
-        }
-
         [AuraEffectHandler(AuraType.LinkedSummon)]
         void HandleLinkedSummon(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

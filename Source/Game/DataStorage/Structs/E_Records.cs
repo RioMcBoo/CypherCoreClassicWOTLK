@@ -8,7 +8,7 @@ namespace Game.DataStorage
 {
     public sealed class EmotesRecord
     {
-        public uint Id;
+        public int Id;
         private long _raceMask;
         public string EmoteSlashCommand;
         private int _animId;
@@ -74,7 +74,7 @@ namespace Game.DataStorage
 
     public sealed class ExpectedStatModRecord
     {
-        public uint Id;
+        public int Id;
         public float CreatureHealthMod;
         public float PlayerHealthMod;
         public float CreatureAutoAttackDPSMod;

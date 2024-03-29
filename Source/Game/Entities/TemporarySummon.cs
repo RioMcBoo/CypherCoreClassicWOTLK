@@ -611,7 +611,7 @@ namespace Game.Entities
 
             int creature_ID = (petType == PetType.Hunter) ? 1 : cinfo.Entry;
 
-            SetMeleeDamageSchool((SpellSchools)cinfo.DmgSchool);
+            SetMeleeDamageSchool(cinfo.DmgSchool);
 
             SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, (float)petlevel * 50);
 
@@ -934,13 +934,13 @@ namespace Game.Entities
         {
             if (school > SpellSchools.Normal)
             {
-                float baseValue = GetFlatModifierValue(UnitMods.ResistanceStart + (int)school, UnitModifierFlatType.Base);
+                float value = GetTotalAuraModValue(UnitMods.ResistanceStart + (int)school);
 
                 // hunter and warlock pets gain 40% of owner's resistance
                 if (IsPet())
-                    baseValue += (float)MathFunctions.CalculatePct(m_owner.GetResistance(school), 40);
+                    value += MathFunctions.CalculatePct(m_owner.GetResistance(school), 40);
 
-                SetResistance(school, (int)baseValue);
+                SetResistance(school, (int)value);
             }
             else
                 UpdateArmor();

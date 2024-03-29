@@ -130,7 +130,7 @@ namespace Game
         {
             // Get Random dungeons that can be done at a certain level and expansion
             int level = GetPlayer().GetLevel();
-            var randomDungeons = Global.LFGMgr.GetRandomAndSeasonalDungeons(level, GetExpansion(), 0);
+            var randomDungeons = Global.LFGMgr.GetRandomAndSeasonalDungeons(level, GetExpansion());
 
             LfgPlayerInfo lfgPlayerInfo = new();
 

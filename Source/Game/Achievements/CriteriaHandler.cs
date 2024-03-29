@@ -1259,7 +1259,7 @@ namespace Game.Achievements
         {
             int reqValue = modifier.Asset;
             int secondaryAsset = modifier.SecondaryAsset;
-            int tertiaryAsset = modifier.TertiaryAsset;
+            //int tertiaryAsset = modifier.TertiaryAsset;
 
             switch (modifier.Type)
             {

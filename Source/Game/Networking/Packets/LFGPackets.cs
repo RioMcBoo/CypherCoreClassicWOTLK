@@ -324,8 +324,8 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QueuedSlot);
-            _worldPacket.WriteUInt32(ActualSlot);
+            _worldPacket.WriteInt32(QueuedSlot);
+            _worldPacket.WriteInt32(ActualSlot);
             _worldPacket.WriteInt32(RewardMoney);
             _worldPacket.WriteInt32(AddedXP);
             _worldPacket.WriteInt32(Rewards.Count);
@@ -334,8 +334,8 @@ namespace Game.Networking.Packets
                 reward.Write(_worldPacket);
         }
 
-        public uint QueuedSlot;
-        public uint ActualSlot;
+        public int QueuedSlot;
+        public int ActualSlot;
         public int RewardMoney;
         public int AddedXP;
         public List<LFGPlayerRewards> Rewards = new();
