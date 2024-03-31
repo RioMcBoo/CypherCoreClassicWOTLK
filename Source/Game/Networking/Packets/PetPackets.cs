@@ -59,12 +59,12 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             PetGUID = _worldPacket.ReadPackedGuid();
-            SpellID = _worldPacket.ReadUInt32();
+            SpellID = _worldPacket.ReadInt32();
             AutocastEnabled = _worldPacket.HasBit();
         }
 
         public ObjectGuid PetGUID;
-        public uint SpellID;
+        public int SpellID;
         public bool AutocastEnabled;
     }
 
@@ -181,10 +181,10 @@ namespace Game.Networking.Packets
             if (RenameData.HasDeclinedNames)
             {
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                    _worldPacket.WriteBits(RenameData.DeclinedNames.name[i].GetByteCount(), 7);
+                    _worldPacket.WriteBits(RenameData.DeclinedNames.Name[i].GetByteCount(), 7);
 
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                    _worldPacket.WriteString(RenameData.DeclinedNames.name[i]);
+                    _worldPacket.WriteString(RenameData.DeclinedNames.Name[i]);
             }
 
             _worldPacket.WriteString(RenameData.NewName);
@@ -203,18 +203,18 @@ namespace Game.Networking.Packets
             RenameData.PetGUID = _worldPacket.ReadPackedGuid();
             RenameData.PetNumber = _worldPacket.ReadInt32();
 
-            uint nameLen = _worldPacket.ReadBits<uint>(8);
+            int nameLen = _worldPacket.ReadBits<int>(8);
 
             RenameData.HasDeclinedNames = _worldPacket.HasBit();
             if (RenameData.HasDeclinedNames)
             {
                 RenameData.DeclinedNames = new DeclinedName();
-                uint[] count = new uint[SharedConst.MaxDeclinedNameCases];
+                int[] count = new int[SharedConst.MaxDeclinedNameCases];
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                    count[i] = _worldPacket.ReadBits<uint>(7);
+                    count[i] = _worldPacket.ReadBits<int>(7);
 
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                    RenameData.DeclinedNames.name[i] = _worldPacket.ReadString(count[i]);
+                    RenameData.DeclinedNames.Name[i] = _worldPacket.ReadString(count[i]);
             }
 
             RenameData.NewName = _worldPacket.ReadString(nameLen);
@@ -231,14 +231,14 @@ namespace Game.Networking.Packets
         {
             PetGUID = _worldPacket.ReadPackedGuid();
 
-            Action = _worldPacket.ReadUInt32();
+            Action = _worldPacket.ReadInt32();
             TargetGUID = _worldPacket.ReadPackedGuid();
 
             ActionPosition = _worldPacket.ReadVector3();
         }
 
         public ObjectGuid PetGUID;
-        public uint Action;
+        public int Action;
         public ObjectGuid TargetGUID;
         public Vector3 ActionPosition;
     }
@@ -251,13 +251,13 @@ namespace Game.Networking.Packets
         {
             PetGUID = _worldPacket.ReadPackedGuid();
 
-            Index = _worldPacket.ReadUInt32();
-            Action = _worldPacket.ReadUInt32();
+            Index = _worldPacket.ReadInt32();
+            Action = _worldPacket.ReadInt32();
         }
 
         public ObjectGuid PetGUID;
-        public uint Index;
-        public uint Action;
+        public int Index;
+        public int Action;
     }
 
     class SetPetSpecialization : ServerPacket

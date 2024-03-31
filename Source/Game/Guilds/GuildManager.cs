@@ -71,7 +71,7 @@ namespace Game
             return null;
         }
 
-        public string GetGuildNameById(uint guildId)
+        public string GetGuildNameById(int guildId)
         {
             Guild guild = GetGuildById(guildId);
             if (guild != null)
@@ -466,7 +466,7 @@ namespace Game
                 reward.ItemID = result.Read<int>(0);
                 reward.MinGuildRep = result.Read<byte>(1);
                 reward.RaceMask = (RaceMask)(result.Read<long>(2));
-                reward.Cost = result.Read<ulong>(3);
+                reward.Cost = result.Read<long>(3);
 
                 if (Global.ObjectMgr.GetItemTemplate(reward.ItemID) == null)
                 {
@@ -527,7 +527,7 @@ namespace Game
         public int ItemID;
         public byte MinGuildRep;
         public RaceMask RaceMask;
-        public ulong Cost;
+        public long Cost;
         public List<int> AchievementsRequired = new();
     }
 }

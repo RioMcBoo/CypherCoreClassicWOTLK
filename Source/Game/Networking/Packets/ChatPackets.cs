@@ -18,7 +18,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Language = (Language)_worldPacket.ReadInt32();
-            uint len = _worldPacket.ReadBits<uint>(11);
+            int len = _worldPacket.ReadBits<int>(11);
             switch (GetOpcode())
             {
                 case ClientOpcodes.ChatMessageSay:
@@ -46,8 +46,8 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Language = (Language)_worldPacket.ReadInt32();
-            uint targetLen = _worldPacket.ReadBits<uint>(9);
-            uint textLen = _worldPacket.ReadBits<uint>(11);
+            int targetLen = _worldPacket.ReadBits<int>(9);
+            int textLen = _worldPacket.ReadBits<int>(11);
             Target = _worldPacket.ReadString(targetLen);
             Text = _worldPacket.ReadString(textLen);
         }
@@ -65,8 +65,8 @@ namespace Game.Networking.Packets
         {
             Language = (Language)_worldPacket.ReadInt32();
             ChannelGUID = _worldPacket.ReadPackedGuid();
-            uint targetLen = _worldPacket.ReadBits<uint>(9);
-            uint textLen = _worldPacket.ReadBits<uint>(11);
+            int targetLen = _worldPacket.ReadBits<int>(9);
+            int textLen = _worldPacket.ReadBits<int>(11);
             if (_worldPacket.HasBit())
                 IsSecure = _worldPacket.HasBit();
 
@@ -99,7 +99,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint targetLen = _worldPacket.ReadBits<uint>(9);
+            int targetLen = _worldPacket.ReadBits<int>(9);
             _worldPacket.ResetBitPos();
 
             Params.Read(_worldPacket);
@@ -118,7 +118,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(11);
+            int len = _worldPacket.ReadBits<int>(11);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -131,7 +131,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(11);
+            int len = _worldPacket.ReadBits<int>(11);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -144,7 +144,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(11);
+            int len = _worldPacket.ReadBits<int>(11);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -402,7 +402,7 @@ namespace Game.Networking.Packets
             int count = _worldPacket.ReadInt32();
 
             for (int i = 0; i < count; ++i)
-                Prefixes[i] = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(5));
+                Prefixes[i] = _worldPacket.ReadString(_worldPacket.ReadBits<int>(5));
         }
 
         public Array<string> Prefixes = new(MAX_PREFIXES);
@@ -534,8 +534,8 @@ namespace Game.Networking.Packets
     {
         public void Read(WorldPacket data)
         {
-            uint prefixLen = data.ReadBits<uint>(5);
-            uint textLen = data.ReadBits<uint>(8);
+            int prefixLen = data.ReadBits<int>(5);
+            int textLen = data.ReadBits<int>(8);
             IsLogged = data.HasBit();
             Type = (ChatMsg)data.ReadInt32();
             Prefix = data.ReadString(prefixLen);

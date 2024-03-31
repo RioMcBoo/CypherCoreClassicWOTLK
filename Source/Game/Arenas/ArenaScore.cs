@@ -47,7 +47,7 @@ namespace Game.Arenas
 
     public class ArenaTeamScore
     {
-        public void Assign(uint preMatchRating, uint postMatchRating, uint preMatchMMR, uint postMatchMMR)
+        public void Assign(int preMatchRating, int postMatchRating, int preMatchMMR, int postMatchMMR)
         {
             PreMatchRating = preMatchRating;
             PostMatchRating = postMatchRating;
@@ -55,9 +55,9 @@ namespace Game.Arenas
             PostMatchMMR = postMatchMMR;
         }
 
-        public uint PreMatchRating;
-        public uint PostMatchRating;
-        public uint PreMatchMMR;
-        public uint PostMatchMMR;
+        public int PreMatchRating;
+        public int PostMatchRating;
+        public int PreMatchMMR;
+        public int PostMatchMMR;
     }
 }

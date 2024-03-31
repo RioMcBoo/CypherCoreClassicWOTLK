@@ -13,7 +13,7 @@ namespace Game.Chat
     class SpellCommands
     {
         [CommandNonGroup("cooldown", RBACPermissions.CommandCooldown)]
-        static bool HandleCooldownCommand(CommandHandler handler, uint? spellIdArg)
+        static bool HandleCooldownCommand(CommandHandler handler, int? spellIdArg)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
@@ -53,7 +53,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("aura", RBACPermissions.CommandAura)]
-        static bool HandleAuraCommand(CommandHandler handler, uint spellId)
+        static bool HandleAuraCommand(CommandHandler handler, int spellId)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
@@ -77,7 +77,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unaura", RBACPermissions.CommandUnaura)]
-        static bool HandleUnAuraCommand(CommandHandler handler, uint spellId = 0)
+        static bool HandleUnAuraCommand(CommandHandler handler, int spellId = 0)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
@@ -104,7 +104,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("setskill", RBACPermissions.CommandSetskill)]
-        static bool HandleSetSkillCommand(CommandHandler handler, uint skillId, uint level, uint? maxSkillArg)
+        static bool HandleSetSkillCommand(CommandHandler handler, int skillId, int level, int? maxSkillArg)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
@@ -132,7 +132,7 @@ namespace Game.Chat
             // If the player has the skill, we get the current skill step. If they don't have the skill, we
             // add the skill to the player's book with step 1 (which is the first rank, in most cases something
             // like 'Apprentice <skill>'.
-            target.SetSkill((SkillType)skillId, (uint)(targetHasSkill ? target.GetSkillStep((SkillType)skillId) : 1), level, max);
+            target.SetSkill(skillId, targetHasSkill ? target.GetSkillStep(skillId) : 1, level, max);
             handler.SendSysMessage(CypherStrings.SetSkill, skillId, skillLine.DisplayName[handler.GetSessionDbcLocale()], handler.GetNameLink(target), level, max);
             return true;
         }

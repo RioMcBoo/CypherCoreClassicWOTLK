@@ -29,7 +29,7 @@ namespace Game.Entities
             uint count = 0;
             do
             {
-                AddPetition(ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(0)), ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1)), result.Read<string>(2), true);
+                AddPetition(ObjectGuid.Create(HighGuid.Item, result.Read<long>(0)), ObjectGuid.Create(HighGuid.Player, result.Read<long>(1)), result.Read<string>(2), true);
                 ++count;
             } while (result.NextRow());
 
@@ -50,11 +50,11 @@ namespace Game.Entities
             uint count = 0;
             do
             {
-                Petition petition = GetPetition(ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(0)));
+                Petition petition = GetPetition(ObjectGuid.Create(HighGuid.Item, result.Read<long>(0)));
                 if (petition == null)
                     continue;
 
-                petition.AddSignature(result.Read<uint>(1), ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2)), true);
+                petition.AddSignature(result.Read<int>(1), ObjectGuid.Create(HighGuid.Player, result.Read<long>(2)), true);
                 ++count;
             } while (result.NextRow());
 
@@ -147,9 +147,9 @@ namespace Game.Entities
         public ObjectGuid PetitionGuid;
         public ObjectGuid ownerGuid;
         public string PetitionName;
-        public List<(uint AccountId, ObjectGuid PlayerGuid)> Signatures = new();
+        public List<(int AccountId, ObjectGuid PlayerGuid)> Signatures = new();
 
-        public bool IsPetitionSignedByAccount(uint accountId)
+        public bool IsPetitionSignedByAccount(int accountId)
         {
             foreach (var signature in Signatures)
                 if (signature.AccountId == accountId)
@@ -158,7 +158,7 @@ namespace Game.Entities
             return false;
         }
 
-        public void AddSignature(uint accountId, ObjectGuid playerGuid, bool isLoading)
+        public void AddSignature(int accountId, ObjectGuid playerGuid, bool isLoading)
         {
             Signatures.Add((accountId, playerGuid));
 

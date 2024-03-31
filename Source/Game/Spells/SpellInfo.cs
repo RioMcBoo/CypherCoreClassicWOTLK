@@ -3982,8 +3982,8 @@ namespace Game.Spells
         public SpellAttr13 AttributesEx13 { get; set; }
         public SpellCustomAttributes AttributesCu { get; set; }
         public BitSet NegativeEffects { get; set; } = new BitSet(SpellConst.MaxEffects);
-        public ulong Stances { get; set; }
-        public ulong StancesNot { get; set; }
+        public long Stances { get; set; }
+        public long StancesNot { get; set; }
         public SpellCastTargetFlags Targets { get; set; }
         public int TargetCreatureType { get; set; }
         public int RequiresSpellFocus { get; set; }

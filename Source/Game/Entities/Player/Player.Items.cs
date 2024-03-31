@@ -2567,7 +2567,7 @@ namespace Game.Entities
                 return false;
             }
 
-            Creature creature = GetNPCIfCanInteractWith(vendorGuid, NPCFlags.Vendor, NPCFlags2.None);
+            Creature creature = GetNPCIfCanInteractWith(vendorGuid, NPCFlags1.Vendor, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: BuyCurrencyFromVendorSlot - {0} not found or you can't interact with him.", vendorGuid.ToString());
@@ -2730,7 +2730,7 @@ namespace Game.Entities
             if (!IsGameMaster() && ((pProto.HasFlag(ItemFlags2.FactionHorde) && GetTeam() == Team.Alliance) || (pProto.HasFlag(ItemFlags2.FactionAlliance) && GetTeam() == Team.Horde)))
                 return false;
 
-            Creature creature = GetNPCIfCanInteractWith(vendorguid, NPCFlags.Vendor, NPCFlags2.None);
+            Creature creature = GetNPCIfCanInteractWith(vendorguid, NPCFlags1.Vendor, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, $"Player.BuyItemFromVendorSlot: Vendor {vendorguid} not found or you can't interact with him.");

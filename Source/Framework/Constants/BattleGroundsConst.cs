@@ -356,19 +356,19 @@ namespace Framework.Constants
     //Arenas
     public struct ArenaBroadcastTexts
     {
-        public const uint OneMinute = 15740;
-        public const uint ThirtySeconds = 15741;
-        public const uint FifteenSeconds = 15739;
-        public const uint HasBegun = 15742;
+        public const int OneMinute = 15740;
+        public const int ThirtySeconds = 15741;
+        public const int FifteenSeconds = 15739;
+        public const int HasBegun = 15742;
     }
 
     public struct ArenaSpellIds
     {
-        public const uint AllianceGoldFlag = 32724;
-        public const uint AllianceGreenFlag = 32725;
-        public const uint HordeGoldFlag = 35774;
-        public const uint HordeGreenFlag = 35775;
-        public const uint LastManStanding = 26549;            // Arena Achievement Related
+        public const int AllianceGoldFlag = 32724;
+        public const int AllianceGreenFlag = 32725;
+        public const int HordeGoldFlag = 35774;
+        public const int HordeGreenFlag = 35775;
+        public const int LastManStanding = 26549;            // Arena Achievement Related
     }
 
     public enum ArenaTeamCommandTypes

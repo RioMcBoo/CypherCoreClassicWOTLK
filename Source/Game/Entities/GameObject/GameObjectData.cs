@@ -423,7 +423,7 @@ namespace Game.Entities
                 case GameObjectTypes.QuestGiver:
                     return QuestGiver.noDamageImmune;
                 case GameObjectTypes.Chest:
-                    return Chest.DamageImmuneOK == 0 ? 1 : 0u;
+                    return Chest.DamageImmuneOK == 0 ? 1 : 0;
                 case GameObjectTypes.Goober:
                     return Goober.noDamageImmune;
                 case GameObjectTypes.FlagStand:

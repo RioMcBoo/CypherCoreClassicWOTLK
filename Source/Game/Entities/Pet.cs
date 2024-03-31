@@ -362,7 +362,7 @@ namespace Game.Entities
                         {
                             _declinedname = new();
                             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                                _declinedname.name[i] = result.Read<string>(i);
+                                _declinedname.Name[i] = result.Read<string>(i);
                         }
                     }
 

@@ -24,7 +24,7 @@ namespace Game.AI
         ObjectGuid _leaderGUID;
         uint _updateFollowTimer;
         FollowState _followState;
-        uint _questForFollow;
+        int _questForFollow;
 
         public FollowerAI(Creature creature) : base(creature)
         {
@@ -164,7 +164,7 @@ namespace Game.AI
             DoMeleeAttackIfReady();
         }
 
-        public void StartFollow(Player player, uint factionForFollower = 0, Quest quest = null)
+        public void StartFollow(Player player, int factionForFollower = 0, Quest quest = null)
         {
             CreatureData cdata = me.GetCreatureData();
             if (cdata != null)
@@ -196,7 +196,7 @@ namespace Game.AI
             me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
             me.PauseMovement();
 
-            me.ReplaceAllNpcFlags(NPCFlags.None);
+            me.ReplaceAllNpcFlags(NPCFlags1.None);
             me.ReplaceAllNpcFlags2(NPCFlags2.None);
 
             AddFollowState(FollowState.Inprogress);

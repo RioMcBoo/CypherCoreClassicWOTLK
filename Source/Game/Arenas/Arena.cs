@@ -137,12 +137,12 @@ namespace Game.Arenas
             // arena rating calculation
             if (IsRated())
             {
-                uint loserTeamRating;
-                uint loserMatchmakerRating;
+                int loserTeamRating;
+                int loserMatchmakerRating;
                 int loserChange = 0;
                 int loserMatchmakerChange = 0;
-                uint winnerTeamRating;
-                uint winnerMatchmakerRating;
+                int winnerTeamRating;
+                int winnerMatchmakerRating;
                 int winnerChange = 0;
                 int winnerMatchmakerChange = 0;
                 bool guildAwarded = false;
@@ -170,16 +170,16 @@ namespace Game.Arenas
                             "rating loss: {6}, old MMR: {7}, MMR loss: {8} ---", GetArenaType(), winnerTeamRating, winnerChange, winnerMatchmakerRating, winnerMatchmakerChange,
                             loserTeamRating, loserChange, loserMatchmakerRating, loserMatchmakerChange);
 
-                        SetArenaMatchmakerRating(winner, (uint)(winnerMatchmakerRating + winnerMatchmakerChange));
-                        SetArenaMatchmakerRating(GetOtherTeam(winner), (uint)(loserMatchmakerRating + loserMatchmakerChange));
+                        SetArenaMatchmakerRating(winner, winnerMatchmakerRating + winnerMatchmakerChange);
+                        SetArenaMatchmakerRating(GetOtherTeam(winner), loserMatchmakerRating + loserMatchmakerChange);
 
                         // bg team that the client expects is different to TeamId
                         // alliance 1, horde 0
                         byte winnerTeam = (byte)(winner == Team.Alliance ? PvPTeamId.Alliance : PvPTeamId.Horde);
                         byte loserTeam = (byte)(winner == Team.Alliance ? PvPTeamId.Horde : PvPTeamId.Alliance);
 
-                        _arenaTeamScores[winnerTeam].Assign(winnerTeamRating, (uint)(winnerTeamRating + winnerChange), winnerMatchmakerRating, GetArenaMatchmakerRating(winner));
-                        _arenaTeamScores[loserTeam].Assign(loserTeamRating, (uint)(loserTeamRating + loserChange), loserMatchmakerRating, GetArenaMatchmakerRating(GetOtherTeam(winner)));
+                        _arenaTeamScores[winnerTeam].Assign(winnerTeamRating, winnerTeamRating + winnerChange, winnerMatchmakerRating, GetArenaMatchmakerRating(winner));
+                        _arenaTeamScores[loserTeam].Assign(loserTeamRating, loserTeamRating + loserChange, loserMatchmakerRating, GetArenaMatchmakerRating(GetOtherTeam(winner)));
 
                         Log.outDebug(LogFilter.Arena, "Arena match Type: {0} for Team1Id: {1} - Team2Id: {2} ended. WinnerTeamId: {3}. Winner rating: +{4}, Loser rating: {5}",
                             GetArenaType(), GetArenaTeamIdByIndex(TeamId.Alliance), GetArenaTeamIdByIndex(TeamId.Horde), winnerArenaTeam.GetId(), winnerChange, loserChange);
@@ -201,8 +201,8 @@ namespace Game.Arenas
                     // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
                     else
                     {
-                        _arenaTeamScores[(int)PvPTeamId.Alliance].Assign(winnerTeamRating, (uint)(winnerTeamRating + SharedConst.ArenaTimeLimitPointsLoss), winnerMatchmakerRating, GetArenaMatchmakerRating(Team.Alliance));
-                        _arenaTeamScores[(int)PvPTeamId.Horde].Assign(loserTeamRating, (uint)(loserTeamRating + SharedConst.ArenaTimeLimitPointsLoss), loserMatchmakerRating, GetArenaMatchmakerRating(Team.Horde));
+                        _arenaTeamScores[(int)PvPTeamId.Alliance].Assign(winnerTeamRating, winnerTeamRating + SharedConst.ArenaTimeLimitPointsLoss, winnerMatchmakerRating, GetArenaMatchmakerRating(Team.Alliance));
+                        _arenaTeamScores[(int)PvPTeamId.Horde].Assign(loserTeamRating, loserTeamRating + SharedConst.ArenaTimeLimitPointsLoss, loserMatchmakerRating, GetArenaMatchmakerRating(Team.Horde));
 
                         winnerArenaTeam.FinishGame(SharedConst.ArenaTimeLimitPointsLoss);
                         loserArenaTeam.FinishGame(SharedConst.ArenaTimeLimitPointsLoss);
@@ -236,7 +236,7 @@ namespace Game.Arenas
                         if (team == winner)
                         {
                             // update achievement BEFORE personal rating update
-                            uint rating = player.GetArenaPersonalRating(winnerArenaTeam.GetSlot());
+                            int rating = player.GetArenaPersonalRating(winnerArenaTeam.GetSlot());
                             player.StartCriteria(CriteriaStartEvent.WinRankedArenaMatchWithTeamSize, 0);
                             player.UpdateCriteria(CriteriaType.WinAnyRankedArena, rating != 0 ? rating : 1);
                             player.UpdateCriteria(CriteriaType.WinArena, GetMapId());
@@ -248,7 +248,7 @@ namespace Game.Arenas
                             if (!guildAwarded)
                             {
                                 guildAwarded = true;
-                                ulong guildId = GetBgMap().GetOwnerGuildId(player.GetBGTeam());
+                                long guildId = GetBgMap().GetOwnerGuildId(player.GetBGTeam());
                                 if (guildId != 0)
                                 {
                                     Guild guild = Global.GuildMgr.GetGuildById(guildId);

@@ -35,13 +35,13 @@ namespace Game
             }
 
             if (_collectionMgr.AddToy(item.GetEntry(), false, false))
-                _player.DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+                _player.DestroyItem(item.InventoryPosition, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.UseToy, Processing = PacketProcessing.Inplace)]
         void HandleUseToy(UseToy packet)
         {
-            uint itemId = packet.Cast.Misc[0];
+            int itemId = packet.Cast.Misc[0];
             ItemTemplate item = Global.ObjectMgr.GetItemTemplate(itemId);
             if (item == null)
                 return;

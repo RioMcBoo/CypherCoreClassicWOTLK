@@ -12,7 +12,7 @@ namespace Game.Chat
     class SceneCommands
     {
         [Command("cancel", RBACPermissions.CommandSceneCancel)]
-        static bool HandleCancelSceneCommand(CommandHandler handler, uint sceneScriptPackageId)
+        static bool HandleCancelSceneCommand(CommandHandler handler, int sceneScriptPackageId)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
@@ -42,7 +42,7 @@ namespace Game.Chat
         }
 
         [Command("play", RBACPermissions.CommandScenePlay)]
-        static bool HandlePlaySceneCommand(CommandHandler handler, uint sceneId)
+        static bool HandlePlaySceneCommand(CommandHandler handler, int sceneId)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
@@ -59,7 +59,7 @@ namespace Game.Chat
         }
 
         [Command("playpackage", RBACPermissions.CommandScenePlayPackage)]
-        static bool HandlePlayScenePackageCommand(CommandHandler handler, uint sceneScriptPackageId, SceneFlags? flags)
+        static bool HandlePlayScenePackageCommand(CommandHandler handler, int sceneScriptPackageId, SceneFlags? flags)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)

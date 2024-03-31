@@ -49,7 +49,7 @@ namespace Game.Chat
                 stmt.AddValue(0, player.GetGUID().GetCounter());
                 using var resultGroup = DB.Characters.Query(stmt);
                 if (!resultGroup.IsEmpty())
-                    groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
+                    groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<int>(0));
             }
 
             if (groupTarget == null)

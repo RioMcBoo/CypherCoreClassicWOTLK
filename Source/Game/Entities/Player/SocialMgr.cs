@@ -119,8 +119,8 @@ namespace Game.Entities
             {
                 do
                 {
-                    ObjectGuid friendGuid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
-                    ObjectGuid friendAccountGuid = ObjectGuid.Create(HighGuid.WowAccount, result.Read<uint>(1));
+                    ObjectGuid friendGuid = ObjectGuid.Create(HighGuid.Player, result.Read<long>(0));
+                    ObjectGuid friendAccountGuid = ObjectGuid.Create(HighGuid.WowAccount, result.Read<int>(1));
                     SocialFlag flags = (SocialFlag)result.Read<byte>(2);
 
                     social.PlayerSocialMap[friendGuid] = new FriendInfo(friendAccountGuid, flags, result.Read<string>(3));
@@ -306,8 +306,8 @@ namespace Game.Entities
         public ObjectGuid WowAccountGuid;
         public FriendStatus Status;
         public SocialFlag Flags;
-        public uint Area;
-        public uint Level;
+        public int Area;
+        public int Level;
         public Class Class;
         public string Note;
 

@@ -618,7 +618,7 @@ namespace Game
                 bool hasConditions = false;
                 foreach (TraitCondRecord condition in conditions)
                 {
-                    if (condition.CondType() == TraitConditionType.Available || condition.CondType() == TraitConditionType.Visible)
+                    if (condition.CondType == TraitConditionType.Available || condition.CondType == TraitConditionType.Visible)
                     {
                         if (MeetsTraitCondition(traitConfig, player, condition, ref spentCurrencies))
                             return true;
@@ -636,7 +636,7 @@ namespace Game
                     return TalentLearnResult.FailedUnknown;
 
                 Node node = _traitNodes.LookupByKey(traitEntry.TraitNodeID);
-                if (node.Data.NodeType() == TraitNodeType.Selection)
+                if (node.Data.NodeType == TraitNodeType.Selection)
                     if (getNodeEntryCount(traitEntry.TraitNodeID) != 1)
                         return TalentLearnResult.FailedUnknown;
 

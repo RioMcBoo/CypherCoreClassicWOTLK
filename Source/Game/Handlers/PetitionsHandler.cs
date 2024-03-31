@@ -17,7 +17,7 @@ namespace Game
         void HandlePetitionBuy(PetitionBuy packet)
         {
             // prevent cheating
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Petitioner, NPCFlags2.None);
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags1.Petitioner, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandlePetitionBuyOpcode - {packet.Unit} not found or you can't interact with him.");
@@ -417,7 +417,7 @@ namespace Game
 
         public void SendPetitionShowList(ObjectGuid guid)
         {
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Petitioner, NPCFlags2.None);
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags1.Petitioner, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandlePetitionShowListOpcode - {guid} not found or you can't interact with him.");

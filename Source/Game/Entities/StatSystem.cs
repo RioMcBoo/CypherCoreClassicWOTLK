@@ -596,7 +596,7 @@ namespace Game.Entities
             }
         }
 
-        public void SetOverrideDisplayPowerId(uint powerDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.OverrideDisplayPowerID), powerDisplayId); }
+        public void SetOverrideDisplayPowerId(int powerDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.OverrideDisplayPowerID), powerDisplayId); }
 
         public void SetMaxPower(PowerType powerType, int val)
         {

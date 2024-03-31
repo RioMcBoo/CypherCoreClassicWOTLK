@@ -55,7 +55,7 @@ namespace Game.Chat.Commands
         [Command("gameaccountcreate", RBACPermissions.CommandBnetAccountCreateGame, true)]
         static bool HandleGameAccountCreateCommand(CommandHandler handler, string bnetAccountName)
         {
-            uint accountId = Global.BNetAccountMgr.GetId(bnetAccountName);
+            int accountId = Global.BNetAccountMgr.GetId(bnetAccountName);
             if (accountId == 0)
             {
                 handler.SendSysMessage(CypherStrings.AccountNotExist, bnetAccountName);
@@ -276,7 +276,7 @@ namespace Game.Chat.Commands
             [Command("password", RBACPermissions.CommandBnetAccountSetPassword, true)]
             static bool HandleAccountSetPasswordCommand(CommandHandler handler, string accountName, string password, string passwordConfirmation)
             {
-                uint targetAccountId = Global.BNetAccountMgr.GetId(accountName);
+                int targetAccountId = Global.BNetAccountMgr.GetId(accountName);
                 if (targetAccountId == 0)
                 {
                     handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);

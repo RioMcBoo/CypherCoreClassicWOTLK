@@ -2181,14 +2181,14 @@ namespace Game.Entities
             foreach (var effect in CliDB.SpellEffectStorage.Values)
             {
                 Cypher.Assert(effect.EffectIndex < SpellConst.MaxEffects, $"MAX_SPELL_EFFECTS must be at least {effect.EffectIndex}");
-                Cypher.Assert(effect.Effect < (int)SpellEffectName.TotalSpellEffects, $"TOTAL_SPELL_EFFECTS must be at least {effect.Effect}");
-                Cypher.Assert(effect.EffectAura < (int)AuraType.Total, $"TOTAL_AURAS must be at least {effect.EffectAura}");
+                Cypher.Assert(effect.Effect < SpellEffectName.TotalSpellEffects, $"TOTAL_SPELL_EFFECTS must be at least {effect.Effect}");
+                Cypher.Assert(effect.EffectAura < AuraType.Total, $"TOTAL_AURAS must be at least {effect.EffectAura}");
                 Cypher.Assert(effect.ImplicitTarget[0] < (int)Targets.TotalSpellTargets, $"TOTAL_SPELL_TARGETS must be at least {effect.ImplicitTarget[0]}");
                 Cypher.Assert(effect.ImplicitTarget[1] < (int)Targets.TotalSpellTargets, $"TOTAL_SPELL_TARGETS must be at least {effect.ImplicitTarget[1]}");
 
                 GetLoadHelper(effect.SpellID, effect.DifficultyID).Effects[effect.EffectIndex] = effect;
 
-                if (effect.Effect == (int)SpellEffectName.Summon)
+                if (effect.Effect == SpellEffectName.Summon)
                 {
                     var summonProperties = CliDB.SummonPropertiesStorage.LookupByKey(effect.EffectMiscValue[1]);
                     if (summonProperties != null)
@@ -2202,7 +2202,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (effect.Effect == (int)SpellEffectName.Language)
+                if (effect.Effect == SpellEffectName.Language)
                     Global.LanguageMgr.LoadSpellEffectLanguage(effect);
 
                 switch ((AuraType)effect.EffectAura)
@@ -2423,10 +2423,10 @@ namespace Game.Entities
                         Difficulty difficulty = (Difficulty)effectsResult.Read<uint>(1);
                         SpellEffectRecord effect = new();
                         effect.EffectIndex = effectsResult.Read<int>(2);
-                        effect.Effect = effectsResult.Read<int>(3);
+                        effect.Effect = (SpellEffectName)effectsResult.Read<int>(3);
                         effect.EffectAmplitude = effectsResult.Read<float>(4);
                         effect.EffectAttributes = (SpellEffectAttributes)effectsResult.Read<int>(5);
-                        effect.EffectAura = effectsResult.Read<short>(6);
+                        effect.EffectAura = (AuraType)effectsResult.Read<short>(6);
                         effect.EffectAuraPeriod = effectsResult.Read<uint>(7);
                         effect.EffectBasePoints = effectsResult.Read<int>(8);
                         effect.EffectBonusCoefficient = effectsResult.Read<float>(9);
@@ -2472,13 +2472,13 @@ namespace Game.Entities
                             continue;
                         }
 
-                        if (effect.Effect >= (uint)SpellEffectName.TotalSpellEffects)
+                        if (effect.Effect >= SpellEffectName.TotalSpellEffects)
                         {
                             Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid effect Type {effect.Effect} at index {effect.EffectIndex}, skipped");
                             continue;
                         }
 
-                        if (effect.EffectAura >= (uint)AuraType.Total)
+                        if (effect.EffectAura >= AuraType.Total)
                         {
                             Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid aura Type {effect.EffectAura} at index {effect.EffectIndex}, skipped");
                             continue;
@@ -2564,8 +2564,8 @@ namespace Game.Entities
                         spellInfo.AttributesEx11 = (SpellAttr11)spellsResult.Read<uint>(16);
                         spellInfo.AttributesEx12 = (SpellAttr12)spellsResult.Read<uint>(17);
                         spellInfo.AttributesEx13 = (SpellAttr13)spellsResult.Read<uint>(18);
-                        spellInfo.Stances = spellsResult.Read<ulong>(19);
-                        spellInfo.StancesNot = spellsResult.Read<ulong>(20);
+                        spellInfo.Stances = spellsResult.Read<long>(19);
+                        spellInfo.StancesNot = spellsResult.Read<long>(20);
                         spellInfo.Targets = (SpellCastTargetFlags)spellsResult.Read<uint>(21);
                         spellInfo.TargetCreatureType = spellsResult.Read<int>(22);
                         spellInfo.RequiresSpellFocus = spellsResult.Read<int>(23);

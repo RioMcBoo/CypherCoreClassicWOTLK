@@ -172,7 +172,7 @@ namespace Game.Achievements
 
         public virtual void CompletedAchievement(AchievementRecord entry, Player referencePlayer) { }
 
-        public Func<uint, AchievementRecord> VisibleAchievementCheck = id =>
+        public Func<int, AchievementRecord> VisibleAchievementCheck = id =>
         {
             AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(id);
             if (achievement != null && !achievement.Flags.HasAnyFlag(AchievementFlags.Hidden))

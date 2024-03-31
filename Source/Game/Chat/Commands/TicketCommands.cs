@@ -31,13 +31,13 @@ namespace Game.Chat.Commands
         class TicketBugCommands
         {
             [Command("assign", RBACPermissions.CommandTicketBugAssign, true)]
-            static bool HandleTicketBugAssignCommand(CommandHandler handler, uint ticketId, string targetName)
+            static bool HandleTicketBugAssignCommand(CommandHandler handler, int ticketId, string targetName)
             {
                 return HandleTicketAssignToCommand<BugTicket>(handler, ticketId, targetName);
             }
 
             [Command("close", RBACPermissions.CommandTicketBugClose, true)]
-            static bool HandleTicketBugCloseCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketBugCloseCommand(CommandHandler handler, int ticketId)
             {
                 return HandleCloseByIdCommand<BugTicket>(handler, ticketId);
             }
@@ -49,13 +49,13 @@ namespace Game.Chat.Commands
             }
 
             [Command("comment", RBACPermissions.CommandTicketBugComment, true)]
-            static bool HandleTicketBugCommentCommand(CommandHandler handler, uint ticketId, QuotedString comment)
+            static bool HandleTicketBugCommentCommand(CommandHandler handler, int ticketId, QuotedString comment)
             {
                 return HandleCommentCommand<BugTicket>(handler, ticketId, comment);
             }
 
             [Command("delete", RBACPermissions.CommandTicketBugDelete, true)]
-            static bool HandleTicketBugDeleteCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketBugDeleteCommand(CommandHandler handler, int ticketId)
             {
                 return HandleDeleteByIdCommand<BugTicket>(handler, ticketId);
             }
@@ -67,13 +67,13 @@ namespace Game.Chat.Commands
             }
 
             [Command("unassign", RBACPermissions.CommandTicketBugUnassign, true)]
-            static bool HandleTicketBugUnAssignCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketBugUnAssignCommand(CommandHandler handler, int ticketId)
             {
                 return HandleUnAssignCommand<BugTicket>(handler, ticketId);
             }
 
             [Command("view", RBACPermissions.CommandTicketBugView, true)]
-            static bool HandleTicketBugViewCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketBugViewCommand(CommandHandler handler, int ticketId)
             {
                 return HandleGetByIdCommand<BugTicket>(handler, ticketId);
             }
@@ -83,13 +83,13 @@ namespace Game.Chat.Commands
         class TicketComplaintCommands
         {
             [Command("assign", RBACPermissions.CommandTicketComplaintAssign, true)]
-            static bool HandleTicketComplaintAssignCommand(CommandHandler handler, uint ticketId, string targetName)
+            static bool HandleTicketComplaintAssignCommand(CommandHandler handler, int ticketId, string targetName)
             {
                 return HandleTicketAssignToCommand<ComplaintTicket>(handler, ticketId, targetName);
             }
 
             [Command("close", RBACPermissions.CommandTicketComplaintClose, true)]
-            static bool HandleTicketComplaintCloseCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketComplaintCloseCommand(CommandHandler handler, int ticketId)
             {
                 return HandleCloseByIdCommand<ComplaintTicket>(handler, ticketId);
             }
@@ -101,13 +101,13 @@ namespace Game.Chat.Commands
             }
 
             [Command("comment", RBACPermissions.CommandTicketComplaintComment, true)]
-            static bool HandleTicketComplaintCommentCommand(CommandHandler handler, uint ticketId, QuotedString comment)
+            static bool HandleTicketComplaintCommentCommand(CommandHandler handler, int ticketId, QuotedString comment)
             {
                 return HandleCommentCommand<ComplaintTicket>(handler, ticketId, comment);
             }
 
             [Command("delete", RBACPermissions.CommandTicketComplaintDelete, true)]
-            static bool HandleTicketComplaintDeleteCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketComplaintDeleteCommand(CommandHandler handler, int ticketId)
             {
                 return HandleDeleteByIdCommand<ComplaintTicket>(handler, ticketId);
             }
@@ -119,13 +119,13 @@ namespace Game.Chat.Commands
             }
 
             [Command("unassign", RBACPermissions.CommandTicketComplaintUnassign, true)]
-            static bool HandleTicketComplaintUnAssignCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketComplaintUnAssignCommand(CommandHandler handler, int ticketId)
             {
                 return HandleUnAssignCommand<ComplaintTicket>(handler, ticketId);
             }
 
             [Command("view", RBACPermissions.CommandTicketComplaintView, true)]
-            static bool HandleTicketComplaintViewCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketComplaintViewCommand(CommandHandler handler, int ticketId)
             {
                 return HandleGetByIdCommand<ComplaintTicket>(handler, ticketId);
             }
@@ -135,13 +135,13 @@ namespace Game.Chat.Commands
         class TicketSuggestionCommands
         {
             [Command("assign", RBACPermissions.CommandTicketSuggestionAssign, true)]
-            static bool HandleTicketSuggestionAssignCommand(CommandHandler handler, uint ticketId, string targetName)
+            static bool HandleTicketSuggestionAssignCommand(CommandHandler handler, int ticketId, string targetName)
             {
                 return HandleTicketAssignToCommand<SuggestionTicket>(handler, ticketId, targetName);
             }
 
             [Command("close", RBACPermissions.CommandTicketSuggestionClose, true)]
-            static bool HandleTicketSuggestionCloseCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketSuggestionCloseCommand(CommandHandler handler, int ticketId)
             {
                 return HandleCloseByIdCommand<SuggestionTicket>(handler, ticketId);
             }
@@ -153,13 +153,13 @@ namespace Game.Chat.Commands
             }
 
             [Command("comment", RBACPermissions.CommandTicketSuggestionComment, true)]
-            static bool HandleTicketSuggestionCommentCommand(CommandHandler handler, uint ticketId, QuotedString comment)
+            static bool HandleTicketSuggestionCommentCommand(CommandHandler handler, int ticketId, QuotedString comment)
             {
                 return HandleCommentCommand<SuggestionTicket>(handler, ticketId, comment);
             }
 
             [Command("delete", RBACPermissions.CommandTicketSuggestionDelete, true)]
-            static bool HandleTicketSuggestionDeleteCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketSuggestionDeleteCommand(CommandHandler handler, int ticketId)
             {
                 return HandleDeleteByIdCommand<SuggestionTicket>(handler, ticketId);
             }
@@ -171,13 +171,13 @@ namespace Game.Chat.Commands
             }
 
             [Command("unassign", RBACPermissions.CommandTicketSuggestionUnassign, true)]
-            static bool HandleTicketSuggestionUnAssignCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketSuggestionUnAssignCommand(CommandHandler handler, int ticketId)
             {
                 return HandleUnAssignCommand<SuggestionTicket>(handler, ticketId);
             }
 
             [Command("view", RBACPermissions.CommandTicketSuggestionView, true)]
-            static bool HandleTicketSuggestionViewCommand(CommandHandler handler, uint ticketId)
+            static bool HandleTicketSuggestionViewCommand(CommandHandler handler, int ticketId)
             {
                 return HandleGetByIdCommand<SuggestionTicket>(handler, ticketId);
             }
@@ -223,7 +223,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        static bool HandleTicketAssignToCommand<T>(CommandHandler handler, uint ticketId, string targetName) where T : Ticket
+        static bool HandleTicketAssignToCommand<T>(CommandHandler handler, int ticketId, string targetName) where T : Ticket
         {
             if (targetName.IsEmpty())
                 return false;
@@ -239,7 +239,7 @@ namespace Game.Chat.Commands
             }
 
             ObjectGuid targetGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(targetName);
-            uint accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
+            int accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
             // Target must exist and have administrative rights
             if (!Global.AccountMgr.HasPermission(accountId, RBACPermissions.CommandsBeAssignedTicket, Global.WorldMgr.GetRealm().Id.Index))
             {
@@ -264,7 +264,7 @@ namespace Game.Chat.Commands
             }
 
             // Assign ticket
-            ticket.SetAssignedTo(targetGuid, Global.AccountMgr.IsAdminAccount(Global.AccountMgr.GetSecurity(accountId, (int)Global.WorldMgr.GetRealm().Id.Index)));
+            ticket.SetAssignedTo(targetGuid, Global.AccountMgr.IsAdminAccount(Global.AccountMgr.GetSecurity(accountId, Global.WorldMgr.GetRealm().Id.Index)));
             ticket.SaveToDB();
 
             string msg = ticket.FormatViewMessageString(handler, null, targetName, null, null);
@@ -272,7 +272,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        static bool HandleCloseByIdCommand<T>(CommandHandler handler, uint ticketId) where T : Ticket
+        static bool HandleCloseByIdCommand<T>(CommandHandler handler, int ticketId) where T : Ticket
         {
             T ticket = Global.SupportMgr.GetTicket<T>(ticketId);
             if (ticket == null || ticket.IsClosed())
@@ -294,7 +294,7 @@ namespace Game.Chat.Commands
             if (player != null)
                 closedByGuid = player.GetGUID();
             else
-                closedByGuid.SetRawValue(0, ulong.MaxValue);
+                closedByGuid.SetRawValue(0, -1);
 
             Global.SupportMgr.CloseTicket<T>(ticket.GetId(), closedByGuid);
 
@@ -310,7 +310,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        static bool HandleCommentCommand<T>(CommandHandler handler, uint ticketId, QuotedString comment) where T : Ticket
+        static bool HandleCommentCommand<T>(CommandHandler handler, int ticketId, QuotedString comment) where T : Ticket
         {
             if (comment.IsEmpty())
                 return false;
@@ -342,7 +342,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        static bool HandleDeleteByIdCommand<T>(CommandHandler handler, uint ticketId) where T : Ticket
+        static bool HandleDeleteByIdCommand<T>(CommandHandler handler, int ticketId) where T : Ticket
         {
             T ticket = Global.SupportMgr.GetTicket<T>(ticketId);
             if (ticket == null)
@@ -387,7 +387,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        static bool HandleUnAssignCommand<T>(CommandHandler handler, uint ticketId) where T : Ticket
+        static bool HandleUnAssignCommand<T>(CommandHandler handler, int ticketId) where T : Ticket
         {
             T ticket = Global.SupportMgr.GetTicket<T>(ticketId);
             if (ticket == null || ticket.IsClosed())
@@ -410,8 +410,8 @@ namespace Game.Chat.Commands
             else
             {
                 ObjectGuid guid = ticket.GetAssignedToGUID();
-                uint accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
-                security = Global.AccountMgr.GetSecurity(accountId, (int)Global.WorldMgr.GetRealm().Id.Index);
+                int accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
+                security = Global.AccountMgr.GetSecurity(accountId, Global.WorldMgr.GetRealm().Id.Index);
             }
 
             // Check security
@@ -433,7 +433,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        static bool HandleGetByIdCommand<T>(CommandHandler handler, uint ticketId) where T : Ticket
+        static bool HandleGetByIdCommand<T>(CommandHandler handler, int ticketId) where T : Ticket
         {
             T ticket = Global.SupportMgr.GetTicket<T>(ticketId);
             if (ticket == null || ticket.IsClosed())

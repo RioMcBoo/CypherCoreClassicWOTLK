@@ -54,7 +54,7 @@ namespace Game.AI
                 return new VehicleAI(creature);
             else if (creature.HasUnitTypeMask(UnitTypeMask.ControlableGuardian) && ((Guardian)creature).GetOwner().IsTypeId(TypeId.Player))
                 return new PetAI(creature);
-            else if (creature.HasNpcFlag(NPCFlags.SpellClick))
+            else if (creature.HasNpcFlag(NPCFlags1.SpellClick))
                 return new NullCreatureAI(creature);
             else if (creature.IsGuard())
                 return new GuardAI(creature);

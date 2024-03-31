@@ -74,7 +74,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint titleLen = _worldPacket.ReadBits<uint>(7);
+            int titleLen = _worldPacket.ReadBits<int>(7);
 
             Unit = _worldPacket.ReadPackedGuid();
             Unused910 = _worldPacket.ReadUInt32();
@@ -249,7 +249,7 @@ namespace Game.Networking.Packets
             PetitionGuid = _worldPacket.ReadPackedGuid();
 
             _worldPacket.ResetBitPos();
-            uint nameLen = _worldPacket.ReadBits<uint>(7);
+            int nameLen = _worldPacket.ReadBits<int>(7);
 
             NewGuildName = _worldPacket.ReadString(nameLen);
         }

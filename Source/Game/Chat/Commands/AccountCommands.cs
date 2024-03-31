@@ -38,7 +38,7 @@ namespace Game.Chat
             if (session.HasPermission(RBACPermissions.MayCheckOwnEmail))
             {
                 string emailoutput;
-                uint accountId = session.GetAccountId();
+                int accountId = session.GetAccountId();
 
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
                 stmt.AddValue(0, accountId);
@@ -241,7 +241,7 @@ namespace Game.Chat
         [Command("delete", CypherStrings.CommandAccDeleteHelp, RBACPermissions.CommandAccountDelete, true)]
         static bool HandleAccountDeleteCommand(CommandHandler handler, string accountName)
         {
-            uint accountId = Global.AccountMgr.GetId(accountName);
+            int accountId = Global.AccountMgr.GetId(accountName);
             if (accountId == 0)
             {
                 handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -505,8 +505,8 @@ namespace Game.Chat
                     if (player == null)
                         continue;
 
-                    uint playerMapId = player.GetMapId();
-                    uint playerZoneId = player.GetZoneId();
+                    int playerMapId = player.GetMapId();
+                    int playerZoneId = player.GetZoneId();
 
                     // Apply optional ipAddress filter
                     if (!ipAddress.IsEmpty() && ipAddress != session.GetRemoteAddress())
@@ -616,7 +616,7 @@ namespace Game.Chat
             [Command("addon", CypherStrings.CommandAccSetAddonHelp, RBACPermissions.CommandAccountSetAddon, true)]
             static bool HandleAccountSetAddonCommand(CommandHandler handler, [OptionalArg] string accountName, byte expansion)
             {
-                uint accountId;
+                int accountId;
                 if (!accountName.IsEmpty())
                 {
                     // Convert Account name to Upper Format
@@ -662,7 +662,7 @@ namespace Game.Chat
             [Command("password", CypherStrings.CommandAccSetPasswordHelp, RBACPermissions.CommandAccountSetPassword, true)]
             static bool HandleAccountSetPasswordCommand(CommandHandler handler, string accountName, string password, string confirmPassword)
             {
-                uint targetAccountId = Global.AccountMgr.GetId(accountName);
+                int targetAccountId = Global.AccountMgr.GetId(accountName);
                 if (targetAccountId == 0)
                 {
                     handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -704,7 +704,7 @@ namespace Game.Chat
             [Command("gmlevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
             static bool HandleAccountSetSecLevelCommand(CommandHandler handler, [OptionalArg] string accountName, byte securityLevel, int? realmId)
             {
-                uint accountId;
+                int accountId;
                 if (!accountName.IsEmpty())
                 {
                     accountId = Global.AccountMgr.GetId(accountName);
@@ -772,7 +772,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                Global.AccountMgr.UpdateAccountAccess(null, accountId, (byte)securityLevel, realmID);
+                Global.AccountMgr.UpdateAccountAccess(null, accountId, securityLevel, realmID);
 
                 handler.SendSysMessage(CypherStrings.YouChangeSecurity, accountName, securityLevel);
                 return true;
@@ -784,7 +784,7 @@ namespace Game.Chat
                 [Command("email", CypherStrings.CommandAccSetSecEmailHelp, RBACPermissions.CommandAccountSetSecEmail, true)]
                 static bool HandleAccountSetEmailCommand(CommandHandler handler, string accountName, string email, string confirmEmail)
                 {
-                    uint targetAccountId = Global.AccountMgr.GetId(accountName);
+                    int targetAccountId = Global.AccountMgr.GetId(accountName);
                     if (targetAccountId == 0)
                     {
                         handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -826,7 +826,7 @@ namespace Game.Chat
                 [Command("regmail", CypherStrings.CommandAccSetSecRegmailHelp, RBACPermissions.CommandAccountSetSecRegmail, true)]
                 static bool HandleAccountSetRegEmailCommand(CommandHandler handler, string accountName, string email, string confirmEmail)
                 {
-                    uint targetAccountId = Global.AccountMgr.GetId(accountName);
+                    int targetAccountId = Global.AccountMgr.GetId(accountName);
                     if (targetAccountId == 0)
                     {
                         handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);

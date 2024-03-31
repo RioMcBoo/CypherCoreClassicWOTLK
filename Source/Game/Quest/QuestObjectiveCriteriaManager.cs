@@ -60,7 +60,7 @@ namespace Game
             {
                 do
                 {
-                    uint objectiveId = objectiveResult.Read<uint>(0);
+                    int objectiveId = objectiveResult.Read<int>(0);
 
                     QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveId);
                     if (objective == null)
@@ -150,7 +150,7 @@ namespace Game
             }
         }
 
-        public void ResetCriteriaTree(uint criteriaTreeId)
+        public void ResetCriteriaTree(int criteriaTreeId)
         {
             CriteriaTree tree = Global.CriteriaMgr.GetCriteriaTree(criteriaTreeId);
             if (tree == null)

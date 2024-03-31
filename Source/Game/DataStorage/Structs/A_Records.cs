@@ -55,53 +55,53 @@ namespace Game.DataStorage
     public sealed class AchievementCategoryRecord
     {
         public LocalizedString Name;
-        public uint Id;
+        public int Id;
         public short Parent;
         public sbyte UiOrder;
     }
 
     public sealed class AdventureJournalRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public LocalizedString Description;
         public LocalizedString ButtonText;
         public LocalizedString RewardDescription;
         public LocalizedString ContinueDescription;
         public byte Type;
-        public uint PlayerConditionID;
+        public int PlayerConditionID;
         public int Flags;
         public byte ButtonActionType;
         public int TextureFileDataID;
         public ushort LfgDungeonID;
-        public uint QuestID;
+        public int QuestID;
         public ushort BattleMasterListID;
         public byte PriorityMin;
         public byte PriorityMax;
         public int ItemID;
-        public uint ItemQuantity;
+        public int ItemQuantity;
         public ushort CurrencyType;
         public byte CurrencyQuantity;
         public ushort UiMapID;
-        public uint[] BonusPlayerConditionID = new uint[2];
+        public int[] BonusPlayerConditionID = new int[2];
         public byte[] BonusValue = new byte[2];
     }
 
     public sealed class AdventureMapPOIRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Title;
         public LocalizedString Description;
         public Vector2 WorldPosition;
         public sbyte Type;
-        public uint PlayerConditionID;
-        public uint QuestID;
-        public uint LfgDungeonID;
+        public int PlayerConditionID;
+        public int QuestID;
+        public int LfgDungeonID;
         public int RewardItemID;
-        public uint UiTextureAtlasMemberID;
-        public uint UiTextureKitID;
+        public int UiTextureAtlasMemberID;
+        public int UiTextureKitID;
         public int MapID;
-        public uint AreaTableID;
+        public int AreaTableID;
     }
 
     public sealed class AnimationDataRecord

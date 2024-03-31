@@ -247,7 +247,6 @@ namespace Game.Guilds
         {
             QueryGuildInfoResponse response = new();
             response.GuildGUID = GetGUID();
-            response.HasGuildInfo = true;
 
             response.Info.GuildGuid = GetGUID();
             response.Info.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
@@ -1538,7 +1537,7 @@ namespace Game.Guilds
             }
         }
 
-        public List<Player> GetMembersTrackingCriteria(uint criteriaId)
+        public List<Player> GetMembersTrackingCriteria(int criteriaId)
         {
             List<Player> members = new();
             foreach (var (_, member) in m_members)

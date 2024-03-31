@@ -741,7 +741,7 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             return base.GetPrematureWinner();
         }
 
-        public override void ProcessEvent(WorldObject target, uint eventId, WorldObject invoker)
+        public override void ProcessEvent(WorldObject target, int eventId, WorldObject invoker)
         {
             base.ProcessEvent(target, eventId, invoker);
 
@@ -840,7 +840,7 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
     struct BgEyeOfStormPointIconsStruct
     {
-        public BattlegroundEYPointIconsStruct(int worldStateControlIndex, int worldStateAllianceControlledIndex, int worldStateHordeControlledIndex, int worldStateAllianceStatusBarIcon, int worldStateHordeStatusBarIcon)
+        public BgEyeOfStormPointIconsStruct(int worldStateControlIndex, int worldStateAllianceControlledIndex, int worldStateHordeControlledIndex, int worldStateAllianceStatusBarIcon, int worldStateHordeStatusBarIcon)
         {
             WorldStateControlIndex = worldStateControlIndex;
             WorldStateAllianceControlledIndex = worldStateAllianceControlledIndex;
@@ -897,9 +897,9 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
     class BgEyeOfStormControlZoneHandler : ControlZoneHandler
     {
         BgEyeofStorm _battleground;
-        uint _point;
+        int _point;
 
-        public BgEyeOfStormControlZoneHandler(BgEyeofStorm bg, uint point)
+        public BgEyeOfStormControlZoneHandler(BgEyeofStorm bg, int point)
         {
             _battleground = bg;
             _point = point;

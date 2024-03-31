@@ -170,7 +170,7 @@ namespace Game.Chat
                 return true;
             }
 
-            uint VISUAL_AURA = 37800;
+            int VISUAL_AURA = 37800;
 
             if (visibleArg.Value)
             {

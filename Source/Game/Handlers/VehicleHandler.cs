@@ -32,7 +32,7 @@ namespace Game
                 return;
 
             VehicleSeatRecord seat = GetPlayer().GetVehicle().GetSeatForPassenger(GetPlayer());
-            if (!seat.CanSwitchFromSeat())
+            if (!seat.CanSwitchFromSeat)
             {
                 Log.outError(LogFilter.Network, "HandleRequestVehiclePrevSeat: {0} tried to switch seats but current seatflags {1} don't permit that.",
                     GetPlayer().GetGUID().ToString(), seat.Flags);
@@ -50,7 +50,7 @@ namespace Game
                 return;
 
             VehicleSeatRecord seat = GetPlayer().GetVehicle().GetSeatForPassenger(GetPlayer());
-            if (!seat.CanSwitchFromSeat())
+            if (!seat.CanSwitchFromSeat)
             {
                 Log.outError(LogFilter.Network, "HandleRequestVehicleNextSeat: {0} tried to switch seats but current seatflags {1} don't permit that.",
                     GetPlayer().GetGUID().ToString(), seat.Flags);
@@ -68,7 +68,7 @@ namespace Game
                 return;
 
             VehicleSeatRecord seat = GetPlayer().GetVehicle().GetSeatForPassenger(GetPlayer());
-            if (!seat.CanSwitchFromSeat())
+            if (!seat.CanSwitchFromSeat)
             {
                 Log.outError(LogFilter.Network, "HandleMoveChangeVehicleSeats, {0} tried to switch seats but current seatflags {1} don't permit that.",
                     GetPlayer().GetGUID().ToString(), seat.Flags);
@@ -105,7 +105,7 @@ namespace Game
                 return;
 
             VehicleSeatRecord seat = GetPlayer().GetVehicle().GetSeatForPassenger(GetPlayer());
-            if (!seat.CanSwitchFromSeat())
+            if (!seat.CanSwitchFromSeat)
             {
                 Log.outError(LogFilter.Network, "HandleRequestVehicleSwitchSeat: {0} tried to switch seats but current seatflags {1} don't permit that.",
                     GetPlayer().GetGUID().ToString(), seat.Flags);
@@ -174,7 +174,7 @@ namespace Game
 
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(unit);
                 Cypher.Assert(seat != null);
-                if (seat.IsEjectable())
+                if (seat.IsEjectable)
                     unit.ExitVehicle();
                 else
                     Log.outError(LogFilter.Network, "{0} attempted to eject {1} from non-ejectable seat.", GetPlayer().GetGUID().ToString(), packet.Passenger.ToString());
@@ -193,7 +193,7 @@ namespace Game
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());
                 if (seat != null)
                 {
-                    if (seat.CanEnterOrExit())
+                    if (seat.CanEnterOrExit)
                         GetPlayer().ExitVehicle();
                     else
                         Log.outError(LogFilter.Network, "{0} tried to exit vehicle, but seatflags {1} (ID: {2}) don't permit that.",

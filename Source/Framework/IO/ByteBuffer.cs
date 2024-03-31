@@ -106,7 +106,7 @@ namespace Framework.IO
             return tmpString.ToString();
         }
 
-        public string ReadString(uint length)
+        public string ReadString(int length)
         {
             if (length == 0)
                 return "";
@@ -121,10 +121,10 @@ namespace Framework.IO
             return readStream.ReadBoolean();
         }
 
-        public byte[] ReadBytes(uint count)
+        public byte[] ReadBytes(int count)
         {
             ResetBitPos();
-            return readStream.ReadBytes((int)count);
+            return readStream.ReadBytes(count);
         }
 
         public void Skip(int count)
@@ -278,10 +278,10 @@ namespace Framework.IO
             writeStream.Write(data, 0, data.Length);
         }
 
-        public void WriteBytes(byte[] data, uint count)
+        public void WriteBytes(byte[] data, int count)
         {
             FlushBits();
-            writeStream.Write(data, 0, (int)count);
+            writeStream.Write(data, 0, count);
         }
 
         public void WriteBytes(ByteBuffer buffer)

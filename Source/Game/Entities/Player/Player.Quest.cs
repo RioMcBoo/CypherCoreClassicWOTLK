@@ -746,7 +746,7 @@ namespace Game.Entities
                             GetReputationMgr().SetVisible(factionEntry);
                         break;
                     case QuestObjectiveType.CriteriaTree:
-                        m_questObjectiveCriteriaMgr.ResetCriteriaTree((uint)obj.ObjectID);
+                        m_questObjectiveCriteriaMgr.ResetCriteriaTree(obj.ObjectID);
                         break;
                     default:
                         break;

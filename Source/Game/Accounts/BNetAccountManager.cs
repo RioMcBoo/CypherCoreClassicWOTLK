@@ -39,7 +39,7 @@ namespace Game
             stmt.AddValue(3, verifier);
             DB.Login.DirectExecute(stmt);
 
-            uint newAccountId = GetId(email);
+            int newAccountId = GetId(email);
             Cypher.Assert(newAccountId != 0);
 
             if (withGameAccount)
@@ -64,7 +64,7 @@ namespace Game
             string srpUsername = GetSrpUsername(username);
             var (salt, verifier) = SRP6.MakeBNetRegistrationData<BnetSRP6v2Hash256>(srpUsername, newPassword);
 
-            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_LOGON);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LOGON);
             stmt.AddValue(0, (sbyte)SrpVersion.v2);
             stmt.AddValue(1, salt);
             stmt.AddValue(2, verifier);
@@ -74,7 +74,7 @@ namespace Game
             return AccountOpResult.Ok;
         }
 
-        public bool CheckPassword(uint accountId, string password)
+        public bool CheckPassword(int accountId, string password)
         {
             string username;
             if (!GetName(accountId, out username))

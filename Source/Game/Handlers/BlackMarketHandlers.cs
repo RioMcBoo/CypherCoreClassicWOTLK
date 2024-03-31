@@ -15,7 +15,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BlackMarketOpen)]
         void HandleBlackMarketOpen(BlackMarketOpen blackMarketOpen)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketOpen.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketOpen.Guid, NPCFlags1.BlackMarket, NPCFlags2.BlackMarketView);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketHello - {0} not found or you can't interact with him.", blackMarketOpen.Guid.ToString());
@@ -44,7 +44,7 @@ namespace Game
             if (!Global.BlackMarketMgr.IsEnabled())
                 return;
 
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketRequestItems.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketRequestItems.Guid, NPCFlags1.BlackMarket, NPCFlags2.BlackMarketView);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketRequestItems - {0} not found or you can't interact with him.", blackMarketRequestItems.Guid.ToString());
@@ -63,7 +63,7 @@ namespace Game
                 return;
 
             Player player = GetPlayer();
-            Creature unit = player.GetNPCIfCanInteractWith(blackMarketBidOnItem.Guid, NPCFlags.BlackMarket, NPCFlags2.None);
+            Creature unit = player.GetNPCIfCanInteractWith(blackMarketBidOnItem.Guid, NPCFlags1.BlackMarket, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} not found or you can't interact with him.", blackMarketBidOnItem.Guid.ToString());
@@ -116,7 +116,7 @@ namespace Game
             SendBlackMarketBidOnItemResult(BlackMarketError.Ok, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
         }
 
-        void SendBlackMarketBidOnItemResult(BlackMarketError result, uint marketId, ItemInstance item)
+        void SendBlackMarketBidOnItemResult(BlackMarketError result, int marketId, ItemInstance item)
         {
             BlackMarketBidOnItemResult packet = new();
 

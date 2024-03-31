@@ -2493,10 +2493,10 @@ namespace Game.Spells
                     case SpellEffectName.WeaponDamage:
                     case SpellEffectName.WeaponDamageNoSchool:
                     case SpellEffectName.NormalizedWeaponDmg:
-                        weaponDamage += (uint)fixed_bonus;
+                        weaponDamage += fixed_bonus;
                         break;
                     case SpellEffectName.WeaponPercentDamage:
-                        weaponDamage = (uint)(weaponDamage * weaponDamagePercentMod);
+                        weaponDamage = (int)(weaponDamage * weaponDamagePercentMod);
                         break;
                     default:
                         continue;                                      // not weapon damage effect, just skip
@@ -2506,15 +2506,15 @@ namespace Game.Spells
                     mechanic = spellEffectInfo.Mechanic;
             }
 
-            weaponDamage += (uint)spell_bonus;
-            weaponDamage = (uint)(weaponDamage * totalDamagePercentMod);
+            weaponDamage += spell_bonus;
+            weaponDamage = (int)(weaponDamage * totalDamagePercentMod);
 
             // prevent negative damage
             weaponDamage = Math.Max(weaponDamage, 0);
 
             // Add melee damage bonuses (also check for negative)
-            weaponDamage = (uint)unitCaster.MeleeDamageBonusDone(unitTarget, (int)weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo, mechanic, m_spellSchoolMask, this);
-            m_damage += unitTarget.MeleeDamageBonusTaken(unitCaster, (int)weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo);
+            weaponDamage = unitCaster.MeleeDamageBonusDone(unitTarget, weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo, mechanic, m_spellSchoolMask, this);
+            m_damage += unitTarget.MeleeDamageBonusTaken(unitCaster, weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo);
         }
 
         [SpellEffectHandler(SpellEffectName.Threat)]
@@ -4769,7 +4769,7 @@ namespace Game.Spells
                 return;                       
 
             Player playerCaster = unitTarget.ToPlayer();
-            playerCaster.SetBonusTalentGroupCount(effectInfo.BasePoints);
+            playerCaster.SetBonusTalentGroupCount((int)effectInfo.BasePoints);
             playerCaster.SendTalentsInfoData();
         }
 
@@ -4782,7 +4782,7 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
                 return;
 
-            unitTarget.ToPlayer().ActivateTalentGroup(effectInfo.BasePoints);
+            unitTarget.ToPlayer().ActivateTalentGroup((int)effectInfo.BasePoints);
         }
 
         [SpellEffectHandler(SpellEffectName.PlaySound)]
@@ -5125,8 +5125,7 @@ namespace Game.Spells
             if (player == null)
                 return;
 
-            foreach (var spellId in talent.SpellRank)
-                player.RemoveTalent(spellId);
+            player.RemoveTalent(talent);
             player.SendTalentsInfoData();
         }
 
@@ -5449,7 +5448,7 @@ namespace Game.Spells
             if (unitCaster == null || !m_targets.HasDst())
                 return;
 
-            SceneObject sceneObject = SceneObject.CreateSceneObject((uint)effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), ObjectGuid.Empty);
+            SceneObject sceneObject = SceneObject.CreateSceneObject(effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), ObjectGuid.Empty);
             if (sceneObject != null)
             {
                 bool hasAuraTargetingCaster = m_UniqueTargetInfo.Any(target => IsUnitTargetSceneObjectAura(this, target));
@@ -5468,7 +5467,7 @@ namespace Game.Spells
             if (unitCaster == null || !m_targets.HasDst())
                 return;
 
-            SceneObject sceneObject = SceneObject.CreateSceneObject((uint)effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), unitCaster.GetGUID());
+            SceneObject sceneObject = SceneObject.CreateSceneObject(effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), unitCaster.GetGUID());
             if (sceneObject != null)
             {
                 bool hasAuraTargetingCaster = m_UniqueTargetInfo.Any(target => IsUnitTargetSceneObjectAura(this, target));

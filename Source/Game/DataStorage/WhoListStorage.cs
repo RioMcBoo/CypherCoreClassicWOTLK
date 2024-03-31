@@ -10,14 +10,14 @@ namespace Game.DataStorage
 {
     public class WhoListPlayerInfo
     {
-        public WhoListPlayerInfo(ObjectGuid guid, Team team, AccountTypes security, uint level, Class clss, Race race, uint zoneid, byte gender, bool visible, bool gamemaster, string playerName, string guildName, ObjectGuid guildguid)
+        public WhoListPlayerInfo(ObjectGuid guid, Team team, AccountTypes security, int level, Class classId, Race race, int zoneid, byte gender, bool visible, bool gamemaster, string playerName, string guildName, ObjectGuid guildguid)
         {
             Guid = guid;
             Team = team;
             Security = security;
             Level = level;
-            Class = (byte)clss;
-            Race = (byte)race;
+            Class = classId;
+            Race = race;
             ZoneId = zoneid;
             Gender = gender;
             IsVisible = visible;
@@ -30,10 +30,10 @@ namespace Game.DataStorage
         public ObjectGuid Guid { get; }
         public Team Team { get; }
         public AccountTypes Security { get; }
-        public uint Level { get; }
-        public byte Class { get; }
-        public byte Race { get; }
-        public uint ZoneId { get; }
+        public int Level { get; }
+        public Class Class { get; }
+        public Race Race { get; }
+        public int ZoneId { get; }
         public byte Gender { get; }
         public bool IsVisible { get; }
         public bool IsGamemaster { get; }
@@ -63,7 +63,7 @@ namespace Game.DataStorage
                     continue;
 
                 string playerName = player.GetName();
-                string guildName = Global.GuildMgr.GetGuildNameById((uint)player.GetGuildId());
+                string guildName = Global.GuildMgr.GetGuildNameById((int)player.GetGuildId());
 
                 Guild guild = player.GetGuild();
                 ObjectGuid guildGuid = ObjectGuid.Empty;

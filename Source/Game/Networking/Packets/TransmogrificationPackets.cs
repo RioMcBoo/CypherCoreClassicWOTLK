@@ -62,13 +62,13 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             ItemModifiedAppearanceID = data.ReadInt32();
-            Slot = data.ReadUInt32();
+            Slot = (byte)data.ReadUInt32();
             SpellItemEnchantmentID = data.ReadInt32();
             SecondaryItemModifiedAppearanceID = data.ReadInt32();
         }
 
         public int ItemModifiedAppearanceID;
-        public uint Slot;
+        public byte Slot;
         public int SpellItemEnchantmentID;
         public int SecondaryItemModifiedAppearanceID;
     }

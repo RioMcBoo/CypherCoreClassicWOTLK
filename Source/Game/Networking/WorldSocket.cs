@@ -28,7 +28,7 @@ namespace Game.Networking
         SocketBuffer _packetBuffer;
 
         ConnectionType _connectType;
-        ulong _key;
+        long _key;
 
         byte[] _serverChallenge;
         WorldCrypt _worldCrypt;
@@ -136,7 +136,7 @@ namespace Game.Networking
                     }
 
                     ByteBuffer buffer = new(_packetBuffer.GetData());
-                    string initializer = buffer.ReadString((uint)ClientConnectionInitialize.Length);
+                    string initializer = buffer.ReadString(ClientConnectionInitialize.Length);
                     if (initializer != ClientConnectionInitialize)
                     {
                         CloseSocket();
@@ -369,7 +369,7 @@ namespace Game.Networking
                 byte[] compressedData;
                 uint compressedSize = CompressPacket(data, opcode, out compressedData);
                 buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize)); 
-                buffer.WriteBytes(compressedData, compressedSize);
+                buffer.WriteBytes(compressedData, (int)compressedSize);
 
                 packetSize = (int)(compressedSize + 12);
                 opcode = ServerOpcodes.CompressedPacket;
@@ -683,7 +683,7 @@ namespace Game.Networking
                 return;
             }
 
-            uint accountId = key.AccountId;
+            int accountId = key.AccountId;
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO_CONTINUED_SESSION);
             stmt.AddValue(0, accountId);
 
@@ -702,7 +702,7 @@ namespace Game.Networking
             ConnectToKey key = new();
             _key = key.Raw = authSession.Key;
 
-            uint accountId = key.AccountId;
+            int accountId = key.AccountId;
             string login = result.Read<string>(0);
             _sessionKey = result.Read<byte[]>(1);
 
@@ -846,7 +846,7 @@ namespace Game.Networking
             // FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID IN (-1, ?)
             // LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id LEFT JOIN account r ON a.id = r.recruiter
             // WHERE a.username = ? AND LENGTH(a.session_key) = 40 ORDER BY aa.RealmID DESC LIMIT 1
-            game.Id = fields.Read<uint>(0);
+            game.Id = fields.Read<int>(0);
             game.KeyData = fields.Read<byte[]>(1);
             battleNet.LastIP = fields.Read<string>(2);
             battleNet.IsLockedToIP = fields.Read<bool>(3);
@@ -854,10 +854,10 @@ namespace Game.Networking
             game.Expansion = fields.Read<byte>(5);
             game.MuteTime = fields.Read<long>(6);
             battleNet.Locale = (Locale)fields.Read<byte>(7);
-            game.Recruiter = fields.Read<uint>(8);
+            game.Recruiter = fields.Read<int>(8);
             game.OS = fields.Read<string>(9);
             game.TimezoneOffset = TimeSpan.FromMinutes(fields.Read<short>(10));
-            battleNet.Id = fields.Read<uint>(11);
+            battleNet.Id = fields.Read<int>(11);
             game.Security = (AccountTypes)fields.Read<byte>(12);
             battleNet.IsBanned = fields.Read<uint>(13) != 0;
             game.IsBanned = fields.Read<uint>(14) != 0;
@@ -874,7 +874,7 @@ namespace Game.Networking
 
         public struct BattleNet
         {
-            public uint Id;
+            public int Id;
             public bool IsLockedToIP;
             public string LastIP;
             public string LockCountry;
@@ -884,11 +884,11 @@ namespace Game.Networking
 
         public struct Game
         {
-            public uint Id;
+            public int Id;
             public byte[] KeyData;
             public byte Expansion;
             public long MuteTime;
-            public uint Recruiter;
+            public int Recruiter;
             public string OS;
             public TimeSpan TimezoneOffset;
             public bool IsRectuiter;

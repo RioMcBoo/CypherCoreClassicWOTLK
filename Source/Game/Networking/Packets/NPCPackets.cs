@@ -93,7 +93,7 @@ namespace Game.Networking.Packets
             GossipID = _worldPacket.ReadInt32();
             GossipOptionID = _worldPacket.ReadInt32();
 
-            uint length = _worldPacket.ReadBits<uint>(8);
+            int length = _worldPacket.ReadBits<int>(8);
             PromotionCode = _worldPacket.ReadString(length);
         }
 

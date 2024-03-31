@@ -813,7 +813,7 @@ namespace Game.Spells
                         if (spellInfo == null || !(spellInfo.IsPassive() || spellInfo.HasAttribute(SpellAttr0.DoNotDisplaySpellbookAuraIconCombatLog)))
                             continue;
 
-                        if (Convert.ToBoolean(spellInfo.Stances & (1ul << (GetMiscValue() - 1))))
+                        if (Convert.ToBoolean(spellInfo.Stances & (1 << (GetMiscValue() - 1))))
                             target.CastSpell(target, pair.Key, new CastSpellExtraArgs(this));
                     }
                 }
@@ -847,7 +847,7 @@ namespace Game.Spells
                         continue;
 
                     // Use the new aura to see on what stance the target will be
-                    ulong newStance = newAura != null ? (1ul << (newAura.GetMiscValue() - 1)) : 0;
+                    long newStance = newAura != null ? (1 << (newAura.GetMiscValue() - 1)) : 0;
 
                     // If the stances are not compatible with the spell, remove it
                     if (app.Value.GetBase().IsRemovedOnShapeLost(target) && !Convert.ToBoolean(app.Value.GetBase().GetSpellInfo().Stances & newStance))
@@ -5192,7 +5192,7 @@ namespace Game.Spells
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
                 if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect))
-                    damage = target.CalculateAOEAvoidance(damage, m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
+                    damage = target.CalculateAOEAvoidance(damage, m_spellInfo.SchoolMask, (caster != null && !caster.IsControlledByPlayer()) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe));
             }
 
             int dmg = damage;

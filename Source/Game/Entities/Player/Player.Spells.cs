@@ -2442,8 +2442,8 @@ namespace Game.Entities
             // note: form passives activated with shapeshift spells be implemented by HandleShapeshiftBoosts instead of spell_learn_spell
             // talent dependent passives activated at form apply have proper stance data
             ShapeShiftForm form = GetShapeshiftForm();
-            bool need_cast = (spellInfo.Stances == 0 || (form != 0 && Convert.ToBoolean(spellInfo.Stances & (1ul << ((int)form - 1)))) ||
-            (form == 0 && spellInfo.HasAttribute(SpellAttr2.AllowWhileNotShapeshiftedCasterForm)));
+            bool need_cast = spellInfo.Stances == 0 || (form != 0 && Convert.ToBoolean(spellInfo.Stances & (1 << ((int)form - 1)))) ||
+            (form == 0 && spellInfo.HasAttribute(SpellAttr2.AllowWhileNotShapeshiftedCasterForm));
 
             // Check EquippedItemClass
             // passive spells which apply aura and have an item requirement are to be added manually, instead of casted

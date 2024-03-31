@@ -33,7 +33,7 @@ namespace Game.Chat
             }
 
             var map = CliDB.MapStorage.LookupByKey(tele.mapId);
-            if (map == null || (map.IsBattlegroundOrArena() && (player.GetMapId() != tele.mapId || !player.IsGameMaster())))
+            if (map == null || (map.IsBattlegroundOrArena && (player.GetMapId() != tele.mapId || !player.IsGameMaster())))
             {
                 handler.SendSysMessage(CypherStrings.CannotTeleToBg);
                 return false;
@@ -119,7 +119,7 @@ namespace Game.Chat
                 return false;
 
             MapRecord map = CliDB.MapStorage.LookupByKey(tele.mapId);
-            if (map == null || map.IsBattlegroundOrArena())
+            if (map == null || map.IsBattlegroundOrArena)
             {
                 handler.SendSysMessage(CypherStrings.CannotTeleToBg);
                 return false;
@@ -168,7 +168,7 @@ namespace Game.Chat
             return true;
         }
 
-        static bool DoNameTeleport(CommandHandler handler, PlayerIdentifier player, uint mapId, Position pos, string locationName)
+        static bool DoNameTeleport(CommandHandler handler, PlayerIdentifier player, int mapId, Position pos, string locationName)
         {
             if (!GridDefines.IsValidMapCoord(mapId, pos) || Global.ObjectMgr.IsTransportMap(mapId))
             {
@@ -245,7 +245,7 @@ namespace Game.Chat
                         if (!result.IsEmpty())
                         {
                             WorldLocation loc = new(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
-                            uint zoneId = result.Read<ushort>(1);
+                            int zoneId = result.Read<ushort>(1);
 
                             Player.SavePositionInDB(loc, zoneId, player.GetGUID());
                         }
@@ -263,7 +263,7 @@ namespace Game.Chat
             class TeleNameNpcCommands
             {
                 [Command("guid", RBACPermissions.CommandTeleName, true)]
-                static bool HandleTeleNameNpcSpawnIdCommand(CommandHandler handler, PlayerIdentifier player, ulong spawnId)
+                static bool HandleTeleNameNpcSpawnIdCommand(CommandHandler handler, PlayerIdentifier player, long spawnId)
                 {
                     if (player == null)
                         return false;
@@ -281,7 +281,7 @@ namespace Game.Chat
                 }
 
                 [Command("id", RBACPermissions.CommandTeleName, true)]
-                static bool HandleTeleNameNpcIdCommand(CommandHandler handler, PlayerIdentifier player, uint creatureId)
+                static bool HandleTeleNameNpcIdCommand(CommandHandler handler, PlayerIdentifier player, int creatureId)
                 {
                     if (player == null)
                         return false;

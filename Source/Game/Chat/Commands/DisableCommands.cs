@@ -14,7 +14,7 @@ namespace Game.Chat.Commands
         [CommandGroup("add")]
         class DisableAddCommands
         {
-            static bool HandleAddDisables(CommandHandler handler, DisableType disableType, uint entry, uint? flags, Tail disableComment)
+            static bool HandleAddDisables(CommandHandler handler, DisableType disableType, int entry, uint? flags, Tail disableComment)
             {
                 switch (disableType)
                 {
@@ -127,49 +127,49 @@ namespace Game.Chat.Commands
             }
 
             [Command("spell", RBACPermissions.CommandDisableAddSpell, true)]
-            static bool HandleAddDisableSpellCommand(CommandHandler handler, uint entry, uint? flags, Tail disableComment)
+            static bool HandleAddDisableSpellCommand(CommandHandler handler, int entry, uint? flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.Spell, entry, flags, disableComment);
             }
 
             [Command("quest", RBACPermissions.CommandDisableAddQuest, true)]
-            static bool HandleAddDisableQuestCommand(CommandHandler handler, uint entry, uint? flags, Tail disableComment)
+            static bool HandleAddDisableQuestCommand(CommandHandler handler, int entry, uint? flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.Quest, entry, flags, disableComment);
             }
 
             [Command("map", RBACPermissions.CommandDisableAddMap, true)]
-            static bool HandleAddDisableMapCommand(CommandHandler handler, uint entry, uint? flags, Tail disableComment)
+            static bool HandleAddDisableMapCommand(CommandHandler handler, int entry, uint? flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.Map, entry, flags, disableComment);
             }
 
             [Command("Battleground", RBACPermissions.CommandDisableAddBattleground, true)]
-            static bool HandleAddDisableBattlegroundCommand(CommandHandler handler, uint entry, uint flags, Tail disableComment)
+            static bool HandleAddDisableBattlegroundCommand(CommandHandler handler, int entry, uint flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.Battleground, entry, flags, disableComment);
             }
 
             [Command("criteria", RBACPermissions.CommandDisableAddCriteria, true)]
-            static bool HandleAddDisableCriteriaCommand(CommandHandler handler, uint entry, uint flags, Tail disableComment)
+            static bool HandleAddDisableCriteriaCommand(CommandHandler handler, int entry, uint flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.Criteria, entry, flags, disableComment);
             }
 
             [Command("outdoorpvp", RBACPermissions.CommandDisableAddOutdoorpvp, true)]
-            static bool HandleAddDisableOutdoorPvPCommand(CommandHandler handler, uint entry, uint flags, Tail disableComment)
+            static bool HandleAddDisableOutdoorPvPCommand(CommandHandler handler, int entry, uint flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.OutdoorPVP, entry, flags, disableComment);
             }
 
             [Command("vmap", RBACPermissions.CommandDisableAddVmap, true)]
-            static bool HandleAddDisableVmapCommand(CommandHandler handler, uint entry, uint flags, Tail disableComment)
+            static bool HandleAddDisableVmapCommand(CommandHandler handler, int entry, uint flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.VMAP, entry, flags, disableComment);
             }
 
             [Command("mmap", RBACPermissions.CommandDisableAddMmap, true)]
-            static bool HandleAddDisableMMapCommand(CommandHandler handler, uint entry, uint flags, Tail disableComment)
+            static bool HandleAddDisableMMapCommand(CommandHandler handler, int entry, uint flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.MMAP, entry, flags, disableComment);
             }
@@ -178,7 +178,7 @@ namespace Game.Chat.Commands
         [CommandGroup("remove")]
         class DisableRemoveCommands
         {
-            static bool HandleRemoveDisables(CommandHandler handler, DisableType disableType, uint entry)
+            static bool HandleRemoveDisables(CommandHandler handler, DisableType disableType, int entry)
             {
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_DISABLES);
                 stmt.AddValue(0, entry);
@@ -202,49 +202,49 @@ namespace Game.Chat.Commands
             }
 
             [Command("spell", RBACPermissions.CommandDisableRemoveSpell, true)]
-            static bool HandleRemoveDisableSpellCommand(CommandHandler handler, uint entry)
+            static bool HandleRemoveDisableSpellCommand(CommandHandler handler, int entry)
             {
                 return HandleRemoveDisables(handler, DisableType.Spell, entry);
             }
 
             [Command("quest", RBACPermissions.CommandDisableRemoveQuest, true)]
-            static bool HandleRemoveDisableQuestCommand(CommandHandler handler, uint entry)
+            static bool HandleRemoveDisableQuestCommand(CommandHandler handler, int entry)
             {
                 return HandleRemoveDisables(handler, DisableType.Quest, entry);
             }
 
             [Command("map", RBACPermissions.CommandDisableRemoveMap, true)]
-            static bool HandleRemoveDisableMapCommand(CommandHandler handler, uint entry)
+            static bool HandleRemoveDisableMapCommand(CommandHandler handler, int entry)
             {
                 return HandleRemoveDisables(handler, DisableType.Map, entry);
             }
 
             [Command("Battleground", RBACPermissions.CommandDisableRemoveBattleground, true)]
-            static bool HandleRemoveDisableBattlegroundCommand(CommandHandler handler, uint entry)
+            static bool HandleRemoveDisableBattlegroundCommand(CommandHandler handler, int entry)
             {
                 return HandleRemoveDisables(handler, DisableType.Battleground, entry);
             }
 
             [Command("criteria", RBACPermissions.CommandDisableRemoveCriteria, true)]
-            static bool HandleRemoveDisableCriteriaCommand(CommandHandler handler, uint entry)
+            static bool HandleRemoveDisableCriteriaCommand(CommandHandler handler, int entry)
             {
                 return HandleRemoveDisables(handler, DisableType.Criteria, entry);
             }
 
             [Command("outdoorpvp", RBACPermissions.CommandDisableRemoveOutdoorpvp, true)]
-            static bool HandleRemoveDisableOutdoorPvPCommand(CommandHandler handler, uint entry)
+            static bool HandleRemoveDisableOutdoorPvPCommand(CommandHandler handler, int entry)
             {
                 return HandleRemoveDisables(handler, DisableType.OutdoorPVP, entry);
             }
 
             [Command("vmap", RBACPermissions.CommandDisableRemoveVmap, true)]
-            static bool HandleRemoveDisableVmapCommand(CommandHandler handler, uint entry)
+            static bool HandleRemoveDisableVmapCommand(CommandHandler handler, int entry)
             {
                 return HandleRemoveDisables(handler, DisableType.VMAP, entry);
             }
 
             [Command("mmap", RBACPermissions.CommandDisableRemoveMmap, true)]
-            static bool HandleRemoveDisableMMapCommand(CommandHandler handler, uint entry)
+            static bool HandleRemoveDisableMMapCommand(CommandHandler handler, int entry)
             {
                 return HandleRemoveDisables(handler, DisableType.MMAP, entry);
             }

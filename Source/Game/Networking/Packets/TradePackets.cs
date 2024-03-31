@@ -78,12 +78,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Type = _worldPacket.ReadUInt32();
-            Quantity = _worldPacket.ReadUInt32();
+            Type = _worldPacket.ReadInt32();
+            Quantity = _worldPacket.ReadInt32();
         }
 
-        public uint Type;
-        public uint Quantity;
+        public int Type;
+        public int Quantity;
     }
 
     public class SetTradeGold : ClientPacket
@@ -92,10 +92,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Coinage = _worldPacket.ReadUInt64();
+            Coinage = _worldPacket.ReadInt64();
         }
 
-        public ulong Coinage;
+        public long Coinage;
     }
 
     public class SetTradeItem : ClientPacket
@@ -134,7 +134,7 @@ namespace Game.Networking.Packets
                 case TradeStatus.Failed:
                     _worldPacket.WriteBit(FailureForYou);
                     _worldPacket.WriteInt32((int)BagResult);
-                    _worldPacket.WriteUInt32(ItemID);
+                    _worldPacket.WriteInt32(ItemID);
                     break;
                 case TradeStatus.Initiated:
                     _worldPacket.WriteUInt32(Id);
@@ -166,7 +166,7 @@ namespace Game.Networking.Packets
         public int CurrencyQuantity;
         public bool FailureForYou;
         public InventoryResult BagResult;
-        public uint ItemID;
+        public int ItemID;
         public uint Id;
         public bool PartnerIsSameBnetAccount;
     }
@@ -178,10 +178,10 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt8(WhichPlayer);
-            _worldPacket.WriteUInt32(Id);
-            _worldPacket.WriteUInt32(ClientStateIndex);
-            _worldPacket.WriteUInt32(CurrentStateIndex);
-            _worldPacket.WriteUInt64(Gold);
+            _worldPacket.WriteInt32(Id);
+            _worldPacket.WriteInt32(ClientStateIndex);
+            _worldPacket.WriteInt32(CurrentStateIndex);
+            _worldPacket.WriteInt64(Gold);
             _worldPacket.WriteInt32(CurrencyType);
             _worldPacket.WriteInt32(CurrencyQuantity);
             _worldPacket.WriteInt32(ProposedEnchantment);
@@ -199,8 +199,8 @@ namespace Game.Networking.Packets
                 data.WriteInt32(OnUseEnchantmentID);
                 data.WritePackedGuid(Creator);
                 data.WriteInt32(Charges);
-                data.WriteUInt32(MaxDurability);
-                data.WriteUInt32(Durability);
+                data.WriteInt32(MaxDurability);
+                data.WriteInt32(Durability);
                 data.WriteBits(Gems.Count, 2);
                 data.WriteBit(Lock);
                 data.FlushBits();
@@ -215,8 +215,8 @@ namespace Game.Networking.Packets
             public ObjectGuid Creator;
             public int Charges;
             public bool Lock;
-            public uint MaxDurability;
-            public uint Durability;
+            public int MaxDurability;
+            public int Durability;
             public List<ItemGemData> Gems = new();
         }
 
@@ -242,13 +242,13 @@ namespace Game.Networking.Packets
             public UnwrappedTradeItem Unwrapped;
         }
 
-        public ulong Gold;
-        public uint CurrentStateIndex;
+        public long Gold;
+        public int CurrentStateIndex;
         public byte WhichPlayer;
-        public uint ClientStateIndex;
+        public int ClientStateIndex;
         public List<TradeItem> Items = new();
         public int CurrencyType;
-        public uint Id;
+        public int Id;
         public int ProposedEnchantment;
         public int CurrencyQuantity;
     }

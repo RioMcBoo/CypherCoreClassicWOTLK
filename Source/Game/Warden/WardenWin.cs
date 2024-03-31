@@ -278,8 +278,8 @@ namespace Game
                     }
                     case WardenCheckType.Module:
                     {
-                        uint seed = RandomHelper.Rand32();
-                        buff.WriteUInt32(seed);
+                        int seed = RandomHelper.Rand32();
+                        buff.WriteInt32(seed);
                         HmacHash hmac = new(BitConverter.GetBytes(seed));
                         hmac.Finish(check.Str);
                         buff.WriteBytes(hmac.Digest);
@@ -384,7 +384,7 @@ namespace Game
 
                         byte[] expected = Global.WardenCheckMgr.GetCheckResult(id);
 
-                        if (buff.ReadBytes((uint)expected.Length).Compare(expected))
+                        if (buff.ReadBytes(expected.Length).Compare(expected))
                         {
                             Log.outDebug(LogFilter.Warden, $"RESULT MEM_CHECK fail CheckId {id} account Id {_session.GetAccountId()}");
                             checkFailed = id;

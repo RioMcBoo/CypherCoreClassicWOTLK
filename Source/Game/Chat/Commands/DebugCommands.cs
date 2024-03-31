@@ -109,7 +109,7 @@ namespace Game.Chat
         }
 
         [Command("conversation", RBACPermissions.CommandDebug)]
-        static bool HandleDebugConversationCommand(CommandHandler handler, uint conversationEntry)
+        static bool HandleDebugConversationCommand(CommandHandler handler, int conversationEntry)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
@@ -129,7 +129,7 @@ namespace Game.Chat
         }
 
         [Command("entervehicle", RBACPermissions.CommandDebug)]
-        static bool HandleDebugEnterVehicleCommand(CommandHandler handler, uint entry, sbyte seatId = -1)
+        static bool HandleDebugEnterVehicleCommand(CommandHandler handler, int entry, sbyte seatId = -1)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null || !target.IsVehicle())
@@ -427,7 +427,7 @@ namespace Game.Chat
         }
 
         [Command("guidlimits", RBACPermissions.CommandDebug, true)]
-        static bool HandleDebugGuidLimitsCommand(CommandHandler handler, uint mapId)
+        static bool HandleDebugGuidLimitsCommand(CommandHandler handler, int mapId)
         {
             if (mapId != 0)
                 Global.MapMgr.DoForAllMapsWithMapId(mapId, map => HandleDebugGuidLimitsMap(handler, map));
@@ -440,18 +440,18 @@ namespace Game.Chat
         }
 
         [Command("instancespawn", RBACPermissions.CommandDebug)]
-        static bool HandleDebugInstanceSpawns(CommandHandler handler, [VariantArg<uint, string>] object optArg)
+        static bool HandleDebugInstanceSpawns(CommandHandler handler, [VariantArg<int, string>] object optArg)
         {
             Player player = handler.GetPlayer();
             if (player == null)
                 return false;
 
             bool explain = false;
-            uint groupID = 0;
+            int groupID = 0;
             if (optArg is string && (optArg as string).Equals("explain", StringComparison.OrdinalIgnoreCase))
                 explain = true;
             else
-                groupID = (uint)optArg;
+                groupID = (int)optArg;
 
             if (groupID != 0 && Global.ObjectMgr.GetSpawnGroupData(groupID) == null)
             {
@@ -475,7 +475,7 @@ namespace Game.Chat
                 return false;
             }
 
-            MultiMap<uint, Tuple<bool, byte, byte>> store = new();
+            MultiMap<int, (bool, byte, EncounterStateMask)> store = new();
             foreach (InstanceSpawnGroupInfo info in spawnGroups)
             {
                 if (groupID != 0 && info.SpawnGroupId != groupID)
@@ -489,7 +489,7 @@ namespace Game.Chat
                 else
                     continue;
 
-                store.Add(info.SpawnGroupId, Tuple.Create(isSpawn, info.BossStateId, info.BossStates));
+                store.Add(info.SpawnGroupId, (isSpawn, info.BossStateId, info.BossStates));
             }
 
             if (groupID != 0 && !store.ContainsKey(groupID))
@@ -514,7 +514,7 @@ namespace Game.Chat
                         bool isSpawn = tuple.Item1;
                         byte bossStateId = tuple.Item2;
                         EncounterState actualState = instance.GetBossState(bossStateId);
-                        if ((tuple.Item3 & (1 << (int)actualState)) != 0)
+                        if (tuple.Item3.HasState(actualState))
                         {
                             if (isSpawn)
                             {
@@ -547,7 +547,7 @@ namespace Game.Chat
         }
 
         [Command("itemexpire", RBACPermissions.CommandDebug)]
-        static bool HandleDebugItemExpireCommand(CommandHandler handler, ulong guid)
+        static bool HandleDebugItemExpireCommand(CommandHandler handler, long guid)
         {
             Item item = handler.GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
             if (item == null)
@@ -560,7 +560,7 @@ namespace Game.Chat
         }
 
         [Command("loadcells", RBACPermissions.CommandDebug, true)]
-        static bool HandleDebugLoadCellsCommand(CommandHandler handler, uint? mapId, uint? tileX, uint? tileY)
+        static bool HandleDebugLoadCellsCommand(CommandHandler handler, int? mapId, int? tileX, int? tileY)
         {
             if (mapId.HasValue)
             {
@@ -578,7 +578,7 @@ namespace Game.Chat
             return false;
         }
 
-        static bool HandleDebugLoadCellsCommandHelper(CommandHandler handler, Map map, uint? tileX, uint? tileY)
+        static bool HandleDebugLoadCellsCommandHelper(CommandHandler handler, Map map, int? tileX, int? tileY)
         {
             if (map == null)
                 return false;
@@ -726,13 +726,13 @@ namespace Game.Chat
         }
 
         [Command("objectcount", RBACPermissions.CommandDebug, true)]
-        static bool HandleDebugObjectCountCommand(CommandHandler handler, uint? mapId)
+        static bool HandleDebugObjectCountCommand(CommandHandler handler, int? mapId)
         {
             void HandleDebugObjectCountMap(Map map)
             {
                 handler.SendSysMessage($"Map Id: {map.GetId()} Name: '{map.GetMapName()}' Instance Id: {map.GetInstanceId()} Creatures: {map.GetObjectsStore().OfType<Creature>().Count()} GameObjects: {map.GetObjectsStore().OfType<GameObject>().Count()} SetActive Objects: {map.GetActiveNonPlayersCount()}");
 
-                Dictionary<uint, uint> creatureIds = new();
+                Dictionary<int, int> creatureIds = new();
                 foreach (var p in map.GetObjectsStore())
                 {
                     if (p.Value.IsCreature())
@@ -779,7 +779,7 @@ namespace Game.Chat
         }
 
         [Command("playercondition", RBACPermissions.CommandDebug)]
-        static bool HandleDebugPlayerConditionCommand(CommandHandler handler, uint playerConditionId)
+        static bool HandleDebugPlayerConditionCommand(CommandHandler handler, int playerConditionId)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
@@ -866,7 +866,7 @@ namespace Game.Chat
         }
 
         [Command("raidreset", RBACPermissions.CommandDebug)]
-        static bool HandleDebugRaidResetCommand(CommandHandler handler, uint mapId, uint difficulty)
+        static bool HandleDebugRaidResetCommand(CommandHandler handler, int mapId, int difficulty)
         {
             MapRecord mEntry = CliDB.MapStorage.LookupByKey(mapId);
             if (mEntry == null)
@@ -875,7 +875,7 @@ namespace Game.Chat
                 return true;
             }
 
-            if (!mEntry.IsDungeon())
+            if (!mEntry.IsDungeon)
             {
                 handler.SendSysMessage($"'{mEntry.MapName[handler.GetSessionDbcLocale()]}' is not a dungeon map.");
                 return true;
@@ -919,7 +919,7 @@ namespace Game.Chat
         }
 
         [Command("spawnvehicle", RBACPermissions.CommandDebug)]
-        static bool HandleDebugSpawnVehicleCommand(CommandHandler handler, uint entry, uint id)
+        static bool HandleDebugSpawnVehicleCommand(CommandHandler handler, int entry, int id)
         {
             float x, y, z, o = handler.GetPlayer().GetOrientation();
             handler.GetPlayer().GetClosePoint(out x, out y, out z, handler.GetPlayer().GetCombatReach());
@@ -1128,7 +1128,7 @@ namespace Game.Chat
         }
 
         [Command("worldstate", RBACPermissions.CommandDebug)]
-        static bool HandleDebugUpdateWorldStateCommand(CommandHandler handler, uint variable, uint value)
+        static bool HandleDebugUpdateWorldStateCommand(CommandHandler handler, int variable, int value)
         {
             handler.GetPlayer().SendUpdateWorldState(variable, value);
             return true;
@@ -1146,7 +1146,7 @@ namespace Game.Chat
         }
 
         [Command("wsexpression", RBACPermissions.CommandDebug)]
-        static bool HandleDebugWSExpressionCommand(CommandHandler handler, uint expressionId)
+        static bool HandleDebugWSExpressionCommand(CommandHandler handler, int expressionId)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
@@ -1181,7 +1181,7 @@ namespace Game.Chat
         class DebugPlayCommands
         {
             [Command("cinematic", RBACPermissions.CommandDebug)]
-            static bool HandleDebugPlayCinematicCommand(CommandHandler handler, uint cinematicId)
+            static bool HandleDebugPlayCinematicCommand(CommandHandler handler, int cinematicId)
             {
                 CinematicSequencesRecord cineSeq = CliDB.CinematicSequencesStorage.LookupByKey(cinematicId);
                 if (cineSeq == null)
@@ -1209,7 +1209,7 @@ namespace Game.Chat
             }
 
             [Command("movie", RBACPermissions.CommandDebug)]
-            static bool HandleDebugPlayMovieCommand(CommandHandler handler, uint movieId)
+            static bool HandleDebugPlayMovieCommand(CommandHandler handler, int movieId)
             {
                 if (!CliDB.MovieStorage.ContainsKey(movieId))
                 {
@@ -1222,7 +1222,7 @@ namespace Game.Chat
             }
 
             [Command("music", RBACPermissions.CommandDebug)]
-            static bool HandleDebugPlayMusicCommand(CommandHandler handler, uint musicId)
+            static bool HandleDebugPlayMusicCommand(CommandHandler handler, int musicId)
             {
                 if (!CliDB.SoundKitStorage.ContainsKey(musicId))
                 {
@@ -1239,7 +1239,7 @@ namespace Game.Chat
             }
 
             [Command("objectsound", RBACPermissions.CommandDebug)]
-            static bool HandleDebugPlayObjectSoundCommand(CommandHandler handler, uint soundKitId, int? broadcastTextId)
+            static bool HandleDebugPlayObjectSoundCommand(CommandHandler handler, int soundKitId, int? broadcastTextId)
             {
                 if (!CliDB.SoundKitStorage.ContainsKey(soundKitId))
                 {
@@ -1256,7 +1256,7 @@ namespace Game.Chat
             }
 
             [Command("sound", RBACPermissions.CommandDebug)]
-            static bool HandleDebugPlaySoundCommand(CommandHandler handler, uint soundId, uint broadcastTextId)
+            static bool HandleDebugPlaySoundCommand(CommandHandler handler, int soundId, int broadcastTextId)
             {
                 if (!CliDB.SoundKitStorage.ContainsKey(soundId))
                 {
@@ -1400,7 +1400,7 @@ namespace Game.Chat
             }
 
             [Command("setphaseshift", RBACPermissions.CommandDebug)]
-            static bool HandleDebugSendSetPhaseShiftCommand(CommandHandler handler, uint phaseId, uint visibleMapId, uint uiMapPhaseId)
+            static bool HandleDebugSendSetPhaseShiftCommand(CommandHandler handler, int phaseId, int visibleMapId, int uiMapPhaseId)
             {
                 PhaseShift phaseShift = new();
 

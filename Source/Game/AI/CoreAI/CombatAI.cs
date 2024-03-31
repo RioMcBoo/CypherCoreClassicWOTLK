@@ -10,7 +10,7 @@ namespace Game.AI
 {
     public class CombatAI : CreatureAI
     {
-        protected List<uint> _spells = new();
+        protected List<int> _spells = new();
 
         public CombatAI(Creature c) : base(c) { }
 
@@ -63,7 +63,7 @@ namespace Game.AI
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            uint spellId = _events.ExecuteEvent();
+            int spellId = _events.ExecuteEvent();
             if (spellId != 0)
             {
                 DoCast(spellId);
@@ -168,7 +168,7 @@ namespace Game.AI
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            uint spellId = _events.ExecuteEvent();
+            int spellId = _events.ExecuteEvent();
             if (spellId != 0)
             {
                 DoCast(spellId);

@@ -138,7 +138,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CompleteMovie)]
         void HandleCompleteMovie(CompleteMovie packet)
         {
-            uint movie = _player.GetMovie();
+            int movie = _player.GetMovie();
             if (movie == 0)
                 return;
 
@@ -190,11 +190,11 @@ namespace Game
             if (player.IsAlive() && packet.Entered)
             {
                 // not using Player.UpdateQuestObjectiveProgress, ObjectID in quest_objectives can be set to -1, areatrigger_involvedrelation then holds correct id
-                List<uint> quests = Global.ObjectMgr.GetQuestsForAreaTrigger(packet.AreaTriggerID);
+                List<int> quests = Global.ObjectMgr.GetQuestsForAreaTrigger(packet.AreaTriggerID);
                 if (quests != null)
                 {
                     bool anyObjectiveChangedCompletionState = false;
-                    foreach (uint questId in quests)
+                    foreach (var questId in quests)
                     {
                         Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questId);
                         ushort slot = player.FindQuestSlot(questId);
@@ -277,7 +277,7 @@ namespace Game
                     if (player.HasCorpse())
                     {
                         // let enter in ghost mode in instance that connected to inner instance with corpse
-                        uint corpseMap = player.GetCorpseLocation().GetMapId();
+                        int corpseMap = player.GetCorpseLocation().GetMapId();
                         do
                         {
                             if (corpseMap == at.target_mapId)
@@ -543,7 +543,7 @@ namespace Game
             else
                 packet.TitleID = 0;
 
-            GetPlayer().SetChosenTitle((uint)packet.TitleID);
+            GetPlayer().SetChosenTitle(packet.TitleID);
         }
 
         [WorldPacketHandler(ClientOpcodes.ResetInstances)]

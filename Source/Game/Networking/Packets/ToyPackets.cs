@@ -68,9 +68,9 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            ItemID = _worldPacket.ReadUInt32();
+            ItemID = _worldPacket.ReadInt32();
         }
 
-        public uint ItemID;
+        public int ItemID;
     }
 }

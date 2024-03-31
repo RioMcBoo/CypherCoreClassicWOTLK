@@ -135,7 +135,7 @@ namespace Game.Maps
                     state = EncounterState.NotStarted;
 
                 if (state < EncounterState.ToBeDecided)
-                    _instance.SetBossState((uint)bossId, state);
+                    _instance.SetBossState(bossId, state);
             }
 
             return Result.Ok;
@@ -172,15 +172,18 @@ namespace Game.Maps
             return Result.Ok;
         }
 
-        uint GetInstanceId() { return _instance.instance.GetInstanceId(); }
+        int GetInstanceId() { return _instance.instance.GetInstanceId(); }
 
-        uint GetMapId() { return _instance.instance.GetId(); }
+        int GetMapId() { return _instance.instance.GetId(); }
 
         string GetMapName() { return _instance.instance.GetMapName(); }
 
-        uint GetDifficultyId() { return (uint)_instance.instance.GetDifficultyID(); }
+        Difficulty GetDifficultyId() { return _instance.instance.GetDifficultyID(); }
 
-        string GetDifficultyName() { return CliDB.DifficultyStorage.LookupByKey(_instance.instance.GetDifficultyID()).Name; }
+        string GetDifficultyName()
+        { 
+            return CliDB.DifficultyStorage.LookupByKey((int)_instance.instance.GetDifficultyID()).Name[Global.WorldMgr.GetDefaultDbcLocale()]; 
+        }
     }
 
     class InstanceScriptDataWriter
@@ -209,7 +212,7 @@ namespace Game.Maps
             _doc.Add("Header", _instance.GetHeader());
 
             JsonArray bossStates = new();
-            for (uint bossId = 0; bossId < _instance.GetEncounterCount(); ++bossId)
+            for (int bossId = 0; bossId < _instance.GetEncounterCount(); ++bossId)
                 bossStates.Add(JsonValue.Create((int)(withValues ? _instance.GetBossState(bossId) : EncounterState.NotStarted)));
 
             _doc.Add("BossStates", bossStates);

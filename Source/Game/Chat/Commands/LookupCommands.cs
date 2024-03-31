@@ -91,7 +91,7 @@ namespace Game.Chat
             var ctc = Global.ObjectMgr.GetCreatureTemplates();
             foreach (var template in ctc)
             {
-                uint id = template.Value.Entry;
+                int id = template.Value.Entry;
                 byte localeIndex = handler.GetSessionDbLocaleIndex();
                 CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(id);
                 if (creatureLocale != null)
@@ -250,8 +250,8 @@ namespace Game.Chat
 
                     if (factionState != null) // and then target != NULL also
                     {
-                        uint index = target.GetReputationMgr().GetReputationRankStrIndex(factionEntry);
-                        string rankName = handler.GetCypherString((CypherStrings)index);
+                        CypherStrings index = target.GetReputationMgr().GetReputationRankStrIndex(factionEntry);
+                        string rankName = handler.GetCypherString(index);
 
                         ss.AppendFormat(" {0}|h|r ({1})", rankName, target.GetReputationMgr().GetReputation(factionEntry));
 
@@ -672,7 +672,7 @@ namespace Game.Chat
             }
 
             [Command("id", RBACPermissions.CommandLookupItemId, true)]
-            static bool HandleLookupItemIdCommand(CommandHandler handler, uint id)
+            static bool HandleLookupItemIdCommand(CommandHandler handler, int id)
             {
                 ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(id);
                 if (itemTemplate != null)
@@ -803,7 +803,7 @@ namespace Game.Chat
                         StringBuilder ss = new();
                         ss.Append(mapInfo.Id + " - [" + name + ']');
 
-                        if (mapInfo.IsContinent())
+                        if (mapInfo.IsContinent)
                             ss.Append(handler.GetCypherString(CypherStrings.Continent));
 
                         switch (mapInfo.InstanceType)
@@ -835,7 +835,7 @@ namespace Game.Chat
             }
 
             [Command("id", RBACPermissions.CommandLookupMapId, true)]
-            static bool HandleLookupMapIdCommand(CommandHandler handler, uint id)
+            static bool HandleLookupMapIdCommand(CommandHandler handler, int id)
             {
                 var mapInfo = CliDB.MapStorage.LookupByKey(id);
                 if (mapInfo != null)
@@ -851,7 +851,7 @@ namespace Game.Chat
                     StringBuilder ss = new();
                     ss.Append($"{id} - [{name}]");
 
-                    if (mapInfo.IsContinent())
+                    if (mapInfo.IsContinent)
                         ss.Append(handler.GetCypherString(CypherStrings.Continent));
 
                     switch (mapInfo.InstanceType)
@@ -952,7 +952,7 @@ namespace Game.Chat
 
                             do
                             {
-                                ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result2.Read<ulong>(0));
+                                ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result2.Read<long>(0));
                                 string name = result2.Read<string>(1);
                                 bool online = result2.Read<bool>(2);
 
@@ -1105,7 +1105,7 @@ namespace Game.Chat
             }
 
             [Command("id", RBACPermissions.CommandLookupQuestId, true)]
-            static bool HandleLookupQuestIdCommand(CommandHandler handler, uint id)
+            static bool HandleLookupQuestIdCommand(CommandHandler handler, int id)
             {
                 // can be NULL at console call
                 Player target = handler.GetSelectedPlayerOrSelf();
@@ -1259,7 +1259,7 @@ namespace Game.Chat
             }
 
             [Command("id", RBACPermissions.CommandLookupSpellId)]
-            static bool HandleLookupSpellIdCommand(CommandHandler handler, uint id)
+            static bool HandleLookupSpellIdCommand(CommandHandler handler, int id)
             {
                 // can be NULL at console call
                 Player target = handler.GetSelectedPlayer();

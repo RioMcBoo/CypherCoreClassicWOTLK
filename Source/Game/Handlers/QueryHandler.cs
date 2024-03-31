@@ -151,7 +151,7 @@ namespace Game
             QueryPageTextResponse response = new();
             response.PageTextID = packet.PageTextID;
 
-            uint pageID = packet.PageTextID;
+            int pageID = packet.PageTextID;
             while (pageID != 0)
             {
                 PageText pageText = Global.ObjectMgr.GetPageText(pageID);
@@ -196,8 +196,8 @@ namespace Game
             }
 
             WorldLocation corpseLocation = player.GetCorpseLocation();
-            uint corpseMapID = corpseLocation.GetMapId();
-            uint mapID = corpseLocation.GetMapId();
+            int corpseMapID = corpseLocation.GetMapId();
+            int mapID = corpseLocation.GetMapId();
             var pos = corpseLocation.GetPosition3D();
 
             // if corpse at different map
@@ -207,13 +207,13 @@ namespace Game
                 MapRecord corpseMapEntry = CliDB.MapStorage.LookupByKey(mapID);
                 if (corpseMapEntry != null)
                 {
-                    if (corpseMapEntry.IsDungeon() && corpseMapEntry.CorpseMapID >= 0)
+                    if (corpseMapEntry.IsDungeon && corpseMapEntry.CorpseMapID >= 0)
                     {
                         // if corpse map have entrance
-                        TerrainInfo entranceTerrain = Global.TerrainMgr.LoadTerrain((uint)corpseMapEntry.CorpseMapID);
+                        TerrainInfo entranceTerrain = Global.TerrainMgr.LoadTerrain(corpseMapEntry.CorpseMapID);
                         if (entranceTerrain != null)
                         {
-                            mapID = (uint)corpseMapEntry.CorpseMapID;
+                            mapID = corpseMapEntry.CorpseMapID;
 
                             pos = new Vector3(Global.ObjectMgr.GetMapCorpsePosition(corpseMapEntry.Id),
                                 entranceTerrain.GetStaticHeight(player.GetPhaseShift(), mapID, pos.X, pos.Y, MapConst.MaxHeight));
@@ -224,8 +224,8 @@ namespace Game
 
             packet.Valid = true;
             packet.Player = queryCorpseLocation.Player;
-            packet.MapID = (int)corpseMapID;
-            packet.ActualMapID = (int)mapID;
+            packet.MapID = corpseMapID;
+            packet.ActualMapID = mapID;
             packet.Position = pos;
             packet.Transport = ObjectGuid.Empty;
             SendPacket(packet);
@@ -272,7 +272,7 @@ namespace Game
                     questCompletionNPC.NPCs.Add(id);
 
                 foreach (var id in Global.ObjectMgr.GetGOQuestInvolvedRelationReverseBounds(questID))
-                    questCompletionNPC.NPCs.Add(id | 0x80000000); // GO mask
+                    questCompletionNPC.NPCs.Add(id | unchecked((int)0x80000000)); // GO mask
 
                 response.QuestCompletionNPCs.Add(questCompletionNPC);
             }

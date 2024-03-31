@@ -111,11 +111,11 @@ namespace Game.Chat
                 target = it.GetSource();
                 if (target != null)
                 {
-                    uint oldlevel = target.GetLevel();
+                    int oldlevel = target.GetLevel();
 
                     if (level != oldlevel)
                     {
-                        target.SetLevel((uint)level);
+                        target.SetLevel(level);
                         target.InitTalentForLevel();
                         target.SetXP(0);
                     }
@@ -150,7 +150,7 @@ namespace Game.Chat
                 stmt.AddValue(0, target.GetGUID().GetCounter());
                 using var resultGroup = DB.Characters.Query(stmt);
                 if (!resultGroup.IsEmpty())
-                    groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
+                    groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<int>(0));
             }
 
             // If both fails, players simply has no party. Return false.
@@ -202,7 +202,7 @@ namespace Game.Chat
                     phases = PhasingHandler.FormatPhases(player.GetPhaseShift());
 
                     AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(player.GetAreaId());
-                    if (area != null && area.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                    if (area != null && area.HasFlag(AreaFlags.IsSubzone))
                     {
                         AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                         if (zone != null)

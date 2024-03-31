@@ -58,12 +58,12 @@ namespace Game.AI
             {
                 if (_aura > 0)
                 {
-                    if (!target.HasAura((uint)_aura))
+                    if (!target.HasAura(_aura))
                         return false;
                 }
                 else
                 {
-                    if (target.HasAura((uint)-_aura))
+                    if (target.HasAura(-_aura))
                         return false;
                 }
             }
@@ -79,7 +79,7 @@ namespace Game.AI
         Unit _caster;
         SpellInfo _spellInfo;
 
-        public SpellTargetSelector(Unit caster, uint spellId)
+        public SpellTargetSelector(Unit caster, int spellId)
         {
             _caster = caster;
             _spellInfo = Global.SpellMgr.GetSpellInfo(spellId, caster.GetMap().GetDifficultyID());
@@ -125,12 +125,12 @@ namespace Game.AI
                     rangeMod = _caster.GetCombatReach();
                     rangeMod += target.GetCombatReach();
 
-                    if (minRange > 0.0f && !_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Ranged))
+                    if (minRange > 0.0f && !_spellInfo.RangeEntry.HasAnyFlag(SpellRangeFlag.Ranged))
                         minRange += rangeMod;
                 }
 
                 if (_caster.IsMoving() && target.IsMoving() && !_caster.IsWalking() && !target.IsWalking() &&
-                    (_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Melee) || target.IsTypeId(TypeId.Player)))
+                    (_spellInfo.RangeEntry.HasAnyFlag(SpellRangeFlag.Melee) || target.IsTypeId(TypeId.Player)))
                     rangeMod += 8.0f / 3.0f;
             }
 

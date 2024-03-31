@@ -113,10 +113,10 @@ namespace Game.DataStorage
 
     public sealed class ChrClassUIDisplayRecord
     {
-        public uint Id;
+        public int Id;
         private byte _chrClassesID;
-        public uint AdvGuidePlayerConditionID;
-        public uint SplashPlayerConditionID;
+        public int AdvGuidePlayerConditionID;
+        public int SplashPlayerConditionID;
 
         #region Properties
         public Class ChrClassesID => (Class)_chrClassesID;
@@ -130,11 +130,11 @@ namespace Game.DataStorage
         public LocalizedString NameMale;
         public LocalizedString NameFemale;
         public string PetNameToken;
-        public uint Id;
-        public uint CreateScreenFileDataID;
-        public uint SelectScreenFileDataID;
-        public uint IconFileDataID;
-        public uint LowResScreenFileDataID;
+        public int Id;
+        public int CreateScreenFileDataID;
+        public int SelectScreenFileDataID;
+        public int IconFileDataID;
+        public int LowResScreenFileDataID;
         public int Flags;
         public int StartingLevel;
         public uint ArmorTypeMask;

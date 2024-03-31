@@ -471,7 +471,7 @@ namespace Game
                             }
 
                             ModelEquip newModelEquipSet = new();
-                            newModelEquipSet.modelid = result.Read<uint>(3);
+                            newModelEquipSet.modelid = result.Read<int>(3);
                             newModelEquipSet.equipment_id = result.Read<byte>(4);
                             newModelEquipSet.equipement_id_prev = 0;
                             newModelEquipSet.modelid_prev = 0;

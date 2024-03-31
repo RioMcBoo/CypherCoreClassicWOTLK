@@ -26,7 +26,7 @@ namespace Game
             if (item == null)
                 return;
 
-            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<(ItemPos item, int count)> dest, item, false);
+            InventoryResult msg = GetPlayer().CanBankItem(ItemPos.Undefined, out List<(ItemPos Pos, int Count)> dest, item, false);
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, item);
@@ -47,7 +47,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BankerActivate, Processing = PacketProcessing.Inplace)]
         void HandleBankerActivate(Hello packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Banker, NPCFlags2.None);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags1.Banker, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outError(LogFilter.Network, $"HandleBankerActivate: {packet.Unit} not found or you can not interact with him.");
@@ -111,7 +111,7 @@ namespace Game
                 return;
             }
 
-            uint slot = GetPlayer().GetBankBagSlotCount();
+            int slot = GetPlayer().GetBankBagSlotCount();
             // next slot
             ++slot;
 

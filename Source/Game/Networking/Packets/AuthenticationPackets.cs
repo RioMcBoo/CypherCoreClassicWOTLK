@@ -77,7 +77,7 @@ namespace Game.Networking.Packets
             Digest = _worldPacket.ReadBytes(DigestLength);
 
             UseIPv6 = _worldPacket.HasBit();
-            uint realmJoinTicketSize = _worldPacket.ReadUInt32();
+            int realmJoinTicketSize = _worldPacket.ReadInt32();
             if (realmJoinTicketSize != 0)
                 RealmJoinTicket = _worldPacket.ReadString(realmJoinTicketSize);
         }
@@ -124,9 +124,9 @@ namespace Game.Networking.Packets
                     foreach (var classAvailability in raceClassAvailability.Classes)
                     {
                         _worldPacket.WriteUInt8((byte)classAvailability.ClassID);
-                        _worldPacket.WriteUInt8(classAvailability.ActiveExpansionLevel);
-                        _worldPacket.WriteUInt8(classAvailability.AccountExpansionLevel);
-                        _worldPacket.WriteUInt8(classAvailability.MinActiveExpansionLevel);
+                        _worldPacket.WriteUInt8((byte)classAvailability.ActiveExpansionLevel);
+                        _worldPacket.WriteUInt8((byte)classAvailability.AccountExpansionLevel);
+                        _worldPacket.WriteUInt8((byte)classAvailability.MinActiveExpansionLevel);
                     }
                 }
 
@@ -172,7 +172,7 @@ namespace Game.Networking.Packets
 
                 foreach (var templat in SuccessInfo.Templates)
                 {
-                    _worldPacket.WriteUInt32(templat.TemplateSetId);
+                    _worldPacket.WriteInt32(templat.TemplateSetId);
                     _worldPacket.WriteInt32(templat.Classes.Count);
                     foreach (var templateClass in templat.Classes)
                     {
@@ -291,7 +291,7 @@ namespace Game.Networking.Packets
 
             Payload.Signature = RsaCrypt.RSA.SignHash(hash.Digest, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1).Reverse().ToArray();
 
-            _worldPacket.WriteBytes(Payload.Signature, (uint)Payload.Signature.Length);
+            _worldPacket.WriteBytes(Payload.Signature, Payload.Signature.Length);
             _worldPacket.WriteBytes(whereBuffer);
             _worldPacket.WriteUInt16(Payload.Port);
             _worldPacket.WriteUInt32((uint)Serial);
@@ -335,14 +335,14 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            DosResponse = _worldPacket.ReadUInt64();
-            Key = _worldPacket.ReadUInt64();
+            DosResponse = _worldPacket.ReadInt64();
+            Key = _worldPacket.ReadInt64();
             LocalChallenge = _worldPacket.ReadBytes(16);
             Digest = _worldPacket.ReadBytes(DigestLength);
         }
 
-        public ulong DosResponse;
-        public ulong Key;
+        public long DosResponse;
+        public long Key;
         public byte[] LocalChallenge = new byte[16];
         public byte[] Digest = new byte[DigestLength];
     }

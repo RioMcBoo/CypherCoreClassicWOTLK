@@ -65,8 +65,8 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(WowAccountGuid);
             _worldPacket.WriteUInt32(VirtualRealmAddress);
             _worldPacket.WriteUInt8((byte)Status);
-            _worldPacket.WriteUInt32(AreaID);
-            _worldPacket.WriteUInt32(Level);
+            _worldPacket.WriteInt32(AreaID);
+            _worldPacket.WriteInt32(Level);
             _worldPacket.WriteUInt32((uint)ClassID);
             _worldPacket.WriteBits(Notes.GetByteCount(), 10);
             _worldPacket.WriteBit(Mobile);
@@ -80,8 +80,8 @@ namespace Game.Networking.Packets
         public FriendStatus Status;
         public ObjectGuid Guid;
         public ObjectGuid WowAccountGuid;
-        public uint Level;
-        public uint AreaID;
+        public int Level;
+        public int AreaID;
         public FriendsResult FriendResult;
         public bool Mobile;
     }
@@ -92,8 +92,8 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLength = _worldPacket.ReadBits<uint>(9);
-            uint noteslength = _worldPacket.ReadBits<uint>(9);
+            int nameLength = _worldPacket.ReadBits<int>(9);
+            int noteslength = _worldPacket.ReadBits<int>(9);
             Name = _worldPacket.ReadString(nameLength);
             Notes = _worldPacket.ReadString(noteslength);
         }
@@ -121,7 +121,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Player.Read(_worldPacket);
-            Notes = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(10));
+            Notes = _worldPacket.ReadString(_worldPacket.ReadBits<int>(10));
         }
 
         public QualifiedGUID Player;
@@ -134,7 +134,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLength = _worldPacket.ReadBits<uint>(9);
+            int nameLength = _worldPacket.ReadBits<int>(9);
             AccountGUID = _worldPacket.ReadPackedGuid();
             Name = _worldPacket.ReadString(nameLength);
         }
@@ -200,8 +200,8 @@ namespace Game.Networking.Packets
             data.WriteUInt32(NativeRealmAddr);
             data.WriteUInt32((uint)TypeFlags);
             data.WriteUInt8((byte)Status);
-            data.WriteUInt32(AreaID);
-            data.WriteUInt32(Level);
+            data.WriteInt32(AreaID);
+            data.WriteInt32(Level);
             data.WriteUInt32((uint)ClassID);
             data.WriteBits(Notes.GetByteCount(), 10);
             data.WriteBit(Mobile);
@@ -216,8 +216,8 @@ namespace Game.Networking.Packets
         SocialFlag TypeFlags;
         string Notes;
         FriendStatus Status;
-        uint AreaID;
-        uint Level;
+        int AreaID;
+        int Level;
         Class ClassID;
         bool Mobile;
     }

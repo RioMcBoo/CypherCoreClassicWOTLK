@@ -756,6 +756,11 @@ namespace Game.Entities
             SetTransportServerTime(0);
         }
 
+        public void SetTransportServerTime(uint transportServerTime) 
+        { 
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransportServerTime), (int)transportServerTime); 
+        }
+
         void ScheduleDelayedOperation(PlayerDelayedOperations operation)
         {
             if (operation < PlayerDelayedOperations.End)
@@ -5223,9 +5228,9 @@ namespace Game.Entities
             CharacterCacheStorage.UpdateCharacterGuildId(GetGUID(), guildId);
         }
         public void SetGuildRank(byte rankId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildRankID), rankId); }
-        public uint GetGuildRank() { return m_playerData.GuildRankID; }
-        public void SetGuildLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildLevel), (int)level); }
-        public uint GetGuildLevel() { return (uint)m_playerData.GuildLevel.GetValue(); }
+        public int GetGuildRank() { return m_playerData.GuildRankID; }
+        public void SetGuildLevel(int level) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildLevel), level); }
+        public int GetGuildLevel() { return m_playerData.GuildLevel; }
         public void SetGuildIdInvited(long GuildId) { m_GuildIdInvited = GuildId; }
         public long GetGuildId() { return ((ObjectGuid)m_unitData.GuildGUID).GetCounter(); }
 
@@ -7652,11 +7657,6 @@ namespace Game.Entities
         public void AddAuraVision(PlayerFieldByte2Flags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
         public void RemoveAuraVision(PlayerFieldByte2Flags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
 
-        public void SetTransportServerTime(int transportServerTime) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransportServerTime), transportServerTime); }
-
-        public void SetRequiredMountCapabilityFlag(byte flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RequiredMountCapabilityFlags), flag); }
-        public void ReplaceAllRequiredMountCapabilityFlags(byte flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RequiredMountCapabilityFlags), flags); }
-
         public bool CanTameExoticPets() { return IsGameMaster() || HasAuraType(AuraType.AllowTamePetType); }
 
         void SendAttackSwingCantAttack() { SendPacket(new AttackSwingError(AttackSwingErr.CantAttack)); }
@@ -7836,15 +7836,5 @@ namespace Game.Entities
 
         //Clears the Menu
         public void ClearGossipMenu() { PlayerTalkClass.ClearMenus(); }
-
-        public void SetPersonalTabard(int style, int color, int borderStyle, int borderColor, int backgroundColor)
-        {
-            CustomTabardInfo personalTabard = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PersonalTabard);
-            SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.EmblemStyle), style);
-            SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.EmblemColor), color);
-            SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.BorderStyle), borderStyle);
-            SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.BorderColor), borderColor);
-            SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.BackgroundColor), backgroundColor);
-        }
     }
 }

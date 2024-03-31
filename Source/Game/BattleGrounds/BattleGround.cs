@@ -42,7 +42,7 @@ namespace Game.BattleGrounds
         {
             // remove objects and creatures
             // (this is done automatically in mapmanager update, when the instance is reset after the reset time)
-            for (uint i = 0; i < BgCreatures.Length; ++i)
+            for (var i = 0; i < BgCreatures.Length; ++i)
                 DelCreature(i);
 
             for (var i = 0; i < BgObjects.Length; ++i)

@@ -23,7 +23,7 @@ namespace Game
 
         AccountManager() { }
 
-        public AccountOpResult CreateAccount(string username, string password, string email = "", uint bnetAccountId = 0, byte bnetIndex = 0)
+        public AccountOpResult CreateAccount(string username, string password, string email = "", int bnetAccountId = 0, byte bnetIndex = 0)
         {
             if (username.Length > MaxAccountLength)
                 return AccountOpResult.NameTooLong;
@@ -284,7 +284,7 @@ namespace Game
             return false;
         }
 
-        public bool GetEmail(uint accountId, out string email)
+        public bool GetEmail(int accountId, out string email)
         {
             email = "";
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
@@ -320,7 +320,7 @@ namespace Game
             return false;
         }
 
-        public bool CheckEmail(uint accountId, string newEmail)
+        public bool CheckEmail(int accountId, string newEmail)
         {
             string oldEmail;
 
@@ -334,13 +334,13 @@ namespace Game
             return false;
         }
 
-        public uint GetCharactersCount(uint accountId)
+        public int GetCharactersCount(int accountId)
         {
             // check character count
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_SUM_CHARS);
             stmt.AddValue(0, accountId);
             using var result = DB.Characters.Query(stmt);
-            return result.IsEmpty() ? 0 : (uint)result.Read<ulong>(0);
+            return result.IsEmpty() ? 0 : (int)result.Read<long>(0);
         }
 
         public bool IsBannedAccount(string name)
@@ -453,7 +453,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} permission definitions, {1} linked permissions and {2} default permissions in {3} ms", count1, count2, count3, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public void UpdateAccountAccess(RBACData rbac, uint accountId, byte securityLevel, int realmId)
+        public void UpdateAccountAccess(RBACData rbac, int accountId, byte securityLevel, int realmId)
         {
             if (rbac != null && securityLevel != rbac.GetSecurityLevel())
                 rbac.SetSecurityLevel(securityLevel);
@@ -502,7 +502,7 @@ namespace Game
                 return false;
             }
 
-            RBACData rbac = new(accountId, "", (int)realmId, (byte)GetSecurity(accountId, (int)realmId));
+            RBACData rbac = new(accountId, "", realmId, (byte)GetSecurity(accountId, realmId));
             rbac.LoadFromDB();
             bool hasPermission = rbac.HasPermission(permissionId);
 

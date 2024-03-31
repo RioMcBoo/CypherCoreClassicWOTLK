@@ -767,10 +767,10 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             CastID = _worldPacket.ReadPackedGuid();
-            SpellID = _worldPacket.ReadUInt32();
+            SpellID = _worldPacket.ReadInt32();
         }
 
-        public uint SpellID;
+        public int SpellID;
         public ObjectGuid CastID;
     }
 
@@ -1546,7 +1546,7 @@ namespace Game.Networking.Packets
             bool hasOrientation = data.HasBit();
             bool hasMapId = data.HasBit();
 
-            uint nameLength = data.ReadBits<uint>(7);
+            int nameLength = data.ReadBits<int>(7);
 
             Unit = data.ReadPackedGuid();
             Item = data.ReadPackedGuid();

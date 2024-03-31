@@ -71,21 +71,21 @@ namespace Game
                         continue;
 
                 // check if target's level is in level range
-                uint lvl = target.Level;
+                int lvl = target.Level;
                 if (lvl < request.MinLevel || lvl > request.MaxLevel)
                     continue;
 
                 // check if class matches classmask
-                if (!Convert.ToBoolean(request.ClassFilter & (1 << target.Class)))
+                if (!request.ClassFilter.HasClass(target.Class))
                     continue;
 
                 // check if race matches racemask
-                if (!request.RaceFilter.HasRace((Race)target.Race))
+                if (!request.RaceFilter.HasRace(target.Race))
                     continue;
 
                 if (!whoRequest.Areas.Empty())
                 {
-                    if (whoRequest.Areas.Contains((int)target.ZoneId))
+                    if (whoRequest.Areas.Contains(target.ZoneId))
                         continue;
                 }
 
@@ -134,7 +134,7 @@ namespace Game
                     whoEntry.GuildName = target.GuildName;
                 }
 
-                whoEntry.AreaID = (int)target.ZoneId;
+                whoEntry.AreaID = target.ZoneId;
                 whoEntry.IsGM = target.IsGamemaster;
 
                 response.Response.Add(whoEntry);
@@ -270,7 +270,7 @@ namespace Game
             }
 
             // When not found, consult database
-            GetQueryProcessor().AddCallback(Global.AccountMgr.GetSecurityAsync(friendCharacterInfo.AccountId, (int)Global.WorldMgr.GetRealmId().Index, friendSecurity =>
+            GetQueryProcessor().AddCallback(Global.AccountMgr.GetSecurityAsync(friendCharacterInfo.AccountId, Global.WorldMgr.GetRealmId().Index, friendSecurity =>
             {
                 if (!Global.AccountMgr.IsPlayerAccount((AccountTypes)friendSecurity))
                 {

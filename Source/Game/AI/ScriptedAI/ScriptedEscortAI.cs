@@ -310,12 +310,12 @@ namespace Game.AI
             }
         }
 
-        void AddWaypoint(uint id, float x, float y, float z, bool run)
+        void AddWaypoint(int id, float x, float y, float z, bool run)
         {
             AddWaypoint(id, x, y, z, 0.0f, TimeSpan.Zero, run);
         }
 
-        public void AddWaypoint(uint id, float x, float y, float z, float orientation = 0, TimeSpan waitTime = default, bool run = false)
+        public void AddWaypoint(int id, float x, float y, float z, float orientation = 0, TimeSpan waitTime = default, bool run = false)
         {
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
@@ -336,7 +336,7 @@ namespace Game.AI
             _path.nodes.Clear();
         }
 
-        public void LoadPath(uint pathId)
+        public void LoadPath(int pathId)
         {
             WaypointPath path = Global.WaypointMgr.GetPath(pathId);
             if (path == null)
@@ -396,7 +396,7 @@ namespace Game.AI
             me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
 
             //disable npcflags
-            me.ReplaceAllNpcFlags(NPCFlags.None);
+            me.ReplaceAllNpcFlags(NPCFlags1.None);
             me.ReplaceAllNpcFlags2(NPCFlags2.None);
             if (me.IsImmuneToNPC())
             {
@@ -479,7 +479,7 @@ namespace Game.AI
 
     struct EscortPointIds
     {
-        public const uint LastPoint = 0xFFFFFF;
-        public const uint Home = 0xFFFFFE;
+        public const int LastPoint = 0xFFFFFF;
+        public const int Home = 0xFFFFFE;
     }
 }

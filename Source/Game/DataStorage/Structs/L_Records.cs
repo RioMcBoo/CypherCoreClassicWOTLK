@@ -10,7 +10,7 @@ namespace Game.DataStorage
 {
     public sealed class LanguageWordsRecord
     {
-        public uint Id;
+        public int Id;
         public string Word;
         public byte LanguageID;
     }
@@ -18,7 +18,7 @@ namespace Game.DataStorage
     public sealed class LanguagesRecord
     {
         public LocalizedString Name;
-        public uint Id;
+        public int Id;
         public int Flags;
         public int UiTextureKitID;
         public int UiTextureKitElementCount;

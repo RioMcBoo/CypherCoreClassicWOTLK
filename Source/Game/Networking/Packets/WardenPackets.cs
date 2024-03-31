@@ -31,7 +31,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint size = _worldPacket.ReadUInt32();
+            int size = _worldPacket.ReadInt32();
 
             if (size != 0)
                 Data = new ByteBuffer(_worldPacket.ReadBytes(size));

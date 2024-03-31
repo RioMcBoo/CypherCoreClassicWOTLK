@@ -392,8 +392,6 @@ namespace Game.Maps
 
                                 DoUpdateCriteria(CriteriaType.DefeatDungeonEncounter, dungeonEncounter.Id);
                                 SendBossKillCredit(dungeonEncounter.Id);
-                                if (dungeonEncounter.CompleteWorldStateID != 0)
-                                    DoUpdateWorldState((uint)dungeonEncounter.CompleteWorldStateID, 1);
 
                                 UpdateLfgEncounterState(bossInfo);
                             }
@@ -464,10 +462,6 @@ namespace Game.Maps
                 {
                     if (bosses[i].state == EncounterState.Done && !CheckRequiredBosses(i))
                         bosses[i].state = EncounterState.NotStarted;
-
-                    var dungeonEncounter = bosses[i].GetDungeonEncounterForDifficulty(instance.GetDifficultyID());
-                    if (dungeonEncounter != null && dungeonEncounter.CompleteWorldStateID != 0)
-                        DoUpdateWorldState((uint)dungeonEncounter.CompleteWorldStateID, bosses[i].state == EncounterState.Done ? 1 : 0);
                 }
 
                 UpdateSpawnGroups();
@@ -618,7 +612,7 @@ namespace Game.Maps
         }
 
         // Update Achievement Criteria for all players in instance
-        public void DoUpdateCriteria(CriteriaType type, uint miscValue1 = 0, uint miscValue2 = 0, Unit unit = null)
+        public void DoUpdateCriteria(CriteriaType type, int miscValue1 = 0, int miscValue2 = 0, Unit unit = null)
         {
             instance.DoOnPlayers(player => player.UpdateCriteria(type, miscValue1, miscValue2, 0, unit));
         }
@@ -799,7 +793,7 @@ namespace Game.Maps
             instance.SendToPlayers(new InstanceEncounterEnd());
         }
 
-        public void SendBossKillCredit(uint encounterId)
+        public void SendBossKillCredit(int encounterId)
         {
             BossKill bossKillCreditMessage = new();
             bossKillCreditMessage.DungeonEncounterID = encounterId;

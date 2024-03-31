@@ -801,11 +801,11 @@ namespace Game.DataStorage
             return _hotfixBlob[(int)locale].LookupByKey((tableHash, recordId));
         }
 
-        public List<HotfixOptionalData> GetHotfixOptionalData(uint tableHash, uint recordId, Locale locale)
+        public List<HotfixOptionalData> GetHotfixOptionalData(uint tableHash, int recordId, Locale locale)
         {
             Cypher.Assert(SharedConst.IsValidLocale(locale), $"Locale {locale} is invalid locale");
 
-            return _hotfixOptionalData[(int)locale].LookupByKey((tableHash, (int)recordId));
+            return _hotfixOptionalData[(int)locale].LookupByKey((tableHash, recordId));
         }
 
         public int GetEmptyAnimStateID()

@@ -624,19 +624,11 @@ namespace Game.Entities
                 switch (GetClass())
                 {
                     case Class.Deathknight:
-                        {
-                            int talentPointsForLevel = numTalentsAtLevel.NumTalentsDeathKnight;
-                            talentPointsForLevel += GetQuestRewardTalentCount();
-
-                            if (talentPointsForLevel > numTalentsAtLevel.NumTalents)
-                                talentPointsForLevel = numTalentsAtLevel.NumTalents;
-
-                            return talentPointsForLevel * WorldConfig.GetIntValue(WorldCfg.RateTalent);
-                        }
+                        return numTalentsAtLevel.NumTalentsDeathKnight;
                     case Class.DemonHunter:
                         return numTalentsAtLevel.NumTalentsDemonHunter;
                     default:
-                        return numTalentsAtLevel.NumTalents * WorldConfig.GetIntValue(WorldCfg.RateTalent);
+                        return numTalentsAtLevel.NumTalents;
                 }
             }
 

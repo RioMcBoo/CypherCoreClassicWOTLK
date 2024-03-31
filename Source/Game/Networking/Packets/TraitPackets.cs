@@ -65,7 +65,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             ConfigID = _worldPacket.ReadInt32();
-            uint nameLength = _worldPacket.ReadBits<uint>(9);
+            int nameLength = _worldPacket.ReadBits<int>(9);
             Name = _worldPacket.ReadString(nameLength);
         }
         
@@ -194,7 +194,7 @@ namespace Game.Networking.Packets
                 Entries.Add(traitEntry);
             }
 
-            uint nameLength = data.ReadBits<uint>(9);
+            int nameLength = data.ReadBits<int>(9);
             Name = data.ReadString(nameLength);
         }
 

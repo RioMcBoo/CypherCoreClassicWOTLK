@@ -896,7 +896,7 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, pointId));
         }
 
-        public void MoveAlongSplineChain(uint pointId, uint dbChainId, bool walk)
+        public void MoveAlongSplineChain(int pointId, int dbChainId, bool walk)
         {
             Creature owner = _owner.ToCreature();
             if (owner == null)
@@ -913,7 +913,7 @@ namespace Game.Movement
             MoveAlongSplineChain(pointId, chain, walk);
         }
 
-        void MoveAlongSplineChain(uint pointId, List<SplineChainLink> chain, bool walk)
+        void MoveAlongSplineChain(int pointId, List<SplineChainLink> chain, bool walk)
         {
             Add(new SplineChainMovementGenerator(pointId, chain, walk));
         }
@@ -1039,7 +1039,7 @@ namespace Game.Movement
             Add(new WaypointMovementGenerator(path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath), MovementSlot.Default);
         }
 
-        public void MoveRotate(uint id, uint time, RotateDirection direction)
+        public void MoveRotate(int id, uint time, RotateDirection direction)
         {
             if (time == 0)
                 return;

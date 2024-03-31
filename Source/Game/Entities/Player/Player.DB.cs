@@ -1019,7 +1019,7 @@ namespace Game.Entities
                     switch (traitConfig.Type)
                     {
                         case TraitConfigType.Combat:
-                            traitConfig.ChrSpecializationID = configsResult.Read<int>(2);
+                            traitConfig.ChrSpecializationID = (ChrSpecialization)configsResult.Read<int>(2);
                             traitConfig.CombatConfigFlags = (TraitCombatConfigFlags)configsResult.Read<int>(3);
                             traitConfig.LocalIdentifier = configsResult.Read<int>(4);
                             break;
@@ -1084,7 +1084,7 @@ namespace Game.Entities
 
                     TraitConfigPacket traitConfig = new();
                     traitConfig.Type = TraitConfigType.Combat;
-                    traitConfig.ChrSpecializationID = (int)spec.Id;
+                    traitConfig.ChrSpecializationID = spec.Id;
                     traitConfig.CombatConfigFlags = TraitCombatConfigFlags.ActiveForSpec;
                     traitConfig.LocalIdentifier = findFreeLocalIdentifier((int)spec.Id);
                     traitConfig.Name = spec.Name[GetSession().GetSessionDbcLocale()];
@@ -1620,7 +1620,7 @@ namespace Game.Entities
                 petInfo.LastSaveTime = result.Read<uint>(12);
                 petInfo.CreatedBySpellId = result.Read<int>(13);
                 petInfo.Type = (PetType)result.Read<byte>(14);
-                petInfo.SpecializationId = result.Read<ushort>(15);
+                petInfo.SpecializationId = (ChrSpecialization)result.Read<ushort>(15);
                 if (slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot)
                 {
                     m_petStable.ActivePets[(int)slot] = petInfo;
@@ -2737,7 +2737,7 @@ namespace Game.Entities
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PLAYER_BGDATA);
             stmt.AddValue(0, GetGUID().GetCounter());
             stmt.AddValue(1, m_bgData.bgInstanceID);
-            stmt.AddValue(2, m_bgData.bgTeam);
+            stmt.AddValue(2, (ushort)m_bgData.bgTeam);
             stmt.AddValue(3, m_bgData.joinPos.GetPositionX());
             stmt.AddValue(4, m_bgData.joinPos.GetPositionY());
             stmt.AddValue(5, m_bgData.joinPos.GetPositionZ());
@@ -3423,7 +3423,6 @@ namespace Game.Entities
             }
             */
 
-            SetPersonalTabard(personalTabardEmblemStyle, personalTabardEmblemColor, personalTabardBorderStyle, personalTabardBorderColor, personalTabardBackgroundColor);
             Log.outDebug(LogFilter.Player, $"Player.LoadFromDB: The value of player {GetName()} after load item and aura is: ");            
 
             // GM state
@@ -3698,8 +3697,8 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
                 stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
-                stmt.AddValue(index++, m_playerData.PlayerFlags);
-                stmt.AddValue(index++, m_playerData.PlayerFlagsEx);
+                stmt.AddValue(index++, (uint)m_playerData.PlayerFlags.GetValue());
+                stmt.AddValue(index++, (uint)m_playerData.PlayerFlagsEx.GetValue());
 
                 if (!IsBeingTeleported())
                 {
@@ -3780,7 +3779,7 @@ namespace Game.Entities
 
                 stmt.AddValue(index++, GetSession().GetLatency());
                 stmt.AddValue(index++, GetActiveTalentGroup());
-                stmt.AddValue(index++, GetLootSpecId());
+                stmt.AddValue(index++, (uint)GetLootSpecId());
 
                 ss.Clear();
                 for (int i = 0; i < PlayerConst.ExploredZonesSize; ++i)
@@ -4420,7 +4419,7 @@ namespace Game.Entities
                 int count = 0;
                 do
                 {
-                    DeleteFromDB(ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0)), result.Read<uint>(1), true, true);
+                    DeleteFromDB(ObjectGuid.Create(HighGuid.Player, result.Read<long>(0)), result.Read<int>(1), true, true);
                     count++;
                 }
                 while (result.NextRow());

@@ -17,9 +17,9 @@ namespace Game.Entities
         Unit _victim;
         float _groupRate;
         Player _maxNotGrayMember;
-        uint _count;
-        uint _sumLevel;
-        uint _xp;
+        int _count;
+        int _sumLevel;
+        int _xp;
         bool _isFullXP;
         byte _maxLevel;
         bool _isBattleground;
@@ -111,7 +111,7 @@ namespace Game.Entities
                     {
                         if (killer == member || (member.IsAtGroupRewardDistance(_victim) && member.IsAlive()))
                         {
-                            uint lvl = member.GetLevel();
+                            int lvl = member.GetLevel();
                             // 2.1. _count - number of alive group members within reward distance;
                             ++_count;
                             // 2.2. _sumLevel - sum of levels of alive group members within reward distance;
@@ -121,7 +121,7 @@ namespace Game.Entities
                                 _maxLevel = (byte)lvl;
                             // 2.4. _maxNotGrayMember - maximum level of alive group member within reward distance,
                             //      for whom victim is not gray;
-                            uint grayLevel = Formulas.GetGrayLevel(lvl);
+                            int grayLevel = Formulas.GetGrayLevel(lvl);
                             if (_victim.GetLevelForTarget(member) > grayLevel && (_maxNotGrayMember == null || _maxNotGrayMember.GetLevel() < lvl))
                                 _maxNotGrayMember = member;
                         }
@@ -155,7 +155,7 @@ namespace Game.Entities
 
         void _RewardXP(Player player, float rate)
         {
-            uint xp = _xp;
+            int xp = _xp;
             if (player.GetGroup() != null)
             {
                 // 4.2.1. If player is in group, adjust XP:
@@ -164,16 +164,16 @@ namespace Game.Entities
                 if (_maxNotGrayMember != null && player.IsAlive() &&
                     _maxNotGrayMember.GetLevel() >= player.GetLevel())
                     xp = _isFullXP ?
-                        (uint)(xp * rate) :             // Reward FULL XP if all group members are not gray.
-                        (uint)(xp * rate / 2) + 1;      // Reward only HALF of XP if some of group members are gray.
+                        (int)(xp * rate) :             // Reward FULL XP if all group members are not gray.
+                        (int)(xp * rate / 2) + 1;      // Reward only HALF of XP if some of group members are gray.
                 else
                     xp = 0;
             }
             if (xp != 0)
             {
                 // 4.2.2. Apply auras modifying rewarded XP (SPELL_AURA_MOD_XP_PCT and SPELL_AURA_MOD_XP_FROM_CREATURE_TYPE).
-                xp = (uint)(xp * player.GetTotalAuraMultiplier(AuraType.ModXpPct));
-                xp = (uint)(xp * player.GetTotalAuraMultiplierByMiscValue(AuraType.ModXpFromCreatureType, (int)_victim.GetCreatureType()));
+                xp = (int)(xp * player.GetTotalAuraMultiplier(AuraType.ModXpPct));
+                xp = (int)(xp * player.GetTotalAuraMultiplierByMiscValue(AuraType.ModXpFromCreatureType, (int)_victim.GetCreatureType()));
 
                 // 4.2.3. Give XP to player.
                 player.GiveXP(xp, _victim, _groupRate);
@@ -200,7 +200,7 @@ namespace Game.Entities
                 if (target != null)
                 {
                     player.KilledMonster(target.GetCreatureTemplate(), target.GetGUID());
-                    player.UpdateCriteria(CriteriaType.KillAnyCreature, (ulong)target.GetCreatureType(), 1, 0, target);
+                    player.UpdateCriteria(CriteriaType.KillAnyCreature, (long)target.GetCreatureType(), 1, 0, target);
                 }
             }
         }
@@ -246,11 +246,11 @@ namespace Game.Entities
                 // (Battlegroundrewards only XP, that's why).
                 if (!_isBattleground || _xp != 0)
                 {
-                    bool isDungeon = !_isPvP && CliDB.MapStorage.LookupByKey(killer.GetMapId()).IsDungeon();
+                    bool isDungeon = !_isPvP && CliDB.MapStorage.LookupByKey(killer.GetMapId()).IsDungeon;
                     if (!_isBattleground)
                     {
                         // 3.1.2. Alter group rate if group is in raid (not for Battlegrounds).
-                        bool isRaid = !_isPvP && CliDB.MapStorage.LookupByKey(killer.GetMapId()).IsRaid() && group.IsRaidGroup();
+                        bool isRaid = !_isPvP && CliDB.MapStorage.LookupByKey(killer.GetMapId()).IsRaid && group.IsRaidGroup();
                         _groupRate = Formulas.XPInGroupRate(_count, isRaid);
                     }
                     // 3.1.3. Reward each group member (even dead or corpse) within reward distance.

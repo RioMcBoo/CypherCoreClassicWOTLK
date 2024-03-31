@@ -178,7 +178,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt64(progress.DateStarted);
                 progress.DateUpdated.Write(_worldPacket);
                 _worldPacket.WriteUInt32(0); // this is a hack. this is a packed time written as int64 (progress.DateUpdated)
-                _worldPacket.WriteUInt64(progress.Quantity);
+                _worldPacket.WriteInt64(progress.Quantity);
                 _worldPacket.WritePackedGuid(progress.PlayerGUID);
                 _worldPacket.WriteInt32(progress.Unused_10_1_5);
                 _worldPacket.WriteInt32(progress.Flags);
@@ -208,10 +208,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            AchievementID = _worldPacket.ReadUInt32();
+            AchievementID = _worldPacket.ReadInt32();
         }
 
-        public uint AchievementID;
+        public int AchievementID;
     }
 
     public class GuildAchievementDeleted : ServerPacket

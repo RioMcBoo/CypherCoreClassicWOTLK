@@ -224,7 +224,7 @@ namespace Game.Movement
 
             CreatureAI ai = owner.ToCreature().GetAI();
             if (ai != null)
-                ai.MovementInform(MovementGeneratorType.Follow, (uint)target.GetGUID().GetCounter());
+                ai.MovementInform(MovementGeneratorType.Follow, (int)target.GetGUID().GetCounter());
         }
     }
 }

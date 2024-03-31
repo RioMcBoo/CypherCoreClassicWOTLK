@@ -37,10 +37,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SceneInstanceID);
+            _worldPacket.WriteInt32(SceneInstanceID);
         }
 
-        public uint SceneInstanceID;
+        public int SceneInstanceID;
     }
 
     class SceneTriggerEvent : ClientPacket
@@ -49,12 +49,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(6);
-            SceneInstanceID = _worldPacket.ReadUInt32();
+            int len = _worldPacket.ReadBits<int>(6);
+            SceneInstanceID = _worldPacket.ReadInt32();
             _Event = _worldPacket.ReadString(len);
         }
 
-        public uint SceneInstanceID;
+        public int SceneInstanceID;
         public string _Event;
     }
 
@@ -64,10 +64,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            SceneInstanceID = _worldPacket.ReadUInt32();
+            SceneInstanceID = _worldPacket.ReadInt32();
         }
 
-        public uint SceneInstanceID;
+        public int SceneInstanceID;
     }
 
     class ScenePlaybackCanceled : ClientPacket
@@ -76,9 +76,9 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            SceneInstanceID = _worldPacket.ReadUInt32();
+            SceneInstanceID = _worldPacket.ReadInt32();
         }
 
-        public uint SceneInstanceID;
+        public int SceneInstanceID;
     }
 }

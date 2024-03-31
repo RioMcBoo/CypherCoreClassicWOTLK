@@ -62,7 +62,6 @@ namespace Game.Loots
                     continue;
 
                 Loot loot = new(lootOwner.GetMap(), lootOwner.GetGUID(), type, null);
-                loot.SetItemContext(ItemBonusMgr.GetContextForPlayer(mapDifficulty, tapper));
                 loot.SetDungeonEncounterId(dungeonEncounterId);
                 loot.GenerateMoneyLoot(minMoney, maxMoney);
 

@@ -71,7 +71,7 @@ namespace Game.Chat
                 return false;
             }
 
-            uint spellId = spellInfo.Id;
+            int spellId = spellInfo.Id;
 
             // Check if pet already has it
             if (pet.HasSpell(spellId))
@@ -103,7 +103,7 @@ namespace Game.Chat
                 return false;
             }
 
-            uint spellId = spellInfo.Id;
+            int spellId = spellInfo.Id;
 
             if (pet.HasSpell(spellId))
                 pet.RemoveSpell(spellId, false);
@@ -125,7 +125,7 @@ namespace Game.Chat
             }
 
             if (!level.HasValue)
-                level = (int)(owner.GetLevel() - pet.GetLevel());
+                level = owner.GetLevel() - pet.GetLevel();
 
             if (level == 0 || level < -SharedConst.StrongMaxLevel || level > SharedConst.StrongMaxLevel)
             {
@@ -133,11 +133,11 @@ namespace Game.Chat
                 return false;
             }
 
-            int newLevel = (int)pet.GetLevel() + level.Value;
+            int newLevel = pet.GetLevel() + level.Value;
             if (newLevel < 1)
                 newLevel = 1;
             else if (newLevel > owner.GetLevel())
-                newLevel = (int)owner.GetLevel();
+                newLevel = owner.GetLevel();
 
             pet.GivePetLevel(newLevel);
             return true;

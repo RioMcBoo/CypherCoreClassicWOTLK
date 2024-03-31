@@ -13,365 +13,365 @@ namespace Game.AI
     public struct Spells
     {
         /* Generic */
-        public const uint AutoShot = 75;
-        public const uint Shoot = 3018;
-        public const uint Throw = 2764;
-        public const uint Wand = 5019;
+        public const int AutoShot = 75;
+        public const int Shoot = 3018;
+        public const int Throw = 2764;
+        public const int Wand = 5019;
 
         /* Warrior - Generic */
-        public const uint BattleStance = 2457;
-        public const uint BerserkerStance = 2458;
-        public const uint DefensiveStance = 71;
-        public const uint Charge = 11578;
-        public const uint Intercept = 20252;
-        public const uint EnragedRegen = 55694;
-        public const uint IntimidatingShout = 5246;
-        public const uint Pummel = 6552;
-        public const uint ShieldBash = 72;
-        public const uint Bloodrage = 2687;
+        public const int BattleStance = 2457;
+        public const int BerserkerStance = 2458;
+        public const int DefensiveStance = 71;
+        public const int Charge = 11578;
+        public const int Intercept = 20252;
+        public const int EnragedRegen = 55694;
+        public const int IntimidatingShout = 5246;
+        public const int Pummel = 6552;
+        public const int ShieldBash = 72;
+        public const int Bloodrage = 2687;
 
         /* Warrior - Arms */
-        public const uint SweepingStrikes = 12328;
-        public const uint MortalStrike = 12294;
-        public const uint Bladestorm = 46924;
-        public const uint Rend = 47465;
-        public const uint Retaliation = 20230;
-        public const uint ShatteringThrow = 64382;
-        public const uint ThunderClap = 47502;
+        public const int SweepingStrikes = 12328;
+        public const int MortalStrike = 12294;
+        public const int Bladestorm = 46924;
+        public const int Rend = 47465;
+        public const int Retaliation = 20230;
+        public const int ShatteringThrow = 64382;
+        public const int ThunderClap = 47502;
 
         /* Warrior - Fury */
-        public const uint DeathWish = 12292;
-        public const uint Bloodthirst = 23881;
-        public const uint PassiveTitansGrip = 46917;
-        public const uint DemoShout = 47437;
-        public const uint Execute = 47471;
-        public const uint HeroicFury = 60970;
-        public const uint Recklessness = 1719;
-        public const uint PiercingHowl = 12323;
+        public const int DeathWish = 12292;
+        public const int Bloodthirst = 23881;
+        public const int PassiveTitansGrip = 46917;
+        public const int DemoShout = 47437;
+        public const int Execute = 47471;
+        public const int HeroicFury = 60970;
+        public const int Recklessness = 1719;
+        public const int PiercingHowl = 12323;
 
         /* Warrior - Protection */
-        public const uint Vigilance = 50720;
-        public const uint Devastate = 20243;
-        public const uint Shockwave = 46968;
-        public const uint ConcussionBlow = 12809;
-        public const uint Disarm = 676;
-        public const uint LastStand = 12975;
-        public const uint ShieldBlock = 2565;
-        public const uint ShieldSlam = 47488;
-        public const uint ShieldWall = 871;
-        public const uint Reflection = 23920;
+        public const int Vigilance = 50720;
+        public const int Devastate = 20243;
+        public const int Shockwave = 46968;
+        public const int ConcussionBlow = 12809;
+        public const int Disarm = 676;
+        public const int LastStand = 12975;
+        public const int ShieldBlock = 2565;
+        public const int ShieldSlam = 47488;
+        public const int ShieldWall = 871;
+        public const int Reflection = 23920;
 
         /* Paladin - Generic */
-        public const uint PalAuraMastery = 31821;
-        public const uint LayOnHands = 48788;
-        public const uint BlessingOfMight = 48932;
-        public const uint AvengingWrath = 31884;
-        public const uint DivineProtection = 498;
-        public const uint DivineShield = 642;
-        public const uint HammerOfJustice = 10308;
-        public const uint HandOfFreedom = 1044;
-        public const uint HandOfProtection = 10278;
-        public const uint HandOfSacrifice = 6940;
+        public const int PalAuraMastery = 31821;
+        public const int LayOnHands = 48788;
+        public const int BlessingOfMight = 48932;
+        public const int AvengingWrath = 31884;
+        public const int DivineProtection = 498;
+        public const int DivineShield = 642;
+        public const int HammerOfJustice = 10308;
+        public const int HandOfFreedom = 1044;
+        public const int HandOfProtection = 10278;
+        public const int HandOfSacrifice = 6940;
 
         /* Paladin - Holy*/
-        public const uint PassiveIllumination = 20215;
-        public const uint HolyShock = 20473;
-        public const uint BeaconOfLight = 53563;
-        public const uint Consecration = 48819;
-        public const uint FlashOfLight = 48785;
-        public const uint HolyLight = 48782;
-        public const uint DivineFavor = 20216;
-        public const uint DivineIllumination = 31842;
+        public const int PassiveIllumination = 20215;
+        public const int HolyShock = 20473;
+        public const int BeaconOfLight = 53563;
+        public const int Consecration = 48819;
+        public const int FlashOfLight = 48785;
+        public const int HolyLight = 48782;
+        public const int DivineFavor = 20216;
+        public const int DivineIllumination = 31842;
 
         /* Paladin - Protection */
-        public const uint BlessOfSanc = 20911;
-        public const uint HolyShield = 20925;
-        public const uint AvengersShield = 48827;
-        public const uint DivineSacrifice = 64205;
-        public const uint HammerOfRighteous = 53595;
-        public const uint RighteousFury = 25780;
-        public const uint ShieldOfRighteous = 61411;
+        public const int BlessOfSanc = 20911;
+        public const int HolyShield = 20925;
+        public const int AvengersShield = 48827;
+        public const int DivineSacrifice = 64205;
+        public const int HammerOfRighteous = 53595;
+        public const int RighteousFury = 25780;
+        public const int ShieldOfRighteous = 61411;
 
         /* Paladin - Retribution */
-        public const uint SealOfCommand = 20375;
-        public const uint CrusaderStrike = 35395;
-        public const uint DivineStorm = 53385;
-        public const uint Judgement = 20271;
-        public const uint HammerOfWrath = 48806;
+        public const int SealOfCommand = 20375;
+        public const int CrusaderStrike = 35395;
+        public const int DivineStorm = 53385;
+        public const int Judgement = 20271;
+        public const int HammerOfWrath = 48806;
 
         /* Hunter - Generic */
-        public const uint Deterrence = 19263;
-        public const uint ExplosiveTrap = 49067;
-        public const uint FreezingArrow = 60192;
-        public const uint RapidFire = 3045;
-        public const uint KillShot = 61006;
-        public const uint MultiShot = 49048;
-        public const uint ViperSting = 3034;
+        public const int Deterrence = 19263;
+        public const int ExplosiveTrap = 49067;
+        public const int FreezingArrow = 60192;
+        public const int RapidFire = 3045;
+        public const int KillShot = 61006;
+        public const int MultiShot = 49048;
+        public const int ViperSting = 3034;
 
         /* Hunter - Beast Mastery */
-        public const uint BestialWrath = 19574;
-        public const uint PassiveBeastWithin = 34692;
-        public const uint PassiveBeastMastery = 53270;
+        public const int BestialWrath = 19574;
+        public const int PassiveBeastWithin = 34692;
+        public const int PassiveBeastMastery = 53270;
 
         /* Hunter - Marksmanship */
-        public const uint AimedShot = 19434;
-        public const uint PassiveTrueshotAura = 19506;
-        public const uint ChimeraShot = 53209;
-        public const uint ArcaneShot = 49045;
-        public const uint SteadyShot = 49052;
-        public const uint Readiness = 23989;
-        public const uint SilencingShot = 34490;
+        public const int AimedShot = 19434;
+        public const int PassiveTrueshotAura = 19506;
+        public const int ChimeraShot = 53209;
+        public const int ArcaneShot = 49045;
+        public const int SteadyShot = 49052;
+        public const int Readiness = 23989;
+        public const int SilencingShot = 34490;
 
         /* Hunter - Survival */
-        public const uint PassiveLockAndLoad = 56344;
-        public const uint WyvernSting = 19386;
-        public const uint ExplosiveShot = 53301;
-        public const uint BlackArrow = 3674;
+        public const int PassiveLockAndLoad = 56344;
+        public const int WyvernSting = 19386;
+        public const int ExplosiveShot = 53301;
+        public const int BlackArrow = 3674;
 
         /* Rogue - Generic */
-        public const uint Dismantle = 51722;
-        public const uint Evasion = 26669;
-        public const uint Kick = 1766;
-        public const uint Vanish = 26889;
-        public const uint Blind = 2094;
-        public const uint CloakOfShadows = 31224;
+        public const int Dismantle = 51722;
+        public const int Evasion = 26669;
+        public const int Kick = 1766;
+        public const int Vanish = 26889;
+        public const int Blind = 2094;
+        public const int CloakOfShadows = 31224;
 
         /* Rogue - Assassination */
-        public const uint ColdBlood = 14177;
-        public const uint Mutilate = 1329;
-        public const uint HungerForBlood = 51662;
-        public const uint Envenom = 57993;
+        public const int ColdBlood = 14177;
+        public const int Mutilate = 1329;
+        public const int HungerForBlood = 51662;
+        public const int Envenom = 57993;
 
         /* Rogue - Combat */
-        public const uint SinisterStrike = 48637;
-        public const uint BladeFlurry = 13877;
-        public const uint AdrenalineRush = 13750;
-        public const uint KillingSpree = 51690;
-        public const uint Eviscerate = 48668;
+        public const int SinisterStrike = 48637;
+        public const int BladeFlurry = 13877;
+        public const int AdrenalineRush = 13750;
+        public const int KillingSpree = 51690;
+        public const int Eviscerate = 48668;
 
         /* Rogue - Sublety */
-        public const uint Hemorrhage = 16511;
-        public const uint Premeditation = 14183;
-        public const uint ShadowDance = 51713;
-        public const uint Preparation = 14185;
-        public const uint Shadowstep = 36554;
+        public const int Hemorrhage = 16511;
+        public const int Premeditation = 14183;
+        public const int ShadowDance = 51713;
+        public const int Preparation = 14185;
+        public const int Shadowstep = 36554;
 
         /* Priest - Generic */
-        public const uint FearWard = 6346;
-        public const uint PowerWordFort = 48161;
-        public const uint DivineSpirit = 48073;
-        public const uint ShadowProtection = 48169;
-        public const uint DivineHymn = 64843;
-        public const uint HymnOfHope = 64901;
-        public const uint ShadowWordDeath = 48158;
-        public const uint PsychicScream = 10890;
+        public const int FearWard = 6346;
+        public const int PowerWordFort = 48161;
+        public const int DivineSpirit = 48073;
+        public const int ShadowProtection = 48169;
+        public const int DivineHymn = 64843;
+        public const int HymnOfHope = 64901;
+        public const int ShadowWordDeath = 48158;
+        public const int PsychicScream = 10890;
 
         /* Priest - Discipline */
-        public const uint PassiveSoulWarding = 63574;
-        public const uint PowerInfusion = 10060;
-        public const uint Penance = 47540;
-        public const uint PainSuppression = 33206;
-        public const uint InnerFocus = 14751;
-        public const uint PowerWordShield = 48066;
+        public const int PassiveSoulWarding = 63574;
+        public const int PowerInfusion = 10060;
+        public const int Penance = 47540;
+        public const int PainSuppression = 33206;
+        public const int InnerFocus = 14751;
+        public const int PowerWordShield = 48066;
 
         /* Priest - Holy */
-        public const uint PassiveSpiritRedemption = 20711;
-        public const uint DesperatePrayer = 19236;
-        public const uint GuardianSpirit = 47788;
-        public const uint FlashHeal = 48071;
-        public const uint Renew = 48068;
+        public const int PassiveSpiritRedemption = 20711;
+        public const int DesperatePrayer = 19236;
+        public const int GuardianSpirit = 47788;
+        public const int FlashHeal = 48071;
+        public const int Renew = 48068;
 
         /* Priest - Shadow */
-        public const uint VampiricEmbrace = 15286;
-        public const uint Shadowform = 15473;
-        public const uint VampiricTouch = 34914;
-        public const uint MindFlay = 15407;
-        public const uint MindBlast = 48127;
-        public const uint ShadowWordPain = 48125;
-        public const uint DevouringPlague = 48300;
-        public const uint Dispersion = 47585;
+        public const int VampiricEmbrace = 15286;
+        public const int Shadowform = 15473;
+        public const int VampiricTouch = 34914;
+        public const int MindFlay = 15407;
+        public const int MindBlast = 48127;
+        public const int ShadowWordPain = 48125;
+        public const int DevouringPlague = 48300;
+        public const int Dispersion = 47585;
 
         /* Death Knight - Generic */
-        public const uint DeathGrip = 49576;
-        public const uint Strangulate = 47476;
-        public const uint EmpowerRuneWeap = 47568;
-        public const uint IcebornFortitude = 48792;
-        public const uint AntiMagicShell = 48707;
-        public const uint DeathCoilDk = 49895;
-        public const uint MindFreeze = 47528;
-        public const uint IcyTouch = 49909;
-        public const uint AuraFrostFever = 55095;
-        public const uint PlagueStrike = 49921;
-        public const uint AuraBloodPlague = 55078;
-        public const uint Pestilence = 50842;
+        public const int DeathGrip = 49576;
+        public const int Strangulate = 47476;
+        public const int EmpowerRuneWeap = 47568;
+        public const int IcebornFortitude = 48792;
+        public const int AntiMagicShell = 48707;
+        public const int DeathCoilDk = 49895;
+        public const int MindFreeze = 47528;
+        public const int IcyTouch = 49909;
+        public const int AuraFrostFever = 55095;
+        public const int PlagueStrike = 49921;
+        public const int AuraBloodPlague = 55078;
+        public const int Pestilence = 50842;
 
         /* Death Knight - Blood */
-        public const uint RuneTap = 48982;
-        public const uint Hysteria = 49016;
-        public const uint HeartStrike = 55050;
-        public const uint DeathStrike = 49924;
-        public const uint BloodStrike = 49930;
-        public const uint MarkOfBlood = 49005;
-        public const uint VampiricBlood = 55233;
+        public const int RuneTap = 48982;
+        public const int Hysteria = 49016;
+        public const int HeartStrike = 55050;
+        public const int DeathStrike = 49924;
+        public const int BloodStrike = 49930;
+        public const int MarkOfBlood = 49005;
+        public const int VampiricBlood = 55233;
 
         /* Death Knight - Frost */
-        public const uint PassiveIcyTalons = 50887;
-        public const uint FrostStrike = 49143;
-        public const uint HowlingBlast = 49184;
-        public const uint UnbreakableArmor = 51271;
-        public const uint Obliterate = 51425;
-        public const uint Deathchill = 49796;
+        public const int PassiveIcyTalons = 50887;
+        public const int FrostStrike = 49143;
+        public const int HowlingBlast = 49184;
+        public const int UnbreakableArmor = 51271;
+        public const int Obliterate = 51425;
+        public const int Deathchill = 49796;
 
         /* Death Knight - Unholy */
-        public const uint PassiveUnholyBlight = 49194;
-        public const uint PassiveMasterOfGhoul = 52143;
-        public const uint ScourgeStrike = 55090;
-        public const uint DeathAndDecay = 49938;
-        public const uint AntiMagicZone = 51052;
-        public const uint SummonGargoyle = 49206;
+        public const int PassiveUnholyBlight = 49194;
+        public const int PassiveMasterOfGhoul = 52143;
+        public const int ScourgeStrike = 55090;
+        public const int DeathAndDecay = 49938;
+        public const int AntiMagicZone = 51052;
+        public const int SummonGargoyle = 49206;
 
         /* Shaman - Generic */
-        public const uint Heroism = 32182;
-        public const uint Bloodlust = 2825;
-        public const uint GroundingTotem = 8177;
+        public const int Heroism = 32182;
+        public const int Bloodlust = 2825;
+        public const int GroundingTotem = 8177;
 
         /* Shaman - Elemental*/
-        public const uint PassiveElementalFocus = 16164;
-        public const uint TotemOfWrath = 30706;
-        public const uint Thunderstorm = 51490;
-        public const uint LightningBolt = 49238;
-        public const uint EarthShock = 49231;
-        public const uint FlameShock = 49233;
-        public const uint LavaBurst = 60043;
-        public const uint ChainLightning = 49271;
-        public const uint ElementalMastery = 16166;
+        public const int PassiveElementalFocus = 16164;
+        public const int TotemOfWrath = 30706;
+        public const int Thunderstorm = 51490;
+        public const int LightningBolt = 49238;
+        public const int EarthShock = 49231;
+        public const int FlameShock = 49233;
+        public const int LavaBurst = 60043;
+        public const int ChainLightning = 49271;
+        public const int ElementalMastery = 16166;
 
         /* Shaman - Enhancement */
-        public const uint PassiveSpiritWeapons = 16268;
-        public const uint LavaLash = 60103;
-        public const uint FeralSpirit = 51533;
-        public const uint AuraMaelstromWeapon = 53817;
-        public const uint Stormstrike = 17364;
-        public const uint ShamanisticRage = 30823;
+        public const int PassiveSpiritWeapons = 16268;
+        public const int LavaLash = 60103;
+        public const int FeralSpirit = 51533;
+        public const int AuraMaelstromWeapon = 53817;
+        public const int Stormstrike = 17364;
+        public const int ShamanisticRage = 30823;
 
         /* Shaman - Restoration*/
-        public const uint ShaNatureSwift = 591;
-        public const uint ManaTideTotem = 590;
-        public const uint EarthShield = 49284;
-        public const uint Riptide = 61295;
-        public const uint HealingWave = 49273;
-        public const uint LesserHealWave = 49276;
-        public const uint TidalForce = 55198;
+        public const int ShaNatureSwift = 591;
+        public const int ManaTideTotem = 590;
+        public const int EarthShield = 49284;
+        public const int Riptide = 61295;
+        public const int HealingWave = 49273;
+        public const int LesserHealWave = 49276;
+        public const int TidalForce = 55198;
 
         /* Mage - Generic */
-        public const uint DampenMagic = 43015;
-        public const uint Evocation = 12051;
-        public const uint ManaShield = 43020;
-        public const uint MirrorImage = 55342;
-        public const uint Spellsteal = 30449;
-        public const uint Counterspell = 2139;
-        public const uint IceBlock = 45438;
+        public const int DampenMagic = 43015;
+        public const int Evocation = 12051;
+        public const int ManaShield = 43020;
+        public const int MirrorImage = 55342;
+        public const int Spellsteal = 30449;
+        public const int Counterspell = 2139;
+        public const int IceBlock = 45438;
 
         /* Mage - Arcane */
-        public const uint FocusMagic = 54646;
-        public const uint ArcanePower = 12042;
-        public const uint ArcaneBarrage = 44425;
-        public const uint ArcaneBlast = 42897;
-        public const uint AuraArcaneBlast = 36032;
-        public const uint ArcaneMissiles = 42846;
-        public const uint PresenceOfMind = 12043;
+        public const int FocusMagic = 54646;
+        public const int ArcanePower = 12042;
+        public const int ArcaneBarrage = 44425;
+        public const int ArcaneBlast = 42897;
+        public const int AuraArcaneBlast = 36032;
+        public const int ArcaneMissiles = 42846;
+        public const int PresenceOfMind = 12043;
 
         /* Mage - Fire */
-        public const uint Pyroblast = 11366;
-        public const uint Combustion = 11129;
-        public const uint LivingBomb = 44457;
-        public const uint Fireball = 42833;
-        public const uint FireBlast = 42873;
-        public const uint DragonsBreath = 31661;
-        public const uint BlastWave = 11113;
+        public const int Pyroblast = 11366;
+        public const int Combustion = 11129;
+        public const int LivingBomb = 44457;
+        public const int Fireball = 42833;
+        public const int FireBlast = 42873;
+        public const int DragonsBreath = 31661;
+        public const int BlastWave = 11113;
 
         /* Mage - Frost */
-        public const uint IcyVeins = 12472;
-        public const uint IceBarrier = 11426;
-        public const uint DeepFreeze = 44572;
-        public const uint FrostNova = 42917;
-        public const uint Frostbolt = 42842;
-        public const uint ColdSnap = 11958;
-        public const uint IceLance = 42914;
+        public const int IcyVeins = 12472;
+        public const int IceBarrier = 11426;
+        public const int DeepFreeze = 44572;
+        public const int FrostNova = 42917;
+        public const int Frostbolt = 42842;
+        public const int ColdSnap = 11958;
+        public const int IceLance = 42914;
 
         /* Warlock - Generic */
-        public const uint Fear = 6215;
-        public const uint HowlOfTerror = 17928;
-        public const uint Corruption = 47813;
-        public const uint DeathCoilW = 47860;
-        public const uint ShadowBolt = 47809;
-        public const uint Incinerate = 47838;
-        public const uint Immolate = 47811;
-        public const uint SeedOfCorruption = 47836;
+        public const int Fear = 6215;
+        public const int HowlOfTerror = 17928;
+        public const int Corruption = 47813;
+        public const int DeathCoilW = 47860;
+        public const int ShadowBolt = 47809;
+        public const int Incinerate = 47838;
+        public const int Immolate = 47811;
+        public const int SeedOfCorruption = 47836;
 
         /* Warlock - Affliction */
-        public const uint PassiveSiphonLife = 63108;
-        public const uint UnstableAffliction = 30108;
-        public const uint Haunt = 48181;
-        public const uint CurseOfAgony = 47864;
-        public const uint DrainSoul = 47855;
+        public const int PassiveSiphonLife = 63108;
+        public const int UnstableAffliction = 30108;
+        public const int Haunt = 48181;
+        public const int CurseOfAgony = 47864;
+        public const int DrainSoul = 47855;
 
         /* Warlock - Demonology */
-        public const uint SoulLink = 19028;
-        public const uint DemonicEmpowerment = 47193;
-        public const uint Metamorphosis = 59672;
-        public const uint ImmolationAura = 50589;
-        public const uint DemonCharge = 54785;
-        public const uint AuraDecimation = 63167;
-        public const uint AuraMoltenCore = 71165;
-        public const uint SoulFire = 47825;
+        public const int SoulLink = 19028;
+        public const int DemonicEmpowerment = 47193;
+        public const int Metamorphosis = 59672;
+        public const int ImmolationAura = 50589;
+        public const int DemonCharge = 54785;
+        public const int AuraDecimation = 63167;
+        public const int AuraMoltenCore = 71165;
+        public const int SoulFire = 47825;
 
         /* Warlock - Destruction */
-        public const uint Shadowburn = 17877;
-        public const uint Conflagrate = 17962;
-        public const uint ChaosBolt = 50796;
-        public const uint Shadowfury = 47847;
+        public const int Shadowburn = 17877;
+        public const int Conflagrate = 17962;
+        public const int ChaosBolt = 50796;
+        public const int Shadowfury = 47847;
 
         /* Druid - Generic */
-        public const uint Barkskin = 22812;
-        public const uint Innervate = 29166;
+        public const int Barkskin = 22812;
+        public const int Innervate = 29166;
 
         /* Druid - Balance */
-        public const uint InsectSwarm = 5570;
-        public const uint MoonkinForm = 24858;
-        public const uint Starfall = 48505;
-        public const uint Typhoon = 61384;
-        public const uint AuraEclipseLunar = 48518;
-        public const uint Moonfire = 48463;
-        public const uint Starfire = 48465;
-        public const uint Wrath = 48461;
+        public const int InsectSwarm = 5570;
+        public const int MoonkinForm = 24858;
+        public const int Starfall = 48505;
+        public const int Typhoon = 61384;
+        public const int AuraEclipseLunar = 48518;
+        public const int Moonfire = 48463;
+        public const int Starfire = 48465;
+        public const int Wrath = 48461;
 
         /* Druid - Feral */
-        public const uint CatForm = 768;
-        public const uint SurvivalInstincts = 61336;
-        public const uint Mangle = 33917;
-        public const uint Berserk = 50334;
-        public const uint MangleCat = 48566;
-        public const uint FeralChargeCat = 49376;
-        public const uint Rake = 48574;
-        public const uint Rip = 49800;
-        public const uint SavageRoar = 52610;
-        public const uint TigerFury = 50213;
-        public const uint Claw = 48570;
-        public const uint Dash = 33357;
-        public const uint Maim = 49802;
+        public const int CatForm = 768;
+        public const int SurvivalInstincts = 61336;
+        public const int Mangle = 33917;
+        public const int Berserk = 50334;
+        public const int MangleCat = 48566;
+        public const int FeralChargeCat = 49376;
+        public const int Rake = 48574;
+        public const int Rip = 49800;
+        public const int SavageRoar = 52610;
+        public const int TigerFury = 50213;
+        public const int Claw = 48570;
+        public const int Dash = 33357;
+        public const int Maim = 49802;
 
         /* Druid - Restoration */
-        public const uint Swiftmend = 18562;
-        public const uint TreeOfLife = 33891;
-        public const uint WildGrowth = 48438;
-        public const uint NatureSwiftness = 17116;
-        public const uint Tranquility = 48447;
-        public const uint Nourish = 50464;
-        public const uint HealingTouch = 48378;
-        public const uint Rejuvenation = 48441;
-        public const uint Regrowth = 48443;
-        public const uint Lifebloom = 48451;
+        public const int Swiftmend = 18562;
+        public const int TreeOfLife = 33891;
+        public const int WildGrowth = 48438;
+        public const int NatureSwiftness = 17116;
+        public const int Tranquility = 48447;
+        public const int Nourish = 50464;
+        public const int HealingTouch = 48378;
+        public const int Rejuvenation = 48441;
+        public const int Regrowth = 48443;
+        public const int Lifebloom = 48451;
     }
 
     public class PlayerAI : UnitAI
@@ -395,7 +395,7 @@ namespace Game.AI
                 return false;
 
             var chrSpec = who.GetPrimarySpecializationEntry();
-            return chrSpec != null && chrSpec.Role() == ChrSpecializationRole.Healer;
+            return chrSpec != null && chrSpec.Role == ChrSpecializationRole.Healer;
         }
 
         bool IsPlayerRangedAttacker(Player who)
@@ -404,13 +404,13 @@ namespace Game.AI
                 return false;
 
             var chrSpec = who.GetPrimarySpecializationEntry();
-            return chrSpec != null && chrSpec.Flags().HasFlag(ChrSpecializationFlag.Ranged);
+            return chrSpec != null && chrSpec.HasFlag(ChrSpecializationFlag.Ranged);
         }
 
-        Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)
+        (Spell, Unit) VerifySpellCast(int spellId, Unit target)
         {
             // Find highest spell rank that we know
-            uint knownRank, nextRank;
+            int knownRank, nextRank;
             if (me.HasSpell(spellId))
             {
                 // this will save us some lookups if the player has the highest rank (expected case)
@@ -430,23 +430,23 @@ namespace Game.AI
             }
 
             if (knownRank == 0)
-                return null;
+                return default;
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(knownRank, me.GetMap().GetDifficultyID());
             if (spellInfo == null)
-                return null;
+                return default;
 
             if (me.GetSpellHistory().HasGlobalCooldown(spellInfo))
-                return null;
+                return default;
 
             Spell spell = new(me, spellInfo, TriggerCastFlags.None);
             if (spell.CanAutoCast(target))
-                return Tuple.Create(spell, target);
+                return (spell, target);
 
-            return null;
+            return default;
         }
 
-        public Tuple<Spell, Unit> VerifySpellCast(uint spellId, SpellTarget target)
+        public (Spell, Unit) VerifySpellCast(int spellId, SpellTarget target)
         {
             Unit pTarget = null;
             switch (target)
@@ -456,12 +456,12 @@ namespace Game.AI
                 case SpellTarget.Victim:
                     pTarget = me.GetVictim();
                     if (pTarget == null)
-                        return null;
+                        return default;
                     break;
                 case SpellTarget.Charmer:
                     pTarget = me.GetCharmer();
                     if (pTarget == null)
-                        return null;
+                        return default;
                     break;
                 case SpellTarget.Self:
                     pTarget = me;
@@ -471,20 +471,20 @@ namespace Game.AI
             return VerifySpellCast(spellId, pTarget);
         }
 
-        public Tuple<Spell, Unit> SelectSpellCast(List<Tuple<Tuple<Spell, Unit>, uint>> spells)
+        public (Spell, Unit) SelectSpellCast(List<((Spell, Unit), int)> spells)
         {
             if (spells.Empty())
-                return null;
+                return default;
 
-            uint totalWeights = 0;
+            int totalWeights = 0;
             foreach (var wSpell in spells)
                 totalWeights += wSpell.Item2;
 
-            Tuple<Spell, Unit> selected = null;
-            uint randNum = RandomHelper.URand(0, totalWeights - 1);
+            (Spell, Unit) selected = default;
+            int randNum = RandomHelper.IRand(0, totalWeights - 1);
             foreach (var wSpell in spells)
             {
-                if (selected != null)
+                if (selected != default)
                 {
                     //delete wSpell.first.first;
                     continue;
@@ -503,14 +503,14 @@ namespace Game.AI
             return selected;
         }
 
-        public void VerifyAndPushSpellCast<T>(List<Tuple<Tuple<Spell, Unit>, uint>> spells, uint spellId, T target, uint weight) where T : Unit
+        public void VerifyAndPushSpellCast<T>(List<((Spell, Unit), int)> spells, int spellId, T target, int weight) where T : Unit
         {
-            Tuple<Spell, Unit> spell = VerifySpellCast(spellId, target);
-            if (spell != null)
-                spells.Add(Tuple.Create(spell, weight));
+            (Spell, Unit) spell = VerifySpellCast(spellId, target);
+            if (spell != default)
+                spells.Add((spell, weight));
         }
 
-        public void DoCastAtTarget(Tuple<Spell, Unit> spell)
+        public void DoCastAtTarget((Spell, Unit) spell)
         {
             SpellCastTargets targets = new();
             targets.SetUnitTarget(spell.Item2);
@@ -529,13 +529,13 @@ namespace Game.AI
             if (victim == null) 
                 return;
 
-            uint rangedAttackSpell = 0;
+            int rangedAttackSpell = 0;
 
             Item rangedItem = me.GetItemByPos(EquipmentSlot.Ranged);
             ItemTemplate rangedTemplate = rangedItem != null? rangedItem.GetTemplate() : null;
             if (rangedTemplate != null)
             {
-                switch ((ItemSubClassWeapon)rangedTemplate.GetSubClass())
+                switch (rangedTemplate.GetSubClass().Weapon)
                 {
                     case ItemSubClassWeapon.Bow:
                     case ItemSubClassWeapon.Gun:
@@ -671,9 +671,9 @@ namespace Game.AI
             return null;
         }
 
-        Tuple<Spell, Unit> SelectAppropriateCastForSpec()
+        (Spell, Unit) SelectAppropriateCastForSpec()
         {
-            List<Tuple<Tuple<Spell, Unit>, uint>> spells = new();
+            List<((Spell, Unit), int)> spells = new();
             /*
             switch (me.getClass())
             {
@@ -1281,8 +1281,8 @@ namespace Game.AI
                                     AttackStartCaster(target, CASTER_CHASE_DISTANCE);
                             }
                         }
-                        Tuple<Spell, Unit> shouldCast = SelectAppropriateCastForSpec();
-                        if (shouldCast != null)
+                        var shouldCast = SelectAppropriateCastForSpec();
+                        if (shouldCast != default)
                             DoCastAtTarget(shouldCast);
                         _castCheckTimer = 500;
                     }

@@ -43,8 +43,8 @@ namespace Game.Networking.Packets
             bool hasPartyIndex = _worldPacket.HasBit();
 
             _worldPacket.ResetBitPos();
-            uint targetNameLen = _worldPacket.ReadBits<uint>(9);
-            uint targetRealmLen = _worldPacket.ReadBits<uint>(9);
+            int targetNameLen = _worldPacket.ReadBits<int>(9);
+            int targetRealmLen = _worldPacket.ReadBits<int>(9);
 
             ProposedRoles = _worldPacket.ReadUInt32();
             TargetGUID = _worldPacket.ReadPackedGuid();

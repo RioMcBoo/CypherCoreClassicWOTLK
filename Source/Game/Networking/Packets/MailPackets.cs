@@ -66,11 +66,11 @@ namespace Game.Networking.Packets
             Info.SendMoney = _worldPacket.ReadInt64();
             Info.Cod = _worldPacket.ReadInt64();
 
-            uint targetLength = _worldPacket.ReadBits<uint>(9);
-            uint subjectLength = _worldPacket.ReadBits<uint>(9);
-            uint bodyLength = _worldPacket.ReadBits<uint>(11);
+            int targetLength = _worldPacket.ReadBits<int>(9);
+            int subjectLength = _worldPacket.ReadBits<int>(9);
+            int bodyLength = _worldPacket.ReadBits<int>(11);
 
-            uint count = _worldPacket.ReadBits<uint>(5);
+            int count = _worldPacket.ReadBits<int>(5);
 
             Info.Target = _worldPacket.ReadString(targetLength);
             Info.Subject = _worldPacket.ReadString(subjectLength);

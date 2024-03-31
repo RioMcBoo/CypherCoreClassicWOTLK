@@ -94,7 +94,7 @@ namespace Game.Chat
         }
 
         [Command("faction", RBACPermissions.CommandModifyFaction)]
-        static bool HandleModifyFactionCommand(CommandHandler handler, uint? factionid, uint? flag, ulong? npcflag, uint? dyflag)
+        static bool HandleModifyFactionCommand(CommandHandler handler, int? factionid, uint? flag, ulong? npcflag, uint? dyflag)
         {
             Creature target = handler.GetSelectedCreature();
             if (target == null)
@@ -128,7 +128,7 @@ namespace Game.Chat
 
             target.SetFaction(factionid.Value);
             target.ReplaceAllUnitFlags((UnitFlags)flag);
-            target.ReplaceAllNpcFlags((NPCFlags)(npcflag & 0xFFFFFFFF));
+            target.ReplaceAllNpcFlags((NPCFlags1)(npcflag & 0xFFFFFFFF));
             target.ReplaceAllNpcFlags2((NPCFlags2)(npcflag >> 32));
             target.ReplaceAllDynamicFlags((UnitDynFlags)dyflag);
 
@@ -202,7 +202,7 @@ namespace Game.Chat
         }
 
         [Command("mount", RBACPermissions.CommandModifyMount)]
-        static bool HandleModifyMountCommand(CommandHandler handler, uint mount, float speed)
+        static bool HandleModifyMountCommand(CommandHandler handler, int mount, float speed)
         {
             if (!CliDB.CreatureDisplayInfoStorage.HasRecord(mount))
             {
@@ -246,7 +246,7 @@ namespace Game.Chat
                 return false;
 
             long moneyToAdd = args.NextInt64();
-            ulong targetMoney = target.GetMoney();
+            long targetMoney = target.GetMoney();
 
             if (moneyToAdd < 0)
             {
@@ -264,13 +264,13 @@ namespace Game.Chat
                 else
                 {
                     ulong moneyToAddMsg = (ulong)(moneyToAdd * -1);
-                    if (newmoney > (long)PlayerConst.MaxMoneyAmount)
-                        newmoney = (long)PlayerConst.MaxMoneyAmount;
+                    if (newmoney > PlayerConst.MaxMoneyAmount)
+                        newmoney = PlayerConst.MaxMoneyAmount;
 
                     handler.SendSysMessage(CypherStrings.YouTakeMoney, moneyToAddMsg, handler.GetNameLink(target));
                     if (handler.NeedReportToTarget(target))
                         target.SendSysMessage(CypherStrings.YoursMoneyTaken, handler.GetNameLink(), moneyToAddMsg);
-                    target.SetMoney((ulong)newmoney);
+                    target.SetMoney(newmoney);
                 }
             }
             else
@@ -282,7 +282,7 @@ namespace Game.Chat
                 if ((ulong)moneyToAdd >= PlayerConst.MaxMoneyAmount)
                     moneyToAdd = Convert.ToInt64(PlayerConst.MaxMoneyAmount);
 
-                moneyToAdd = (long)Math.Min((ulong)moneyToAdd, (PlayerConst.MaxMoneyAmount - targetMoney));
+                moneyToAdd = Math.Min(moneyToAdd, (PlayerConst.MaxMoneyAmount - targetMoney));
 
                 target.ModifyMoney(moneyToAdd);
             }
@@ -355,7 +355,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(factionTxt))
                 return false;
 
-            if (!uint.TryParse(factionTxt, out uint factionId))
+            if (!int.TryParse(factionTxt, out int factionId))
                 return false;
 
             string rankTxt = args.NextString();
@@ -427,7 +427,7 @@ namespace Game.Chat
         }
 
         [Command("phase", RBACPermissions.CommandModifyPhase)]
-        static bool HandleModifyPhaseCommand(CommandHandler handler, uint phaseId, uint? visibleMapId)
+        static bool HandleModifyPhaseCommand(CommandHandler handler, int phaseId, int? visibleMapId)
         {
             if (phaseId != 0 && !CliDB.PhaseStorage.ContainsKey(phaseId))
             {
@@ -624,15 +624,15 @@ namespace Game.Chat
                 return false;
             }
 
-            uint currencyId = args.NextUInt32();
+            int currencyId = args.NextInt32();
             if (!CliDB.CurrencyTypesStorage.ContainsKey(currencyId))
                 return false;
 
-            uint amount = args.NextUInt32();
+            int amount = args.NextInt32();
             if (amount == 0)
                 return false;
 
-            target.ModifyCurrency(currencyId, (int)amount, CurrencyGainSource.Cheat, CurrencyDestroyReason.Cheat);
+            target.ModifyCurrency(currencyId, amount, CurrencyGainSource.Cheat, CurrencyDestroyReason.Cheat);
 
             return true;
         }
@@ -662,12 +662,12 @@ namespace Game.Chat
                 return false;
 
             // we can run the command
-            target.GiveXP((uint)xp, null);
+            target.GiveXP(xp, null);
             return true;
         }
 
         [CommandNonGroup("morph", RBACPermissions.CommandMorph)]
-        static bool HandleModifyMorphCommand(CommandHandler handler, uint displayId)
+        static bool HandleModifyMorphCommand(CommandHandler handler, int displayId)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)

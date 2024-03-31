@@ -33,7 +33,7 @@ namespace Game
 
             if (packet.ChatChannelId != 0)
             { // system channel
-                Channel channel = cMgr.GetSystemChannel((uint)packet.ChatChannelId, zone);
+                Channel channel = cMgr.GetSystemChannel(packet.ChatChannelId, zone);
                 if (channel != null)
                     channel.JoinChannel(GetPlayer());
             }
@@ -91,12 +91,12 @@ namespace Game
             ChannelManager cMgr = ChannelManager.ForTeam(GetPlayer().GetTeam());
             if (cMgr != null)
             {
-                Channel channel = cMgr.GetChannel((uint)packet.ZoneChannelID, packet.ChannelName, GetPlayer(), true, zone);
+                Channel channel = cMgr.GetChannel(packet.ZoneChannelID, packet.ChannelName, GetPlayer(), true, zone);
                 if (channel != null)
                     channel.LeaveChannel(GetPlayer(), true);
 
                 if (packet.ZoneChannelID != 0)
-                    cMgr.LeftChannel((uint)packet.ZoneChannelID, zone);
+                    cMgr.LeftChannel(packet.ZoneChannelID, zone);
             }
         }
 

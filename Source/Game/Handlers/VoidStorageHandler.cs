@@ -19,7 +19,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UnlockVoidStorage, Processing = PacketProcessing.Inplace)]
         void HandleVoidStorageUnlock(UnlockVoidStorage unlockVoidStorage)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(unlockVoidStorage.Npc, NPCFlags.VaultKeeper, NPCFlags2.None);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(unlockVoidStorage.Npc, NPCFlags1.VaultKeeper, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageUnlock - {0} not found or player can't interact with it.", unlockVoidStorage.Npc.ToString());
@@ -41,7 +41,7 @@ namespace Game
         {
             Player player = GetPlayer();
 
-            Creature unit = player.GetNPCIfCanInteractWith(queryVoidStorage.Npc, NPCFlags.Transmogrifier | NPCFlags.VaultKeeper, NPCFlags2.None);
+            Creature unit = player.GetNPCIfCanInteractWith(queryVoidStorage.Npc, NPCFlags1.Transmogrifier | NPCFlags1.VaultKeeper, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageQuery - {0} not found or player can't interact with it.", queryVoidStorage.Npc.ToString());
@@ -80,7 +80,7 @@ namespace Game
         {
             Player player = GetPlayer();
 
-            Creature unit = player.GetNPCIfCanInteractWith(voidStorageTransfer.Npc, NPCFlags.VaultKeeper, NPCFlags2.None);
+            Creature unit = player.GetNPCIfCanInteractWith(voidStorageTransfer.Npc, NPCFlags1.VaultKeeper, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleVoidStorageTransfer - {voidStorageTransfer.Npc} not found or player can't interact with it.");
@@ -200,7 +200,7 @@ namespace Game
         { 
             Player player = GetPlayer();
 
-            Creature unit = player.GetNPCIfCanInteractWith(swapVoidItem.Npc, NPCFlags.VaultKeeper, NPCFlags2.None);
+            Creature unit = player.GetNPCIfCanInteractWith(swapVoidItem.Npc, NPCFlags1.VaultKeeper, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleVoidSwapItem - {0} not found or player can't interact with it.", swapVoidItem.Npc.ToString());

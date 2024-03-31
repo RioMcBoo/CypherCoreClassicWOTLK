@@ -92,7 +92,7 @@ namespace Game.DataStorage
         public byte Flags;
         public sbyte ChrSpecializationIndex;
         private sbyte _chrSpecializationRole;
-        public uint ModifierTreeID;
+        public int ModifierTreeID;
         private sbyte _powerType;
         public byte PowerTypeComp;
         public byte PowerTypeValue;
@@ -141,7 +141,7 @@ namespace Game.DataStorage
 
     public sealed class PowerDisplayRecord
     {
-        public uint Id;
+        public int Id;
         public string GlobalStringBaseTag;
         public byte ActualType;
         public byte Red;
@@ -151,7 +151,7 @@ namespace Game.DataStorage
 
     public sealed class PowerTypeRecord
     {
-        public uint Id;
+        public int Id;
         public string NameGlobalStringTag;
         public string CostGlobalStringTag;        
         private sbyte _powerTypeEnum;
@@ -185,7 +185,7 @@ namespace Game.DataStorage
 
     public sealed class PrestigeLevelInfoRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public int PrestigeLevel;
         public int BadgeTextureFileDataID;

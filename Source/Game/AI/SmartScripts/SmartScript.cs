@@ -1568,21 +1568,21 @@ namespace Game.AI
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().ReplaceAllNpcFlags((NPCFlags)e.Action.flag.flag);
+                            target.ToUnit().ReplaceAllNpcFlags((NPCFlags1)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.AddNpcFlag:
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().SetNpcFlag((NPCFlags)e.Action.flag.flag);
+                            target.ToUnit().SetNpcFlag((NPCFlags1)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.RemoveNpcFlag:
                 {
                     foreach (var target in targets)
                         if (IsUnit(target))
-                            target.ToUnit().RemoveNpcFlag((NPCFlags)e.Action.flag.flag);
+                            target.ToUnit().RemoveNpcFlag((NPCFlags1)e.Action.flag.flag);
                     break;
                 }
                 case SmartActions.CrossCast:

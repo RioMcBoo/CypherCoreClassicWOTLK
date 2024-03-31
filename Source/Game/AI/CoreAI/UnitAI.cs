@@ -116,12 +116,12 @@ namespace Game.AI
         /// - Has aura with ID <aura> (if aura > 0)
         /// - Does not have aura with ID -<aura> (if aura < 0)
         /// </summary>
-        public Unit SelectTarget(SelectTargetMethod targetType, uint offset = 0, float dist = 0.0f, bool playerOnly = false, bool withTank = true, int aura = 0)
+        public Unit SelectTarget(SelectTargetMethod targetType, int offset = 0, float dist = 0.0f, bool playerOnly = false, bool withTank = true, int aura = 0)
         {
             return SelectTarget(targetType, offset, new DefaultTargetSelector(me, dist, playerOnly, withTank, aura));
         }
 
-        public Unit SelectTarget(SelectTargetMethod targetType, uint offset, ICheck<Unit> selector)
+        public Unit SelectTarget(SelectTargetMethod targetType, int offset, ICheck<Unit> selector)
         {
             return SelectTarget(targetType, offset, selector.Invoke);
         }
@@ -131,14 +131,14 @@ namespace Game.AI
         /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
         /// </summary>
         public delegate bool SelectTargetDelegate(Unit unit);
-        public Unit SelectTarget(SelectTargetMethod targetType, uint offset, SelectTargetDelegate selector)
+        public Unit SelectTarget(SelectTargetMethod targetType, int offset, SelectTargetDelegate selector)
         {
             ThreatManager mgr = GetThreatManager();
             // shortcut: if we ignore the first <offset> elements, and there are at most <offset> elements, then we ignore ALL elements
             if (mgr.GetThreatListSize() <= offset)
                 return null;
 
-            List<Unit> targetList = SelectTargetList((uint)mgr.GetThreatListSize(), targetType, offset, selector);
+            List<Unit> targetList = SelectTargetList(mgr.GetThreatListSize(), targetType, offset, selector);
 
             // maybe nothing fulfills the predicate
             if (targetList.Empty())
@@ -163,7 +163,7 @@ namespace Game.AI
         /// - Does not have aura with ID -<aura> (if aura < 0)
         /// The resulting targets are stored in <targetList> (which is cleared first).
         /// </summary>
-        public List<Unit> SelectTargetList(uint num, SelectTargetMethod targetType, uint offset = 0, float dist = 0f, bool playerOnly = false, bool withTank = true, int aura = 0)
+        public List<Unit> SelectTargetList(int num, SelectTargetMethod targetType, int offset = 0, float dist = 0f, bool playerOnly = false, bool withTank = true, int aura = 0)
         {
             return SelectTargetList(num, targetType, offset, new DefaultTargetSelector(me, dist, playerOnly, withTank, aura).Invoke);
         }
@@ -172,7 +172,7 @@ namespace Game.AI
         /// Select the best (up to) <num> targets (in <targetType> order) satisfying <predicate> from the threat list and stores them in <targetList> (which is cleared first).
         /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
         /// </summary>
-        public List<Unit> SelectTargetList(uint num, SelectTargetMethod targetType, uint offset, SelectTargetDelegate selector)
+        public List<Unit> SelectTargetList(int num, SelectTargetMethod targetType, int offset, SelectTargetDelegate selector)
         {
             var targetList = new List<Unit>();
 

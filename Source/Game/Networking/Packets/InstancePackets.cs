@@ -249,10 +249,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(DungeonEncounterID);
+            _worldPacket.WriteInt32(DungeonEncounterID);
         }
 
-        public uint DungeonEncounterID;
+        public int DungeonEncounterID;
     }
 
     //Structs

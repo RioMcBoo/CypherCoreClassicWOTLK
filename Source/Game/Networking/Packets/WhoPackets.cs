@@ -2,9 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
-using Game.Miscellaneous;
 using System;
 using System.Collections.Generic;
 
@@ -16,7 +14,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            CharName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
+            CharName = _worldPacket.ReadString(_worldPacket.ReadBits<int>(6));
         }
 
         public string CharName;
@@ -99,13 +97,13 @@ namespace Game.Networking.Packets
             MinLevel = data.ReadInt32();
             MaxLevel = data.ReadInt32();
             RaceFilter = (RaceMask)data.ReadInt64();
-            ClassFilter = data.ReadInt32();
+            ClassFilter = (ClassMask)data.ReadInt32();
 
-            uint nameLength = data.ReadBits<uint>(6);
-            uint virtualRealmNameLength = data.ReadBits<uint>(9);
-            uint guildNameLength = data.ReadBits<uint>(7);
-            uint guildVirtualRealmNameLength = data.ReadBits<uint>(9);
-            uint wordsCount = data.ReadBits<uint>(3);
+            int nameLength = data.ReadBits<int>(6);
+            int virtualRealmNameLength = data.ReadBits<int>(9);
+            int guildNameLength = data.ReadBits<int>(7);
+            int guildVirtualRealmNameLength = data.ReadBits<int>(9);
+            int wordsCount = data.ReadBits<int>(3);
 
             ShowEnemies = data.HasBit();
             ShowArenaPlayers = data.HasBit();
@@ -117,7 +115,7 @@ namespace Game.Networking.Packets
 
             for (int i = 0; i < wordsCount; ++i)
             {
-                Words.Add(data.ReadString(data.ReadBits<uint>(7)));
+                Words.Add(data.ReadString(data.ReadBits<int>(7)));
                 data.ResetBitPos();
             }
 
@@ -137,7 +135,7 @@ namespace Game.Networking.Packets
         public string Guild;
         public string GuildVirtualRealmName;
         public RaceMask RaceFilter;
-        public int ClassFilter = -1;
+        public ClassMask ClassFilter = ClassMask.All;
         public List<string> Words = new();
         public bool ShowEnemies;
         public bool ShowArenaPlayers;

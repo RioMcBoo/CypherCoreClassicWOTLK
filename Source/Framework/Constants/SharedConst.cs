@@ -700,7 +700,7 @@ namespace Framework.Constants
         Playable = Warrior | Paladin | Hunter | Rogue | Priest | Deathknight | Shaman |
             Mage | Warlock | Monk | Druid | DemonHunter | Evoker | Adventurer,
 
-        All = Playable,
+        All = -1,
     }
 
     public enum ScalingClass

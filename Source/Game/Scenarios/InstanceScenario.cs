@@ -37,13 +37,13 @@ namespace Game.Scenarios
                 var spawnGroups = Global.ObjectMgr.GetInstanceSpawnGroupsForMap(_map.GetId());
                 if (spawnGroups != null)
                 {
-                    Dictionary<uint, ulong> despawnedCreatureCountsById = new();
+                    Dictionary<int, long> despawnedCreatureCountsById = new();
                     foreach (InstanceSpawnGroupInfo spawnGroup in spawnGroups)
                     {
                         if (instanceScript.GetBossState(spawnGroup.BossStateId) != EncounterState.Done)
                             continue;
 
-                        bool isDespawned = ((1 << (int)EncounterState.Done) & spawnGroup.BossStates) == 0 || spawnGroup.Flags.HasFlag(InstanceSpawnGroupFlags.BlockSpawn);
+                        bool isDespawned = !spawnGroup.BossStates.HasState(EncounterState.Done) || spawnGroup.Flags.HasFlag(InstanceSpawnGroupFlags.BlockSpawn);
                         if (isDespawned)
                         {
                             foreach (var spawn in Global.ObjectMgr.GetSpawnMetadataForGroup(spawnGroup.SpawnGroupId))
@@ -58,7 +58,7 @@ namespace Game.Scenarios
                     foreach (Criteria criteria in killCreatureCriteria)
                     {
                         // count creatures in despawned spawn groups
-                        ulong progress = despawnedCreatureCountsById.LookupByKey(criteria.Entry.Asset);
+                        long progress = despawnedCreatureCountsById.LookupByKey(criteria.Entry.Asset);
                         if (progress != 0)
                         {
                             SetCriteriaProgress(criteria, progress, null, ProgressType.Set);

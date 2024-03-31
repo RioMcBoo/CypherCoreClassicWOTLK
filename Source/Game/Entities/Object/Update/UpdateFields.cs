@@ -849,7 +849,7 @@ namespace Game.Entities
         public UpdateField<byte> PlayerClassId = new(0, 26);
         public UpdateField<byte> Sex = new(0, 27);
         public UpdateField<byte> DisplayPower = new(0, 28);
-        public UpdateField<uint> OverrideDisplayPowerID = new(0, 29);
+        public UpdateField<int> OverrideDisplayPowerID = new(0, 29);
         public UpdateField<int> Level = new(0, 30);
         public UpdateField<int> EffectiveLevel = new(0, 31);
         public UpdateField<int> ContentTuningID = new(32, 33);
@@ -985,7 +985,7 @@ namespace Game.Entities
             data.WriteUInt8(PlayerClassId);
             data.WriteUInt8(Sex);
             data.WriteUInt8(DisplayPower);
-            data.WriteUInt32(OverrideDisplayPowerID);            
+            data.WriteInt32(OverrideDisplayPowerID);            
             if (fieldVisibilityFlags.HasAnyFlag(UpdateFieldFlag.Owner | UpdateFieldFlag.UnitAll))
             {
                 for (int i = 0; i < 10; ++i)
@@ -1339,7 +1339,7 @@ namespace Game.Entities
                 }
                 if (changesMask[29])
                 {
-                    data.WriteUInt32(OverrideDisplayPowerID);
+                    data.WriteInt32(OverrideDisplayPowerID);
                 }
                 if (changesMask[30])
                 {
@@ -2231,7 +2231,7 @@ namespace Game.Entities
         public UpdateField<ObjectGuid> LootTargetGUID = new(0, 6);
         public UpdateField<PlayerFlags> PlayerFlags = new(0, 7);
         public UpdateField<PlayerFlagsEx> PlayerFlagsEx = new(0, 8);
-        public UpdateField<uint> GuildRankID = new(0, 9);
+        public UpdateField<int> GuildRankID = new(0, 9);
         public UpdateField<uint> GuildDeleteDate = new(0, 10);
         public UpdateField<int> GuildLevel = new(0, 11);
         public UpdateField<byte> NumBankSlots = new(0, 12);
@@ -2270,7 +2270,7 @@ namespace Game.Entities
             data.WritePackedGuid(LootTargetGUID);
             data.WriteUInt32((uint)PlayerFlags.GetValue());
             data.WriteUInt32((uint)PlayerFlagsEx.GetValue());
-            data.WriteUInt32(GuildRankID);
+            data.WriteInt32(GuildRankID);
             data.WriteUInt32(GuildDeleteDate);
             data.WriteInt32(GuildLevel);
             data.WriteInt32(Customizations.Size());
@@ -2438,7 +2438,7 @@ namespace Game.Entities
                 }
                 if (changesMask[9])
                 {
-                    data.WriteUInt32(GuildRankID);
+                    data.WriteInt32(GuildRankID);
                 }
                 if (changesMask[10])
                 {

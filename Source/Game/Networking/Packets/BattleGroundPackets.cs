@@ -645,18 +645,18 @@ namespace Game.Networking.Packets
             public void Write(WorldPacket data)
             {
                 foreach (var id in Prematch)
-                    data.WriteUInt32(id);
+                    data.WriteInt32(id);
 
                 foreach (var id in Postmatch)
-                    data.WriteUInt32(id);
+                    data.WriteInt32(id);
 
                 foreach (var id in PrematchMMR)
-                    data.WriteUInt32(id);
+                    data.WriteInt32(id);
             }
 
-            public uint[] Prematch = new uint[2];
-            public uint[] Postmatch = new uint[2];
-            public uint[] PrematchMMR = new uint[2];
+            public int[] Prematch = new int[2];
+            public int[] Postmatch = new int[2];
+            public int[] PrematchMMR = new int[2];
         }
 
         public struct HonorData

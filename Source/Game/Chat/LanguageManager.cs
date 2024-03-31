@@ -13,16 +13,16 @@ namespace Game.Chat
 {
     public class LanguageManager : Singleton<LanguageManager>
     {
-        MultiMap<uint, LanguageDesc> _langsMap = new();
-        MultiMap<Tuple<uint, byte>, string> _wordsMap = new();
+        MultiMap<int, LanguageDesc> _langsMap = new();
+        MultiMap<(int, byte), string> _wordsMap = new();
 
         LanguageManager() { }
 
         public void LoadSpellEffectLanguage(SpellEffectRecord spellEffect)
         {
-            Cypher.Assert(spellEffect != null && spellEffect.Effect == (uint)SpellEffectName.Language);
+            Cypher.Assert(spellEffect != null && spellEffect.Effect == SpellEffectName.Language);
 
-            uint languageId = (uint)spellEffect.EffectMiscValue[0];
+            int languageId = spellEffect.EffectMiscValue[0];
             _langsMap.Add(languageId, new LanguageDesc(spellEffect.SpellID, 0)); // register without a skill id for now
         }
 
@@ -41,7 +41,7 @@ namespace Game.Chat
                     List<LanguageDesc> langsWithSkill = new();
                     foreach (var spellItr in spellsRange)
                         foreach (var skillPair in Global.SpellMgr.GetSkillLineAbilityMapBounds(spellItr.SpellId))
-                            langsWithSkill.Add(new LanguageDesc(spellItr.SpellId, (uint)skillPair.SkillLine));
+                            langsWithSkill.Add(new LanguageDesc(spellItr.SpellId, (int)skillPair.SkillLine));
 
                     foreach (var langDesc in langsWithSkill)
                     {
@@ -53,9 +53,9 @@ namespace Game.Chat
             }
 
             // Add the languages used in code in case they don't exist
-            _langsMap.Add((uint)Language.Universal, new LanguageDesc());
-            _langsMap.Add((uint)Language.Addon, new LanguageDesc());
-            _langsMap.Add((uint)Language.AddonLogged, new LanguageDesc());
+            _langsMap.Add((int)Language.Universal, new LanguageDesc());
+            _langsMap.Add((int)Language.Addon, new LanguageDesc());
+            _langsMap.Add((int)Language.AddonLogged, new LanguageDesc());
 
             // Log load time
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_langsMap.Count} languages in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
@@ -65,12 +65,12 @@ namespace Game.Chat
         {
             uint oldMSTime = Time.GetMSTime();
 
-            uint wordsNum = 0;
+            int wordsNum = 0;
             foreach (LanguageWordsRecord wordEntry in CliDB.LanguageWordsStorage.Values)
             {
                 byte length = (byte)Math.Min(18, wordEntry.Word.Length);
 
-                var key = Tuple.Create((uint)wordEntry.LanguageID, length);
+                var key = ((int)wordEntry.LanguageID, length);
 
                 _wordsMap.Add(key, wordEntry.Word);
                 ++wordsNum;
@@ -80,12 +80,12 @@ namespace Game.Chat
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_wordsMap.Count} word groups from {wordsNum} words in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        List<string> FindWordGroup(uint language, uint wordLen)
+        List<string> FindWordGroup(int language, int wordLen)
         {
-            return _wordsMap.LookupByKey(Tuple.Create(language, (byte)wordLen));
+            return _wordsMap.LookupByKey((language, (byte)wordLen));
         }
 
-        public string Translate(string msg, uint language, Locale locale)
+        public string Translate(string msg, int language, Locale locale)
         {
             string textToTranslate = "";
             StripHyperlinks(msg, ref textToTranslate);
@@ -95,7 +95,7 @@ namespace Game.Chat
             StringArray tokens = new(textToTranslate, ' ');
             foreach (string str in tokens)
             {
-                uint wordLen = (uint)Math.Min(18, str.Length);
+                int wordLen = Math.Min(18, str.Length);
                 var wordGroup = FindWordGroup(language, wordLen);
                 if (!wordGroup.Empty())
                 {
@@ -146,15 +146,15 @@ namespace Game.Chat
 
         public bool IsLanguageExist(Language languageId)
         {
-            return CliDB.LanguagesStorage.HasRecord((uint)languageId);
+            return CliDB.LanguagesStorage.HasRecord((int)languageId);
         }
 
         public List<LanguageDesc> GetLanguageDescById(Language languageId)
         {
-            return _langsMap.LookupByKey((uint)languageId);
+            return _langsMap.LookupByKey((int)languageId);
         }
 
-        public bool ForEachLanguage(Func<uint, LanguageDesc, bool> callback)
+        public bool ForEachLanguage(Func<int, LanguageDesc, bool> callback)
         {
             foreach (var pair in _langsMap)
                 if (!callback(pair.Key, pair.Value))

@@ -736,7 +736,7 @@ namespace Game.Loots
         }
 
         // Calls processor of corresponding LootTemplate (which handles everything including references)
-        public bool FillLoot(int lootId, LootStore store, Player lootOwner, bool personal, bool noEmptyError, LootModes lootMode, ItemContext context)
+        public bool FillLoot(int lootId, LootStore store, Player lootOwner, bool personal, bool noEmptyError = false, LootModes lootMode = LootModes.Default, ItemContext context = ItemContext.None)
         {
             // Must be provided
             if (lootOwner == null)

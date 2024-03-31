@@ -3,7 +3,6 @@
 
 using Framework.Collections;
 using Framework.Constants;
-using Framework.Dynamic;
 using Framework.IO;
 using Game.Cache;
 using Game.Entities;
@@ -19,10 +18,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            CreatureID = _worldPacket.ReadUInt32();
+            CreatureID = _worldPacket.ReadInt32();
         }
 
-        public uint CreatureID;
+        public int CreatureID;
     }
 
     public class QueryCreatureResponse : ServerPacket
@@ -144,12 +143,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PageTextID = _worldPacket.ReadUInt32();
+            PageTextID = _worldPacket.ReadInt32();
             ItemGUID = _worldPacket.ReadPackedGuid();
         }
 
         public ObjectGuid ItemGUID;
-        public uint PageTextID;
+        public int PageTextID;
     }
 
     public class QueryPageTextResponse : ServerPacket
@@ -158,7 +157,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(PageTextID);
+            _worldPacket.WriteInt32(PageTextID);
             _worldPacket.WriteBit(Allow);
             _worldPacket.FlushBits();
 
@@ -170,7 +169,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public uint PageTextID;
+        public int PageTextID;
         public bool Allow;
         public List<PageTextInfo> Pages = new();
 
@@ -178,8 +177,8 @@ namespace Game.Networking.Packets
         {
             public void Write(WorldPacket data)
             {
-                data.WriteUInt32(Id);
-                data.WriteUInt32(NextPageID);
+                data.WriteInt32(Id);
+                data.WriteInt32(NextPageID);
                 data.WriteInt32(PlayerConditionID);
                 data.WriteUInt8(Flags);
                 data.WriteBits(Text.GetByteCount(), 12);
@@ -188,8 +187,8 @@ namespace Game.Networking.Packets
                 data.WriteString(Text);
             }
 
-            public uint Id;
-            public uint NextPageID;
+            public int Id;
+            public int NextPageID;
             public int PlayerConditionID;
             public byte Flags;
             public string Text;
@@ -202,12 +201,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            TextID = _worldPacket.ReadUInt32();
+            TextID = _worldPacket.ReadInt32();
             Guid = _worldPacket.ReadPackedGuid();
         }
 
         public ObjectGuid Guid;
-        public uint TextID;
+        public int TextID;
     }
 
     public class QueryNPCTextResponse : ServerPacket
@@ -216,24 +215,24 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(TextID);
+            _worldPacket.WriteInt32(TextID);
             _worldPacket.WriteBit(Allow);
 
             _worldPacket.WriteInt32(Allow ? SharedConst.MaxNpcTextOptions * (4 + 4) : 0);
             if (Allow)
             {
-                for (uint i = 0; i < SharedConst.MaxNpcTextOptions; ++i)
+                for (int i = 0; i < SharedConst.MaxNpcTextOptions; ++i)
                     _worldPacket.WriteFloat(Probabilities[i]);
 
-                for (uint i = 0; i < SharedConst.MaxNpcTextOptions; ++i)
-                    _worldPacket.WriteUInt32(BroadcastTextID[i]);
+                for (int i = 0; i < SharedConst.MaxNpcTextOptions; ++i)
+                    _worldPacket.WriteInt32(BroadcastTextID[i]);
             }
         }
 
-        public uint TextID;
+        public int TextID;
         public bool Allow;
         public float[] Probabilities = new float[SharedConst.MaxNpcTextOptions];
-        public uint[] BroadcastTextID = new uint[SharedConst.MaxNpcTextOptions];
+        public int[] BroadcastTextID = new int[SharedConst.MaxNpcTextOptions];
     }
 
     public class QueryGameObject : ClientPacket

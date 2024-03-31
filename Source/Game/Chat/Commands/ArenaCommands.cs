@@ -45,7 +45,7 @@ namespace Game.Chat
         }
 
         [Command("disband", RBACPermissions.CommandArenaDisband, true)]
-        static bool HandleArenaDisbandCommand(CommandHandler handler, uint teamId)
+        static bool HandleArenaDisbandCommand(CommandHandler handler, int teamId)
         {
             ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
             if (arena == null)
@@ -100,7 +100,7 @@ namespace Game.Chat
         }
 
         [Command("captain", RBACPermissions.CommandArenaCaptain)]
-        static bool HandleArenaCaptainCommand(CommandHandler handler, uint teamId, PlayerIdentifier target)
+        static bool HandleArenaCaptainCommand(CommandHandler handler, int teamId, PlayerIdentifier target)
         {
             ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
             if (arena == null)
@@ -142,7 +142,7 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandArenaInfo, true)]
-        static bool HandleArenaInfoCommand(CommandHandler handler, uint teamId)
+        static bool HandleArenaInfoCommand(CommandHandler handler, int teamId)
         {
             ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
             if (arena == null)

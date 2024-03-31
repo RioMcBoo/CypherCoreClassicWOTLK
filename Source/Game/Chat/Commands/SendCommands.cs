@@ -54,14 +54,14 @@ namespace Game.Chat.Commands
                 return false;
 
             // extract items
-            List<KeyValuePair<uint, uint>> items = new();
+            List<KeyValuePair<int, int>> items = new();
 
             var tokens = new StringArray(itemsStr, ' ');
             for (var i = 0; i < tokens.Length; ++i)
             {
                 // parse item str
                 string[] itemIdAndCountStr = tokens[i].Split(':');
-                if (!uint.TryParse(itemIdAndCountStr[0], out uint itemId) || itemId == 0)
+                if (!int.TryParse(itemIdAndCountStr[0], out int itemId) || itemId == 0)
                     return false;
 
                 ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(itemId);
@@ -71,7 +71,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                if (itemIdAndCountStr[1].IsEmpty() || !uint.TryParse(itemIdAndCountStr[1], out uint itemCount))
+                if (itemIdAndCountStr[1].IsEmpty() || !int.TryParse(itemIdAndCountStr[1], out int itemCount))
                     itemCount = 1;
 
                 if (itemCount < 1 || (itemProto.GetMaxCount() > 0 && itemCount > itemProto.GetMaxCount()))
@@ -82,11 +82,11 @@ namespace Game.Chat.Commands
 
                 while (itemCount > itemProto.GetMaxStackSize())
                 {
-                    items.Add(new KeyValuePair<uint, uint>(itemId, itemProto.GetMaxStackSize()));
+                    items.Add(new KeyValuePair<int, int>(itemId, itemProto.GetMaxStackSize()));
                     itemCount -= itemProto.GetMaxStackSize();
                 }
 
-                items.Add(new KeyValuePair<uint, uint>(itemId, itemCount));
+                items.Add(new KeyValuePair<int, int>(itemId, itemCount));
 
                 if (items.Count > SharedConst.MaxMailItems)
                 {

@@ -24,7 +24,7 @@ namespace Game.Entities
             _isDebuggingScenes = false;
         }
 
-        public uint PlayScene(int sceneId, Position position = null)
+        public int PlayScene(int sceneId, Position position = null)
         {
             SceneTemplate sceneTemplate = Global.ObjectMgr.GetSceneTemplate(sceneId);
             return PlaySceneByTemplate(sceneTemplate, position);
@@ -82,7 +82,7 @@ namespace Game.Entities
             return PlaySceneByTemplate(sceneTemplate, position);
         }
 
-        void CancelScene(uint sceneInstanceID, bool removeFromMap = true)
+        void CancelScene(int sceneInstanceID, bool removeFromMap = true)
         {
             if (removeFromMap)
                 RemoveSceneInstanceId(sceneInstanceID);
@@ -92,7 +92,7 @@ namespace Game.Entities
             GetPlayer().SendPacket(cancelScene);
         }
 
-        public void OnSceneTrigger(uint sceneInstanceID, string triggerName)
+        public void OnSceneTrigger(int sceneInstanceID, string triggerName)
         {
             if (!HasScene(sceneInstanceID))
                 return;
@@ -104,7 +104,7 @@ namespace Game.Entities
             Global.ScriptMgr.OnSceneTrigger(GetPlayer(), sceneInstanceID, sceneTemplate, triggerName);
         }
 
-        public void OnSceneCancel(uint sceneInstanceID)
+        public void OnSceneCancel(int sceneInstanceID)
         {
             if (!HasScene(sceneInstanceID))
                 return;
@@ -173,7 +173,7 @@ namespace Game.Entities
                 if (pair.Value.SceneId == sceneId)
                     instancesIds.Add(pair.Key);
 
-            foreach (uint sceneInstanceID in instancesIds)
+            foreach (var sceneInstanceID in instancesIds)
                 CancelScene(sceneInstanceID);
         }
 
@@ -185,7 +185,7 @@ namespace Game.Entities
                 if (sceneTemplate.Value.ScenePackageId == sceneScriptPackageId)
                     instancesIds.Add(sceneTemplate.Key);
 
-            foreach (uint sceneInstanceID in instancesIds)
+            foreach (var sceneInstanceID in instancesIds)
                 CancelScene(sceneInstanceID);
         }
 

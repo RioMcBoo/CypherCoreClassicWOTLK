@@ -452,7 +452,7 @@ namespace Game.Movement
     public class SplineChainResumeInfo
     {
         public SplineChainResumeInfo() { }
-        public SplineChainResumeInfo(uint id, List<SplineChainLink> chain, bool walk, byte splineIndex, byte wpIndex, uint msToNext)
+        public SplineChainResumeInfo(int id, List<SplineChainLink> chain, bool walk, byte splineIndex, byte wpIndex, uint msToNext)
         {
             PointID = id;
             Chain = chain;
@@ -465,7 +465,7 @@ namespace Game.Movement
         public bool Empty() { return Chain.Empty(); }
         public void Clear() { Chain.Clear(); }
 
-        public uint PointID;
+        public int PointID;
         public List<SplineChainLink> Chain = new();
         public bool IsWalkMode;
         public byte SplineIndex;

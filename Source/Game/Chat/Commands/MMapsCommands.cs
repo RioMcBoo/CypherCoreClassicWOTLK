@@ -94,7 +94,7 @@ namespace Game.Chat
             handler.SendSysMessage("tileloc [{0}, {1}]", gx, gy);
 
             // calculate navmesh tile location
-            uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), x, y);
+            int terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), x, y);
             Detour.dtNavMesh navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
             Detour.dtNavMeshQuery navmeshquery = Global.MMapMgr.GetNavMeshQuery(terrainMapId, player.GetMapId(), player.GetInstanceId());
             if (navmesh == null || navmeshquery == null)
@@ -146,7 +146,7 @@ namespace Game.Chat
         static bool HandleMmapLoadedTilesCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
-            uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), player.GetPositionX(), player.GetPositionY());
+            int terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), player.GetPositionX(), player.GetPositionY());
             Detour.dtNavMesh navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
             Detour.dtNavMeshQuery navmeshquery = Global.MMapMgr.GetNavMeshQuery(terrainMapId, player.GetMapId(), player.GetInstanceId());
             if (navmesh == null || navmeshquery == null)
@@ -172,7 +172,7 @@ namespace Game.Chat
         static bool HandleMmapStatsCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
-            uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), player.GetPositionX(), player.GetPositionY());
+            int terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), player.GetPositionX(), player.GetPositionY());
             handler.SendSysMessage("mmap stats:");
             handler.SendSysMessage("  global mmap pathfinding is {0}abled", Global.DisableMgr.IsPathfindingEnabled(player.GetMapId()) ? "En" : "Dis");
             handler.SendSysMessage(" {0} maps loaded with {1} tiles overall", Global.MMapMgr.GetLoadedMapsCount(), Global.MMapMgr.GetLoadedTilesCount());

@@ -158,7 +158,7 @@ namespace Game.Chat.Commands
             if (accountName.IsEmpty())
                 return false;
 
-            uint accountId = Global.AccountMgr.GetId(accountName);
+            int accountId = Global.AccountMgr.GetId(accountName);
             if (accountId == 0)
             {
                 handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -209,7 +209,7 @@ namespace Game.Chat.Commands
                 if (result.Read<bool>(2) && (result.Read<long>(1) == 0L || unbanDate >= GameTime.GetGameTime()))
                     active = true;
                 bool permanent = (result.Read<long>(1) == 0L);
-                string banTime = permanent ? handler.GetCypherString(CypherStrings.BaninfoInfinite) : Time.secsToTimeString(result.Read<ulong>(1), TimeFormat.ShortText);
+                string banTime = permanent ? handler.GetCypherString(CypherStrings.BaninfoInfinite) : Time.secsToTimeString(result.Read<long>(1), TimeFormat.ShortText);
                 handler.SendSysMessage(CypherStrings.BaninfoHistoryentry, Time.UnixTimeToDateTime(result.Read<long>(0)).ToShortTimeString(), banTime,
                     active ? handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No), result.Read<string>(4), result.Read<string>(5));
             }
@@ -231,14 +231,14 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            bool permanent = result.Read<ulong>(6) == 0;
+            bool permanent = result.Read<long>(6) == 0;
             handler.SendSysMessage(CypherStrings.BaninfoIpentry, result.Read<string>(0), result.Read<string>(1), permanent ? handler.GetCypherString(CypherStrings.BaninfoNever) : result.Read<string>(2),
-                permanent ? handler.GetCypherString(CypherStrings.BaninfoInfinite) : Time.secsToTimeString(result.Read<ulong>(3), TimeFormat.ShortText), result.Read<string>(4), result.Read<string>(5));
+                permanent ? handler.GetCypherString(CypherStrings.BaninfoInfinite) : Time.secsToTimeString(result.Read<long>(3), TimeFormat.ShortText), result.Read<string>(4), result.Read<string>(5));
 
             return true;
         }
 
-        static bool HandleBanInfoHelper(uint accountId, string accountName, CommandHandler handler)
+        static bool HandleBanInfoHelper(int accountId, string accountName, CommandHandler handler)
         {
             using var result = DB.Login.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{0}' ORDER BY bandate ASC", accountId);
             if (result.IsEmpty())
@@ -255,7 +255,7 @@ namespace Game.Chat.Commands
                 if (result.Read<bool>(2) && (result.Read<ulong>(1) == 0 || unbanDate >= GameTime.GetGameTime()))
                     active = true;
                 bool permanent = (result.Read<ulong>(1) == 0);
-                string banTime = permanent ? handler.GetCypherString(CypherStrings.BaninfoInfinite) : Time.secsToTimeString(result.Read<ulong>(1), TimeFormat.ShortText);
+                string banTime = permanent ? handler.GetCypherString(CypherStrings.BaninfoInfinite) : Time.secsToTimeString(result.Read<long>(1), TimeFormat.ShortText);
                 handler.SendSysMessage(CypherStrings.BaninfoHistoryentry,
                     result.Read<string>(0), banTime, active ? handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No), result.Read<string>(4), result.Read<string>(5));
             }
@@ -495,7 +495,7 @@ namespace Game.Chat.Commands
                 {
                     handler.SendSysMessage("-------------------------------------------------------------------------------");
 
-                    uint accountId = result.Read<uint>(0);
+                    int accountId = result.Read<int>(0);
 
                     string accountName;
 

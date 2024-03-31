@@ -151,7 +151,7 @@ namespace Game.Chat
             [Command("ownership", RBACPermissions.CommandChannelSetOwnership)]
             static bool HandleChannelSetOwnership(CommandHandler handler, string channelName, bool grantOwnership)
             {
-                uint channelId = 0;
+                int channelId = 0;
                 foreach (var channelEntry in CliDB.ChatChannelsStorage.Values)
                 {
                     if (channelEntry.Name[handler.GetSessionDbcLocale()].Equals(channelName, StringComparison.OrdinalIgnoreCase))

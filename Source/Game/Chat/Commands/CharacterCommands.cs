@@ -181,7 +181,7 @@ namespace Game.Chat
             if (player == null)
                 return false;
 
-            uint oldlevel = player.IsConnected() ? player.GetConnectedPlayer().GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(player.GetGUID());
+            int oldlevel = player.IsConnected() ? player.GetConnectedPlayer().GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(player.GetGUID());
 
             if (newlevel < 1)
                 newlevel = 1;
@@ -192,7 +192,7 @@ namespace Game.Chat
             Player target = player.GetConnectedPlayer();
             if (target != null)
             {
-                target.GiveLevel((uint)newlevel);
+                target.GiveLevel(newlevel);
                 target.InitTalentForLevel();
                 target.SetXP(0);
 
@@ -262,13 +262,13 @@ namespace Game.Chat
                 return false;
             }
 
-            uint oldAccountId = characterInfo.AccountId;
+            int oldAccountId = characterInfo.AccountId;
 
             // nothing to do :)
             if (newAccount.GetID() == oldAccountId)
                 return true;
 
-            uint charCount = Global.AccountMgr.GetCharactersCount(newAccount.GetID());
+            int charCount = Global.AccountMgr.GetCharactersCount(newAccount.GetID());
             if (charCount != 0)
             {
                 if (charCount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
@@ -411,7 +411,7 @@ namespace Game.Chat
         [Command("erase", RBACPermissions.CommandCharacterErase, true)]
         static bool HandleCharacterEraseCommand(CommandHandler handler, PlayerIdentifier player)
         {
-            uint accountId;
+            int accountId;
 
             Player target = player?.GetConnectedPlayer();
             if (target != null)
@@ -575,9 +575,9 @@ namespace Game.Chat
                     {
                         DeletedInfo info;
 
-                        info.guid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
+                        info.guid = ObjectGuid.Create(HighGuid.Player, result.Read<long>(0));
                         info.name = result.Read<string>(1);
-                        info.accountId = result.Read<uint>(2);
+                        info.accountId = result.Read<int>(2);
 
                         // account name will be empty for not existed account
                         Global.AccountMgr.GetName(info.accountId, out info.accountName);
@@ -626,7 +626,7 @@ namespace Game.Chat
                 }
 
                 // check character count
-                uint charcount = Global.AccountMgr.GetCharactersCount(delInfo.accountId);
+                int charcount = Global.AccountMgr.GetCharactersCount(delInfo.accountId);
                 if (charcount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
                 {
                     handler.SendSysMessage(CypherStrings.CharacterDeletedSkipFull, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
@@ -652,7 +652,7 @@ namespace Game.Chat
             {
                 public ObjectGuid guid; // the GUID from the character
                 public string name; // the character name
-                public uint accountId; // the account id
+                public int accountId; // the account id
                 public string accountName; // the account name
                 public long deleteDate; // the date at which the character has been deleted
             }
@@ -678,7 +678,7 @@ namespace Game.Chat
             Player target = player.GetConnectedPlayer();
             if (target != null)
             {
-                target.GiveLevel((uint)newlevel);
+                target.GiveLevel(newlevel);
                 target.InitTalentForLevel();
                 target.SetXP(0);
 

@@ -51,11 +51,11 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Cleaned character database in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        delegate bool CheckFor(uint id);
+        delegate bool CheckFor(int id);
 
         static void CheckUnique(string column, string table, CheckFor check)
         {
-            using var result = DB.Characters.Query("SELECT DISTINCT {0} FROM {1}", column, table);
+            using SQLResult result = DB.Characters.Query("SELECT DISTINCT {0} FROM {1}", column, table);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.Sql, "Table {0} is empty.", table);
@@ -66,7 +66,7 @@ namespace Game
             StringBuilder ss = new();
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 if (!check(id))
                 {
                     if (!found)

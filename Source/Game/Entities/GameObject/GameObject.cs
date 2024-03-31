@@ -4226,8 +4226,8 @@ namespace Game.Entities
 
                 if (newState != GameObjectState.TransportActive)
                 {
-                    Cypher.Assert(newState < (GameObjectState)(GameObjectState.TransportStopped + 9));
-                    int stopFrame = (int)(newState - GameObjectState.TransportStopped);
+                    Cypher.Assert(newState < (GameObjectState.TransportStopped + 9));
+                    int stopFrame = newState - GameObjectState.TransportStopped;
                     Cypher.Assert(stopFrame < _stopFrames.Count);
                     stopPathProgress = _stopFrames[stopFrame];
                 }
@@ -4235,7 +4235,7 @@ namespace Game.Entities
                 _stateChangeTime = GameTime.GetGameTimeMS();
                 _stateChangeProgress = _pathProgress;
                 uint timeToStop = (uint)Math.Abs(_pathProgress - stopPathProgress);
-                _owner.SetLevel(GameTime.GetGameTimeMS() + timeToStop);
+                _owner.SetLevel((int)(GameTime.GetGameTimeMS() + timeToStop));
                 _owner.SetPathProgressForClient(_pathProgress / (float)GetTransportPeriod());
 
                 if (oldState == GameObjectState.Active || oldState == newState)

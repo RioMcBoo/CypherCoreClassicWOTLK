@@ -66,7 +66,7 @@ namespace Game.DungeonFinding
             return rolesstr.ToString();
         }
 
-        public static string ConcatenateDungeons(List<uint> dungeons)
+        public static string ConcatenateDungeons(List<int> dungeons)
         {
             string str = "";
             if (!dungeons.Empty())

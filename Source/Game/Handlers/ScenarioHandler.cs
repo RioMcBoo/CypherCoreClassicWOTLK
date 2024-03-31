@@ -22,7 +22,7 @@ namespace Game
 
             foreach (int criteriaTreeId in criteriaTreeIds)
             {
-                var poiVector = Global.ScenarioMgr.GetScenarioPOIs((uint)criteriaTreeId);
+                var poiVector = Global.ScenarioMgr.GetScenarioPOIs(criteriaTreeId);
                 if (poiVector != null)
                 {
                     ScenarioPOIData scenarioPOIData = new();

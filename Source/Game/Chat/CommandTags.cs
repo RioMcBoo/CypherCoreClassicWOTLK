@@ -93,7 +93,7 @@ namespace Game.Chat
 
     class AccountIdentifier
     {
-        uint _id;
+        int _id;
         string _name;
         WorldSession _session;
 
@@ -105,7 +105,7 @@ namespace Game.Chat
             _session = session;
         }
 
-        public uint GetID() { return _id; }
+        public int GetID() { return _id; }
         public string GetName() { return _name; }
         public bool IsConnected() { return _session != null; }
         public WorldSession GetConnectedSession() { return _session; }
@@ -124,7 +124,7 @@ namespace Game.Chat
                 return next;
 
             // try parsing as account id instead
-            if (uint.TryParse(text, out uint id))
+            if (int.TryParse(text, out int id))
                 return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAccountNameNoExist, _name));
             _id = id;
             _session = Global.WorldMgr.FindSession(_id);

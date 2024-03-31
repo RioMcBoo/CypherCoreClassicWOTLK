@@ -14,7 +14,7 @@ namespace Game.Chat.Commands
     class TitleCommands
     {
         [Command("current", RBACPermissions.CommandTitlesCurrent)]
-        static bool HandleTitlesCurrentCommand(CommandHandler handler, uint titleId)
+        static bool HandleTitlesCurrentCommand(CommandHandler handler, int titleId)
         {
             Player target = handler.GetSelectedPlayer();
             if (target == null)
@@ -45,7 +45,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("add", RBACPermissions.CommandTitlesAdd)]
-        static bool HandleTitlesAddCommand(CommandHandler handler, uint titleId)
+        static bool HandleTitlesAddCommand(CommandHandler handler, int titleId)
         {
             Player target = handler.GetSelectedPlayer();
             if (target == null)
@@ -76,7 +76,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("remove", RBACPermissions.CommandTitlesRemove)]
-        static bool HandleTitlesRemoveCommand(CommandHandler handler, uint titleId)
+        static bool HandleTitlesRemoveCommand(CommandHandler handler, int titleId)
         {
             Player target = handler.GetSelectedPlayer();
             if (target == null)

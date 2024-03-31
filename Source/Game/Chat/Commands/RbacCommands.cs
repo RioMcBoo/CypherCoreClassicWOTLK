@@ -13,7 +13,7 @@ namespace Game.Chat.Commands
     class RbacComands
     {
         [Command("list", RBACPermissions.CommandRbacList, true)]
-        static bool HandleRBACListPermissionsCommand(CommandHandler handler, uint? permId)
+        static bool HandleRBACListPermissionsCommand(CommandHandler handler, int? permId)
         {
             if (!permId.HasValue)
             {
@@ -24,7 +24,7 @@ namespace Game.Chat.Commands
             }
             else
             {
-                RBACPermission permission = Global.AccountMgr.GetRBACPermission(permId.Value);
+                RBACPermission permission = Global.AccountMgr.GetRBACPermission((RBACPermissions)permId.Value);
                 if (permission == null)
                 {
                     handler.SendSysMessage(CypherStrings.RbacWrongParameterId, permId.Value);
@@ -49,7 +49,7 @@ namespace Game.Chat.Commands
         class RbacAccountCommands
         {
             [Command("deny", RBACPermissions.CommandRbacAccPermDeny, true)]
-            static bool HandleRBACPermDenyCommand(CommandHandler handler, AccountIdentifier account, uint permId, int? realmId)
+            static bool HandleRBACPermDenyCommand(CommandHandler handler, AccountIdentifier account, int permId, int? realmId)
             {
                 if (account == null)
                     account = AccountIdentifier.FromTarget(handler);
@@ -64,8 +64,8 @@ namespace Game.Chat.Commands
 
                 RBACCommandData data = GetRBACData(account);
 
-                RBACCommandResult result = data.rbac.DenyPermission(permId, realmId.Value);
-                RBACPermission  permission = Global.AccountMgr.GetRBACPermission(permId);
+                RBACCommandResult result = data.rbac.DenyPermission((RBACPermissions)permId, realmId.Value);
+                RBACPermission  permission = Global.AccountMgr.GetRBACPermission((RBACPermissions)permId);
 
                 switch (result)
                 {
@@ -92,7 +92,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("grant", RBACPermissions.CommandRbacAccPermGrant, true)]
-            static bool HandleRBACPermGrantCommand(CommandHandler handler, AccountIdentifier account, uint permId, int? realmId)
+            static bool HandleRBACPermGrantCommand(CommandHandler handler, AccountIdentifier account, int permId, int? realmId)
             {
                 if (account == null)
                     account = AccountIdentifier.FromTarget(handler);
@@ -107,8 +107,8 @@ namespace Game.Chat.Commands
 
                 RBACCommandData data = GetRBACData(account);
 
-                RBACCommandResult result = data.rbac.GrantPermission(permId, realmId.Value);
-                RBACPermission permission = Global.AccountMgr.GetRBACPermission(permId);
+                RBACCommandResult result = data.rbac.GrantPermission((RBACPermissions)permId, realmId.Value);
+                RBACPermission permission = Global.AccountMgr.GetRBACPermission((RBACPermissions)permId);
 
                 switch (result)
                 {
@@ -186,7 +186,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("revoke", RBACPermissions.CommandRbacAccPermRevoke, true)]
-            static bool HandleRBACPermRevokeCommand(CommandHandler handler, AccountIdentifier account, uint permId, int? realmId)
+            static bool HandleRBACPermRevokeCommand(CommandHandler handler, AccountIdentifier account, int permId, int? realmId)
             {
                 if (account == null)
                     account = AccountIdentifier.FromTarget(handler);
@@ -201,8 +201,8 @@ namespace Game.Chat.Commands
 
                 RBACCommandData data = GetRBACData(account);
 
-                RBACCommandResult result = data.rbac.RevokePermission(permId, realmId.Value);
-                RBACPermission  permission = Global.AccountMgr.GetRBACPermission(permId);
+                RBACCommandResult result = data.rbac.RevokePermission((RBACPermissions)permId, realmId.Value);
+                RBACPermission  permission = Global.AccountMgr.GetRBACPermission((RBACPermissions)permId);
 
                 switch (result)
                 {
@@ -230,7 +230,7 @@ namespace Game.Chat.Commands
             if (account.IsConnected())
                 return new RBACCommandData() { rbac = account.GetConnectedSession().GetRBACData(), needDelete = false };
 
-            RBACData rbac = new(account.GetID(), account.GetName(), (int)Global.WorldMgr.GetRealmId().Index, (byte)Global.AccountMgr.GetSecurity(account.GetID(), (int)Global.WorldMgr.GetRealmId().Index));
+            RBACData rbac = new(account.GetID(), account.GetName(), Global.WorldMgr.GetRealmId().Index, (byte)Global.AccountMgr.GetSecurity(account.GetID(), Global.WorldMgr.GetRealmId().Index));
             rbac.LoadFromDB();
 
             return new RBACCommandData() { rbac = rbac, needDelete = true };

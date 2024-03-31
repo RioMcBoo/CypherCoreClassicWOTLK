@@ -2550,10 +2550,6 @@ namespace Game
                 return;
             }
 
-            _player.SetPersonalTabard(savePersonalEmblem.PersonalTabard.EmblemStyle, savePersonalEmblem.PersonalTabard.EmblemColor,
-                savePersonalEmblem.PersonalTabard.BorderStyle, savePersonalEmblem.PersonalTabard.BorderColor,
-                savePersonalEmblem.PersonalTabard.BackgroundColor);
-
             SendPacket(new PlayerSavePersonalEmblem(GuildEmblemError.Success));
         }
 

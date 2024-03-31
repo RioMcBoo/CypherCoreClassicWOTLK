@@ -264,7 +264,7 @@ namespace BNetServer.Networking
         public bool IsPermanenetlyBanned;
         public AccountTypes SecurityLevel;
 
-        public Dictionary<int, byte> CharacterCounts;
+        public Dictionary<uint, byte> CharacterCounts;
         public Dictionary<string, LastPlayedCharacterInfo> LastPlayedCharacters;
 
         public GameAccountInfo(SQLFields fields, int startColumn)
@@ -282,7 +282,7 @@ namespace BNetServer.Networking
             else
                 DisplayName = Name;
 
-            CharacterCounts = new Dictionary<int, byte>();
+            CharacterCounts = new Dictionary<uint, byte>();
             LastPlayedCharacters = new Dictionary<string, LastPlayedCharacterInfo>();
         }
     }

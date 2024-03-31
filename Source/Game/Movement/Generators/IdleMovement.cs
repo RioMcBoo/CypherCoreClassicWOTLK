@@ -47,7 +47,7 @@ namespace Game.Movement
 
     public class RotateMovementGenerator : MovementGenerator
     {
-        public RotateMovementGenerator(uint id, uint time, RotateDirection direction)
+        public RotateMovementGenerator(int id, uint time, RotateDirection direction)
         {
             _id = id;
             _duration = time;
@@ -126,7 +126,7 @@ namespace Game.Movement
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Rotate; }
 
-        uint _id;
+        int _id;
         uint _duration;
         uint _maxDuration;
         RotateDirection _direction;

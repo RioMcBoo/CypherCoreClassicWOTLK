@@ -140,8 +140,8 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(AddedUserGUID);
             _worldPacket.WriteUInt8((byte)UserFlags);
-            _worldPacket.WriteUInt32((uint)ChannelFlags);
-            _worldPacket.WriteUInt32(ChannelID);
+            _worldPacket.WriteInt32((int)ChannelFlags);
+            _worldPacket.WriteInt32(ChannelID);
 
             _worldPacket.WriteBits(ChannelName.GetByteCount(), 7);
             _worldPacket.FlushBits();
@@ -151,7 +151,7 @@ namespace Game.Networking.Packets
         public ObjectGuid AddedUserGUID;
         public ChannelFlags ChannelFlags;
         public ChannelMemberFlags UserFlags;
-        public uint ChannelID;
+        public int ChannelID;
         public string ChannelName;
     }
 
@@ -162,7 +162,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(RemovedUserGUID);
-            _worldPacket.WriteUInt32((uint)ChannelFlags);
+            _worldPacket.WriteInt32((int)ChannelFlags);
             _worldPacket.WriteInt32(ChannelID);
 
             _worldPacket.WriteBits(ChannelName.GetByteCount(), 7);
@@ -184,7 +184,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(UpdatedUserGUID);
             _worldPacket.WriteUInt8((byte)UserFlags);
-            _worldPacket.WriteUInt32((uint)ChannelFlags);
+            _worldPacket.WriteInt32((int)ChannelFlags);
             _worldPacket.WriteInt32(ChannelID);
 
             _worldPacket.WriteBits(ChannelName.GetByteCount(), 7);
@@ -219,7 +219,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            ChannelName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(7));
+            ChannelName = _worldPacket.ReadString(_worldPacket.ReadBits<int>(7));
         }
 
         public string ChannelName;
@@ -249,8 +249,8 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint channelNameLength = _worldPacket.ReadBits<uint>(7);
-            uint nameLength = _worldPacket.ReadBits<uint>(9);
+            int channelNameLength = _worldPacket.ReadBits<int>(7);
+            int nameLength = _worldPacket.ReadBits<int>(9);
             ChannelName = _worldPacket.ReadString(channelNameLength);
             Name = _worldPacket.ReadString(nameLength);
         }
@@ -265,8 +265,8 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint channelNameLength = _worldPacket.ReadBits<uint>(7);
-            uint passwordLength = _worldPacket.ReadBits<uint>(7);
+            int channelNameLength = _worldPacket.ReadBits<int>(7);
+            int passwordLength = _worldPacket.ReadBits<int>(7);
             ChannelName = _worldPacket.ReadString(channelNameLength);
             Password = _worldPacket.ReadString(passwordLength);
         }
@@ -284,8 +284,8 @@ namespace Game.Networking.Packets
             ChatChannelId = _worldPacket.ReadInt32();
             CreateVoiceSession = _worldPacket.HasBit();
             Internal = _worldPacket.HasBit();
-            uint channelLength = _worldPacket.ReadBits<uint>(7);
-            uint passwordLength = _worldPacket.ReadBits<uint>(7);
+            int channelLength = _worldPacket.ReadBits<int>(7);
+            int passwordLength = _worldPacket.ReadBits<int>(7);
             ChannelName = _worldPacket.ReadString(channelLength);
             Password = _worldPacket.ReadString(passwordLength);
         }
@@ -304,7 +304,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             ZoneChannelID = _worldPacket.ReadInt32();
-            ChannelName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(7));
+            ChannelName = _worldPacket.ReadString(_worldPacket.ReadBits<int>(7));
         }
 
         public int ZoneChannelID;

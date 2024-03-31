@@ -368,7 +368,7 @@ namespace Game.Maps
         /// <param name="difficulty">(Optional) Difficulty of instance locks to reset</param>
         /// <param name="locksReset">All locks that were reset</param>
         /// <param name="locksFailedToReset">Locks that could not be reset because they are used by existing instance map</param>
-        public void ResetInstanceLocksForPlayer(ObjectGuid playerGuid, uint? mapId, Difficulty? difficulty, List<InstanceLock> locksReset, List<InstanceLock> locksFailedToReset)
+        public void ResetInstanceLocksForPlayer(ObjectGuid playerGuid, int? mapId, Difficulty? difficulty, List<InstanceLock> locksReset, List<InstanceLock> locksFailedToReset)
         {
             var playerLocks = _instanceLocksByPlayer.LookupByKey(playerGuid);
             if (playerLocks == null)
@@ -406,7 +406,7 @@ namespace Game.Maps
                     instanceLock.SetExtended(false);
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_FORCE_EXPIRE);
-                    stmt.AddValue(0, (ulong)Time.DateTimeToUnixTime(newExpiryTime));
+                    stmt.AddValue(0, Time.DateTimeToUnixTime(newExpiryTime));
                     stmt.AddValue(1, playerGuid.GetCounter());
                     stmt.AddValue(2, entries.MapDifficulty.MapID);
                     stmt.AddValue(3, entries.MapDifficulty.LockID);

@@ -105,20 +105,20 @@ namespace Game.Networking
         {
             var loLength = ReadUInt8();
             var hiLength = ReadUInt8();
-            var low = ReadPackedUInt64(loLength);
-            return new ObjectGuid(ReadPackedUInt64(hiLength), low);
+            var low = ReadPackedInt64(loLength);
+            return new ObjectGuid(ReadPackedInt64(hiLength), low);
         }
 
-        private ulong ReadPackedUInt64(byte length)
+        private long ReadPackedInt64(byte length)
         {
             if (length == 0)
                 return 0;
 
-            var guid = 0ul;
+            long guid = 0;
 
             for (var i = 0; i < 8; i++)
                 if ((1 << i & length) != 0)
-                    guid |= (ulong)ReadUInt8() << (i * 8);
+                    guid |= (long)ReadUInt8() << (i * 8);
 
             return guid;
         }
@@ -140,8 +140,8 @@ namespace Game.Networking
             byte lowMask, highMask;
             byte[] lowPacked, highPacked;
 
-            var loSize = PackUInt64(guid.GetLowValue(), out lowMask, out lowPacked);
-            var hiSize = PackUInt64(guid.GetHighValue(), out highMask, out highPacked);
+            var loSize = PackInt64(guid.GetLowValue(), out lowMask, out lowPacked);
+            var hiSize = PackInt64(guid.GetHighValue(), out highMask, out highPacked);
 
             WriteUInt8(lowMask);
             WriteUInt8(highMask);
@@ -149,19 +149,19 @@ namespace Game.Networking
             WriteBytes(highPacked, hiSize);
         }
 
-        public void WritePackedUInt64(ulong guid)
+        public void WritePackedInt64(long guid)
         {
             byte mask;
             byte[] packed;
-            var packedSize = PackUInt64(guid, out mask, out packed);
+            var packedSize = PackInt64(guid, out mask, out packed);
 
             WriteUInt8(mask);
             WriteBytes(packed, packedSize);
         }
 
-        uint PackUInt64(ulong value, out byte mask, out byte[] result)
+        int PackInt64(long value, out byte mask, out byte[] result)
         {
-            uint resultSize = 0;
+            int resultSize = 0;
             mask = 0;
             result = new byte[8];
 

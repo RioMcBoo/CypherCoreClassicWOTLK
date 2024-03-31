@@ -31,7 +31,7 @@ namespace Game.AI
         float _followAngle;
 
         SmartEscortState _escortState;
-        uint _escortNPCFlags;
+        NPCFlags1 _escortNPCFlags;
         uint _escortInvokerCheckTimer;
         int _currentWaypointNode;
         bool _waypointReached;
@@ -92,8 +92,8 @@ namespace Game.AI
 
             if (invoker != null && invoker.IsPlayer())
             {
-                _escortNPCFlags = (uint)me.GetNpcFlags();
-                me.ReplaceAllNpcFlags(NPCFlags.None);
+                _escortNPCFlags = me.GetNpcFlags();
+                me.ReplaceAllNpcFlags(NPCFlags1.None);
             }
 
             me.GetMotionMaster().MovePath(path, _repeatWaypointPath);
@@ -209,7 +209,7 @@ namespace Game.AI
 
             if (_escortNPCFlags != 0)
             {
-                me.ReplaceAllNpcFlags((NPCFlags)_escortNPCFlags);
+                me.ReplaceAllNpcFlags((NPCFlags1)_escortNPCFlags);
                 _escortNPCFlags = 0;
             }
 

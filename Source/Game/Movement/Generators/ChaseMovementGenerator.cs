@@ -270,7 +270,7 @@ namespace Game.Movement
 
             CreatureAI ai = owner.ToCreature().GetAI();
             if (ai != null)
-                ai.MovementInform(MovementGeneratorType.Chase, (uint)target.GetGUID().GetCounter());
+                ai.MovementInform(MovementGeneratorType.Chase, (int)target.GetGUID().GetCounter());
         }
 
         public Unit GetTarget()

@@ -1063,7 +1063,7 @@ namespace Game
             listItemsResult.HasMoreResults = builder.HasMoreResults();
         }
 
-        public void BuildListOwnedItems(AuctionListOwnedItemsResult listOwnerItemsResult, Player player, uint offset, AuctionSortDef[] sorts, int sortCount)
+        public void BuildListOwnedItems(AuctionListOwnedItemsResult listOwnerItemsResult, Player player, int offset, AuctionSortDef[] sorts, int sortCount)
         {
             // always full list
             List<AuctionPosting> auctions = new();

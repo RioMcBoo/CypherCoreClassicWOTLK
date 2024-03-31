@@ -96,7 +96,7 @@ namespace Game.Chat
             if (curRespawnDelay < 0)
                 curRespawnDelay = 0;
 
-            string curRespawnDelayStr = Time.secsToTimeString((ulong)curRespawnDelay, TimeFormat.ShortText);
+            string curRespawnDelayStr = Time.secsToTimeString(curRespawnDelay, TimeFormat.ShortText);
             string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
 
             handler.SendSysMessage(CypherStrings.NpcinfoChar, target.GetName(), target.GetSpawnId(), target.GetGUID().ToString(), entry, faction, npcflags, displayid, nativeid);
@@ -114,17 +114,17 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags, (uint)target.m_unitData.Flags);
             foreach (UnitFlags value in Enum.GetValues(typeof(UnitFlags)))
                 if (target.HasUnitFlag(value))
-                    handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags)value, value);
+                    handler.SendSysMessage("{0} (0x{1:X})", value, value);
 
             handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags2, (uint)target.m_unitData.Flags2);
             foreach (UnitFlags2 value in Enum.GetValues(typeof(UnitFlags2)))
                 if (target.HasUnitFlag2(value))
-                    handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags2)value, value);
+                    handler.SendSysMessage("{0} (0x{1:X})", value, value);
 
             handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags3, (uint)target.m_unitData.Flags3);
             foreach (UnitFlags3 value in Enum.GetValues(typeof(UnitFlags3)))
                 if (target.HasUnitFlag3(value))
-                    handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags3)value, value);
+                    handler.SendSysMessage("{0} (0x{1:X})", value, value);
 
             handler.SendSysMessage(CypherStrings.NpcinfoDynamicFlags, target.GetDynamicFlags());
             handler.SendSysMessage(CypherStrings.CommandRawpawntimes, defRespawnDelayStr, curRespawnDelayStr);

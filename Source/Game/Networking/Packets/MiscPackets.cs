@@ -1316,11 +1316,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            MountSpellID = _worldPacket.ReadUInt32();
+            MountSpellID = _worldPacket.ReadInt32();
             IsFavorite = _worldPacket.HasBit();
         }
 
-        public uint MountSpellID;
+        public int MountSpellID;
         public bool IsFavorite;
     }
 

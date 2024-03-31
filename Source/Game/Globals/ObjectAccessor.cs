@@ -191,7 +191,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
 
         return player;
     }
-    public Player FindPlayerByLowGUID(ulong lowguid)
+    public Player FindPlayerByLowGUID(long lowguid)
     {
         ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, lowguid);
         return FindPlayer(guid);

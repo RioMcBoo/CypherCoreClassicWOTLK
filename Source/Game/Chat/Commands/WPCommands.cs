@@ -15,13 +15,13 @@ namespace Game.Chat.Commands
     class WPCommands
     {
         [Command("add", RBACPermissions.CommandWpAdd)]
-        static bool HandleWpAddCommand(CommandHandler handler, uint? optionalPathId)
+        static bool HandleWpAddCommand(CommandHandler handler, int? optionalPathId)
         {
             uint point = 0;
             Creature target = handler.GetSelectedCreature();
 
             PreparedStatement stmt;
-            uint pathId;
+            int pathId;
 
             if (!optionalPathId.HasValue)
             {
@@ -32,7 +32,7 @@ namespace Game.Chat.Commands
                     stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_ID);
                     using var result1 = DB.World.Query(stmt);
 
-                    uint maxpathid = result1.Read<uint>(0);
+                    int maxpathid = result1.Read<int>(0);
                     pathId = maxpathid + 1;
                     handler.SendSysMessage("|cff00ff00New path started.|r");
                 }
@@ -73,7 +73,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("load", RBACPermissions.CommandWpLoad)]
-        static bool HandleWpLoadCommand(CommandHandler handler, uint? optionalPathId)
+        static bool HandleWpLoadCommand(CommandHandler handler, int? optionalPathId)
         {
             Creature target = handler.GetSelectedCreature();
 
@@ -81,7 +81,7 @@ namespace Game.Chat.Commands
             if (!optionalPathId.HasValue)
                 return false;
 
-            uint pathId = optionalPathId.Value;
+            int pathId = optionalPathId.Value;
 
             if (target == null)
             {
@@ -101,7 +101,7 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            ulong guidLow = target.GetSpawnId();
+            long guidLow = target.GetSpawnId();
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_ADDON_BY_GUID);
             stmt.AddValue(0, guidLow);
@@ -279,7 +279,7 @@ namespace Game.Chat.Commands
                 PhasingHandler.InheritPhaseShift(creature, chr);
                 creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
-                ulong dbGuid = creature.GetSpawnId();
+                long dbGuid = creature.GetSpawnId();
 
                 // current "wpCreature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                 creature.CleanupsBeforeDelete();
@@ -323,7 +323,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("reload", RBACPermissions.CommandWpReload)]
-        static bool HandleWpReloadCommand(CommandHandler handler, uint pathId)
+        static bool HandleWpReloadCommand(CommandHandler handler, int pathId)
         {
             if (pathId == 0)
                 return false;
@@ -334,7 +334,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("show", RBACPermissions.CommandWpShow)]
-        static bool HandleWpShowCommand(CommandHandler handler, string subCommand, uint? optionalPathId)
+        static bool HandleWpShowCommand(CommandHandler handler, string subCommand, int? optionalPathId)
         {
             // first arg: on, off, first, last
             if (subCommand.IsEmpty())
@@ -343,7 +343,7 @@ namespace Game.Chat.Commands
             Creature target = handler.GetSelectedCreature();
 
             // Did player provide a PathID?
-            uint pathId;
+            int pathId;
 
             if (!optionalPathId.HasValue)
             {
@@ -392,8 +392,8 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage("|cff00ffffDEBUG: wp show info:|r");
                 do
                 {
-                    pathId = result.Read<uint>(0);
-                    uint point = result.Read<uint>(1);
+                    pathId = result.Read<int>(0);
+                    int point = result.Read<int>(1);
                     uint delay = result.Read<uint>(2);
                     uint flag = result.Read<uint>(3);
 
@@ -431,7 +431,7 @@ namespace Game.Chat.Commands
                         bool hasError = false;
                         do
                         {
-                            ulong wpguid = result2.Read<ulong>(0);
+                            long wpguid = result2.Read<long>(0);
 
                             if (!Creature.DeleteFromDB(wpguid))
                             {
@@ -453,13 +453,13 @@ namespace Game.Chat.Commands
 
                 do
                 {
-                    uint point = result.Read<uint>(0);
+                    int point = result.Read<int>(0);
                     float x = result.Read<float>(1);
                     float y = result.Read<float>(2);
                     float z = result.Read<float>(3);
                     float o = result.Read<float>(4);
 
-                    uint id = 1;
+                    int id = 1;
 
                     Player chr = handler.GetSession().GetPlayer();
                     Map map = chr.GetMap();
@@ -474,7 +474,7 @@ namespace Game.Chat.Commands
                     PhasingHandler.InheritPhaseShift(creature, chr);
                     creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
-                    ulong dbGuid = creature.GetSpawnId();
+                    long dbGuid = creature.GetSpawnId();
 
                     // current "wpCreature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                     creature.CleanupsBeforeDelete();
@@ -542,7 +542,7 @@ namespace Game.Chat.Commands
                     PhasingHandler.InheritPhaseShift(creature, chr);
                     creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
-                    ulong dbGuid = creature.GetSpawnId();
+                    long dbGuid = creature.GetSpawnId();
 
                     // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                     creature.CleanupsBeforeDelete();
@@ -597,7 +597,7 @@ namespace Game.Chat.Commands
                 PhasingHandler.InheritPhaseShift(creature, chr);
                 creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
-                ulong dbGuid = creature.GetSpawnId();
+                long dbGuid = creature.GetSpawnId();
 
                 // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                 creature.CleanupsBeforeDelete();
@@ -633,7 +633,7 @@ namespace Game.Chat.Commands
                 bool hasError = false;
                 do
                 {
-                    ulong lowguid = result.Read<ulong>(0);
+                    long lowguid = result.Read<long>(0);
 
                     if (Creature.DeleteFromDB(lowguid))
                     {
@@ -673,7 +673,7 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            ulong guidLow = target.GetSpawnId();
+            long guidLow = target.GetSpawnId();
             if (guidLow == 0)
             {
                 handler.SendSysMessage("|cffff33ffTarget is not saved to DB.|r");

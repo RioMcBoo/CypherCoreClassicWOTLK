@@ -16,10 +16,10 @@ namespace Game.Networking.Packets
         {
             TableHash = _worldPacket.ReadUInt32();
 
-            uint count = _worldPacket.ReadBits<uint>(13);
-            for (uint i = 0; i < count; ++i)
+            int count = _worldPacket.ReadBits<int>(13);
+            for (int i = 0; i < count; ++i)
             {
-                Queries.Add(new DBQueryRecord(_worldPacket.ReadUInt32()));
+                Queries.Add(new DBQueryRecord(_worldPacket.ReadInt32()));
             }
         }
 
@@ -28,12 +28,12 @@ namespace Game.Networking.Packets
 
         public struct DBQueryRecord
         {
-            public DBQueryRecord(uint recordId)
+            public DBQueryRecord(int recordId)
             {
                 RecordID = recordId;
             }
 
-            public uint RecordID;
+            public int RecordID;
         }
     }
 
@@ -44,7 +44,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(TableHash);
-            _worldPacket.WriteUInt32(RecordID);
+            _worldPacket.WriteInt32(RecordID);
             _worldPacket.WriteUInt32(Timestamp);
             _worldPacket.WriteBits((byte)Status, 3);
             _worldPacket.WriteUInt32(Data.GetSize());
@@ -53,7 +53,7 @@ namespace Game.Networking.Packets
 
         public uint TableHash;
         public uint Timestamp;
-        public uint RecordID;
+        public int RecordID;
         public HotfixRecord.Status Status = HotfixRecord.Status.Invalid;
 
         public ByteBuffer Data = new();

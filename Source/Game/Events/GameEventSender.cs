@@ -50,10 +50,10 @@ namespace Game
                 source.StartCriteria(CriteriaStartEvent.SendEvent, gameEventId);
             }
 
-            source.UpdateCriteria(CriteriaType.PlayerTriggerGameEvent, (ulong)gameEventId, 0, 0, source);
+            source.UpdateCriteria(CriteriaType.PlayerTriggerGameEvent, gameEventId, 0, 0, source);
 
             if (map.IsScenario())
-                source.UpdateCriteria(CriteriaType.AnyoneTriggerGameEventScenario, (ulong)gameEventId, 0, 0, source);
+                source.UpdateCriteria(CriteriaType.AnyoneTriggerGameEventScenario, gameEventId, 0, 0, source);
         }
 
         public static void TriggerForMap(int gameEventId, Map map, WorldObject source = null, WorldObject target = null)

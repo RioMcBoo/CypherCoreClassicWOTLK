@@ -19,7 +19,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TabardVendorActivate, Processing = PacketProcessing.Inplace)]
         void HandleTabardVendorActivate(TabardVendorActivate tabardVendorActivate)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(tabardVendorActivate.Vendor, NPCFlags.TabardDesigner, NPCFlags2.None);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(tabardVendorActivate.Vendor, NPCFlags1.TabardDesigner, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleTabardVendorActivateOpcode - {tabardVendorActivate.Vendor} not found or you can not interact with him.");
@@ -62,7 +62,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TrainerList, Processing = PacketProcessing.Inplace)]
         void HandleTrainerList(Hello packet)
         {
-            Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer, NPCFlags2.None);
+            Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags1.Trainer, NPCFlags2.None);
             if (npc == null)
             {
                 Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - {packet.Unit} not found or you can not interact with him.");
@@ -98,7 +98,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TrainerBuySpell, Processing = PacketProcessing.Inplace)]
         void HandleTrainerBuySpell(TrainerBuySpell packet)
         {
-            Creature npc = _player.GetNPCIfCanInteractWith(packet.TrainerGUID, NPCFlags.Trainer, NPCFlags2.None);
+            Creature npc = _player.GetNPCIfCanInteractWith(packet.TrainerGUID, NPCFlags1.Trainer, NPCFlags2.None);
             if (npc == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleTrainerBuySpell - {packet.TrainerGUID} not found or you can not interact with him.");
@@ -135,7 +135,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TalkToGossip, Processing = PacketProcessing.Inplace)]
         void HandleGossipHello(Hello packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Gossip, NPCFlags2.None);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags1.Gossip, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleGossipHello - {0} not found or you can not interact with him.", packet.Unit.ToString());
@@ -184,7 +184,7 @@ namespace Game
             GameObject go = null;
             if (packet.GossipUnit.IsCreatureOrVehicle())
             {
-                unit = GetPlayer().GetNPCIfCanInteractWith(packet.GossipUnit, NPCFlags.Gossip, NPCFlags2.None);
+                unit = GetPlayer().GetNPCIfCanInteractWith(packet.GossipUnit, NPCFlags1.Gossip, NPCFlags2.None);
                 if (unit == null)
                 {
                     Log.outDebug(LogFilter.Network, "WORLD: HandleGossipSelectOption - {0} not found or you can't interact with him.", packet.GossipUnit.ToString());
@@ -252,7 +252,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SpiritHealerActivate)]
         void HandleSpiritHealerActivate(SpiritHealerActivate packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Healer, NPCFlags.SpiritHealer, NPCFlags2.None);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Healer, NPCFlags1.SpiritHealer, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleSpiritHealerActivateOpcode - {0} not found or you can not interact with him.", packet.Healer.ToString());
@@ -299,7 +299,7 @@ namespace Game
             if (!GetPlayer().IsInWorld || !GetPlayer().IsAlive())
                 return;
 
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Innkeeper, NPCFlags2.None);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags1.Innkeeper, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBinderActivate - {0} not found or you can not interact with him.", packet.Unit.ToString());
@@ -366,7 +366,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RepairItem, Processing = PacketProcessing.Inplace)]
         void HandleRepairItem(RepairItem packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.NpcGUID, NPCFlags.Repair, NPCFlags2.None);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.NpcGUID, NPCFlags1.Repair, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleRepairItemOpcode - {0} not found or you can not interact with him.", packet.NpcGUID.ToString());
@@ -406,7 +406,7 @@ namespace Game
 
         public void SendListInventory(ObjectGuid vendorGuid)
         {
-            Creature vendor = GetPlayer().GetNPCIfCanInteractWith(vendorGuid, NPCFlags.Vendor, NPCFlags2.None);
+            Creature vendor = GetPlayer().GetNPCIfCanInteractWith(vendorGuid, NPCFlags1.Vendor, NPCFlags2.None);
             if (vendor == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: SendListInventory - {vendorGuid} not found or you can not interact with him.");

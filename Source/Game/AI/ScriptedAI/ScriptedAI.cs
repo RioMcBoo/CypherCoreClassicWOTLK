@@ -85,7 +85,7 @@ namespace Game.AI
         }
 
         //Plays a sound to all nearby players
-        public static void DoPlaySoundToSet(WorldObject source, uint soundId)
+        public static void DoPlaySoundToSet(WorldObject source, int soundId)
         {
             if (source == null)
                 return;
@@ -212,7 +212,7 @@ namespace Game.AI
         /// <param name="maxSearchRange"></param>
         /// <param name="samePhase"></param>
         /// <param name="reset"></param>
-        void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
+        void ForceCombatStopForCreatureEntry(int entry, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
         {
             Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
 
@@ -239,14 +239,14 @@ namespace Game.AI
         /// <param name="maxSearchRange"></param>
         /// <param name="samePhase"></param>
         /// <param name="reset"></param>
-        void ForceCombatStopForCreatureEntry(List<uint> creatureEntries, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
+        void ForceCombatStopForCreatureEntry(List<int> creatureEntries, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
         {
             foreach (var entry in creatureEntries)
                 ForceCombatStopForCreatureEntry(entry, maxSearchRange, samePhase, reset);
         }
 
         //Spawns a creature relative to me
-        public Creature DoSpawnCreature(uint entry, float offsetX, float offsetY, float offsetZ, float angle, TempSummonType type, TimeSpan despawntime)
+        public Creature DoSpawnCreature(int entry, float offsetX, float offsetY, float offsetZ, float angle, TempSummonType type, TimeSpan despawntime)
         {
             return me.SummonCreature(entry, me.GetPositionX() + offsetX, me.GetPositionY() + offsetY, me.GetPositionZ() + offsetZ, angle, type, despawntime);
         }
@@ -369,7 +369,7 @@ namespace Game.AI
         }
 
         //Returns friendly unit with the most amount of hp missing from max hp
-        public Unit DoSelectLowestHpFriendly(float range, uint minHPDiff = 1)
+        public Unit DoSelectLowestHpFriendly(float range, int minHPDiff = 1)
         {
             var u_check = new MostHPMissingInRange<Unit>(me, range, minHPDiff);
             var searcher = new UnitLastSearcher(me, u_check);
@@ -390,7 +390,7 @@ namespace Game.AI
         }
 
         //Returns a list of all friendly units missing a specific buff within range
-        public List<Creature> DoFindFriendlyMissingBuff(float range, uint spellId)
+        public List<Creature> DoFindFriendlyMissingBuff(float range, int spellId)
         {
             List<Creature> list = new();
             var u_check = new FriendlyMissingBuffInRange(me, range, spellId);
@@ -419,13 +419,13 @@ namespace Game.AI
             }
 
             if (mainHand >= 0)
-                me.SetVirtualItem(0, (uint)mainHand);
+                me.SetVirtualItem(0, mainHand);
 
             if (offHand >= 0)
-                me.SetVirtualItem(1, (uint)offHand);
+                me.SetVirtualItem(1, offHand);
 
             if (ranged >= 0)
-                me.SetVirtualItem(2, (uint)ranged);
+                me.SetVirtualItem(2, ranged);
         }
 
         // Used to control if MoveChase() is to be used or not in AttackStart(). Some creatures does not chase victims
@@ -438,7 +438,7 @@ namespace Game.AI
             _isCombatMovementAllowed = allowMovement;
         }
 
-        public static Creature GetClosestCreatureWithEntry(WorldObject source, uint entry, float maxSearchRange, bool alive = true)
+        public static Creature GetClosestCreatureWithEntry(WorldObject source, int entry, float maxSearchRange, bool alive = true)
         {
             return source.FindNearestCreature(entry, maxSearchRange, alive);
         }
@@ -448,7 +448,7 @@ namespace Game.AI
             return source.FindNearestCreatureWithOptions(maxSearchRange, options);
         }
 
-        public static GameObject GetClosestGameObjectWithEntry(WorldObject source, uint entry, float maxSearchRange, bool spawnedOnly = true)
+        public static GameObject GetClosestGameObjectWithEntry(WorldObject source, int entry, float maxSearchRange, bool spawnedOnly = true)
         {
             return source.FindNearestGameObject(entry, maxSearchRange, spawnedOnly);
         }
@@ -603,7 +603,7 @@ namespace Game.AI
             }
         }
 
-        void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool reset = true)
+        void ForceCombatStopForCreatureEntry(int entry, float maxSearchRange = 250.0f, bool reset = true)
         {
             Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
 
@@ -774,7 +774,7 @@ namespace Game.AI
         // to override UpdateAI
         // note: You must re-schedule the event within this method if the event
         // is supposed to run more than once
-        public virtual void ExecuteEvent(uint eventId) { }
+        public virtual void ExecuteEvent(int eventId) { }
 
         public override void Reset() { _Reset(); }
 

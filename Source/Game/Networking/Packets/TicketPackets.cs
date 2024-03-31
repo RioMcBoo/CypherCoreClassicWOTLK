@@ -95,7 +95,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Header.Read(_worldPacket);
-            uint noteLength = _worldPacket.ReadBits<uint>(24);
+            int noteLength = _worldPacket.ReadBits<int>(24);
             IsSuggestion = _worldPacket.HasBit();
 
             if (noteLength != 0)
@@ -120,7 +120,7 @@ namespace Game.Networking.Packets
             MinorCategoryFlags = _worldPacket.ReadInt32();
             ChatLog.Read(_worldPacket);
 
-            uint noteLength = _worldPacket.ReadBits<uint>(10);
+            int noteLength = _worldPacket.ReadBits<int>(10);
             bool hasMailInfo = _worldPacket.HasBit();
             bool hasCalendarInfo = _worldPacket.HasBit();
             bool hasPetInfo = _worldPacket.HasBit();
@@ -220,7 +220,7 @@ namespace Game.Networking.Packets
             public SupportTicketChatLine(WorldPacket data)
             {
                 Timestamp = data.ReadInt64();
-                Text = data.ReadString(data.ReadBits<uint>(12));
+                Text = data.ReadString(data.ReadBits<int>(12));
             }
 
             public SupportTicketChatLine(long timestamp, string text)
@@ -232,7 +232,7 @@ namespace Game.Networking.Packets
             public void Read(WorldPacket data)
             {
                 Timestamp = data.ReadUInt32();
-                Text = data.ReadString(data.ReadBits<uint>(12));
+                Text = data.ReadString(data.ReadBits<int>(12));
             }
         }
 
@@ -267,10 +267,10 @@ namespace Game.Networking.Packets
                 bool hasChannelGUID = data.HasBit();
                 bool hasRealmAddress = data.HasBit();
                 bool hasSlashCmd = data.HasBit();
-                uint textLength = data.ReadBits<uint>(12);
+                int textLength = data.ReadBits<int>(12);
 
                 if (hasClubID)
-                    ClubID = data.ReadUInt64();
+                    ClubID = data.ReadInt64();
 
                 if (hasChannelGUID)
                     ChannelGUID = data.ReadPackedGuid();
@@ -299,7 +299,7 @@ namespace Game.Networking.Packets
 
             public long Timestamp;
             public ObjectGuid AuthorGUID;
-            public ulong? ClubID;
+            public long? ClubID;
             public ObjectGuid? ChannelGUID;
             public SenderRealm? RealmAddress;
             public int? SlashCmd;
@@ -328,15 +328,15 @@ namespace Game.Networking.Packets
         {
             public void Read(WorldPacket data)
             {
-                MailID = data.ReadUInt64();
-                uint bodyLength = data.ReadBits<uint>(13);
-                uint subjectLength = data.ReadBits<uint>(9);
+                MailID = data.ReadInt64();
+                int bodyLength = data.ReadBits<int>(13);
+                int subjectLength = data.ReadBits<int>(9);
 
                 MailBody = data.ReadString(bodyLength);
                 MailSubject = data.ReadString(subjectLength);
             }
 
-            public ulong MailID;
+            public long MailID;
             public string MailSubject;
             public string MailBody;
         }
@@ -426,7 +426,7 @@ namespace Game.Networking.Packets
                 RideTicket = new RideTicket();
 
                 RideTicket.Read(data);
-                Comment = data.ReadString(data.ReadBits<uint>(9));
+                Comment = data.ReadString(data.ReadBits<int>(9));
             }
 
             public RideTicket RideTicket;
@@ -440,17 +440,17 @@ namespace Game.Networking.Packets
 
         public struct SupportTicketClubFinderResult
         {
-            public ulong ClubFinderPostingID;
-            public ulong ClubID;
+            public long ClubFinderPostingID;
+            public long ClubID;
             public ObjectGuid ClubFinderGUID;
             public string ClubName;
 
             public void Read(WorldPacket data)
             {
-                ClubFinderPostingID = data.ReadUInt64();
-                ClubID = data.ReadUInt64();
+                ClubFinderPostingID = data.ReadInt64();
+                ClubID = data.ReadInt64();
                 ClubFinderGUID = data.ReadPackedGuid();
-                ClubName = data.ReadString(data.ReadBits<uint>(12));
+                ClubName = data.ReadString(data.ReadBits<int>(12));
             }
         }
 
@@ -461,7 +461,7 @@ namespace Game.Networking.Packets
 
             public void Read(WorldPacket data)
             {
-                uint field_0Length = data.ReadBits<uint>(7);
+                int field_0Length = data.ReadBits<int>(7);
                 field_104 = data.ReadPackedGuid();
                 field_0 = data.ReadString(field_0Length);
             }
@@ -480,24 +480,24 @@ namespace Game.Networking.Packets
             switch (ComplaintType)
             {
                 case SupportSpamType.Mail:
-                    MailID = _worldPacket.ReadUInt64();
+                    MailID = _worldPacket.ReadInt64();
                     break;
                 case SupportSpamType.Chat:
                     Chat.Read(_worldPacket);
                     break;
                 case SupportSpamType.Calendar:
-                    EventGuid = _worldPacket.ReadUInt64();
-                    InviteGuid = _worldPacket.ReadUInt64();
+                    EventGuid = _worldPacket.ReadInt64();
+                    InviteGuid = _worldPacket.ReadInt64();
                     break;
             }
         }
 
         public SupportSpamType ComplaintType;
         public ComplaintOffender Offender;
-        public ulong MailID;
+        public long MailID;
         public ComplaintChat Chat;
-        public ulong EventGuid;
-        public ulong InviteGuid;
+        public long EventGuid;
+        public long InviteGuid;
 
         public struct ComplaintOffender
         {
@@ -517,13 +517,13 @@ namespace Game.Networking.Packets
         {
             public void Read(WorldPacket data)
             {
-                Command = data.ReadUInt32();
-                ChannelID = data.ReadUInt32();
-                MessageLog = data.ReadString(data.ReadBits<uint>(12));
+                Command = data.ReadInt32();
+                ChannelID = data.ReadInt32();
+                MessageLog = data.ReadString(data.ReadBits<int>(12));
             }
 
-            public uint Command;
-            public uint ChannelID;
+            public int Command;
+            public int ChannelID;
             public string MessageLog;
         }
     }
@@ -549,13 +549,13 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Type = _worldPacket.ReadBit();
-            uint diagLen = _worldPacket.ReadBits<uint>(12);
-            uint textLen = _worldPacket.ReadBits<uint>(10);
+            int diagLen = _worldPacket.ReadBits<int>(12);
+            int textLen = _worldPacket.ReadBits<int>(10);
             DiagInfo = _worldPacket.ReadString(diagLen);
             Text = _worldPacket.ReadString(textLen);
         }
 
-        public uint Type;
+        public int Type;
         public string Text;
         public string DiagInfo;
     }
@@ -565,13 +565,13 @@ namespace Game.Networking.Packets
     {
         public void Read(WorldPacket packet)
         {
-            MapID = packet.ReadUInt32();
+            MapID = packet.ReadInt32();
             Position = packet.ReadVector3();
             Facing = packet.ReadFloat();
             Program = packet.ReadInt32();
         }
 
-        public uint MapID;
+        public int MapID;
         public Vector3 Position;
         public float Facing;
         public int Program;

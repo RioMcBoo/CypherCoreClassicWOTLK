@@ -361,7 +361,7 @@ namespace Game.AI
                     if (me.HasUnitState(UnitState.Chase))
                         me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
 
-                    me.GetMotionMaster().MovePoint((uint)me.GetGUID().GetCounter(), x, y, z);
+                    me.GetMotionMaster().MovePoint((int)me.GetGUID().GetCounter(), x, y, z);
                 }
             }
             else // COMMAND_FOLLOW

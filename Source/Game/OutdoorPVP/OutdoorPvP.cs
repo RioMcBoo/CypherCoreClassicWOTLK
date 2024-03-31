@@ -113,7 +113,7 @@ namespace Game.PvP
             return false;
         }
 
-        public virtual bool HandleAreaTrigger(Player player, uint trigger, bool entered)
+        public virtual bool HandleAreaTrigger(Player player, int trigger, bool entered)
         {
             return false;
         }

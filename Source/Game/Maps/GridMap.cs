@@ -530,7 +530,7 @@ namespace Game.Maps
             // Check water Type in cell
             int idx = (x_int >> 3) * 16 + (y_int >> 3);
             LiquidHeaderTypeFlags type = _liquidFlags != null ? (LiquidHeaderTypeFlags)_liquidFlags[idx] : _liquidGlobalFlags;
-            uint entry = _liquidEntry != null ? _liquidEntry[idx] : _liquidGlobalEntry;
+            int entry = _liquidEntry != null ? _liquidEntry[idx] : _liquidGlobalEntry;
             LiquidTypeRecord liquidEntry = CliDB.LiquidTypeStorage.LookupByKey(entry);
             if (liquidEntry != null)
             {
@@ -541,7 +541,7 @@ namespace Game.Maps
                     var area = CliDB.AreaTableStorage.LookupByKey(GetArea(x, y));
                     if (area != null)
                     {
-                        uint overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
+                        int overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
                         if (overrideLiquid == 0 && area.ParentAreaID == 0)
                         {
                             area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);

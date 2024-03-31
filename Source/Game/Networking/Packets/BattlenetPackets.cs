@@ -78,7 +78,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Method.Read(_worldPacket);
-            uint protoSize = _worldPacket.ReadUInt32();
+            int protoSize = _worldPacket.ReadInt32();
 
             Data = _worldPacket.ReadBytes(protoSize);
         }
@@ -110,19 +110,19 @@ namespace Game.Networking.Packets
         public void Read(ByteBuffer data)
         {
             Type = data.ReadUInt64();
-            ObjectId = data.ReadUInt64();
+            ObjectId = data.ReadInt64();
             Token = data.ReadUInt32();
         }
 
         public void Write(ByteBuffer data)
         {
             data.WriteUInt64(Type);
-            data.WriteUInt64(ObjectId);
+            data.WriteInt64(ObjectId);
             data.WriteUInt32(Token);
         }
 
         public ulong Type;
-        public ulong ObjectId;
+        public long ObjectId;
         public uint Token;
     }
 }

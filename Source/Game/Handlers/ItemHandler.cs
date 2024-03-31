@@ -334,7 +334,7 @@ namespace Game
 
             var pl = GetPlayer();
 
-            Creature creature = pl.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
+            Creature creature = pl.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags1.Vendor, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleSellItemOpcode - {packet.VendorGUID} not found or you can not interact with him.");
@@ -451,7 +451,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BuyBackItem, Processing = PacketProcessing.Inplace)]
         void HandleBuybackItem(BuyBackItem packet)
         {
-            Creature creature = _player.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
+            Creature creature = _player.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags1.Vendor, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleBuybackItem - {packet.VendorGUID} not found or you can not interact with him.");
@@ -978,7 +978,7 @@ namespace Game
 
             if (!isUsingBankCommand)
             {
-                Creature creature = GetPlayer().GetNPCIfCanInteractWith(bankerGUID, NPCFlags.Banker, NPCFlags2.None);
+                Creature creature = GetPlayer().GetNPCIfCanInteractWith(bankerGUID, NPCFlags1.Banker, NPCFlags2.None);
                 if (creature == null)
                     return false;
             }

@@ -7,15 +7,14 @@ using Game.Entities;
 using Game.Networking;
 using Game.Movement;
 using System.Numerics;
-using Game.Networking.Packets;
 
 public static class PacketHandlerExtensions
 {
     public static void Write(this EquipmentSetInfo.EquipmentSetData data, WorldPacket _worldPacket)
     {
         _worldPacket.WriteInt32((int)data.Type);
-        _worldPacket.WriteUInt64(data.Guid);
-        _worldPacket.WriteUInt32(data.SetID);
+        _worldPacket.WriteInt64(data.Guid);
+        _worldPacket.WriteInt32(data.SetID);
         _worldPacket.WriteUInt32(data.IgnoreMask);
 
         for (int i = 0; i < EquipmentSlot.End; ++i)
@@ -46,8 +45,8 @@ public static class PacketHandlerExtensions
     public static void Read(this EquipmentSetInfo.EquipmentSetData data, WorldPacket _worldPacket)
     {
         data.Type = (EquipmentSetInfo.EquipmentSetType)_worldPacket.ReadInt32();
-        data.Guid = _worldPacket.ReadUInt64();
-        data.SetID = _worldPacket.ReadUInt32();
+        data.Guid = _worldPacket.ReadInt64();
+        data.SetID = _worldPacket.ReadInt32();
         data.IgnoreMask = _worldPacket.ReadUInt32();
 
         for (byte i = 0; i < EquipmentSlot.End; ++i)
@@ -66,8 +65,8 @@ public static class PacketHandlerExtensions
 
         bool hasSpecIndex = _worldPacket.HasBit();
 
-        uint setNameLength = _worldPacket.ReadBits<uint>(8);
-        uint setIconLength = _worldPacket.ReadBits<uint>(9);
+        int setNameLength = _worldPacket.ReadBits<int>(8);
+        int setIconLength = _worldPacket.ReadBits<int>(9);
 
         if (hasSpecIndex)
             data.AssignedSpecIndex = _worldPacket.ReadInt32();
@@ -93,7 +92,7 @@ public static class PacketHandlerExtensions
             transportInfo.prevTime = data.ReadUInt32();         // PrevMoveTime
 
         if (hasVehicleId)
-            transportInfo.vehicleId = data.ReadUInt32();        // VehicleRecID
+            transportInfo.vehicleId = data.ReadInt32();        // VehicleRecID
     }
 
     public static void Write(this MovementInfo.TransportInfo transportInfo, WorldPacket data)
@@ -117,7 +116,7 @@ public static class PacketHandlerExtensions
             data.WriteUInt32(transportInfo.prevTime);         // PrevMoveTime
 
         if (hasVehicleId)
-            data.WriteUInt32(transportInfo.vehicleId);        // VehicleRecID
+            data.WriteInt32(transportInfo.vehicleId);        // VehicleRecID
     }
 
     public static void Read(this MovementInfo movementInfo, WorldPacket data)
@@ -277,7 +276,7 @@ public static class PacketHandlerExtensions
 
     public static void Write(this MoveSpline moveSpline, WorldPacket data)
     {
-        data.WriteUInt32(moveSpline.GetId());                                         // ID
+        data.WriteInt32(moveSpline.GetId());                                         // ID
 
         if (!moveSpline.IsCyclic())                                                 // Destination
             data.WriteVector3(moveSpline.FinalDestination());
@@ -325,9 +324,9 @@ public static class PacketHandlerExtensions
             if (moveSpline.spell_effect_extra != null)
             {
                 data.WritePackedGuid(moveSpline.spell_effect_extra.Target);
-                data.WriteUInt32(moveSpline.spell_effect_extra.SpellVisualId);
-                data.WriteUInt32(moveSpline.spell_effect_extra.ProgressCurveId);
-                data.WriteUInt32(moveSpline.spell_effect_extra.ParabolicCurveId);
+                data.WriteInt32(moveSpline.spell_effect_extra.SpellVisualId);
+                data.WriteInt32(moveSpline.spell_effect_extra.ProgressCurveId);
+                data.WriteInt32(moveSpline.spell_effect_extra.ParabolicCurveId);
             }
 
             if (hasJumpExtraData)
@@ -339,9 +338,9 @@ public static class PacketHandlerExtensions
 
             if (moveSpline.anim_tier != null)
             {
-                data.WriteUInt32(moveSpline.anim_tier.TierTransitionId);
+                data.WriteInt32(moveSpline.anim_tier.TierTransitionId);
                 data.WriteInt32(moveSpline.effect_start_time);
-                data.WriteUInt32(0);
+                data.WriteInt32(0);
                 data.WriteUInt8(moveSpline.anim_tier.AnimTier);
             }
         }
@@ -386,7 +385,7 @@ public static class PacketHandlerExtensions
         else
             data.WriteVector3(movementForce.Direction);
 
-        data.WriteUInt32(movementForce.TransportID);
+        data.WriteInt32(movementForce.TransportID);
         data.WriteFloat(movementForce.Magnitude);
         data.WriteInt32(movementForce.Unused910);
         data.WriteBits((byte)movementForce.Type, 2);
@@ -398,7 +397,7 @@ public static class PacketHandlerExtensions
         movementForce.ID = data.ReadPackedGuid();
         movementForce.Origin = data.ReadVector3();
         movementForce.Direction = data.ReadVector3();
-        movementForce.TransportID = data.ReadUInt32();
+        movementForce.TransportID = data.ReadInt32();
         movementForce.Magnitude = data.ReadFloat();
         movementForce.Unused910 = data.ReadInt32();
         movementForce.Type = (MovementForceType)data.ReadBits<byte>(2);

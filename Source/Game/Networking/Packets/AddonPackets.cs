@@ -14,8 +14,8 @@ namespace Game.Networking.Packets
         {
             data.ResetBitPos();
 
-            uint nameLength = data.ReadBits<uint>(10);
-            uint versionLength = data.ReadBits<uint>(10);
+            int nameLength = data.ReadBits<int>(10);
+            int versionLength = data.ReadBits<int>(10);
             Loaded = data.HasBit();
             Disabled = data.HasBit();
             if (nameLength > 1)

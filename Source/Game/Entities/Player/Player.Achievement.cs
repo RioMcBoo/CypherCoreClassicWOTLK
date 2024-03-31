@@ -73,7 +73,7 @@ namespace Game.Entities
             m_achievementSys.CompletedAchievement(entry, this);
         }
 
-        public bool ModifierTreeSatisfied(uint modifierTreeId)
+        public bool ModifierTreeSatisfied(int modifierTreeId)
         {
             return m_achievementSys.ModifierTreeSatisfied(modifierTreeId);
         }

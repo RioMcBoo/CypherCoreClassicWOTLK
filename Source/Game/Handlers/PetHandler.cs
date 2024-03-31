@@ -41,7 +41,7 @@ namespace Game
             ObjectGuid guid1 = packet.PetGUID;         //pet guid
             ObjectGuid guid2 = packet.TargetGUID;      //tag guid
 
-            uint spellid = UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packet.Action);
+            int spellid = UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packet.Action);
             ActiveStates flag = (ActiveStates)UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(packet.Action);             //delete = 0x07 CastSpell = C1
 
             // used also for charmed creature
@@ -108,7 +108,7 @@ namespace Game
             pet.AttackStop();
         }
 
-        void HandlePetActionHelper(Unit pet, ObjectGuid guid1, uint spellid, ActiveStates flag, ObjectGuid guid2, float x, float y, float z)
+        void HandlePetActionHelper(Unit pet, ObjectGuid guid1, int spellid, ActiveStates flag, ObjectGuid guid2, float x, float y, float z)
         {
             CharmInfo charmInfo = pet.GetCharmInfo();
             if (charmInfo == null)
@@ -434,7 +434,7 @@ namespace Game
             // stable master case
             else
             {
-                if (GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.StableMaster, NPCFlags2.None) == null)
+                if (GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags1.StableMaster, NPCFlags2.None) == null)
                 {
                     Log.outDebug(LogFilter.Network, "Stablemaster {0} not found or you can't interact with him.", guid.ToString());
                     return false;
@@ -466,10 +466,10 @@ namespace Game
                 if (controlled.GetEntry() == pet.GetEntry() && controlled.IsAlive())
                     pets.Add(controlled);
 
-            uint position = packet.Index;
-            uint actionData = packet.Action;
+            int position = packet.Index;
+            int actionData = packet.Action;
 
-            uint spell_id = UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(actionData);
+            int spell_id = UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(actionData);
             ActiveStates act_state = (ActiveStates)UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(actionData);
 
             Log.outDebug(LogFilter.Network, "Player {0} has changed pet spell action. Position: {1}, Spell: {2}, State: {3}", GetPlayer().GetName(), position, spell_id, act_state);
@@ -561,7 +561,7 @@ namespace Game
                 stmt.AddValue(1, GetPlayer().GetGUID().ToString());
 
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                    stmt.AddValue(i + 1, packet.RenameData.DeclinedNames.name[i]);
+                    stmt.AddValue(i + 1, packet.RenameData.DeclinedNames.Name[i]);
 
                 trans.Append(stmt);
             }
@@ -649,7 +649,7 @@ namespace Game
                 return;
             }
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)petCastSpell.Cast.SpellID, caster.GetMap().GetDifficultyID());
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(petCastSpell.Cast.SpellID, caster.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Network, "WorldSession.HandlePetCastSpell: unknown spell id {0} tried to cast by {1}", petCastSpell.Cast.SpellID, petCastSpell.PetGUID.ToString());
@@ -688,8 +688,8 @@ namespace Game
 
             Spell spell = new(caster, spellInfo, triggerCastFlags);
             spell.m_fromClient = true;
-            spell.m_misc.Data0 = (uint)petCastSpell.Cast.Misc[0];
-            spell.m_misc.Data1 = (uint)petCastSpell.Cast.Misc[1];
+            spell.m_misc.Data0 = petCastSpell.Cast.Misc[0];
+            spell.m_misc.Data1 = petCastSpell.Cast.Misc[1];
             spell.m_targets = targets;
 
             SpellCastResult result = spell.CheckPetCast(null);
@@ -736,7 +736,7 @@ namespace Game
             petNameInvalid.Result = error;
             petNameInvalid.RenameData.NewName = name;
             for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                petNameInvalid.RenameData.DeclinedNames.name[i] = declinedName.name[i];
+                petNameInvalid.RenameData.DeclinedNames.Name[i] = declinedName.Name[i];
 
             SendPacket(petNameInvalid);
         }

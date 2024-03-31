@@ -341,7 +341,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             SequenceIndex = _worldPacket.ReadUInt32();
-            Name = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
+            Name = _worldPacket.ReadString(_worldPacket.ReadBits<int>(6));
         }
 
         public uint SequenceIndex;
@@ -373,7 +373,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             CreateInfo = new CharacterCreateInfo();
-            uint nameLength = _worldPacket.ReadBits<uint>(6);
+            int nameLength = _worldPacket.ReadBits<int>(6);
             bool hasTemplateSet = _worldPacket.HasBit();
             CreateInfo.IsTrialBoost = _worldPacket.HasBit();
             CreateInfo.UseNPE = _worldPacket.HasBit();
@@ -442,7 +442,7 @@ namespace Game.Networking.Packets
         {
             RenameInfo = new CharacterRenameInfo();
             RenameInfo.Guid = _worldPacket.ReadPackedGuid();
-            RenameInfo.NewName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
+            RenameInfo.NewName = _worldPacket.ReadString(_worldPacket.ReadBits<int>(6));
         }
 
         public CharacterRenameInfo RenameInfo;
@@ -486,7 +486,7 @@ namespace Game.Networking.Packets
 
             CustomizeInfo.Customizations.Sort();
 
-            CustomizeInfo.CharName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
+            CustomizeInfo.CharName = _worldPacket.ReadString(_worldPacket.ReadBits<int>(6));
         }
 
         public CharCustomizeInfo CustomizeInfo;
@@ -504,7 +504,7 @@ namespace Game.Networking.Packets
 
             RaceOrFactionChangeInfo.FactionChange = _worldPacket.HasBit();
 
-            uint nameLength = _worldPacket.ReadBits<uint>(6);
+            int nameLength = _worldPacket.ReadBits<int>(6);
 
             RaceOrFactionChangeInfo.Guid = _worldPacket.ReadPackedGuid();
             RaceOrFactionChangeInfo.SexID = (Gender)_worldPacket.ReadUInt8();
@@ -819,14 +819,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(TotalTime);
-            _worldPacket.WriteInt32(LevelTime);
+            _worldPacket.WriteUInt32(TotalTime);
+            _worldPacket.WriteUInt32(LevelTime);
             _worldPacket.WriteBit(TriggerEvent);
             _worldPacket.FlushBits();
         }
 
-        public int TotalTime;
-        public int LevelTime;
+        public uint TotalTime;
+        public uint LevelTime;
         public bool TriggerEvent;
     }
 
@@ -976,10 +976,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(FactionIndex);
+            _worldPacket.WriteInt32(FactionIndex);
         }
 
-        public uint FactionIndex;
+        public int FactionIndex;
     }
 
     class CharCustomizeSuccess : ServerPacket

@@ -205,7 +205,7 @@ namespace Game
             Guild.EmblemInfo emblemInfo = new();
             emblemInfo.ReadPacket(packet);
 
-            if (GetPlayer().GetNPCIfCanInteractWith(packet.Vendor, NPCFlags.TabardDesigner, NPCFlags2.None) != null)
+            if (GetPlayer().GetNPCIfCanInteractWith(packet.Vendor, NPCFlags1.TabardDesigner, NPCFlags2.None) != null)
             {
                 // Remove fake death
                 if (GetPlayer().HasUnitState(UnitState.Died))
@@ -310,15 +310,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AutoGuildBankItem)]
         void HandleAutoGuildBankItem(AutoGuildBankItem depositGuildBankItem)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(depositGuildBankItem.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(depositGuildBankItem.GI_Items.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos playerInvPos = new(depositGuildBankItem.ContainerItemSlot, depositGuildBankItem.ContainerSlot);
-            ItemPos guildBankPos = new(depositGuildBankItem.BankSlot, depositGuildBankItem.BankTab);
+            ItemPos playerInvPos = new(depositGuildBankItem.GI_Items.ContainerItemSlot, depositGuildBankItem.GI_Items.ContainerSlot);
+            ItemPos guildBankPos = new(depositGuildBankItem.GI_Items.BankSlot, depositGuildBankItem.GI_Items.BankTab);
 
             if (!playerInvPos.IsInventoryPos)
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
@@ -329,15 +329,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.StoreGuildBankItem)]
         void HandleStoreGuildBankItem(StoreGuildBankItem storeGuildBankItem)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(storeGuildBankItem.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(storeGuildBankItem.GI_Items.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos playerInvPos = new(storeGuildBankItem.ContainerItemSlot, storeGuildBankItem.ContainerSlot);
-            ItemPos guildBankPos = new(storeGuildBankItem.BankSlot, storeGuildBankItem.BankTab);
+            ItemPos playerInvPos = new(storeGuildBankItem.GI_Items.ContainerItemSlot, storeGuildBankItem.GI_Items.ContainerSlot);
+            ItemPos guildBankPos = new(storeGuildBankItem.GI_Items.BankSlot, storeGuildBankItem.GI_Items.BankTab);
 
             if (!playerInvPos.IsInventoryPos)
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
@@ -348,15 +348,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SwapItemWithGuildBankItem)]
         void HandleSwapItemWithGuildBankItem(SwapItemWithGuildBankItem swapItemWithGuildBankItem)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(swapItemWithGuildBankItem.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(swapItemWithGuildBankItem.GI_Items.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos playerInvPos = new(swapItemWithGuildBankItem.ContainerItemSlot, swapItemWithGuildBankItem.ContainerSlot);
-            ItemPos guildBankPos = new(swapItemWithGuildBankItem.BankSlot, swapItemWithGuildBankItem.BankTab);
+            ItemPos playerInvPos = new(swapItemWithGuildBankItem.GI_Items.ContainerItemSlot, swapItemWithGuildBankItem.GI_Items.ContainerSlot);
+            ItemPos guildBankPos = new(swapItemWithGuildBankItem.GI_Items.BankSlot, swapItemWithGuildBankItem.GI_Items.BankTab);
 
             if (!playerInvPos.IsInventoryPos)
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
@@ -367,15 +367,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SwapGuildBankItemWithGuildBankItem)]
         void HandleSwapGuildBankItemWithGuildBankItem(SwapGuildBankItemWithGuildBankItem swapGuildBankItemWithGuildBankItem)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(swapGuildBankItemWithGuildBankItem.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(swapGuildBankItemWithGuildBankItem.GG_Items.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos src = new(swapGuildBankItemWithGuildBankItem.BankSlot[0], swapGuildBankItemWithGuildBankItem.BankTab[0]);
-            ItemPos dest = new(swapGuildBankItemWithGuildBankItem.BankSlot[1], swapGuildBankItemWithGuildBankItem.BankTab[1]);
+            ItemPos src = new(swapGuildBankItemWithGuildBankItem.GG_Items.BankSlot, swapGuildBankItemWithGuildBankItem.GG_Items.BankTab);
+            ItemPos dest = new(swapGuildBankItemWithGuildBankItem.GG_Items.BankSlot1, swapGuildBankItemWithGuildBankItem.GG_Items.BankTab1);
 
             guild.SwapItems(GetPlayer(), src, dest, 0);
         }
@@ -383,15 +383,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveGuildBankItem)]
         void HandleMoveGuildBankItem(MoveGuildBankItem moveGuildBankItem)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(moveGuildBankItem.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(moveGuildBankItem.GG_Items.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos src = new(moveGuildBankItem.BankSlot, moveGuildBankItem.BankTab);
-            ItemPos dest = new(moveGuildBankItem.BankSlot1, moveGuildBankItem.BankTab1);
+            ItemPos src = new(moveGuildBankItem.GG_Items.BankSlot, moveGuildBankItem.GG_Items.BankTab);
+            ItemPos dest = new(moveGuildBankItem.GG_Items.BankSlot1, moveGuildBankItem.GG_Items.BankTab1);
 
             guild.SwapItems(GetPlayer(), src, dest, 0);
         }
@@ -399,77 +399,77 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MergeItemWithGuildBankItem)]
         void HandleMergeItemWithGuildBankItem(MergeItemWithGuildBankItem mergeItemWithGuildBankItem)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(mergeItemWithGuildBankItem.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(mergeItemWithGuildBankItem.GI_StackItems.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos playerInvPos = new(mergeItemWithGuildBankItem.ContainerItemSlot, mergeItemWithGuildBankItem.ContainerSlot);
-            ItemPos guildBankPos = new(mergeItemWithGuildBankItem.BankSlot, mergeItemWithGuildBankItem.BankTab);
+            ItemPos playerInvPos = new(mergeItemWithGuildBankItem.GI_StackItems.ContainerItemSlot, mergeItemWithGuildBankItem.GI_StackItems.ContainerSlot);
+            ItemPos guildBankPos = new(mergeItemWithGuildBankItem.GI_StackItems.BankSlot, mergeItemWithGuildBankItem.GI_StackItems.BankTab);
 
             if (!playerInvPos.IsInventoryPos)
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), false, guildBankPos, playerInvPos, mergeItemWithGuildBankItem.StackCount);
+                guild.SwapItemsWithInventory(GetPlayer(), false, guildBankPos, playerInvPos, mergeItemWithGuildBankItem.GI_StackItems.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.SplitItemToGuildBank)]
         void HandleSplitItemToGuildBank(SplitItemToGuildBank splitItemToGuildBank)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(splitItemToGuildBank.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(splitItemToGuildBank.GI_StackItems.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos playerInvPos = new(splitItemToGuildBank.ContainerItemSlot, splitItemToGuildBank.ContainerSlot);
-            ItemPos guildBankPos = new(splitItemToGuildBank.BankSlot, splitItemToGuildBank.BankTab);
+            ItemPos playerInvPos = new(splitItemToGuildBank.GI_StackItems.ContainerItemSlot, splitItemToGuildBank.GI_StackItems.ContainerSlot);
+            ItemPos guildBankPos = new(splitItemToGuildBank.GI_StackItems.BankSlot, splitItemToGuildBank.GI_StackItems.BankTab);
 
             if (!playerInvPos.IsInventoryPos)
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), false, guildBankPos, playerInvPos, splitItemToGuildBank.StackCount);
+                guild.SwapItemsWithInventory(GetPlayer(), false, guildBankPos, playerInvPos, splitItemToGuildBank.GI_StackItems.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.MergeGuildBankItemWithItem)]
         void HandleMergeGuildBankItemWithItem(MergeGuildBankItemWithItem mergeGuildBankItemWithItem)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(mergeGuildBankItemWithItem.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(mergeGuildBankItemWithItem.GI_StackItems.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos playerInvPos = new(mergeGuildBankItemWithItem.ContainerItemSlot, mergeGuildBankItemWithItem.ContainerSlot);
-            ItemPos guildBankPos = new(mergeGuildBankItemWithItem.BankSlot, mergeGuildBankItemWithItem.BankTab);
+            ItemPos playerInvPos = new(mergeGuildBankItemWithItem.GI_StackItems.ContainerItemSlot, mergeGuildBankItemWithItem.GI_StackItems.ContainerSlot);
+            ItemPos guildBankPos = new(mergeGuildBankItemWithItem.GI_StackItems.BankSlot, mergeGuildBankItemWithItem.GI_StackItems.BankTab);
 
             if (!playerInvPos.IsInventoryPos)
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), true, guildBankPos, playerInvPos, mergeGuildBankItemWithItem.StackCount);
+                guild.SwapItemsWithInventory(GetPlayer(), true, guildBankPos, playerInvPos, mergeGuildBankItemWithItem.GI_StackItems.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.SplitGuildBankItemToInventory)]
         void HandleSplitGuildBankItemToInventory(SplitGuildBankItemToInventory splitGuildBankItemToInventory)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(splitGuildBankItemToInventory.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(splitGuildBankItemToInventory.GI_StackItems.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos playerInvPos = new(splitGuildBankItemToInventory.ContainerItemSlot, splitGuildBankItemToInventory.ContainerSlot);
-            ItemPos guildBankPos = new(splitGuildBankItemToInventory.BankSlot, splitGuildBankItemToInventory.BankTab);
+            ItemPos playerInvPos = new(splitGuildBankItemToInventory.GI_StackItems.ContainerItemSlot, splitGuildBankItemToInventory.GI_StackItems.ContainerSlot);
+            ItemPos guildBankPos = new(splitGuildBankItemToInventory.GI_StackItems.BankSlot, splitGuildBankItemToInventory.GI_StackItems.BankTab);
 
             if (!playerInvPos.IsInventoryPos)
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), true, guildBankPos, playerInvPos, splitGuildBankItemToInventory.StackCount);
+                guild.SwapItemsWithInventory(GetPlayer(), true, guildBankPos, playerInvPos, splitGuildBankItemToInventory.GI_StackItems.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.AutoStoreGuildBankItem)]
@@ -490,33 +490,33 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MergeGuildBankItemWithGuildBankItem)]
         void HandleMergeGuildBankItemWithGuildBankItem(MergeGuildBankItemWithGuildBankItem mergeGuildBankItemWithGuildBankItem)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(mergeGuildBankItemWithGuildBankItem.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(mergeGuildBankItemWithGuildBankItem.GG_StackItems.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos src = new(mergeGuildBankItemWithGuildBankItem.BankSlot, mergeGuildBankItemWithGuildBankItem.BankTab);
-            ItemPos dest = new(mergeGuildBankItemWithGuildBankItem.BankSlot1, mergeGuildBankItemWithGuildBankItem.BankTab1);
+            ItemPos src = new(mergeGuildBankItemWithGuildBankItem.GG_StackItems.BankSlot, mergeGuildBankItemWithGuildBankItem.GG_StackItems.BankTab);
+            ItemPos dest = new(mergeGuildBankItemWithGuildBankItem.GG_StackItems.BankSlot1, mergeGuildBankItemWithGuildBankItem.GG_StackItems.BankTab1);
 
-            guild.SwapItems(GetPlayer(), src, dest, mergeGuildBankItemWithGuildBankItem.StackCount);
+            guild.SwapItems(GetPlayer(), src, dest, mergeGuildBankItemWithGuildBankItem.GG_StackItems.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.SplitGuildBankItem)]
         void HandleSplitGuildBankItem(SplitGuildBankItem splitGuildBankItem)
         {
-            if (GetPlayer().GetGameObjectIfCanInteractWith(splitGuildBankItem.Banker, GameObjectTypes.GuildBank) == null)
+            if (GetPlayer().GetGameObjectIfCanInteractWith(splitGuildBankItem.GG_StackItems.Banker, GameObjectTypes.GuildBank) == null)
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            ItemPos src = new(splitGuildBankItem.BankSlot, splitGuildBankItem.BankTab);
-            ItemPos dest = new(splitGuildBankItem.BankSlot1, splitGuildBankItem.BankTab1);
+            ItemPos src = new(splitGuildBankItem.GG_StackItems.BankSlot, splitGuildBankItem.GG_StackItems.BankTab);
+            ItemPos dest = new(splitGuildBankItem.GG_StackItems.BankSlot1, splitGuildBankItem.GG_StackItems.BankTab1);
 
-            guild.SwapItems(GetPlayer(), src, dest, splitGuildBankItem.StackCount);
+            guild.SwapItems(GetPlayer(), src, dest, splitGuildBankItem.GG_StackItems.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.GuildBankBuyTab)]
@@ -595,7 +595,7 @@ namespace Game
 
             Guild.GuildBankRightsAndSlots[] rightsAndSlots = new Guild.GuildBankRightsAndSlots[GuildConst.MaxBankTabs];
             for (byte tabId = 0; tabId < GuildConst.MaxBankTabs; ++tabId)
-                rightsAndSlots[tabId] = new Guild.GuildBankRightsAndSlots(tabId, (sbyte)packet.TabFlags[tabId], (int)packet.TabWithdrawItemLimit[tabId]);
+                rightsAndSlots[tabId] = new Guild.GuildBankRightsAndSlots(tabId, (sbyte)packet.TabFlags[tabId], packet.TabWithdrawItemLimit[tabId]);
 
             guild.HandleSetRankInfo(this, (GuildRankId)packet.RankID, packet.RankName, (GuildRankRights)packet.Flags, packet.WithdrawGoldLimit, rightsAndSlots);
         }
@@ -665,7 +665,7 @@ namespace Game
         {
             Guild guild = GetPlayer().GetGuild();
             if (guild != null)
-                guild.HandleNewsSetSticky(this, (uint)packet.NewsID, packet.Sticky);
+                guild.HandleNewsSetSticky(this, packet.NewsID, packet.Sticky);
         }
 
         [WorldPacketHandler(ClientOpcodes.GuildReplaceGuildMaster)]

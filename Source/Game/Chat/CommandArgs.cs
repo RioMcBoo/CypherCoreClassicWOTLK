@@ -239,14 +239,14 @@ namespace Game.Chat
                         case nameof(AchievementRecord):
                         {
                             ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
-                            if (!result.IsSuccessful() || (val = CliDB.AchievementStorage.LookupByKey((uint)tempVal)) != null)
+                            if (!result.IsSuccessful() || (val = CliDB.AchievementStorage.LookupByKey((int)tempVal)) != null)
                                 return result;
                             return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAchievementNoExist, tempVal));
                         }
                         case nameof(CurrencyTypesRecord):
                         {
                             ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
-                            if (!result.IsSuccessful() || (val = CliDB.CurrencyTypesStorage.LookupByKey((uint)tempVal)) != null)
+                            if (!result.IsSuccessful() || (val = CliDB.CurrencyTypesStorage.LookupByKey((int)tempVal)) != null)
                                 return result;
                             return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCurrencyNoExist, tempVal));
                         }

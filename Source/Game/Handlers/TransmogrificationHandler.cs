@@ -19,21 +19,21 @@ namespace Game
             Player player = GetPlayer();
 
             // Validate
-            if (player.GetNPCIfCanInteractWith(transmogrifyItems.Npc, NPCFlags.Transmogrifier, NPCFlags2.None) == null)
+            if (player.GetNPCIfCanInteractWith(transmogrifyItems.Npc, NPCFlags1.Transmogrifier, NPCFlags2.None) == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Unit (GUID: {0}) not found or player can't interact with it.", transmogrifyItems.ToString());
                 return;
             }
 
             long cost = 0;
-            Dictionary<Item, uint[]> transmogItems = new();// new Dictionary<Item, Tuple<uint, uint>>();
-            Dictionary<Item, uint> illusionItems = new();
+            Dictionary<Item, int[]> transmogItems = new();// new Dictionary<Item, Tuple<uint, uint>>();
+            Dictionary<Item, int> illusionItems = new();
 
             List<Item> resetAppearanceItems = new();
             List<Item> resetIllusionItems = new();
-            List<uint> bindAppearances = new();
+            List<int> bindAppearances = new();
 
-            bool validateAndStoreTransmogItem(Item itemTransmogrified, uint itemModifiedAppearanceId, bool isSecondary)
+            bool validateAndStoreTransmogItem(Item itemTransmogrified, int itemModifiedAppearanceId, bool isSecondary)
             {
                 var itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
                 if (itemModifiedAppearance == null)
@@ -70,7 +70,7 @@ namespace Game
                 }
 
                 if (!transmogItems.ContainsKey(itemTransmogrified))
-                    transmogItems[itemTransmogrified] = new uint[2];
+                    transmogItems[itemTransmogrified] = new int[2];
 
                 if (!isSecondary)
                     transmogItems[itemTransmogrified][0] = itemModifiedAppearanceId;
@@ -93,7 +93,7 @@ namespace Game
                 }
 
                 // transmogrified item
-                Item itemTransmogrified = player.GetItemByPos(InventorySlots.Bag0, (byte)transmogItem.Slot);
+                Item itemTransmogrified = player.GetItemByPos(transmogItem.Slot);
                 if (itemTransmogrified == null)
                 {
                     Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Player (GUID: {0}, name: {1}) tried to transmogrify an invalid item in a valid slot (slot: {2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
@@ -102,10 +102,10 @@ namespace Game
 
                 if (transmogItem.ItemModifiedAppearanceID != 0 || transmogItem.SecondaryItemModifiedAppearanceID > 0)
                 {
-                    if (transmogItem.ItemModifiedAppearanceID != 0 && !validateAndStoreTransmogItem(itemTransmogrified, (uint)transmogItem.ItemModifiedAppearanceID, false))
+                    if (transmogItem.ItemModifiedAppearanceID != 0 && !validateAndStoreTransmogItem(itemTransmogrified, transmogItem.ItemModifiedAppearanceID, false))
                         return;
 
-                    if (transmogItem.SecondaryItemModifiedAppearanceID > 0 && !validateAndStoreTransmogItem(itemTransmogrified, (uint)transmogItem.SecondaryItemModifiedAppearanceID, true))
+                    if (transmogItem.SecondaryItemModifiedAppearanceID > 0 && !validateAndStoreTransmogItem(itemTransmogrified, transmogItem.SecondaryItemModifiedAppearanceID, true))
                         return;
 
                     // add cost
@@ -171,7 +171,7 @@ namespace Game
                     transmogrified.SetModifier(ItemConst.SecondaryAppearanceModifierSlotBySpec[player.GetActiveTalentGroup()], transmogPair.Value[1]);
                 }
 
-                player.SetVisibleItemSlot(transmogrified.GetSlot(), transmogrified);
+                player.SetVisibleItemSlot(transmogrified.InventorySlot, transmogrified);
 
                 transmogrified.SetNotRefundable(player);
                 transmogrified.ClearSoulboundTradeable(player);
@@ -203,7 +203,7 @@ namespace Game
                     transmogrified.SetModifier(ItemConst.IllusionModifierSlotBySpec[player.GetActiveTalentGroup()], illusionPair.Value);
                 }
 
-                player.SetVisibleItemSlot(transmogrified.GetSlot(), transmogrified);
+                player.SetVisibleItemSlot(transmogrified.InventorySlot, transmogrified);
 
                 transmogrified.SetNotRefundable(player);
                 transmogrified.ClearSoulboundTradeable(player);
@@ -252,7 +252,7 @@ namespace Game
                 }
 
                 item.SetState(ItemUpdateState.Changed, player);
-                player.SetVisibleItemSlot(item.GetSlot(), item);
+                player.SetVisibleItemSlot(item.InventorySlot, item);
             }
 
             foreach (Item item in resetIllusionItems)
@@ -281,10 +281,10 @@ namespace Game
                 }
 
                 item.SetState(ItemUpdateState.Changed, player);
-                player.SetVisibleItemSlot(item.GetSlot(), item);
+                player.SetVisibleItemSlot(item.InventorySlot, item);
             }
 
-            foreach (uint itemModifedAppearanceId in bindAppearances)
+            foreach (var itemModifedAppearanceId in bindAppearances)
             {
                 var itemsProvidingAppearance = GetCollectionMgr().GetItemsProvidingTemporaryAppearance(itemModifedAppearanceId);
                 foreach (ObjectGuid itemGuid in itemsProvidingAppearance)

@@ -10,8 +10,8 @@ namespace Game.Chat.Commands
 {
     struct Spells
     {
-        public const uint LFGDundeonDeserter = 71041;
-        public const uint BGDeserter = 26013;
+        public const int LFGDundeonDeserter = 71041;
+        public const int BGDeserter = 26013;
     }
 
     [CommandGroup("deserter")]

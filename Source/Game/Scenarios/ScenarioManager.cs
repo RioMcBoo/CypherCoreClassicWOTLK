@@ -16,12 +16,12 @@ namespace Game.Scenarios
 
         public InstanceScenario CreateInstanceScenario(InstanceMap map, int team)
         {
-            var dbData = _scenarioDBData.LookupByKey(Tuple.Create(map.GetId(), (byte)map.GetDifficultyID()));
+            var dbData = _scenarioDBData.LookupByKey((map.GetId(), map.GetDifficultyID()));
             // No scenario registered for this map and difficulty in the database
             if (dbData == null)
                 return null;
 
-            uint scenarioID = 0;
+            int scenarioID = 0;
             switch (team)
             {
                 case TeamId.Alliance:
@@ -60,17 +60,17 @@ namespace Game.Scenarios
 
             do
             {
-                uint mapId = result.Read<uint>(0);
-                byte difficulty = result.Read<byte>(1);
+                int mapId = result.Read<int>(0);
+                var difficulty = (Difficulty)result.Read<byte>(1);
 
-                uint scenarioAllianceId = result.Read<uint>(2);
+                int scenarioAllianceId = result.Read<int>(2);
                 if (scenarioAllianceId > 0 && !_scenarioData.ContainsKey(scenarioAllianceId))
                 {
                     Log.outError(LogFilter.Sql, "ScenarioMgr.LoadDBData: DB Table `scenarios`, column scenario_A contained an invalid scenario (Id: {0})!", scenarioAllianceId);
                     continue;
                 }
 
-                uint scenarioHordeId = result.Read<uint>(3);
+                int scenarioHordeId = result.Read<int>(3);
                 if (scenarioHordeId > 0 && !_scenarioData.ContainsKey(scenarioHordeId))
                 {
                     Log.outError(LogFilter.Sql, "ScenarioMgr.LoadDBData: DB Table `scenarios`, column scenario_H contained an invalid scenario (Id: {0})!", scenarioHordeId);
@@ -85,7 +85,7 @@ namespace Game.Scenarios
                 data.DifficultyID = difficulty;
                 data.Scenario_A = scenarioAllianceId;
                 data.Scenario_H = scenarioHordeId;
-                _scenarioDBData[Tuple.Create(mapId, difficulty)] = data;
+                _scenarioDBData[(mapId, difficulty)] = data;
             }
             while (result.NextRow());
 
@@ -96,8 +96,8 @@ namespace Game.Scenarios
         {
             _scenarioData.Clear();
 
-            Dictionary<uint, Dictionary<byte, ScenarioStepRecord>> scenarioSteps = new();
-            uint deepestCriteriaTreeSize = 0;
+            Dictionary<int, Dictionary<byte, ScenarioStepRecord>> scenarioSteps = new();
+            int deepestCriteriaTreeSize = 0;
 
             foreach (ScenarioStepRecord step in CliDB.ScenarioStepStorage.Values)
             {
@@ -108,7 +108,7 @@ namespace Game.Scenarios
                 CriteriaTree tree = Global.CriteriaMgr.GetCriteriaTree(step.CriteriaTreeId);
                 if (tree != null)
                 {
-                    uint criteriaTreeSize = 0;
+                    int criteriaTreeSize = 0;
                     CriteriaManager.WalkCriteriaTree(tree, treeFunc =>
                     {
                         ++criteriaTreeSize;
@@ -145,7 +145,7 @@ namespace Game.Scenarios
                 return;
             }
 
-            Dictionary<uint, MultiMap<int, ScenarioPOIPoint>> allPoints = new();
+            Dictionary<int, MultiMap<int, ScenarioPOIPoint>> allPoints = new();
 
             //                                                0               1    2  3  4
             using (var pointsResult = DB.World.Query("SELECT CriteriaTreeID, Idx1, X, Y, Z FROM scenario_poi_points ORDER BY CriteriaTreeID DESC, Idx1, Idx2"))
@@ -154,7 +154,7 @@ namespace Game.Scenarios
                 {
                     do
                     {
-                        uint CriteriaTreeID = pointsResult.Read<uint>(0);
+                        int CriteriaTreeID = pointsResult.Read<int>(0);
                         int Idx1 = pointsResult.Read<int>(1);
                         int X = pointsResult.Read<int>(2);
                         int Y = pointsResult.Read<int>(3);
@@ -171,7 +171,7 @@ namespace Game.Scenarios
 
             do
             {
-                uint criteriaTreeID = result.Read<uint>(0);
+                int criteriaTreeID = result.Read<int>(0);
                 int blobIndex = result.Read<int>(1);
                 int idx1 = result.Read<int>(2);
                 int mapID = result.Read<int>(3);
@@ -204,7 +204,7 @@ namespace Game.Scenarios
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} scenario POI definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        public List<ScenarioPOI> GetScenarioPOIs(uint CriteriaTreeID)
+        public List<ScenarioPOI> GetScenarioPOIs(int CriteriaTreeID)
         {
             if (!_scenarioPOIStore.ContainsKey(CriteriaTreeID))
                 return null;
@@ -212,9 +212,9 @@ namespace Game.Scenarios
             return _scenarioPOIStore[CriteriaTreeID];
         }
 
-        Dictionary<uint, ScenarioData> _scenarioData = new();
-        MultiMap<uint, ScenarioPOI> _scenarioPOIStore = new();
-        Dictionary<Tuple<uint, byte>, ScenarioDBData> _scenarioDBData = new();
+        Dictionary<int, ScenarioData> _scenarioData = new();
+        MultiMap<int, ScenarioPOI> _scenarioPOIStore = new();
+        Dictionary<(int, Difficulty), ScenarioDBData> _scenarioDBData = new();
     }
 
     public class ScenarioData
@@ -225,10 +225,10 @@ namespace Game.Scenarios
 
     class ScenarioDBData
     {
-        public uint MapID;
-        public byte DifficultyID;
-        public uint Scenario_A;
-        public uint Scenario_H;
+        public int MapID;
+        public Difficulty DifficultyID;
+        public int Scenario_A;
+        public int Scenario_H;
     }
 
     public struct ScenarioPOIPoint

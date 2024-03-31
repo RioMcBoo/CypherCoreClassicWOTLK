@@ -292,7 +292,7 @@ namespace Game
                 SpellCastTargets his_targets = new();
 
                 // not accept if spell can't be casted now (cheating)
-                uint my_spell_id = my_trade.GetSpell();
+                int my_spell_id = my_trade.GetSpell();
                 if (my_spell_id != 0)
                 {
                     SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(my_spell_id, _player.GetMap().GetDifficultyID());
@@ -328,7 +328,7 @@ namespace Game
                 }
 
                 // not accept if spell can't be casted now (cheating)
-                uint his_spell_id = his_trade.GetSpell();
+                int his_spell_id = his_trade.GetSpell();
                 if (his_spell_id != 0)
                 {
                     SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(his_spell_id, trader.GetMap().GetDifficultyID());

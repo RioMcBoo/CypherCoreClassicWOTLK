@@ -353,11 +353,11 @@ namespace Game
 
             foreach (var factionEntry in CliDB.FactionStorage.Values)
             {
-                if (factionEntry.CanHaveReputation())
+                if (factionEntry.CanHaveReputation)
                 {
                     FactionState newFaction = new();
                     newFaction.Id = factionEntry.Id;
-                    newFaction.ReputationListID = (uint)factionEntry.ReputationIndex;
+                    newFaction.ReputationListID = factionEntry.ReputationIndex;
                     newFaction.Standing = 0;
                     newFaction.VisualStandingIncrease = 0;
                     newFaction.Flags = GetDefaultStateFlags(factionEntry);

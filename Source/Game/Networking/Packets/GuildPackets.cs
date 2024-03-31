@@ -153,7 +153,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint textLen = _worldPacket.ReadBits<uint>(11);
+            int textLen = _worldPacket.ReadBits<int>(11);
             MotdText = _worldPacket.ReadString(textLen);
         }
 
@@ -210,7 +210,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLen = _worldPacket.ReadBits<uint>(9);
+            int nameLen = _worldPacket.ReadBits<int>(9);
             bool hasUnused910 = _worldPacket.HasBit();
 
             Name = _worldPacket.ReadString(nameLen);
@@ -563,16 +563,16 @@ namespace Game.Networking.Packets
             RankID = _worldPacket.ReadUInt8();
             RankOrder = _worldPacket.ReadInt32();
             Flags = _worldPacket.ReadUInt32();
-            WithdrawGoldLimit = _worldPacket.ReadUInt32();
+            WithdrawGoldLimit = _worldPacket.ReadInt32();
 
             for (byte i = 0; i < GuildConst.MaxBankTabs; i++)
             {
                 TabFlags[i] = _worldPacket.ReadUInt32();
-                TabWithdrawItemLimit[i] = _worldPacket.ReadUInt32();
+                TabWithdrawItemLimit[i] = _worldPacket.ReadInt32();
             }
 
             _worldPacket.ResetBitPos();
-            uint rankNameLen = _worldPacket.ReadBits<uint>(7);
+            int rankNameLen = _worldPacket.ReadBits<int>(7);
 
             RankName = _worldPacket.ReadString(rankNameLen);
 
@@ -581,11 +581,11 @@ namespace Game.Networking.Packets
 
         public byte RankID;
         public int RankOrder;
-        public uint WithdrawGoldLimit;
+        public int WithdrawGoldLimit;
         public uint Flags;
         public uint OldFlags;
         public uint[] TabFlags = new uint[GuildConst.MaxBankTabs];
-        public uint[] TabWithdrawItemLimit = new uint[GuildConst.MaxBankTabs];
+        public int[] TabWithdrawItemLimit = new int[GuildConst.MaxBankTabs];
         public string RankName;
     }
 
@@ -595,7 +595,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLen = _worldPacket.ReadBits<uint>(7);
+            int nameLen = _worldPacket.ReadBits<int>(7);
             _worldPacket.ResetBitPos();
 
             RankOrder = _worldPacket.ReadInt32();
@@ -701,7 +701,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint textLen = _worldPacket.ReadBits<uint>(11);
+            int textLen = _worldPacket.ReadBits<int>(11);
             InfoText = _worldPacket.ReadString(textLen);
         }
 
@@ -716,7 +716,7 @@ namespace Game.Networking.Packets
         {
             NoteeGUID = _worldPacket.ReadPackedGuid();
 
-            uint noteLen = _worldPacket.ReadBits<uint>(8);
+            int noteLen = _worldPacket.ReadBits<int>(8);
             IsPublic = _worldPacket.HasBit();
 
             Note = _worldPacket.ReadString(noteLen);
@@ -810,7 +810,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLen = _worldPacket.ReadBits<uint>(7);
+            int nameLen = _worldPacket.ReadBits<int>(7);
             NewName = _worldPacket.ReadString(nameLen);
         }
 
@@ -931,8 +931,8 @@ namespace Game.Networking.Packets
             BankTab = _worldPacket.ReadUInt8();
 
             _worldPacket.ResetBitPos();
-            uint nameLen = _worldPacket.ReadBits<uint>(7);
-            uint iconLen = _worldPacket.ReadBits<uint>(9);
+            int nameLen = _worldPacket.ReadBits<int>(7);
+            int iconLen = _worldPacket.ReadBits<int>(9);
 
             Name = _worldPacket.ReadString(nameLen);
             Icon = _worldPacket.ReadString(iconLen);
@@ -951,11 +951,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Banker = _worldPacket.ReadPackedGuid();
-            Money = _worldPacket.ReadUInt64();
+            Money = _worldPacket.ReadInt64();
         }
 
         public ObjectGuid Banker;
-        public ulong Money;
+        public long Money;
     }
 
     public class GuildBankQueryTab : ClientPacket
@@ -1001,11 +1001,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Banker = _worldPacket.ReadPackedGuid();
-            Money = _worldPacket.ReadUInt64();
+            Money = _worldPacket.ReadInt64();
         }
 
         public ObjectGuid Banker;
-        public ulong Money;
+        public long Money;
     }
 
     public class GuildBankQueryResults : ServerPacket
@@ -1284,7 +1284,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Tab = _worldPacket.ReadInt32();
-            TabText = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(14));
+            TabText = _worldPacket.ReadString(_worldPacket.ReadBits<int>(14));
         }
 
         public int Tab;
@@ -1347,7 +1347,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLen = _worldPacket.ReadBits<uint>(9);
+            int nameLen = _worldPacket.ReadBits<int>(9);
             NewMasterName = _worldPacket.ReadString(nameLen);
         }
 
@@ -1426,13 +1426,13 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint count = _worldPacket.ReadUInt32();
+            int count = _worldPacket.ReadInt32();
 
-            for (uint i = 0; i < count; ++i)
-                AchievementIDs[(int)i] = _worldPacket.ReadUInt32();
+            for (int i = 0; i < count; ++i)
+                AchievementIDs[i] = _worldPacket.ReadInt32();
         }
 
-        public Array<uint> AchievementIDs = new(10);
+        public Array<int> AchievementIDs = new(10);
     }
 
     class GuildNameChanged : ServerPacket
@@ -1567,25 +1567,25 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(ItemID);
+            data.WriteInt32(ItemID);
             data.WriteUInt32(Unk4);
             data.WriteInt32(AchievementsRequired.Count);
             data.WriteUInt64((ulong)RaceMask);
             data.WriteInt32(MinGuildLevel);
             data.WriteInt32(MinGuildRep);
-            data.WriteUInt64(Cost);
+            data.WriteInt64(Cost);
 
             foreach (var achievementId in AchievementsRequired)
-                data.WriteUInt32(achievementId);
+                data.WriteInt32(achievementId);
         }
         
-        public uint ItemID;
+        public int ItemID;
         public uint Unk4;
-        public List<uint> AchievementsRequired = new();
+        public List<int> AchievementsRequired = new();
         public RaceMask RaceMask;
         public int MinGuildLevel;
         public int MinGuildRep;
-        public ulong Cost;
+        public long Cost;
     }
 
     public class GuildBankItemInfo
@@ -1644,7 +1644,7 @@ namespace Game.Networking.Packets
             BankTab = data.ReadUInt8();
             BankSlot = data.ReadUInt8(); ;
             ContainerItemSlot = data.ReadUInt8();
-            StackCount = data.ReadUInt32();
+            StackCount = data.ReadInt32();
 
             if (data.HasBit())
                 ContainerSlot = data.ReadUInt8();
@@ -1655,7 +1655,7 @@ namespace Game.Networking.Packets
         public byte BankSlot;
         public byte? ContainerSlot;
         public byte ContainerItemSlot;
-        public uint StackCount;
+        public int StackCount;
     }
 
     public struct GBank_X_Inventory_ItemInfo
@@ -1687,7 +1687,7 @@ namespace Game.Networking.Packets
             BankSlot = data.ReadUInt8();
             BankTab1 = data.ReadUInt8();
             BankSlot1 = data.ReadUInt8();
-            StackCount = data.ReadUInt32();
+            StackCount = data.ReadInt32();
         }
 
         public ObjectGuid Banker;
@@ -1695,7 +1695,7 @@ namespace Game.Networking.Packets
         public byte BankSlot;
         public byte BankTab1;
         public byte BankSlot1;
-        public uint StackCount;
+        public int StackCount;
     }
 
     public struct GBank_X_GBank_ItemInfo

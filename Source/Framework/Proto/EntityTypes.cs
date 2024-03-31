@@ -107,11 +107,11 @@ namespace Bgs.Protocol {
 
     /// <summary>Field number for the "low" field.</summary>
     public const int LowFieldNumber = 2;
-    private readonly static ulong LowDefaultValue = 0UL;
+    private readonly static long LowDefaultValue = 0;
 
-    private ulong low_;
+    private long low_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ulong Low {
+    public long Low {
       get { if ((_hasBits0 & 2) != 0) { return low_; } else { return LowDefaultValue; } }
       set {
         _hasBits0 |= 2;
@@ -171,7 +171,7 @@ namespace Bgs.Protocol {
       }
       if (HasLow) {
         output.WriteRawTag(17);
-        output.WriteFixed64(Low);
+        output.WriteFixed64((ulong)Low);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -220,7 +220,7 @@ namespace Bgs.Protocol {
             break;
           }
           case 17: {
-            Low = input.ReadFixed64();
+            Low = (long)input.ReadFixed64();
             break;
           }
         }

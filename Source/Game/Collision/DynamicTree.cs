@@ -145,7 +145,7 @@ namespace Game.Collision
             if (intersectionCallBack.GetLocationInfo().hitModel != null)
             {
                 data.floorZ = intersectionCallBack.GetLocationInfo().ground_Z;
-                uint liquidType = intersectionCallBack.GetLocationInfo().hitModel.GetLiquidType();
+                int liquidType = intersectionCallBack.GetLocationInfo().hitModel.GetLiquidType();
                 float liquidLevel = 0;
                 if (reqLiquidType == 0 || (Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType) != 0)
                     if (intersectionCallBack.GetHitModel().GetLiquidLevel(v, intersectionCallBack.GetLocationInfo(), ref liquidLevel))

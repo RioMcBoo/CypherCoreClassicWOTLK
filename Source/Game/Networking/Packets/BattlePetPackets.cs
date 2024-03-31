@@ -121,7 +121,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             PetGuid = _worldPacket.ReadPackedGuid();
-            uint nameLength = _worldPacket.ReadBits<uint>(7);
+            int nameLength = _worldPacket.ReadBits<int>(7);
 
             if (_worldPacket.HasBit())
             {
@@ -133,7 +133,7 @@ namespace Game.Networking.Packets
                     declinedNameLengths[i] = _worldPacket.ReadBits<byte>(7);
 
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                    DeclinedNames.name[i] = _worldPacket.ReadString(declinedNameLengths[i]);
+                    DeclinedNames.Name[i] = _worldPacket.ReadString(declinedNameLengths[i]);
             }
 
             Name = _worldPacket.ReadString(nameLength);
@@ -176,10 +176,10 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(HasDeclined);
 
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                    _worldPacket.WriteBits(DeclinedNames.name[i].GetByteCount(), 7);
+                    _worldPacket.WriteBits(DeclinedNames.Name[i].GetByteCount(), 7);
 
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                    _worldPacket.WriteString(DeclinedNames.name[i]);
+                    _worldPacket.WriteString(DeclinedNames.Name[i]);
 
                 _worldPacket.WriteString(Name);
             }
@@ -305,17 +305,17 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(Guid);
-            data.WriteUInt32(Species);
-            data.WriteUInt32(CreatureID);
-            data.WriteUInt32(DisplayID);
+            data.WriteInt32(Species);
+            data.WriteInt32(CreatureID);
+            data.WriteInt32(DisplayID);
             data.WriteUInt16(Breed);
             data.WriteUInt16(Level);
             data.WriteUInt16(Exp);
             data.WriteUInt16(Flags);
-            data.WriteUInt32(Power);
-            data.WriteUInt32(Health);
-            data.WriteUInt32(MaxHealth);
-            data.WriteUInt32(Speed);
+            data.WriteInt32(Power);
+            data.WriteInt32(Health);
+            data.WriteInt32(MaxHealth);
+            data.WriteInt32(Speed);
             data.WriteUInt8(Quality);
             data.WriteBits(Name.GetByteCount(), 7);
             data.WriteBit(OwnerInfo.HasValue); // HasOwnerInfo

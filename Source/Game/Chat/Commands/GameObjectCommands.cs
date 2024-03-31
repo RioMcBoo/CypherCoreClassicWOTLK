@@ -19,7 +19,7 @@ namespace Game.Chat
     class GameObjectCommands
     {
         [Command("activate", RBACPermissions.CommandGobjectActivate)]
-        static bool HandleGameObjectActivateCommand(CommandHandler handler, ulong guidLow)
+        static bool HandleGameObjectActivateCommand(CommandHandler handler, long guidLow)
         {
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
             if (obj == null)
@@ -39,7 +39,7 @@ namespace Game.Chat
         }
 
         [Command("delete", RBACPermissions.CommandGobjectDelete)]
-        static bool HandleGameObjectDeleteCommand(CommandHandler handler, ulong spawnId)
+        static bool HandleGameObjectDeleteCommand(CommandHandler handler, long spawnId)
         {
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(spawnId);
             if (obj != null)
@@ -76,7 +76,7 @@ namespace Game.Chat
                 return false;
 
             bool deleteRespawnTimes = false;
-            uint groupId = 0;
+            int groupId = 0;
 
             // Decode arguments
             foreach (var variant in opts)
@@ -84,7 +84,7 @@ namespace Game.Chat
                 if (variant.Equals("removerespawntime", StringComparison.OrdinalIgnoreCase))
                     deleteRespawnTimes = true;
                 else
-                    uint.TryParse(variant, out groupId);
+                    int.TryParse(variant, out groupId);
             }
 
             Player player = handler.GetSession().GetPlayer();
@@ -102,13 +102,13 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandGobjectInfo)]
-        static bool HandleGameObjectInfoCommand(CommandHandler handler, [OptionalArg] string isGuid, ulong data)
+        static bool HandleGameObjectInfoCommand(CommandHandler handler, [OptionalArg] string isGuid, long data)
         {
             GameObject thisGO = null;
             GameObjectData spawnData = null;
 
-            uint entry;
-            ulong spawnId = 0;
+            int entry;
+            long spawnId = 0;
             if (!isGuid.IsEmpty() && isGuid.Equals("guid", StringComparison.OrdinalIgnoreCase))
             {
                 spawnId = data;
@@ -124,7 +124,7 @@ namespace Game.Chat
             }
             else
             {
-                entry = (uint)data;
+                entry = (int)data;
             }
 
             GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
@@ -135,9 +135,9 @@ namespace Game.Chat
             }
 
             GameObjectTypes type = gameObjectInfo.type;
-            uint displayId = gameObjectInfo.displayId;
+            int displayId = gameObjectInfo.displayId;
             string name = gameObjectInfo.name;
-            uint lootId = gameObjectInfo.GetLootId();
+            int lootId = gameObjectInfo.GetLootId();
             if (type == GameObjectTypes.Chest && lootId == 0)
                 lootId = gameObjectInfo.Chest.chestPersonalLoot;
 
@@ -187,7 +187,7 @@ namespace Game.Chat
         }
 
         [Command("move", RBACPermissions.CommandGobjectMove)]
-        static bool HandleGameObjectMoveCommand(CommandHandler handler, ulong guidLow, float[] xyz)
+        static bool HandleGameObjectMoveCommand(CommandHandler handler, long guidLow, float[] xyz)
         {
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
             if (obj == null)
@@ -259,8 +259,8 @@ namespace Game.Chat
             {
                 do
                 {
-                    ulong guid = result.Read<ulong>(0);
-                    uint entry = result.Read<uint>(1);
+                    long guid = result.Read<long>(0);
+                    int entry = result.Read<int>(1);
                     float x = result.Read<float>(2);
                     float y = result.Read<float>(3);
                     float z = result.Read<float>(4);
@@ -288,7 +288,7 @@ namespace Game.Chat
 
             bool ignoreRespawn = false;
             bool force = false;
-            uint groupId = 0;
+            int groupId = 0;
 
             // Decode arguments
             string arg = args.NextString();
@@ -302,7 +302,7 @@ namespace Game.Chat
                 else if (thisArg.IsEmpty() || !thisArg.IsNumber())
                     return false;
                 else
-                    groupId = uint.Parse(thisArg);
+                    groupId = int.Parse(thisArg);
 
                 arg = args.NextString();
             }
@@ -386,22 +386,22 @@ namespace Game.Chat
 
                 bool found = false;
                 float x, y, z, o;
-                ulong guidLow;
-                uint id, phaseId, phaseGroup;
+                long guidLow;
+                int id, phaseId, phaseGroup;
                 ushort mapId;
-                uint poolId;
+                int poolId;
 
                 do
                 {
-                    guidLow = result.Read<ulong>(0);
-                    id = result.Read<uint>(1);
+                    guidLow = result.Read<long>(0);
+                    id = result.Read<int>(1);
                     x = result.Read<float>(2);
                     y = result.Read<float>(3);
                     z = result.Read<float>(4);
                     o = result.Read<float>(5);
                     mapId = result.Read<ushort>(6);
-                    phaseId = result.Read<uint>(7);
-                    phaseGroup = result.Read<uint>(8);
+                    phaseId = result.Read<int>(7);
+                    phaseGroup = result.Read<int>(8);
                     poolId = Global.PoolMgr.IsPartOfAPool<GameObject>(guidLow);
                     if (poolId == 0 || Global.PoolMgr.IsSpawnedObject<GameObject>(guidLow))
                         found = true;
@@ -442,7 +442,7 @@ namespace Game.Chat
         }
 
         [Command("turn", RBACPermissions.CommandGobjectTurn)]
-        static bool HandleGameObjectTurnCommand(CommandHandler handler, ulong guidLow, float? oz, float? oy, float? ox)
+        static bool HandleGameObjectTurnCommand(CommandHandler handler, long guidLow, float? oz, float? oy, float? ox)
         {
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
             if (obj == null)
@@ -479,7 +479,7 @@ namespace Game.Chat
         class AddCommands
         {
             [Command("", RBACPermissions.CommandGobjectAdd)]
-            static bool HandleGameObjectAddCommand(CommandHandler handler, uint objectId, int? spawnTimeSecs)
+            static bool HandleGameObjectAddCommand(CommandHandler handler, int objectId, int? spawnTimeSecs)
             {
                 if (objectId == 0)
                     return false;
@@ -513,7 +513,7 @@ namespace Game.Chat
 
                 // fill the gameobject data and save to the db
                 obj.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
-                ulong spawnId = obj.GetSpawnId();
+                long spawnId = obj.GetSpawnId();
 
                 // this will generate a new guid if the object is in an instance
                 obj = GameObject.CreateGameObjectFromDB(spawnId, map);
@@ -527,7 +527,7 @@ namespace Game.Chat
             }
 
             [Command("temp", RBACPermissions.CommandGobjectAddTemp)]
-            static bool HandleGameObjectAddTempCommand(CommandHandler handler, uint objectId, ulong? spawntime)
+            static bool HandleGameObjectAddTempCommand(CommandHandler handler, int objectId, long? spawntime)
             {
                 Player player = handler.GetPlayer();
                 TimeSpan spawntm = TimeSpan.FromSeconds(spawntime.GetValueOrDefault(300));
@@ -549,7 +549,7 @@ namespace Game.Chat
         class SetCommands
         {
             [Command("phase", RBACPermissions.CommandGobjectSetPhase)]
-            static bool HandleGameObjectSetPhaseCommand(CommandHandler handler, ulong guidLow, uint phaseId)
+            static bool HandleGameObjectSetPhaseCommand(CommandHandler handler, long guidLow, int phaseId)
             {
                 if (guidLow == 0)
                     return false;
@@ -573,7 +573,7 @@ namespace Game.Chat
             }
 
             [Command("state", RBACPermissions.CommandGobjectSetState)]
-            static bool HandleGameObjectSetStateCommand(CommandHandler handler, ulong guidLow, int objectType, uint? objectState)
+            static bool HandleGameObjectSetStateCommand(CommandHandler handler, long guidLow, int objectType, int? objectState)
             {
                 if (guidLow == 0)
                     return false;
@@ -615,7 +615,7 @@ namespace Game.Chat
                         obj.SendCustomAnim(objectState.Value);
                         break;
                     case 5:
-                        if (objectState < 0 || objectState > (uint)GameObjectDestructibleState.Rebuilding)
+                        if (objectState < 0 || objectState > (int)GameObjectDestructibleState.Rebuilding)
                             return false;
 
                         obj.SetDestructibleState((GameObjectDestructibleState)objectState);

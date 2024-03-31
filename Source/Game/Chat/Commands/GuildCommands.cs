@@ -97,7 +97,7 @@ namespace Game.Chat
             if (targetIdentifier == null)
                 return false;
 
-            ulong guildId = targetIdentifier.IsConnected() ? targetIdentifier.GetConnectedPlayer().GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(targetIdentifier.GetGUID());
+            long guildId = targetIdentifier.IsConnected() ? targetIdentifier.GetConnectedPlayer().GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(targetIdentifier.GetGUID());
             if (guildId == 0)
                 return false;
 
@@ -117,7 +117,7 @@ namespace Game.Chat
             if (player == null)
                 return false;
 
-            ulong guildId = player.IsConnected() ? player.GetConnectedPlayer().GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(player.GetGUID());
+            long guildId = player.IsConnected() ? player.GetConnectedPlayer().GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(player.GetGUID());
             if (guildId == 0)
                 return false;
 

@@ -58,14 +58,14 @@ namespace Game.Networking.Packets
         {
             Guid = _worldPacket.ReadPackedGuid();
             MarketID = _worldPacket.ReadInt32();
-            BidAmount = _worldPacket.ReadUInt64();
+            BidAmount = _worldPacket.ReadInt64();
             Item.Read(_worldPacket);
         }
 
         public ObjectGuid Guid;
         public int MarketID;
         public ItemInstance Item = new();
-        public ulong BidAmount;
+        public long BidAmount;
     }
 
     class BlackMarketBidOnItemResult : ServerPacket

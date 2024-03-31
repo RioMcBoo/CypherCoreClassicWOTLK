@@ -424,7 +424,7 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            ulong curTime = (ulong)GameTime.GetGameTime();
+            long curTime = GameTime.GetGameTime();
 
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
