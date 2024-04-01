@@ -731,7 +731,7 @@ namespace Game.Networking.Packets
         public string CursorName;
         public CreatureType CreatureType;
         public CreatureFamily CreatureFamily;
-        public CreatureEliteType Classification;
+        public CreatureClassifications Classification;
         public int PetSpellDataId;
         public CreatureDisplayStats Display = new();
         public float HpMulti;

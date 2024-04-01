@@ -653,7 +653,7 @@ namespace Game.Entities
                 CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(petlevel, cinfo.UnitClass);
                 CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
 
-                float healthmod = GetHealthMod(cinfo.Rank);
+                float healthmod = GetHealthMod(cinfo.Classification);
                 int basehp = stats.GenerateHealth(GetCreatureDifficulty());
                 int health = (int)(basehp * healthmod);
                 int mana = stats.GenerateMana(creatureDifficulty);
