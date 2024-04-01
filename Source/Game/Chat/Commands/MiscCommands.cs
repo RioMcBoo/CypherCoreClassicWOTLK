@@ -267,7 +267,7 @@ namespace Game.Chat
 
             // non-melee damage
 
-            SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
+            SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker)), spellInfo.SchoolMask);
             damageInfo.damage = damage;
             Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);
@@ -2003,7 +2003,7 @@ namespace Game.Chat
                 if (caster != null)
                 {
                     ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
-                    Spell.SendCastResult(caster, spellInfo, new SpellCastVisual(SPELL_UNSTUCK_VISUAL, 0), castId, SpellCastResult.CantDoThatRightNow);
+                    Spell.SendCastResult(caster, spellInfo, new SpellCastVisual(SPELL_UNSTUCK_VISUAL), castId, SpellCastResult.CantDoThatRightNow);
                 }
 
                 return false;

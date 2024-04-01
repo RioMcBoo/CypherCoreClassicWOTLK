@@ -4527,7 +4527,7 @@ namespace Game.Spells
 
             foreach (SpellPowerCost cost in m_powerCost)
             {
-                bool hit = true;
+                //bool hit = true;
                 if (unitCaster.IsTypeId(TypeId.Player))
                 {
                     if (m_spellInfo.HasAttribute(SpellAttr1.DiscountPowerOnMiss))
@@ -4538,7 +4538,7 @@ namespace Game.Spells
                             var ihit = m_UniqueTargetInfo.FirstOrDefault(targetInfo => targetInfo.TargetGUID == targetGUID && targetInfo.MissCondition != SpellMissInfo.None);
                             if (ihit != null)
                             {
-                                hit = false;
+                                //hit = false;
                                 //lower spell cost on fail (by talent aura)
                                 Player modOwner = unitCaster.GetSpellModOwner();
                                 if (modOwner != null)
@@ -4568,7 +4568,7 @@ namespace Game.Spells
 
                 if (cost.Power >= PowerType.Max)
                 {
-                    Log.outError(LogFilter.Spells, "Spell.TakePower: Unknown power Type '{0}'", cost.Power);
+                    Log.outError(LogFilter.Spells, $"Spell.TakePower: Unknown power Type '{cost.Power}'.");
                     continue;
                 }
 
@@ -7161,7 +7161,7 @@ namespace Game.Spells
 
         bool IsNeedSendToClient()
         {
-            return m_SpellVisual.SpellXSpellVisualID != 0 || m_SpellVisual.ScriptVisualID != 0 || m_spellInfo.IsChanneled() ||
+            return m_SpellVisual.SpellXSpellVisualID != 0 || m_spellInfo.IsChanneled() ||
                 (m_spellInfo.HasAttribute(SpellAttr8.AuraPointsOnClient)) || m_spellInfo.HasHitDelay() || (m_triggeredByAuraSpell == null && !IsTriggered()) ||
                 m_spellInfo.HasAttribute(SpellAttr7.AlwaysCastLog);
         }

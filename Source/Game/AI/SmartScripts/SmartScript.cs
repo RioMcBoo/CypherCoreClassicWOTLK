@@ -3351,7 +3351,7 @@ namespace Game.AI
                 }
                 case SmartEvents.Movementinform:
                 {
-                    if ((e.Event.movementInform.type != 0 && var0 != e.Event.movementInform.type) || (e.Event.movementInform.id != 0xFFFFFFFF && var1 != e.Event.movementInform.id))
+                    if ((e.Event.movementInform.type != 0 && var0 != e.Event.movementInform.type) || (e.Event.movementInform.id != -1 && var1 != e.Event.movementInform.id))
                         return;
                     ProcessAction(e, unit, var0, var1);
                     break;
@@ -3369,7 +3369,7 @@ namespace Game.AI
                 case SmartEvents.WaypointStopped:
                 case SmartEvents.WaypointEnded:
                 {
-                    if (_me == null || (e.Event.waypoint.pointID != 0xFFFFFFFF && var0 != e.Event.waypoint.pointID) || (e.Event.waypoint.pathID != 0 && var1 != e.Event.waypoint.pathID))
+                    if (_me == null || (e.Event.waypoint.pointID != -1 && var0 != e.Event.waypoint.pointID) || (e.Event.waypoint.pathID != 0 && var1 != e.Event.waypoint.pathID))
                         return;
                     ProcessAction(e, unit);
                     break;

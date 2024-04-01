@@ -515,7 +515,6 @@ namespace Framework.Constants
         Content_1_60 = 0,
         Content_61_70 = 1,
         Content_71_80 = 2,
-        Content_81_85 = 3,
         Max
     }
 

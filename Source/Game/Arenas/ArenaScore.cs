@@ -23,13 +23,13 @@ namespace Game.Arenas
                 playerData.PreMatchRating = PreMatchRating;
 
             if (PostMatchRating != PreMatchRating)
-                playerData.RatingChange = (int)(PostMatchRating - PreMatchRating);
+                playerData.RatingChange = PostMatchRating - PreMatchRating;
 
             if (PreMatchMMR != 0)
                 playerData.PreMatchMMR = PreMatchMMR;
 
             if (PostMatchMMR != PreMatchMMR)
-                playerData.MmrChange = (int)(PostMatchMMR - PreMatchMMR);
+                playerData.MmrChange = PostMatchMMR - PreMatchMMR;
         }
 
         // For Logging purpose
@@ -39,10 +39,10 @@ namespace Game.Arenas
                 $"PreMatchMMR: {PreMatchMMR} PostMatchRating: {PostMatchRating} PostMatchMMR: {PostMatchMMR}";
         }
 
-        uint PreMatchRating;
-        uint PreMatchMMR;
-        uint PostMatchRating;
-        uint PostMatchMMR;
+        int PreMatchRating;
+        int PreMatchMMR;
+        int PostMatchRating;
+        int PostMatchMMR;
     }
 
     public class ArenaTeamScore

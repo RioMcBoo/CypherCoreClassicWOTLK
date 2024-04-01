@@ -201,13 +201,4 @@ namespace Game.DataStorage
         public readonly float TrinketMultiplier;
         public readonly float JewelryMultiplier;
     };
-
-    public sealed class GtXpRecord
-    {
-        public readonly float Total;
-        public readonly float PerKill;
-        public readonly float Junk;
-        public readonly float Stats;
-        public readonly float Divisor;
-    }
 }

@@ -426,13 +426,11 @@ namespace Game
             if (player == null)
                 return 0;
 
+            int quest_level = (questLevel == -1 ? player.GetLevel() : questLevel);
+
             QuestXPRecord questXp = CliDB.QuestXPStorage.LookupByKey(questLevel);
             if (questXp == null || xpDifficulty >= 10)
                 return 0;
-
-            float multiplier = 1.0f;
-            if (questLevel != player.GetLevel())
-                multiplier = CliDB.XpGameTable.GetRow(Math.Min(player.GetLevel(), questLevel)).Divisor / CliDB.XpGameTable.GetRow(player.GetLevel()).Divisor;
 
             int diffFactor = 2 * (questLevel - player.GetLevel()) + 20;
             if (diffFactor < 1)
@@ -440,7 +438,7 @@ namespace Game
             else if (diffFactor > 10)
                 diffFactor = 10;
 
-            int xp = RoundXPValue((int)(diffFactor * questXp.Difficulty[xpDifficulty] / 10 * multiplier));
+            int xp = RoundXPValue(diffFactor * questXp.Difficulty[xpDifficulty] / 10);
 
             if (WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) != 0)
             {

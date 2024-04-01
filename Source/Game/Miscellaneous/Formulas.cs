@@ -154,7 +154,7 @@ namespace Game
             {
                 float xpMod = 1.0f;
 
-                gain = BaseGain(player.GetLevel(), u.GetLevelForTarget(player), Global.DB2Mgr.GetContentLevelsForMapAndZone(u.GetMapId(), u.GetZoneId()));
+                gain = BaseGain(player.GetLevel(), u.GetLevel(), Global.DB2Mgr.GetContentLevelsForMapAndZone(u.GetMapId(), u.GetZoneId()));
 
                 if (gain != 0 && creature != null)
                 {

@@ -917,7 +917,7 @@ namespace Game
 
             // at entrance map for corpse map
             bool foundEntr = false;
-            float distEntr = 10000;
+            //float distEntr = 10000;
             WorldSafeLocsEntry entryEntr = null;
 
             // some where other
@@ -981,13 +981,13 @@ namespace Game
 
                     if (foundEntr)
                     {
-                        distEntr = 0.0f;
+                        //distEntr = 0.0f;
                         entryEntr = entry;
                     }
                     else
                     {
                         foundEntr = true;
-                        distEntr = 0.0f;
+                        //distEntr = 0.0f;
                         entryEntr = entry;
                     }
                 }
@@ -6706,7 +6706,7 @@ namespace Game
                     if (currentlevel >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                     {
                         if (currentlevel > SharedConst.StrongMaxLevel)        // hardcoded level maximum
-                            Log.outError(LogFilter.Sql, $"Wrong (> {SharedConst.StrongMaxLevel}) level {currentlevel} in `player_xp_for_level` table, ignoring.");
+                            Log.outError(LogFilter.Sql, $"Wrong (> {SharedConst.StrongMaxLevel}) level {currentlevel} in `player_xp_for_levels` table, ignoring.");
                         else
                         {
                             Log.outError(LogFilter.Sql, $"Unused (> MaxPlayerLevel in worldserver.conf) level {currentlevel} in `player_xp_for_levels` table, ignoring.");
@@ -6724,8 +6724,8 @@ namespace Game
                 {
                     if (_playerXPperLevel[level] == 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Level {level + 1} does not have XP for level data. Using data of level [{level}] + 12000XP.");
-                        _playerXPperLevel[level] = _playerXPperLevel[level - 1] + 12000;
+                        Log.outError(LogFilter.Sql, $"Level {level + 1} does not have XP for level data. Using data of level [{level}] + 100XP.");
+                        _playerXPperLevel[level] = _playerXPperLevel[level - 1] + 100;
                     }
                 }
 

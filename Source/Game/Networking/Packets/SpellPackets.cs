@@ -1414,10 +1414,10 @@ namespace Game.Networking.Packets
 
     public struct SpellCastVisual
     {
-        public SpellCastVisual(int spellXSpellVisualID, int scriptVisualID)
+        public SpellCastVisual(int spellXSpellVisualID/*, int scriptVisualID*/)
         {
             SpellXSpellVisualID = spellXSpellVisualID;
-            ScriptVisualID = scriptVisualID;
+            //ScriptVisualID = scriptVisualID;
         }
 
         public void Read(WorldPacket data)
@@ -1433,7 +1433,7 @@ namespace Game.Networking.Packets
         }
         
         public int SpellXSpellVisualID;
-        public int ScriptVisualID;
+        //public int ScriptVisualID;
     }
 
     public class AuraDataInfo

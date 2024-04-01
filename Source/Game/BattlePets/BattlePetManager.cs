@@ -764,16 +764,16 @@ namespace Game.BattlePets
             player.CastSpell(_owner.GetPlayer(), summonSpellId, args);
         }
 
-        public void DismissPet()
-        {
-            Player player = _owner.GetPlayer();
-            Creature summonedBattlePet = player.GetSummonedBattlePet();
-            if (summonedBattlePet != null)
-            {
-                summonedBattlePet.DespawnOrUnsummon();
-                player.SetBattlePetData(null);
-            }
-        }
+        //public void DismissPet()
+        //{
+        //    Player player = _owner.GetPlayer();
+        //    Creature summonedBattlePet = player.GetSummonedBattlePet();
+        //    if (summonedBattlePet != null)
+        //    {
+        //        summonedBattlePet.DespawnOrUnsummon();
+        //        player.SetBattlePetData(null);
+        //    }
+        //}
 
         public void SendJournal()
         {

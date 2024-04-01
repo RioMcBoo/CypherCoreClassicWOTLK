@@ -636,8 +636,11 @@ namespace Game.Entities
         }
 
         public void SetGlyphSlot(int slotIndex, int slotType)
-        { 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GlyphSlots, slotIndex), slotType);
+        {
+            var v1 = m_values.ModifyValue(m_activePlayerData);
+            var v2 = v1.ModifyValue(m_activePlayerData.GlyphSlots, slotIndex);
+            
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GlyphSlots, slotIndex), slotType);
         }
 
         public int GetGlyphSlot(int slotIndex) { return m_activePlayerData.GlyphSlots[slotIndex]; }
@@ -645,7 +648,7 @@ namespace Game.Entities
         public void SetGlyph(int slotIndex, int glyph)
         {
             _specializationInfo.Glyphs[GetActiveTalentGroup()][slotIndex] = glyph;
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Glyphs, slotIndex), glyph);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Glyphs, slotIndex), glyph);
         }
     
         public int GetGlyph(int slotIndex) { return _specializationInfo.Glyphs[GetActiveTalentGroup()][slotIndex]; }

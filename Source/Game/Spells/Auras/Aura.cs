@@ -336,7 +336,7 @@ namespace Game.Spells
             m_castItemGuid = createInfo.CastItemGUID;
             m_castItemId = createInfo.CastItemId;
             m_castItemLevel = createInfo.CastItemLevel;
-            m_spellVisual = new SpellCastVisual(createInfo.Caster != null ? createInfo.Caster.GetCastSpellXSpellVisualId(createInfo._spellInfo) : createInfo._spellInfo.GetSpellXSpellVisualId(), 0);
+            m_spellVisual = new SpellCastVisual(createInfo.Caster != null ? createInfo.Caster.GetCastSpellXSpellVisualId(createInfo._spellInfo) : createInfo._spellInfo.GetSpellXSpellVisualId());
             m_applyTime = GameTime.GetGameTime();
             m_owner = createInfo._owner;
             m_timeCla = 0;

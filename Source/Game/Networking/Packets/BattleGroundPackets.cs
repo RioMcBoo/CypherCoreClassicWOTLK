@@ -725,19 +725,19 @@ namespace Game.Networking.Packets
                     Honor.Value.Write(data);
 
                 if (PreMatchRating.HasValue)
-                    data.WriteUInt32(PreMatchRating.Value);
+                    data.WriteInt32(PreMatchRating.Value);
 
                 if (RatingChange.HasValue)
                     data.WriteInt32(RatingChange.Value);
 
                 if (PreMatchMMR.HasValue)
-                    data.WriteUInt32(PreMatchMMR.Value);
+                    data.WriteInt32(PreMatchMMR.Value);
 
                 if (MmrChange.HasValue)
                     data.WriteInt32(MmrChange.Value);
 
                 if (PostMatchMMR.HasValue)
-                    data.WriteUInt32(PostMatchMMR.Value);
+                    data.WriteInt32(PostMatchMMR.Value);
             }
 
             public ObjectGuid PlayerGUID;
@@ -747,11 +747,11 @@ namespace Game.Networking.Packets
             public HonorData? Honor;
             public int DamageDone;
             public int HealingDone;
-            public uint? PreMatchRating;
+            public int? PreMatchRating;
             public int? RatingChange;
-            public uint? PreMatchMMR;
+            public int? PreMatchMMR;
             public int? MmrChange;
-            public uint? PostMatchMMR;
+            public int? PostMatchMMR;
             public List<PVPMatchPlayerPVPStat> Stats = new();
             public ChrSpecialization PrimaryTalentTree;
             public Gender Sex;
