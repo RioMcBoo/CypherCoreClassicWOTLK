@@ -1316,7 +1316,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    var mailId = mailItemsResult.Read<long>(50);
+                    var mailId = mailItemsResult.Read<long>(47);
                     _LoadMailedItem(GetGUID(), this, mailId, mailById[mailId], mailItemsResult.GetFields());
                 }
                 while (mailItemsResult.NextRow());
