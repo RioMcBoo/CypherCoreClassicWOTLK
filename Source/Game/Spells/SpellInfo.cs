@@ -4079,8 +4079,8 @@ namespace Game.Spells
             if (effect != null)
             {
                 EffectIndex = effect.EffectIndex;
-                Effect = (SpellEffectName)effect.Effect;
-                ApplyAuraName = (AuraType)effect.EffectAura;
+                Effect = effect.Effect;
+                ApplyAuraName = effect.EffectAura;
                 ApplyAuraPeriod = effect.EffectAuraPeriod;
                 BasePoints = effect.EffectBasePoints;
                 RealPointsPerLevel = effect.EffectRealPointsPerLevel;
@@ -4097,6 +4097,7 @@ namespace Game.Spells
                 TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[0]);
                 TargetBRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[1]);
                 ChainTargets = effect.EffectChainTargets;
+                DieSides = effect.EffectDieSides;
                 ItemType = effect.EffectItemType;
                 TriggerSpell = effect.EffectTriggerSpell;
                 SpellClassMask = effect.EffectSpellClassMask;
@@ -4179,8 +4180,17 @@ namespace Game.Spells
             {
                 float delta = Math.Abs(Scaling.Variance * 0.5f);
                 double valueVariance = RandomHelper.FRand(-delta, delta);
-                value += (double)basePoints * valueVariance;
+                value += basePoints * valueVariance;
                 variance = (float)valueVariance;
+            }
+
+            // roll in a range <1;EffectDieSides> as of patch 3.3.3
+            if (DieSides != 0)
+            {
+                if (DieSides == 1)
+                    value += DieSides;
+                else
+                    value += (DieSides >= 1) ? RandomHelper.IRand(1, DieSides) : RandomHelper.IRand(DieSides, 1);
             }
 
             // base amount modification based on spell lvl vs caster lvl
@@ -4193,12 +4203,12 @@ namespace Game.Spells
             {
                 if (casterUnit != null && basePointsPerLevel != 0.0f)
                 {
-                    int level = (int)casterUnit.GetLevel();
-                    if (level > (int)_spellInfo.MaxLevel && _spellInfo.MaxLevel > 0)
-                        level = (int)_spellInfo.MaxLevel;
+                    int level = casterUnit.GetLevel();
+                    if (level > _spellInfo.MaxLevel && _spellInfo.MaxLevel > 0)
+                        level = _spellInfo.MaxLevel;
 
                     // if base level is greater than spell level, reduce by base level (eg. pilgrims foods)
-                    level -= (int)Math.Max(_spellInfo.BaseLevel, _spellInfo.SpellLevel);
+                    level -= Math.Max(_spellInfo.BaseLevel, _spellInfo.SpellLevel);
                     if (level < 0)
                         level = 0;
                     value += level * basePointsPerLevel;
@@ -4841,6 +4851,7 @@ namespace Game.Spells
         public SpellRadiusRecord TargetARadiusEntry;
         public SpellRadiusRecord TargetBRadiusEntry;
         public int ChainTargets;
+        public int DieSides;
         public int ItemType;
         public int TriggerSpell;
         public FlagArray128 SpellClassMask;
