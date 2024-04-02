@@ -810,7 +810,13 @@ namespace Game.DataStorage
 
         public int GetEmptyAnimStateID()
         {
-            return AnimationDataStorage.GetNumRows();
+            //return AnimationDataStorage.GetNumRows();
+
+            /*fixed animations for creatures and gameobjects which were broken due to a mismatching AnimationEntry storage sizes between retail and wotlk classic clients
+            For some reason the WotLK client expects the retail value for these two affected animation fields and since we have no way to get that value in a clean manner, 
+            we have to resort to a hardcoded value for now */
+
+            return 1772; // the Classic client expects the retail storage size so we have to hardcode the value
         }
 
         public List<int> GetAreasForGroup(int areaGroupId)
