@@ -4321,6 +4321,7 @@ namespace Game.Spells
             {
                 unitCaster.ClearChannelObjects();
                 unitCaster.SetChannelSpellId(0);
+                unitCaster.SetChannelSpellXSpellVisualId(0);
             }
 
             SpellChannelUpdate spellChannelUpdate = new();

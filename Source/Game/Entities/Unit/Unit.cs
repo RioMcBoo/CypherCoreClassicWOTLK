@@ -2368,11 +2368,13 @@ namespace Game.Entities
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, channelSpellId);
         }
 
-        public void SetChannelSpellXSpellVisual(int spellXSpellVisualId)
+        public int GetChannelSpellXSpellVisualId() { return m_unitData.ChannelData.GetValue().SpellXSpellVisualID; }
+        public void SetChannelSpellXSpellVisualId(int spellXSpellVisualId)
         {
             UnitChannel unitChannel = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData);
             SetUpdateFieldValue(ref unitChannel.SpellXSpellVisualID, spellXSpellVisualId);
         }
+
         public void AddChannelObject(ObjectGuid guid) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), guid); }
         public void SetChannelObject(int slot, ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects, slot), guid); }
         public void ClearChannelObjects() { ClearDynamicUpdateFieldValues(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects)); }
