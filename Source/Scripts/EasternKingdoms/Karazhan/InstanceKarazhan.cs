@@ -11,77 +11,77 @@ namespace Scripts.EasternKingdoms.Karazhan
 {
     struct DataTypes
     {
-        public const uint Attumen = 0;
-        public const uint Moroes = 1;
-        public const uint MaidenOfVirtue = 2;
-        public const uint OptionalBoss = 3;
-        public const uint OperaPerformance = 4;
-        public const uint Curator = 5;
-        public const uint Aran = 6;
-        public const uint Terestian = 7;
-        public const uint Netherspite = 8;
-        public const uint Chess = 9;
-        public const uint Malchezzar = 10;
-        public const uint Nightbane = 11;
+        public const int Attumen = 0;
+        public const int Moroes = 1;
+        public const int MaidenOfVirtue = 2;
+        public const int OptionalBoss = 3;
+        public const int OperaPerformance = 4;
+        public const int Curator = 5;
+        public const int Aran = 6;
+        public const int Terestian = 7;
+        public const int Netherspite = 8;
+        public const int Chess = 9;
+        public const int Malchezzar = 10;
+        public const int Nightbane = 11;
 
-        public const uint OperaOzDeathcount = 14;
+        public const int OperaOzDeathcount = 14;
 
-        public const uint Kilrek = 15;
-        public const uint GoCurtains = 18;
-        public const uint GoStagedoorleft = 19;
-        public const uint GoStagedoorright = 20;
-        public const uint GoLibraryDoor = 21;
-        public const uint GoMassiveDoor = 22;
-        public const uint GoNetherDoor = 23;
-        public const uint GoGameDoor = 24;
-        public const uint GoGameExitDoor = 25;
+        public const int Kilrek = 15;
+        public const int GoCurtains = 18;
+        public const int GoStagedoorleft = 19;
+        public const int GoStagedoorright = 20;
+        public const int GoLibraryDoor = 21;
+        public const int GoMassiveDoor = 22;
+        public const int GoNetherDoor = 23;
+        public const int GoGameDoor = 24;
+        public const int GoGameExitDoor = 25;
 
-        public const uint ImageOfMedivh = 26;
-        public const uint MastersTerraceDoor1 = 27;
-        public const uint MastersTerraceDoor2 = 28;
-        public const uint GoSideEntranceDoor = 29;
-        public const uint GoBlackenedUrn = 30;
+        public const int ImageOfMedivh = 26;
+        public const int MastersTerraceDoor1 = 27;
+        public const int MastersTerraceDoor2 = 28;
+        public const int GoSideEntranceDoor = 29;
+        public const int GoBlackenedUrn = 30;
     }
 
     struct CreatureIds
     {
-        public const uint HyakissTheLurker = 16179;
-        public const uint RokadTheRavager = 16181;
-        public const uint ShadikithTheGlider = 16180;
-        public const uint TerestianIllhoof = 15688;
-        public const uint Moroes = 15687;
-        public const uint Nightbane = 17225;
-        public const uint AttumenUnmounted = 15550;
-        public const uint AttumenMounted = 16152;
-        public const uint Midnight = 16151;
+        public const int HyakissTheLurker = 16179;
+        public const int RokadTheRavager = 16181;
+        public const int ShadikithTheGlider = 16180;
+        public const int TerestianIllhoof = 15688;
+        public const int Moroes = 15687;
+        public const int Nightbane = 17225;
+        public const int AttumenUnmounted = 15550;
+        public const int AttumenMounted = 16152;
+        public const int Midnight = 16151;
 
         // Trash
-        public const uint ColdmistWidow = 16171;
-        public const uint ColdmistStalker = 16170;
-        public const uint Shadowbat = 16173;
-        public const uint VampiricShadowbat = 16175;
-        public const uint GreaterShadowbat = 16174;
-        public const uint PhaseHound = 16178;
-        public const uint Dreadbeast = 16177;
-        public const uint Shadowbeast = 16176;
-        public const uint Kilrek = 17229;
+        public const int ColdmistWidow = 16171;
+        public const int ColdmistStalker = 16170;
+        public const int Shadowbat = 16173;
+        public const int VampiricShadowbat = 16175;
+        public const int GreaterShadowbat = 16174;
+        public const int PhaseHound = 16178;
+        public const int Dreadbeast = 16177;
+        public const int Shadowbeast = 16176;
+        public const int Kilrek = 17229;
     }
 
     struct GameObjectIds
     {
-        public const uint StageCurtain = 183932;
-        public const uint StageDoorLeft = 184278;
-        public const uint StageDoorRight = 184279;
-        public const uint PrivateLibraryDoor = 184517;
-        public const uint MassiveDoor = 185521;
-        public const uint GamesmanHallDoor = 184276;
-        public const uint GamesmanHallExitDoor = 184277;
-        public const uint NetherspaceDoor = 185134;
-        public const uint MastersTerraceDoor = 184274;
-        public const uint MastersTerraceDoor2 = 184280;
-        public const uint SideEntranceDoor = 184275;
-        public const uint DustCoveredChest = 185119;
-        public const uint BlackenedUrn = 194092;
+        public const int StageCurtain = 183932;
+        public const int StageDoorLeft = 184278;
+        public const int StageDoorRight = 184279;
+        public const int PrivateLibraryDoor = 184517;
+        public const int MassiveDoor = 185521;
+        public const int GamesmanHallDoor = 184276;
+        public const int GamesmanHallExitDoor = 184277;
+        public const int NetherspaceDoor = 185134;
+        public const int MastersTerraceDoor = 184274;
+        public const int MastersTerraceDoor2 = 184280;
+        public const int SideEntranceDoor = 184275;
+        public const int DustCoveredChest = 185119;
+        public const int BlackenedUrn = 194092;
     }
 
     enum KZMisc
@@ -118,9 +118,9 @@ namespace Scripts.EasternKingdoms.Karazhan
 
         class instance_karazhan_InstanceMapScript : InstanceScript
         {
-            uint OperaEvent;
-            uint OzDeathCount;
-            uint OptionalBossCount;
+            int OperaEvent;
+            int OzDeathCount;
+            int OptionalBossCount;
             ObjectGuid CurtainGUID;
             ObjectGuid StageDoorLeftGUID;
             ObjectGuid StageDoorRightGUID;
@@ -146,7 +146,7 @@ namespace Scripts.EasternKingdoms.Karazhan
                 LoadDungeonEncounterData(encounters);
 
                 // 1 - Oz, 2 - Hood, 3 - Raj, this never gets altered.
-                OperaEvent = RandomHelper.URand(1, 3);
+                OperaEvent = RandomHelper.IRand(1, 3);
                 OzDeathCount = 0;
                 OptionalBossCount = 0;
             }
@@ -213,20 +213,20 @@ namespace Scripts.EasternKingdoms.Karazhan
                 }
             }
 
-            public override void SetData(uint type, uint data)
+            public override void SetData(int type, int data)
             {
                 switch (type)
                 {
                     case DataTypes.OperaOzDeathcount:
-                        if (data == (uint)EncounterState.Special)
+                        if (data == (int)EncounterState.Special)
                             ++OzDeathCount;
-                        else if (data == (uint)EncounterState.InProgress)
+                        else if (data == (int)EncounterState.InProgress)
                             OzDeathCount = 0;
                         break;
                 }
             }
 
-            public override bool SetBossState(uint type, EncounterState state)
+            public override bool SetBossState(int type, EncounterState state)
             {
                 if (!base.SetBossState(type, state))
                     return false;
@@ -254,7 +254,7 @@ namespace Scripts.EasternKingdoms.Karazhan
                 return true;
             }
 
-            public override void SetGuidData(uint type, ObjectGuid data)
+            public override void SetGuidData(int type, ObjectGuid data)
             {
                 if (type == DataTypes.ImageOfMedivh)
                     ImageGUID = data;
@@ -327,7 +327,7 @@ namespace Scripts.EasternKingdoms.Karazhan
                 }
             }
 
-            public override uint GetData(uint type)
+            public override int GetData(int type)
             {
                 switch (type)
                 {
@@ -340,7 +340,7 @@ namespace Scripts.EasternKingdoms.Karazhan
                 return 0;
             }
 
-            public override ObjectGuid GetGuidData(uint type)
+            public override ObjectGuid GetGuidData(int type)
             {
                 switch (type)
                 {

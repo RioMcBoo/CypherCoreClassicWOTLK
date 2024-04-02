@@ -15,42 +15,42 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
 {
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SayAxeToss1 = 1;
-        public const uint SayAxeToss2 = 2;
-        //public const uint SaySpecial1                = 3; Not used, needs to be implemented, but I don't know where it should be used.
-        //public const uint SaySpecial2                = 4; Not used, needs to be implemented, but I don't know where it should be used.
-        //public const uint SaySpecial3                = 5; Not used, needs to be implemented, but I don't know where it should be used.
-        public const uint SaySlay = 6;
-        public const uint SaySummon = 7;
-        public const uint SayDeath = 8;
+        public const int SayAggro = 0;
+        public const int SayAxeToss1 = 1;
+        public const int SayAxeToss2 = 2;
+        //public const int SaySpecial1                = 3; Not used, needs to be implemented, but I don't know where it should be used.
+        //public const int SaySpecial2                = 4; Not used, needs to be implemented, but I don't know where it should be used.
+        //public const int SaySpecial3                = 5; Not used, needs to be implemented, but I don't know where it should be used.
+        public const int SaySlay = 6;
+        public const int SaySummon = 7;
+        public const int SayDeath = 8;
     }
 
     struct SpellIds
     {
-        public const uint Enfeeble = 30843;                       //Enfeeble during phase 1 and 2
-        public const uint EnfeebleEffect = 41624;
+        public const int Enfeeble = 30843;                       //Enfeeble during phase 1 and 2
+        public const int EnfeebleEffect = 41624;
 
-        public const uint Shadownova = 30852;                       //Shadownova used during all phases
-        public const uint SwPain = 30854;                       //Shadow word pain during phase 1 and 3 (different targeting rules though)
-        public const uint ThrashPassive = 12787;                       //Extra attack Chance during phase 2
-        public const uint SunderArmor = 30901;                       //Sunder armor during phase 2
-        public const uint ThrashAura = 12787;                       //Passive proc Chance for thrash
-        public const uint EquipAxes = 30857;                       //Visual for axe equiping
-        public const uint AmplifyDamage = 39095;                       //Amplifiy during phase 3
-        public const uint Cleave = 30131;                     //Same as Nightbane.
-        public const uint Hellfire = 30859;                       //Infenals' hellfire aura
+        public const int Shadownova = 30852;                       //Shadownova used during all phases
+        public const int SwPain = 30854;                       //Shadow word pain during phase 1 and 3 (different targeting rules though)
+        public const int ThrashPassive = 12787;                       //Extra attack Chance during phase 2
+        public const int SunderArmor = 30901;                       //Sunder armor during phase 2
+        public const int ThrashAura = 12787;                       //Passive proc Chance for thrash
+        public const int EquipAxes = 30857;                       //Visual for axe equiping
+        public const int AmplifyDamage = 39095;                       //Amplifiy during phase 3
+        public const int Cleave = 30131;                     //Same as Nightbane.
+        public const int Hellfire = 30859;                       //Infenals' hellfire aura
 
-        public const uint InfernalRelay = 30834;
+        public const int InfernalRelay = 30834;
     }
 
     struct MiscConst
     {
-        public const uint TotalInfernalPoints = 18;
-        public const uint NetherspiteInfernal = 17646;                       //The netherspite infernal creature
-        public const uint MalchezarsAxe = 17650;                       //Malchezar's axes (creatures), summoned during phase 3
+        public const int TotalInfernalPoints = 18;
+        public const int NetherspiteInfernal = 17646;                       //The netherspite infernal creature
+        public const int MalchezarsAxe = 17650;                       //Malchezar's axes (creatures), summoned during phase 3
 
-        public const uint InfernalModelInvisible = 11686;                       //Infernal Effects
+        public const int InfernalModelInvisible = 11686;                       //Infernal Effects
         public const int EquipIdAxe = 33542;                      //Axes info
     }
 
@@ -102,7 +102,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             }
         }
 
-        public override void DamageTaken(Unit done_by, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit done_by, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (done_by == null || done_by.GetGUID() != Malchezaar)
                 damage = 0;
@@ -151,9 +151,9 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
 
         ObjectGuid[] axes = new ObjectGuid[2];
         ObjectGuid[] enfeeble_targets = new ObjectGuid[5];
-        ulong[] enfeeble_health = new ulong[5];
+        long[] enfeeble_health = new long[5];
 
-        uint phase;
+        int phase;
 
         public boss_malchezaar(Creature creature) : base(creature)
         {

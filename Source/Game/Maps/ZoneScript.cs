@@ -39,7 +39,7 @@ namespace Game.Maps
         public virtual void SetData64(int dataId, long value) { }
 
         //All-purpose data storage 32 bit
-        public virtual uint GetData(int dataId) { return 0; }
+        public virtual int GetData(int dataId) { return 0; }
         public virtual void SetData(int dataId, int value) { }
 
         public virtual void ProcessEvent(WorldObject obj, int eventId, WorldObject invoker) { }
