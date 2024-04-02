@@ -2900,7 +2900,7 @@ namespace Game
                     creatureDifficulty.MinLevel = creatureDifficulty.MaxLevel;
                 }
 
-                if (creatureDifficulty.HealthScalingExpansion < Expansion.LevelCurrent || creatureDifficulty.HealthScalingExpansion >= Expansion.Max)
+                if (creatureDifficulty.HealthScalingExpansion < Expansion.LevelCurrent || creatureDifficulty.HealthScalingExpansion > Expansion.Current)
                 {
                     Log.outError(LogFilter.Sql,$"Table `creature_template_difficulty` lists creature (ID: {entry}) with invalid `HealthScalingExpansion` " +
                         $"{creatureDifficulty.HealthScalingExpansion}. Ignored and set to 0.");
