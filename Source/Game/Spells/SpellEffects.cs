@@ -1930,7 +1930,7 @@ namespace Game.Spells
             if (playerTarget == null)
                 return;
 
-            if (damage < 1)
+            if (damage < 0)
                 return;
 
             var skillid = (SkillType)effectInfo.MiscValue;            
@@ -1944,12 +1944,12 @@ namespace Game.Spells
                 return;
 
             ushort skillval = Math.Max((ushort)1, playerTarget.GetPureSkillValue(skillid));
-            ushort maxSkillVal = (ushort)tier.GetValueForTierIndex(damage - 1);
+            ushort maxSkillVal = (ushort)tier.GetValueForTierIndex(damage);
 
             if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                 skillval = maxSkillVal;
 
-            playerTarget.SetSkill(skillid, damage, skillval, maxSkillVal);
+            playerTarget.SetSkill(skillid, damage + 1, skillval, maxSkillVal);
         }
 
         [SpellEffectHandler(SpellEffectName.PlayMovie)]
@@ -4287,11 +4287,11 @@ namespace Game.Spells
             if (playerTarget == null)
                 return;
 
-            if (damage < 1)
+            if (damage < 0)
                 return;
 
             var skillid = (SkillType)effectInfo.MiscValue;
-            if (playerTarget.GetSkillStep(skillid) >= damage)
+            if (playerTarget.GetSkillStep(skillid) >= damage + 1)
                 return;
 
             var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, playerTarget.GetRace(), playerTarget.GetClass());
@@ -4303,12 +4303,12 @@ namespace Game.Spells
                 return;
 
             ushort skillval = Math.Max((ushort)1, playerTarget.GetPureSkillValue(skillid));
-            ushort maxSkillVal = (ushort)tier.GetValueForTierIndex(damage - 1);
+            ushort maxSkillVal = (ushort)tier.GetValueForTierIndex(damage);
 
             if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                 skillval = maxSkillVal;
 
-            playerTarget.SetSkill(skillid, damage, skillval, maxSkillVal);
+            playerTarget.SetSkill(skillid, damage + 1, skillval, maxSkillVal);
         }
 
         void EffectSpiritHeal()
