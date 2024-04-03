@@ -39,10 +39,6 @@ namespace Game.Entities
                 // Base value
                 DoneAdvertisedBenefit += (int)ToPlayer().GetBaseSpellPowerBonus();
 
-                // Check if we are ever using mana - PaperDollFrame.lua
-                if (GetPowerIndex(PowerType.Mana) != (uint)PowerType.Max)
-                    DoneAdvertisedBenefit += Math.Max(0, (int)GetStat(Stats.Intellect));  // spellpower from intellect
-
                 // Damage bonus from stats
                 var mDamageDoneOfStatPercent = GetAuraEffectsByType(AuraType.ModSpellDamageOfStatPercent);
                 foreach (var eff in mDamageDoneOfStatPercent)
