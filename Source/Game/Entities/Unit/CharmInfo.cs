@@ -430,17 +430,17 @@ namespace Game.Entities
 
         public static int MAKE_UNIT_ACTION_BUTTON(int action, byte type)
         {
-            return (action | (type << 24));
+            return (action | (type << 23));
         }
 
         public static int UNIT_ACTION_BUTTON_ACTION(int packedData)
         {
-            return (packedData & 0x00FFFFFF);
+            return (packedData & 0x007FFFFF);
         }
 
         public static byte UNIT_ACTION_BUTTON_TYPE(int packedData)
         {
-            return (byte)(((uint)packedData & 0xFF000000) >> 24);
+            return (byte)(((uint)packedData & 0xFF000000) >> 23);
         }
     }
 
