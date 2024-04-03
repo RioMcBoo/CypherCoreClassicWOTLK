@@ -251,10 +251,10 @@ namespace Game.Scenarios
         void BuildScenarioStateFor(Player player, ScenarioState scenarioState)
         {
             scenarioState.ScenarioGUID = _guid;
-            scenarioState.ScenarioID = (int)_data.Entry.Id;
+            scenarioState.ScenarioID = _data.Entry.Id;
             ScenarioStepRecord step = GetStep();
             if (step != null)
-                scenarioState.CurrentStep = (int)step.Id;
+                scenarioState.CurrentStep = step.Id;
             scenarioState.CriteriaProgress = GetCriteriasProgressFor(player);
             scenarioState.BonusObjectives = GetBonusObjectivesData();
             // Don't know exactly what this is for, but seems to contain list of scenario steps that we're either on or that are completed

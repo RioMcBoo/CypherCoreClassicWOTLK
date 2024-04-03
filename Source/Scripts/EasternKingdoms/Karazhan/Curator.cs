@@ -12,24 +12,24 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
 {
     struct SpellIds
     {
-        public const uint HatefulBolt = 30383;
-        public const uint Evocation = 30254;
-        public const uint ArcaneInfusion = 30403;
-        public const uint Berserk = 26662;
-        public const uint SummonAstralFlareNe = 30236;
-        public const uint SummonAstralFlareNw = 30239;
-        public const uint SummonAstralFlareSe = 30240;
-        public const uint SummonAstralFlareSw = 30241;
+        public const int HatefulBolt = 30383;
+        public const int Evocation = 30254;
+        public const int ArcaneInfusion = 30403;
+        public const int Berserk = 26662;
+        public const int SummonAstralFlareNe = 30236;
+        public const int SummonAstralFlareNw = 30239;
+        public const int SummonAstralFlareSe = 30240;
+        public const int SummonAstralFlareSw = 30241;
     }
 
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SaySummon = 1;
-        public const uint SayEvocate = 2;
-        public const uint SayEnrage = 3;
-        public const uint SayKill = 4;
-        public const uint SayDeath = 5;
+        public const int SayAggro = 0;
+        public const int SaySummon = 1;
+        public const int SayEvocate = 2;
+        public const int SayEnrage = 3;
+        public const int SayKill = 4;
+        public const int SayDeath = 5;
     }
 
     struct MiscConst
@@ -100,7 +100,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
             });
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthAbovePct(15) && !_infused)
             {

@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.IO;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
@@ -12,86 +11,86 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
 {
     struct CreatureIds
     {
-        public const uint Emperor = 9019;
-        public const uint Phalanx = 9502;
-        public const uint Angerrel = 9035;
-        public const uint Doperel = 9040;
-        public const uint Haterel = 9034;
-        public const uint Vilerel = 9036;
-        public const uint Seethrel = 9038;
-        public const uint Gloomrel = 9037;
-        public const uint Doomrel = 9039;
-        public const uint Magmus = 9938;
-        public const uint Moira = 8929;
-        public const uint Coren = 23872;
+        public const int Emperor = 9019;
+        public const int Phalanx = 9502;
+        public const int Angerrel = 9035;
+        public const int Doperel = 9040;
+        public const int Haterel = 9034;
+        public const int Vilerel = 9036;
+        public const int Seethrel = 9038;
+        public const int Gloomrel = 9037;
+        public const int Doomrel = 9039;
+        public const int Magmus = 9938;
+        public const int Moira = 8929;
+        public const int Coren = 23872;
     }
 
     struct GameObjectIds
     {
-        public const uint Arena1 = 161525;
-        public const uint Arena2 = 161522;
-        public const uint Arena3 = 161524;
-        public const uint Arena4 = 161523;
-        public const uint ShadowLock = 161460;
-        public const uint ShadowMechanism = 161461;
-        public const uint ShadowGiantDoor = 157923;
-        public const uint ShadowDummy = 161516;
-        public const uint BarKegShot = 170607;
-        public const uint BarKegTrap = 171941;
-        public const uint BarDoor = 170571;
-        public const uint TombEnter = 170576;
-        public const uint TombExit = 170577;
-        public const uint Lyceum = 170558;
-        public const uint SfN = 174745; // Shadowforge Brazier North
-        public const uint SfS = 174744; // Shadowforge Brazier South
-        public const uint GolemRoomN = 170573; // Magmus door North
-        public const uint GolemRoomS = 170574; // Magmus door Soutsh
-        public const uint ThroneRoom = 170575; // Throne door
-        public const uint SpectralChalice = 164869;
-        public const uint ChestSeven = 169243;
+        public const int Arena1 = 161525;
+        public const int Arena2 = 161522;
+        public const int Arena3 = 161524;
+        public const int Arena4 = 161523;
+        public const int ShadowLock = 161460;
+        public const int ShadowMechanism = 161461;
+        public const int ShadowGiantDoor = 157923;
+        public const int ShadowDummy = 161516;
+        public const int BarKegShot = 170607;
+        public const int BarKegTrap = 171941;
+        public const int BarDoor = 170571;
+        public const int TombEnter = 170576;
+        public const int TombExit = 170577;
+        public const int Lyceum = 170558;
+        public const int SfN = 174745; // Shadowforge Brazier North
+        public const int SfS = 174744; // Shadowforge Brazier South
+        public const int GolemRoomN = 170573; // Magmus door North
+        public const int GolemRoomS = 170574; // Magmus door Soutsh
+        public const int ThroneRoom = 170575; // Throne door
+        public const int SpectralChalice = 164869;
+        public const int ChestSeven = 169243;
     }
 
     struct DataTypes
     {
-        public const uint TypeRingOfLaw = 1;
-        public const uint TypeVault = 2;
-        public const uint TypeBar = 3;
-        public const uint TypeTombOfSeven = 4;
-        public const uint TypeLyceum = 5;
-        public const uint TypeIronHall = 6;
+        public const int TypeRingOfLaw = 1;
+        public const int TypeVault = 2;
+        public const int TypeBar = 3;
+        public const int TypeTombOfSeven = 4;
+        public const int TypeLyceum = 5;
+        public const int TypeIronHall = 6;
 
-        public const uint DataEmperor = 10;
-        public const uint DataPhalanx = 11;
+        public const int DataEmperor = 10;
+        public const int DataPhalanx = 11;
 
-        public const uint DataArena1 = 12;
-        public const uint DataArena2 = 13;
-        public const uint DataArena3 = 14;
-        public const uint DataArena4 = 15;
+        public const int DataArena1 = 12;
+        public const int DataArena2 = 13;
+        public const int DataArena3 = 14;
+        public const int DataArena4 = 15;
 
-        public const uint DataGoBarKeg = 16;
-        public const uint DataGoBarKegTrap = 17;
-        public const uint DataGoBarDoor = 18;
-        public const uint DataGoChalice = 19;
+        public const int DataGoBarKeg = 16;
+        public const int DataGoBarKegTrap = 17;
+        public const int DataGoBarDoor = 18;
+        public const int DataGoChalice = 19;
 
-        public const uint DataGhostkill = 20;
-        public const uint DataEvenstarter = 21;
+        public const int DataGhostkill = 20;
+        public const int DataEvenstarter = 21;
 
-        public const uint DataGolemDoorN = 22;
-        public const uint DataGolemDoorS = 23;
+        public const int DataGolemDoorN = 22;
+        public const int DataGolemDoorS = 23;
 
-        public const uint DataThroneDoor = 24;
+        public const int DataThroneDoor = 24;
 
-        public const uint DataSfBrazierN = 25;
-        public const uint DataSfBrazierS = 26;
-        public const uint DataMoira = 27;
-        public const uint DataCoren = 28;
+        public const int DataSfBrazierN = 25;
+        public const int DataSfBrazierS = 26;
+        public const int DataMoira = 27;
+        public const int DataCoren = 28;
     }
 
     struct MiscConst
     {
-        public const uint TimerTombOfTheSeven = 15000;
-        public const uint MaxEncounter = 6;
-        public const uint TombOfSevenBossNum = 7;
+        public const int TimerTombOfTheSeven = 15000;
+        public const int MaxEncounter = 6;
+        public const int TombOfSevenBossNum = 7;
     }
 
     class instance_blackrock_depths : InstanceMapScript
@@ -128,8 +127,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
             ObjectGuid GoChestGUID;
             ObjectGuid GoSpectralChaliceGUID;
 
-            uint BarAleCount;
-            uint GhostKillCount;
+            int BarAleCount;
+            int GhostKillCount;
             ObjectGuid[] TombBossGUIDs = new ObjectGuid[MiscConst.TombOfSevenBossNum];
             ObjectGuid TombEventStarterGUID;
             uint TombTimer;
@@ -203,7 +202,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 }
             }
 
-            public override void SetGuidData(uint type, ObjectGuid data)
+            public override void SetGuidData(int type, ObjectGuid data)
             {
                 switch (type)
                 {
@@ -217,7 +216,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 }
             }
 
-            public override void SetData(uint type, uint data)
+            public override void SetData(int type, int data)
             {
                 switch (type)
                 {
@@ -248,32 +247,32 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 }
             }
 
-            public override uint GetData(uint type)
+            public override int GetData(int type)
             {
                 switch (type)
                 {
                     case DataTypes.TypeRingOfLaw:
-                        return (uint)GetBossState(0);
+                        return (int)GetBossState(0);
                     case DataTypes.TypeVault:
-                        return (uint)GetBossState(1);
+                        return (int)GetBossState(1);
                     case DataTypes.TypeBar:
                         if (GetBossState(2) == EncounterState.InProgress && BarAleCount == 3)
-                            return (uint)EncounterState.Special;
+                            return (int)EncounterState.Special;
                         else
-                            return (uint)GetBossState(2);
+                            return (int)GetBossState(2);
                     case DataTypes.TypeTombOfSeven:
-                        return (uint)GetBossState(3);
+                        return (int)GetBossState(3);
                     case DataTypes.TypeLyceum:
-                        return (uint)GetBossState(4);
+                        return (int)GetBossState(4);
                     case DataTypes.TypeIronHall:
-                        return (uint)GetBossState(5);
+                        return (int)GetBossState(5);
                     case DataTypes.DataGhostkill:
                         return GhostKillCount;
                 }
                 return 0;
             }
 
-            public override ObjectGuid GetGuidData(uint data)
+            public override ObjectGuid GetGuidData(int data)
             {
                 switch (data)
                 {
@@ -324,7 +323,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                     Creature boss = instance.GetCreature(TombBossGUIDs[TombEventCounter]);
                     if (boss != null)
                     {
-                        boss.SetFaction((uint)FactionTemplates.DarkIronDwarves);
+                        boss.SetFaction(FactionTemplates.DarkIronDwarves);
                         boss.SetImmuneToPC(false);
                         Unit target = boss.SelectNearestTarget(500);
                         if (target != null)
@@ -345,21 +344,21 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                         if (!boss.IsAlive())
                             boss.Respawn();
                         else
-                            boss.SetFaction((uint)FactionTemplates.Friendly);
+                            boss.SetFaction(FactionTemplates.Friendly);
                     }
                 }
                 GhostKillCount = 0;
                 TombEventStarterGUID.Clear();
                 TombEventCounter = 0;
                 TombTimer = MiscConst.TimerTombOfTheSeven;
-                SetData(DataTypes.TypeTombOfSeven, (uint)EncounterState.NotStarted);
+                SetData(DataTypes.TypeTombOfSeven, (int)EncounterState.NotStarted);
             }
 
             void TombOfSevenStart()
             {
                 HandleGameObject(GoTombExitGUID, false);//event started, close exit door
                 HandleGameObject(GoTombEnterGUID, false);//event started, close entrance door
-                SetData(DataTypes.TypeTombOfSeven, (uint)EncounterState.InProgress);
+                SetData(DataTypes.TypeTombOfSeven, (int)EncounterState.InProgress);
             }
 
             void TombOfSevenEnd()
@@ -368,7 +367,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 HandleGameObject(GoTombExitGUID, true);//event done, open exit door
                 HandleGameObject(GoTombEnterGUID, true);//event done, open entrance door
                 TombEventStarterGUID.Clear();
-                SetData(DataTypes.TypeTombOfSeven, (uint)EncounterState.Done);
+                SetData(DataTypes.TypeTombOfSeven, (int)EncounterState.Done);
             }
 
             public override void Update(uint diff)
@@ -392,7 +391,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                             {
                                 if (!boss.IsAlive())
                                 {
-                                    GhostKillCount = i + 1u;
+                                    GhostKillCount = i + 1;
                                 }
                             }
                         }

@@ -54,7 +54,7 @@ namespace Game.Chat
 
             PacketSenderOwning<ChannelNotifyJoined> notify = new();
             //notify.ChannelWelcomeMsg = "";
-            notify.Data.ChatChannelID = (int)_source.GetChannelId();
+            notify.Data.ChatChannelID = _source.GetChannelId();
             //notify.InstanceID = 0;
             notify.Data.ChannelFlags = _source.GetFlags();
             notify.Data.Channel = _source.GetName(localeIdx);
@@ -282,7 +282,7 @@ namespace Game.Chat
 
         public void Append(ChannelNotify data)
         {
-            data.ChatChannelID = (int)_channel.GetChannelId();
+            data.ChatChannelID = _channel.GetChannelId();
         }
 
         Channel _channel;
@@ -299,7 +299,7 @@ namespace Game.Chat
 
         public void Append(ChannelNotify data)
         {
-            data.ChatChannelID = (int)_channel.GetChannelId();
+            data.ChatChannelID = _channel.GetChannelId();
         }
 
         Channel _channel;

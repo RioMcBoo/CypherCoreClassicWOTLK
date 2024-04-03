@@ -11,18 +11,18 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 {
     struct DataTypes
     {
-        public const uint Lucifron = 0;
-        public const uint Magmadar = 1;
-        public const uint Gehennas = 2;
-        public const uint Garr = 3;
-        public const uint Shazzrah = 4;
-        public const uint BaronGeddon = 5;
-        public const uint SulfuronHarbinger = 6;
-        public const uint GolemaggTheIncinerator = 7;
-        public const uint MajordomoExecutus = 8;
-        public const uint Ragnaros = 9;
+        public const int Lucifron = 0;
+        public const int Magmadar = 1;
+        public const int Gehennas = 2;
+        public const int Garr = 3;
+        public const int Shazzrah = 4;
+        public const int BaronGeddon = 5;
+        public const int SulfuronHarbinger = 6;
+        public const int GolemaggTheIncinerator = 7;
+        public const int MajordomoExecutus = 8;
+        public const int Ragnaros = 9;
 
-        public const uint MaxEncounter = 10;
+        public const int MaxEncounter = 10;
     }
 
     struct ActionIds
@@ -33,28 +33,28 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 
     struct MCCreatureIds
     {
-        public const uint Lucifron = 12118;
-        public const uint Magmadar = 11982;
-        public const uint Gehennas = 12259;
-        public const uint Garr = 12057;
-        public const uint Shazzrah = 12264;
-        public const uint BaronGeddon = 12056;
-        public const uint SulfuronHarbinger = 12098;
-        public const uint GolemaggTheIncinerator = 11988;
-        public const uint MajordomoExecutus = 12018;
-        public const uint Ragnaros = 11502;
-        public const uint FlamewakerHealer = 11663;
-        public const uint FlamewakerElite = 11664;
+        public const int Lucifron = 12118;
+        public const int Magmadar = 11982;
+        public const int Gehennas = 12259;
+        public const int Garr = 12057;
+        public const int Shazzrah = 12264;
+        public const int BaronGeddon = 12056;
+        public const int SulfuronHarbinger = 12098;
+        public const int GolemaggTheIncinerator = 11988;
+        public const int MajordomoExecutus = 12018;
+        public const int Ragnaros = 11502;
+        public const int FlamewakerHealer = 11663;
+        public const int FlamewakerElite = 11664;
     }
 
     struct MCGameObjectIds
     {
-        public const uint CacheOfTheFirelord = 179703;
+        public const int CacheOfTheFirelord = 179703;
     }
 
     struct MCMiscConst
     {
-        public const uint DataRagnarosAdds = 0;
+        public const int DataRagnarosAdds = 0;
 
         public static Position[] SummonPositions =
         {
@@ -143,7 +143,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 }
             }
 
-            public override void SetData(uint type, uint data)
+            public override void SetData(int type, int data)
             {
                 if (type == MCMiscConst.DataRagnarosAdds)
                 {
@@ -154,7 +154,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 }
             }
 
-            public override uint GetData(uint type)
+            public override int GetData(int type)
             {
                 switch (type)
                 {
@@ -165,7 +165,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 return 0;
             }
 
-            public override ObjectGuid GetGuidData(uint type)
+            public override ObjectGuid GetGuidData(int type)
             {
                 switch (type)
                 {
@@ -178,7 +178,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 return ObjectGuid.Empty;
             }
 
-            public override bool SetBossState(uint bossId, EncounterState state)
+            public override bool SetBossState(int bossId, EncounterState state)
             {
                 if (!base.SetBossState(bossId, state))
                     return false;

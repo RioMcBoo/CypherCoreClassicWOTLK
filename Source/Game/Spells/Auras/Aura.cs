@@ -166,13 +166,13 @@ namespace Game.Spells
             }
             Cypher.Assert(aurEff != null);
             Cypher.Assert(HasEffect(effIndex) == (!apply));
-            Cypher.Assert(Convert.ToBoolean((1 << (int)effIndex) & _effectsToApply));
+            Cypher.Assert(Convert.ToBoolean((1 << effIndex) & _effectsToApply));
             Log.outDebug(LogFilter.Spells, "AuraApplication._HandleEffect: {0}, apply: {1}: amount: {2}", aurEff.GetAuraType(), apply, aurEff.GetAmount());
 
             if (apply)
             {
-                Cypher.Assert(!Convert.ToBoolean(_effectMask & (1 << (int)effIndex)));
-                _effectMask |= (uint)(1 << (int)effIndex);
+                Cypher.Assert(!Convert.ToBoolean(_effectMask & (1 << effIndex)));
+                _effectMask |= (uint)(1 << effIndex);
                 aurEff.HandleEffect(this, AuraEffectHandleModes.Real, true);
             }
             else
@@ -394,7 +394,7 @@ namespace Game.Spells
 
             foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if ((effMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
+                if ((effMask & (1 << spellEffectInfo.EffectIndex)) != 0)
                     _effects[spellEffectInfo.EffectIndex] = new AuraEffect(this, spellEffectInfo, baseAmount != null ? baseAmount[spellEffectInfo.EffectIndex] : null, caster);
             }
         }
@@ -531,7 +531,7 @@ namespace Game.Spells
                     // check target immunities (for existing targets)
                     foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
                         if (app.Value.GetTarget().IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster, true))
-                            existing &= ~(uint)(1 << (int)spellEffectInfo.EffectIndex);
+                            existing &= ~(uint)(1 << spellEffectInfo.EffectIndex);
 
                     targets[app.Value.GetTarget()] = existing;
 
@@ -555,7 +555,7 @@ namespace Game.Spells
                     // check target immunities (for new targets)
                     foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
                         if (unit.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster))
-                            targets[unit] &= ~(uint)(1 << (int)spellEffectInfo.EffectIndex);
+                            targets[unit] &= ~(uint)(1 << spellEffectInfo.EffectIndex);
 
                     if (targets[unit] == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster) || !CanBeAppliedOn(unit))
                         addUnit = false;
@@ -598,8 +598,8 @@ namespace Game.Spells
                     {
                         // @todo There is a crash caused by shadowfiend load addon
                         Log.outFatal(LogFilter.Spells, "Aura {0}: Owner {1} (map {2}) is not in the same map as target {3} (map {4}).", GetSpellInfo().Id,
-                            m_owner.GetName(), m_owner.IsInWorld ? (int)m_owner.GetMap().GetId() : -1,
-                            unit.GetName(), unit.IsInWorld ? (int)unit.GetMap().GetId() : -1);
+                            m_owner.GetName(), m_owner.IsInWorld ? m_owner.GetMap().GetId() : -1,
+                            unit.GetName(), unit.IsInWorld ? unit.GetMap().GetId() : -1);
                     }
 
                     if (aurApp != null)
@@ -643,7 +643,7 @@ namespace Game.Spells
             List<Unit> targetList = new();
             foreach (var app in m_applications.Values)
             {
-                if (Convert.ToBoolean(app.GetEffectsToApply() & (1 << (int)effIndex)) && !app.HasEffect(effIndex))
+                if (Convert.ToBoolean(app.GetEffectsToApply() & (1 << effIndex)) && !app.HasEffect(effIndex))
                     targetList.Add(app.GetTarget());
             }
 
@@ -722,7 +722,7 @@ namespace Game.Spells
                                 if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
                                     continue;
 
-                                int manaPerSecond = (int)power.ManaPerSecond;
+                                int manaPerSecond = power.ManaPerSecond;
                                 if (power.PowerType != PowerType.Health)
                                     manaPerSecond += MathFunctions.CalculatePct(caster.GetMaxPower(power.PowerType), power.PowerPctPerSecond);
                                 else
@@ -950,7 +950,7 @@ namespace Game.Spells
                 if (m_spellInfo.StackAmount == 0)
                     stackAmount = 1;
                 else
-                    stackAmount = (int)m_spellInfo.StackAmount;
+                    stackAmount = m_spellInfo.StackAmount;
             }
             // we're out of stacks, remove
             else if (stackAmount <= 0)
@@ -1136,7 +1136,7 @@ namespace Game.Spells
                     continue;
 
                 effect.SetAmount(amount[effect.GetEffIndex()]);
-                effect.SetCanBeRecalculated(Convert.ToBoolean(recalculateMask & (1 << (int)effect.GetEffIndex())));
+                effect.SetCanBeRecalculated(Convert.ToBoolean(recalculateMask & (1 << effect.GetEffIndex())));
                 effect.CalculatePeriodic(caster, false, true);
                 effect.CalculateSpellMod();
                 effect.RecalculateAmount(caster);
@@ -2493,7 +2493,7 @@ namespace Game.Spells
             uint effMask = 0;
             foreach (AuraEffect aurEff in GetAuraEffects())
                 if (aurEff != null)
-                    effMask |= (uint)(1 << (int)aurEff.GetEffIndex());
+                    effMask |= (uint)(1 << aurEff.GetEffIndex());
 
             return effMask;
         }
@@ -2529,14 +2529,14 @@ namespace Game.Spells
                     foreach (var spellEffectInfo in spellProto.GetEffects())
                     {
                         if (spellEffectInfo.IsUnitOwnedAuraEffect())
-                            effMask |= (1u << (int)spellEffectInfo.EffectIndex);
+                            effMask |= (1u << spellEffectInfo.EffectIndex);
                     }
                     break;
                 case TypeId.DynamicObject:
                     foreach (var spellEffectInfo in spellProto.GetEffects())
                     {
                         if (spellEffectInfo.Effect == SpellEffectName.PersistentAreaAura)
-                            effMask |= (1u << (int)spellEffectInfo.EffectIndex);
+                            effMask |= (1u << spellEffectInfo.EffectIndex);
                     }
                     break;
                 default:
@@ -2858,8 +2858,8 @@ namespace Game.Spells
             // only valid for non-area auras
             foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if ((effMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
-                    effMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
+                if ((effMask & (1u << spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
+                    effMask &= ~(1u << spellEffectInfo.EffectIndex);
             }
 
             if (effMask == 0)
@@ -2929,7 +2929,7 @@ namespace Game.Spells
                     if (!targets.ContainsKey(unit))
                         targets[unit] = 0;
 
-                    targets[unit] |= 1u << (int)spellEffectInfo.EffectIndex;
+                    targets[unit] |= 1u << spellEffectInfo.EffectIndex;
                 }
             }
         }

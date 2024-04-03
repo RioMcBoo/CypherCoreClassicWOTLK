@@ -90,7 +90,7 @@ namespace Scripts.Spells.Warlock
         {
             Unit caster = GetCaster();
 
-            if (caster.GetHealthPct() <= (float)(GetEffectInfo(1).CalcValue(caster)))
+            if (caster.GetHealthPct() <= GetEffectInfo(1).CalcValue(caster))
             {
                 SetCustomCastResultMessage(SpellCustomErrors.YouDontHaveEnoughHealth);
                 return SpellCastResult.CustomError;
@@ -110,7 +110,7 @@ namespace Scripts.Spells.Warlock
     {
         void PeriodicTick(AuraEffect aurEff)
         {
-            if (GetTarget().GetHealthPct() <= (float)(aurEff.GetAmount()))
+            if (GetTarget().GetHealthPct() <= aurEff.GetAmount())
             {
                 PreventDefaultAction();
                 Remove();
@@ -416,7 +416,7 @@ namespace Scripts.Spells.Warlock
     {
         void HandleOnHit()
         {
-            int heal = (int)MathFunctions.CalculatePct(GetCaster().GetCreateHealth(), GetHitHeal());
+            int heal = MathFunctions.CalculatePct(GetCaster().GetCreateHealth(), GetHitHeal());
             SetHitHeal(heal);
         }
 
@@ -573,7 +573,7 @@ namespace Scripts.Spells.Warlock
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int amount = (int)(aurEff.GetAmount() - damageInfo.GetDamage());
+            int amount = aurEff.GetAmount() - damageInfo.GetDamage();
             if (amount > 0)
             {
                 aurEff.SetAmount(amount);
@@ -618,7 +618,7 @@ namespace Scripts.Spells.Warlock
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int amount = (int)(aurEff.GetAmount() - damageInfo.GetDamage());
+            int amount = aurEff.GetAmount() - damageInfo.GetDamage();
             if (amount > 0)
             {
                 aurEff.SetAmount(amount);

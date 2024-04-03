@@ -14,32 +14,32 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
     struct SpellIds
     {
         // Attumen
-        public const uint Shadowcleave = 29832;
-        public const uint IntangiblePresence = 29833;
-        public const uint SpawnSmoke = 10389;
-        public const uint Charge = 29847;
+        public const int Shadowcleave = 29832;
+        public const int IntangiblePresence = 29833;
+        public const int SpawnSmoke = 10389;
+        public const int Charge = 29847;
 
         // Midnight
-        public const uint Knockdown = 29711;
-        public const uint SummonAttumen = 29714;
-        public const uint Mount = 29770;
-        public const uint SummonAttumenMounted = 29799;
+        public const int Knockdown = 29711;
+        public const int SummonAttumen = 29714;
+        public const int Mount = 29770;
+        public const int SummonAttumenMounted = 29799;
     }
 
     struct TextIds
     {
-        public const uint SayKill = 0;
-        public const uint SayRandom = 1;
-        public const uint SayDisarmed = 2;
-        public const uint SayMidnightKill = 3;
-        public const uint SayAppear = 4;
-        public const uint SayMount = 5;
+        public const int SayKill = 0;
+        public const int SayRandom = 1;
+        public const int SayDisarmed = 2;
+        public const int SayMidnightKill = 3;
+        public const int SayAppear = 4;
+        public const int SayMount = 5;
 
-        public const uint SayDeath = 3;
+        public const int SayDeath = 3;
 
         // Midnight
-        public const uint EmoteCallAttumen = 0;
-        public const uint EmoteMountUp = 1;
+        public const int EmoteCallAttumen = 0;
+        public const int EmoteMountUp = 1;
     }
 
     enum Phases
@@ -105,11 +105,11 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             });
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             // Attumen does not die until he mounts Midnight, let health fall to 1 and prevent further damage.
             if (damage >= me.GetHealth() && _phase != Phases.Mounted)
-                damage = (uint)(me.GetHealth() - 1);
+                damage = (int)(me.GetHealth() - 1);
 
             if (_phase == Phases.AttumenEngages && me.HealthBelowPctDamaged(25, damage))
             {
@@ -139,7 +139,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                         summon.SetHealth(me.GetHealth());
 
                     summon.GetAI().DoZoneInCombat();
-                    summon.GetAI().SetGUID(_midnightGUID, (int)CreatureIds.Midnight);
+                    summon.GetAI().SetGUID(_midnightGUID, CreatureIds.Midnight);
                 }
             }
 
@@ -283,11 +283,11 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             me.SetReactState(ReactStates.Defensive);
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             // Midnight never dies, let health fall to 1 and prevent further damage.
             if (damage >= me.GetHealth())
-                damage = (uint)(me.GetHealth() - 1);
+                damage = (int)(me.GetHealth() - 1);
 
             if (_phase == Phases.None && me.HealthBelowPctDamaged(95, damage))
             {
@@ -307,7 +307,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             if (summon.GetEntry() == CreatureIds.AttumenUnmounted)
             {
                 _attumenGUID = summon.GetGUID();
-                summon.GetAI().SetGUID(me.GetGUID(), (int)CreatureIds.Midnight);
+                summon.GetAI().SetGUID(me.GetGUID(), CreatureIds.Midnight);
                 summon.GetAI().AttackStart(me.GetVictim());
                 summon.GetAI().Talk(TextIds.SayAppear);
             }

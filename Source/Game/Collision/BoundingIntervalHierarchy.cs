@@ -67,7 +67,7 @@ namespace Game.Collision
                         Log.outError(LogFilter.Server, "Reached tree area in error - discarding node with: {0} objects", right - left + 1);
                 }
                 // find longest axis
-                axis = (int)d.primaryAxis();
+                axis = d.primaryAxis();
                 split = 0.5f * (gridBox.lo.GetAt(axis) + gridBox.hi.GetAt(axis));
                 // partition L/R subsets
                 clipL = float.NegativeInfinity;

@@ -1360,7 +1360,7 @@ namespace Game.Entities
 
         public bool ActivateToQuest(Player target)
         {
-            if (target.HasQuestForGO((int)GetEntry()))
+            if (target.HasQuestForGO(GetEntry()))
                 return true;
 
             if (!Global.ObjectMgr.IsGameObjectForQuests(GetEntry()))
@@ -3311,7 +3311,7 @@ namespace Game.Entities
         public float GetInteractionDistance()
         {
             if (GetGoInfo().GetInteractRadiusOverride() != 0)
-                return (float)GetGoInfo().GetInteractRadiusOverride() / 100.0f;
+                return GetGoInfo().GetInteractRadiusOverride() / 100.0f;
 
             switch (GetGoType())
             {
@@ -4100,7 +4100,7 @@ namespace Game.Entities
                                 progressPct += 1.0f;
                         }
 
-                        newProgress = (uint)((float)period * progressPct) % period;
+                        newProgress = (uint)(period * progressPct) % period;
                     }
                     else
                         newProgress = stopTargetTime;
@@ -4184,7 +4184,7 @@ namespace Game.Entities
                     Vector3 dst = next;
                     if (prev != next)
                     {
-                        float animProgress = (float)(newProgress - oldAnimation.TimeIndex) / (float)(newAnimation.TimeIndex - oldAnimation.TimeIndex);
+                        float animProgress = (newProgress - oldAnimation.TimeIndex) / (float)(newAnimation.TimeIndex - oldAnimation.TimeIndex);
 
                         dst = pathRotation.Multiply(Vector3.Lerp(prev, next, animProgress));
                     }
@@ -4206,7 +4206,7 @@ namespace Game.Entities
 
                     if (prev != next)
                     {
-                        float animProgress = (float)(newProgress - oldRotation.TimeIndex) / (float)(newRotation.TimeIndex - oldRotation.TimeIndex);
+                        float animProgress = (newProgress - oldRotation.TimeIndex) / (float)(newRotation.TimeIndex - oldRotation.TimeIndex);
 
                         rotation = Quaternion.Lerp(prev, next, animProgress);
                     }
@@ -4216,7 +4216,7 @@ namespace Game.Entities
                 }
 
                 // update progress marker for client
-                _owner.SetPathProgressForClient((float)_pathProgress / (float)period);
+                _owner.SetPathProgressForClient(_pathProgress / (float)period);
             }
 
             public override void OnStateChanged(GameObjectState oldState, GameObjectState newState)

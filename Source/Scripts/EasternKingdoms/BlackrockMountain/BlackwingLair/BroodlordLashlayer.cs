@@ -13,24 +13,24 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Broodlord
 {
     struct SpellIds
     {
-        public const uint Cleave = 26350;
-        public const uint Blastwave = 23331;
-        public const uint Mortalstrike = 24573;
-        public const uint Knockback = 25778;
-        public const uint SuppressionAura = 22247; // Suppression Device Spell
+        public const int Cleave = 26350;
+        public const int Blastwave = 23331;
+        public const int Mortalstrike = 24573;
+        public const int Knockback = 25778;
+        public const int SuppressionAura = 22247; // Suppression Device Spell
     }
 
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SayLeash = 1;
+        public const int SayAggro = 0;
+        public const int SayLeash = 1;
     }
 
     struct EventIds
     {
         // Suppression Device Events
-        public const uint SuppressionCast = 1;
-        public const uint SuppressionReset = 2;
+        public const int SuppressionCast = 1;
+        public const int SuppressionReset = 2;
     }
 
     struct ActionIds
@@ -145,7 +145,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Broodlord
             });
         }
 
-        public override void OnLootStateChanged(uint state, Unit unit)
+        public override void OnLootStateChanged(LootState state, Unit unit)
         {
             switch ((LootState)state)
             {

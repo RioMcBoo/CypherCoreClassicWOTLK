@@ -37,7 +37,7 @@ namespace Game.Entities
             TrainerList trainerList = new();
             trainerList.TrainerGUID = npc.GetGUID();
             trainerList.TrainerType = (int)_type;
-            trainerList.TrainerID = (int)_id;
+            trainerList.TrainerID = _id;
             trainerList.Greeting = GetGreeting(locale);
 
             foreach (TrainerSpell trainerSpell in _spells)

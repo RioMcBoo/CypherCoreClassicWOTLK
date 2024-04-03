@@ -10,7 +10,6 @@ using Game.Entities;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
-using Game.Miscellaneous;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -192,7 +191,7 @@ namespace Game
         {
             if (sourceType > ConditionSourceType.None && sourceType < ConditionSourceType.Max)
             {
-                var conditions = ConditionStorage[sourceType].LookupByKey(new ConditionId(0, (int)entry, 0));
+                var conditions = ConditionStorage[sourceType].LookupByKey(new ConditionId(0, entry, 0));
                 if (conditions != null)
                 {
                     Log.outDebug(LogFilter.Condition, "GetConditionsForNotGroupedEntry: found conditions for Type {0} and entry {1}", sourceType, entry);
@@ -218,14 +217,14 @@ namespace Game
         public bool HasConditionsForNotGroupedEntry(ConditionSourceType sourceType, int entry)
         {
             if (sourceType > ConditionSourceType.None && sourceType < ConditionSourceType.Max)
-                return ConditionStorage[sourceType].ContainsKey(new ConditionId(0, (int)entry, 0));
+                return ConditionStorage[sourceType].ContainsKey(new ConditionId(0, entry, 0));
 
             return false;
         }
 
         public bool IsObjectMeetingSpellClickConditions(int creatureId, int spellId, WorldObject clicker, WorldObject target)
         {
-            var conditions = ConditionStorage[ConditionSourceType.SpellClickEvent].LookupByKey(new ConditionId(creatureId, (int)spellId, 0));
+            var conditions = ConditionStorage[ConditionSourceType.SpellClickEvent].LookupByKey(new ConditionId(creatureId, spellId, 0));
             if (conditions != null)
             {
                 Log.outDebug(LogFilter.Condition, "GetConditionsForSpellClickEvent: found conditions for SpellClickEvent entry {0} spell {1}", creatureId, spellId);
@@ -275,7 +274,7 @@ namespace Game
 
         public bool IsObjectMeetingVendorItemConditions(int creatureId, int itemId, Player player, Creature vendor)
         {
-            var conditions = ConditionStorage[ConditionSourceType.NpcVendor].LookupByKey(new ConditionId(creatureId, (int)itemId, 0));
+            var conditions = ConditionStorage[ConditionSourceType.NpcVendor].LookupByKey(new ConditionId(creatureId, itemId, 0));
             if (conditions != null)
             {
                 Log.outDebug(LogFilter.Condition, "GetConditionsForNpcVendor: found conditions for creature entry {0} item {1}", creatureId, itemId);
@@ -566,7 +565,7 @@ namespace Game
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
                     // additional checks by condition Type
-                    if ((conditionEffMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
+                    if ((conditionEffMask & (1 << spellEffectInfo.EffectIndex)) != 0)
                     {
                         switch (cond.ConditionType)
                         {
@@ -948,7 +947,7 @@ namespace Game
 
                     foreach (SpellEffectInfo spellEffectInfo in spellInfo.GetEffects())
                     {
-                        if (((1 << (int)spellEffectInfo.EffectIndex) & cond.SourceGroup) == 0)
+                        if (((1 << spellEffectInfo.EffectIndex) & cond.SourceGroup) == 0)
                             continue;
 
                         if (spellEffectInfo.ChainTargets > 0)
@@ -2386,7 +2385,7 @@ namespace Game
                 case UnitConditionVariable.Class:
                     return (int)unit.GetClass();
                 case UnitConditionVariable.Level:
-                    return (int)unit.GetLevel();
+                    return unit.GetLevel();
                 case UnitConditionVariable.IsSelf:
                     return unit == otherUnit ? 1 : 0;
                 case UnitConditionVariable.IsMyPet:

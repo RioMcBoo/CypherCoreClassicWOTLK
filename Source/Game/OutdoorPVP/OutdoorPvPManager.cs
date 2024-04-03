@@ -6,7 +6,6 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Misc;
 using System.Collections.Generic;
 
 namespace Game.PvP

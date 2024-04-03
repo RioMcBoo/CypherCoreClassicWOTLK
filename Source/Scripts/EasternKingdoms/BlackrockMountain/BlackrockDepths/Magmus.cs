@@ -14,11 +14,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
     struct SpellIds
     {
         //Magmus
-        public const uint Fieryburst = 13900;
-        public const uint Warstomp = 24375;
+        public const int Fieryburst = 13900;
+        public const int Warstomp = 24375;
 
         //IronhandGuardian
-        public const uint Goutofflame = 15529;
+        public const int Goutofflame = 15529;
     }
 
     enum Phases
@@ -43,7 +43,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
         {
             InstanceScript instance = me.GetInstanceScript();
             if (instance != null)
-                instance.SetData(DataTypes.TypeIronHall, (uint)EncounterState.InProgress);
+                instance.SetData(DataTypes.TypeIronHall, (int)EncounterState.InProgress);
 
             phase = Phases.One;
             _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
@@ -53,7 +53,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
             });
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.HealthBelowPctDamaged(50, damage) && phase == Phases.One)
             {
@@ -80,7 +80,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
             if (instance != null)
             {
                 instance.HandleGameObject(instance.GetGuidData(DataTypes.DataThroneDoor), true);
-                instance.SetData(DataTypes.TypeIronHall, (uint)EncounterState.Done);
+                instance.SetData(DataTypes.TypeIronHall, (int)EncounterState.Done);
             }
         }
     }
@@ -106,7 +106,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
         {
             if (!_active)
             {
-                if (_instance.GetData(DataTypes.TypeIronHall) == (uint)EncounterState.NotStarted)
+                if (_instance.GetData(DataTypes.TypeIronHall) == (int)EncounterState.NotStarted)
                     return;
                 // Once the boss is engaged, the guardians will stay activated until the next instance reset
                 _scheduler.Schedule(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(10), task =>

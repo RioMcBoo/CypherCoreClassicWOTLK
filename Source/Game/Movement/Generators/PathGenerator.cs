@@ -609,7 +609,7 @@ namespace Game.Movement
             for (int i = (int)npath - 1; i >= 0; --i)
             {
                 bool found = false;
-                for (int j = (int)nvisited - 1; j >= 0; --j)
+                for (int j = nvisited - 1; j >= 0; --j)
                 {
                     if (path[i] == visited[j])
                     {

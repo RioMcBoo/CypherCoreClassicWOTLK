@@ -444,7 +444,7 @@ namespace Game.Entities
         
         void InitMovementInfoForBase()
         {
-            VehicleFlags vehicleFlags = (VehicleFlags)GetVehicleInfo().Flags;
+            VehicleFlags vehicleFlags = GetVehicleInfo().Flags;
 
             if (vehicleFlags.HasAnyFlag(VehicleFlags.NoStrafe))
                 _me.AddUnitMovementFlag2(MovementFlag2.NoStrafe);
@@ -506,7 +506,7 @@ namespace Game.Entities
                 GetBase().GetPositionZ(), GetBase().GetOrientation());
         }
 
-        public int GetMapIdForSpawning() { return (int)GetBase().GetMapId(); }
+        public int GetMapIdForSpawning() { return GetBase().GetMapId(); }
         
         public void RemovePendingEvent(VehicleJoinEvent e)
         {

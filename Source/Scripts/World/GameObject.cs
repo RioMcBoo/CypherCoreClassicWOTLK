@@ -13,8 +13,8 @@ namespace Scripts.World.GameObjects
 {
     class go_gilded_brazier : GameObjectAI
     {
-        const uint NpcStillblade = 17716;
-        const uint QuestTheFirstTrial = 9678;
+        const int NpcStillblade = 17716;
+        const int QuestTheFirstTrial = 9678;
 
         public go_gilded_brazier(GameObject go) : base(go) { }
 
@@ -52,14 +52,14 @@ namespace Scripts.World.GameObjects
 
     class go_ethereum_prison : GameObjectAI
     {
-        const uint SpellRepLc = 39456;
-        const uint SpellRepShat = 39457;
-        const uint SpellRepCe = 39460;
-        const uint SpellRepCon = 39474;
-        const uint SpellRepKt = 39475;
-        const uint SpellRepSpor = 39476;
+        const int SpellRepLc = 39456;
+        const int SpellRepShat = 39457;
+        const int SpellRepCe = 39460;
+        const int SpellRepCon = 39474;
+        const int SpellRepKt = 39475;
+        const int SpellRepSpor = 39476;
 
-        uint[] NpcPrisonEntry =
+        int[] NpcPrisonEntry =
         {
             22810, 22811, 22812, 22813, 22814, 22815,               //good guys
             20783, 20784, 20785, 20786, 20788, 20789, 20790         //bad guys
@@ -79,7 +79,7 @@ namespace Scripts.World.GameObjects
                     var pFaction = creature.GetFactionTemplateEntry();
                     if (pFaction != null)
                     {
-                        uint spellId = 0;
+                        int spellId = 0;
 
                         switch (pFaction.Faction)
                         {
@@ -105,7 +105,7 @@ namespace Scripts.World.GameObjects
 
     class go_ethereum_stasis : GameObjectAI
     {
-        uint[] NpcStasisEntry = { 22825, 20888, 22827, 22826, 22828 };
+        int[] NpcStasisEntry = { 22825, 20888, 22827, 22826, 22828 };
 
         public go_ethereum_stasis(GameObject go) : base(go) { }
 
@@ -122,7 +122,7 @@ namespace Scripts.World.GameObjects
 
     class go_resonite_cask : GameObjectAI
     {
-        const uint NpcGoggeroc = 11920;
+        const int NpcGoggeroc = 11920;
 
         public go_resonite_cask(GameObject go) : base(go) { }
 
@@ -137,9 +137,9 @@ namespace Scripts.World.GameObjects
 
     class go_southfury_moonstone : GameObjectAI
     {
-        const uint NpcRizzle = 23002;
-        const uint SpellBlackjack = 39865; //stuns player
-        const uint SpellSummonRizzle = 39866;
+        const int NpcRizzle = 23002;
+        const int SpellBlackjack = 39865; //stuns player
+        const int SpellSummonRizzle = 39866;
 
         public go_southfury_moonstone(GameObject go) : base(go) { }
 
@@ -158,7 +158,7 @@ namespace Scripts.World.GameObjects
 
     class go_tele_to_dalaran_crystal : GameObjectAI
     {
-        const uint QuestTeleCrystalFlag = 12845;
+        const int QuestTeleCrystalFlag = 12845;
 
         public go_tele_to_dalaran_crystal(GameObject go) : base(go) { }
 
@@ -174,7 +174,7 @@ namespace Scripts.World.GameObjects
 
     class go_tele_to_violet_stand : GameObjectAI
     {
-        const uint QuestLearnLeaveReturn = 12790;
+        const int QuestLearnLeaveReturn = 12790;
 
         public go_tele_to_violet_stand(GameObject go) : base(go) { }
 
@@ -189,7 +189,7 @@ namespace Scripts.World.GameObjects
 
     class go_blood_filled_orb : GameObjectAI
     {
-        const uint NpcZelemar = 17830;
+        const int NpcZelemar = 17830;
 
         public go_blood_filled_orb(GameObject go) : base(go) { }
 
@@ -217,14 +217,14 @@ namespace Scripts.World.GameObjects
 
     class go_amberpine_outhouse : GameObjectAI
     {
-        const uint ItemAnderholsSliderCider = 37247;
-        const uint NpcOuthouseBunny = 27326;
-        const uint QuestDoingYourDuty = 12227;
-        const uint SpellIndisposed = 53017;
-        const uint SpellIndisposedIii = 48341;
-        const uint SpellCreateAmberseeds = 48330;
-        const uint GossipOuthouseInuse = 12775;
-        const uint GossipOuthouseVacant = 12779;
+        const int ItemAnderholsSliderCider = 37247;
+        const int NpcOuthouseBunny = 27326;
+        const int QuestDoingYourDuty = 12227;
+        const int SpellIndisposed = 53017;
+        const int SpellIndisposedIii = 48341;
+        const int SpellCreateAmberseeds = 48330;
+        const int GossipOuthouseInuse = 12775;
+        const int GossipOuthouseVacant = 12779;
 
         public go_amberpine_outhouse(GameObject go) : base(go) { }
 
@@ -242,9 +242,9 @@ namespace Scripts.World.GameObjects
             return true;
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            int action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             if (action == eTradeskill.GossipActionInfoDef + 1)
             {
@@ -252,7 +252,7 @@ namespace Scripts.World.GameObjects
                 Creature target = ScriptedAI.GetClosestCreatureWithEntry(player, NpcOuthouseBunny, 3.0f);
                 if (target != null)
                 {
-                    target.GetAI().SetData(1, (uint)player.GetNativeGender());
+                    target.GetAI().SetData(1, (int)player.GetNativeGender());
                     me.CastSpell(target, SpellIndisposedIii);
                 }
                 me.CastSpell(player, SpellIndisposed);
@@ -282,9 +282,9 @@ namespace Scripts.World.GameObjects
 
     class go_veil_skith_cage : GameObjectAI
     {
-        const uint QuestMissingFriends = 10852;
-        const uint NpcCaptiveChild = 22314;
-        const uint SayFree0 = 0;
+        const int QuestMissingFriends = 10852;
+        const int NpcCaptiveChild = 22314;
+        const int SayFree0 = 0;
 
         public go_veil_skith_cage(GameObject go) : base(go) { }
 
@@ -309,11 +309,11 @@ namespace Scripts.World.GameObjects
 
     class go_midsummer_bonfire : GameObjectAI
     {
-        const uint StampOutBonfireQuestComplete = 45458;
+        const int StampOutBonfireQuestComplete = 45458;
 
         public go_midsummer_bonfire(GameObject go) : base(go) { }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
             player.CastSpell(player, StampOutBonfireQuestComplete, true);
             player.CloseGossipMenu();
@@ -323,13 +323,13 @@ namespace Scripts.World.GameObjects
 
     class go_midsummer_ribbon_pole : GameObjectAI
     {
-        const uint SpellTestRibbonPole1 = 29705;
-        const uint SpellTestRibbonPole2 = 29726;
-        const uint SpellTestRibbonPole3 = 29727;
-        const uint NpcPoleRibbonBunny = 17066;
+        const int SpellTestRibbonPole1 = 29705;
+        const int SpellTestRibbonPole2 = 29726;
+        const int SpellTestRibbonPole3 = 29727;
+        const int NpcPoleRibbonBunny = 17066;
         const int ActionCosmeticFires = 0;
 
-        uint[] RibbonPoleSpells =
+        int[] RibbonPoleSpells =
         {
             SpellTestRibbonPole1,
             SpellTestRibbonPole2,
@@ -344,7 +344,7 @@ namespace Scripts.World.GameObjects
             if (creature != null)
             {
                 creature.GetAI().DoAction(ActionCosmeticFires);
-                player.CastSpell(player, RibbonPoleSpells[RandomHelper.URand(0, 2)], true);
+                player.CastSpell(player, RibbonPoleSpells[RandomHelper.IRand(0, 2)], true);
             }
             return true;
         }
@@ -352,12 +352,12 @@ namespace Scripts.World.GameObjects
 
     struct BrewfestMusicConst
     {
-        public const uint Dwarf01 = 11810; // 1.35 min
-        public const uint Dwarf02 = 11812; // 1.55 min
-        public const uint Dwarf03 = 11813; // 0.23 min
-        public const uint Goblin01 = 11811; // 1.08 min
-        public const uint Goblin02 = 11814; // 1.33 min
-        public const uint Goblin03 = 11815; // 0.28 min
+        public const int Dwarf01 = 11810; // 1.35 min
+        public const int Dwarf02 = 11812; // 1.55 min
+        public const int Dwarf03 = 11813; // 0.23 min
+        public const int Goblin01 = 11811; // 1.08 min
+        public const int Goblin02 = 11814; // 1.33 min
+        public const int Goblin03 = 11815; // 0.28 min
 
         public static TimeSpan Dwarf01Time = TimeSpan.FromSeconds(95);
         public static TimeSpan Dwarf02Time = TimeSpan.FromSeconds(155);
@@ -507,8 +507,8 @@ namespace Scripts.World.GameObjects
     [Script]
     class go_midsummer_music : GameObjectAI
     {
-        const uint EventmidsummerfirefestivalA = 12319; // 1.08 min
-        const uint EventmidsummerfirefestivalH = 12325; // 1.12 min
+        const int EventmidsummerfirefestivalA = 12319; // 1.08 min
+        const int EventmidsummerfirefestivalH = 12325; // 1.12 min
 
         public go_midsummer_music(GameObject go) : base(go)
         {
@@ -538,7 +538,7 @@ namespace Scripts.World.GameObjects
     [Script]
     class go_darkmoon_faire_music : GameObjectAI
     {
-        const uint MusicDarkmoonFaireMusic = 8440;
+        const int MusicDarkmoonFaireMusic = 8440;
 
         public go_darkmoon_faire_music(GameObject go) : base(go)
         {
@@ -561,7 +561,7 @@ namespace Scripts.World.GameObjects
     [Script]
     class go_pirate_day_music : GameObjectAI
     {
-        const uint MusicPirateDayMusic = 12845;
+        const int MusicPirateDayMusic = 12845;
 
         public go_pirate_day_music(GameObject go) : base(go)
         {
@@ -584,19 +584,19 @@ namespace Scripts.World.GameObjects
 
     struct BellHourlyConst
     {
-        public const uint Belltollhorde = 6595; // Undercity
-        public const uint Belltolltribal = 6675; // Orgrimma/Thunderbluff
-        public const uint Belltollalliance = 6594; // Stormwind
-        public const uint Belltollnightelf = 6674; // Darnassus
-        public const uint Belltolldwarfgnome = 7234; // Ironforge
-        public const uint Belltollkharazhan = 9154;  // Kharazhan
+        public const int Belltollhorde = 6595; // Undercity
+        public const int Belltolltribal = 6675; // Orgrimma/Thunderbluff
+        public const int Belltollalliance = 6594; // Stormwind
+        public const int Belltollnightelf = 6674; // Darnassus
+        public const int Belltolldwarfgnome = 7234; // Ironforge
+        public const int Belltollkharazhan = 9154;  // Kharazhan
 
-        public const uint GoHordeBell = 175885;
-        public const uint GoAllianceBell = 176573;
-        public const uint GoKharazhanBell = 182064;
+        public const int GoHordeBell = 175885;
+        public const int GoAllianceBell = 176573;
+        public const int GoKharazhanBell = 182064;
 
-        public const uint GameEventHourlyBells = 73;
-        public const uint EventRingBell = 1;
+        public const int GameEventHourlyBells = 73;
+        public const int EventRingBell = 1;
     }
 
     enum BellHourlySoundZoneIds
@@ -615,13 +615,13 @@ namespace Scripts.World.GameObjects
     [Script]
     class go_bells : GameObjectAI
     {
-        uint _soundId;
+        int _soundId;
 
         public go_bells(GameObject go) : base(go) { }
 
         public override void InitializeAI()
         {
-            uint zoneId = me.GetZoneId();
+            int zoneId = me.GetZoneId();
 
             switch (me.GetEntry())
             {

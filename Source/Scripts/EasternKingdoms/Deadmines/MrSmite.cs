@@ -12,9 +12,9 @@ namespace Scripts.EasternKingdoms.Deadmines
 {
     struct SpellIds
     {
-        public const uint Trash = 3391;
-        public const uint SmiteStomp = 6432;
-        public const uint SmiteSlam = 6435;
+        public const int Trash = 3391;
+        public const int SmiteStomp = 6432;
+        public const int SmiteSlam = 6435;
     }
 
     struct EquipIds
@@ -26,8 +26,8 @@ namespace Scripts.EasternKingdoms.Deadmines
 
     struct TextIds
     {
-        public const uint SayPhase1 = 2;
-        public const uint SayPhase2 = 3;
+        public const int SayPhase1 = 2;
+        public const int SayPhase2 = 3;
     }
 
     [Script]
@@ -177,7 +177,7 @@ namespace Scripts.EasternKingdoms.Deadmines
             }
         }
 
-        public override void MovementInform(MovementGeneratorType uiType, uint uiId)
+        public override void MovementInform(MovementGeneratorType uiType, int uiId)
         {
             if (uiType != MovementGeneratorType.Point)
                 return;

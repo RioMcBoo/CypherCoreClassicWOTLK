@@ -132,7 +132,7 @@ namespace Scripts.Spells.DeathKnight
             if (!GetTarget().HasAura(SpellIds.VolatileShielding))
             {
                 CastSpellExtraArgs args = new(aurEff);
-                args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbAmount, 2 * absorbAmount * 100 / maxHealth));
+                args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(absorbAmount, 2 * absorbAmount * 100 / maxHealth));
                 GetTarget().CastSpell(GetTarget(), SpellIds.RunicPowerEnergize, args);
             }
         }
@@ -143,7 +143,7 @@ namespace Scripts.Spells.DeathKnight
             if (volatileShielding != null)
             {
                 CastSpellExtraArgs args = new(volatileShielding);
-                args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbedAmount, volatileShielding.GetAmount()));
+                args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(absorbedAmount, volatileShielding.GetAmount()));
                 GetTarget().CastSpell(null, SpellIds.VolatileShieldingDamage, args);
             }
         }
@@ -799,7 +799,7 @@ namespace Scripts.Spells.DeathKnight
 
         bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            float chance = (float)GetSpellInfo().GetEffect(1).CalcValue(GetTarget());
+            float chance = GetSpellInfo().GetEffect(1).CalcValue(GetTarget());
             if (eventInfo.GetSpellInfo().Id == SpellIds.FrostScythe)
                 chance /= 2.0f;
 

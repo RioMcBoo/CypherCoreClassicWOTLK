@@ -823,7 +823,7 @@ namespace Game.Loots
                     if (referenced == null)
                         continue;                                       // Error message already printed at loading stage
 
-                    uint maxcount = (uint)((float)item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
+                    uint maxcount = (uint)(item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
                     List<Player> gotLoot = new();
                     for (uint loop = 0; loop < maxcount; ++loop)      // Ref multiplicator
                     {

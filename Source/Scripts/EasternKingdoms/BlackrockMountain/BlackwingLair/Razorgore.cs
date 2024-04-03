@@ -14,36 +14,36 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
     struct SpellIds
     {
         // @todo orb uses the wrong spell, this needs sniffs
-        public const uint Mindcontrol = 42013;
-        public const uint Channel = 45537;
-        public const uint EggDestroy = 19873;
+        public const int Mindcontrol = 42013;
+        public const int Channel = 45537;
+        public const int EggDestroy = 19873;
 
-        public const uint Cleave = 22540;
-        public const uint Warstomp = 24375;
-        public const uint Fireballvolley = 22425;
-        public const uint Conflagration = 23023;
+        public const int Cleave = 22540;
+        public const int Warstomp = 24375;
+        public const int Fireballvolley = 22425;
+        public const int Conflagration = 23023;
     }
 
     struct TextIds
     {
-        public const uint SayEggsBroken1 = 0;
-        public const uint SayEggsBroken2 = 1;
-        public const uint SayEggsBroken3 = 2;
-        public const uint SayDeath = 3;
+        public const int SayEggsBroken1 = 0;
+        public const int SayEggsBroken2 = 1;
+        public const int SayEggsBroken3 = 2;
+        public const int SayDeath = 3;
     }
 
     struct CreatureIds
     {
-        public const uint EliteDrachkin = 12422;
-        public const uint EliteWarrior = 12458;
-        public const uint Warrior = 12416;
-        public const uint Mage = 12420;
-        public const uint Warlock = 12459;
+        public const int EliteDrachkin = 12422;
+        public const int EliteWarrior = 12458;
+        public const int Warrior = 12416;
+        public const int Mage = 12420;
+        public const int Warlock = 12459;
     }
 
     struct GameObjectIds
     {
-        public const uint Egg = 177807;
+        public const int Egg = 177807;
     }
 
     [Script]
@@ -66,7 +66,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
             _Reset();
 
             Initialize();
-            instance.SetData(BWLMisc.DataEggEvent, (uint)EncounterState.NotStarted);
+            instance.SetData(BWLMisc.DataEggEvent, (int)EncounterState.NotStarted);
         }
 
         public override void JustDied(Unit killer)
@@ -74,7 +74,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
             _JustDied();
             Talk(TextIds.SayDeath);
 
-            instance.SetData(BWLMisc.DataEggEvent, (uint)EncounterState.NotStarted);
+            instance.SetData(BWLMisc.DataEggEvent, (int)EncounterState.NotStarted);
         }
 
         void DoChangePhase()
@@ -111,7 +111,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
                 DoChangePhase();
         }
 
-        public override void DamageTaken(Unit who, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit who, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             // @todo this is wrong - razorgore should still take damage, he should just nuke the whole room and respawn if he dies during P1
             if (!secondPhase)
@@ -139,7 +139,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
 
         public override bool OnGossipHello(Player player)
         {
-            if (instance.GetData(BWLMisc.DataEggEvent) != (uint)EncounterState.Done)
+            if (instance.GetData(BWLMisc.DataEggEvent) != (int)EncounterState.Done)
             {
                 Creature razorgore = instance.GetCreature(DataTypes.RazorgoreTheUntamed);
                 if (razorgore != null)
@@ -159,7 +159,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
         {
             InstanceScript instance = GetCaster().GetInstanceScript();
             if (instance != null)
-                instance.SetData(BWLMisc.DataEggEvent, (uint)EncounterState.Special);
+                instance.SetData(BWLMisc.DataEggEvent, (int)EncounterState.Special);
         }
 
         public override void Register()

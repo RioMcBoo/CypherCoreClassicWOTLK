@@ -118,8 +118,8 @@ namespace Game.Maps
         {
             GridCoord p = GridDefines.ComputeGridCoord(x, y);
 
-            int gx = (int)((MapConst.MaxGrids - 1) - p.X_coord);
-            int gy = (int)((MapConst.MaxGrids - 1) - p.Y_coord);
+            int gx = (MapConst.MaxGrids - 1) - p.X_coord;
+            int gy = (MapConst.MaxGrids - 1) - p.Y_coord;
 
             return TerrainInfo.ExistMap(mapid, gx, gy) && TerrainInfo.ExistVMap(mapid, gx, gy);
         }

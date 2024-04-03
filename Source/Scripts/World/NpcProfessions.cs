@@ -12,125 +12,125 @@ namespace Scripts.World.NpcProfessions
 {
     struct SpellIds
     {
-        public const uint Weapon = 9787;
-        public const uint Armor = 9788;
-        public const uint Hammer = 17040;
-        public const uint Axe = 17041;
-        public const uint Sword = 17039;
+        public const int Weapon = 9787;
+        public const int Armor = 9788;
+        public const int Hammer = 17040;
+        public const int Axe = 17041;
+        public const int Sword = 17039;
 
-        public const uint LearnWeapon = 9789;
-        public const uint LearnArmor = 9790;
-        public const uint LearnHammer = 39099;
-        public const uint LearnAxe = 39098;
-        public const uint LearnSword = 39097;
+        public const int LearnWeapon = 9789;
+        public const int LearnArmor = 9790;
+        public const int LearnHammer = 39099;
+        public const int LearnAxe = 39098;
+        public const int LearnSword = 39097;
 
-        public const uint UnlearnWeapon = 36436;
-        public const uint UnlearnArmor = 36435;
-        public const uint UnlearnHammer = 36441;
-        public const uint UnlearnAxe = 36439;
-        public const uint UnlearnSword = 36438;
+        public const int UnlearnWeapon = 36436;
+        public const int UnlearnArmor = 36435;
+        public const int UnlearnHammer = 36441;
+        public const int UnlearnAxe = 36439;
+        public const int UnlearnSword = 36438;
 
-        public const uint RepArmor = 17451;
-        public const uint RepWeapon = 17452;
+        public const int RepArmor = 17451;
+        public const int RepWeapon = 17452;
 
-        public const uint Dragon = 10656;
-        public const uint Elemental = 10658;
-        public const uint Tribal = 10660;
+        public const int Dragon = 10656;
+        public const int Elemental = 10658;
+        public const int Tribal = 10660;
 
-        public const uint LearnDragon = 10657;
-        public const uint LearnElemental = 10659;
-        public const uint LearnTribal = 10661;
+        public const int LearnDragon = 10657;
+        public const int LearnElemental = 10659;
+        public const int LearnTribal = 10661;
 
-        public const uint UnlearnDragon = 36434;
-        public const uint UnlearnElemental = 36328;
-        public const uint UnlearnTribal = 36433;
+        public const int UnlearnDragon = 36434;
+        public const int UnlearnElemental = 36328;
+        public const int UnlearnTribal = 36433;
 
-        public const uint Goblin = 20222;
-        public const uint Gnomish = 20219;
+        public const int Goblin = 20222;
+        public const int Gnomish = 20219;
 
-        public const uint LearnGoblin = 20221;
-        public const uint LearnGnomish = 20220;
+        public const int LearnGoblin = 20221;
+        public const int LearnGnomish = 20220;
 
-        public const uint Spellfire = 26797;
-        public const uint Mooncloth = 26798;
-        public const uint Shadoweave = 26801;
+        public const int Spellfire = 26797;
+        public const int Mooncloth = 26798;
+        public const int Shadoweave = 26801;
 
-        public const uint LearnSpellfire = 26796;
-        public const uint LearnMooncloth = 26799;
-        public const uint LearnShadoweave = 26800;
+        public const int LearnSpellfire = 26796;
+        public const int LearnMooncloth = 26799;
+        public const int LearnShadoweave = 26800;
 
-        public const uint UnlearnSpellfire = 41299;
-        public const uint UnlearnMooncloth = 41558;
-        public const uint UnlearnShadoweave = 41559;
+        public const int UnlearnSpellfire = 41299;
+        public const int UnlearnMooncloth = 41558;
+        public const int UnlearnShadoweave = 41559;
 
-        public const uint Transmute = 28672;
-        public const uint Elixir = 28677;
-        public const uint Potion = 28675;
+        public const int Transmute = 28672;
+        public const int Elixir = 28677;
+        public const int Potion = 28675;
 
-        public const uint LearnTransmute = 28674;
-        public const uint LearnElixir = 28678;
-        public const uint LearnPotion = 28676;
+        public const int LearnTransmute = 28674;
+        public const int LearnElixir = 28678;
+        public const int LearnPotion = 28676;
 
-        public const uint UnlearnTransmute = 41565;
-        public const uint UnlearnElixir = 41564;
-        public const uint UnlearnPotion = 41563;
+        public const int UnlearnTransmute = 41565;
+        public const int UnlearnElixir = 41564;
+        public const int UnlearnPotion = 41563;
 
         // EngineeringTrinkets
-        public const uint LearnToEverlook = 23490;
-        public const uint LearnToGadget = 23491;
-        public const uint LearnToArea52 = 36956;
-        public const uint LearnToToshley = 36957;
+        public const int LearnToEverlook = 23490;
+        public const int LearnToGadget = 23491;
+        public const int LearnToArea52 = 36956;
+        public const int LearnToToshley = 36957;
 
-        public const uint ToEverlook = 23486;
-        public const uint ToGadget = 23489;
-        public const uint ToArea52 = 36954;
-        public const uint ToToshley = 36955;
+        public const int ToEverlook = 23486;
+        public const int ToGadget = 23489;
+        public const int ToArea52 = 36954;
+        public const int ToToshley = 36955;
     }
 
     struct CreatureIds
     {
         //Alchemy
-        public const uint TrainerTransmute = 22427; // Zarevhi
-        public const uint TrainerElixir = 19052; // Lorokeem
-        public const uint TrainerPotion = 17909; // Lauranna Thar'well
+        public const int TrainerTransmute = 22427; // Zarevhi
+        public const int TrainerElixir = 19052; // Lorokeem
+        public const int TrainerPotion = 17909; // Lauranna Thar'well
 
         //Blacksmithing
-        public const uint TrainerSmithomni1 = 11145; // Myolor Sunderfury
-        public const uint TrainerSmithomni2 = 11176; // Krathok Moltenfist
-        public const uint TrainerWeapon1 = 11146; // Ironus Coldsteel
-        public const uint TrainerWeapon2 = 11178; // Borgosh Corebender
-        public const uint TrainerArmor1 = 5164; // Grumnus Steelshaper
-        public const uint TrainerArmor2 = 11177; // Okothos Ironrager
-        public const uint TrainerHammer = 11191; // Lilith the Lithe
-        public const uint TrainerAxe = 11192; // Kilram
-        public const uint TrainerSword = 11193; // Seril Scourgebane
+        public const int TrainerSmithomni1 = 11145; // Myolor Sunderfury
+        public const int TrainerSmithomni2 = 11176; // Krathok Moltenfist
+        public const int TrainerWeapon1 = 11146; // Ironus Coldsteel
+        public const int TrainerWeapon2 = 11178; // Borgosh Corebender
+        public const int TrainerArmor1 = 5164; // Grumnus Steelshaper
+        public const int TrainerArmor2 = 11177; // Okothos Ironrager
+        public const int TrainerHammer = 11191; // Lilith the Lithe
+        public const int TrainerAxe = 11192; // Kilram
+        public const int TrainerSword = 11193; // Seril Scourgebane
 
         //Leatherworking
-        public const uint TrainerDragon1 = 7866; // Peter Galen
-        public const uint TrainerDragon2 = 7867; // Thorkaf Dragoneye
-        public const uint TrainerElemental1 = 7868; // Sarah Tanner
-        public const uint TrainerElemental2 = 7869; // Brumn Winterhoof
-        public const uint TrainerTribal1 = 7870; // Caryssia Moonhunter
-        public const uint TrainerTribal2 = 7871; // Se'Jib
+        public const int TrainerDragon1 = 7866; // Peter Galen
+        public const int TrainerDragon2 = 7867; // Thorkaf Dragoneye
+        public const int TrainerElemental1 = 7868; // Sarah Tanner
+        public const int TrainerElemental2 = 7869; // Brumn Winterhoof
+        public const int TrainerTribal1 = 7870; // Caryssia Moonhunter
+        public const int TrainerTribal2 = 7871; // Se'Jib
 
         //Tailoring
-        public const uint TrainerSpellfire = 22213; // Gidge Spellweaver
-        public const uint TrainerMooncloth = 22208; // Nasmara Moonsong
-        public const uint TrainerShadoweave = 22212; // Andrion Darkspinner
+        public const int TrainerSpellfire = 22213; // Gidge Spellweaver
+        public const int TrainerMooncloth = 22208; // Nasmara Moonsong
+        public const int TrainerShadoweave = 22212; // Andrion Darkspinner
 
         // EngineeringTrinkets
-        public const uint Zap = 14742;
-        public const uint Jhordy = 14743;
-        public const uint Kablam = 21493;
-        public const uint Smiles = 21494;
+        public const int Zap = 14742;
+        public const int Jhordy = 14743;
+        public const int Kablam = 21493;
+        public const int Smiles = 21494;
     }
 
     struct QuestIds
     {
         //Alchemy
-        public const uint MasterTransmute = 10899;
-        public const uint MasterElixir = 10902;
-        public const uint MasterPotion = 10897;
+        public const int MasterTransmute = 10899;
+        public const int MasterElixir = 10902;
+        public const int MasterPotion = 10897;
     }
 
     struct ProfessionConst
@@ -138,16 +138,16 @@ namespace Scripts.World.NpcProfessions
         public const string GossipTextBrowseGoods = "I'd like to browse your goods.";
         public const string GossipTextTrain = "Train me!";
 
-        public const uint RepArmor = 46;
-        public const uint RepWeapon = 289;
-        public const uint RepHammer = 569;
-        public const uint RepAxe = 570;
-        public const uint RepSword = 571;
+        public const int RepArmor = 46;
+        public const int RepWeapon = 289;
+        public const int RepHammer = 569;
+        public const int RepAxe = 570;
+        public const int RepSword = 571;
 
-        public const uint TrainerIdAlchemy = 122;
-        public const uint TrainerIdBlacksmithing = 80;
-        public const uint TrainerIdLeatherworking = 103;
-        public const uint TrainerIdTailoring = 117;
+        public const int TrainerIdAlchemy = 122;
+        public const int TrainerIdBlacksmithing = 80;
+        public const int TrainerIdLeatherworking = 103;
+        public const int TrainerIdTailoring = 117;
 
         public const string TalkMustUnlearnWeapon = "You must forget your weapon type specialty before I can help you. Go to Everlook in Winterspring and seek help there.";
 
@@ -159,9 +159,9 @@ namespace Scripts.World.NpcProfessions
         public const string TalkAxeUnlearn = "Forgetting your Axesmithing skill is not something to do lightly. If you choose to abandon it you will forget all recipes that require Axesmithing to create!";
         public const string TalkSwordUnlearn = "Forgetting your Swordsmithing skill is not something to do lightly. If you choose to abandon it you will forget all recipes that require Swordsmithing to create!";
 
-        public const uint GossipSenderLearn = 50;
-        public const uint GossipSenderUnlearn = 51;
-        public const uint GossipSenderCheck = 52;
+        public const int GossipSenderLearn = 50;
+        public const int GossipSenderUnlearn = 51;
+        public const int GossipSenderCheck = 52;
 
         public const string GossipLearnPotion = "Please teach me how to become a Master of Potions, Lauranna";
         public const string GossipUnlearnPotion = "I wish to unlearn Potion Mastery";
@@ -204,30 +204,30 @@ namespace Scripts.World.NpcProfessions
 
         public const string BoxUnlearnTailorSpec = "Do you really want to unlearn your tailoring specialty and lose all associated recipes? \n Cost: ";
 
-        public const uint GossipOptionAlchemy = 0;
-        public const uint GossipOptionBlacksmithing = 1;
-        public const uint GossipOptionEnchanting = 2;
-        public const uint GossipOptionEngineering = 3;
-        public const uint GossipOptionHerbalism = 4;
-        public const uint GossipOptionInscription = 5;
-        public const uint GossipOptionJewelcrafting = 6;
-        public const uint GossipOptionLeatherworking = 7;
-        public const uint GossipOptionMining = 8;
-        public const uint GossipOptionSkinning = 9;
-        public const uint GossipOptionTailoring = 10;
-        public const uint GossipOptionMulti = 11;
+        public const int GossipOptionAlchemy = 0;
+        public const int GossipOptionBlacksmithing = 1;
+        public const int GossipOptionEnchanting = 2;
+        public const int GossipOptionEngineering = 3;
+        public const int GossipOptionHerbalism = 4;
+        public const int GossipOptionInscription = 5;
+        public const int GossipOptionJewelcrafting = 6;
+        public const int GossipOptionLeatherworking = 7;
+        public const int GossipOptionMining = 8;
+        public const int GossipOptionSkinning = 9;
+        public const int GossipOptionTailoring = 10;
+        public const int GossipOptionMulti = 11;
 
-        public const uint GossipMenuHerbalism = 12188;
-        public const uint GossipMenuMining = 12189;
-        public const uint GossipMenuSkinning = 12190;
-        public const uint GossipMenuAlchemy = 12191;
-        public const uint GossipMenuBlacksmithing = 12192;
-        public const uint GossipMenuEnchanting = 12193;
-        public const uint GossipMenuEngineering = 12195;
-        public const uint GossipMenuInscription = 12196;
-        public const uint GossipMenuJewelcrafting = 12197;
-        public const uint GossipMenuLeatherworking = 12198;
-        public const uint GossipMenuTailoring = 12199;
+        public const int GossipMenuHerbalism = 12188;
+        public const int GossipMenuMining = 12189;
+        public const int GossipMenuSkinning = 12190;
+        public const int GossipMenuAlchemy = 12191;
+        public const int GossipMenuBlacksmithing = 12192;
+        public const int GossipMenuEnchanting = 12193;
+        public const int GossipMenuEngineering = 12195;
+        public const int GossipMenuInscription = 12196;
+        public const int GossipMenuJewelcrafting = 12197;
+        public const int GossipMenuLeatherworking = 12198;
+        public const int GossipMenuTailoring = 12199;
 
         public const string GossipItemZap = "This Dimensional Imploder sounds dangerous! How can I make one?";
         public const string GossipItemJhordy = "I must build a beacon for this marvelous device!";
@@ -245,7 +245,7 @@ namespace Scripts.World.NpcProfessions
 
         public static int DoMedUnlearnCost(Player player)                     //blacksmith, leatherwork
         {
-            uint level = player.GetLevel();
+            int level = player.GetLevel();
             if (level < 51)
                 return 250000;
             else if (level < 66)
@@ -256,14 +256,14 @@ namespace Scripts.World.NpcProfessions
 
         public static int DoLowUnlearnCost(Player player)                     //blacksmith
         {
-            uint level = player.GetLevel();
+            int level = player.GetLevel();
             if (level < 66)
                 return 50000;
             else
                 return 100000;
         }
 
-        public static void ProcessCastaction(Player player, Creature creature, uint spellId, uint triggeredSpellId, int Cost)
+        public static void ProcessCastaction(Player player, Creature creature, int spellId, int triggeredSpellId, int Cost)
         {
             if (!(spellId != 0 && player.HasSpell(spellId)) && player.HasEnoughMoney(Cost))
             {
@@ -275,7 +275,7 @@ namespace Scripts.World.NpcProfessions
             player.CloseGossipMenu();
         }
 
-        static bool EquippedOk(Player player, uint spellId)
+        static bool EquippedOk(Player player, int spellId)
         {
             SpellInfo spell = SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spell == null)
@@ -283,14 +283,14 @@ namespace Scripts.World.NpcProfessions
 
             foreach (SpellEffectInfo spellEffectInfo in spell.GetEffects())
             {
-                uint reqSpell = spellEffectInfo.TriggerSpell;
+                int reqSpell = spellEffectInfo.TriggerSpell;
                 if (reqSpell == 0)
                     continue;
 
                 Item item;
                 for (byte j = EquipmentSlot.Start; j < EquipmentSlot.End; ++j)
                 {
-                    item = player.GetItemByPos(InventorySlots.Bag0, j);
+                    item = player.GetItemByPos(j);
                     if (item != null && item.GetTemplate().GetRequiredSpell() == reqSpell)
                     {
                         //player has item equipped that require specialty. Not allow to unlearn, player has to unequip first
@@ -302,7 +302,7 @@ namespace Scripts.World.NpcProfessions
             return true;
         }
 
-        static void ProfessionUnlearnSpells(Player player, uint type)
+        static void ProfessionUnlearnSpells(Player player, int type)
         {
             switch (type)
             {
@@ -395,7 +395,7 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        public static void ProcessUnlearnAction(Player player, Creature creature, uint spellId, uint alternativeSpellId, int Cost)
+        public static void ProcessUnlearnAction(Player player, Creature creature, int spellId, int alternativeSpellId, int Cost)
         {
             if (EquippedOk(player, spellId))
             {
@@ -468,7 +468,7 @@ namespace Scripts.World.NpcProfessions
             return true;
         }
 
-        void SendActionMenu(Player player, uint action)
+        void SendActionMenu(Player player, int action)
         {
             switch (action)
             {
@@ -501,7 +501,7 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        void SendConfirmLearn(Player player, uint action)
+        void SendConfirmLearn(Player player, int action)
         {
             if (action != 0)
             {
@@ -526,7 +526,7 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        void SendConfirmUnlearn(Player player, uint action)
+        void SendConfirmUnlearn(Player player, int action)
         {
             if (action != 0)
             {
@@ -551,10 +551,10 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
-            uint sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            int sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
+            int action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             switch (sender)
             {
@@ -598,7 +598,7 @@ namespace Scripts.World.NpcProfessions
             if (me.IsTrainer())
                 player.AddGossipItem(GossipOptionNpc.Trainer, ProfessionConst.GossipTextTrain, eTradeskill.GossipSenderMain, eTradeskill.GossipActionTrain);
 
-            uint creatureId = me.GetEntry();
+            int creatureId = me.GetEntry();
             //Weaponsmith & Armorsmith
             if (player.GetBaseSkillValue(SkillType.Blacksmithing) >= 225)
             {
@@ -653,7 +653,7 @@ namespace Scripts.World.NpcProfessions
             return true;
         }
 
-        void SendActionMenu(Player player, uint action)
+        void SendActionMenu(Player player, int action)
         {
             switch (action)
             {
@@ -719,7 +719,7 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        void SendConfirmLearn(Player player, uint action)
+        void SendConfirmLearn(Player player, int action)
         {
             if (action != 0)
             {
@@ -744,7 +744,7 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        void SendConfirmUnlearn(Player player, uint action)
+        void SendConfirmUnlearn(Player player, int action)
         {
             if (action != 0)
             {
@@ -778,10 +778,10 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
-            uint sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            int sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
+            int action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             switch (sender)
             {
@@ -810,7 +810,7 @@ namespace Scripts.World.NpcProfessions
     {
         public npc_engineering_tele_trinket(Creature creature) : base(creature) { }
 
-        bool CanLearn(Player player, uint textId, uint altTextId, uint skillValue, uint reqSpellId, uint spellId, ref uint npcTextId)
+        bool CanLearn(Player player, int textId, int altTextId, int skillValue, int reqSpellId, int spellId, ref int npcTextId)
         {
             bool res = false;
             npcTextId = textId;
@@ -826,7 +826,7 @@ namespace Scripts.World.NpcProfessions
 
         public override bool OnGossipHello(Player player)
         {
-            uint npcTextId = 0;
+            int npcTextId = 0;
             string gossipItem = "";
             bool canLearn = false;
 
@@ -864,10 +864,10 @@ namespace Scripts.World.NpcProfessions
             return true;
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
-            uint sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            int sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
+            int action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             if (action == eTradeskill.GossipActionInfoDef + 1)
                 player.CloseGossipMenu();
@@ -936,7 +936,7 @@ namespace Scripts.World.NpcProfessions
             return true;
         }
 
-        void SendActionMenu(Player player, uint action)
+        void SendActionMenu(Player player, int action)
         {
             switch (action)
             {
@@ -959,7 +959,7 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        void SendConfirmUnlearn(Player player, uint action)
+        void SendConfirmUnlearn(Player player, int action)
         {
             if (action != 0)
             {
@@ -987,10 +987,10 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
-            uint sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            int sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
+            int action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             switch (sender)
             {
@@ -1063,7 +1063,7 @@ namespace Scripts.World.NpcProfessions
             return true;
         }
 
-        void SendActionMenu(Player player, uint action)
+        void SendActionMenu(Player player, int action)
         {
             switch (action)
             {
@@ -1096,7 +1096,7 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        void SendConfirmLearn(Player player, uint action)
+        void SendConfirmLearn(Player player, int action)
         {
             if (action != 0)
             {
@@ -1121,7 +1121,7 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        void SendConfirmUnlearn(Player player, uint action)
+        void SendConfirmUnlearn(Player player, int action)
         {
             if (action != 0)
             {
@@ -1146,10 +1146,10 @@ namespace Scripts.World.NpcProfessions
             }
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
-            uint sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            int sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
+            int action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             switch (sender)
             {

@@ -540,9 +540,9 @@ namespace Game.Entities
 
         public bool HealthAbovePctHealed(int pct, int heal) { return GetHealth() + heal > CountPctFromMaxHealth(pct); }
 
-        public long CountPctFromMaxHealth(int pct) { return (long)MathFunctions.CalculatePct(GetMaxHealth(), pct); }
+        public long CountPctFromMaxHealth(int pct) { return MathFunctions.CalculatePct(GetMaxHealth(), pct); }
 
-        public long CountPctFromCurHealth(int pct) { return (long)MathFunctions.CalculatePct(GetHealth(), pct); }
+        public long CountPctFromCurHealth(int pct) { return MathFunctions.CalculatePct(GetHealth(), pct); }
 
         public virtual float GetHealthMultiplierForTarget(WorldObject target) { return 1.0f; }
 
@@ -605,7 +605,7 @@ namespace Game.Entities
                 return;
 
             int cur_power = GetPower(powerType);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxPower, (int)powerIndex), val);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxPower, powerIndex), val);
 
             // group update
             if (IsTypeId(TypeId.Player))
@@ -634,8 +634,8 @@ namespace Game.Entities
             if (maxPower < val)
                 val = maxPower;
 
-            int oldPower = m_unitData.Power[(int)powerIndex];
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)powerIndex), val);
+            int oldPower = m_unitData.Power[powerIndex];
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, powerIndex), val);
 
             if (IsInWorld && withPowerUpdate)
             {
@@ -670,7 +670,7 @@ namespace Game.Entities
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return 0;
 
-            return m_unitData.Power[(int)powerIndex];
+            return m_unitData.Power[powerIndex];
         }
 
         public int GetMaxPower(PowerType powerType)
@@ -679,13 +679,13 @@ namespace Game.Entities
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return 0;
 
-            return (int)(uint)m_unitData.MaxPower[(int)powerIndex];
+            return (int)(uint)m_unitData.MaxPower[powerIndex];
         }
 
         public virtual int GetCreatePowerValue(PowerType powerType)
         {
             if (powerType == PowerType.Mana)
-                return (int)GetCreateMana();
+                return GetCreateMana();
 
             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
             if (powerTypeEntry != null)
@@ -919,7 +919,7 @@ namespace Game.Entities
         
         float GetUnitDodgeChance(WeaponAttackType attType, Unit victim)
         {
-            int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
+            int levelDiff = victim.GetLevelForTarget(this) - GetLevelForTarget(victim);
 
             float chance = 0.0f;
             float levelBonus = 0.0f;
@@ -956,7 +956,7 @@ namespace Game.Entities
 
         float GetUnitParryChance(WeaponAttackType attType, Unit victim)
         {
-            int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
+            int levelDiff = victim.GetLevelForTarget(this) - GetLevelForTarget(victim);
 
             float chance = 0.0f;
             float levelBonus = 0.0f;
@@ -1004,7 +1004,7 @@ namespace Game.Entities
 
         float GetUnitBlockChance(WeaponAttackType attType, Unit victim)
         {
-            int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
+            int levelDiff = victim.GetLevelForTarget(this) - GetLevelForTarget(victim);
 
             float chance = 0.0f;
             float levelBonus = 0.0f;
@@ -1487,7 +1487,7 @@ namespace Game.Entities
             // Magic damage modifiers implemented in Unit.SpellDamageBonusDone
             // This information for client side use only
             // Get healing bonus for all schools
-            SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePos), (int)SpellBaseHealingBonusDone(SpellSchoolMask.All));
+            SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePos), SpellBaseHealingBonusDone(SpellSchoolMask.All));
             // Get damage bonus for all schools
             var modDamageAuras = GetAuraEffectsByType(AuraType.ModDamageDone);
             for (int i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
@@ -1595,7 +1595,7 @@ namespace Game.Entities
 
         public void UpdateShieldBlockValue()
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), (int)GetShieldBlockValue());
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), GetShieldBlockValue());
         }
 
         public override void UpdateArmor()

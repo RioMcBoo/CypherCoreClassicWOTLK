@@ -156,7 +156,7 @@ namespace Game.Achievements
                     {
                         CriteriaProgress criteriaProgress = GetCriteriaProgress(criteriaTree.Criteria);
                         if (criteriaProgress != null)
-                            progress += (long)criteriaProgress.Counter;
+                            progress += criteriaProgress.Counter;
                     }
                 });
                 return progress >= tree.Entry.Amount;

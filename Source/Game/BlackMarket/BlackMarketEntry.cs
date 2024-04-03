@@ -173,7 +173,7 @@ namespace Game.BlackMarket
 
             _bidder = player.GetGUID().GetCounter();
 
-            player.ModifyMoney(-(long)bid);
+            player.ModifyMoney(-bid);
 
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_BLACKMARKET_AUCTIONS);

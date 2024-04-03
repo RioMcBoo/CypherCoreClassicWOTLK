@@ -4,14 +4,10 @@
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
-using Framework.Dynamic;
-using Framework.IO;
 using Game.Entities;
-using Game.Networking;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using static Game.Networking.Packets.ReportPvPPlayerAFKResult;
 
 namespace Game.Networking.Packets
 {

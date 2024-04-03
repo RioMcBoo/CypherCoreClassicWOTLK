@@ -1097,7 +1097,7 @@ namespace Scripts.Spells.Azerite
         void ModDest(ref SpellDestination dest)
         {
             float dist = GetEffectInfo(0).CalcRadius(GetCaster());
-            float angle = RandomHelper.FRand(0.75f, 1.25f) * (float)(MathF.PI);
+            float angle = RandomHelper.FRand(0.75f, 1.25f) * MathF.PI;
 
             Position pos = GetCaster().GetNearPosition(dist, angle);
             dest.Relocate(pos);

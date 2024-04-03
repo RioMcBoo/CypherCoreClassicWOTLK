@@ -20,16 +20,16 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_absorb0_hitlimit1 : AuraScript
     {
-        uint limit;
+        int limit;
 
         public override bool Load()
         {
             // Max absorb stored in 1 dummy effect
-            limit = (uint)GetSpellInfo().GetEffect(1).CalcValue();
+            limit = GetSpellInfo().GetEffect(1).CalcValue();
             return true;
         }
 
-        void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
         {
             absorbAmount = Math.Min(limit, absorbAmount);
         }
@@ -43,11 +43,11 @@ namespace Scripts.Spells.Generic
     [Script] // 28764 - Adaptive Warding (Frostfire Regalia Set)
     class spell_gen_adaptive_warding : AuraScript
     {
-        const uint SpellGenAdaptiveWardingFire = 28765;
-        const uint SpellGenAdaptiveWardingNature = 28768;
-        const uint SpellGenAdaptiveWardingFrost = 28766;
-        const uint SpellGenAdaptiveWardingShadow = 28769;
-        const uint SpellGenAdaptiveWardingArcane = 28770;
+        const int SpellGenAdaptiveWardingFire = 28765;
+        const int SpellGenAdaptiveWardingNature = 28768;
+        const int SpellGenAdaptiveWardingFrost = 28766;
+        const int SpellGenAdaptiveWardingShadow = 28769;
+        const int SpellGenAdaptiveWardingArcane = 28770;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -74,7 +74,7 @@ namespace Scripts.Spells.Generic
         {
             PreventDefaultAction();
 
-            uint spellId = eventInfo.GetSchoolMask().GetFirstSchool() switch
+            int spellId = eventInfo.GetSchoolMask().GetFirstSchool() switch
             {
                 SpellSchools.Fire => SpellGenAdaptiveWardingFire,
                 SpellSchools.Nature => SpellGenAdaptiveWardingNature,
@@ -115,8 +115,8 @@ namespace Scripts.Spells.Generic
     [Script] // 46221 - Animal Blood
     class spell_gen_animal_blood : AuraScript
     {
-        const uint SpellAnimalBlood = 46221;
-        const uint SpellSpawnBloodPool = 63471;
+        const int SpellAnimalBlood = 46221;
+        const int SpellSpawnBloodPool = 63471;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -321,7 +321,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_bandage : SpellScript
     {
-        const uint SpellRecentlyBandaged = 11196;
+        const int SpellRecentlyBandaged = 11196;
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellRecentlyBandaged);
@@ -355,7 +355,7 @@ namespace Scripts.Spells.Generic
     [Script] // 193970 - Mercenary Shapeshift
     class spell_gen_battleground_mercenary_shapeshift : AuraScript
     {
-        List<uint> RacialSkills = new();
+        List<SkillType> RacialSkills = new();
 
         Dictionary<Race, Race[]> RaceInfo = new()
         {
@@ -386,33 +386,33 @@ namespace Scripts.Spells.Generic
             { Race.MechaGnome , new[] { Race.Vulpera } },
         };
 
-        Dictionary<Race, uint[]> RaceDisplayIds = new()
+        Dictionary<Race, int[]> RaceDisplayIds = new()
         {
-            {  Race.Human , new uint[] { 55239, 55238 } },
-            {  Race.Orc , new uint[] { 55257, 55256 } },
-            {  Race.Dwarf , new uint[] { 55241, 55240 } },
-            {  Race.NightElf , new uint[] { 55243, 55242 } },
-            {  Race.Undead , new uint[] { 55259, 55258 } },
-            {  Race.Tauren , new uint[] { 55261, 55260 } },
-            {  Race.Gnome , new uint[] { 55245, 55244 } },
-            {  Race.Troll , new uint[] { 55263, 55262 } },
-            { Race.Goblin , new uint[] { 55267, 57244 } },
-            {  Race.BloodElf , new uint[] { 55265, 55264 } },
-            { Race.Draenei , new uint[] { 55247, 55246 } },
-            {  Race.Worgen , new uint[] { 55255, 55254 } },
-            {  Race.PandarenNeutral , new uint[] { 55253, 55252 } }, // not verified, might be swapped with RacePandarenHorde
-            {  Race.PandarenAlliance , new uint[] { 55249, 55248 } },
-            {  Race.PandarenHorde , new uint[] { 55251, 55250 } },
-            {  Race.Nightborne , new uint[] { 82375, 82376 } },
-            {  Race.HighmountainTauren , new uint[] { 82377, 82378 } },
-            {  Race.VoidElf , new uint[] { 82371, 82372 } },
-            {  Race.LightforgedDraenei , new uint[] { 82373, 82374 } },
-            {  Race.ZandalariTroll , new uint[] { 88417, 88416 } },
-            {  Race.KulTiran , new uint[] { 88414, 88413 } },
-            {  Race.DarkIronDwarf , new uint[] { 88409, 88408 } },
-            {  Race.Vulpera , new uint[] { 94999, 95001 } },
-            {  Race.MagharOrc , new uint[] { 88420, 88410 } },
-            {  Race.MechaGnome , new uint[] { 94998, 95000 } },
+            {  Race.Human , new int[] { 55239, 55238 } },
+            {  Race.Orc , new int[] { 55257, 55256 } },
+            {  Race.Dwarf , new int[] { 55241, 55240 } },
+            {  Race.NightElf , new int[] { 55243, 55242 } },
+            {  Race.Undead , new int[] { 55259, 55258 } },
+            {  Race.Tauren , new int[] { 55261, 55260 } },
+            {  Race.Gnome , new int[] { 55245, 55244 } },
+            {  Race.Troll , new int[] { 55263, 55262 } },
+            { Race.Goblin , new int[] { 55267, 57244 } },
+            {  Race.BloodElf , new int[] { 55265, 55264 } },
+            { Race.Draenei , new int[] { 55247, 55246 } },
+            {  Race.Worgen , new int[] { 55255, 55254 } },
+            {  Race.PandarenNeutral , new int[] { 55253, 55252 } }, // not verified, might be swapped with RacePandarenHorde
+            {  Race.PandarenAlliance , new int[] { 55249, 55248 } },
+            {  Race.PandarenHorde , new int[] { 55251, 55250 } },
+            {  Race.Nightborne , new int[] { 82375, 82376 } },
+            {  Race.HighmountainTauren , new int[] { 82377, 82378 } },
+            {  Race.VoidElf , new int[] { 82371, 82372 } },
+            {  Race.LightforgedDraenei , new int[] { 82373, 82374 } },
+            {  Race.ZandalariTroll , new int[] { 88417, 88416 } },
+            {  Race.KulTiran , new int[] { 88414, 88413 } },
+            {  Race.DarkIronDwarf , new int[] { 88409, 88408 } },
+            {  Race.Vulpera , new int[] { 94999, 95001 } },
+            {  Race.MagharOrc , new int[] { 88420, 88410 } },
+            {  Race.MechaGnome , new int[] { 94998, 95000 } },
         };
 
         Race GetReplacementRace(Race nativeRace, Class playerClass)
@@ -426,7 +426,7 @@ namespace Scripts.Spells.Generic
             return Race.None;
         }
 
-        uint GetDisplayIdForRace(Race race, Gender gender)
+        int GetDisplayIdForRace(Race race, Gender gender)
         {
             var displayIds = RaceDisplayIds.LookupByKey(race);
             if (!displayIds.Empty())
@@ -439,27 +439,27 @@ namespace Scripts.Spells.Generic
         {
             foreach (var (race, otherRaces) in RaceInfo)
             {
-                if (!CliDB.ChrRacesStorage.ContainsKey(race))
+                if (!CliDB.ChrRacesStorage.ContainsKey((int)race))
                     return false;
 
                 foreach (Race otherRace in otherRaces)
-                    if (!CliDB.ChrRacesStorage.ContainsKey(otherRace))
+                    if (!CliDB.ChrRacesStorage.ContainsKey((int)otherRace))
                         return false;
             }
 
             foreach (var (race, displayIds) in RaceDisplayIds)
             {
-                if (!CliDB.ChrRacesStorage.ContainsKey(race))
+                if (!CliDB.ChrRacesStorage.ContainsKey((int)race))
                     return false;
 
-                foreach (uint displayId in displayIds)
+                foreach (var displayId in displayIds)
                     if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(displayId))
                         return false;
             }
 
             RacialSkills.Clear();
             foreach (var skillLine in CliDB.SkillLineStorage.Values)
-                if (skillLine.GetFlags().HasFlag(SkillLineFlags.RacialForThePurposeOfTemporaryRaceChange))
+                if (skillLine.HasFlag(SkillLineFlags.RacialForThePurposeOfTemporaryRaceChange))
                     RacialSkills.Add(skillLine.Id);
 
             return true;
@@ -472,7 +472,7 @@ namespace Scripts.Spells.Generic
             if (otherFactionRace == Race.None)
                 return;
 
-            uint displayId = GetDisplayIdForRace(otherFactionRace, owner.GetNativeGender());
+            int displayId = GetDisplayIdForRace(otherFactionRace, owner.GetNativeGender());
             if (displayId != 0)
                 owner.SetDisplayId(displayId);
 
@@ -521,8 +521,8 @@ namespace Scripts.Spells.Generic
     [Script] // Blood Reserve - 64568
     class spell_gen_blood_reserve : AuraScript
     {
-        const uint SpellGenBloodReserveAura = 64568;
-        const uint SpellGenBloodReserveHeal = 64569;
+        const int SpellGenBloodReserveAura = 64568;
+        const int SpellGenBloodReserveHeal = 64569;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -560,11 +560,11 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_bonked : SpellScript
     {
-        const uint SpellBonked = 62991;
-        const uint SpellFoamSwordDefeat = 62994;
-        const uint SpellOnGuard = 62972;
+        const int SpellBonked = 62991;
+        const int SpellFoamSwordDefeat = 62994;
+        const int SpellOnGuard = 62972;
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Player target = GetHitPlayer();
             if (target != null)
@@ -596,19 +596,19 @@ namespace Scripts.Spells.Generic
     [Script("spell_gen_tournament_counterattack")]
     class spell_gen_break_shield : SpellScript
     {
-        const uint SpellBreakShieldDamage2K = 62626;
-        const uint SpellBreakShieldDamage10K = 64590;
+        const int SpellBreakShieldDamage2K = 62626;
+        const int SpellBreakShieldDamage10K = 64590;
 
-        const uint SpellBreakShieldTriggerFactionMounts = 62575; // Also on ToC5 mounts
-        const uint SpellBreakShieldTriggerCampaingWarhorse = 64595;
-        const uint SpellBreakShieldTriggerUnk = 66480;
+        const int SpellBreakShieldTriggerFactionMounts = 62575; // Also on ToC5 mounts
+        const int SpellBreakShieldTriggerCampaingWarhorse = 64595;
+        const int SpellBreakShieldTriggerUnk = 66480;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(62552, 62719, 64100, 66482);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             Unit target = GetHitUnit();
 
@@ -616,7 +616,7 @@ namespace Scripts.Spells.Generic
             {
                 case 0: // On spells wich trigger the damaging spell (and also the visual)
                 {
-                    uint spellId;
+                    int spellId;
 
                     switch (GetSpellInfo().Id)
                     {
@@ -679,19 +679,19 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellEffect((spellInfo.Id, 2)) && ValidateSpellInfo((uint)(spellInfo.GetEffect(2).CalcValue()));
+            return ValidateSpellEffect((spellInfo.Id, 2)) && ValidateSpellInfo(spellInfo.GetEffect(2).CalcValue());
         }
 
         void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit caster = GetCaster();
             if (caster != null)
-                caster.CastSpell(GetTarget(), (uint)GetEffectInfo(2).CalcValue());
+                caster.CastSpell(GetTarget(), GetEffectInfo(2).CalcValue());
         }
 
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().RemoveAurasDueToSpell((uint)GetEffectInfo(2).CalcValue(), GetCasterGUID());
+            GetTarget().RemoveAurasDueToSpell(GetEffectInfo(2).CalcValue(), GetCasterGUID());
         }
 
         public override void Register()
@@ -704,7 +704,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_cannibalize : SpellScript
     {
-        const uint SpellCannibalizeTriggered = 20578;
+        const int SpellCannibalizeTriggered = 20578;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -726,7 +726,7 @@ namespace Scripts.Spells.Generic
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellCannibalizeTriggered, false);
         }
@@ -761,14 +761,14 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_chaos_blast : SpellScript
     {
-        const uint SpellChaosBlast = 37675;
+        const int SpellChaosBlast = 37675;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellChaosBlast);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             int basepoints0 = 100;
             Unit caster = GetCaster();
@@ -790,7 +790,7 @@ namespace Scripts.Spells.Generic
     [Script] // 28471 - ClearAll
     class spell_clear_all : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit caster = GetCaster();
             caster.RemoveAllAurasOnDeath();
@@ -805,12 +805,12 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_clone : SpellScript
     {
-        const uint SpellNightmareFigmentMirrorImage = 57528;
+        const int SpellNightmareFigmentMirrorImage = 57528;
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
+            GetHitUnit().CastSpell(GetCaster(), GetEffectValue(), true);
         }
 
         public override void Register()
@@ -831,10 +831,10 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_clone_weapon : SpellScript
     {
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
+            GetHitUnit().CastSpell(GetCaster(), GetEffectValue(), true);
         }
 
         public override void Register()
@@ -846,16 +846,16 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_clone_weapon_AuraScript : AuraScript
     {
-        const uint SpellCopyWeaponAura = 41054;
-        const uint SpellCopyWeapon2Aura = 63418;
-        const uint SpellCopyWeapon3Aura = 69893;
+        const int SpellCopyWeaponAura = 41054;
+        const int SpellCopyWeapon2Aura = 63418;
+        const int SpellCopyWeapon3Aura = 69893;
 
-        const uint SpellCopyOffhandAura = 45205;
-        const uint SpellCopyOffhand2Aura = 69896;
+        const int SpellCopyOffhandAura = 45205;
+        const int SpellCopyOffhand2Aura = 69896;
 
-        const uint SpellCopyRangedAura = 57594;
+        const int SpellCopyRangedAura = 57594;
 
-        uint prevItem;
+        int prevItem;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -999,15 +999,15 @@ namespace Scripts.Spells.Generic
     [Script] // 63845 - Create Lance
     class spell_gen_create_lance : SpellScript
     {
-        const uint SpellCreateLanceAlliance = 63914;
-        const uint SpellCreateLanceHorde = 63919;
+        const int SpellCreateLanceAlliance = 63914;
+        const int SpellCreateLanceHorde = 63919;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellCreateLanceAlliance, SpellCreateLanceHorde);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
@@ -1031,13 +1031,13 @@ namespace Scripts.Spells.Generic
     [Script("spell_gen_silver_covenant_disguise")]
     class spell_gen_dalaran_disguise : SpellScript
     {
-        const uint SpellSunreaverDisguiseTrigger = 69672;
-        const uint SpellSunreaverDisguiseFemale = 70973;
-        const uint SpellSunreaverDisguiseMale = 70974;
+        const int SpellSunreaverDisguiseTrigger = 69672;
+        const int SpellSunreaverDisguiseFemale = 70973;
+        const int SpellSunreaverDisguiseMale = 70974;
 
-        const uint SpellSilverCovenantDisguiseTrigger = 69673;
-        const uint SpellSilverCovenantDisguiseFemale = 70971;
-        const uint SpellSilverCovenantDisguiseMale = 70972;
+        const int SpellSilverCovenantDisguiseTrigger = 69673;
+        const int SpellSilverCovenantDisguiseFemale = 70971;
+        const int SpellSilverCovenantDisguiseMale = 70972;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1054,14 +1054,14 @@ namespace Scripts.Spells.Generic
             return false;
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Player player = GetHitPlayer();
             if (player != null)
             {
                 Gender gender = player.GetNativeGender();
 
-                uint spellId = GetSpellInfo().Id;
+                int spellId = GetSpellInfo().Id;
 
                 switch (spellId)
                 {
@@ -1161,9 +1161,9 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_defend : AuraScript
     {
-        const uint SpellVisualShield1 = 63130;
-        const uint SpellVisualShield2 = 63131;
-        const uint SpellVisualShield3 = 63132;
+        const int SpellVisualShield1 = 63130;
+        const int SpellVisualShield2 = 63131;
+        const int SpellVisualShield3 = 63132;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1256,7 +1256,7 @@ namespace Scripts.Spells.Generic
             return GetCaster().GetTypeId() == TypeId.Unit;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) || GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))
                 GetCaster().ToCreature().DespawnOrUnsummon();
@@ -1271,7 +1271,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_despawn_target : SpellScript
     {
-        void HandleDespawn(uint effIndex)
+        void HandleDespawn(int effIndex)
         {
             if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) || GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))
             {
@@ -1290,7 +1290,7 @@ namespace Scripts.Spells.Generic
     [Script] // 70769 Divine Storm!
     class spell_gen_divine_storm_cd_reset : SpellScript
     {
-        const uint SpellDivineStorm = 53385;
+        const int SpellDivineStorm = 53385;
 
         public override bool Load()
         {
@@ -1302,7 +1302,7 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellDivineStorm);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetCaster().GetSpellHistory().ResetCooldown(SpellDivineStorm, true);
         }
@@ -1316,7 +1316,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_ds_flush_knockback : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             // Here the target is the water spout and determines the position where the player is knocked from
             Unit target = GetHitUnit();
@@ -1343,15 +1343,15 @@ namespace Scripts.Spells.Generic
     [Script] // 50051 - Ethereal Pet Aura
     class spell_ethereal_pet_AuraScript : AuraScript
     {
-        const uint NpcEtherealSoulTrader = 27914;
+        const int NpcEtherealSoulTrader = 27914;
 
-        const uint SayStealEssence = 1;
+        const int SayStealEssence = 1;
 
-        const uint SpellStealEssenceVisual = 50101;
+        const int SpellStealEssenceVisual = 50101;
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            uint levelDiff = (uint)Math.Abs(GetTarget().GetLevel() - eventInfo.GetProcTarget().GetLevel());
+            int levelDiff = Math.Abs(GetTarget().GetLevel() - eventInfo.GetProcTarget().GetLevel());
             return levelDiff <= 9;
         }
 
@@ -1381,14 +1381,14 @@ namespace Scripts.Spells.Generic
     [Script] // 50052 - Ethereal Pet onSummon
     class spell_ethereal_pet_onsummon : SpellScript
     {
-        const uint SpellProcTriggerOnKillAura = 50051;
+        const int SpellProcTriggerOnKillAura = 50051;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellProcTriggerOnKillAura);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             Unit target = GetHitUnit();
             target.CastSpell(target, SpellProcTriggerOnKillAura, true);
@@ -1403,14 +1403,14 @@ namespace Scripts.Spells.Generic
     [Script] // 50055 - Ethereal Pet Aura Remove
     class spell_ethereal_pet_aura_Remove : SpellScript
     {
-        const uint SpellEtherealPetAura = 50055;
+        const int SpellEtherealPetAura = 50055;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellEtherealPetAura);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             GetHitUnit().RemoveAurasDueToSpell(SpellEtherealPetAura);
         }
@@ -1424,8 +1424,8 @@ namespace Scripts.Spells.Generic
     [Script] // 50101 - Ethereal Pet OnKill Steal Essence
     class spell_steal_essence_visual : AuraScript
     {
-        const uint SpellCreateToken = 50063;
-        const uint SayCreateToken = 2;
+        const int SpellCreateToken = 50063;
+        const int SayCreateToken = 2;
 
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
@@ -1447,22 +1447,22 @@ namespace Scripts.Spells.Generic
 
     struct FeastSpellIds
     {
-        public const uint GreatFeast = 57337;
-        public const uint FishFeast = 57397;
-        public const uint GiganticFeast = 58466;
-        public const uint SmallFeast = 58475;
-        public const uint BountifulFeast = 66477;
+        public const int GreatFeast = 57337;
+        public const int FishFeast = 57397;
+        public const int GiganticFeast = 58466;
+        public const int SmallFeast = 58475;
+        public const int BountifulFeast = 66477;
 
-        public const uint FeastFood = 45548;
-        public const uint FeastDrink = 57073;
-        public const uint BountifulFeastDrink = 66041;
-        public const uint BountifulFeastFood = 66478;
+        public const int FeastFood = 45548;
+        public const int FeastDrink = 57073;
+        public const int BountifulFeastDrink = 66041;
+        public const int BountifulFeastFood = 66478;
 
-        public const uint GreatFeastRefreshment = 57338;
-        public const uint FishFeastRefreshment = 57398;
-        public const uint GiganticFeastRefreshment = 58467;
-        public const uint SmallFeastRefreshment = 58477;
-        public const uint BountifulFeastRefreshment = 66622;
+        public const int GreatFeastRefreshment = 57338;
+        public const int FishFeastRefreshment = 57398;
+        public const int GiganticFeastRefreshment = 58467;
+        public const int SmallFeastRefreshment = 58477;
+        public const int BountifulFeastRefreshment = 66622;
     }
 
     //57397 - Fish Feast
@@ -1477,7 +1477,7 @@ namespace Scripts.Spells.Generic
                 FeastSpellIds.GiganticFeastRefreshment, FeastSpellIds.SmallFeastRefreshment, FeastSpellIds.BountifulFeastRefreshment);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
 
@@ -1659,9 +1659,9 @@ namespace Scripts.Spells.Generic
     [Script] // 35491 - Furious Rage
     class spell_gen_furious_rage : AuraScript
     {
-        const uint EmoteFuriousRage = 19415;
-        const uint EmoteExhausted = 18368;
-        const uint SpellExhaustion = 35492;
+        const int EmoteFuriousRage = 19415;
+        const int EmoteExhausted = 18368;
+        const int SpellExhaustion = 35492;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1696,7 +1696,7 @@ namespace Scripts.Spells.Generic
     [Script] // 46642 - 5,000 Gold
     class spell_gen_5000_gold : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Player target = GetHitPlayer();
             if (target != null)
@@ -1712,8 +1712,8 @@ namespace Scripts.Spells.Generic
     [Script] // 131474 - Fishing
     class spell_gen_fishing : SpellScript
     {
-        const uint SpellFishingNoFishingPole = 131476;
-        const uint SpellFishingWithPole = 131490;
+        const int SpellFishingNoFishingPole = 131476;
+        const int SpellFishingWithPole = 131490;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1725,13 +1725,13 @@ namespace Scripts.Spells.Generic
             return GetCaster().IsPlayer();
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            uint spellId;
+            int spellId;
             Item mainHand = GetCaster().ToPlayer().GetItemByPos(EquipmentSlot.MainHand);
-            if (mainHand == null || mainHand.GetTemplate().GetClass() != ItemClass.Weapon || (ItemSubClassWeapon)mainHand.GetTemplate().GetSubClass() != ItemSubClassWeapon.FishingPole)
-                spellId = SpellIds.FishingNoFishingPole;
+            if (mainHand == null || mainHand.GetTemplate().GetClass() != ItemClass.Weapon || mainHand.GetTemplate().GetSubClass().Weapon != ItemSubClassWeapon.FishingPole)
+                spellId = SpellFishingNoFishingPole;
             else
                 spellId = SpellFishingWithPole;
 
@@ -1747,16 +1747,16 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_gadgetzan_transporter_backfire : SpellScript
     {
-        const uint SpellTransporterMalfunctionPolymorph = 23444;
-        const uint SpellTransporterEvilTwin = 23445;
-        const uint SpellTransporterMalfunctionMiss = 36902;
+        const int SpellTransporterMalfunctionPolymorph = 23444;
+        const int SpellTransporterEvilTwin = 23445;
+        const int SpellTransporterMalfunctionMiss = 36902;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellTransporterMalfunctionPolymorph, SpellTransporterEvilTwin, SpellTransporterMalfunctionMiss);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             int r = RandomHelper.IRand(0, 119);
@@ -1809,15 +1809,15 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_gnomish_transporter : SpellScript
     {
-        const uint SpellTransporterSuccess = 23441;
-        const uint SpellTransporterFailure = 23446;
+        const int SpellTransporterSuccess = 23441;
+        const int SpellTransporterFailure = 23446;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellTransporterSuccess, SpellTransporterFailure);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().CastSpell(GetCaster(), RandomHelper.randChance(50) ? SpellTransporterSuccess : SpellTransporterFailure, true);
         }
@@ -1860,7 +1860,7 @@ namespace Scripts.Spells.Generic
     [Script] //41582 - Hate to Zero(Should be added, Melee)
     class spell_gen_hate_to_zero : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             if (GetCaster().CanHaveThreatList())
                 GetCaster().GetThreatManager().ModifyThreatByPercent(GetHitUnit(), -100);
@@ -1876,7 +1876,7 @@ namespace Scripts.Spells.Generic
     [Script] // 63984 - Hate to Zero
     class spell_gen_hate_to_zero_caster_target : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit target = GetHitUnit();
             if (target != null)
@@ -1893,7 +1893,7 @@ namespace Scripts.Spells.Generic
     [Script] // 19707 - Hate to 50%
     class spell_gen_hate_to_50 : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             if (GetCaster().CanHaveThreatList())
                 GetCaster().GetThreatManager().ModifyThreatByPercent(GetHitUnit(), -50);
@@ -1908,7 +1908,7 @@ namespace Scripts.Spells.Generic
     [Script] // 26886 - Hate to 75%
     class spell_gen_hate_to_75 : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             if (GetCaster().CanHaveThreatList())
                 GetCaster().GetThreatManager().ModifyThreatByPercent(GetHitUnit(), -25);
@@ -1924,7 +1924,7 @@ namespace Scripts.Spells.Generic
     [Script] // 44835 - Maim Interrupt
     class spell_gen_interrupt : AuraScript
     {
-        const uint SpellGenThrowInterrupt = 32747;
+        const int SpellGenThrowInterrupt = 32747;
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellGenThrowInterrupt);
@@ -1949,12 +1949,12 @@ namespace Scripts.Spells.Generic
     [Script("spell_pri_shadow_protection")]
     class spell_gen_increase_stats_buff : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             if (GetHitUnit().IsInRaidWith(GetCaster()))
-                GetCaster().CastSpell(GetCaster(), (uint)(GetEffectValue() + 1), true); // raid buff
+                GetCaster().CastSpell(GetCaster(), GetEffectValue() + 1, true); // raid buff
             else
-                GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true); // single-target buff
+                GetCaster().CastSpell(GetHitUnit(), GetEffectValue(), true); // single-target buff
         }
 
         public override void Register()
@@ -1970,15 +1970,15 @@ namespace Scripts.Spells.Generic
     [Script("spell_faction_champion_dru_lifebloom", SpellFactionChapionsDruLifebloomFinalHeal)]
     class spell_gen_lifebloom : AuraScript
     {
-        const uint SpellHexlordMalacrassLifebloomFinalHeal = 43422;
-        const uint SpellTurRagepawLifebloomFinalHeal = 52552;
-        const uint SpellCenarionScoutLifebloomFinalHeal = 53692;
-        const uint SpellTwistedVisageLifebloomFinalHeal = 57763;
-        const uint SpellFactionChapionsDruLifebloomFinalHeal = 66094;
+        const int SpellHexlordMalacrassLifebloomFinalHeal = 43422;
+        const int SpellTurRagepawLifebloomFinalHeal = 52552;
+        const int SpellCenarionScoutLifebloomFinalHeal = 53692;
+        const int SpellTwistedVisageLifebloomFinalHeal = 57763;
+        const int SpellFactionChapionsDruLifebloomFinalHeal = 66094;
 
-        uint _spellId;
+        int _spellId;
 
-        public spell_gen_lifebloom(uint spellId)
+        public spell_gen_lifebloom(int spellId)
         {
             _spellId = spellId;
         }
@@ -2007,27 +2007,27 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_mounted_charge : SpellScript
     {
-        const uint SpellChargeDamage8K5 = 62874;
-        const uint SpellChargeDamage20K = 68498;
-        const uint SpellChargeDamage45K = 64591;
+        const int SpellChargeDamage8K5 = 62874;
+        const int SpellChargeDamage20K = 68498;
+        const int SpellChargeDamage45K = 64591;
 
-        const uint SpellChargeChargingEffect8K5 = 63661;
-        const uint SpellChargeCharging20K1 = 68284;
-        const uint SpellChargeCharging20K2 = 68501;
-        const uint SpellChargeCharging45K1 = 62563;
-        const uint SpellChargeCharging45K2 = 66481;
+        const int SpellChargeChargingEffect8K5 = 63661;
+        const int SpellChargeCharging20K1 = 68284;
+        const int SpellChargeCharging20K2 = 68501;
+        const int SpellChargeCharging45K1 = 62563;
+        const int SpellChargeCharging45K2 = 66481;
 
-        const uint SpellChargeTriggerFactionMounts = 62960;
-        const uint SpellChargeTriggerTrialChapion = 68282;
+        const int SpellChargeTriggerFactionMounts = 62960;
+        const int SpellChargeTriggerTrialChapion = 68282;
 
-        const uint SpellChargeMissEffect = 62977;
+        const int SpellChargeMissEffect = 62977;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(62552, 62719, 64100, 66482);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             Unit target = GetHitUnit();
 
@@ -2035,7 +2035,7 @@ namespace Scripts.Spells.Generic
             {
                 case 0: // On spells wich trigger the damaging spell (and also the visual)
                 {
-                    uint spellId;
+                    int spellId;
 
                     switch (GetSpellInfo().Id)
                     {
@@ -2091,9 +2091,9 @@ namespace Scripts.Spells.Generic
             }
         }
 
-        void HandleChargeEffect(uint effIndex)
+        void HandleChargeEffect(int effIndex)
         {
-            uint spellId;
+            int spellId;
 
             switch (GetSpellInfo().Id)
             {
@@ -2135,7 +2135,7 @@ namespace Scripts.Spells.Generic
     [Script] // 31399 Moss Covered Feet
     class spell_gen_moss_covered_feet : AuraScript
     {
-        const uint SpellFallDown = 6869;
+        const int SpellFallDown = 6869;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -2157,7 +2157,7 @@ namespace Scripts.Spells.Generic
     [Script] // 28702 - Netherbloom
     class spell_gen_netherbloom : SpellScript
     {
-        const uint SpellNetherbloomPollen1 = 28703;
+        const int SpellNetherbloomPollen1 = 28703;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -2168,7 +2168,7 @@ namespace Scripts.Spells.Generic
             return true;
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
@@ -2188,7 +2188,7 @@ namespace Scripts.Spells.Generic
                     if (target.HasAura(SpellNetherbloomPollen1 + i))
                         return;
 
-                target.CastSpell(target, SpellNetherbloomPollen1 + RandomHelper.URand(0, 4), true);
+                target.CastSpell(target, SpellNetherbloomPollen1 + RandomHelper.IRand(0, 4), true);
             }
         }
 
@@ -2201,14 +2201,14 @@ namespace Scripts.Spells.Generic
     [Script] // 28720 - Nightmare Vine
     class spell_gen_nightmare_vine : SpellScript
     {
-        const uint SpellNightmarePollen = 28721;
+        const int SpellNightmarePollen = 28721;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellNightmarePollen);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
@@ -2323,10 +2323,10 @@ namespace Scripts.Spells.Generic
             return GetCaster().IsPlayer();
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Player player = GetCaster().ToPlayer();
-            uint factionId = (uint)GetEffectInfo().CalcValue();
+            int factionId = GetEffectInfo().CalcValue();
             int repChange = GetEffectInfo(1).CalcValue();
 
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
@@ -2350,16 +2350,16 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_orc_disguise : SpellScript
     {
-        const uint SpellOrcDisguiseTrigger = 45759;
-        const uint SpellOrcDisguiseMale = 45760;
-        const uint SpellOrcDisguiseFemale = 45762;
+        const int SpellOrcDisguiseTrigger = 45759;
+        const int SpellOrcDisguiseMale = 45760;
+        const int SpellOrcDisguiseFemale = 45762;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellOrcDisguiseTrigger, SpellOrcDisguiseMale, SpellOrcDisguiseFemale);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit caster = GetCaster();
             Player target = GetHitPlayer();
@@ -2381,7 +2381,7 @@ namespace Scripts.Spells.Generic
     [Script] // 35201 - Paralytic Poison
     class spell_gen_paralytic_poison : AuraScript
     {
-        const uint SpellParalysis = 35202;
+        const int SpellParalysis = 35202;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -2429,15 +2429,15 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return CliDB.BroadcastTextStorage.HasRecord((uint)spellInfo.GetEffect(0).CalcValue());
+            return CliDB.BroadcastTextStorage.HasRecord(spellInfo.GetEffect(0).CalcValue());
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             // Note: target here is always player; caster here is gameobj, creature or player (self cast)
             Unit target = GetHitUnit();
             if (target != null)
-                target.Say((uint)GetEffectValue(), target);
+                target.Say(GetEffectValue(), target);
         }
 
         public override void Register()
@@ -2491,8 +2491,8 @@ namespace Scripts.Spells.Generic
     [Script] // 45472 Parachute
     class spell_gen_parachute : AuraScript
     {
-        const uint SpellParachute = 45472;
-        const uint SpellParachuteBuff = 44795;
+        const int SpellParachute = 45472;
+        const int SpellParachuteBuff = 44795;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -2519,16 +2519,16 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_pet_summoned : SpellScript
     {
-        const uint NpcDoomguard = 11859;
-        const uint NpcInfernal = 89;
-        const uint NpcImp = 416;
+        const int NpcDoomguard = 11859;
+        const int NpcInfernal = 89;
+        const int NpcImp = 416;
 
         public override bool Load()
         {
             return GetCaster().IsPlayer();
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Player player = GetCaster().ToPlayer();
             if (player.GetLastPetNumber() != 0)
@@ -2568,7 +2568,7 @@ namespace Scripts.Spells.Generic
     [Script] // 36553 - PetWait
     class spell_gen_pet_wait : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetCaster().GetMotionMaster().Clear();
             GetCaster().GetMotionMaster().MoveIdle();
@@ -2583,7 +2583,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_profession_research : SpellScript
     {
-        const uint SpellNorthrendInscriptionResearch = 61177;
+        const int SpellNorthrendInscriptionResearch = 61177;
 
         public override bool Load()
         {
@@ -2603,10 +2603,10 @@ namespace Scripts.Spells.Generic
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Player caster = GetCaster().ToPlayer();
-            uint spellId = GetSpellInfo().Id;
+            int spellId = GetSpellInfo().Id;
 
             // Learn random explicit discovery recipe (if any)
             // Players will now learn 3 recipes the very first time they perform Northrend Inscription Research (3.3.0 patch notes)
@@ -2614,13 +2614,13 @@ namespace Scripts.Spells.Generic
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    uint discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
+                    int discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
                     if (discoveredSpellId != 0)
                         caster.LearnSpell(discoveredSpellId, false);
                 }
             }
 
-            uint discoveredSpellId1 = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
+            int discoveredSpellId1 = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
             if (discoveredSpellId1 != 0)
                 caster.LearnSpell(discoveredSpellId1, false);
         }
@@ -2635,8 +2635,8 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_pvp_trinket : SpellScript
     {
-        const uint SpellPvpTrinketAlliance = 97403;
-        const uint SpellPvpTrinketHorde = 97404;
+        const int SpellPvpTrinketAlliance = 97403;
+        const int SpellPvpTrinketHorde = 97404;
 
         void TriggerAnimation()
         {
@@ -2664,7 +2664,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_Remove_flight_auras : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
             if (target != null)
@@ -2683,7 +2683,7 @@ namespace Scripts.Spells.Generic
     [Script] // 20589 - Escape artist
     class spell_gen_Remove_impairing_auras : SpellScript
     {
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             GetHitUnit().RemoveMovementImpairingAuras(true);
         }
@@ -2706,7 +2706,7 @@ namespace Scripts.Spells.Generic
             if (target == null)
                 return;
 
-            uint heal = (uint)target.CountPctFromMaxHealth(10);
+            int heal = (int)target.CountPctFromMaxHealth(10);
             HealInfo healInfo = new(target, target, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
             target.HealBySpell(healInfo);
 
@@ -2850,8 +2850,8 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_replenishment_AuraScript : AuraScript
     {
-        const uint SpellReplenishment = 57669;
-        const uint SpellInfiniteReplenishment = 61782;
+        const int SpellReplenishment = 57669;
+        const int SpellInfiniteReplenishment = 61782;
 
         public override bool Load()
         {
@@ -2881,7 +2881,7 @@ namespace Scripts.Spells.Generic
 
     struct RunningWildMountIds
     {
-        public const uint AlteredForm = 97709;
+        public const int AlteredForm = 97709;
     }
 
     [Script]
@@ -2956,7 +2956,7 @@ namespace Scripts.Spells.Generic
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleTransform(uint effIndex)
+        void HandleTransform(int effIndex)
         {
             Unit target = GetHitUnit();
             PreventHitDefaultEffect(effIndex);
@@ -2990,7 +2990,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_seaforium_blast : SpellScript
     {
-        const uint SpellPlantChargesCreditAchievement = 60937;
+        const int SpellPlantChargesCreditAchievement = 60937;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -3002,7 +3002,7 @@ namespace Scripts.Spells.Generic
             return GetGObjCaster().GetOwnerGUID().IsPlayer();
         }
 
-        void AchievementCredit(uint effIndex)
+        void AchievementCredit(int effIndex)
         {
             Unit owner = GetGObjCaster().GetOwner();
             if (owner != null)
@@ -3025,7 +3025,7 @@ namespace Scripts.Spells.Generic
     {
         Emote[] EmoteArray = { Emote.OneshotCheer, Emote.OneshotExclamation, Emote.OneshotApplaud };
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             if (RandomHelper.randChance(40))
                 GetCaster().HandleEmoteCommand(EmoteArray.SelectRandom());
@@ -3045,7 +3045,7 @@ namespace Scripts.Spells.Generic
             return GetOriginalCaster() != null && GetOriginalCaster().IsPlayer();
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Player originalCaster = GetOriginalCaster().ToPlayer();
             Unit target = GetHitUnit();
@@ -3068,7 +3068,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_summon_tournament_mount : SpellScript
     {
-        const uint SpellLanceEquipped = 62853;
+        const int SpellLanceEquipped = 62853;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -3098,10 +3098,10 @@ namespace Scripts.Spells.Generic
     [Script] // 41213, 43416, 69222, 73076 - Throw Shield
     class spell_gen_throw_shield : SpellScript
     {
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
+            GetCaster().CastSpell(GetHitUnit(), GetEffectValue(), true);
         }
 
         public override void Register()
@@ -3113,15 +3113,15 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_tournament_duel : SpellScript
     {
-        const uint SpellOnTournamentMount = 63034;
-        const uint SpellMountedDuel = 62875;
+        const int SpellOnTournamentMount = 63034;
+        const int SpellMountedDuel = 62875;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellOnTournamentMount, SpellMountedDuel);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             Unit rider = GetCaster().GetCharmer();
             if (rider != null)
@@ -3175,12 +3175,12 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_teleporting : SpellScript
     {
-        const uint AreaVioletCitadelSpire = 4637;
+        const int AreaVioletCitadelSpire = 4637;
 
-        const uint SpellTeleportSpireDown = 59316;
-        const uint SpellTeleportSpireUp = 59314;
+        const int SpellTeleportSpireDown = 59316;
+        const int SpellTeleportSpireUp = 59314;
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
             if (!target.IsPlayer())
@@ -3246,12 +3246,12 @@ namespace Scripts.Spells.Generic
     [Script("spell_wotf_shared_cd", SpellWillOfTheForsakenCooldownTriggerWotf)]
     class spell_pvp_trinket_wotf_shared_cd : SpellScript
     {
-        const uint SpellWillOfTheForsakenCooldownTrigger = 72752;
-        const uint SpellWillOfTheForsakenCooldownTriggerWotf = 72757;
+        const int SpellWillOfTheForsakenCooldownTrigger = 72752;
+        const int SpellWillOfTheForsakenCooldownTriggerWotf = 72757;
 
-        uint _triggeredSpellId;
+        int _triggeredSpellId;
 
-        public spell_pvp_trinket_wotf_shared_cd(uint triggeredSpellId)
+        public spell_pvp_trinket_wotf_shared_cd(int triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
         }
@@ -3276,7 +3276,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_turkey_marker : AuraScript
     {
-        const uint SpellTurkeyVengeance = 25285;
+        const int SpellTurkeyVengeance = 25285;
 
         List<uint> _applyTimes = new();
 
@@ -3317,9 +3317,9 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_upper_deck_create_foam_sword : SpellScript
     {
-        uint[] itemId = { 45061, 45176, 45177, 45178, 45179 };
+        int[] itemId = { 45061, 45176, 45177, 45178, 45179 };
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Player player = GetHitPlayer();
             if (player != null)
@@ -3346,7 +3346,7 @@ namespace Scripts.Spells.Generic
     [Script] // 60501 - VaMathF.PIric Touch
     class spell_gen_vapiric_touch : AuraScript
     {
-        const uint SpellVapiricTouchHeal = 52724;
+        const int SpellVapiricTouchHeal = 52724;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -3362,7 +3362,7 @@ namespace Scripts.Spells.Generic
 
             Unit caster = eventInfo.GetActor();
             CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)(damageInfo.GetDamage() / 2));
+            args.AddSpellMod(SpellValueMod.BasePoint0, damageInfo.GetDamage() / 2);
             caster.CastSpell(caster, SpellVapiricTouchHeal, args);
         }
 
@@ -3375,7 +3375,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_vehicle_scaling : AuraScript
     {
-        const uint SpellGearScaling = 66668;
+        const int SpellGearScaling = 66668;
 
         public override bool Load()
         {
@@ -3419,9 +3419,9 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_vendor_bark_trigger : SpellScript
     {
-        const uint NpcAmphitheaterVendor = 30098;
-        const uint SayAmphitheaterVendor = 0;
-        void HandleDummy(uint effIndex)
+        const int NpcAmphitheaterVendor = 30098;
+        const int SayAmphitheaterVendor = 0;
+        void HandleDummy(int effIndex)
         {
             Creature vendor = GetCaster().ToCreature();
             if (vendor != null)
@@ -3454,7 +3454,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_whisper_gulch_yogg_saron_whisper : AuraScript
     {
-        const uint SpellYoggSaronWhisperDummy = 29072;
+        const int SpellYoggSaronWhisperDummy = 29072;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -3478,17 +3478,17 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return CliDB.BroadcastTextStorage.HasRecord((uint)spellInfo.GetEffect(0).CalcValue());
+            return CliDB.BroadcastTextStorage.HasRecord(spellInfo.GetEffect(0).CalcValue());
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             TempSummon casterSummon = GetCaster().ToTempSummon();
             if (casterSummon != null)
             {
                 Player target = casterSummon.GetSummonerUnit().ToPlayer();
                 if (target != null)
-                    casterSummon.Whisper((uint)GetEffectValue(), target, false);
+                    casterSummon.Whisper(GetEffectValue(), target, false);
             }
         }
 
@@ -3507,18 +3507,18 @@ namespace Scripts.Spells.Generic
     [Script("spell_past_you_whisper_to_controller_random", WhisperPastYou)]
     class spell_gen_whisper_to_controller_random : SpellScript
     {
-        const uint WhisperFutureYou = 2;
-        const uint WhisperDefender = 1;
-        const uint WhisperPastYou = 2;
+        const int WhisperFutureYou = 2;
+        const int WhisperDefender = 1;
+        const int WhisperPastYou = 2;
 
-        uint _text;
+        int _text;
 
-        public spell_gen_whisper_to_controller_random(uint text)
+        public spell_gen_whisper_to_controller_random(int text)
         {
             _text = text;
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             // Same for all spells
             if (!RandomHelper.randChance(20))
@@ -3570,7 +3570,7 @@ namespace Scripts.Spells.Generic
             return true;
         }
 
-        void EjectPassenger(uint effIndex)
+        void EjectPassenger(int effIndex)
         {
             Vehicle vehicle = GetHitUnit().GetVehicleKit();
             if (vehicle != null)
@@ -3598,7 +3598,7 @@ namespace Scripts.Spells.Generic
             _seatId = (sbyte)seatId;
         }
 
-        void EjectPassenger(uint effIndex)
+        void EjectPassenger(int effIndex)
         {
             Vehicle vehicle = GetHitUnit().GetVehicleKit();
             if (vehicle != null)
@@ -3618,7 +3618,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_gm_freeze : AuraScript
     {
-        const uint SpellGmFreeze = 9454;
+        const int SpellGmFreeze = 9454;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -3632,7 +3632,7 @@ namespace Scripts.Spells.Generic
             if (player != null)
             {
                 // stop combat + make player unattackable + duel stop + stop some spells
-                player.SetFaction((uint)FactionTemplates.Friendly);
+                player.SetFaction(FactionTemplates.Friendly);
                 player.CombatStop();
                 if (player.IsNonMeleeSpellCast(true))
                     player.InterruptNonMeleeSpells(true);
@@ -3677,7 +3677,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_stand : SpellScript
     {
-        void HandleScript(uint eff)
+        void HandleScript(int eff)
         {
             Creature target = GetHitCreature();
             if (target == null)
@@ -3695,90 +3695,90 @@ namespace Scripts.Spells.Generic
 
     struct MixologySpellIds
     {
-        public const uint Mixology = 53042;
+        public const int Mixology = 53042;
         // Flasks
-        public const uint FlaskOfTheFrostWyrm = 53755;
-        public const uint FlaskOfStoneblood = 53758;
-        public const uint FlaskOfEndlessRage = 53760;
-        public const uint FlaskOfPureMojo = 54212;
-        public const uint LesserFlaskOfResistance = 62380;
-        public const uint LesserFlaskOfToughness = 53752;
-        public const uint FlaskOfBlindingLight = 28521;
-        public const uint FlaskOfChromaticWonder = 42735;
-        public const uint FlaskOfFortification = 28518;
-        public const uint FlaskOfMightyRestoration = 28519;
-        public const uint FlaskOfPureDeath = 28540;
-        public const uint FlaskOfRelentlessAssault = 28520;
-        public const uint FlaskOfChromaticResistance = 17629;
-        public const uint FlaskOfDistilledWisdom = 17627;
-        public const uint FlaskOfSupremePower = 17628;
-        public const uint FlaskOfTheTitans = 17626;
+        public const int FlaskOfTheFrostWyrm = 53755;
+        public const int FlaskOfStoneblood = 53758;
+        public const int FlaskOfEndlessRage = 53760;
+        public const int FlaskOfPureMojo = 54212;
+        public const int LesserFlaskOfResistance = 62380;
+        public const int LesserFlaskOfToughness = 53752;
+        public const int FlaskOfBlindingLight = 28521;
+        public const int FlaskOfChromaticWonder = 42735;
+        public const int FlaskOfFortification = 28518;
+        public const int FlaskOfMightyRestoration = 28519;
+        public const int FlaskOfPureDeath = 28540;
+        public const int FlaskOfRelentlessAssault = 28520;
+        public const int FlaskOfChromaticResistance = 17629;
+        public const int FlaskOfDistilledWisdom = 17627;
+        public const int FlaskOfSupremePower = 17628;
+        public const int FlaskOfTheTitans = 17626;
         // Elixirs
-        public const uint ElixirOfMightyAgility = 28497;
-        public const uint ElixirOfAccuracy = 60340;
-        public const uint ElixirOfDeadlyStrikes = 60341;
-        public const uint ElixirOfMightyDefense = 60343;
-        public const uint ElixirOfExpertise = 60344;
-        public const uint ElixirOfArmorPiercing = 60345;
-        public const uint ElixirOfLightningSpeed = 60346;
-        public const uint ElixirOfMightyFortitude = 53751;
-        public const uint ElixirOfMightyMageblood = 53764;
-        public const uint ElixirOfMightyStrength = 53748;
-        public const uint ElixirOfMightyToughts = 60347;
-        public const uint ElixirOfProtection = 53763;
-        public const uint ElixirOfSpirit = 53747;
-        public const uint GurusElixir = 53749;
-        public const uint ShadowpowerElixir = 33721;
-        public const uint WrathElixir = 53746;
-        public const uint ElixirOfEmpowerment = 28514;
-        public const uint ElixirOfMajorMageblood = 28509;
-        public const uint ElixirOfMajorShadowPower = 28503;
-        public const uint ElixirOfMajorDefense = 28502;
-        public const uint FelStrengthElixir = 38954;
-        public const uint ElixirOfIronskin = 39628;
-        public const uint ElixirOfMajorAgility = 54494;
-        public const uint ElixirOfDraenicWisdom = 39627;
-        public const uint ElixirOfMajorFirepower = 28501;
-        public const uint ElixirOfMajorFrostPower = 28493;
-        public const uint EarthenElixir = 39626;
-        public const uint ElixirOfMastery = 33726;
-        public const uint ElixirOfHealingPower = 28491;
-        public const uint ElixirOfMajorFortitude = 39625;
-        public const uint ElixirOfMajorStrength = 28490;
-        public const uint AdeptsElixir = 54452;
-        public const uint OnslaughtElixir = 33720;
-        public const uint MightyTrollsBloodElixir = 24361;
-        public const uint GreaterArcaneElixir = 17539;
-        public const uint ElixirOfTheMongoose = 17538;
-        public const uint ElixirOfBruteForce = 17537;
-        public const uint ElixirOfSages = 17535;
-        public const uint ElixirOfSuperiorDefense = 11348;
-        public const uint ElixirOfDemonslaying = 11406;
-        public const uint ElixirOfGreaterFirepower = 26276;
-        public const uint ElixirOfShadowPower = 11474;
-        public const uint MagebloodElixir = 24363;
-        public const uint ElixirOfGiants = 11405;
-        public const uint ElixirOfGreaterAgility = 11334;
-        public const uint ArcaneElixir = 11390;
-        public const uint ElixirOfGreaterIntellect = 11396;
-        public const uint ElixirOfGreaterDefense = 11349;
-        public const uint ElixirOfFrostPower = 21920;
-        public const uint ElixirOfAgility = 11328;
-        public const uint MajorTrollsBlloodElixir = 3223;
-        public const uint ElixirOfFortitude = 3593;
-        public const uint ElixirOfOgresStrength = 3164;
-        public const uint ElixirOfFirepower = 7844;
-        public const uint ElixirOfLesserAgility = 3160;
-        public const uint ElixirOfDefense = 3220;
-        public const uint StrongTrollsBloodElixir = 3222;
-        public const uint ElixirOfMinorAccuracy = 63729;
-        public const uint ElixirOfWisdom = 3166;
-        public const uint ElixirOfGianthGrowth = 8212;
-        public const uint ElixirOfMinorAgility = 2374;
-        public const uint ElixirOfMinorFortitude = 2378;
-        public const uint WeakTrollsBloodElixir = 3219;
-        public const uint ElixirOfLionsStrength = 2367;
-        public const uint ElixirOfMinorDefense = 673;
+        public const int ElixirOfMightyAgility = 28497;
+        public const int ElixirOfAccuracy = 60340;
+        public const int ElixirOfDeadlyStrikes = 60341;
+        public const int ElixirOfMightyDefense = 60343;
+        public const int ElixirOfExpertise = 60344;
+        public const int ElixirOfArmorPiercing = 60345;
+        public const int ElixirOfLightningSpeed = 60346;
+        public const int ElixirOfMightyFortitude = 53751;
+        public const int ElixirOfMightyMageblood = 53764;
+        public const int ElixirOfMightyStrength = 53748;
+        public const int ElixirOfMightyToughts = 60347;
+        public const int ElixirOfProtection = 53763;
+        public const int ElixirOfSpirit = 53747;
+        public const int GurusElixir = 53749;
+        public const int ShadowpowerElixir = 33721;
+        public const int WrathElixir = 53746;
+        public const int ElixirOfEmpowerment = 28514;
+        public const int ElixirOfMajorMageblood = 28509;
+        public const int ElixirOfMajorShadowPower = 28503;
+        public const int ElixirOfMajorDefense = 28502;
+        public const int FelStrengthElixir = 38954;
+        public const int ElixirOfIronskin = 39628;
+        public const int ElixirOfMajorAgility = 54494;
+        public const int ElixirOfDraenicWisdom = 39627;
+        public const int ElixirOfMajorFirepower = 28501;
+        public const int ElixirOfMajorFrostPower = 28493;
+        public const int EarthenElixir = 39626;
+        public const int ElixirOfMastery = 33726;
+        public const int ElixirOfHealingPower = 28491;
+        public const int ElixirOfMajorFortitude = 39625;
+        public const int ElixirOfMajorStrength = 28490;
+        public const int AdeptsElixir = 54452;
+        public const int OnslaughtElixir = 33720;
+        public const int MightyTrollsBloodElixir = 24361;
+        public const int GreaterArcaneElixir = 17539;
+        public const int ElixirOfTheMongoose = 17538;
+        public const int ElixirOfBruteForce = 17537;
+        public const int ElixirOfSages = 17535;
+        public const int ElixirOfSuperiorDefense = 11348;
+        public const int ElixirOfDemonslaying = 11406;
+        public const int ElixirOfGreaterFirepower = 26276;
+        public const int ElixirOfShadowPower = 11474;
+        public const int MagebloodElixir = 24363;
+        public const int ElixirOfGiants = 11405;
+        public const int ElixirOfGreaterAgility = 11334;
+        public const int ArcaneElixir = 11390;
+        public const int ElixirOfGreaterIntellect = 11396;
+        public const int ElixirOfGreaterDefense = 11349;
+        public const int ElixirOfFrostPower = 21920;
+        public const int ElixirOfAgility = 11328;
+        public const int MajorTrollsBlloodElixir = 3223;
+        public const int ElixirOfFortitude = 3593;
+        public const int ElixirOfOgresStrength = 3164;
+        public const int ElixirOfFirepower = 7844;
+        public const int ElixirOfLesserAgility = 3160;
+        public const int ElixirOfDefense = 3220;
+        public const int StrongTrollsBloodElixir = 3222;
+        public const int ElixirOfMinorAccuracy = 63729;
+        public const int ElixirOfWisdom = 3166;
+        public const int ElixirOfGianthGrowth = 8212;
+        public const int ElixirOfMinorAgility = 2374;
+        public const int ElixirOfMinorFortitude = 2378;
+        public const int WeakTrollsBloodElixir = 3219;
+        public const int ElixirOfLionsStrength = 2367;
+        public const int ElixirOfMinorDefense = 673;
     }
 
     [Script]
@@ -3983,9 +3983,9 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_landmine_knockback_achievement : SpellScript
     {
-        const uint SpellLandmineKnockbackAchievement = 57064;
+        const int SpellLandmineKnockbackAchievement = 57064;
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Player target = GetHitPlayer();
             if (target != null)
@@ -4007,7 +4007,7 @@ namespace Scripts.Spells.Generic
     [Script] // 34098 - ClearAllDebuffs
     class spell_gen_clear_debuffs : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
             if (target != null)
@@ -4030,8 +4030,8 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_pony_mount_check : AuraScript
     {
-        const uint AchievPonyUp = 3736;
-        const uint MountPony = 29736;
+        const int AchievPonyUp = 3736;
+        const int MountPony = 29736;
 
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
@@ -4062,10 +4062,10 @@ namespace Scripts.Spells.Generic
 
     struct CorruptinPlagueIds
     {
-        public const uint NpcApexisFlayer = 22175;
-        public const uint NpcShardHideBoar = 22180;
-        public const uint NpcAetherRay = 22181;
-        public const uint SpellCorruptingPlague = 40350;
+        public const int NpcApexisFlayer = 22175;
+        public const int NpcShardHideBoar = 22180;
+        public const int NpcAetherRay = 22181;
+        public const int SpellCorruptingPlague = 40350;
     }
 
     // 40350 - Corrupting Plague
@@ -4122,8 +4122,8 @@ namespace Scripts.Spells.Generic
 
     struct StasisFieldIds
     {
-        public const uint NpcDaggertailLizard = 22255;
-        public const uint SpellStasisField = 40307;
+        public const int NpcDaggertailLizard = 22255;
+        public const int SpellStasisField = 40307;
     }
 
     // 40307 - Stasis Field
@@ -4181,7 +4181,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_vehicle_control_link : AuraScript
     {
-        const uint SpellSiegeTankControl = 47963;
+        const int SpellSiegeTankControl = 47963;
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
@@ -4197,11 +4197,11 @@ namespace Scripts.Spells.Generic
     [Script] // 34779 - Freezing Circle
     class spell_freezing_circle : SpellScript
     {
-        const uint SpellFreezingCirclePitOfSaronNormal = 69574;
-        const uint SpellFreezingCirclePitOfSaronHeroic = 70276;
-        const uint SpellFreezingCircle = 34787;
-        const uint SpellFreezingCircleScenario = 141383;
-        const uint MapIdBloodInTheSnowScenario = 1130;
+        const int SpellFreezingCirclePitOfSaronNormal = 69574;
+        const int SpellFreezingCirclePitOfSaronHeroic = 70276;
+        const int SpellFreezingCircle = 34787;
+        const int SpellFreezingCircleScenario = 141383;
+        const int MapIdBloodInTheSnowScenario = 1130;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -4212,10 +4212,10 @@ namespace Scripts.Spells.Generic
                );
         }
 
-        void HandleDamage(uint effIndex)
+        void HandleDamage(int effIndex)
         {
             Unit caster = GetCaster();
-            uint spellId;
+            int spellId;
             Map map = caster.GetMap();
 
             if (map.IsDungeon())
@@ -4260,14 +4260,14 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_cannon_blast : SpellScript
     {
-        const uint SpellCannonBlast = 42578;
-        const uint SpellCannonBlastDamage = 42576;
+        const int SpellCannonBlast = 42578;
+        const int SpellCannonBlastDamage = 42576;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellCannonBlast);
         }
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             int bp = GetEffectValue();
             Unit target = GetHitUnit();
@@ -4285,7 +4285,7 @@ namespace Scripts.Spells.Generic
     [Script] // 37751 - Submerged
     class spell_gen_submerged : SpellScript
     {
-        void HandleScript(uint eff)
+        void HandleScript(int eff)
         {
             Creature target = GetHitCreature();
             if (target != null)
@@ -4301,7 +4301,7 @@ namespace Scripts.Spells.Generic
     [Script] // 169869 - Transformation Sickness
     class spell_gen_decimatus_transformation_sickness : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
             if (target != null)
@@ -4317,9 +4317,9 @@ namespace Scripts.Spells.Generic
     [Script] // 189491 - Summon Towering Infernal.
     class spell_gen_anetheron_summon_towering_infernal : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
+            GetCaster().CastSpell(GetHitUnit(), GetEffectValue(), true);
         }
 
         public override void Register()
@@ -4351,8 +4351,8 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_mark_of_kazrogal_hellfire_AuraScript : AuraScript
     {
-        const uint SpellMarkOfKazrogalHellfire = 189512;
-        const uint SpellMarkOfKazrogalDamageHellfire = 189515;
+        const int SpellMarkOfKazrogalHellfire = 189512;
+        const int SpellMarkOfKazrogalDamageHellfire = 189515;
 
         public override bool Validate(SpellInfo spell)
         {
@@ -4380,9 +4380,9 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_azgalor_rain_of_fire_hellfire_citadel : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
+            GetCaster().CastSpell(GetHitUnit(), GetEffectValue(), true);
         }
 
         public override void Register()
@@ -4394,7 +4394,7 @@ namespace Scripts.Spells.Generic
     [Script] // 99947 - Face Rage
     class spell_gen_face_rage : AuraScript
     {
-        const uint SpellFaceRage = 99947;
+        const int SpellFaceRage = 99947;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -4416,7 +4416,7 @@ namespace Scripts.Spells.Generic
     [Script] // 187213 - Impatient Mind
     class spell_gen_impatient_mind : AuraScript
     {
-        const uint SpellImpatientMind = 187213;
+        const int SpellImpatientMind = 187213;
 
         public override bool Validate(SpellInfo spell)
         {
@@ -4437,8 +4437,8 @@ namespace Scripts.Spells.Generic
     [Script] // 209352 - Boost 2.0 [Paladin+Priest] - Watch for Shield
     class spell_gen_boost_2_0_paladin_priest_watch_for_shield : AuraScript
     {
-        uint SpellPowerWordShield = 17;
-        uint SpellDivineShield = 642;
+        int SpellPowerWordShield = 17;
+        int SpellDivineShield = 642;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -4507,21 +4507,21 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_defender_of_azeroth_death_gate_selector : SpellScript
     {
-        const uint SpellDeathGateTeleportStormwind = 316999;
-        const uint SpellDeathGateTeleportOrgrimmar = 317000;
+        const int SpellDeathGateTeleportStormwind = 316999;
+        const int SpellDeathGateTeleportOrgrimmar = 317000;
 
-        const uint QuestDefenderOfAzerothAlliance = 58902;
-        const uint QuestDefenderOfAzerothHorde = 58903;
+        const int QuestDefenderOfAzerothAlliance = 58902;
+        const int QuestDefenderOfAzerothHorde = 58903;
 
-        (WorldLocation, uint) StormwindInnLoc = (new(0, -8868.1f, 675.82f, 97.9f, 5.164778709411621093f), 5148);
-        (WorldLocation, uint) OrgrimmarInnLoc = (new(1, 1573.18f, -4441.62f, 16.06f, 1.818284034729003906f), 8618);
+        (WorldLocation, int) StormwindInnLoc = (new(0, -8868.1f, 675.82f, 97.9f, 5.164778709411621093f), 5148);
+        (WorldLocation, int) OrgrimmarInnLoc = (new(1, 1573.18f, -4441.62f, 16.06f, 1.818284034729003906f), 8618);
 
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellDeathGateTeleportStormwind, SpellDeathGateTeleportOrgrimmar);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Player player = GetHitUnit().ToPlayer();
             if (player == null)
@@ -4547,11 +4547,11 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_defender_of_azeroth_speak_with_mograine : SpellScript
     {
-        const uint NpcNazgrim = 161706;
-        const uint NpcTrollbane = 161707;
-        const uint NpcWhitemane = 161708;
+        const int NpcNazgrim = 161706;
+        const int NpcTrollbane = 161707;
+        const int NpcWhitemane = 161708;
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             if (GetCaster() == null)
                 return;
@@ -4582,15 +4582,15 @@ namespace Scripts.Spells.Generic
     [Script] // 118301 - Summon Battle Pet
     class spell_summon_battle_pet : SpellScript
     {
-        void HandleSummon(uint effIndex)
+        void HandleSummon(int effIndex)
         {
-            uint creatureId = (uint)GetSpellValue().EffectBasePoints[effIndex];
+            int creatureId = GetSpellValue().EffectBasePoints[effIndex];
             if (ObjectMgr.GetCreatureTemplate(creatureId) != null)
             {
                 PreventHitDefaultEffect(effIndex);
 
                 Unit caster = GetCaster();
-                var properties = CliDB.SummonPropertiesStorage.LookupByKey((uint)GetEffectInfo().MiscValueB);
+                var properties = CliDB.SummonPropertiesStorage.LookupByKey(GetEffectInfo().MiscValueB);
                 TimeSpan duration = TimeSpan.FromMilliseconds(GetSpellInfo().CalcDuration(caster));
                 Position pos = GetHitDest().GetPosition();
 
@@ -4649,7 +4649,7 @@ namespace Scripts.Spells.Generic
     [Script] // 45313 - Anchor Here
     class spell_gen_anchor_here : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Creature creature = GetHitCreature();
             if (creature != null)
@@ -4668,7 +4668,7 @@ namespace Scripts.Spells.Generic
         void OnPeriodic(AuraEffect aurEff)
         {
             Unit target = GetTarget();
-            uint mountDisplayId = 0;
+            int mountDisplayId = 0;
 
             TempSummon tempSummon = target.ToTempSummon();
             if (tempSummon == null)
@@ -4703,22 +4703,22 @@ namespace Scripts.Spells.Generic
     [Script] // 274738 - Ancestral Call (Mag'har Orc Racial)
     class spell_gen_ancestral_call : SpellScript
     {
-        const uint SpellRictusOfTheLaughingSkull = 274739;
-        const uint SpellZealOfTheBurningBlade = 274740;
-        const uint SpellFerocityOfTheFrostwolf = 274741;
-        const uint SpellMightOfTheBlackrock = 274742;
+        const int SpellRictusOfTheLaughingSkull = 274739;
+        const int SpellZealOfTheBurningBlade = 274740;
+        const int SpellFerocityOfTheFrostwolf = 274741;
+        const int SpellMightOfTheBlackrock = 274742;
 
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellRictusOfTheLaughingSkull, SpellZealOfTheBurningBlade, SpellFerocityOfTheFrostwolf, SpellMightOfTheBlackrock);
         }
 
-        uint[] AncestralCallBuffs = { SpellRictusOfTheLaughingSkull, SpellZealOfTheBurningBlade, SpellFerocityOfTheFrostwolf, SpellMightOfTheBlackrock };
+        int[] AncestralCallBuffs = { SpellRictusOfTheLaughingSkull, SpellZealOfTheBurningBlade, SpellFerocityOfTheFrostwolf, SpellMightOfTheBlackrock };
 
         void HandleOnCast()
         {
             Unit caster = GetCaster();
-            uint spellId = AncestralCallBuffs.SelectRandom();
+            int spellId = AncestralCallBuffs.SelectRandom();
 
             caster.CastSpell(caster, spellId, true);
         }
@@ -4732,7 +4732,7 @@ namespace Scripts.Spells.Generic
     [Script] // 83477 - Eject Passengers 3-8
     class spell_gen_eject_passengers_3_8 : SpellScript
     {
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             Vehicle vehicle = GetHitUnit().GetVehicleKit();
             if (vehicle == null)
@@ -4751,9 +4751,9 @@ namespace Scripts.Spells.Generic
     [Script] // 83781 - Reverse Cast Ride Vehicle
     class spell_gen_reverse_cast_target_to_caster_triggered : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
-            GetHitUnit().CastSpell(GetCaster(), (uint)GetSpellInfo().GetEffect(effIndex).CalcValue(), true);
+            GetHitUnit().CastSpell(GetCaster(), GetSpellInfo().GetEffect(effIndex).CalcValue(), true);
         }
 
         public override void Register()
@@ -4768,7 +4768,7 @@ namespace Scripts.Spells.Generic
     [Script] // 160938 - Despawn All Summons (Garrison Intro Only)
     class spell_gen_despawn_all_summons_owned_by_caster : SpellScript
     {
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             Unit caster = GetCaster();
             if (caster != null)
@@ -4789,24 +4789,24 @@ namespace Scripts.Spells.Generic
     [Script] // 8613 - Skinning
     class spell_gen_skinning : SpellScript
     {
-        const uint SpellClassicSkinning = 265856;
-        const uint SpellOutlandSkinning = 265858;
-        const uint SpellNorthrendSkinning = 265860;
-        const uint SpellCataclysmSkinning = 265862;
-        const uint SpellPandariaSkinning = 265864;
-        const uint SpellDraenorSkinning = 265866;
-        const uint SpellLegionSkinning = 265868;
-        const uint SpellKulTiranSkinning = 265870;
-        const uint SpellZandalariSkinning = 265872;
-        const uint SpellShadowlandsSkinning = 308570;
-        const uint SpellDragonIslesSkinning = 366263;
+        const int SpellClassicSkinning = 265856;
+        const int SpellOutlandSkinning = 265858;
+        const int SpellNorthrendSkinning = 265860;
+        const int SpellCataclysmSkinning = 265862;
+        const int SpellPandariaSkinning = 265864;
+        const int SpellDraenorSkinning = 265866;
+        const int SpellLegionSkinning = 265868;
+        const int SpellKulTiranSkinning = 265870;
+        const int SpellZandalariSkinning = 265872;
+        const int SpellShadowlandsSkinning = 308570;
+        const int SpellDragonIslesSkinning = 366263;
 
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellOutlandSkinning, SpellNorthrendSkinning, SpellCataclysmSkinning, SpellPandariaSkinning, SpellDraenorSkinning, SpellKulTiranSkinning, SpellZandalariSkinning, SpellShadowlandsSkinning, SpellDragonIslesSkinning);
         }
 
-        void HandleSkinningEffect(uint effIndex)
+        void HandleSkinningEffect(int effIndex)
         {
             Player player = GetCaster().ToPlayer();
             if (player == null)
@@ -4816,14 +4816,14 @@ namespace Scripts.Spells.Generic
             if (contentTuning == null)
                 return;
 
-            uint skinningSkill = player.GetProfessionSkillForExp(SkillType.Skinning, 0);
+            var skinningSkill = player.GetProfessionSkillForExp(SkillType.Skinning, 0);
             if (skinningSkill == 0)
                 return;
 
             // Autolearning missing skinning skill (Dragonflight)
-            uint getSkinningLearningSpellBySkill()
+            int getSkinningLearningSpellBySkill()
             {
-                switch ((SkillType)skinningSkill)
+                switch (skinningSkill)
                 {
                     case SkillType.OutlandSkinning: return SpellOutlandSkinning;
                     case SkillType.NorthrendSkinning: return SpellNorthrendSkinning;
@@ -4843,7 +4843,7 @@ namespace Scripts.Spells.Generic
 
             if (!player.HasSkill(skinningSkill))
             {
-                uint spellId = getSkinningLearningSpellBySkill();
+                int spellId = getSkinningLearningSpellBySkill();
                 if (spellId != 0)
                     player.CastSpell(null, spellId, true);
             }
@@ -4874,15 +4874,15 @@ namespace Scripts.Spells.Generic
     [Script("spell_item_bloodlust_drums", SpellShamanExhaustion)]
     class spell_gen_bloodlust : SpellScript
     {
-        const uint SpellShamanSated = 57724; // Bloodlust
-        const uint SpellShamanExhaustion = 57723; // Heroism, Drums
-        const uint SpellMageTemporalDisplacement = 80354;
-        const uint SpellHunterFatigued = 264689;
-        const uint SpellEvokerExhaustion = 390435;
+        const int SpellShamanSated = 57724; // Bloodlust
+        const int SpellShamanExhaustion = 57723; // Heroism, Drums
+        const int SpellMageTemporalDisplacement = 80354;
+        const int SpellHunterFatigued = 264689;
+        const int SpellEvokerExhaustion = 390435;
 
-        uint _exhaustionSpellId;
+        int _exhaustionSpellId;
 
-        public spell_gen_bloodlust(uint exhaustionSpellId)
+        public spell_gen_bloodlust(int exhaustionSpellId)
         {
             _exhaustionSpellId = exhaustionSpellId;
         }
@@ -4908,7 +4908,7 @@ namespace Scripts.Spells.Generic
             });
         }
 
-        void HandleHit(uint effIndex)
+        void HandleHit(int effIndex)
         {
             Unit target = GetHitUnit();
             target.CastSpell(target, _exhaustionSpellId, true);
@@ -4949,7 +4949,7 @@ namespace Scripts.Spells.Generic
     [Script] // 156758 - Spirit Heal
     class spell_gen_spirit_heal_personal : AuraScript
     {
-        uint SpellSpiritHealEffect = 156763;
+        int SpellSpiritHealEffect = 156763;
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
@@ -4983,7 +4983,7 @@ namespace Scripts.Spells.Generic
             _caster = caster;
         }
 
-        public override bool Execute(ulong e_time, uint p_time)
+        public override bool Execute(long e_time, uint p_time)
         {
             if (_caster.GetChannelSpellId() == 0)
                 _caster.CastSpell(null, BattlegroundConst.SpellSpiritHealChannelAoE, false);
@@ -5030,23 +5030,23 @@ namespace Scripts.Spells.Generic
 
     struct MajorPlayerHealingCooldownHelpers
     {
-        public const uint SpellDruidTranquility = 740;
-        public const uint SpellDruidTranquilityHeal = 157982;
-        public const uint SpellPriestDivineHymn = 64843;
-        public const uint SpellPriestDivineHymnHeal = 64844;
-        public const uint SpellPriestLuminousBarrier = 271466;
-        public const uint SpellShamanHealingTideTotem = 108280;
-        public const uint SpellShamanHealingTideTotemHeal = 114942;
-        public const uint SpellMonkRevival = 115310;
-        public const uint SpellEvokerRewind = 363534;
+        public const int SpellDruidTranquility = 740;
+        public const int SpellDruidTranquilityHeal = 157982;
+        public const int SpellPriestDivineHymn = 64843;
+        public const int SpellPriestDivineHymnHeal = 64844;
+        public const int SpellPriestLuminousBarrier = 271466;
+        public const int SpellShamanHealingTideTotem = 108280;
+        public const int SpellShamanHealingTideTotemHeal = 114942;
+        public const int SpellMonkRevival = 115310;
+        public const int SpellEvokerRewind = 363534;
 
-        public static float GetBonusMultiplier(Unit unit, uint spellId)
+        public static float GetBonusMultiplier(Unit unit, int spellId)
         {
             // Note: if caster is not in a raid setting, is in PvP or while in arena combat with 5 or less allied players.
             if (!unit.GetMap().IsRaid() || !unit.GetMap().IsBattleground())
             {
-                uint bonusSpellId;
-                uint effIndex;
+                int bonusSpellId;
+                int effIndex;
                 switch (spellId)
                 {
                     case SpellDruidTranquilityHeal:

@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Numerics;
 
 /**
@@ -242,7 +241,7 @@ public static partial class Detour
         ///  @param[in]	ip		The index of the polygon within the tile.
         public dtPolyRef encodePolyId(uint salt, uint it, uint ip)
         {
-            return ((dtPolyRef)salt << (int)(DT_POLY_BITS + DT_TILE_BITS)) | ((dtPolyRef)it << (int)DT_POLY_BITS) | (dtPolyRef)ip;
+            return ((dtPolyRef)salt << (int)(DT_POLY_BITS + DT_TILE_BITS)) | ((dtPolyRef)it << (int)DT_POLY_BITS) | ip;
         }
 
         /// Decodes a standard polygon reference.
@@ -255,8 +254,8 @@ public static partial class Detour
         public void decodePolyId(dtPolyRef polyRef, ref uint salt, ref uint it, ref uint ip)
         {
             dtPolyRef saltMask = (dtPolyRef)(1 << (int)DT_SALT_BITS) - 1;
-            dtPolyRef tileMask = (dtPolyRef)((1 << (int)DT_TILE_BITS) - 1);
-            dtPolyRef polyMask = (dtPolyRef)((1ul << (int)DT_POLY_BITS) - 1);
+            dtPolyRef tileMask = (1 << (int)DT_TILE_BITS) - 1;
+            dtPolyRef polyMask = (1ul << (int)DT_POLY_BITS) - 1;
             salt = (uint)((polyRef >> (int)(DT_POLY_BITS + DT_TILE_BITS)) & saltMask);
             it = (uint)((polyRef >> (int)DT_POLY_BITS) & tileMask);
             ip = (uint)(polyRef & polyMask);
@@ -268,7 +267,7 @@ public static partial class Detour
         ///  @see #encodePolyId
         public uint decodePolyIdSalt(dtPolyRef polyRef)
         {
-            dtPolyRef saltMask = (dtPolyRef)((1 << (int)DT_SALT_BITS) - 1);
+            dtPolyRef saltMask = (1 << (int)DT_SALT_BITS) - 1;
             return (uint)((polyRef >> (int)(DT_POLY_BITS + DT_TILE_BITS)) & saltMask);
         }
 
@@ -278,7 +277,7 @@ public static partial class Detour
         ///  @see #encodePolyId
         public uint decodePolyIdTile(dtPolyRef polyRef)
         {
-            dtPolyRef tileMask = (dtPolyRef)((1 << (int)DT_TILE_BITS) - 1);
+            dtPolyRef tileMask = (1 << (int)DT_TILE_BITS) - 1;
             return (uint)((polyRef >> (int)DT_POLY_BITS) & tileMask);
         }
 
@@ -288,7 +287,7 @@ public static partial class Detour
         ///  @see #encodePolyId
         public uint decodePolyIdPoly(dtPolyRef polyRef)
         {
-            dtPolyRef polyMask = (dtPolyRef)((1ul << (int)DT_POLY_BITS) - 1);
+            dtPolyRef polyMask = (1ul << (int)DT_POLY_BITS) - 1;
             return (uint)(polyRef & polyMask);
         }
 
@@ -406,7 +405,7 @@ public static partial class Detour
             for (uint i = 0; i < tile.header.polyCount; ++i)
             {
                 dtPoly poly = tile.polys[i];
-                int nv = (int)poly.vertCount;
+                int nv = poly.vertCount;
                 for (int j = 0; j < nv; ++j)
                 {
                     // Skip edges which do not point to the right side.
@@ -434,7 +433,7 @@ public static partial class Detour
                     {
                         conarea[n * 2 + 0] = Math.Max(amin[0], bmin[0]);
                         conarea[n * 2 + 1] = Math.Min(amax[0], bmax[0]);
-                        con[n] = polyRefBase | (dtPolyRef)i;
+                        con[n] = polyRefBase | i;
                         n++;
                     }
                     break;
@@ -494,14 +493,14 @@ public static partial class Detour
                 // Create new links.
                 //		ushort m = DT_EXT_LINK | (ushort)side;
 
-                int nv = (int)poly.vertCount;
+                int nv = poly.vertCount;
                 for (int j = 0; j < nv; ++j)
                 {
                     // Skip non-portal edges.
                     if ((poly.neis[j] & DT_EXT_LINK) == 0)
                         continue;
 
-                    int dir = (int)(poly.neis[j] & 0xff);
+                    int dir = poly.neis[j] & 0xff;
                     if (side != -1 && dir != side)
                         continue;
 
@@ -596,7 +595,7 @@ public static partial class Detour
                 {
                     dtLink link = target.links[idx];
                     link.polyRef = polyRef;
-                    link.edge = (byte)1;
+                    link.edge = 1;
                     link.side = oppositeSide;
                     link.bmin = link.bmax = 0;
                     // Add to linked list.
@@ -613,7 +612,7 @@ public static partial class Detour
                         ushort landPolyIdx = (ushort)decodePolyIdPoly(polyRef);
                         dtPoly landPoly = tile.polys[landPolyIdx];
                         dtLink link = tile.links[tidx];
-                        link.polyRef = getPolyRefBase(target) | (dtPolyRef)(targetCon.poly);
+                        link.polyRef = getPolyRefBase(target) | targetCon.poly;
                         link.edge = 0xff;
                         link.side = (byte)(side == -1 ? 0xff : side);
                         link.bmin = link.bmax = 0;
@@ -653,7 +652,7 @@ public static partial class Detour
                     if (idx != DT_NULL_LINK)
                     {
                         dtLink link = tile.links[idx];
-                        link.polyRef = polyRefBase | (dtPolyRef)(poly.neis[j] - 1u);
+                        link.polyRef = polyRefBase | poly.neis[j] - 1u;
                         link.edge = (byte)j;
                         link.side = 0xff;
                         link.bmin = link.bmax = 0;
@@ -702,7 +701,7 @@ public static partial class Detour
                 {
                     dtLink link = tile.links[idx];
                     link.polyRef = polyRef;
-                    link.edge = (byte)0;
+                    link.edge = 0;
                     link.side = 0xff;
                     link.bmin = link.bmax = 0;
                     // Add to linked list.
@@ -717,7 +716,7 @@ public static partial class Detour
                     ushort landPolyIdx = (ushort)decodePolyIdPoly(polyRef);
                     dtPoly landPoly = tile.polys[landPolyIdx];
                     dtLink link = tile.links[tidx];
-                    link.polyRef = polyRefBase | (dtPolyRef)(con.poly);
+                    link.polyRef = polyRefBase | con.poly;
                     link.edge = 0xff;
                     link.side = 0xff;
                     link.bmin = link.bmax = 0;
@@ -1071,7 +1070,7 @@ public static partial class Detour
             else
             {
                 // Try to relocate the tile to specific index with same salt.
-                int tileIndex = (int)decodePolyIdTile((dtPolyRef)lastRef);
+                int tileIndex = (int)decodePolyIdTile(lastRef);
                 if (tileIndex >= m_maxTiles)
                     return DT_FAILURE | DT_OUT_OF_MEMORY;
                 // Try to find the specific tile id from the free list.
@@ -1093,7 +1092,7 @@ public static partial class Detour
                     prev.next = tile.next;
 
                 // Restore salt.
-                tile.salt = decodePolyIdSalt((dtPolyRef)lastRef);
+                tile.salt = decodePolyIdSalt(lastRef);
             }
 
             // Make sure we could allocate a tile.
@@ -1294,8 +1293,8 @@ public static partial class Detour
         {
             if (tileRef == 0)
                 return null;
-            uint tileIndex = decodePolyIdTile((dtPolyRef)tileRef);
-            uint tileSalt = decodePolyIdSalt((dtPolyRef)tileRef);
+            uint tileIndex = decodePolyIdTile(tileRef);
+            uint tileSalt = decodePolyIdSalt(tileRef);
             if ((int)tileIndex >= m_maxTiles)
                 return null;
             dtMeshTile tile = m_tiles[tileIndex];
@@ -1430,8 +1429,8 @@ public static partial class Detour
 
             if (tileRef == 0)
                 return DT_FAILURE | DT_INVALID_PARAM;
-            uint tileIndex = decodePolyIdTile((dtPolyRef)tileRef);
-            uint tileSalt = decodePolyIdSalt((dtPolyRef)tileRef);
+            uint tileIndex = decodePolyIdTile(tileRef);
+            uint tileSalt = decodePolyIdSalt(tileRef);
             if ((int)tileIndex >= m_maxTiles)
                 return DT_FAILURE | DT_INVALID_PARAM;
             dtMeshTile tile = m_tiles[tileIndex];
@@ -1513,7 +1512,7 @@ public static partial class Detour
 #if DT_POLYREF64
 	        tile.salt = (tile.salt+1) & ((1<<DT_SALT_BITS)-1);
 #else
-            tile.salt = (uint)((tile.salt + 1) & ((1 << (int)DT_SALT_BITS) - 1));
+            tile.salt = (tile.salt + 1) & ((1 << (int)DT_SALT_BITS) - 1);
 #endif
             if (tile.salt == 0)
                 tile.salt++;

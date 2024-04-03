@@ -7,13 +7,11 @@ using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Loots;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Groups
 {

@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
@@ -504,7 +503,7 @@ namespace Game.Chat.Commands
                     int gridY = ri.gridId / MapConst.MaxGrids;
                     int gridX = ri.gridId % MapConst.MaxGrids;
 
-                    string respawnTime = ri.respawnTime > GameTime.GetGameTime() ? Time.secsToTimeString((long)(ri.respawnTime - GameTime.GetGameTime()), TimeFormat.ShortText) : stringOverdue;
+                    string respawnTime = ri.respawnTime > GameTime.GetGameTime() ? Time.secsToTimeString(ri.respawnTime - GameTime.GetGameTime(), TimeFormat.ShortText) : stringOverdue;
                     handler.SendSysMessage($"{ri.spawnId} | {ri.entry} | [{gridX:2},{gridY:2}] | {GetZoneName(respawnZoneId, locale)} ({respawnZoneId}) | {respawnTime}{(map.IsSpawnGroupActive(data.spawnGroupData.groupId) ? "" : " (inactive)")}");
                 }
             }

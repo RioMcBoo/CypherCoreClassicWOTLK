@@ -559,7 +559,7 @@ namespace Scripts.Spells.Hunter
             PreventDefaultAction();
 
             CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()));
+            args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()));
             eventInfo.GetActor().CastSpell(GetCaster(), SpellIds.RoarOfSacrificeTriggered, args);
         }
 

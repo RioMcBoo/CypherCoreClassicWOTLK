@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Framework.Cryptography.Ed25519.Internal
+﻿namespace Framework.Cryptography.Ed25519.Internal
 {
     internal static class Sha512Internal
     {

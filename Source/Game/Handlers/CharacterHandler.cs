@@ -11,7 +11,6 @@ using Game.Entities;
 using Game.Groups;
 using Game.Guilds;
 using Game.Maps;
-using Game.Miscellaneous;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -701,13 +700,13 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GenerateRandomCharacterName, Status = SessionStatus.Authed)]
         void HandleRandomizeCharName(GenerateRandomCharacterName packet)
         {
-            if (!Player.IsValidRace((Race)packet.Race))
+            if (!Player.IsValidRace(packet.Race))
             {
                 Log.outError(LogFilter.Network, "Invalid race ({0}) sent by accountId: {1}", packet.Race, GetAccountId());
                 return;
             }
 
-            if (!Player.IsValidGender((Gender)packet.Sex))
+            if (!Player.IsValidGender(packet.Sex))
             {
                 Log.outError(LogFilter.Network, "Invalid gender ({0}) sent by accountId: {1}", packet.Sex, GetAccountId());
                 return;

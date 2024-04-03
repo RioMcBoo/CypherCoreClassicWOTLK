@@ -124,7 +124,7 @@ namespace Game.AI
             if (_spells.Empty())
                 return;
 
-            int spell = (int)(RandomHelper.Rand32() % _spells.Count);
+            int spell = RandomHelper.Rand32() % _spells.Count;
             uint count = 0;
             foreach (var id in _spells)
             {

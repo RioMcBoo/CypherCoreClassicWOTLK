@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal
+﻿namespace Framework.Cryptography.Ed25519.Internal
 {
     // Loops? Arrays? Never heard of that stuff
     // Library avoids unnecessary heap allocations and unsafe code
@@ -10,7 +8,7 @@ namespace Framework.Cryptography.Ed25519.Internal
         public static ulong LoadBigEndian64(byte[] buf, int offset)
         {
             return
-                (ulong)(buf[offset + 7])
+                buf[offset + 7]
                 | (((ulong)(buf[offset + 6])) << 8)
                 | (((ulong)(buf[offset + 5])) << 16)
                 | (((ulong)(buf[offset + 4])) << 24)

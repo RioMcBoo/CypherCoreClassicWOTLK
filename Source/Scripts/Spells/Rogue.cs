@@ -93,8 +93,8 @@ namespace Scripts.Spells.Rogue
             Unit caster = GetCaster();
             if (hitUnit.IsInBack(caster))
             {
-                float currDamage = (float)(GetHitDamage());
-                float newDamage = MathFunctions.AddPct(ref currDamage, (float)(GetEffectInfo(3).CalcValue(caster)));
+                float currDamage = GetHitDamage();
+                float newDamage = MathFunctions.AddPct(ref currDamage, GetEffectInfo(3).CalcValue(caster));
                 SetHitDamage((int)newDamage);
             }
         }
@@ -152,7 +152,7 @@ namespace Scripts.Spells.Rogue
             if (damageInfo != null)
             {
                 CastSpellExtraArgs args = new(aurEff);
-                args.AddSpellMod(SpellValueMod.BasePoint0, (int)damageInfo.GetDamage());
+                args.AddSpellMod(SpellValueMod.BasePoint0, damageInfo.GetDamage());
                 GetTarget().CastSpell(_procTarget, SpellIds.BladeFlurryExtraAttack, args);
             }
         }
@@ -563,7 +563,7 @@ namespace Scripts.Spells.Rogue
             var spentCP = Misc.GetFinishingMoveCPCost(procInfo.GetProcSpell());
             if (spentCP.HasValue)
             {
-                int cdExtra = -(int)((float)(aurEff.GetAmount() * spentCP.Value) * 0.1f);
+                int cdExtra = -(int)(aurEff.GetAmount() * spentCP.Value * 0.1f);
 
                 SpellHistory history = GetTarget().GetSpellHistory();
                 foreach (uint spellId in Spells)
@@ -656,8 +656,8 @@ namespace Scripts.Spells.Rogue
             if (cost == null)
                 return;
 
-            float pct = (float)(aura.GetDuration()) / (float)(aura.GetMaxDuration());
-            int extraAmount = (int)((float)(cost.Amount) * pct);
+            float pct = aura.GetDuration() / (float)(aura.GetMaxDuration());
+            int extraAmount = (int)(cost.Amount * pct);
             caster.ModifyPower(PowerType.Energy, extraAmount);
         }
 

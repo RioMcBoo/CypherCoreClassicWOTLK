@@ -193,8 +193,8 @@ namespace Game.Maps
 
             uint legTimeAccelDecel(double dist)
             {
-                double speed = (double)goInfo.MoTransport.moveSpeed;
-                double accel = (double)goInfo.MoTransport.accelRate;
+                double speed = goInfo.MoTransport.moveSpeed;
+                double accel = goInfo.MoTransport.accelRate;
                 double accelDist = 0.5 * speed * speed / accel;
                 if (accelDist >= dist * 0.5)
                     return (uint)(Math.Sqrt(dist / accel) * 2000.0);
@@ -204,8 +204,8 @@ namespace Game.Maps
 
             uint legTimeAccel(double dist)
             {
-                double speed = (double)goInfo.MoTransport.moveSpeed;
-                double accel = (double)goInfo.MoTransport.accelRate;
+                double speed = goInfo.MoTransport.moveSpeed;
+                double accel = goInfo.MoTransport.accelRate;
                 double accelDist = 0.5 * speed * speed / accel;
                 if (accelDist >= dist)
                     return (uint)(Math.Sqrt((dist + dist) / accel) * 1000.0);
@@ -287,7 +287,7 @@ namespace Game.Maps
                 if (pauseItr != 0)
                     eventSplineTime = legTimeAccel(eventLength);
                 else
-                    eventSplineTime = (uint)(eventLength / (double)goInfo.MoTransport.moveSpeed * 1000.0);
+                    eventSplineTime = (uint)(eventLength / goInfo.MoTransport.moveSpeed * 1000.0);
 
                 if (pathPoints[eventPointIndex].ArrivalEventID != 0)
                 {
@@ -578,8 +578,8 @@ namespace Game.Maps
 
             if (!isOnPause)
                 distanceMoved += CalculateDistanceMoved(
-                    (double)(time - prevSegmentTime) * 0.001,
-                    (double)(pathSegment.SegmentEndArrivalTimestamp - prevSegmentTime) * 0.001,
+                    (time - prevSegmentTime) * 0.001,
+                    (pathSegment.SegmentEndArrivalTimestamp - prevSegmentTime) * 0.001,
                     segmentIndex == 0,
                     segmentIndex == leg.Segments.Count - 1);
 

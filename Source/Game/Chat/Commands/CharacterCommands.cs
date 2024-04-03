@@ -3,14 +3,12 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.Cache;
 using Game.DataStorage;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Chat
 {
@@ -666,7 +664,7 @@ namespace Game.Chat
             if (player == null)
                 return false;
 
-            int oldlevel = (int)(player.IsConnected() ? player.GetConnectedPlayer().GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(player.GetGUID()));
+            int oldlevel = player.IsConnected() ? player.GetConnectedPlayer().GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(player.GetGUID());
             int newlevel = oldlevel + level;
 
             if (newlevel < 1)

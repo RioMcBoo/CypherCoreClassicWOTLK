@@ -776,7 +776,7 @@ namespace Scripts.Spells.Paladin
             int amount = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 
             Cypher.Assert(spellInfo.GetMaxTicks() > 0);
-            amount /= (int)spellInfo.GetMaxTicks();
+            amount /= spellInfo.GetMaxTicks();
 
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);

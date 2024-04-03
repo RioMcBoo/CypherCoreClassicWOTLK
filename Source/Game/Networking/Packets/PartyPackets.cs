@@ -294,7 +294,7 @@ namespace Game.Networking.Packets
             foreach (AuraApplication aurApp in player.GetVisibleAuras())
             {
                 PartyMemberAuraStates aura = new();
-                aura.SpellID = (int)aurApp.GetBase().GetId();
+                aura.SpellID = aurApp.GetBase().GetId();
                 aura.ActiveFlags = aurApp.GetEffectMask();
                 aura.Flags = aurApp.GetFlags();
 
@@ -332,7 +332,7 @@ namespace Game.Networking.Packets
                 {
                     PartyMemberAuraStates aura = new();
 
-                    aura.SpellID = (int)aurApp.GetBase().GetId();
+                    aura.SpellID = aurApp.GetBase().GetId();
                     aura.ActiveFlags = aurApp.GetEffectMask();
                     aura.Flags = aurApp.GetFlags();
 

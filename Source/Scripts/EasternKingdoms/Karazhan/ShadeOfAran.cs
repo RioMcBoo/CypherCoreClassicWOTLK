@@ -14,48 +14,48 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 {
     struct SpellIds
     {
-        public const uint Frostbolt = 29954;
-        public const uint Fireball = 29953;
-        public const uint Arcmissle = 29955;
-        public const uint Chainsofice = 29991;
-        public const uint Dragonsbreath = 29964;
-        public const uint Massslow = 30035;
-        public const uint FlameWreath = 29946;
-        public const uint AoeCs = 29961;
-        public const uint Playerpull = 32265;
-        public const uint Aexplosion = 29973;
-        public const uint MassPoly = 29963;
-        public const uint BlinkCenter = 29967;
-        public const uint Elementals = 29962;
-        public const uint Conjure = 29975;
-        public const uint Drink = 30024;
-        public const uint Potion = 32453;
-        public const uint AoePyroblast = 29978;
+        public const int Frostbolt = 29954;
+        public const int Fireball = 29953;
+        public const int Arcmissle = 29955;
+        public const int Chainsofice = 29991;
+        public const int Dragonsbreath = 29964;
+        public const int Massslow = 30035;
+        public const int FlameWreath = 29946;
+        public const int AoeCs = 29961;
+        public const int Playerpull = 32265;
+        public const int Aexplosion = 29973;
+        public const int MassPoly = 29963;
+        public const int BlinkCenter = 29967;
+        public const int Elementals = 29962;
+        public const int Conjure = 29975;
+        public const int Drink = 30024;
+        public const int Potion = 32453;
+        public const int AoePyroblast = 29978;
 
-        public const uint CircularBlizzard = 29951;
-        public const uint Waterbolt = 31012;
-        public const uint ShadowPyro = 29978;
+        public const int CircularBlizzard = 29951;
+        public const int Waterbolt = 31012;
+        public const int ShadowPyro = 29978;
     }
 
     struct CreatureIds
     {
-        public const uint WaterElemental = 17167;
-        public const uint ShadowOfAran = 18254;
-        public const uint AranBlizzard = 17161;
+        public const int WaterElemental = 17167;
+        public const int ShadowOfAran = 18254;
+        public const int AranBlizzard = 17161;
     }
 
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SayFlamewreath = 1;
-        public const uint SayBlizzard = 2;
-        public const uint SayExplosion = 3;
-        public const uint SayDrink = 4;
-        public const uint SayElementals = 5;
-        public const uint SayKill = 6;
-        public const uint SayTimeover = 7;
-        public const uint SayDeath = 8;
-        public const uint SayAtiesh = 9;
+        public const int SayAggro = 0;
+        public const int SayFlamewreath = 1;
+        public const int SayBlizzard = 2;
+        public const int SayExplosion = 3;
+        public const int SayDrink = 4;
+        public const int SayElementals = 5;
+        public const int SayKill = 6;
+        public const int SayTimeover = 7;
+        public const int SayDeath = 8;
+        public const int SayAtiesh = 9;
     }
 
     enum SuperSpell
@@ -68,7 +68,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
     [Script]
     class boss_aran : ScriptedAI
     {
-        static uint[] AtieshStaves =
+        static int[] AtieshStaves =
         {
             22589, //ItemAtieshMage,
             22630, //ItemAtieshWarlock,
@@ -92,7 +92,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
         float[] FWTargPosX = new float[3];
         float[] FWTargPosY = new float[3];
 
-        uint CurrentNormalSpell;
+        int CurrentNormalSpell;
         uint ArcaneCooldown;
         uint FireCooldown;
         uint FrostCooldown;
@@ -286,7 +286,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                     if (target == null)
                         return;
 
-                    uint[] Spells = new uint[3];
+                    int[] Spells = new int[3];
                     byte AvailableSpells = 0;
 
                     //Check for what spells are not on cooldown
@@ -466,7 +466,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
             me.SetCanMelee(ArcaneCooldown != 0 && FireCooldown != 0 && FrostCooldown != 0);
         }
 
-        public override void DamageTaken(Unit pAttacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit pAttacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!DrinkInturrupted && Drinking && damage != 0)
                 DrinkInturrupted = true;

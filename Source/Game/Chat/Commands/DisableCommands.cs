@@ -4,7 +4,6 @@
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
-using System;
 
 namespace Game.Chat.Commands
 {

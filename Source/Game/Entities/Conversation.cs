@@ -195,7 +195,7 @@ namespace Game.Entities
 
         public void AddActor(int actorId, int actorIdx, ConversationActorType type, int creatureId, int creatureDisplayInfoId)
         {
-            ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, (int)actorIdx);
+            ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, actorIdx);
             SetUpdateFieldValue(ref actorField.CreatureID, creatureId);
             SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, creatureDisplayInfoId);
             SetUpdateFieldValue(ref actorField.ActorGUID, ObjectGuid.Empty);

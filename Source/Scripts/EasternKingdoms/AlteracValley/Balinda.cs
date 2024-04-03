@@ -13,19 +13,19 @@ namespace Scripts.EasternKingdoms.AlteracValley.Balinda
 {
     struct SpellIds
     {
-        public const uint ArcaneExplosion = 46608;
-        public const uint ConeOfCold = 38384;
-        public const uint Fireball = 46988;
-        public const uint Frostbolt = 46987;
-        public const uint SummonWaterElemental = 45067;
-        public const uint Iceblock = 46604;
+        public const int ArcaneExplosion = 46608;
+        public const int ConeOfCold = 38384;
+        public const int Fireball = 46988;
+        public const int Frostbolt = 46987;
+        public const int SummonWaterElemental = 45067;
+        public const int Iceblock = 46604;
     }
 
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SayEvade = 1;
-        public const uint SaySalvation = 2;
+        public const int SayAggro = 0;
+        public const int SayEvade = 1;
+        public const int SaySalvation = 2;
     }
 
     struct ActionIds
@@ -127,7 +127,7 @@ namespace Scripts.EasternKingdoms.AlteracValley.Balinda
                 Talk(TextIds.SayAggro);
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.HealthBelowPctDamaged(40, damage) && !HasCastIceblock)
             {

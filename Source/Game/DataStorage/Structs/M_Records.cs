@@ -3,8 +3,6 @@
 
 using Framework.Constants;
 using System;
-using System.Numerics;
-using static Game.AI.SmartAction;
 
 namespace Game.DataStorage
 {

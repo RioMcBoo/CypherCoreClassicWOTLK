@@ -254,13 +254,13 @@ namespace Framework.IO
 		{
 			ushort value=tree[c].Code;
 			ushort len=tree[c].Len;
-			if(s.bi_valid>(int)Buf_size-len)
+			if(s.bi_valid> Buf_size - len)
 			{
 				int val=value;
 				s.bi_buf|=(ushort)(val<<s.bi_valid);
 				//was put_short(s, s.bi_buf);
 				s.pending_buf[s.pending++]=(byte)(s.bi_buf&0xff);
-				s.pending_buf[s.pending++]=(byte)((ushort)s.bi_buf>>8);
+				s.pending_buf[s.pending++]=(byte)(s.bi_buf >> 8);
 				s.bi_buf=(ushort)(val>>(Buf_size-s.bi_valid));
 				s.bi_valid+=len-Buf_size;
 			}
@@ -301,13 +301,13 @@ namespace Framework.IO
 		static void send_bits(deflate_state s, int value, int length)
 		{
 			int len=length;
-			if(s.bi_valid>(int)Buf_size-len)
+			if(s.bi_valid> Buf_size - len)
 			{
 				int val=value;
 				s.bi_buf|=(ushort)(val<<s.bi_valid);
 				//was put_short(s, s.bi_buf);
 				s.pending_buf[s.pending++]=(byte)(s.bi_buf&0xff);
-				s.pending_buf[s.pending++]=(byte)((ushort)s.bi_buf>>8);
+				s.pending_buf[s.pending++]=(byte)(s.bi_buf >> 8);
 				s.bi_buf=(ushort)(val>>(Buf_size-s.bi_valid));
 				s.bi_valid+=len-Buf_size;
 			}
@@ -484,7 +484,7 @@ namespace Framework.IO
 				{
 					m=s.heap[--h];
 					if(m>max_code) continue;
-					if((uint)tree[m].Len!=(uint)bits)
+					if(tree[m].Len != (uint)bits)
 					{
 						//Trace((stderr,"code %d bits %d->%d\n", m, tree[m].Len, bits));
 						s.opt_len+=((uint)bits-tree[m].Len)*tree[m].Freq;
@@ -638,7 +638,7 @@ namespace Framework.IO
 			int min_count=4;			// min repeat count
 
 			if(nextlen==0) { max_count=138; min_count=3; }
-			tree[max_code+1].Len=(ushort)0xffff; // guard
+			tree[max_code+1].Len= 0xffff; // guard
 
 			for(n=0; n<=max_code; n++)
 			{
@@ -1001,7 +1001,7 @@ namespace Framework.IO
 			{
 				//was put_short(s, s.bi_buf);
 				s.pending_buf[s.pending++]=(byte)(s.bi_buf&0xff);
-				s.pending_buf[s.pending++]=(byte)((ushort)s.bi_buf>>8);
+				s.pending_buf[s.pending++]=(byte)(s.bi_buf >> 8);
 
 				s.bi_buf=0;
 				s.bi_valid=0;
@@ -1024,7 +1024,7 @@ namespace Framework.IO
 			{
 				//was put_short(s, s.bi_buf);
 				s.pending_buf[s.pending++]=(byte)(s.bi_buf&0xff);
-				s.pending_buf[s.pending++]=(byte)((ushort)s.bi_buf>>8);
+				s.pending_buf[s.pending++]=(byte)(s.bi_buf >> 8);
 			}
 			else if(s.bi_valid>0)
 			{

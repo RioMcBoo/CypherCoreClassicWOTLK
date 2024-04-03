@@ -42,7 +42,7 @@ namespace Game
             tradeUpdated.ClientStateIndex = view_trade.GetClientStateIndex();
             tradeUpdated.CurrentStateIndex = view_trade.GetServerStateIndex();
             tradeUpdated.Gold = view_trade.GetMoney();
-            tradeUpdated.ProposedEnchantment = (int)view_trade.GetSpell();
+            tradeUpdated.ProposedEnchantment = view_trade.GetSpell();
 
             for (byte i = 0; i < (byte)TradeSlots.Count; ++i)
             {
@@ -52,13 +52,13 @@ namespace Game
                     TradeUpdated.TradeItem tradeItem = new();
                     tradeItem.Slot = i;
                     tradeItem.Item = new ItemInstance(item);
-                    tradeItem.StackCount = (int)item.GetCount();
+                    tradeItem.StackCount = item.GetCount();
                     tradeItem.GiftCreator = item.GetGiftCreator();
                     if (!item.IsWrapped())
                     {
                         TradeUpdated.UnwrappedTradeItem unwrappedItem = new();
-                        unwrappedItem.EnchantID = (int)item.GetEnchantmentId(EnchantmentSlot.EnhancementPermanent);
-                        unwrappedItem.OnUseEnchantmentID = (int)item.GetEnchantmentId(EnchantmentSlot.EnhancementUse);
+                        unwrappedItem.EnchantID = item.GetEnchantmentId(EnchantmentSlot.EnhancementPermanent);
+                        unwrappedItem.OnUseEnchantmentID = item.GetEnchantmentId(EnchantmentSlot.EnhancementUse);
                         unwrappedItem.Creator = item.GetCreator();
                         unwrappedItem.Charges = item.GetSpellCharges();
                         unwrappedItem.Lock = item.GetTemplate().GetLockID() != 0 && !item.HasItemFlag(ItemFieldFlags.Unlocked);
@@ -443,10 +443,10 @@ namespace Game
                 }                
 
                 // update money
-                GetPlayer().ModifyMoney(-(long)my_trade.GetMoney());
-                GetPlayer().ModifyMoney((long)his_trade.GetMoney());
-                trader.ModifyMoney(-(long)his_trade.GetMoney());
-                trader.ModifyMoney((long)my_trade.GetMoney());
+                GetPlayer().ModifyMoney(-my_trade.GetMoney());
+                GetPlayer().ModifyMoney(his_trade.GetMoney());
+                trader.ModifyMoney(-his_trade.GetMoney());
+                trader.ModifyMoney(my_trade.GetMoney());
 
                 if (my_spell != null)
                     my_spell.Prepare(my_targets);

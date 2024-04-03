@@ -402,7 +402,7 @@ namespace Game
                     {
                         long money = pProto.GetSellPrice() * packet.Amount;
 
-                        if (!_player.ModifyMoney((long)money)) // ensure player doesn't exceed gold limit
+                        if (!_player.ModifyMoney(money)) // ensure player doesn't exceed gold limit
                         {
                             _player.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
                             return;

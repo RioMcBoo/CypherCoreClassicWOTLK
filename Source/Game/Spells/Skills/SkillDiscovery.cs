@@ -114,7 +114,7 @@ namespace Game.Spells
                 if (!spellEntry.IsExplicitDiscovery())
                     continue;
 
-                if (!SkillDiscoveryStorage.ContainsKey((int)spellEntry.Id))
+                if (!SkillDiscoveryStorage.ContainsKey(spellEntry.Id))
                     Log.outError(LogFilter.Sql, "Spell (ID: {0}) is 100% Chance random discovery ability but not have data in `skill_discovery_template` table", spellEntry.Id);
             }
 

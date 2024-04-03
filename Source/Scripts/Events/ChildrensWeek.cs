@@ -14,115 +14,115 @@ namespace Scripts.Events.ChildrensWeek
 {
     struct TextIds
     {
-        public const uint OracleOrphan1 = 1;
-        public const uint OracleOrphan2 = 2;
-        public const uint OracleOrphan3 = 3;
-        public const uint OracleOrphan4 = 4;
-        public const uint OracleOrphan5 = 5;
-        public const uint OracleOrphan6 = 6;
-        public const uint OracleOrphan7 = 7;
-        public const uint OracleOrphan8 = 8;
-        public const uint OracleOrphan9 = 9;
-        public const uint OracleOrphan10 = 10;
-        public const uint OracleOrphan11 = 11;
-        public const uint OracleOrphan12 = 12;
-        public const uint OracleOrphan13 = 13;
-        public const uint OracleOrphan14 = 14;
+        public const int OracleOrphan1 = 1;
+        public const int OracleOrphan2 = 2;
+        public const int OracleOrphan3 = 3;
+        public const int OracleOrphan4 = 4;
+        public const int OracleOrphan5 = 5;
+        public const int OracleOrphan6 = 6;
+        public const int OracleOrphan7 = 7;
+        public const int OracleOrphan8 = 8;
+        public const int OracleOrphan9 = 9;
+        public const int OracleOrphan10 = 10;
+        public const int OracleOrphan11 = 11;
+        public const int OracleOrphan12 = 12;
+        public const int OracleOrphan13 = 13;
+        public const int OracleOrphan14 = 14;
 
-        public const uint WolvarOrphan1 = 1;
-        public const uint WolvarOrphan2 = 2;
-        public const uint WolvarOrphan3 = 3;
-        public const uint WolvarOrphan4 = 4;
-        public const uint WolvarOrphan5 = 5;
+        public const int WolvarOrphan1 = 1;
+        public const int WolvarOrphan2 = 2;
+        public const int WolvarOrphan3 = 3;
+        public const int WolvarOrphan4 = 4;
+        public const int WolvarOrphan5 = 5;
         // 6 - 9 used in Nesingwary script
-        public const uint WolvarOrphan10 = 10;
-        public const uint WolvarOrphan11 = 11;
-        public const uint WolvarOrphan12 = 12;
-        public const uint WolvarOrphan13 = 13;
+        public const int WolvarOrphan10 = 10;
+        public const int WolvarOrphan11 = 11;
+        public const int WolvarOrphan12 = 12;
+        public const int WolvarOrphan13 = 13;
 
-        public const uint WinterfinPlaymate1 = 1;
-        public const uint WinterfinPlaymate2 = 2;
+        public const int WinterfinPlaymate1 = 1;
+        public const int WinterfinPlaymate2 = 2;
 
-        public const uint SnowfallGladePlaymate1 = 1;
-        public const uint SnowfallGladePlaymate2 = 2;
+        public const int SnowfallGladePlaymate1 = 1;
+        public const int SnowfallGladePlaymate2 = 2;
 
-        public const uint SooRoo1 = 1;
-        public const uint ElderKekek1 = 1;
+        public const int SooRoo1 = 1;
+        public const int ElderKekek1 = 1;
 
-        public const uint Alexstrasza2 = 2;
-        public const uint Krasus8 = 8;
+        public const int Alexstrasza2 = 2;
+        public const int Krasus8 = 8;
     }
 
     struct QuestIds
     {
-        public const uint PlaymateWolvar = 13951;
-        public const uint PlaymateOracle = 13950;
-        public const uint TheBiggestTreeEver = 13929;
-        public const uint TheBronzeDragonshrineOracle = 13933;
-        public const uint TheBronzeDragonshrineWolvar = 13934;
-        public const uint MeetingAGreatOne = 13956;
-        public const uint TheMightyHemetNesingwary = 13957;
-        public const uint DownAtTheDocks = 910;
-        public const uint GatewayToTheFrontier = 911;
-        public const uint BoughtOfEternals = 1479;
-        public const uint SpookyLighthouse = 1687;
-        public const uint StonewroughtDam = 1558;
-        public const uint DarkPortalH = 10951;
-        public const uint DarkPortalA = 10952;
-        public const uint LordaeronThroneRoom = 1800;
-        public const uint AuchindounAndTheRing = 10950;
-        public const uint TimeToVisitTheCavernsH = 10963;
-        public const uint TimeToVisitTheCavernsA = 10962;
-        public const uint TheSeatOfTheNaruu = 10956;
-        public const uint CallOnTheFarseer = 10968;
-        public const uint JheelIsAtAerisLanding = 10954;
-        public const uint HchuuAndTheMushroomPeople = 10945;
-        public const uint VisitTheThroneOfElements = 10953;
-        public const uint NowWhenIGrowUp = 11975;
-        public const uint HomeOfTheBearMen = 13930;
-        public const uint TheDragonQueenOracle = 13954;
-        public const uint TheDragonQueenWolvar = 13955;
+        public const int PlaymateWolvar = 13951;
+        public const int PlaymateOracle = 13950;
+        public const int TheBiggestTreeEver = 13929;
+        public const int TheBronzeDragonshrineOracle = 13933;
+        public const int TheBronzeDragonshrineWolvar = 13934;
+        public const int MeetingAGreatOne = 13956;
+        public const int TheMightyHemetNesingwary = 13957;
+        public const int DownAtTheDocks = 910;
+        public const int GatewayToTheFrontier = 911;
+        public const int BoughtOfEternals = 1479;
+        public const int SpookyLighthouse = 1687;
+        public const int StonewroughtDam = 1558;
+        public const int DarkPortalH = 10951;
+        public const int DarkPortalA = 10952;
+        public const int LordaeronThroneRoom = 1800;
+        public const int AuchindounAndTheRing = 10950;
+        public const int TimeToVisitTheCavernsH = 10963;
+        public const int TimeToVisitTheCavernsA = 10962;
+        public const int TheSeatOfTheNaruu = 10956;
+        public const int CallOnTheFarseer = 10968;
+        public const int JheelIsAtAerisLanding = 10954;
+        public const int HchuuAndTheMushroomPeople = 10945;
+        public const int VisitTheThroneOfElements = 10953;
+        public const int NowWhenIGrowUp = 11975;
+        public const int HomeOfTheBearMen = 13930;
+        public const int TheDragonQueenOracle = 13954;
+        public const int TheDragonQueenWolvar = 13955;
     }
 
     struct AreatriggerIds
     {
-        public const uint DownAtTheDocks = 3551;
-        public const uint GatewayToTheFrontier = 3549;
-        public const uint LordaeronThroneRoom = 3547;
-        public const uint BoughtOfEternals = 3546;
-        public const uint SpookyLighthouse = 3552;
-        public const uint StonewroughtDam = 3548;
-        public const uint DarkPortal = 4356;
+        public const int DownAtTheDocks = 3551;
+        public const int GatewayToTheFrontier = 3549;
+        public const int LordaeronThroneRoom = 3547;
+        public const int BoughtOfEternals = 3546;
+        public const int SpookyLighthouse = 3552;
+        public const int StonewroughtDam = 3548;
+        public const int DarkPortal = 4356;
     }
 
     struct CreatureIds
     {
-        public const uint OrphanOracle = 33533;
-        public const uint OrphanWolvar = 33532;
-        public const uint OrphanBloodElf = 22817;
-        public const uint OrphanDraenei = 22818;
-        public const uint OrphanHuman = 14305;
-        public const uint OrphanOrcish = 14444;
+        public const int OrphanOracle = 33533;
+        public const int OrphanWolvar = 33532;
+        public const int OrphanBloodElf = 22817;
+        public const int OrphanDraenei = 22818;
+        public const int OrphanHuman = 14305;
+        public const int OrphanOrcish = 14444;
 
-        public const uint CavernsOfTimeCwTrigger = 22872;
-        public const uint Exodar01CwTrigger = 22851;
-        public const uint Exodar02CwTrigger = 22905;
-        public const uint AerisLandingCwTrigger = 22838;
-        public const uint AuchindounCwTrigger = 22831;
-        public const uint SporeggarCwTrigger = 22829;
-        public const uint ThroneOfElementsCwTrigger = 22839;
-        public const uint Silvermoon01CwTrigger = 22866;
-        public const uint Krasus = 27990;
+        public const int CavernsOfTimeCwTrigger = 22872;
+        public const int Exodar01CwTrigger = 22851;
+        public const int Exodar02CwTrigger = 22905;
+        public const int AerisLandingCwTrigger = 22838;
+        public const int AuchindounCwTrigger = 22831;
+        public const int SporeggarCwTrigger = 22829;
+        public const int ThroneOfElementsCwTrigger = 22839;
+        public const int Silvermoon01CwTrigger = 22866;
+        public const int Krasus = 27990;
     }
 
     struct Misc
     {
-        public const uint SpellSnowball = 21343;
-        public const uint SpellOrphanOut = 58818;
+        public const int SpellSnowball = 21343;
+        public const int SpellOrphanOut = 58818;
 
-        public const uint DisplayInvisible = 11686;
+        public const int DisplayInvisible = 11686;
 
-        public static ObjectGuid GetOrphanGUID(Player player, uint orphan)
+        public static ObjectGuid GetOrphanGUID(Player player, int orphan)
         {
             Aura orphanOut = player.GetAura(SpellOrphanOut);
             if (orphanOut != null)
@@ -523,8 +523,8 @@ namespace Scripts.Events.ChildrensWeek
 
     class npc_the_etymidian : ScriptedAI
     {
-        const uint SayActivation = 0;
-        const uint QuestTheActivationRune = 12547;
+        const int SayActivation = 0;
+        const int QuestTheActivationRune = 12547;
 
         bool working;
         ObjectGuid orphanGUID;
@@ -545,7 +545,7 @@ namespace Scripts.Events.ChildrensWeek
             Initialize();
         }
 
-        public override void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt)
+        public override void OnQuestReward(Player player, Quest quest, LootItemType type, int opt)
         {
             if (quest.Id != QuestTheActivationRune)
                 return;
@@ -635,7 +635,7 @@ namespace Scripts.Events.ChildrensWeek
             Initialize();
         }
 
-        public override void SetData(uint type, uint data)
+        public override void SetData(int type, int data)
         {
             // Existing SmartAI
             if (type == 0)
@@ -778,8 +778,8 @@ namespace Scripts.Events.ChildrensWeek
             if (player.IsDead() || !player.HasAura(Misc.SpellOrphanOut))
                 return false;
 
-            uint questId = 0;
-            uint orphanId = 0;
+            int questId = 0;
+            int orphanId = 0;
 
             switch (trigger.Id)
             {
@@ -834,8 +834,8 @@ namespace Scripts.Events.ChildrensWeek
                 Player player = who.ToPlayer();
                 if (player != null && player.HasAura(Misc.SpellOrphanOut))
                 {
-                    uint questId = 0;
-                    uint orphanId = 0;
+                    int questId = 0;
+                    int orphanId = 0;
                     switch (me.GetEntry())
                     {
                         case CreatureIds.CavernsOfTimeCwTrigger:

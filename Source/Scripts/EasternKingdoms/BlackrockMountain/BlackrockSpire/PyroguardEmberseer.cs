@@ -13,30 +13,30 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
 {
     struct SpellIds
     {
-        public const uint EncagedEmberseer = 15282; // Self on spawn
-        public const uint FireShieldTrigger = 13377; // Self on spawn missing from 335 dbc triggers public const uint FireShield every 3 sec
-        public const uint FireShield = 13376; // Triggered by public const uint FireShieldTrigger
-        public const uint FreezeAnim = 16245; // Self on event start
-        public const uint EmberseerGrowing = 16048; // Self on event start
-        public const uint EmberseerGrowingTrigger = 16049; // Triggered by public const uint EmberseerGrowing
-        public const uint EmberseerFullStrength = 16047; // Emberseer Full Strength
-        public const uint Firenova = 23462; // Combat
-        public const uint Flamebuffet = 23341; // Combat
-        public const uint Pyroblast = 17274; // Combat
-                                             // Blackhand Incarcerator public const uint s
-        public const uint EncageEmberseer = 15281; // Emberseer on spawn
-        public const uint Strike = 15580; // Combat
-        public const uint Encage = 16045; // Combat
+        public const int EncagedEmberseer = 15282; // Self on spawn
+        public const int FireShieldTrigger = 13377; // Self on spawn missing from 335 dbc triggers public const int FireShield every 3 sec
+        public const int FireShield = 13376; // Triggered by public const int FireShieldTrigger
+        public const int FreezeAnim = 16245; // Self on event start
+        public const int EmberseerGrowing = 16048; // Self on event start
+        public const int EmberseerGrowingTrigger = 16049; // Triggered by public const int EmberseerGrowing
+        public const int EmberseerFullStrength = 16047; // Emberseer Full Strength
+        public const int Firenova = 23462; // Combat
+        public const int Flamebuffet = 23341; // Combat
+        public const int Pyroblast = 17274; // Combat
+                                             // Blackhand Incarcerator public const int s
+        public const int EncageEmberseer = 15281; // Emberseer on spawn
+        public const int Strike = 15580; // Combat
+        public const int Encage = 16045; // Combat
                                           // Cast on player by altar
-        public const uint EmberseerObjectVisual = 16532;
+        public const int EmberseerObjectVisual = 16532;
     }
 
     struct TextIds
     {
-        public const uint EmoteOneStack = 0;
-        public const uint EmoteTenStack = 1;
-        public const uint EmoteFreeOfBonds = 2;
-        public const uint YellFreeOfBonds = 3;
+        public const int EmoteOneStack = 0;
+        public const int EmoteTenStack = 1;
+        public const int EmoteFreeOfBonds = 2;
+        public const int YellFreeOfBonds = 3;
     }
 
     [Script]
@@ -69,7 +69,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             });
         }
 
-        public override void SetData(uint type, uint data)
+        public override void SetData(int type, int data)
         {
             switch (data)
             {

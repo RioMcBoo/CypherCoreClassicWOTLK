@@ -214,7 +214,7 @@ public class RealmManager : Singleton<RealmManager>
                 }
                 realmEntry.Version = version;
 
-                realmEntry.CfgRealmsID = (int)realm.Id.Index;
+                realmEntry.CfgRealmsID = realm.Id.Index;
                 realmEntry.Flags = (int)realm.Flags;
                 realmEntry.Name = realm.Name;
                 realmEntry.CfgConfigsID = (int)realm.GetConfigId();
@@ -264,7 +264,7 @@ public class RealmManager : Singleton<RealmManager>
                 realmListUpdate.Update.Version.Build = (int)realm.Value.Build;
             }
 
-            realmListUpdate.Update.CfgRealmsID = (int)realm.Value.Id.Index;
+            realmListUpdate.Update.CfgRealmsID = realm.Value.Id.Index;
             realmListUpdate.Update.Flags = (int)flag;
             realmListUpdate.Update.Name = realm.Value.Name;
             realmListUpdate.Update.CfgConfigsID = (int)realm.Value.GetConfigId();

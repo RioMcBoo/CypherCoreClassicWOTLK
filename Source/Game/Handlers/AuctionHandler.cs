@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking;
@@ -471,7 +470,7 @@ namespace Game
                         return;
                     }
                     auctionHouse.SendAuctionCancelledToBidder(auction, trans);
-                    player.ModifyMoney(-(long)cancelCost);
+                    player.ModifyMoney(-cancelCost);
                 }
 
                 auctionHouse.SendAuctionRemoved(auction, player, trans);

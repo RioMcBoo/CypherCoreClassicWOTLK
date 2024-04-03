@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Game.Arenas;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
@@ -225,7 +224,7 @@ namespace Game.BattleGrounds
         // create a new Battleground that will really be used to play
         public Battleground CreateNewBattleground(BattlegroundQueueTypeId queueId, BattlegroundBracketId bracketId)
         {
-            BattlegroundTypeId bgTypeId = GetRandomBG((BattlegroundTypeId)queueId.BattlemasterListId);
+            BattlegroundTypeId bgTypeId = GetRandomBG(queueId.BattlemasterListId);
 
             // get the template BG
             BattlegroundTemplate bg_template = GetBattlegroundTemplateByTypeId(bgTypeId);

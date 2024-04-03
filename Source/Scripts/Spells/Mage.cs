@@ -969,7 +969,7 @@ namespace Scripts.Spells.Mage
             if ((spellValue.CustomBasePointsMask & (1 << 1)) != 0)
             {
                 int originalDamage = GetHitDamage();
-                float targetIndex = (float)(spellValue.EffectBasePoints[1]);
+                float targetIndex = spellValue.EffectBasePoints[1];
                 float multiplier = MathF.Pow(GetEffectInfo().CalcDamageMultiplier(GetCaster(), GetSpell()), targetIndex);
                 SetHitDamage((int)(originalDamage * multiplier));
             }
@@ -1002,7 +1002,7 @@ namespace Scripts.Spells.Mage
             int pct = aurEff.GetAmount();
 
             Cypher.Assert(igniteDot.GetMaxTicks() > 0);
-            int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks());
+            int amount = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks();
 
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);
@@ -1427,7 +1427,7 @@ namespace Scripts.Spells.Mage
                 {
                     int extra = MathFunctions.CalculatePct(damageInfo.GetDamage(), 25);
                     if (extra > 0)
-                        aurEff.ChangeAmount(aurEff.GetAmount() + (int)extra);
+                        aurEff.ChangeAmount(aurEff.GetAmount() + extra);
                 }
             }
         }

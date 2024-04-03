@@ -413,7 +413,7 @@ namespace Scripts.Spells.Pets
                     Unit owner = pet.ToPet().GetOwner();
                     if (owner != null)
                     {
-                        int ownerBonus = (int)MathFunctions.CalculatePct(owner.GetArmor(), 35);
+                        int ownerBonus = MathFunctions.CalculatePct(owner.GetArmor(), 35);
                         amount += ownerBonus;
                     }
                 }
@@ -1013,7 +1013,7 @@ namespace Scripts.Spells.Pets
                 if (owner == null)
                     return;
 
-                amount += (int)MathFunctions.CalculatePct(owner.GetArmor(), 35);
+                amount += MathFunctions.CalculatePct(owner.GetArmor(), 35);
             }
         }
 
@@ -1436,7 +1436,7 @@ namespace Scripts.Spells.Pets
                 if (pet.IsGuardian())
                     ((Guardian)pet).SetBonusDamage((int)owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack));
 
-                amount += (int)owner.CalculateDamage(WeaponAttackType.BaseAttack, true, true);
+                amount += owner.CalculateDamage(WeaponAttackType.BaseAttack, true, true);
             }
         }
 

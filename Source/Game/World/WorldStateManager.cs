@@ -184,7 +184,7 @@ namespace Game
             if (worldStateTemplate == null || worldStateTemplate.MapIds.Empty())
                 return _realmWorldStateValues.LookupByKey(worldStateId);
 
-            if (map == null || (!worldStateTemplate.MapIds.Contains((int)map.GetId()) && !worldStateTemplate.MapIds.Contains(AnyMap)))
+            if (map == null || (!worldStateTemplate.MapIds.Contains(map.GetId()) && !worldStateTemplate.MapIds.Contains(AnyMap)))
                 return 0;
 
             return map.GetWorldStateValue(worldStateId);
@@ -227,7 +227,7 @@ namespace Game
                 return;
             }
 
-            if (map == null || (!worldStateTemplate.MapIds.Contains((int)map.GetId()) && !worldStateTemplate.MapIds.Contains(AnyMap)))
+            if (map == null || (!worldStateTemplate.MapIds.Contains(map.GetId()) && !worldStateTemplate.MapIds.Contains(AnyMap)))
                 return;
 
             map.SetWorldStateValue(worldStateId, value, hidden);
@@ -259,7 +259,7 @@ namespace Game
         {
             Dictionary<int, int> initialValues = new();
 
-            if (_worldStatesByMap.TryGetValue((int)map.GetId(), out Dictionary<int, int> valuesTemplate))
+            if (_worldStatesByMap.TryGetValue(map.GetId(), out Dictionary<int, int> valuesTemplate))
             {
                 foreach (var (key, value) in valuesTemplate)
                     initialValues.Add(key, value);

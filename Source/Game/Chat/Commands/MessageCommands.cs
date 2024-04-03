@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;

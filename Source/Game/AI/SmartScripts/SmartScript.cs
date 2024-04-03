@@ -740,7 +740,7 @@ namespace Game.AI
                             {
                                 Aura aur = target.ToUnit().GetAura(e.Action.removeAura.spell, casterGUID);
                                 if (aur != null)
-                                    aur.ModCharges(-(int)e.Action.removeAura.charges, AuraRemoveMode.Expire);
+                                    aur.ModCharges(-e.Action.removeAura.charges, AuraRemoveMode.Expire);
                             }
                             target.ToUnit().RemoveAurasDueToSpell(e.Action.removeAura.spell);
                         }
@@ -1417,7 +1417,7 @@ namespace Game.AI
                             if (target.ToGameObject().IsSpawnedByDefault())
                                 Log.outWarn(LogFilter.Sql, $"Invalid gameobject target '{target.GetName()}' (entry {target.GetEntry()}, spawnId {target.ToGameObject().GetSpawnId()}) for SMART_ACTION_ENABLE_TEMP_GOBJ - the object is spawned by default");
                             else
-                                target.ToGameObject().SetRespawnTime((int)e.Action.enableTempGO.duration);
+                                target.ToGameObject().SetRespawnTime(e.Action.enableTempGO.duration);
                         }
                     }
                     break;
@@ -1458,7 +1458,7 @@ namespace Game.AI
                             }
 
                             for (int i = 0; i < SharedConst.MaxEquipmentItems; ++i)
-                                if (e.Action.equip.mask == 0 || (e.Action.equip.mask & (1 << (int)i)) != 0)
+                                if (e.Action.equip.mask == 0 || (e.Action.equip.mask & (1 << i)) != 0)
                                     npc.SetVirtualItem(i, slot[i].ItemId, slot[i].AppearanceModId, slot[i].ItemVisual);
                         }
                     }
@@ -2190,7 +2190,7 @@ namespace Game.AI
                 {
                     foreach (var target in targets)
                         if (IsCreature(target))
-                            target.ToCreature().LoadEquipment((int)e.Action.loadEquipment.id, e.Action.loadEquipment.force != 0);
+                            target.ToCreature().LoadEquipment(e.Action.loadEquipment.id, e.Action.loadEquipment.force != 0);
 
                     break;
                 }
@@ -2354,7 +2354,7 @@ namespace Game.AI
                     {
                         Unit targetUnit = target.ToUnit();
                         if (targetUnit != null)
-                            targetUnit.SetHealth(targetUnit.CountPctFromMaxHealth((int)e.Action.setHealthPct.percent));
+                            targetUnit.SetHealth(targetUnit.CountPctFromMaxHealth(e.Action.setHealthPct.percent));
                     }
 
                     break;
@@ -2418,7 +2418,7 @@ namespace Game.AI
                     {
                         GameObject targetGo = target.ToGameObject();
                         if (targetGo != null)
-                            targetGo.ActivateObject((GameObjectActions)e.Action.activateGameObject.gameObjectAction, (int)e.Action.activateGameObject.param, GetBaseObject());
+                            targetGo.ActivateObject((GameObjectActions)e.Action.activateGameObject.gameObjectAction, e.Action.activateGameObject.param, GetBaseObject());
                     }
                     break;
                 }
@@ -2485,12 +2485,12 @@ namespace Game.AI
                     {
                         Unit unitTarget = target?.ToUnit();
                         if (unitTarget != null)
-                            unitTarget.GetAI()?.DoAction((int)e.Action.doAction.actionId);
+                            unitTarget.GetAI()?.DoAction(e.Action.doAction.actionId);
                         else
                         {
                             GameObject goTarget = target?.ToGameObject();
                             if (goTarget != null)
-                                goTarget.GetAI()?.DoAction((int)e.Action.doAction.actionId);
+                                goTarget.GetAI()?.DoAction(e.Action.doAction.actionId);
                         }
                     }
 
@@ -3007,7 +3007,7 @@ namespace Game.AI
                 }
                 case SmartTargets.ClosestUnspawnedGameobject:
                 {
-                    GameObject target = baseObject.FindNearestUnspawnedGameObject(e.Target.goClosest.entry, (float)(e.Target.goClosest.dist != 0 ? e.Target.goClosest.dist : 100));
+                    GameObject target = baseObject.FindNearestUnspawnedGameObject(e.Target.goClosest.entry, e.Target.goClosest.dist != 0 ? e.Target.goClosest.dist : 100);
                     if (target != null)
                         targets.Add(target);
                     break;
@@ -3513,7 +3513,7 @@ namespace Game.AI
                         }
                         break;
                         case SmartTargets.ActionInvoker:
-                            unitTarget = DoSelectLowestHpPercentFriendly((float)e.Event.friendlyHealthPct.radius, e.Event.friendlyHealthPct.minHpPct, e.Event.friendlyHealthPct.maxHpPct);
+                            unitTarget = DoSelectLowestHpPercentFriendly(e.Event.friendlyHealthPct.radius, e.Event.friendlyHealthPct.minHpPct, e.Event.friendlyHealthPct.maxHpPct);
                             break;
                         default:
                             return;
@@ -3918,34 +3918,34 @@ namespace Game.AI
                 case SmartScriptType.Creature:
                     e = Global.SmartAIMgr.GetScript(-(int)_me.GetSpawnId(), _scriptType);
                     if (e.Empty())
-                        e = Global.SmartAIMgr.GetScript((int)_me.GetEntry(), _scriptType);
+                        e = Global.SmartAIMgr.GetScript(_me.GetEntry(), _scriptType);
                     FillScript(e, _me, null, null, null, 0);
                     break;
                 case SmartScriptType.GameObject:
                     e = Global.SmartAIMgr.GetScript(-(int)_go.GetSpawnId(), _scriptType);
                     if (e.Empty())
-                        e = Global.SmartAIMgr.GetScript((int)_go.GetEntry(), _scriptType);
+                        e = Global.SmartAIMgr.GetScript(_go.GetEntry(), _scriptType);
                     FillScript(e, _go, null, null, null, 0);
                     break;
                 case SmartScriptType.AreaTriggerEntity:
                 case SmartScriptType.AreaTriggerEntityCustom:
-                    e = Global.SmartAIMgr.GetScript((int)_areaTrigger.GetEntry(), _scriptType);
+                    e = Global.SmartAIMgr.GetScript(_areaTrigger.GetEntry(), _scriptType);
                     FillScript(e, _areaTrigger, null, null, null, 0);
                     break;
                 case SmartScriptType.AreaTrigger:
-                    e = Global.SmartAIMgr.GetScript((int)_trigger.Id, _scriptType);
+                    e = Global.SmartAIMgr.GetScript(_trigger.Id, _scriptType);
                     FillScript(e, null, _trigger, null, null, 0);
                     break;
                 case SmartScriptType.Scene:
-                    e = Global.SmartAIMgr.GetScript((int)_sceneTemplate.SceneId, _scriptType);
+                    e = Global.SmartAIMgr.GetScript(_sceneTemplate.SceneId, _scriptType);
                     FillScript(e, null, null, _sceneTemplate, null, 0);
                     break;
                 case SmartScriptType.Quest:
-                    e = Global.SmartAIMgr.GetScript((int)_quest.Id, _scriptType);
+                    e = Global.SmartAIMgr.GetScript(_quest.Id, _scriptType);
                     FillScript(e, null, null, null, _quest, 0);
                     break;
                 case SmartScriptType.Event:
-                    e = Global.SmartAIMgr.GetScript((int)_eventId, _scriptType);
+                    e = Global.SmartAIMgr.GetScript(_eventId, _scriptType);
                     FillScript(e, null, null, null, null, _eventId);
                     break;
                 default:

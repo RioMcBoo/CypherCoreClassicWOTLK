@@ -13,45 +13,45 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
 {
     struct SpellIds
     {
-        public const uint BellowingRoar = 36922;
-        public const uint CharredEarth = 30129;
-        public const uint Cleave = 30131;
-        public const uint DistractingAsh = 30130;
-        public const uint RainOfBones = 37098;
-        public const uint SmokingBlast = 30128;
-        public const uint SmokingBlastT = 37057;
-        public const uint SmolderingBreath = 30210;
-        public const uint SummonSkeleton = 30170;
-        public const uint TailSweep = 25653;
+        public const int BellowingRoar = 36922;
+        public const int CharredEarth = 30129;
+        public const int Cleave = 30131;
+        public const int DistractingAsh = 30130;
+        public const int RainOfBones = 37098;
+        public const int SmokingBlast = 30128;
+        public const int SmokingBlastT = 37057;
+        public const int SmolderingBreath = 30210;
+        public const int SummonSkeleton = 30170;
+        public const int TailSweep = 25653;
     }
 
     struct TextIds
     {
-        public const uint EmoteSummon = 0;
-        public const uint YellAggro = 1;
-        public const uint YellFlyPhase = 2;
-        public const uint YellLandPhase = 3;
-        public const uint EmoteBreath = 4;
+        public const int EmoteSummon = 0;
+        public const int YellAggro = 1;
+        public const int YellFlyPhase = 2;
+        public const int YellLandPhase = 3;
+        public const int EmoteBreath = 4;
     }
 
     struct PointIds
     {
-        public const uint IntroStart = 0;
-        public const uint IntroEnd = 1;
-        public const uint IntroLanding = 2;
-        public const uint PhaseTwoFly = 3;
-        public const uint PhaseTwoPreFly = 4;
-        public const uint PhaseTwoLanding = 5;
-        public const uint PhaseTwoEnd = 6;
+        public const int IntroStart = 0;
+        public const int IntroEnd = 1;
+        public const int IntroLanding = 2;
+        public const int PhaseTwoFly = 3;
+        public const int PhaseTwoPreFly = 4;
+        public const int PhaseTwoLanding = 5;
+        public const int PhaseTwoEnd = 6;
     }
 
     struct SplineChainIds
     {
-        public const uint IntroStart = 1;
-        public const uint IntroEnd = 2;
-        public const uint IntroLanding = 3;
-        public const uint SecondLanding = 4;
-        public const uint PhaseTwo = 5;
+        public const int IntroStart = 1;
+        public const int IntroEnd = 2;
+        public const int IntroLanding = 3;
+        public const int SecondLanding = 4;
+        public const int PhaseTwo = 5;
     }
 
     enum NightbanePhases
@@ -64,10 +64,10 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
     struct MiscConst
     {
         public const int ActionSummon = 0;
-        public const uint PathPhaseTwo = 13547500;
+        public const int PathPhaseTwo = 13547500;
 
-        public const uint GroupGround = 1;
-        public const uint GroupFly = 2;
+        public const int GroupGround = 1;
+        public const int GroupFly = 2;
 
         public static Position FlyPosition = new Position(-11160.13f, -1870.683f, 97.73876f, 0.0f);
         public static Position FlyPositionLeft = new Position(-11094.42f, -1866.992f, 107.8375f, 0.0f);
@@ -177,12 +177,12 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             SetupGroundPhase();
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (phase == NightbanePhases.Fly)
             {
                 if (damage >= me.GetHealth())
-                    damage = (uint)(me.GetHealth() - 1);
+                    damage = (int)(me.GetHealth() - 1);
                 return;
             }
 
@@ -193,7 +193,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             }
         }
 
-        public override void MovementInform(MovementGeneratorType type, uint pointId)
+        public override void MovementInform(MovementGeneratorType type, int pointId)
         {
             if (type == MovementGeneratorType.SplineChain)
             {

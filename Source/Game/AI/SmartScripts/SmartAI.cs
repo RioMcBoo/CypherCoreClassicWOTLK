@@ -4,9 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
-using Game.Maps;
 using Game.Spells;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -209,7 +207,7 @@ namespace Game.AI
 
             if (_escortNPCFlags != 0)
             {
-                me.ReplaceAllNpcFlags((NPCFlags1)_escortNPCFlags);
+                me.ReplaceAllNpcFlags(_escortNPCFlags);
                 _escortNPCFlags = 0;
             }
 

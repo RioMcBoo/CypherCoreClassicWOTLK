@@ -13,25 +13,25 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
 {
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SayEnergy = 1;
-        public const uint SayEmpowered = 2;
-        public const uint SayKill = 3;
-        public const uint SayDeath = 4;
-        public const uint EmoteCrystal = 5;
+        public const int SayAggro = 0;
+        public const int SayEnergy = 1;
+        public const int SayEmpowered = 2;
+        public const int SayKill = 3;
+        public const int SayDeath = 4;
+        public const int EmoteCrystal = 5;
     }
 
     struct SpellIds
     {
         // Crystal effect spells
-        public const uint FelCrystalDummy = 44329;
-        public const uint ManaRage = 44320;               // This spell triggers 44321, which changes scale and regens mana Requires an entry in spell_script_target
+        public const int FelCrystalDummy = 44329;
+        public const int ManaRage = 44320;               // This spell triggers 44321, which changes scale and regens mana Requires an entry in spell_script_target
 
         // Selin's spells
-        public const uint DrainLife = 44294;
-        public const uint FelExplosion = 44314;
+        public const int DrainLife = 44294;
+        public const int FelExplosion = 44314;
 
-        public const uint DrainMana = 46153;               // Heroic only
+        public const int DrainMana = 46153;               // Heroic only
     }
 
     struct PhaseIds
@@ -42,11 +42,11 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
 
     struct EventIds
     {
-        public const uint FelExplosion = 1;
-        public const uint DrainCrystal = 2;
-        public const uint DrainMana = 3;
-        public const uint DrainLife = 4;
-        public const uint Empower = 5;
+        public const int FelExplosion = 1;
+        public const int DrainCrystal = 2;
+        public const int DrainMana = 3;
+        public const int DrainLife = 4;
+        public const int Empower = 5;
     }
 
     struct MiscConst
@@ -132,7 +132,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
                 Talk(TextIds.SayKill);
         }
 
-        public override void MovementInform(MovementGeneratorType type, uint id)
+        public override void MovementInform(MovementGeneratorType type, int id)
         {
             if (type == MovementGeneratorType.Point && id == 1)
             {

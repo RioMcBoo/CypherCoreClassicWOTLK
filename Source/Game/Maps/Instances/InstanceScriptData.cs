@@ -253,7 +253,7 @@ namespace Game.Maps
         public void SetBossState(UpdateBossStateSaveDataEvent data)
         {
             var array = _doc["BossStates"].AsArray();
-            array[(int)data.BossId] = (int)data.NewState;
+            array[data.BossId] = (int)data.NewState;
         }
 
         public void SetAdditionalData(UpdateAdditionalSaveDataEvent data)

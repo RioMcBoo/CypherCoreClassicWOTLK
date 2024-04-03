@@ -3,14 +3,12 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Spells;
 using System;
 using System.Text;
 using System.Collections.Generic;
-using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Chat
 {
@@ -451,11 +449,11 @@ namespace Game.Chat
 
                     string valStr = "";
                     string knownStr = "";
-                    if (target != null && target.HasSkill((SkillType)skillInfo.Id))
+                    if (target != null && target.HasSkill(skillInfo.Id))
                     {
                         knownStr = handler.GetCypherString(CypherStrings.Known);
-                        uint curValue = target.GetPureSkillValue((SkillType)skillInfo.Id);
-                        uint maxValue = target.GetPureMaxSkillValue((SkillType)skillInfo.Id);
+                        uint curValue = target.GetPureSkillValue(skillInfo.Id);
+                        uint maxValue = target.GetPureMaxSkillValue(skillInfo.Id);
                         uint permValue = target.GetSkillPermBonusValue(skillInfo.Id);
                         uint tempValue = target.GetSkillTempBonusValue(skillInfo.Id);
 

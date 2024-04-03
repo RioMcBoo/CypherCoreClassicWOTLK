@@ -4,7 +4,6 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
-using Game.Miscellaneous;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
@@ -501,7 +500,7 @@ namespace Game.Entities
             if (pEnchant.MinLevel > GetLevel())
                 return;
 
-            if (pEnchant.RequiredSkillID > 0 && pEnchant.RequiredSkillRank > GetSkillValue((SkillType)pEnchant.RequiredSkillID))
+            if (pEnchant.RequiredSkillID > 0 && pEnchant.RequiredSkillRank > GetSkillValue(pEnchant.RequiredSkillID))
                 return;
 
             // If we're dealing with a gem inside a prismatic socket we need to check the prismatic socket requirements
@@ -512,7 +511,7 @@ namespace Game.Entities
                 {
                     // Check if the requirements for the prismatic socket are met before applying the gem stats
                     var pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(EnchantmentSlot.EnhancementSocketPrismatic));
-                    if (pPrismaticEnchant == null || (pPrismaticEnchant.RequiredSkillID > 0 && pPrismaticEnchant.RequiredSkillRank > GetSkillValue((SkillType)pPrismaticEnchant.RequiredSkillID)))
+                    if (pPrismaticEnchant == null || (pPrismaticEnchant.RequiredSkillID > 0 && pPrismaticEnchant.RequiredSkillRank > GetSkillValue(pPrismaticEnchant.RequiredSkillID)))
                         return;
                 }
 
@@ -761,7 +760,7 @@ namespace Game.Entities
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} HASTE");
                                     break;
                                 case ItemModType.ExpertiseRating:
-                                    ApplyRatingMod(CombatRating.Expertise, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.Expertise, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, $"+ {enchant_amount} EXPERTISE");
                                     break;
                                 case ItemModType.AttackPower:
@@ -1214,7 +1213,7 @@ namespace Game.Entities
                     {
                         foreach (SkillLineRecord childSkillLine in childSkillLines)
                         {
-                            if ((SkillType)childSkillLine.ParentSkillLineID == skill)
+                            if (childSkillLine.ParentSkillLineID == skill)
                                 SetSkill(childSkillLine.Id, 0, 0, 0);
                         }
                     }
@@ -1251,7 +1250,7 @@ namespace Game.Entities
                 {
                     if (skillEntry.ParentTierIndex > 0)
                     {
-                        SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo((SkillType)skillEntry.ParentSkillLineID, GetRace(), GetClass());
+                        SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillEntry.ParentSkillLineID, GetRace(), GetClass());
                         if (rcEntry != null)
                         {
                             SkillTiersEntry tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
@@ -1269,7 +1268,7 @@ namespace Game.Entities
                     List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skill);
                     if (childSkillLines != null)
                         foreach (SkillLineRecord childSkillLine in childSkillLines)
-                            if (!HasSkill((SkillType)childSkillLine.Id))
+                            if (!HasSkill(childSkillLine.Id))
                                 SetSkill(childSkillLine.Id, 0, 0, 0);
 
                     int freeProfessionSlot = FindEmptyProfessionSlotFor(skill);
@@ -1331,7 +1330,7 @@ namespace Game.Entities
                     int craft_skill_gain = _spell_idx.NumSkillUps * WorldConfig.GetIntValue(WorldCfg.SkillGainCrafting);
 
                     return UpdateSkillPro(_spell_idx.SkillupSkillLineID, SkillGainChance(SkillValue, _spell_idx.TrivialSkillLineRankHigh,
-                        (int)(_spell_idx.TrivialSkillLineRankHigh + _spell_idx.TrivialSkillLineRankLow) / 2, _spell_idx.TrivialSkillLineRankLow), craft_skill_gain);
+                        (_spell_idx.TrivialSkillLineRankHigh + _spell_idx.TrivialSkillLineRankLow) / 2, _spell_idx.TrivialSkillLineRankLow), craft_skill_gain);
                 }
             }
             return false;
@@ -1370,7 +1369,7 @@ namespace Game.Entities
             }
 
             // For skinning and Mining chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
-            switch ((SkillType)skillEntry.ParentSkillLineID)
+            switch (skillEntry.ParentSkillLineID)
             {
                 case SkillType.Herbalism:
                     return UpdateSkillPro(skillId, SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator, gatheringSkillGain);
@@ -1429,7 +1428,7 @@ namespace Game.Entities
 
         public SkillType GetProfessionSkillForExp(SkillType skill, int expansion)
         {
-            return (SkillType)GetProfessionSkillForExp((int)skill, expansion);
+            return GetProfessionSkillForExp((int)skill, expansion);
         }
 
         public SkillType GetProfessionSkillForExp(int skill, int expansion)
@@ -2082,7 +2081,7 @@ namespace Game.Entities
             PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
             foreach (var rcInfo in info.skills)
             {
-                if (HasSkill((SkillType)rcInfo.SkillID))
+                if (HasSkill(rcInfo.SkillID))
                     continue;
 
                 if (rcInfo.MinLevel > GetLevel())
@@ -2094,7 +2093,7 @@ namespace Game.Entities
 
         public void LearnDefaultSkill(SkillRaceClassInfoRecord rcInfo)
         {
-            SkillType skillId = (SkillType)rcInfo.SkillID;
+            SkillType skillId = rcInfo.SkillID;
             switch (Global.SpellMgr.GetSkillRangeType(rcInfo))
             {
                 case SkillRangeType.Language:
@@ -2202,7 +2201,7 @@ namespace Game.Entities
                 }
             }
             else
-                UpdateQuestObjectiveProgress(QuestObjectiveType.LearnSpell, (int)spellId, 1);
+                UpdateQuestObjectiveProgress(QuestObjectiveType.LearnSpell, spellId, 1);
         }
 
         public void RemoveSpell(int spellId, bool disabled = false, bool learnLowRank = true, bool suppressMessaging = false)
@@ -2854,10 +2853,10 @@ namespace Game.Entities
                         continue;
 
                     // Runeforging special case
-                    if ((_spell_idx.AcquireMethod == AbilityLearnType.OnSkillLearn && !HasSkill((SkillType)_spell_idx.SkillLine))
+                    if ((_spell_idx.AcquireMethod == AbilityLearnType.OnSkillLearn && !HasSkill(_spell_idx.SkillLine))
                         || ((_spell_idx.SkillLine == SkillType.Runeforging) && _spell_idx.TrivialSkillLineRankHigh == 0))
                     {
-                        SkillRaceClassInfoRecord rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo((SkillType)_spell_idx.SkillLine, GetRace(), GetClass());
+                        SkillRaceClassInfoRecord rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo(_spell_idx.SkillLine, GetRace(), GetClass());
                         if (rcInfo != null)
                             LearnDefaultSkill(rcInfo);
                     }
@@ -3319,7 +3318,7 @@ namespace Game.Entities
             SupercededSpells supercededSpells = new();
             LearnedSpellInfo learnedSpellInfo = new();
             learnedSpellInfo.SpellID = newSpell;
-            learnedSpellInfo.Superceded = (int)oldSpell;
+            learnedSpellInfo.Superceded = oldSpell;
             supercededSpells.ClientLearnedSpellData.Add(learnedSpellInfo);
             SendPacket(supercededSpells);
         }
@@ -3673,7 +3672,7 @@ namespace Game.Entities
                         // reduce effect values if enchant is limited
                         if (entry != null && entry.AttributesMask.HasAnyFlag(EnchantProcAttributes.Limit60) && target.GetLevelForTarget(this) > 60)
                         {
-                            int lvlDifference = (int)target.GetLevelForTarget(this) - 60;
+                            int lvlDifference = target.GetLevelForTarget(this) - 60;
                             int lvlPenaltyFactor = 4; // 4% lost effectiveness per level
 
                             int effectPct = Math.Max(0, 100 - (lvlDifference * lvlPenaltyFactor));
@@ -3681,7 +3680,7 @@ namespace Game.Entities
                             foreach (var spellEffectInfo in spellInfo.GetEffects())
                             {
                                 if (spellEffectInfo.IsEffect())
-                                    args.AddSpellMod(SpellValueMod.BasePoint0 + (int)spellEffectInfo.EffectIndex, MathFunctions.CalculatePct(spellEffectInfo.CalcValue(this), effectPct));
+                                    args.AddSpellMod(SpellValueMod.BasePoint0 + spellEffectInfo.EffectIndex, MathFunctions.CalculatePct(spellEffectInfo.CalcValue(this), effectPct));
                             }
                         }
 

@@ -10,7 +10,6 @@ using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
-using Game.DataStorage;
 
 namespace Game
 {
@@ -523,7 +522,7 @@ namespace Game
             if (_player.GetMapId() == setSavedInstanceExtend.MapID)
                 return;
 
-            var expiryTimes = Global.InstanceLockMgr.UpdateInstanceLockExtensionForPlayer(_player.GetGUID(), new MapDb2Entries(setSavedInstanceExtend.MapID, (Difficulty)setSavedInstanceExtend.DifficultyID), setSavedInstanceExtend.Extend);
+            var expiryTimes = Global.InstanceLockMgr.UpdateInstanceLockExtensionForPlayer(_player.GetGUID(), new MapDb2Entries(setSavedInstanceExtend.MapID, setSavedInstanceExtend.DifficultyID), setSavedInstanceExtend.Extend);
 
             if (expiryTimes.Item1 == DateTime.MinValue)
                 return;
@@ -542,7 +541,7 @@ namespace Game
             CalendarRaidLockoutAdded calendarRaidLockoutAdded = new();
             calendarRaidLockoutAdded.InstanceID = instanceLock.GetInstanceId();
             calendarRaidLockoutAdded.ServerTime = GameTime.GetWowTime();
-            calendarRaidLockoutAdded.MapID = (int)instanceLock.GetMapId();
+            calendarRaidLockoutAdded.MapID = instanceLock.GetMapId();
             calendarRaidLockoutAdded.DifficultyID = instanceLock.GetDifficultyId();
             calendarRaidLockoutAdded.TimeRemaining = (int)(instanceLock.GetEffectiveExpiryTime() - GameTime.GetSystemTime()).TotalSeconds;
             SendPacket(calendarRaidLockoutAdded);
@@ -552,7 +551,7 @@ namespace Game
         {
             CalendarRaidLockoutRemoved calendarRaidLockoutRemoved = new();
             calendarRaidLockoutRemoved.InstanceID = instanceLock.GetInstanceId();
-            calendarRaidLockoutRemoved.MapID = (int)instanceLock.GetMapId();
+            calendarRaidLockoutRemoved.MapID = instanceLock.GetMapId();
             calendarRaidLockoutRemoved.DifficultyID = instanceLock.GetDifficultyId();
             SendPacket(calendarRaidLockoutRemoved);
         }

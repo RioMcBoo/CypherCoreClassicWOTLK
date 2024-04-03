@@ -25,11 +25,11 @@ namespace Scripts.World.NpcsSpecial
 
     class AirForceSpawn
     {
-        public uint MyEntry;
-        public uint OtherEntry;
+        public int MyEntry;
+        public int OtherEntry;
         public AirForceBots Type;
 
-        public AirForceSpawn(uint myEntry, uint otherEntry, AirForceBots type)
+        public AirForceSpawn(int myEntry, int otherEntry, AirForceBots type)
         {
             MyEntry = myEntry;
             OtherEntry = otherEntry;
@@ -77,7 +77,7 @@ namespace Scripts.World.NpcsSpecial
 
         float RangeTripwire = 15.0f;
         float RangeAlarmbot = 100.0f;
-        const uint SpellGuardsMark = 38067;
+        const int SpellGuardsMark = 38067;
 
         public npc_air_force_bots(Creature creature) : base(creature)
         {
@@ -152,7 +152,7 @@ namespace Scripts.World.NpcsSpecial
             _toAttack.Add(who.GetGUID());
         }
 
-        AirForceSpawn FindSpawnFor(uint entry)
+        AirForceSpawn FindSpawnFor(int entry)
         {
             foreach (AirForceSpawn spawn in airforceSpawns)
             {
@@ -170,7 +170,7 @@ namespace Scripts.World.NpcsSpecial
     [Script]
     class npc_chicken_cluck : ScriptedAI
     {
-        const uint QuestCluck = 3861;
+        const int QuestCluck = 3861;
 
         public npc_chicken_cluck(Creature creature) : base(creature)
         {
@@ -188,7 +188,7 @@ namespace Scripts.World.NpcsSpecial
         {
             Initialize();
             me.SetFaction(FactionTemplates.Prey);
-            me.RemoveNpcFlag(NPCFlags.QuestGiver);
+            me.RemoveNpcFlag(NPCFlags1.QuestGiver);
         }
 
         public override void JustEngagedWith(Unit who) { }
@@ -196,7 +196,7 @@ namespace Scripts.World.NpcsSpecial
         public override void UpdateAI(uint diff)
         {
             // Reset flags after a certain time has passed so that the next player has to start the 'event' again
-            if (me.HasNpcFlag(NPCFlags.QuestGiver))
+            if (me.HasNpcFlag(NPCFlags1.QuestGiver))
             {
                 if (ResetFlagTimer <= diff)
                 {
@@ -217,15 +217,15 @@ namespace Scripts.World.NpcsSpecial
                 case TextEmotes.Chicken:
                     if (player.GetQuestStatus(QuestCluck) == QuestStatus.None && RandomHelper.Rand32() % 30 == 1)
                     {
-                        me.SetNpcFlag(NPCFlags.QuestGiver);
+                        me.SetNpcFlag(NPCFlags1.QuestGiver);
                         me.SetFaction(FactionTemplates.Friendly);
-                        Talk(player.GetTeam() == Team.Horde ? 1 : 0u);
+                        Talk(player.GetTeam() == Team.Horde ? 1 : 0);
                     }
                     break;
                 case TextEmotes.Cheer:
                     if (player.GetQuestStatus(QuestCluck) == QuestStatus.Complete)
                     {
-                        me.SetNpcFlag(NPCFlags.QuestGiver);
+                        me.SetNpcFlag(NPCFlags1.QuestGiver);
                         me.SetFaction(FactionTemplates.Friendly);
                         Talk(2);
                     }
@@ -239,7 +239,7 @@ namespace Scripts.World.NpcsSpecial
                 Reset();
         }
 
-        public override void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt)
+        public override void OnQuestReward(Player player, Quest quest, LootItemType type, int opt)
         {
             if (quest.Id == QuestCluck)
                 Reset();
@@ -249,9 +249,9 @@ namespace Scripts.World.NpcsSpecial
     [Script]
     class npc_dancing_flames : ScriptedAI
     {
-        const uint SpellSummonBrazier = 45423;
-        const uint SpellBrazierDance = 45427;
-        const uint SpellFierySeduction = 47057;
+        const int SpellSummonBrazier = 45423;
+        const int SpellBrazierDance = 45427;
+        const int SpellFierySeduction = 47057;
 
         public npc_dancing_flames(Creature creature) : base(creature) { }
 
@@ -308,7 +308,7 @@ namespace Scripts.World.NpcsSpecial
     [Script]
     class npc_torch_tossing_target_bunny_controller : ScriptedAI
     {
-        const uint SpellTorchTargetPicker = 45907;
+        const int SpellTorchTargetPicker = 45907;
 
         public npc_torch_tossing_target_bunny_controller(Creature creature) : base(creature) { }
 
@@ -331,10 +331,10 @@ namespace Scripts.World.NpcsSpecial
     [Script]
     class npc_midsummer_bunny_pole : ScriptedAI
     {
-        const uint GoRibbonPole = 181605;
-        const uint SpellRibbonDanceCosmetic = 29726;
-        const uint SpellRedFireRing = 46836;
-        const uint SpellBlueFireRing = 46842;
+        const int GoRibbonPole = 181605;
+        const int SpellRibbonDanceCosmetic = 29726;
+        const int SpellRedFireRing = 46836;
+        const int SpellBlueFireRing = 46842;
 
         bool running;
 
@@ -412,10 +412,10 @@ namespace Scripts.World.NpcsSpecial
 
     struct DoctorConst
     {
-        public const uint SayDoc = 0;
+        public const int SayDoc = 0;
 
-        public const uint DoctorAlliance = 12939;
-        public const uint DoctorHorde = 12920;
+        public const int DoctorAlliance = 12939;
+        public const int DoctorHorde = 12920;
 
         public static Position[] AllianceCoords =
         {
@@ -444,14 +444,14 @@ namespace Scripts.World.NpcsSpecial
         //horde run to where
         public static Position HRunTo = new Position(-1016.44f, -3508.48f, 62.96f);
 
-        public static uint[] AllianceSoldierId =
+        public static int[] AllianceSoldierId =
         {
             12938,                                                  // 12938 Injured Alliance Soldier
             12936,                                                  // 12936 Badly injured Alliance Soldier
             12937                                                   // 12937 Critically injured Alliance Soldier
         };
 
-        public static uint[] HordeSoldierId =
+        public static int[] HordeSoldierId =
         {
             12923,                                                  //12923 Injured Soldier
             12924,                                                  //12924 Badly injured Soldier
@@ -465,9 +465,9 @@ namespace Scripts.World.NpcsSpecial
         ObjectGuid PlayerGUID;
 
         uint SummonPatientTimer;
-        uint SummonPatientCount;
-        uint PatientDiedCount;
-        uint PatientSavedCount;
+        int SummonPatientCount;
+        int PatientDiedCount;
+        int PatientSavedCount;
 
         bool Event;
 
@@ -599,7 +599,7 @@ namespace Scripts.World.NpcsSpecial
                     if (Coordinates.Empty())
                         return;
 
-                    uint patientEntry;
+                    int patientEntry;
 
                     switch (me.GetEntry())
                     {
@@ -681,7 +681,7 @@ namespace Scripts.World.NpcsSpecial
             //to make them lay with face down
             me.SetStandState(UnitStandStateType.Dead);
 
-            uint mobId = me.GetEntry();
+            int mobId = me.GetEntry();
 
             switch (mobId)
             {                                                   //lower max health
@@ -727,7 +727,7 @@ namespace Scripts.World.NpcsSpecial
 
             Talk(DoctorConst.SayDoc);
 
-            uint mobId = me.GetEntry();
+            int mobId = me.GetEntry();
             me.SetWalk(false);
 
             switch (mobId)
@@ -770,25 +770,25 @@ namespace Scripts.World.NpcsSpecial
 
     struct GarmentIds
     {
-        public const uint SpellLesserHealR2 = 2052;
-        public const uint SpellFortitudeR1 = 1243;
+        public const int SpellLesserHealR2 = 2052;
+        public const int SpellFortitudeR1 = 1243;
 
-        public const uint QuestMoon = 5621;
-        public const uint QuestLight1 = 5624;
-        public const uint QuestLight2 = 5625;
-        public const uint QuestSpirit = 5648;
-        public const uint QuestDarkness = 5650;
+        public const int QuestMoon = 5621;
+        public const int QuestLight1 = 5624;
+        public const int QuestLight2 = 5625;
+        public const int QuestSpirit = 5648;
+        public const int QuestDarkness = 5650;
 
-        public const uint EntryShaya = 12429;
-        public const uint EntryRoberts = 12423;
-        public const uint EntryDolf = 12427;
-        public const uint EntryKorja = 12430;
-        public const uint EntryDgKel = 12428;
+        public const int EntryShaya = 12429;
+        public const int EntryRoberts = 12423;
+        public const int EntryDolf = 12427;
+        public const int EntryKorja = 12430;
+        public const int EntryDgKel = 12428;
 
         // used by 12429, 12423, 12427, 12430, 12428, but signed for 12429
-        public const uint SayThanks = 0;
-        public const uint SayGoodbye = 1;
-        public const uint SayHealed = 2;
+        public const int SayThanks = 0;
+        public const int SayGoodbye = 1;
+        public const int SayHealed = 2;
     }
 
     [Script]
@@ -799,7 +799,7 @@ namespace Scripts.World.NpcsSpecial
         bool IsHealed;
         bool CanRun;
 
-        uint questId;
+        int questId;
 
         public npc_garments_of_quests(Creature creature) : base(creature)
         {
@@ -921,7 +921,7 @@ namespace Scripts.World.NpcsSpecial
     [Script]
     class npc_guardian : ScriptedAI
     {
-        const uint SpellDeathtouch = 5;
+        const int SpellDeathtouch = 5;
 
         public npc_guardian(Creature creature) : base(creature) { }
 
@@ -971,91 +971,91 @@ namespace Scripts.World.NpcsSpecial
 
     struct TournamentPennantIds
     {
-        public const uint SpellStormwindAspirant = 62595;
-        public const uint SpellStormwindValiant = 62596;
-        public const uint SpellStormwindChapion = 62594;
-        public const uint SpellGnomereganAspirant = 63394;
-        public const uint SpellGnomereganValiant = 63395;
-        public const uint SpellGnomereganChapion = 63396;
-        public const uint SpellSenJinAspirant = 63397;
-        public const uint SpellSenJinValiant = 63398;
-        public const uint SpellSenJinChapion = 63399;
-        public const uint SpellSilvermoonAspirant = 63401;
-        public const uint SpellSilvermoonValiant = 63402;
-        public const uint SpellSilvermoonChapion = 63403;
-        public const uint SpellDarnassusAspirant = 63404;
-        public const uint SpellDarnassusValiant = 63405;
-        public const uint SpellDarnassusChapion = 63406;
-        public const uint SpellExodarAspirant = 63421;
-        public const uint SpellExodarValiant = 63422;
-        public const uint SpellExodarChapion = 63423;
-        public const uint SpellIronforgeAspirant = 63425;
-        public const uint SpellIronforgeValiant = 63426;
-        public const uint SpellIronforgeChapion = 63427;
-        public const uint SpellUndercityAspirant = 63428;
-        public const uint SpellUndercityValiant = 63429;
-        public const uint SpellUndercityChapion = 63430;
-        public const uint SpellOrgrimmarAspirant = 63431;
-        public const uint SpellOrgrimmarValiant = 63432;
-        public const uint SpellOrgrimmarChapion = 63433;
-        public const uint SpellThunderBluffAspirant = 63434;
-        public const uint SpellThunderBluffValiant = 63435;
-        public const uint SpellThunderBluffChapion = 63436;
-        public const uint SpellArgentCrusadeAspirant = 63606;
-        public const uint SpellArgentCrusadeValiant = 63500;
-        public const uint SpellArgentCrusadeChapion = 63501;
-        public const uint SpellEbonBladeAspirant = 63607;
-        public const uint SpellEbonBladeValiant = 63608;
-        public const uint SpellEbonBladeChapion = 63609;
+        public const int SpellStormwindAspirant = 62595;
+        public const int SpellStormwindValiant = 62596;
+        public const int SpellStormwindChapion = 62594;
+        public const int SpellGnomereganAspirant = 63394;
+        public const int SpellGnomereganValiant = 63395;
+        public const int SpellGnomereganChapion = 63396;
+        public const int SpellSenJinAspirant = 63397;
+        public const int SpellSenJinValiant = 63398;
+        public const int SpellSenJinChapion = 63399;
+        public const int SpellSilvermoonAspirant = 63401;
+        public const int SpellSilvermoonValiant = 63402;
+        public const int SpellSilvermoonChapion = 63403;
+        public const int SpellDarnassusAspirant = 63404;
+        public const int SpellDarnassusValiant = 63405;
+        public const int SpellDarnassusChapion = 63406;
+        public const int SpellExodarAspirant = 63421;
+        public const int SpellExodarValiant = 63422;
+        public const int SpellExodarChapion = 63423;
+        public const int SpellIronforgeAspirant = 63425;
+        public const int SpellIronforgeValiant = 63426;
+        public const int SpellIronforgeChapion = 63427;
+        public const int SpellUndercityAspirant = 63428;
+        public const int SpellUndercityValiant = 63429;
+        public const int SpellUndercityChapion = 63430;
+        public const int SpellOrgrimmarAspirant = 63431;
+        public const int SpellOrgrimmarValiant = 63432;
+        public const int SpellOrgrimmarChapion = 63433;
+        public const int SpellThunderBluffAspirant = 63434;
+        public const int SpellThunderBluffValiant = 63435;
+        public const int SpellThunderBluffChapion = 63436;
+        public const int SpellArgentCrusadeAspirant = 63606;
+        public const int SpellArgentCrusadeValiant = 63500;
+        public const int SpellArgentCrusadeChapion = 63501;
+        public const int SpellEbonBladeAspirant = 63607;
+        public const int SpellEbonBladeValiant = 63608;
+        public const int SpellEbonBladeChapion = 63609;
 
-        public const uint NpcStormwindSteed = 33217;
-        public const uint NpcIronforgeRam = 33316;
-        public const uint NpcGnomereganMechanostrider = 33317;
-        public const uint NpcExodarElekk = 33318;
-        public const uint NpcDarnassianNightsaber = 33319;
-        public const uint NpcOrgrimmarWolf = 33320;
-        public const uint NpcDarkSpearRaptor = 33321;
-        public const uint NpcThunderBluffKodo = 33322;
-        public const uint NpcSilvermoonHawkstrider = 33323;
-        public const uint NpcForsakenWarhorse = 33324;
-        public const uint NpcArgentWarhorse = 33782;
-        public const uint NpcArgentSteedAspirant = 33845;
-        public const uint NpcArgentHawkstriderAspirant = 33844;
+        public const int NpcStormwindSteed = 33217;
+        public const int NpcIronforgeRam = 33316;
+        public const int NpcGnomereganMechanostrider = 33317;
+        public const int NpcExodarElekk = 33318;
+        public const int NpcDarnassianNightsaber = 33319;
+        public const int NpcOrgrimmarWolf = 33320;
+        public const int NpcDarkSpearRaptor = 33321;
+        public const int NpcThunderBluffKodo = 33322;
+        public const int NpcSilvermoonHawkstrider = 33323;
+        public const int NpcForsakenWarhorse = 33324;
+        public const int NpcArgentWarhorse = 33782;
+        public const int NpcArgentSteedAspirant = 33845;
+        public const int NpcArgentHawkstriderAspirant = 33844;
 
-        public const uint AchievementChapionStormwind = 2781;
-        public const uint AchievementChapionDarnassus = 2777;
-        public const uint AchievementChapionIronforge = 2780;
-        public const uint AchievementChapionGnomeregan = 2779;
-        public const uint AchievementChapionTheExodar = 2778;
-        public const uint AchievementChapionOrgrimmar = 2783;
-        public const uint AchievementChapionSenJin = 2784;
-        public const uint AchievementChapionThunderBluff = 2786;
-        public const uint AchievementChapionUndercity = 2787;
-        public const uint AchievementChapionSilvermoon = 2785;
-        public const uint AchievementArgentValor = 2758;
-        public const uint AchievementChapionAlliance = 2782;
-        public const uint AchievementChapionHorde = 2788;
+        public const int AchievementChapionStormwind = 2781;
+        public const int AchievementChapionDarnassus = 2777;
+        public const int AchievementChapionIronforge = 2780;
+        public const int AchievementChapionGnomeregan = 2779;
+        public const int AchievementChapionTheExodar = 2778;
+        public const int AchievementChapionOrgrimmar = 2783;
+        public const int AchievementChapionSenJin = 2784;
+        public const int AchievementChapionThunderBluff = 2786;
+        public const int AchievementChapionUndercity = 2787;
+        public const int AchievementChapionSilvermoon = 2785;
+        public const int AchievementArgentValor = 2758;
+        public const int AchievementChapionAlliance = 2782;
+        public const int AchievementChapionHorde = 2788;
 
-        public const uint QuestValiantOfStormwind = 13593;
-        public const uint QuestAValiantOfStormwind = 13684;
-        public const uint QuestValiantOfDarnassus = 13706;
-        public const uint QuestAValiantOfDarnassus = 13689;
-        public const uint QuestValiantOfIronforge = 13703;
-        public const uint QuestAValiantOfIronforge = 13685;
-        public const uint QuestValiantOfGnomeregan = 13704;
-        public const uint QuestAValiantOfGnomeregan = 13688;
-        public const uint QuestValiantOfTheExodar = 13705;
-        public const uint QuestAValiantOfTheExodar = 13690;
-        public const uint QuestValiantOfOrgrimmar = 13707;
-        public const uint QuestAValiantOfOrgrimmar = 13691;
-        public const uint QuestValiantOfSenJin = 13708;
-        public const uint QuestAValiantOfSenJin = 13693;
-        public const uint QuestValiantOfThunderBluff = 13709;
-        public const uint QuestAValiantOfThunderBluff = 13694;
-        public const uint QuestValiantOfUndercity = 13710;
-        public const uint QuestAValiantOfUndercity = 13695;
-        public const uint QuestValiantOfSilvermoon = 13711;
-        public const uint QuestAValiantOfSilvermoon = 13696;
+        public const int QuestValiantOfStormwind = 13593;
+        public const int QuestAValiantOfStormwind = 13684;
+        public const int QuestValiantOfDarnassus = 13706;
+        public const int QuestAValiantOfDarnassus = 13689;
+        public const int QuestValiantOfIronforge = 13703;
+        public const int QuestAValiantOfIronforge = 13685;
+        public const int QuestValiantOfGnomeregan = 13704;
+        public const int QuestAValiantOfGnomeregan = 13688;
+        public const int QuestValiantOfTheExodar = 13705;
+        public const int QuestAValiantOfTheExodar = 13690;
+        public const int QuestValiantOfOrgrimmar = 13707;
+        public const int QuestAValiantOfOrgrimmar = 13691;
+        public const int QuestValiantOfSenJin = 13708;
+        public const int QuestAValiantOfSenJin = 13693;
+        public const int QuestValiantOfThunderBluff = 13709;
+        public const int QuestAValiantOfThunderBluff = 13694;
+        public const int QuestValiantOfUndercity = 13710;
+        public const int QuestAValiantOfUndercity = 13695;
+        public const int QuestValiantOfSilvermoon = 13711;
+        public const int QuestAValiantOfSilvermoon = 13696;
     }
 
     [Script]
@@ -1082,9 +1082,9 @@ namespace Scripts.World.NpcsSpecial
         }
 
 
-        uint _pennantSpellId;
+        int _pennantSpellId;
 
-        uint GetPennantSpellId(Player player)
+        int GetPennantSpellId(Player player)
         {
             switch (me.GetEntry())
             {
@@ -1198,7 +1198,7 @@ namespace Scripts.World.NpcsSpecial
     [Script]
     class npc_brewfest_reveler : ScriptedAI
     {
-        const uint SpellBrewfestToast = 41586;
+        const int SpellBrewfestToast = 41586;
 
         public npc_brewfest_reveler(Creature creature) : base(creature) { }
 
@@ -1224,8 +1224,8 @@ namespace Scripts.World.NpcsSpecial
             Emote.OneshotLaughNoSheathe
         };
 
-        const uint SpellBrewfestToast = 41586;
-        const uint NpcBrewfestReveler = 24484;
+        const int SpellBrewfestToast = 41586;
+        const int NpcBrewfestReveler = 24484;
 
         List<ObjectGuid> _revelerGuids = new();
 
@@ -1313,7 +1313,7 @@ namespace Scripts.World.NpcsSpecial
             _combatTimer[who.GetGUID()] = TimeSpan.FromSeconds(5);
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             damage = 0;
 
@@ -1344,21 +1344,21 @@ namespace Scripts.World.NpcsSpecial
 
     struct WormholeIds
     {
-        public const uint MenuIdWormhole = 10668; // "This tear in the fabric of time and space looks ominous."
-        public const uint NpcTextWormhole = 14785; // (not 907 "What brings you to this part of the world, $n?")
-        public const uint GossipOption1 = 0;     // "Borean Tundra"
-        public const uint GossipOption2 = 1;     // "Howling Fjord"
-        public const uint GossipOption3 = 2;     // "Sholazar BaMath.Sin"
-        public const uint GossipOption4 = 3;     // "Icecrown"
-        public const uint GossipOption5 = 4;     // "Storm Peaks"
-        public const uint GossipOption6 = 5;     // "Underground..."
+        public const int MenuIdWormhole = 10668; // "This tear in the fabric of time and space looks ominous."
+        public const int NpcTextWormhole = 14785; // (not 907 "What brings you to this part of the world, $n?")
+        public const int GossipOption1 = 0;     // "Borean Tundra"
+        public const int GossipOption2 = 1;     // "Howling Fjord"
+        public const int GossipOption3 = 2;     // "Sholazar BaMath.Sin"
+        public const int GossipOption4 = 3;     // "Icecrown"
+        public const int GossipOption5 = 4;     // "Storm Peaks"
+        public const int GossipOption6 = 5;     // "Underground..."
 
-        public const uint SpellBoreanTundra = 67834; // 0
-        public const uint SpellHowlingFjord = 67838; // 1
-        public const uint SpellSholazarBasin = 67835; // 2
-        public const uint SpellIcecrown = 67836; // 3
-        public const uint SpellStormPeaks = 67837; // 4
-        public const uint SpellUnderground = 68081;  // 5
+        public const int SpellBoreanTundra = 67834; // 0
+        public const int SpellHowlingFjord = 67838; // 1
+        public const int SpellSholazarBasin = 67835; // 2
+        public const int SpellIcecrown = 67836; // 3
+        public const int SpellStormPeaks = 67837; // 4
+        public const int SpellUnderground = 68081;  // 5
     }
 
     [Script]
@@ -1404,9 +1404,9 @@ namespace Scripts.World.NpcsSpecial
             return true;
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            int action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
 
             switch (action)
@@ -1444,12 +1444,12 @@ namespace Scripts.World.NpcsSpecial
     [Script]
     class npc_spring_rabbit : ScriptedAI
     {
-        const uint SpellSpringFling = 61875;
-        const uint SpellSpringRabbitJump = 61724;
-        const uint SpellSpringRabbitWander = 61726;
-        const uint SpellSummonBabyBunny = 61727;
-        const uint SpellSpringRabbitInLove = 61728;
-        const uint NpcSpringRabbit = 32791;
+        const int SpellSpringFling = 61875;
+        const int SpellSpringRabbitJump = 61724;
+        const int SpellSpringRabbitWander = 61726;
+        const int SpellSummonBabyBunny = 61727;
+        const int SpellSpringRabbitInLove = 61728;
+        const int NpcSpringRabbit = 32791;
 
         ObjectGuid rabbitGUID;
 
@@ -1523,8 +1523,8 @@ namespace Scripts.World.NpcsSpecial
     [Script]
     class npc_imp_in_a_ball : ScriptedAI
     {
-        const uint SayRandom = 0;
-        const uint EventTalk = 1;
+        const int SayRandom = 0;
+        const int EventTalk = 1;
 
         ObjectGuid summonerGUID;
 
@@ -1543,7 +1543,7 @@ namespace Scripts.World.NpcsSpecial
                     Player owner = ObjAccessor.GetPlayer(me, summonerGUID);
                     if (owner != null)
                     {
-                        CreatureTextMgr.SendChat(me, (byte)SayRandom, owner, owner.GetGroup() != null ? ChatMsg.MonsterParty : ChatMsg.MonsterWhisper, Language.Addon, CreatureTextRange.Normal);
+                        CreatureTextMgr.SendChat(me, SayRandom, owner, owner.GetGroup() != null ? ChatMsg.MonsterParty : ChatMsg.MonsterWhisper, Language.Addon, CreatureTextRange.Normal);
                     }
                 });
             }
@@ -1558,13 +1558,13 @@ namespace Scripts.World.NpcsSpecial
     [Script]
     class npc_train_wrecker : NullCreatureAI
     {
-        const uint GoToyTrain = 193963;
-        const uint SpellToyTrainPulse = 61551;
-        const uint SpellWreckTrain = 62943;
-        const uint MoveidChase = 1;
-        const uint MoveidJump = 2;
+        const int GoToyTrain = 193963;
+        const int SpellToyTrainPulse = 61551;
+        const int SpellWreckTrain = 62943;
+        const int MoveidChase = 1;
+        const int MoveidJump = 2;
 
-        const uint NpcExultingWindUpTrainWrecker = 81071;
+        const int NpcExultingWindUpTrainWrecker = 81071;
 
         ObjectGuid _target;
 
@@ -1612,7 +1612,7 @@ namespace Scripts.World.NpcsSpecial
             _scheduler.Update(diff);
         }
 
-        void MovementInform(uint type, uint id)
+        void MovementInform(int type, int id)
         {
             _scheduler.CancelAll();
             if (id == MoveidChase)
@@ -1655,39 +1655,39 @@ namespace Scripts.World.NpcsSpecial
 
     struct ArgentSquireIds
     {
-        public const uint SpellDarnassusPennant = 63443;
-        public const uint SpellExodarPennant = 63439;
-        public const uint SpellGnomereganPennant = 63442;
-        public const uint SpellIronforgePennant = 63440;
-        public const uint SpellStormwindPennant = 62727;
-        public const uint SpellSenjinPennant = 63446;
-        public const uint SpellUndercityPennant = 63441;
-        public const uint SpellOrgrimmarPennant = 63444;
-        public const uint SpellSilvermoonPennant = 63438;
-        public const uint SpellThunderbluffPennant = 63445;
-        public const uint AuraPostmanS = 67376;
-        public const uint AuraShopS = 67377;
-        public const uint AuraBankS = 67368;
-        public const uint AuraTiredS = 67401;
-        public const uint AuraBankG = 68849;
-        public const uint AuraPostmanG = 68850;
-        public const uint AuraShopG = 68851;
-        public const uint AuraTiredG = 68852;
-        public const uint SpellTiredPlayer = 67334;
+        public const int SpellDarnassusPennant = 63443;
+        public const int SpellExodarPennant = 63439;
+        public const int SpellGnomereganPennant = 63442;
+        public const int SpellIronforgePennant = 63440;
+        public const int SpellStormwindPennant = 62727;
+        public const int SpellSenjinPennant = 63446;
+        public const int SpellUndercityPennant = 63441;
+        public const int SpellOrgrimmarPennant = 63444;
+        public const int SpellSilvermoonPennant = 63438;
+        public const int SpellThunderbluffPennant = 63445;
+        public const int AuraPostmanS = 67376;
+        public const int AuraShopS = 67377;
+        public const int AuraBankS = 67368;
+        public const int AuraTiredS = 67401;
+        public const int AuraBankG = 68849;
+        public const int AuraPostmanG = 68850;
+        public const int AuraShopG = 68851;
+        public const int AuraTiredG = 68852;
+        public const int SpellTiredPlayer = 67334;
 
-        public const uint GossipOptionBank = 0;
-        public const uint GossipOptionShop = 1;
-        public const uint GossipOptionMail = 2;
-        public const uint GossipOptionDarnassusSenjinPennant = 3;
-        public const uint GossipOptionExodarUndercityPennant = 4;
-        public const uint GossipOptionGnomereganOrgrimmarPennant = 5;
-        public const uint GossipOptionIronforgeSilvermoonPennant = 6;
-        public const uint GossipOptionStormwindThunderbluffPennant = 7;
+        public const int GossipOptionBank = 0;
+        public const int GossipOptionShop = 1;
+        public const int GossipOptionMail = 2;
+        public const int GossipOptionDarnassusSenjinPennant = 3;
+        public const int GossipOptionExodarUndercityPennant = 4;
+        public const int GossipOptionGnomereganOrgrimmarPennant = 5;
+        public const int GossipOptionIronforgeSilvermoonPennant = 6;
+        public const int GossipOptionStormwindThunderbluffPennant = 7;
 
-        public const uint NpcArgentSquire = 33238;
-        public const uint AchievementPonyUp = 3736;
+        public const int NpcArgentSquire = 33238;
+        public const int AchievementPonyUp = 3736;
 
-        public static (uint, uint)[] bannerSpells =
+        public static (int, int)[] bannerSpells =
         {
             (SpellDarnassusPennant, SpellSenjinPennant),
             (SpellExodarPennant, SpellUndercityPennant),
@@ -1717,22 +1717,22 @@ namespace Scripts.World.NpcsSpecial
 
                 if (owner.HasAchieved(ArgentSquireIds.AchievementPonyUp) && !me.HasAura(ArgentSquireIds.AuraTiredS) && !me.HasAura(ArgentSquireIds.AuraTiredG))
                 {
-                    me.SetNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor);
+                    me.SetNpcFlag(NPCFlags1.Banker | NPCFlags1.Mailbox | NPCFlags1.Vendor);
                     return;
                 }
             }
 
-            me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor);
+            me.RemoveNpcFlag(NPCFlags1.Banker | NPCFlags1.Mailbox | NPCFlags1.Vendor);
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
             switch (gossipListId)
             {
                 case ArgentSquireIds.GossipOptionBank:
                 {
-                    me.RemoveNpcFlag(NPCFlags.Mailbox | NPCFlags.Vendor);
-                    uint _bankAura = IsArgentSquire() ? ArgentSquireIds.AuraBankS : ArgentSquireIds.AuraBankG;
+                    me.RemoveNpcFlag(NPCFlags1.Mailbox | NPCFlags1.Vendor);
+                    int _bankAura = IsArgentSquire() ? ArgentSquireIds.AuraBankS : ArgentSquireIds.AuraBankG;
                     if (!me.HasAura(_bankAura))
                         DoCastSelf(_bankAura);
 
@@ -1742,8 +1742,8 @@ namespace Scripts.World.NpcsSpecial
                 }
                 case ArgentSquireIds.GossipOptionShop:
                 {
-                    me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox);
-                    uint _shopAura = IsArgentSquire() ? ArgentSquireIds.AuraShopS : ArgentSquireIds.AuraShopG;
+                    me.RemoveNpcFlag(NPCFlags1.Banker | NPCFlags1.Mailbox);
+                    int _shopAura = IsArgentSquire() ? ArgentSquireIds.AuraShopS : ArgentSquireIds.AuraShopG;
                     if (!me.HasAura(_shopAura))
                         DoCastSelf(_shopAura);
 
@@ -1753,8 +1753,8 @@ namespace Scripts.World.NpcsSpecial
                 }
                 case ArgentSquireIds.GossipOptionMail:
                 {
-                    me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Vendor);
-                    uint _mailAura = IsArgentSquire() ? ArgentSquireIds.AuraPostmanS : ArgentSquireIds.AuraPostmanG;
+                    me.RemoveNpcFlag(NPCFlags1.Banker | NPCFlags1.Vendor);
+                    int _mailAura = IsArgentSquire() ? ArgentSquireIds.AuraPostmanS : ArgentSquireIds.AuraPostmanG;
                     if (!me.HasAura(_mailAura))
                         DoCastSelf(_mailAura);
 
@@ -1793,18 +1793,18 @@ namespace Scripts.World.NpcsSpecial
         public const sbyte SeatPieChair = 4;
         public const sbyte SeatFoodHolder = 5;
         public const sbyte SeatPlateHolder = 6;
-        public const uint NpcTheTurkeyChair = 34812;
-        public const uint NpcTheCranberryChair = 34823;
-        public const uint NpcTheStuffingChair = 34819;
-        public const uint NpcTheSweetPotatoChair = 34824;
-        public const uint NpcThePieChair = 34822;
-        public const uint SpellCranberryServer = 61793;
-        public const uint SpellPieServer = 61794;
-        public const uint SpellStuffingServer = 61795;
-        public const uint SpellTurkeyServer = 61796;
-        public const uint SpellSweetPotatoesServer = 61797;
+        public const int NpcTheTurkeyChair = 34812;
+        public const int NpcTheCranberryChair = 34823;
+        public const int NpcTheStuffingChair = 34819;
+        public const int NpcTheSweetPotatoChair = 34824;
+        public const int NpcThePieChair = 34822;
+        public const int SpellCranberryServer = 61793;
+        public const int SpellPieServer = 61794;
+        public const int SpellStuffingServer = 61795;
+        public const int SpellTurkeyServer = 61796;
+        public const int SpellSweetPotatoesServer = 61797;
 
-        public static Dictionary<uint, uint> ChairSpells = new()
+        public static Dictionary<int, int> ChairSpells = new()
         {
             { NpcTheCranberryChair, SpellCranberryServer },
             { NpcThePieChair, SpellPieServer },
@@ -1817,15 +1817,15 @@ namespace Scripts.World.NpcsSpecial
     class CastFoodSpell : BasicEvent
     {
         Unit _owner;
-        uint _spellId;
+        int _spellId;
 
-        public CastFoodSpell(Unit owner, uint spellId)
+        public CastFoodSpell(Unit owner, int spellId)
         {
             _owner = owner;
             _spellId = spellId;
         }
 
-        public override bool Execute(ulong execTime, uint diff)
+        public override bool Execute(long execTime, uint diff)
         {
             _owner.CastSpell(_owner, _spellId, true);
             return true;
@@ -1897,7 +1897,7 @@ namespace Scripts.World.NpcsSpecial
     [Script]
     class npc_gen_void_zone : ScriptedAI
     {
-        const uint SpellConsumption = 28874;
+        const int SpellConsumption = 28874;
 
         public npc_gen_void_zone(Creature creature) : base(creature) { }
 

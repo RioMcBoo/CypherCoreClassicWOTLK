@@ -8,8 +8,6 @@ using Game.Accounts;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Game
 {

@@ -26,24 +26,24 @@ namespace Scripts.EasternKingdoms.Deadmines
 
     struct DataTypes
     {
-        public const uint SmiteChest = 0;
+        public const int SmiteChest = 0;
     }
 
     struct GameObjectIds
     {
-        public const uint FactoryDoor = 13965;
-        public const uint IroncladDoor = 16397;
-        public const uint DefiasCannon = 16398;
-        public const uint DoorLever = 101833;
-        public const uint MrSmiteChest = 144111;
+        public const int FactoryDoor = 13965;
+        public const int IroncladDoor = 16397;
+        public const int DefiasCannon = 16398;
+        public const int DoorLever = 101833;
+        public const int MrSmiteChest = 144111;
     }
 
     struct SoundIds
     {
-        public const uint Cannonfire = 1400;
-        public const uint Destroydoor = 3079;
-        public const uint MrSmiteAlarm1 = 5775;
-        public const uint MrSmiteAlarm2 = 5777;
+        public const int Cannonfire = 1400;
+        public const int Destroydoor = 3079;
+        public const int MrSmiteAlarm1 = 5775;
+        public const int MrSmiteAlarm2 = 5777;
     }
 
 
@@ -206,7 +206,7 @@ namespace Scripts.EasternKingdoms.Deadmines
                 }
             }
 
-            public override void SetData(uint type, uint data)
+            public override void SetData(int type, int data)
             {
                 switch ((DMData)type)
                 {
@@ -225,18 +225,18 @@ namespace Scripts.EasternKingdoms.Deadmines
                 }
             }
 
-            public override uint GetData(uint type)
+            public override int GetData(int type)
             {
                 switch ((DMData)type)
                 {
                     case DMData.EventState:
-                        return (uint)State;
+                        return (int)State;
                 }
 
                 return 0;
             }
 
-            public override ObjectGuid GetGuidData(uint data)
+            public override ObjectGuid GetGuidData(int data)
             {
                 switch (data)
                 {

@@ -264,7 +264,7 @@ namespace Game.AI
                     {
                         float range = spellInfo.GetMaxRange(false);
 
-                        DefaultTargetSelector targetSelectorInner = new(me, range, false, true, -(int)spellId);
+                        DefaultTargetSelector targetSelectorInner = new(me, range, false, true, -spellId);
                         bool targetSelector(Unit candidate)
                         {
                             if (!candidate.IsPlayer())

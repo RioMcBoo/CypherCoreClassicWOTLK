@@ -13,106 +13,106 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 {
     struct DataTypes
     {
-        public const uint HighlordOmokk = 0;
-        public const uint ShadowHunterVoshgajin = 1;
-        public const uint WarmasterVoone = 2;
-        public const uint MotherSmolderweb = 3;
-        public const uint UrokDoomhowl = 4;
-        public const uint QuartermasterZigris = 5;
-        public const uint GizrulTheSlavener = 6;
-        public const uint Halycon = 7;
-        public const uint OverlordWyrmthalak = 8;
-        public const uint PyrogaurdEmberseer = 9;
-        public const uint WarchiefRendBlackhand = 10;
-        public const uint Gyth = 11;
-        public const uint TheBeast = 12;
-        public const uint GeneralDrakkisath = 13;
-        public const uint LordValthalak = 14;
+        public const int HighlordOmokk = 0;
+        public const int ShadowHunterVoshgajin = 1;
+        public const int WarmasterVoone = 2;
+        public const int MotherSmolderweb = 3;
+        public const int UrokDoomhowl = 4;
+        public const int QuartermasterZigris = 5;
+        public const int GizrulTheSlavener = 6;
+        public const int Halycon = 7;
+        public const int OverlordWyrmthalak = 8;
+        public const int PyrogaurdEmberseer = 9;
+        public const int WarchiefRendBlackhand = 10;
+        public const int Gyth = 11;
+        public const int TheBeast = 12;
+        public const int GeneralDrakkisath = 13;
+        public const int LordValthalak = 14;
         // Extra
-        public const uint DragonspireRoom = 15;
-        public const uint HallRune1 = 16;
-        public const uint HallRune2 = 17;
-        public const uint HallRune3 = 18;
-        public const uint HallRune4 = 19;
-        public const uint HallRune5 = 20;
-        public const uint HallRune6 = 21;
-        public const uint HallRune7 = 22;
-        public const uint ScarshieldInfiltrator = 23;
-        public const uint BlackhandIncarcerator = 24;
+        public const int DragonspireRoom = 15;
+        public const int HallRune1 = 16;
+        public const int HallRune2 = 17;
+        public const int HallRune3 = 18;
+        public const int HallRune4 = 19;
+        public const int HallRune5 = 20;
+        public const int HallRune6 = 21;
+        public const int HallRune7 = 22;
+        public const int ScarshieldInfiltrator = 23;
+        public const int BlackhandIncarcerator = 24;
     }
 
     struct CreaturesIds
     {
-        public const uint HighlordOmokk = 9196;
-        public const uint ShadowHunterVoshgajin = 9236;
-        public const uint WarmasterVoone = 9237;
-        public const uint MotherSmolderweb = 10596;
-        public const uint UrokDoomhowl = 10584;
-        public const uint QuartermasterZigris = 9736;
-        public const uint GizrulTheSlavener = 10268;
-        public const uint Halycon = 10220;
-        public const uint OverlordWyrmthalak = 9568;
-        public const uint PyrogaurdEmberseer = 9816;
-        public const uint WarchiefRendBlackhand = 10429;
-        public const uint Gyth = 10339;
-        public const uint TheBeast = 10430;
-        public const uint GeneralDrakkisath = 10363;
-        public const uint BlackhandDreadweaver = 9817;
-        public const uint BlackhandSummoner = 9818;
-        public const uint BlackhandVeteran = 9819;
-        public const uint BlackhandIncarcerator = 10316;
-        public const uint LordVictorNefarius = 10162;
-        public const uint ScarshieldInfiltrator = 10299;
+        public const int HighlordOmokk = 9196;
+        public const int ShadowHunterVoshgajin = 9236;
+        public const int WarmasterVoone = 9237;
+        public const int MotherSmolderweb = 10596;
+        public const int UrokDoomhowl = 10584;
+        public const int QuartermasterZigris = 9736;
+        public const int GizrulTheSlavener = 10268;
+        public const int Halycon = 10220;
+        public const int OverlordWyrmthalak = 9568;
+        public const int PyrogaurdEmberseer = 9816;
+        public const int WarchiefRendBlackhand = 10429;
+        public const int Gyth = 10339;
+        public const int TheBeast = 10430;
+        public const int GeneralDrakkisath = 10363;
+        public const int BlackhandDreadweaver = 9817;
+        public const int BlackhandSummoner = 9818;
+        public const int BlackhandVeteran = 9819;
+        public const int BlackhandIncarcerator = 10316;
+        public const int LordVictorNefarius = 10162;
+        public const int ScarshieldInfiltrator = 10299;
     }
 
     struct GameObjectsIds
     {
-        public const uint WhelpSpawner = 175622; // trap spawned by public const uint  id 175124
+        public const int WhelpSpawner = 175622; // trap spawned by public const int  id 175124
                                                  // Doors
-        public const uint EmberseerIn = 175244; // First door to Pyroguard Emberseer
-        public const uint Doors = 175705; // Second door to Pyroguard Emberseer
-        public const uint EmberseerOut = 175153; // Door after Pyroguard Emberseer event
-        public const uint GythEntryDoor = 164726;
-        public const uint GythCombatDoor = 175185;
-        public const uint GythExitDoor = 175186;
-        public const uint DrakkisathDoor1 = 175946;
-        public const uint DrakkisathDoor2 = 175947;
-        // Runes in drapublic const uint nspire hall
-        public const uint HallRune1 = 175197;
-        public const uint HallRune2 = 175199;
-        public const uint HallRune3 = 175195;
-        public const uint HallRune4 = 175200;
-        public const uint HallRune5 = 175198;
-        public const uint HallRune6 = 175196;
-        public const uint HallRune7 = 175194;
+        public const int EmberseerIn = 175244; // First door to Pyroguard Emberseer
+        public const int Doors = 175705; // Second door to Pyroguard Emberseer
+        public const int EmberseerOut = 175153; // Door after Pyroguard Emberseer event
+        public const int GythEntryDoor = 164726;
+        public const int GythCombatDoor = 175185;
+        public const int GythExitDoor = 175186;
+        public const int DrakkisathDoor1 = 175946;
+        public const int DrakkisathDoor2 = 175947;
+        // Runes in drapublic const int nspire hall
+        public const int HallRune1 = 175197;
+        public const int HallRune2 = 175199;
+        public const int HallRune3 = 175195;
+        public const int HallRune4 = 175200;
+        public const int HallRune5 = 175198;
+        public const int HallRune6 = 175196;
+        public const int HallRune7 = 175194;
         // Runes in emberseers room
-        public const uint EmberseerRune1 = 175266;
-        public const uint EmberseerRune2 = 175267;
-        public const uint EmberseerRune3 = 175268;
-        public const uint EmberseerRune4 = 175269;
-        public const uint EmberseerRune5 = 175270;
-        public const uint EmberseerRune6 = 175271;
-        public const uint EmberseerRune7 = 175272;
+        public const int EmberseerRune1 = 175266;
+        public const int EmberseerRune2 = 175267;
+        public const int EmberseerRune3 = 175268;
+        public const int EmberseerRune4 = 175269;
+        public const int EmberseerRune5 = 175270;
+        public const int EmberseerRune6 = 175271;
+        public const int EmberseerRune7 = 175272;
         // For Gyth event
-        public const uint DrPortcullis = 175185;
-        public const uint PortcullisActive = 164726;
-        public const uint PortcullisTobossrooms = 175186;
+        public const int DrPortcullis = 175185;
+        public const int PortcullisActive = 164726;
+        public const int PortcullisTobossrooms = 175186;
     }
 
     struct BRSMiscConst
     {
-        public const uint SpellSummonRookeryWhelp = 15745;
-        public const uint EventUrokDoomhowl = 4845;
-        public const uint EventPyroguardEmberseer = 4884;
-        public const uint Areatrigger = 1;
-        public const uint AreatriggerDragonspireHall = 2046;
-        public const uint AreatriggerBlackrockStadium = 2026;
+        public const int SpellSummonRookeryWhelp = 15745;
+        public const int EventUrokDoomhowl = 4845;
+        public const int EventPyroguardEmberseer = 4884;
+        public const int Areatrigger = 1;
+        public const int AreatriggerDragonspireHall = 2046;
+        public const int AreatriggerBlackrockStadium = 2026;
 
-        public const uint EncounterCount = 23;
+        public const int EncounterCount = 23;
 
         //uint const DragonspireRunes[7] = { GoHallRune1, GoHallRune2, GoHallRune3, GoHallRune4, GoHallRune5, GoHallRune6, GoHallRune7 }
 
-        public static uint[] DragonspireMobs = { CreaturesIds.BlackhandDreadweaver, CreaturesIds.BlackhandSummoner, CreaturesIds.BlackhandVeteran };
+        public static int[] DragonspireMobs = { CreaturesIds.BlackhandDreadweaver, CreaturesIds.BlackhandSummoner, CreaturesIds.BlackhandVeteran };
 
         public static DoorData[] doorData =
         {
@@ -127,14 +127,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 
     struct EventIds
     {
-        public const uint DargonspireRoomStore = 1;
-        public const uint DargonspireRoomCheck = 2;
-        public const uint UrokDoomhowlSpawns1 = 3;
-        public const uint UrokDoomhowlSpawns2 = 4;
-        public const uint UrokDoomhowlSpawns3 = 5;
-        public const uint UrokDoomhowlSpawns4 = 6;
-        public const uint UrokDoomhowlSpawns5 = 7;
-        public const uint UrokDoomhowlSpawnIn = 8;
+        public const int DargonspireRoomStore = 1;
+        public const int DargonspireRoomCheck = 2;
+        public const int UrokDoomhowlSpawns1 = 3;
+        public const int UrokDoomhowlSpawns2 = 4;
+        public const int UrokDoomhowlSpawns3 = 5;
+        public const int UrokDoomhowlSpawns4 = 6;
+        public const int UrokDoomhowlSpawns5 = 7;
+        public const int UrokDoomhowlSpawnIn = 8;
     }
 
     [Script]
@@ -327,7 +327,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 }
             }
 
-            public override bool SetBossState(uint type, EncounterState state)
+            public override bool SetBossState(int type, EncounterState state)
             {
                 if (!base.SetBossState(type, state))
                     return false;
@@ -357,7 +357,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 return true;
             }
 
-            public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker)
+            public override void ProcessEvent(WorldObject obj, int eventId, WorldObject invoker)
             {
                 switch (eventId)
                 {
@@ -380,7 +380,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 }
             }
 
-            public override void SetData(uint type, uint data)
+            public override void SetData(int type, int data)
             {
                 switch (type)
                 {
@@ -404,7 +404,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 }
             }
 
-            public override ObjectGuid GetGuidData(uint type)
+            public override ObjectGuid GetGuidData(int type)
             {
                 switch (type)
                 {

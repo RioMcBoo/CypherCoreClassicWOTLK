@@ -7,7 +7,6 @@ using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Game.Chat

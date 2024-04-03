@@ -724,21 +724,21 @@ namespace Game.Entities
             packet.hitInfo = damageInfo.HitInfo;
             packet.AttackerGUID = damageInfo.Attacker.GetGUID();
             packet.VictimGUID = damageInfo.Target.GetGUID();
-            packet.Damage = (int)damageInfo.Damage;
-            packet.OriginalDamage = (int)damageInfo.OriginalDamage;
+            packet.Damage = damageInfo.Damage;
+            packet.OriginalDamage = damageInfo.OriginalDamage;
             int overkill = (int)(damageInfo.Damage - damageInfo.Target.GetHealth());
             packet.OverDamage = (overkill < 0 ? -1 : overkill);
 
             SubDamage subDmg = new();
             subDmg.SchoolMask = (int)damageInfo.DamageSchoolMask;   // School of sub damage
             subDmg.FDamage = damageInfo.Damage;                // sub damage
-            subDmg.Damage = (int)damageInfo.Damage;                 // Sub Damage
-            subDmg.Absorbed = (int)damageInfo.Absorb;
-            subDmg.Resisted = (int)damageInfo.Resist;
+            subDmg.Damage = damageInfo.Damage;                 // Sub Damage
+            subDmg.Absorbed = damageInfo.Absorb;
+            subDmg.Resisted = damageInfo.Resist;
             packet.SubDmg = subDmg;
 
             packet.VictimState = (byte)damageInfo.TargetState;
-            packet.BlockAmount = (int)damageInfo.Blocked;
+            packet.BlockAmount = damageInfo.Blocked;
             packet.LogData.Initialize(damageInfo.Attacker);
 
             ContentTuningParams contentTuningParams = new();
@@ -1205,7 +1205,7 @@ namespace Game.Entities
             Global.ScriptMgr.ModifyMeleeDamage(damageInfo.Target, damageInfo.Attacker, ref damage);
 
             // Calculate armor reduction
-            if (IsDamageReducedByArmor((SpellSchoolMask)damageInfo.DamageSchoolMask))
+            if (IsDamageReducedByArmor(damageInfo.DamageSchoolMask))
             {
                 damageInfo.Damage = CalcArmorReducedDamage(damageInfo.Attacker, damageInfo.Target, damage, null, damageInfo.AttackType);
                 damageInfo.CleanDamage += damage - damageInfo.Damage;
@@ -1305,7 +1305,7 @@ namespace Game.Entities
             if (!damageInfo.HitInfo.HasAnyFlag(HitInfo.Miss))
                 damageInfo.HitInfo |= HitInfo.AffectsVictim;
 
-            int resilienceReduction = (int)damageInfo.Damage;
+            int resilienceReduction = damageInfo.Damage;
             if (CanApplyResilience())
                 ApplyResilience(victim, ref resilienceReduction);
 
@@ -1408,7 +1408,7 @@ namespace Game.Entities
                 attackerLevel + 3 < victimLevel)
             {
                 // cap possible value (with bonuses > max skill)
-                tmp = (int)(10 + 10 * (victimLevel - attackerLevel)) * 100;
+                tmp = (10 + 10 * (victimLevel - attackerLevel)) * 100;
                 if (tmp > 0 && roll < (sum += tmp))
                     return MeleeHitOutcome.Glancing;
             }
@@ -1435,7 +1435,7 @@ namespace Game.Entities
                 !(GetTypeId() == TypeId.Unit && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoCrushingBlows)))
             {
                 // add 2% Chance per level, min. is 15%
-                tmp = (int)(attackerLevel - victimLevel * 1000 - 1500);
+                tmp = attackerLevel - victimLevel * 1000 - 1500;
                 if (roll < (sum += tmp))
                 {
                     Log.outDebug(LogFilter.Unit, "RollMeleeOutcomeAgainst: CRUSHING <{0}, {1})", sum - tmp, sum);

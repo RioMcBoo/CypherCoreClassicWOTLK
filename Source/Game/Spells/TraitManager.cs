@@ -33,7 +33,7 @@ namespace Game
             {
                 TraitCondRecord traitCondEntry = CliDB.TraitCondStorage.LookupByKey(traitNodeEntryXTraitCondEntry.TraitCondID);
                 if (traitCondEntry != null)
-                    nodeEntryConditions.Add((int)traitNodeEntryXTraitCondEntry.TraitNodeEntryID, traitCondEntry);
+                    nodeEntryConditions.Add(traitNodeEntryXTraitCondEntry.TraitNodeEntryID, traitCondEntry);
             }
 
             MultiMap<int, TraitCostRecord> nodeEntryCosts = new();
@@ -186,7 +186,7 @@ namespace Game
                 if (costs1 != null)
                     node.Costs = costs1;
 
-                _traitNodes[(int)traitNode.Id] = node;
+                _traitNodes[traitNode.Id] = node;
             }
 
             foreach (TraitEdgeRecord traitEdgeEntry in CliDB.TraitEdgeStorage.Values)
@@ -746,7 +746,7 @@ namespace Game
                     newEntry.TraitNodeID = loadoutEntry.SelectedTraitNodeID;
                     newEntry.TraitNodeEntryID = loadoutEntry.SelectedTraitNodeEntryID;
                     if (newEntry.TraitNodeEntryID == 0)
-                        newEntry.TraitNodeEntryID = (int)node.Entries[0].Data.Id;
+                        newEntry.TraitNodeEntryID = node.Entries[0].Data.Id;
 
                     TraitEntryPacket entryInConfig = findEntry(traitConfig, newEntry.TraitNodeID, newEntry.TraitNodeEntryID);
 

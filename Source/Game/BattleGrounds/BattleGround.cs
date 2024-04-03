@@ -700,8 +700,8 @@ namespace Game.BattleGrounds
                     BattlegroundPlayer bgPlayer = GetBattlegroundPlayerData(player.GetGUID());
                     if (bgPlayer != null)
                     {
-                        if (Global.BattlegroundMgr.IsRandomBattleground((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId)
-                            || Global.BattlegroundMgr.IsBGWeekend((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId))
+                        if (Global.BattlegroundMgr.IsRandomBattleground(bgPlayer.queueTypeId.BattlemasterListId)
+                            || Global.BattlegroundMgr.IsBGWeekend(bgPlayer.queueTypeId.BattlemasterListId))
                         {
                             UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(winnerKills));
                             if (!player.GetRandomWinner())
@@ -716,7 +716,7 @@ namespace Game.BattleGrounds
                         }
                     }
 
-                    player.UpdateCriteria(CriteriaType.WinBattleground, (long)player.GetMapId());
+                    player.UpdateCriteria(CriteriaType.WinBattleground, player.GetMapId());
                     if (!guildAwarded)
                     {
                         guildAwarded = true;
@@ -725,7 +725,7 @@ namespace Game.BattleGrounds
                         {
                             Guild guild = Global.GuildMgr.GetGuildById(guildId);
                             if (guild != null)
-                                guild.UpdateCriteria(CriteriaType.WinBattleground, (long)player.GetMapId(), 0, 0, null, player);
+                                guild.UpdateCriteria(CriteriaType.WinBattleground, player.GetMapId(), 0, 0, null, player);
                         }
                     }
                 }
@@ -734,8 +734,8 @@ namespace Game.BattleGrounds
                     BattlegroundPlayer bgPlayer = GetBattlegroundPlayerData(player.GetGUID());
                     if (bgPlayer != null)
                     {
-                        if (Global.BattlegroundMgr.IsRandomBattleground((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId)
-                            || Global.BattlegroundMgr.IsBGWeekend((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId))
+                        if (Global.BattlegroundMgr.IsRandomBattleground(bgPlayer.queueTypeId.BattlemasterListId)
+                            || Global.BattlegroundMgr.IsBGWeekend(bgPlayer.queueTypeId.BattlemasterListId))
                             UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(loserKills));
                     }
                 }
@@ -747,7 +747,7 @@ namespace Game.BattleGrounds
 
                 player.SendPacket(pvpMatchComplete);
 
-                player.UpdateCriteria(CriteriaType.ParticipateInBattleground, (long)player.GetMapId());
+                player.UpdateCriteria(CriteriaType.ParticipateInBattleground, player.GetMapId());
             }
         }
 

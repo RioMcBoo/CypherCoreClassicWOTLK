@@ -68,7 +68,7 @@ namespace Game
                 return;
             }
 
-            BattlegroundTypeId bgTypeId = (BattlegroundTypeId)bgQueueTypeId.BattlemasterListId;
+            BattlegroundTypeId bgTypeId = bgQueueTypeId.BattlemasterListId;
 
             // ignore if player is already in BG
             if (GetPlayer().InBattleground())
@@ -287,7 +287,7 @@ namespace Game
                 return;
             }
 
-            BattlegroundTypeId bgTypeId = (BattlegroundTypeId)bgQueueTypeId.BattlemasterListId;
+            BattlegroundTypeId bgTypeId = bgQueueTypeId.BattlemasterListId;
             BattlegroundTemplate bgTemplate = Global.BattlegroundMgr.GetBattlegroundTemplateByTypeId(bgTypeId);
             if (bgTemplate == null)
             {
@@ -430,7 +430,7 @@ namespace Game
                 if (bgQueueTypeId == default)
                     continue;
 
-                BattlegroundTypeId bgTypeId = (BattlegroundTypeId)bgQueueTypeId.BattlemasterListId;
+                BattlegroundTypeId bgTypeId = bgQueueTypeId.BattlemasterListId;
                 bg = _player.GetBattleground();
                 if (bg != null)
                 {

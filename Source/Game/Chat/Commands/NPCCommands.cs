@@ -1161,7 +1161,7 @@ namespace Game.Chat
 
                 PhasingHandler.ResetPhaseShift(creature);
                 PhasingHandler.AddPhase(creature, phaseId, true);
-                creature.SetDBPhase((int)phaseId);
+                creature.SetDBPhase(phaseId);
 
                 creature.SaveToDB();
                 return true;

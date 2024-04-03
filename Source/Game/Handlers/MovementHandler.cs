@@ -805,7 +805,7 @@ namespace Game
             using the following relation:
             serverTime = clockDelta + clientTime
             */
-            long clockDelta = (long)(serverTimeAtSent + lagDelay) - (long)timeSyncResponse.ClientTime;
+            long clockDelta = serverTimeAtSent + lagDelay - (long)timeSyncResponse.ClientTime;
             _timeSyncClockDeltaQueue.PushFront(Tuple.Create(clockDelta, roundTripDuration));
             ComputeNewClockDelta();
         }

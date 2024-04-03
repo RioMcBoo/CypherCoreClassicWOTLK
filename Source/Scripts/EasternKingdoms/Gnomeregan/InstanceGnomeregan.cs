@@ -10,44 +10,44 @@ namespace Scripts.EasternKingdoms.Gnomeregan
 {
     struct GNOGameObjectIds
     {
-        public const uint CaveInLeft = 146085;
-        public const uint CaveInRight = 146086;
-        public const uint RedRocket = 103820;
+        public const int CaveInLeft = 146085;
+        public const int CaveInRight = 146086;
+        public const int RedRocket = 103820;
     }
 
     struct GNOCreatureIds
     {
-        public const uint BlastmasterEmiShortfuse = 7998;
-        public const uint CaverndeepAmbusher = 6207;
-        public const uint Grubbis = 7361;
-        public const uint ViciousFallout = 7079;
-        public const uint Chomper = 6215;
-        public const uint Electrocutioner = 6235;
-        public const uint CrowdPummeler = 6229;
-        public const uint Mekgineer = 7800;
+        public const int BlastmasterEmiShortfuse = 7998;
+        public const int CaverndeepAmbusher = 6207;
+        public const int Grubbis = 7361;
+        public const int ViciousFallout = 7079;
+        public const int Chomper = 6215;
+        public const int Electrocutioner = 6235;
+        public const int CrowdPummeler = 6229;
+        public const int Mekgineer = 7800;
     }
 
     struct DataTypes
     {
-        public const uint BlastmasterEvent = 0;
-        public const uint ViciousFallout = 1;
-        public const uint Electrocutioner = 2;
-        public const uint CrowdPummeler = 3;
-        public const uint Thermaplugg = 4;
+        public const int BlastmasterEvent = 0;
+        public const int ViciousFallout = 1;
+        public const int Electrocutioner = 2;
+        public const int CrowdPummeler = 3;
+        public const int Thermaplugg = 4;
 
-        public const uint MaxEncounter = 5;
+        public const int MaxEncounter = 5;
 
         // Additional Objects
-        public const uint GoCaveInLeft = 6;
-        public const uint GoCaveInRight = 7;
-        public const uint NpcBastmasterEmiShortfuse = 8;
+        public const int GoCaveInLeft = 6;
+        public const int GoCaveInRight = 7;
+        public const int NpcBastmasterEmiShortfuse = 8;
     }
 
     struct DataTypes64
     {
-        public const uint GoCaveInLeft = 0;
-        public const uint GoCaveInRight = 1;
-        public const uint NpcBastmasterEmiShortfuse = 2;
+        public const int GoCaveInLeft = 0;
+        public const int GoCaveInRight = 1;
+        public const int NpcBastmasterEmiShortfuse = 2;
     }
 
     class instance_gnomeregan : InstanceMapScript
@@ -111,7 +111,7 @@ namespace Scripts.EasternKingdoms.Gnomeregan
                     }
             }
 
-            public override ObjectGuid GetGuidData(uint uiType)
+            public override ObjectGuid GetGuidData(int uiType)
             {
                 switch (uiType)
                 {

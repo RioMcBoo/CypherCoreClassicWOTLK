@@ -103,7 +103,7 @@ namespace Game
             if (pet != null)
             {
                 if (battlePetSetFlags.ControlType == FlagsControlType.Apply)
-                    pet.PacketInfo.Flags |= (ushort)battlePetSetFlags.Flags;
+                    pet.PacketInfo.Flags |= battlePetSetFlags.Flags;
                 else
                     pet.PacketInfo.Flags &= (ushort)~battlePetSetFlags.Flags;
 

@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
-	internal static partial class FieldOperations
+    internal static partial class FieldOperations
 	{
 		/*
 		h = f - g

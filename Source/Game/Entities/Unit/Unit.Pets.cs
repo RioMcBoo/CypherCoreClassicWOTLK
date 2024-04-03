@@ -492,7 +492,7 @@ namespace Game.Entities
                             CreatureTemplate cinfo = ToCreature().GetCreatureTemplate();
                             if (cinfo != null && cinfo.CreatureType == CreatureType.Demon)
                             {
-                                SetClass((Class)cinfo.UnitClass);
+                                SetClass(cinfo.UnitClass);
                                 if (GetCharmInfo() != null)
                                     GetCharmInfo().SetPetNumber(0, true);
                                 else

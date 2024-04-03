@@ -147,9 +147,9 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             }
 
             if (team == BatttleGroundTeamId.Alliance)
-                UpdateWorldState(WorldStateIds.AllianceResources, (int)score);
+                UpdateWorldState(WorldStateIds.AllianceResources, score);
             else
-                UpdateWorldState(WorldStateIds.HordeResources, (int)score);
+                UpdateWorldState(WorldStateIds.HordeResources, score);
         }
 
         public override void EndBattleground(Team winner)
@@ -169,9 +169,9 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
         void UpdatePointsCount(Team team)
         {
             if (team == Team.Alliance)
-                UpdateWorldState(WorldStateIds.AllianceBase, (int)m_TeamPointsCount[BatttleGroundTeamId.Alliance]);
+                UpdateWorldState(WorldStateIds.AllianceBase, m_TeamPointsCount[BatttleGroundTeamId.Alliance]);
             else
-                UpdateWorldState(WorldStateIds.HordeBase, (int)m_TeamPointsCount[BatttleGroundTeamId.Horde]);
+                UpdateWorldState(WorldStateIds.HordeBase, m_TeamPointsCount[BatttleGroundTeamId.Horde]);
         }
 
         void UpdatePointsIcons(Team team, int Point)
@@ -406,7 +406,7 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
         void RespawnFlag(bool send_message)
         {
             if (m_FlagCapturedBgObjectType > 0)
-                SpawnBGObject((int)m_FlagCapturedBgObjectType, BattlegroundConst.RespawnOneDay);
+                SpawnBGObject(m_FlagCapturedBgObjectType, BattlegroundConst.RespawnOneDay);
 
             m_FlagCapturedBgObjectType = 0;
             m_FlagState = FlagState.OnBase;
@@ -830,7 +830,7 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
         {
             base.BuildPvPLogPlayerDataPacket(out playerData);
 
-            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)Misc.ObjectiveCaptureFlag, FlagCaptures));
+            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat(Misc.ObjectiveCaptureFlag, FlagCaptures));
         }
 
         public override int GetAttr1() { return FlagCaptures; }

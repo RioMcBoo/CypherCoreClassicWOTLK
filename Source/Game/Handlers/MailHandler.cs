@@ -480,7 +480,7 @@ namespace Game
                             .SendMailTo(trans, new MailReceiver(receiver, m.sender), new MailSender(MailMessageType.Normal, m.receiver), MailCheckFlags.CodPayment);
                     }
 
-                    player.ModifyMoney(-(long)m.COD);
+                    player.ModifyMoney(-m.COD);
                 }
                 m.COD = 0;
                 m.state = MailState.Changed;

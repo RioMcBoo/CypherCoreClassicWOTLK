@@ -11,44 +11,44 @@ namespace Scripts.Events.DarkmoonFaire
 {
     struct GossipIds
     {
-        public const uint MenuSelinaPois = 13076;
-        public const uint MenuSelinaItem = 13113;
+        public const int MenuSelinaPois = 13076;
+        public const int MenuSelinaItem = 13113;
 
-        public const uint MenuOptionTonkArenaPoi = 0;
-        public const uint MenuOptionCannonPoi = 1;
-        public const uint MenuOptionWhackAGnollPoi = 2;
-        public const uint MenuOptionRingTossPoi = 3;
-        public const uint MenuOptionShootingGalleryPoi = 4;
-        public const uint MenuOptionFortuneTellerPoi = 5;
+        public const int MenuOptionTonkArenaPoi = 0;
+        public const int MenuOptionCannonPoi = 1;
+        public const int MenuOptionWhackAGnollPoi = 2;
+        public const int MenuOptionRingTossPoi = 3;
+        public const int MenuOptionShootingGalleryPoi = 4;
+        public const int MenuOptionFortuneTellerPoi = 5;
     }
 
     struct PoiIds
     {
-        public const uint WhackAGnoll = 2716;
-        public const uint Cannon = 2717;
-        public const uint ShootingGallery = 2718;
-        public const uint TonkArena = 2719;
-        public const uint FortuneTeller = 2720;
-        public const uint RingToss = 2721;
+        public const int WhackAGnoll = 2716;
+        public const int Cannon = 2717;
+        public const int ShootingGallery = 2718;
+        public const int TonkArena = 2719;
+        public const int FortuneTeller = 2720;
+        public const int RingToss = 2721;
     }
 
     [Script] // 10445 - Selina Dourman
     class npc_selina_dourman : ScriptedAI
     {
-        const uint SpellReplaceDarkmoonAdventuresGuide = 103413;
-        const uint SayWelcome = 0;
+        const int SpellReplaceDarkmoonAdventuresGuide = 103413;
+        const int SayWelcome = 0;
 
         bool _talkCooldown;
 
         public npc_selina_dourman(Creature creature) : base(creature) { }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
             switch (menuId)
             {
                 case GossipIds.MenuSelinaPois:
                 {
-                    uint poiId = 0;
+                    int poiId = 0;
                     switch (gossipListId)
                     {
                         case GossipIds.MenuOptionTonkArenaPoi:
@@ -106,7 +106,7 @@ namespace Scripts.Events.DarkmoonFaire
     [Script] // 7016 - Darkmoon Faire Entrance
     class at_darkmoon_faire_entrance : AreaTriggerScript
     {
-        const uint NpcSelinaDourman = 10445;
+        const int NpcSelinaDourman = 10445;
 
         public at_darkmoon_faire_entrance() : base("at_darkmoon_faire_entrance") { }
 

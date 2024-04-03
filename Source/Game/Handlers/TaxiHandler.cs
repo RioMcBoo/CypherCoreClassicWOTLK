@@ -92,7 +92,7 @@ namespace Game
             ShowTaxiNodes data = new();
             ShowTaxiNodesWindowInfo windowInfo = new();
             windowInfo.UnitGUID = unit.GetGUID();
-            windowInfo.CurrentNode = (int)curloc;
+            windowInfo.CurrentNode = curloc;
 
             data.WindowInfo = windowInfo;
 

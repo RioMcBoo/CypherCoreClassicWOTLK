@@ -2,8 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Database;
-using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Misc;
@@ -451,7 +449,7 @@ namespace Game
                     if (itemTemplate == null)
                         continue;
 
-                    int leftInStock = vendorItem.maxcount == 0 ? -1 : (int)vendor.GetVendorItemCurrentCount(vendorItem);
+                    int leftInStock = vendorItem.maxcount == 0 ? -1 : vendor.GetVendorItemCurrentCount(vendorItem);
                     if (!GetPlayer().IsGameMaster())
                     {
                         if (!itemTemplate.GetAllowableClass().HasClass(GetPlayer().GetClass()) && itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
@@ -478,13 +476,13 @@ namespace Game
                     if (priceMod != 0)
                         price -= MathFunctions.CalculatePct(price, priceMod);
 
-                    item.MuID = (int)slot + 1;
-                    item.Durability = (int)itemTemplate.MaxDurability;
-                    item.ExtendedCostID = (int)vendorItem.ExtendedCost;
+                    item.MuID = slot + 1;
+                    item.Durability = itemTemplate.MaxDurability;
+                    item.ExtendedCostID = vendorItem.ExtendedCost;
                     item.Type = (int)vendorItem.Type;
                     item.Quantity = leftInStock;
-                    item.StackCount = (int)itemTemplate.GetBuyCount();
-                    item.Price = (ulong)price;
+                    item.StackCount = itemTemplate.GetBuyCount();
+                    item.Price = price;
                     item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
                     item.Refundable = itemTemplate.HasFlag(ItemFlags.ItemPurchaseRecord) && vendorItem.ExtendedCost != 0 && itemTemplate.GetMaxStackSize() == 1;
 
@@ -506,11 +504,11 @@ namespace Game
                     if (vendorItem.ExtendedCost == 0)
                         continue; // there's no price defined for currencies, only extendedcost is used
 
-                    item.MuID = (int)slot + 1; // client expects counting to start at 1
-                    item.ExtendedCostID = (int)vendorItem.ExtendedCost;
+                    item.MuID = slot + 1; // client expects counting to start at 1
+                    item.ExtendedCostID = vendorItem.ExtendedCost;
                     item.Item.ItemID = vendorItem.item;
                     item.Type = (int)vendorItem.Type;
-                    item.StackCount = (int)vendorItem.maxcount;
+                    item.StackCount = vendorItem.maxcount;
                     item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
 
                     packet.Items.Add(item);

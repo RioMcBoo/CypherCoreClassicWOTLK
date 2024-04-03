@@ -1399,7 +1399,7 @@ namespace Game.Entities
                 // Level difference: 5 point / level, starting from level 1.
                 // There may be spells for this and the starting points too, but
                 // not in the DBCs of the client.
-                detectionValue += (int)(GetLevelForTarget(obj) - 1) * 5;
+                detectionValue += (GetLevelForTarget(obj) - 1) * 5;
 
                 // Apply modifiers
                 detectionValue += m_stealthDetect.GetValue((StealthType)i);
@@ -1515,11 +1515,11 @@ namespace Game.Entities
             {
                 InstanceMap instanceMap = map.ToInstanceMap();
                 if (instanceMap != null)
-                    return (ZoneScript)instanceMap.GetInstanceScript();
+                    return instanceMap.GetInstanceScript();
 
                 BattlegroundMap bgMap = map.ToBattlegroundMap();
                 if (bgMap != null)
-                    return (ZoneScript)bgMap.GetBG();
+                    return bgMap.GetBG();
 
                 if (!map.IsBattlegroundOrArena())
                 {

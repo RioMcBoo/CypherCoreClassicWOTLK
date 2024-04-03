@@ -221,7 +221,7 @@ namespace Game
 
             CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(renownFactionEntry.RenownCurrencyID);
             if (currency != null)
-                return (int)_player.GetCurrencyQuantity(currency.Id);
+                return _player.GetCurrencyQuantity(currency.Id);
 
             return 0;
         }
@@ -245,7 +245,7 @@ namespace Game
 
             CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(renownFactionEntry.RenownCurrencyID);
             if (currency != null)
-                return (int)_player.GetCurrencyMaxQuantity(currency);
+                return _player.GetCurrencyMaxQuantity(currency);
 
             return 0;
         }
@@ -279,7 +279,7 @@ namespace Game
             foreach (var pair in _forcedReactions)
             {
                 ForcedReaction forcedReaction;
-                forcedReaction.Faction = (int)pair.Key;
+                forcedReaction.Faction = pair.Key;
                 forcedReaction.Reaction = (int)pair.Value;
 
                 setForcedReactions.Reactions.Add(forcedReaction);
@@ -298,7 +298,7 @@ namespace Game
             }
 
             if (faction != null)
-                setFactionStanding.Faction.Add(new FactionStandingData((int)faction.ReputationListID, getStandingForPacket(faction)));
+                setFactionStanding.Faction.Add(new FactionStandingData(faction.ReputationListID, getStandingForPacket(faction)));
 
             foreach (var state in _factions.Values)
             {
@@ -306,7 +306,7 @@ namespace Game
                 {
                     state.needSend = false;
                     if (faction == null || state.ReputationListID != faction.ReputationListID)
-                        setFactionStanding.Faction.Add(new FactionStandingData((int)state.ReputationListID, getStandingForPacket(state)));
+                        setFactionStanding.Faction.Add(new FactionStandingData(state.ReputationListID, getStandingForPacket(state)));
                 }
             }
 

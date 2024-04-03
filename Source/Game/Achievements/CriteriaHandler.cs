@@ -8,7 +8,6 @@ using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Miscellaneous;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scenarios;
@@ -1083,7 +1082,7 @@ namespace Game.Achievements
                         if (area.AreaBit < 0)
                             continue;
 
-                        int playerIndexOffset = (int)area.AreaBit / ActivePlayerData.ExploredZonesBits;
+                        int playerIndexOffset = area.AreaBit / ActivePlayerData.ExploredZonesBits;
                         if (playerIndexOffset >= PlayerConst.ExploredZonesSize)
                             continue;
 
@@ -1631,7 +1630,7 @@ namespace Game.Achievements
                 {
                     static short getRootAchievementCategory(AchievementRecord achievement)
                     {
-                        short category = (short)achievement.Category;
+                        short category = achievement.Category;
                         do
                         {
                             var categoryEntry = CliDB.AchievementCategoryStorage.LookupByKey(category);
@@ -2794,7 +2793,7 @@ namespace Game.Achievements
                     if (pvpTier == null)
                         return false;
 
-                    PVPInfo pvpInfo = referencePlayer.GetPvpInfoForBracket((byte)pvpTier.BracketID);
+                    PVPInfo pvpInfo = referencePlayer.GetPvpInfoForBracket(pvpTier.BracketID);
                     if (pvpInfo == null)
                         return false;
 
@@ -3652,7 +3651,7 @@ namespace Game.Achievements
                 default:
                     if (DataType != CriteriaDataType.Script)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` has data for non-supported criteria Type (Entry: {0} Type: {1}), ignored.", criteria.Id, (CriteriaType)criteria.Entry.Type);
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` has data for non-supported criteria Type (Entry: {0} Type: {1}), ignored.", criteria.Id, criteria.Entry.Type);
                         return false;
                     }
                     break;

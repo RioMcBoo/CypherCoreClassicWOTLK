@@ -21,7 +21,7 @@ namespace Scripts.Pets.Priest
             me.CastSpell(me, SpellPriestInvokeTheNaaru);
 
             if (me.ToTempSummon().IsGuardian() && summoner.IsUnit())
-                (me as Guardian).SetBonusDamage((int)summoner.ToUnit().SpellBaseHealingBonusDone(SpellSchoolMask.Holy));
+                (me as Guardian).SetBonusDamage(summoner.ToUnit().SpellBaseHealingBonusDone(SpellSchoolMask.Holy));
         }
 
         public override void OnDespawn()

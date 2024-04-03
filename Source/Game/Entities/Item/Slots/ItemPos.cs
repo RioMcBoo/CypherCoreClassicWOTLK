@@ -2,10 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Google.Protobuf.WellKnownTypes;
-using System.Dynamic;
-using static Game.AI.SmartEvent;
-using static Game.Entities.ItemPos;
 
 namespace Game.Entities
 {

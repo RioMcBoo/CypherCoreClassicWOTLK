@@ -14,34 +14,34 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
     {
         // Victor Nefarius
         // Ubrs Spells
-        public const uint ChromaticChaos = 16337; // Self Cast hits 10339
-        public const uint VaelastraszzSpawn = 16354; // Self Cast Depawn one sec after
+        public const int ChromaticChaos = 16337; // Self Cast hits 10339
+        public const int VaelastraszzSpawn = 16354; // Self Cast Depawn one sec after
                                                      // Bwl Spells
-        public const uint Shadowbolt = 22677;
-        public const uint ShadowboltVolley = 22665;
-        public const uint ShadowCommand = 22667;
-        public const uint Fear = 22678;
+        public const int Shadowbolt = 22677;
+        public const int ShadowboltVolley = 22665;
+        public const int ShadowCommand = 22667;
+        public const int Fear = 22678;
 
-        public const uint NefariansBarrier = 22663;
+        public const int NefariansBarrier = 22663;
 
         // Nefarian
-        public const uint ShadowflameInitial = 22992;
-        public const uint Shadowflame = 22539;
-        public const uint Bellowingroar = 22686;
-        public const uint Veilofshadow = 7068;
-        public const uint Cleave = 20691;
-        public const uint Taillash = 23364;
+        public const int ShadowflameInitial = 22992;
+        public const int Shadowflame = 22539;
+        public const int Bellowingroar = 22686;
+        public const int Veilofshadow = 7068;
+        public const int Cleave = 20691;
+        public const int Taillash = 23364;
 
-        public const uint Mage = 23410;     // wild magic
-        public const uint Warrior = 23397;     // beserk
-        public const uint Druid = 23398;     // cat form
-        public const uint Priest = 23401;     // corrupted healing
-        public const uint Paladin = 23418;     // syphon blessing
-        public const uint Shaman = 23425;     // totems
-        public const uint Warlock = 23427;     // infernals
-        public const uint Hunter = 23436;     // bow broke
-        public const uint Rogue = 23414;     // Paralise
-        public const uint DeathKnight = 49576;      // Death Grip
+        public const int Mage = 23410;     // wild magic
+        public const int Warrior = 23397;     // beserk
+        public const int Druid = 23398;     // cat form
+        public const int Priest = 23401;     // corrupted healing
+        public const int Paladin = 23418;     // syphon blessing
+        public const int Shaman = 23425;     // totems
+        public const int Warlock = 23427;     // infernals
+        public const int Hunter = 23436;     // bow broke
+        public const int Rogue = 23414;     // Paralise
+        public const int DeathKnight = 49576;      // Death Grip
 
         // 19484
         // 22664
@@ -53,58 +53,58 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
     {
         // Nefarius
         // Ubrs
-        public const uint SayChaosSpell = 9;
-        public const uint SaySuccess = 10;
-        public const uint SayFailure = 11;
+        public const int SayChaosSpell = 9;
+        public const int SaySuccess = 10;
+        public const int SayFailure = 11;
         // Bwl
-        public const uint SayGamesbegin1 = 12;
-        public const uint SayGamesbegin2 = 13;
-        // public const uint SayVaelIntro             = 14; Not used - when he corrupts Vaelastrasz
+        public const int SayGamesbegin1 = 12;
+        public const int SayGamesbegin2 = 13;
+        // public const int SayVaelIntro             = 14; Not used - when he corrupts Vaelastrasz
 
         // Nefarian
-        public const uint SayRandom = 0;
-        public const uint SayRaiseSkeletons = 1;
-        public const uint SaySlay = 2;
-        public const uint SayDeath = 3;
+        public const int SayRandom = 0;
+        public const int SayRaiseSkeletons = 1;
+        public const int SaySlay = 2;
+        public const int SayDeath = 3;
 
-        public const uint SayMage = 4;
-        public const uint SayWarrior = 5;
-        public const uint SayDruid = 6;
-        public const uint SayPriest = 7;
-        public const uint SayPaladin = 8;
-        public const uint SayShaman = 9;
-        public const uint SayWarlock = 10;
-        public const uint SayHunter = 11;
-        public const uint SayRogue = 12;
-        public const uint SayDeathKnight = 13;
+        public const int SayMage = 4;
+        public const int SayWarrior = 5;
+        public const int SayDruid = 6;
+        public const int SayPriest = 7;
+        public const int SayPaladin = 8;
+        public const int SayShaman = 9;
+        public const int SayWarlock = 10;
+        public const int SayHunter = 11;
+        public const int SayRogue = 12;
+        public const int SayDeathKnight = 13;
 
-        public const uint GossipId = 6045;
-        public const uint GossipOptionId = 0;
+        public const int GossipId = 6045;
+        public const int GossipOptionId = 0;
     }
 
     struct CreatureIds
     {
-        public const uint BronzeDrakanoid = 14263;
-        public const uint BlueDrakanoid = 14261;
-        public const uint RedDrakanoid = 14264;
-        public const uint GreenDrakanoid = 14262;
-        public const uint BlackDrakanoid = 14265;
-        public const uint ChromaticDrakanoid = 14302;
-        public const uint BoneConstruct = 14605;
+        public const int BronzeDrakanoid = 14263;
+        public const int BlueDrakanoid = 14261;
+        public const int RedDrakanoid = 14264;
+        public const int GreenDrakanoid = 14262;
+        public const int BlackDrakanoid = 14265;
+        public const int ChromaticDrakanoid = 14302;
+        public const int BoneConstruct = 14605;
         // Ubrs
-        public const uint Gyth = 10339;
+        public const int Gyth = 10339;
     }
 
     struct GameObjectIds
     {
-        public const uint PortcullisActive = 164726;
-        public const uint PortcullisTobossrooms = 175186;
+        public const int PortcullisActive = 164726;
+        public const int PortcullisTobossrooms = 175186;
     }
 
     struct MiscConst
     {
-        public const uint NefariusPath2 = 11037368;
-        public const uint NefariusPath3 = 11037376;
+        public const int NefariusPath2 = 11037368;
+        public const int NefariusPath3 = 11037376;
 
         public static Position[] DrakeSpawnLoc = // drakonid
         {
@@ -118,36 +118,36 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             new Position(-7535.456543f, -1279.562500f, 476.798706f, 3.0f)  // nefarian move
         };
 
-        public static uint[] Entry = { CreatureIds.BronzeDrakanoid, CreatureIds.BlueDrakanoid, CreatureIds.RedDrakanoid, CreatureIds.GreenDrakanoid, CreatureIds.BlackDrakanoid };
+        public static int[] Entry = { CreatureIds.BronzeDrakanoid, CreatureIds.BlueDrakanoid, CreatureIds.RedDrakanoid, CreatureIds.GreenDrakanoid, CreatureIds.BlackDrakanoid };
     }
 
     struct EventIds
     {
         // Victor Nefarius
-        public const uint SpawnAdd = 1;
-        public const uint ShadowBolt = 2;
-        public const uint Fear = 3;
-        public const uint MindControl = 4;
+        public const int SpawnAdd = 1;
+        public const int ShadowBolt = 2;
+        public const int Fear = 3;
+        public const int MindControl = 4;
         // Nefarian
-        public const uint Shadowflame = 5;
-        public const uint Veilofshadow = 6;
-        public const uint Cleave = 7;
-        public const uint Taillash = 8;
-        public const uint Classcall = 9;
+        public const int Shadowflame = 5;
+        public const int Veilofshadow = 6;
+        public const int Cleave = 7;
+        public const int Taillash = 8;
+        public const int Classcall = 9;
         // Ubrs
-        public const uint Chaos1 = 10;
-        public const uint Chaos2 = 11;
-        public const uint Path2 = 12;
-        public const uint Path3 = 13;
-        public const uint Success1 = 14;
-        public const uint Success2 = 15;
-        public const uint Success3 = 16;
+        public const int Chaos1 = 10;
+        public const int Chaos2 = 11;
+        public const int Path2 = 12;
+        public const int Path3 = 13;
+        public const int Success1 = 14;
+        public const int Success2 = 15;
+        public const int Success3 = 16;
     }
 
     [Script]
     class boss_victor_nefarius : BossAI
     {
-        uint SpawnedAdds;
+        int SpawnedAdds;
 
         public boss_victor_nefarius(Creature creature) : base(creature, DataTypes.Nefarian)
         {
@@ -169,8 +169,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                     _Reset();
 
                 me.SetVisible(true);
-                me.SetNpcFlag(NPCFlags.Gossip);
-                me.SetFaction((uint)FactionTemplates.Friendly);
+                me.SetNpcFlag(NPCFlags1.Gossip);
+                me.SetFaction(FactionTemplates.Friendly);
                 me.SetStandState(UnitStandStateType.SitHighChair);
                 me.RemoveAura(SpellIds.NefariansBarrier);
             }
@@ -187,8 +187,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
 
             Talk(TextIds.SayGamesbegin2);
 
-            me.SetFaction((uint)FactionTemplates.DragonflightBlack);
-            me.RemoveNpcFlag(NPCFlags.Gossip);
+            me.SetFaction(FactionTemplates.DragonflightBlack);
+            me.RemoveNpcFlag(NPCFlags1.Gossip);
             DoCast(me, SpellIds.NefariansBarrier);
             me.SetStandState(UnitStandStateType.Stand);
             me.SetImmuneToPC(false);
@@ -212,7 +212,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
 
         public override void JustSummoned(Creature summon) { }
 
-        public override void SetData(uint type, uint data)
+        public override void SetData(int type, int data)
         {
             if (type == 1 && data == 1)
             {
@@ -326,15 +326,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                         case EventIds.SpawnAdd:
                             for (byte i = 0; i < 2; ++i)
                             {
-                                uint CreatureID;
+                                int CreatureID;
                                 if (RandomHelper.URand(0, 2) == 0)
                                     CreatureID = CreatureIds.ChromaticDrakanoid;
                                 else
-                                    CreatureID = MiscConst.Entry[RandomHelper.URand(0, 4)];
+                                    CreatureID = MiscConst.Entry[RandomHelper.IRand(0, 4)];
                                 Creature dragon = me.SummonCreature(CreatureID, MiscConst.DrakeSpawnLoc[i]);
                                 if (dragon != null)
                                 {
-                                    dragon.SetFaction((uint)FactionTemplates.DragonflightBlack);
+                                    dragon.SetFaction(FactionTemplates.DragonflightBlack);
                                     dragon.GetAI().AttackStart(me.GetVictim());
                                 }
 
@@ -367,7 +367,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             }
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
             if (menuId == TextIds.GossipId && gossipListId == TextIds.GossipOptionId)
             {
@@ -433,7 +433,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             Talk(TextIds.SaySlay, victim);
         }
 
-        public override void MovementInform(MovementGeneratorType type, uint id)
+        public override void MovementInform(MovementGeneratorType type, int id)
         {
             if (type != MovementGeneratorType.Point)
                 return;

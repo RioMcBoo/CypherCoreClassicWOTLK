@@ -7,7 +7,6 @@ using Game.Groups;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
-using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -688,25 +687,25 @@ namespace Game.BattleFields
         public bool IsEnabled() { return m_IsEnabled; }
 
         // All-purpose data storage 64 bit
-        public virtual ulong GetData64(int dataId) { return m_Data64[dataId]; }
-        public virtual void SetData64(int dataId, ulong value) { m_Data64[dataId] = value; }
+        public virtual long GetData64(int dataId) { return m_Data64[dataId]; }
+        public virtual void SetData64(int dataId, long value) { m_Data64[dataId] = value; }
 
         // All-purpose data storage 32 bit
-        public virtual uint GetData(int dataId) { return m_Data32[dataId]; }
-        public virtual void SetData(int dataId, uint value) { m_Data32[dataId] = value; }
+        public virtual int GetData(int dataId) { return m_Data32[dataId]; }
+        public virtual void SetData(int dataId, int value) { m_Data32[dataId] = value; }
         public virtual void UpdateData(int index, int pad)
         {
             if (pad < 0)
-                m_Data32[index] -= (uint)-pad;
+                m_Data32[index] -= -pad;
             else
-                m_Data32[index] += (uint)pad;
+                m_Data32[index] += pad;
         }
 
         // Battlefield - generic methods
-        public uint GetDefenderTeam() { return m_DefenderTeam; }
-        public uint GetAttackerTeam() { return 1 - m_DefenderTeam; }
+        public int GetDefenderTeam() { return m_DefenderTeam; }
+        public int GetAttackerTeam() { return 1 - m_DefenderTeam; }
         public int GetOtherTeam(int teamIndex) { return (teamIndex == BatttleGroundTeamId.Horde ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde); }
-        void SetDefenderTeam(uint team) { m_DefenderTeam = team; }
+        void SetDefenderTeam(int team) { m_DefenderTeam = team; }
 
         // Called on start
         public virtual void OnBattleStart() { }
@@ -725,7 +724,7 @@ namespace Game.BattleFields
 
         public int GetBattleId() { return m_BattleId; }
 
-        public virtual void DoCompleteOrIncrementAchievement(uint achievement, Player player, byte incrementNumber = 1) { }
+        public virtual void DoCompleteOrIncrementAchievement(int achievement, Player player, byte incrementNumber = 1) { }
 
         // Return if we can use mount in battlefield
         public bool CanFlyIn() { return !m_isActive; }
@@ -742,7 +741,7 @@ namespace Game.BattleFields
         protected uint m_Timer;                                         // Global timer for event
         protected bool m_IsEnabled;
         protected bool m_isActive;
-        protected uint m_DefenderTeam;
+        protected int m_DefenderTeam;
 
         // Map of the objectives belonging to this OutdoorPvP
         Dictionary<int /*control zone entry*/, BattleFieldControlZoneHandler> ControlZoneHandlers = new();
@@ -780,8 +779,8 @@ namespace Game.BattleFields
 
         List<ObjectGuid>[] m_Groups = new List<ObjectGuid>[2];                       // Contain different raid group
 
-        Dictionary<int, ulong> m_Data64 = new();
-        protected Dictionary<int, uint> m_Data32 = new();
+        Dictionary<int, long> m_Data64 = new();
+        protected Dictionary<int, int> m_Data32 = new();
     }
 
     public class BfGraveyard

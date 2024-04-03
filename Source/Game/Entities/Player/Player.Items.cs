@@ -15,8 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using static Game.AI.SmartAction;
-using static Game.Entities.GameObjectTemplate;
 
 namespace Game.Entities
 {
@@ -1381,7 +1379,7 @@ namespace Game.Entities
                     case InventoryResult.ItemMaxLimitCategoryEquippedExceededIs:
                     {
                         ItemTemplate proto = item1 != null ? item1.GetTemplate() : Global.ObjectMgr.GetItemTemplate(itemId);
-                        failure.LimitCategory = (int)(proto != null ? proto.GetItemLimitCategory() : 0);
+                        failure.LimitCategory = proto != null ? proto.GetItemLimitCategory() : 0;
                         break;
                     }
                     default:
@@ -2476,9 +2474,9 @@ namespace Game.Entities
 
             if (proto.GetRequiredSkill() != 0)
             {
-                if (GetSkillValue((SkillType)proto.GetRequiredSkill()) == 0)
+                if (GetSkillValue(proto.GetRequiredSkill()) == 0)
                     return InventoryResult.ProficiencyNeeded;
-                else if (GetSkillValue((SkillType)proto.GetRequiredSkill()) < proto.GetRequiredSkillRank())
+                else if (GetSkillValue(proto.GetRequiredSkill()) < proto.GetRequiredSkillRank())
                     return InventoryResult.CantEquipSkill;
             }
 
@@ -2697,7 +2695,7 @@ namespace Game.Entities
                     if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                         continue;
 
-                    RemoveCurrency(iece.CurrencyID[i], (int)(iece.CurrencyCount[i] * stacks), CurrencyDestroyReason.Vendor);
+                    RemoveCurrency(iece.CurrencyID[i], iece.CurrencyCount[i] * stacks, CurrencyDestroyReason.Vendor);
                 }
             }
 
@@ -3202,13 +3200,13 @@ namespace Game.Entities
                     //    ApplyRatingMod(CombatRating.CritTakenSpell, (int)val, apply);
                     //    break;
                     case ItemModType.HasteMeleeRating:
-                        ApplyRatingMod(CombatRating.HasteMelee, (int)val, apply);
+                        ApplyRatingMod(CombatRating.HasteMelee, val, apply);
                         break;
                     case ItemModType.HasteRangedRating:
-                        ApplyRatingMod(CombatRating.HasteRanged, (int)val, apply);
+                        ApplyRatingMod(CombatRating.HasteRanged, val, apply);
                         break;
                     case ItemModType.HasteSpellRating:
-                        ApplyRatingMod(CombatRating.HasteSpell, (int)val, apply);
+                        ApplyRatingMod(CombatRating.HasteSpell, val, apply);
                         break;
                     case ItemModType.HitRating:
                         ApplyRatingMod(CombatRating.HitMelee, (int)(val * combatRatingMultiplier), apply);
@@ -3242,53 +3240,53 @@ namespace Game.Entities
                         ApplyRatingMod(CombatRating.Expertise, (int)(val * combatRatingMultiplier), apply);
                         break;
                     case ItemModType.AttackPower:
-                        HandleStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Total, (float)val, apply);
-                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Total, val, apply);
+                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, val, apply);
                         break;
                     case ItemModType.RangedAttackPower:
-                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, val, apply);
                         break;                    
                     case ItemModType.ManaRegeneration:
-                        ApplyManaRegenBonus((int)val, apply);
+                        ApplyManaRegenBonus(val, apply);
                         break;
                     case ItemModType.ArmorPenetrationRating:
-                        ApplyRatingMod(CombatRating.ArmorPenetration, (int)val, apply);
+                        ApplyRatingMod(CombatRating.ArmorPenetration, val, apply);
                         break;
                     case ItemModType.SpellPower:
-                        ApplySpellPowerBonus((int)val, apply);
+                        ApplySpellPowerBonus(val, apply);
                         break;
                     case ItemModType.HealthRegen:
-                        ApplyHealthRegenBonus((int)val, apply);
+                        ApplyHealthRegenBonus(val, apply);
                         break;
                     case ItemModType.SpellPenetration:
-                        ApplySpellPenetrationBonus((int)val, apply);
+                        ApplySpellPenetrationBonus(val, apply);
                         break;
                     case ItemModType.BlockValue:
-                        HandleBaseModFlatValue(BaseModGroup.ShieldBlockValue, (float)val, apply);
+                        HandleBaseModFlatValue(BaseModGroup.ShieldBlockValue, val, apply);
                         break;
                     //case ItemModType.MasteryRating:
                     //    ApplyRatingMod(CombatRating.Mastery, (int)(val * combatRatingMultiplier), apply);
                     //    break;
                     case ItemModType.ExtraArmor:
-                        HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, val, apply);
                         break;
                     case ItemModType.FireResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceFire, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceFire, UnitModifierFlatType.Base, val, apply);
                         break;
                     case ItemModType.FrostResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceFrost, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceFrost, UnitModifierFlatType.Base, val, apply);
                         break;
                     case ItemModType.HolyResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceHoly, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceHoly, UnitModifierFlatType.Base, val, apply);
                         break;
                     case ItemModType.ShadowResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceShadow, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceShadow, UnitModifierFlatType.Base, val, apply);
                         break;
                     case ItemModType.NatureResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceNature, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceNature, UnitModifierFlatType.Base, val, apply);
                         break;
                     case ItemModType.ArcaneResistance:
-                        HandleStatFlatModifier(UnitMods.ResistanceArcane, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceArcane, UnitModifierFlatType.Base, val, apply);
                         break;           
                     case ItemModType.AgiStrInt:
                         HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
@@ -4334,7 +4332,7 @@ namespace Game.Entities
                 if (swap || GetItemByPos(slot) == null)
                     for (byte i = 0; i < 4; ++i)
                         if (slots[i] == slot)
-                            return (byte)slot;
+                            return slot;
             }
             else
             {
@@ -5346,7 +5344,7 @@ namespace Game.Entities
 
             // It may need a better formula
             // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
-            bones.loot.gold = (uint)(RandomHelper.URand(50, 150) * 0.016f * Math.Pow((float)GetLevel() / 5.76f, 2.5f) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+            bones.loot.gold = (uint)(RandomHelper.URand(50, 150) * 0.016f * Math.Pow(GetLevel() / 5.76f, 2.5f) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
             bones.lootRecipient = looterPlr;
             looterPlr.SendLoot(bones.loot);
         }

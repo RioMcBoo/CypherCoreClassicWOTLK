@@ -714,7 +714,7 @@ namespace Game.Entities
                 {
                     SpellItemEnchantmentRecord enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
                     if (enchantEntry != null)
-                        if (enchantEntry.RequiredSkillID != 0 && player.GetSkillValue((SkillType)enchantEntry.RequiredSkillID) < enchantEntry.RequiredSkillRank)
+                        if (enchantEntry.RequiredSkillID != 0 && player.GetSkillValue(enchantEntry.RequiredSkillID) < enchantEntry.RequiredSkillRank)
                             return false;
                 }
             }
@@ -1724,7 +1724,7 @@ namespace Game.Entities
                 {
                     ItemModList itemModList = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Modifiers);
                     itemModList.ModifyValue(itemModList.Values, modifierIndex);
-                    SetUpdateFieldValue(ref itemModList.ModifyValue(itemModList.Values, modifierIndex).GetValue().Value, (int)value);
+                    SetUpdateFieldValue(ref itemModList.ModifyValue(itemModList.Values, modifierIndex).GetValue().Value, value);
                 }
             }
             else

@@ -199,7 +199,7 @@ namespace Game.Guilds
         public void HandleRoster(WorldSession session = null)
         {
             GuildRoster roster = new();
-            roster.NumAccounts = (int)m_accountsNumber;
+            roster.NumAccounts = m_accountsNumber;
             roster.CreateDate.SetUtcTimeFromUnixTime(m_createdDate);
             roster.CreateDate += session.GetTimezoneOffset();
             roster.GuildFlags = 0;
@@ -211,9 +211,9 @@ namespace Game.Guilds
 
                 memberData.Guid = member.GetGUID();
                 memberData.RankID = (int)member.GetRankId();
-                memberData.AreaID = (int)member.GetZoneId();
-                memberData.PersonalAchievementPoints = (int)member.GetAchievementPoints();
-                memberData.GuildReputation = (int)member.GetTotalReputation();
+                memberData.AreaID = member.GetZoneId();
+                memberData.PersonalAchievementPoints = member.GetAchievementPoints();
+                memberData.GuildReputation = member.GetTotalReputation();
                 memberData.LastSave = member.GetInactiveDays();
 
                 //GuildRosterProfessionData
@@ -589,7 +589,7 @@ namespace Game.Guilds
             invite.BorderStyle = m_emblemInfo.GetBorderStyle();
             invite.BorderColor = m_emblemInfo.GetBorderColor();
             invite.Background = m_emblemInfo.GetBackgroundColor();
-            invite.AchievementPoints = (int)GetAchievementMgr().GetAchievementPoints();
+            invite.AchievementPoints = GetAchievementMgr().GetAchievementPoints();
 
             invite.InviterName = player.GetName();
             invite.GuildName = GetName();
@@ -843,7 +843,7 @@ namespace Game.Guilds
             if (!_IsLeader(session.GetPlayer()))
                 return;
 
-            GuildRankOrder otherRankOrder = (GuildRankOrder)(rankOrder + (shiftUp ? -1 : 1));
+            GuildRankOrder otherRankOrder = rankOrder + (shiftUp ? -1 : 1);
 
             RankInfo rankInfo = GetRankInfo(rankOrder);
             RankInfo otherRankInfo = GetRankInfo(otherRankOrder);
@@ -900,7 +900,7 @@ namespace Game.Guilds
             _ModifyBankMoney(trans, amount, true);
             if (!cashFlow)
             {
-                player.ModifyMoney(-(long)amount);
+                player.ModifyMoney(-amount);
                 player.SaveGoldToDB(trans);
             }
 
@@ -2016,7 +2016,7 @@ namespace Game.Guilds
 
             if ((_GetRankBankTabRights(rankId, tabId) & GuildBankRights.ViewTab) != 0)
             {
-                int remaining = _GetRankBankTabSlotsPerDay(rankId, tabId) - (int)member.GetBankTabWithdrawValue(tabId);
+                int remaining = _GetRankBankTabSlotsPerDay(rankId, tabId) - member.GetBankTabWithdrawValue(tabId);
                 if (remaining > 0)
                     return remaining;
             }
@@ -3099,7 +3099,7 @@ namespace Game.Guilds
             public void WritePacket(GuildNewsPkt newsPacket)
             {
                 GuildNewsEvent newsEvent = new();
-                newsEvent.Id = (int)GetGUID();
+                newsEvent.Id = GetGUID();
                 newsEvent.MemberGuid = GetPlayerGuid();
                 newsEvent.CompletedDate.SetUtcTimeFromUnixTime(GetTimestamp());
                 newsEvent.Flags = GetFlags();

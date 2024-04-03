@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Game.Entities;
-using System;
 using System.Collections.Generic;
 
 namespace Game.Networking.Packets

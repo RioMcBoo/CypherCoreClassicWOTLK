@@ -1,13 +1,4 @@
-﻿using Bgs.Protocol;
-using Framework.Constants;
-using Game.Entities;
-using Game.Networking.Packets;
-using Game.Networking;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Game.Networking.Packets;
 
 namespace Game
 {

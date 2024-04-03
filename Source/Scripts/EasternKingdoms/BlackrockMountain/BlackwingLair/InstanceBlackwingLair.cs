@@ -14,67 +14,67 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
     struct DataTypes
     {
         // Encounter States/Boss GUIDs
-        public const uint RazorgoreTheUntamed = 0;
-        public const uint VaelastrazTheCorrupt = 1;
-        public const uint BroodlordLashlayer = 2;
-        public const uint Firemaw = 3;
-        public const uint Ebonroc = 4;
-        public const uint Flamegor = 5;
-        public const uint Chromaggus = 6;
-        public const uint Nefarian = 7;
+        public const int RazorgoreTheUntamed = 0;
+        public const int VaelastrazTheCorrupt = 1;
+        public const int BroodlordLashlayer = 2;
+        public const int Firemaw = 3;
+        public const int Ebonroc = 4;
+        public const int Flamegor = 5;
+        public const int Chromaggus = 6;
+        public const int Nefarian = 7;
 
         // Additional Data
-        public const uint LordVictorNefarius = 8;
+        public const int LordVictorNefarius = 8;
 
         // Doors
-        public const uint GoChromaggusDoor = 9;
+        public const int GoChromaggusDoor = 9;
     }
 
     struct BWLCreatureIds
     {
-        public const uint Razorgore = 12435;
-        public const uint BlackwingDragon = 12422;
-        public const uint BlackwingTaskmaster = 12458;
-        public const uint BlackwingLegionaire = 12416;
-        public const uint BlackwingWarlock = 12459;
-        public const uint Vaelastraz = 13020;
-        public const uint Broodlord = 12017;
-        public const uint Firemaw = 11983;
-        public const uint Ebonroc = 14601;
-        public const uint Flamegor = 11981;
-        public const uint Chromaggus = 14020;
-        public const uint VictorNefarius = 10162;
-        public const uint Nefarian = 11583;
+        public const int Razorgore = 12435;
+        public const int BlackwingDragon = 12422;
+        public const int BlackwingTaskmaster = 12458;
+        public const int BlackwingLegionaire = 12416;
+        public const int BlackwingWarlock = 12459;
+        public const int Vaelastraz = 13020;
+        public const int Broodlord = 12017;
+        public const int Firemaw = 11983;
+        public const int Ebonroc = 14601;
+        public const int Flamegor = 11981;
+        public const int Chromaggus = 14020;
+        public const int VictorNefarius = 10162;
+        public const int Nefarian = 11583;
     }
 
     struct BWLGameObjectIds
     {
-        public const uint BlackDragonEgg = 177807;
-        public const uint PortcullisRazorgore = 176965;
-        public const uint PortcullisVaelastrasz = 179364;
-        public const uint PortcullisBroodlord = 179365;
-        public const uint PortcullisThreedragons = 179115;
-        public const uint PortcullisChromaggus = 179117; //Door after you kill him, not the one for his room
-        public const uint ChromaggusLever = 179148;
-        public const uint ChromaggusDoor = 179116;
-        public const uint PortcullisNefarian = 176966;
-        public const uint SuppressionDevice = 179784;
+        public const int BlackDragonEgg = 177807;
+        public const int PortcullisRazorgore = 176965;
+        public const int PortcullisVaelastrasz = 179364;
+        public const int PortcullisBroodlord = 179365;
+        public const int PortcullisThreedragons = 179115;
+        public const int PortcullisChromaggus = 179117; //Door after you kill him, not the one for his room
+        public const int ChromaggusLever = 179148;
+        public const int ChromaggusDoor = 179116;
+        public const int PortcullisNefarian = 176966;
+        public const int SuppressionDevice = 179784;
     }
 
     struct EventIds
     {
-        public const uint RazorSpawn = 1;
-        public const uint RazorPhaseTwo = 2;
-        public const uint RespawnNefarius = 3;
+        public const int RazorSpawn = 1;
+        public const int RazorPhaseTwo = 2;
+        public const int RespawnNefarius = 3;
     }
 
     struct BWLMisc
     {
-        public const uint EncounterCount = 8;
+        public const int EncounterCount = 8;
 
         // Razorgore Egg Event
         public const int ActionPhaseTwo = 1;
-        public const uint DataEggEvent = 2;
+        public const int DataEggEvent = 2;
 
         public static DoorData[] doorData =
         {
@@ -118,7 +118,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
             new Position(-7584.175781f, -989.6691289f, 407.199585f, 4.527447f),
         };
 
-        public static uint[] Entry = { 12422, 12458, 12416, 12420, 12459 };
+        public static int[] Entry = { 12422, 12458, 12416, 12420, 12459 };
     }
 
     [Script]
@@ -142,7 +142,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
         {
             // Razorgore
             byte EggCount;
-            uint EggEvent;
+            int EggEvent;
             List<ObjectGuid> EggList = new();
 
             public instance_blackwing_lair_InstanceMapScript(InstanceMap map) : base(map)
@@ -181,7 +181,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                 }
             }
 
-            public override uint GetGameObjectEntry(ulong spawnId, uint entry)
+            public override int GetGameObjectEntry(long spawnId, int entry)
             {
                 if (entry == BWLGameObjectIds.BlackDragonEgg && GetBossState(DataTypes.Firemaw) == EncounterState.Done)
                     return 0;
@@ -210,7 +210,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                     EggList.Remove(go.GetGUID());
             }
 
-            public override bool CheckRequiredBosses(uint bossId, Player player = null)
+            public override bool CheckRequiredBosses(int bossId, Player player = null)
             {
                 if (_SkipCheckRequiredBosses(player))
                     return true;
@@ -240,7 +240,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                 return true;
             }
 
-            public override bool SetBossState(uint type, EncounterState state)
+            public override bool SetBossState(int type, EncounterState state)
             {
                 if (!base.SetBossState(type, state))
                     return false;
@@ -257,7 +257,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                                     egg.SetLootState(LootState.JustDeactivated);
                             }
                         }
-                        SetData(BWLMisc.DataEggEvent, (uint)EncounterState.NotStarted);
+                        SetData(BWLMisc.DataEggEvent, (int)EncounterState.NotStarted);
                         break;
                     case DataTypes.Nefarian:
                         switch (state)
@@ -279,7 +279,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                 return true;
             }
 
-            public override void SetData(uint type, uint data)
+            public override void SetData(int type, int data)
             {
                 if (type == BWLMisc.DataEggEvent)
                 {
@@ -301,7 +301,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                                 Creature razor = GetCreature(DataTypes.RazorgoreTheUntamed);
                                 if (razor != null)
                                 {
-                                    SetData(BWLMisc.DataEggEvent, (uint)EncounterState.Done);
+                                    SetData(BWLMisc.DataEggEvent, (int)EncounterState.Done);
                                     razor.RemoveAurasDueToSpell(42013); // MindControl
                                     DoRemoveAurasDueToSpellOnPlayers(42013, true, true);
                                 }
@@ -309,7 +309,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                                 _events.CancelEvent(EventIds.RazorSpawn);
                             }
                             if (EggEvent == (uint)EncounterState.NotStarted)
-                                SetData(BWLMisc.DataEggEvent, (uint)EncounterState.InProgress);
+                                SetData(BWLMisc.DataEggEvent, (int)EncounterState.InProgress);
                             break;
                     }
                 }

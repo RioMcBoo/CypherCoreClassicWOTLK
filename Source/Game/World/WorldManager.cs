@@ -20,7 +20,6 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Game
 {
@@ -80,7 +79,7 @@ namespace Game
         public void LoadDBAllowedSecurityLevel()
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
-            stmt.AddValue(0, (int)_realm.Id.Index);
+            stmt.AddValue(0, _realm.Id.Index);
             using var result = DB.Login.Query(stmt);
 
             if (!result.IsEmpty())

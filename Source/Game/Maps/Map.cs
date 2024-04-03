@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.Dynamic;
 using Game.BattleGrounds;
 using Game.Collision;
 using Game.DataStorage;
@@ -15,7 +14,6 @@ using Game.Scenarios;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -224,8 +222,8 @@ namespace Game.Maps
                 SetGrid(grid, p.X_coord, p.Y_coord);
 
                 //z coord
-                int gx = (int)((MapConst.MaxGrids - 1) - p.X_coord);
-                int gy = (int)((MapConst.MaxGrids - 1) - p.Y_coord);
+                int gx = (MapConst.MaxGrids - 1) - p.X_coord;
+                int gy = (MapConst.MaxGrids - 1) - p.Y_coord;
 
                 m_terrain.LoadMapAndVMap(gx, gy);
             }
@@ -279,8 +277,8 @@ namespace Game.Maps
         void GridMarkNoUnload(int x, int y)
         {
             // First make sure this grid is loaded
-            float gX = (((float)x - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
-            float gY = (((float)y - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
+            float gX = ((x - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
+            float gY = ((y - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
             Cell cell = new(gX, gY);
             EnsureGridLoaded(cell);
 

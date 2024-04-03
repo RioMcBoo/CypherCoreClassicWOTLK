@@ -4,7 +4,6 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Groups;
-using Game.Maps;
 using Game.Scenarios;
 using System.Collections.Generic;
 using System.Linq;

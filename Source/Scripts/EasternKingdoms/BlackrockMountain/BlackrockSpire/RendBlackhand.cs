@@ -11,46 +11,46 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
 {
     struct SpellIds
     {
-        public const uint Whirlwind = 13736; // sniffed
-        public const uint Cleave = 15284;
-        public const uint MortalStrike = 16856;
-        public const uint Frenzy = 8269;
-        public const uint Knockdown = 13360;  // On spawn during Gyth fight
+        public const int Whirlwind = 13736; // sniffed
+        public const int Cleave = 15284;
+        public const int MortalStrike = 16856;
+        public const int Frenzy = 8269;
+        public const int Knockdown = 13360;  // On spawn during Gyth fight
     }
 
     struct TextIds
     {
         // Rend Blackhand
-        public const uint SayBlackhand1 = 0;
-        public const uint SayBlackhand2 = 1;
-        public const uint EmoteBlackhandDismount = 2;
+        public const int SayBlackhand1 = 0;
+        public const int SayBlackhand2 = 1;
+        public const int EmoteBlackhandDismount = 2;
         // Victor Nefarius
-        public const uint SayNefarius0 = 0;
-        public const uint SayNefarius1 = 1;
-        public const uint SayNefarius2 = 2;
-        public const uint SayNefarius3 = 3;
-        public const uint SayNefarius4 = 4;
-        public const uint SayNefarius5 = 5;
-        public const uint SayNefarius6 = 6;
-        public const uint SayNefarius7 = 7;
-        public const uint SayNefarius8 = 8;
-        public const uint SayNefarius9 = 9;
+        public const int SayNefarius0 = 0;
+        public const int SayNefarius1 = 1;
+        public const int SayNefarius2 = 2;
+        public const int SayNefarius3 = 3;
+        public const int SayNefarius4 = 4;
+        public const int SayNefarius5 = 5;
+        public const int SayNefarius6 = 6;
+        public const int SayNefarius7 = 7;
+        public const int SayNefarius8 = 8;
+        public const int SayNefarius9 = 9;
     }
 
     struct AddIds
     {
-        public const uint ChromaticWhelp = 10442;
-        public const uint ChromaticDragonspawn = 10447;
-        public const uint BlackhandDragonHandler = 10742;
+        public const int ChromaticWhelp = 10442;
+        public const int ChromaticDragonspawn = 10447;
+        public const int BlackhandDragonHandler = 10742;
     }
 
     struct MiscConst
     {
-        public const uint NefariusPath1 = 11037360;
-        public const uint NefariusPath2 = 11037368;
-        public const uint NefariusPath3 = 11037376;
-        public const uint RendPath1 = 11037440;
-        public const uint RendPath2 = 11037448;
+        public const int NefariusPath1 = 11037360;
+        public const int NefariusPath2 = 11037368;
+        public const int NefariusPath3 = 11037376;
+        public const int RendPath1 = 11037440;
+        public const int RendPath2 = 11037448;
 
         public static Wave[] Wave2 = // 22 sec
         {
@@ -100,13 +100,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
 
     class Wave
     {
-        public uint entry;
+        public int entry;
         public float x_pos;
         public float y_pos;
         public float z_pos;
         public float o_pos;
 
-        public Wave(uint _entry, float x, float y, float z, float o)
+        public Wave(int _entry, float x, float y, float z, float o)
         {
             entry = _entry;
             x_pos = x;
@@ -118,38 +118,38 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
 
     struct EventIds
     {
-        public const uint Start1 = 1;
-        public const uint Start2 = 2;
-        public const uint Start3 = 3;
-        public const uint Start4 = 4;
-        public const uint TurnToRend = 5;
-        public const uint TurnToPlayer = 6;
-        public const uint TurnToFacing1 = 7;
-        public const uint TurnToFacing2 = 8;
-        public const uint TurnToFacing3 = 9;
-        public const uint Wave1 = 10;
-        public const uint Wave2 = 11;
-        public const uint Wave3 = 12;
-        public const uint Wave4 = 13;
-        public const uint Wave5 = 14;
-        public const uint Wave6 = 15;
-        public const uint WavesText1 = 16;
-        public const uint WavesText2 = 17;
-        public const uint WavesText3 = 18;
-        public const uint WavesText4 = 19;
-        public const uint WavesText5 = 20;
-        public const uint WavesCompleteText1 = 21;
-        public const uint WavesCompleteText2 = 22;
-        public const uint WavesCompleteText3 = 23;
-        public const uint WavesEmote1 = 24;
-        public const uint WavesEmote2 = 25;
-        public const uint PathRend = 26;
-        public const uint PathNefarius = 27;
-        public const uint Teleport1 = 28;
-        public const uint Teleport2 = 29;
-        public const uint Whirlwind = 30;
-        public const uint Cleave = 31;
-        public const uint MortalStrike = 32;
+        public const int Start1 = 1;
+        public const int Start2 = 2;
+        public const int Start3 = 3;
+        public const int Start4 = 4;
+        public const int TurnToRend = 5;
+        public const int TurnToPlayer = 6;
+        public const int TurnToFacing1 = 7;
+        public const int TurnToFacing2 = 8;
+        public const int TurnToFacing3 = 9;
+        public const int Wave1 = 10;
+        public const int Wave2 = 11;
+        public const int Wave3 = 12;
+        public const int Wave4 = 13;
+        public const int Wave5 = 14;
+        public const int Wave6 = 15;
+        public const int WavesText1 = 16;
+        public const int WavesText2 = 17;
+        public const int WavesText3 = 18;
+        public const int WavesText4 = 19;
+        public const int WavesText5 = 20;
+        public const int WavesCompleteText1 = 21;
+        public const int WavesCompleteText2 = 22;
+        public const int WavesCompleteText3 = 23;
+        public const int WavesEmote1 = 24;
+        public const int WavesEmote2 = 25;
+        public const int PathRend = 26;
+        public const int PathNefarius = 27;
+        public const int Teleport1 = 28;
+        public const int Teleport2 = 29;
+        public const int Whirlwind = 30;
+        public const int Cleave = 31;
+        public const int MortalStrike = 32;
     }
 
     [Script]
@@ -191,7 +191,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                 victor.GetAI().SetData(1, 2);
         }
 
-        public override void SetData(uint type, uint data)
+        public override void SetData(int type, int data)
         {
             if (type == BRSMiscConst.Areatrigger && data == BRSMiscConst.AreatriggerBlackrockStadium)
             {
@@ -213,7 +213,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
             }
         }
 
-        public override void MovementInform(MovementGeneratorType type, uint id)
+        public override void MovementInform(MovementGeneratorType type, int id)
         {
             if (type == MovementGeneratorType.Waypoint)
             {

@@ -18,14 +18,12 @@ using Game.Loots;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
-using Game.Miscellaneous;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Game.AI.SmartTarget;
 using static Global;
 
 namespace Game.Entities
@@ -1782,7 +1780,7 @@ namespace Game.Entities
 
             if (Rep.RepFaction2 != 0 && (!Rep.TeamDependent || team == Team.Horde))
             {
-                int donerep2 = CalculateReputationGain(ReputationSource.Kill, victim.GetLevelForTarget(this), Rep.RepValue2, (int)(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction2));
+                int donerep2 = CalculateReputationGain(ReputationSource.Kill, victim.GetLevelForTarget(this), Rep.RepValue2, ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction2);
                 donerep2 = (int)(donerep2 * rate);
 
                 FactionRecord factionEntry2 = CliDB.FactionStorage.LookupByKey(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction2);
@@ -2057,7 +2055,7 @@ namespace Game.Entities
                 {
                     // send transfer packets
                     TransferPending transferPending = new();
-                    transferPending.MapID = (int)mapid;
+                    transferPending.MapID = mapid;
                     transferPending.OldMapPosition = GetPosition();
 
                     Transport transport1 = (Transport)GetTransport();
@@ -3041,7 +3039,7 @@ namespace Game.Entities
             else if (mailAction == MailResponseType.ItemTaken)
             {
                 result.AttachID = itemGuid;
-                result.QtyInInventory = (int)itemCount;
+                result.QtyInInventory = itemCount;
             }
 
             SendPacket(result);
@@ -3308,7 +3306,7 @@ namespace Game.Entities
             ResurrectPlayer(0.0f, false);
 
             SetHealth(resurrectHealth);
-            SetPower(PowerType.Mana, (int)resurrectMana);
+            SetPower(PowerType.Mana, resurrectMana);
 
             SetPower(PowerType.Rage, 0);
             SetFullPower(PowerType.Energy);
@@ -6211,10 +6209,10 @@ namespace Game.Entities
                     record.TrackedQuantity = currency.TrackedQuantity;
 
                 if (currencyRecord.HasTotalEarned)
-                    record.TotalEarned = (int)currency.EarnedQuantity;
+                    record.TotalEarned = currency.EarnedQuantity;
 
                 if (currencyRecord.HasMaxQuantity(true))
-                    record.MaxQuantity = (int)GetCurrencyMaxQuantity(currencyRecord, true);
+                    record.MaxQuantity = GetCurrencyMaxQuantity(currencyRecord, true);
 
                 record.Flags = (byte)currency.Flags;
                 record.Flags = (byte)(record.Flags & ~(int)CurrencyDbFlags.UnusedFlags);
@@ -6604,9 +6602,9 @@ namespace Game.Entities
 
             LogXPGain packet = new();
             packet.Victim = victim != null ? victim.GetGUID() : ObjectGuid.Empty;
-            packet.Original = (int)(xp + bonus_xp);
+            packet.Original = xp + bonus_xp;
             packet.Reason = victim != null ? PlayerLogXPReason.Kill : PlayerLogXPReason.NoKill;
-            packet.Amount = (int)xp;
+            packet.Amount = xp;
             packet.GroupBonus = group_rate;
             SendPacket(packet);
 
@@ -7558,7 +7556,7 @@ namespace Game.Entities
         public void AddTransmogBlock(int blockValue) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Transmog), blockValue); }
         public void AddTransmogFlag(int slot, uint flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Transmog, slot), (int)flag); }
 
-        public void AddConditionalTransmog(int itemModifiedAppearanceId) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ConditionalTransmog), (int)itemModifiedAppearanceId); }
+        public void AddConditionalTransmog(int itemModifiedAppearanceId) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ConditionalTransmog), itemModifiedAppearanceId); }
         public void RemoveConditionalTransmog(int itemModifiedAppearanceId)
         {
             int index = m_activePlayerData.ConditionalTransmog.FindIndex(itemModifiedAppearanceId);

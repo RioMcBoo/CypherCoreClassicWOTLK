@@ -7,8 +7,6 @@ using Framework.IO;
 using Game.Entities;
 using Game.Loots;
 using Game.Spells;
-using System.Runtime.CompilerServices;
-using System;
 
 namespace Game.Chat
 {

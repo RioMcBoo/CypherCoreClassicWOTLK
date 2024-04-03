@@ -14,19 +14,19 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
     struct SpellIds
     {
         // Golemagg
-        public const uint Magmasplash = 13879;
-        public const uint Pyroblast = 20228;
-        public const uint Earthquake = 19798;
-        public const uint Enrage = 19953;
-        public const uint GolemaggTrust = 20553;
+        public const int Magmasplash = 13879;
+        public const int Pyroblast = 20228;
+        public const int Earthquake = 19798;
+        public const int Enrage = 19953;
+        public const int GolemaggTrust = 20553;
 
         // Core Rager
-        public const uint Mangle = 19820;
+        public const int Mangle = 19820;
     }
 
     struct TextIds
     {
-        public const uint EmoteLowhp = 0;
+        public const int EmoteLowhp = 0;
     }
 
     [Script]
@@ -52,7 +52,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
             });
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthBelowPct(10) || me.HasAura(SpellIds.Enrage))
                 return;
@@ -98,7 +98,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
         });
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (HealthAbovePct(50) || _instance == null)
                 return;

@@ -9,7 +9,6 @@ using Game.DataStorage;
 using Game.Groups;
 using Game.Loots;
 using Game.Mails;
-using Game.Maps;
 using Game.Misc;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -620,7 +619,7 @@ namespace Game.Entities
         {
             uint[] array = new uint[1];
             BoolOptions.CopyTo(array, 0);
-            return (ulong)array[0];
+            return array[0];
         }
 
         public string ProfileName;

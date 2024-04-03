@@ -342,7 +342,7 @@ namespace Game.Entities
                     if (petSpec != null)
                         specId = Global.DB2Mgr.GetChrSpecializationByIndex(owner.HasAuraType(AuraType.OverridePetSpecs) ? Class.Max : 0, petSpec.OrderIndex).Id;
 
-                    SetSpecialization((ChrSpecialization)specId);
+                    SetSpecialization(specId);
 
                     // The SetSpecialization function will run these functions if the pet's spec is not 0
                     if (GetSpecialization() == 0)
@@ -1686,7 +1686,7 @@ namespace Game.Entities
 
             int? unslottedPetIndex = GetCurrentUnslottedPetIndex();
             if (unslottedPetIndex.HasValue)
-                return unslottedPetIndex < UnslottedPets.Count ? UnslottedPets[(int)unslottedPetIndex.Value] : null;
+                return unslottedPetIndex < UnslottedPets.Count ? UnslottedPets[unslottedPetIndex.Value] : null;
 
             return null;
         }

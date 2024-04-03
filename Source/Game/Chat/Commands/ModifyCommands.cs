@@ -250,7 +250,7 @@ namespace Game.Chat
 
             if (moneyToAdd < 0)
             {
-                long newmoney = (long)targetMoney + moneyToAdd;
+                long newmoney = targetMoney + moneyToAdd;
 
                 Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.CurrentMoney), targetMoney, moneyToAdd, newmoney);
                 if (newmoney <= 0)

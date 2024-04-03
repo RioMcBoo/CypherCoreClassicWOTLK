@@ -593,7 +593,7 @@ namespace Game
                 return;
             }
 
-            Difficulty difficultyID = (Difficulty)difficultyEntry.Id;
+            Difficulty difficultyID = difficultyEntry.Id;
             if (difficultyID == GetPlayer().GetDungeonDifficultyID())
                 return;
 
@@ -659,7 +659,7 @@ namespace Game
                 return;
             }
 
-            Difficulty difficultyID = (Difficulty)difficultyEntry.Id;
+            Difficulty difficultyID = difficultyEntry.Id;
             if (difficultyID == (setRaidDifficulty.Legacy != 0 ? GetPlayer().GetLegacyRaidDifficultyID() : GetPlayer().GetRaidDifficultyID()))
                 return;
 

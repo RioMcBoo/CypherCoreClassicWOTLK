@@ -18,16 +18,16 @@ namespace Game.BattleFields
 
         public override bool SetupBattlefield()
         {
-            m_TypeId = (uint)BattleFieldTypes.WinterGrasp;                              // See enum BattlefieldTypes
+            m_TypeId = (int)BattleFieldTypes.WinterGrasp;                              // See enum BattlefieldTypes
             m_BattleId = BattlefieldIds.WG;
-            m_ZoneId = (uint)AreaId.Wintergrasp;
+            m_ZoneId = (int)AreaId.Wintergrasp;
 
             InitStalker(WGNpcs.Stalker, WGConst.WintergraspStalkerPos);
 
-            m_MaxPlayer = WorldConfig.GetUIntValue(WorldCfg.WintergraspPlrMax);
+            m_MaxPlayer = WorldConfig.GetIntValue(WorldCfg.WintergraspPlrMax);
             m_IsEnabled = WorldConfig.GetBoolValue(WorldCfg.WintergraspEnable);
-            m_MinPlayer = WorldConfig.GetUIntValue(WorldCfg.WintergraspPlrMin);
-            m_MinLevel = WorldConfig.GetUIntValue(WorldCfg.WintergraspPlrMinLvl);
+            m_MinPlayer = WorldConfig.GetIntValue(WorldCfg.WintergraspPlrMin);
+            m_MinLevel = WorldConfig.GetIntValue(WorldCfg.WintergraspPlrMinLvl);
             m_BattleTime = WorldConfig.GetUIntValue(WorldCfg.WintergraspBattletime) * Time.Minute * Time.InMilliseconds;
             m_NoWarBattleTime = WorldConfig.GetUIntValue(WorldCfg.WintergraspNobattletime) * Time.Minute * Time.InMilliseconds;
             m_RestartAfterCrash = WorldConfig.GetUIntValue(WorldCfg.WintergraspRestartAfterCrash) * Time.Minute * Time.InMilliseconds;
@@ -55,7 +55,7 @@ namespace Game.BattleFields
             }
 
             m_isActive = Global.WorldStateMgr.GetValue(WorldStates.BattlefieldWgShowTimeNextBattle, m_Map) == 0;
-            m_DefenderTeam = (uint)Global.WorldStateMgr.GetValue(WorldStates.BattlefieldWgDefender, m_Map);
+            m_DefenderTeam = Global.WorldStateMgr.GetValue(WorldStates.BattlefieldWgDefender, m_Map);
 
             m_Timer = (uint)(Global.WorldStateMgr.GetValue(WGConst.ClockWorldState[0], m_Map) - GameTime.GetGameTime());
             if (m_isActive)
@@ -64,7 +64,7 @@ namespace Game.BattleFields
                 m_Timer = m_RestartAfterCrash;
             }
 
-            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgAttacker, (int)GetAttackerTeam(), false, m_Map);
+            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgAttacker, GetAttackerTeam(), false, m_Map);
             Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[1], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
 
             foreach (var gy in WGConst.WGGraveYard)
@@ -157,8 +157,8 @@ namespace Game.BattleFields
             else
                 Log.outError(LogFilter.Battlefield, "WG: Failed to spawn titan relic.");
 
-            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgAttacker, (int)GetAttackerTeam(), false, m_Map);
-            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, (int)GetDefenderTeam(), false, m_Map);
+            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgAttacker, GetAttackerTeam(), false, m_Map);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, GetDefenderTeam(), false, m_Map);
             Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgShowTimeNextBattle, 0, false, m_Map);
             Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgShowTimeBattleEnd, 1, false, m_Map);
             Global.WorldStateMgr.SetValueAndSaveInDb(WGConst.ClockWorldState[0], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
@@ -266,7 +266,7 @@ namespace Game.BattleFields
                 Global.WorldStateMgr.SetValueAndSaveInDb(worldStateId, Global.WorldStateMgr.GetValue((int)worldStateId, m_Map) + 1, false, m_Map);
             }
 
-            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, (int)GetDefenderTeam(), false, m_Map);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgDefender, GetDefenderTeam(), false, m_Map);
             Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.BattlefieldWgShowTimeNextBattle, 1, false, m_Map);
             Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgShowTimeBattleEnd, 0, false, m_Map);
             Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[1], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
@@ -375,7 +375,7 @@ namespace Game.BattleFields
                 SendWarning((GetDefenderTeam() == TeamId.Alliance) ? WintergraspText.FortressDefendAlliance : WintergraspText.FortressDefendHorde);
         }
 
-        public override void DoCompleteOrIncrementAchievement(uint achievement, Player player, byte incrementNumber = 1)
+        public override void DoCompleteOrIncrementAchievement(int achievement, Player player, byte incrementNumber = 1)
         {
             AchievementRecord achievementEntry = CliDB.AchievementStorage.LookupByKey(achievement);
             if (achievementEntry == null)
@@ -402,7 +402,7 @@ namespace Game.BattleFields
             SendWarning(WintergraspText.StartGrouping);
         }
 
-        uint GetSpiritGraveyardId(uint areaId)
+        int GetSpiritGraveyardId(int areaId)
         {
             switch ((AreaId)areaId)
             {
@@ -505,7 +505,7 @@ namespace Game.BattleFields
 
         public override void OnGameObjectCreate(GameObject go)
         {
-            uint workshopId;
+            int workshopId;
 
             switch (go.GetEntry())
             {
@@ -710,7 +710,7 @@ namespace Game.BattleFields
             player.AddAura(m_DefenderTeam == TeamId.Horde ? WGSpells.HordeControlPhaseShift : WGSpells.AllianceControlPhaseShift, player);
         }
 
-        public override uint GetData(uint data)
+        public override int GetData(int data)
         {
             switch ((AreaId)data)
             {
@@ -721,7 +721,7 @@ namespace Game.BattleFields
                 case AreaId.WestparkWorkshop:
                 case AreaId.EastparkWorkshop:
                     // Graveyards and Workshops are controlled by the same team.
-                    BfGraveyard graveyard = GetGraveyardById((int)GetSpiritGraveyardId(data));
+                    BfGraveyard graveyard = GetGraveyardById(GetSpiritGraveyardId(data));
                     if (graveyard != null)
                         return graveyard.GetControlTeamId();
                     break;
@@ -732,7 +732,7 @@ namespace Game.BattleFields
             return base.GetData(data);
         }
 
-        public void BrokenWallOrTower(uint team, BfWGGameObjectBuilding building)
+        public void BrokenWallOrTower(int team, BfWGGameObjectBuilding building)
         {
             if (team == GetDefenderTeam())
             {
@@ -747,7 +747,7 @@ namespace Game.BattleFields
         }
 
         // Called when a tower is broke
-        public void UpdatedDestroyedTowerCount(uint team)
+        public void UpdatedDestroyedTowerCount(int team)
         {
             // Southern tower
             if (team == GetAttackerTeam())
@@ -794,7 +794,7 @@ namespace Game.BattleFields
             }
         }
 
-        public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker)
+        public override void ProcessEvent(WorldObject obj, int eventId, WorldObject invoker)
         {
             if (obj == null || !IsWarTime())
                 return;
@@ -835,7 +835,7 @@ namespace Game.BattleFields
         }
 
         // Called when a tower is damaged, used for honor reward calcul
-        public void UpdateDamagedTowerCount(uint team)
+        public void UpdateDamagedTowerCount(int team)
         {
             if (team == GetAttackerTeam())
                 UpdateData(WGData.DamagedTowerAtt, 1);
@@ -846,10 +846,10 @@ namespace Game.BattleFields
         // Update vehicle count WorldState to player
         void UpdateVehicleCountWG()
         {
-            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgVehicleH, (int)GetData(WGData.VehicleH), false, m_Map);
-            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgMaxVehicleH, (int)GetData(WGData.MaxVehicleH), false, m_Map);
-            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgVehicleA, (int)GetData(WGData.VehicleA), false, m_Map);
-            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgMaxVehicleA, (int)GetData(WGData.MaxVehicleA), false, m_Map);
+            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgVehicleH, GetData(WGData.VehicleH), false, m_Map);
+            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgMaxVehicleH, GetData(WGData.MaxVehicleH), false, m_Map);
+            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgVehicleA, GetData(WGData.VehicleA), false, m_Map);
+            Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgMaxVehicleA, GetData(WGData.MaxVehicleA), false, m_Map);
         }
 
         void UpdateTenacity()
@@ -869,7 +869,7 @@ namespace Game.BattleFields
             if (newStack == m_tenacityStack)
                 return;
 
-            m_tenacityStack = (uint)newStack;
+            m_tenacityStack = newStack;
             // Remove old buff
             if (m_tenacityTeam != TeamId.Neutral)
             {
@@ -899,7 +899,7 @@ namespace Game.BattleFields
                 if (newStack > 20)
                     newStack = 20;
 
-                uint buff_honor = WGSpells.GreatestHonor;
+                int buff_honor = WGSpells.GreatestHonor;
                 if (newStack < 15)
                     buff_honor = WGSpells.GreaterHonor;
                 if (newStack < 10)
@@ -911,14 +911,14 @@ namespace Game.BattleFields
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player != null)
-                        player.SetAuraStack(WGSpells.Tenacity, player, (uint)newStack);
+                        player.SetAuraStack(WGSpells.Tenacity, player, newStack);
                 }
 
                 foreach (var guid in m_vehicles[m_tenacityTeam])
                 {
                     Creature creature = GetCreature(guid);
                     if (creature != null)
-                        creature.SetAuraStack(WGSpells.TenacityVehicle, creature, (uint)newStack);
+                        creature.SetAuraStack(WGSpells.TenacityVehicle, creature, newStack);
                 }
 
                 if (buff_honor != 0)
@@ -965,14 +965,14 @@ namespace Game.BattleFields
         List<ObjectGuid> CanonList = new();
 
         int m_tenacityTeam;
-        uint m_tenacityStack;
+        int m_tenacityStack;
 
         ObjectGuid m_titansRelicGUID;
     }
 
     class BfWGGameObjectBuilding
     {
-        public BfWGGameObjectBuilding(BattlefieldWG WG, WGGameObjectBuildingType type, uint worldState)
+        public BfWGGameObjectBuilding(BattlefieldWG WG, WGGameObjectBuildingType type, int worldState)
         {
             _wg = WG;
             _teamControl = TeamId.Neutral;
@@ -1021,8 +1021,8 @@ namespace Game.BattleFields
                     }
 
                     // Update worldstate
-                    _state = WGGameObjectState.AllianceIntact - ((int)_teamControl * 3);
-                    Global.WorldStateMgr.SetValueAndSaveInDb((int)_worldState, (int)_state, false, _wg.GetMap());
+                    _state = WGGameObjectState.AllianceIntact - (_teamControl * 3);
+                    Global.WorldStateMgr.SetValueAndSaveInDb(_worldState, (int)_state, false, _wg.GetMap());
                 }
                 UpdateCreatureAndGo();
                 build.SetFaction(WGConst.WintergraspFaction[_teamControl]);
@@ -1047,8 +1047,8 @@ namespace Game.BattleFields
         public void Damaged()
         {
             // Update worldstate
-            _state = WGGameObjectState.AllianceDamage - ((int)_teamControl * 3);
-            Global.WorldStateMgr.SetValueAndSaveInDb((int)_worldState, (int)_state, false, _wg.GetMap());
+            _state = WGGameObjectState.AllianceDamage - (_teamControl * 3);
+            Global.WorldStateMgr.SetValueAndSaveInDb(_worldState, (int)_state, false, _wg.GetMap());
 
             // Send warning message
             if (_staticTowerInfo != null)                                       // tower damage + name
@@ -1078,8 +1078,8 @@ namespace Game.BattleFields
         public void Destroyed()
         {
             // Update worldstate
-            _state = WGGameObjectState.AllianceDestroy - ((int)_teamControl * 3);
-            Global.WorldStateMgr.SetValueAndSaveInDb((int)_worldState, (int)_state, false, _wg.GetMap());
+            _state = WGGameObjectState.AllianceDestroy - (_teamControl * 3);
+            Global.WorldStateMgr.SetValueAndSaveInDb(_worldState, (int)_state, false, _wg.GetMap());
 
             // Warn players
             if (_staticTowerInfo != null)
@@ -1134,7 +1134,7 @@ namespace Game.BattleFields
                     break;
             }
 
-            _state = (WGGameObjectState)Global.WorldStateMgr.GetValue((int)_worldState, _wg.GetMap());
+            _state = (WGGameObjectState)Global.WorldStateMgr.GetValue(_worldState, _wg.GetMap());
             if (_state == WGGameObjectState.None)
             {
                 // set to default state based on Type
@@ -1152,7 +1152,7 @@ namespace Game.BattleFields
                     default:
                         break;
                 }
-                Global.WorldStateMgr.SetValueAndSaveInDb((int)_worldState, (int)_state, false, _wg.GetMap());
+                Global.WorldStateMgr.SetValueAndSaveInDb(_worldState, (int)_state, false, _wg.GetMap());
             }
 
             switch (_state)
@@ -1411,10 +1411,10 @@ namespace Game.BattleFields
         ObjectGuid _buildGUID;
 
         // the team that controls this point
-        uint _teamControl;
+        int _teamControl;
 
         WGGameObjectBuildingType _type;
-        uint _worldState;
+        int _worldState;
 
         WGGameObjectState _state;
 
@@ -1445,7 +1445,7 @@ namespace Game.BattleFields
             return _staticInfo.WorkshopId;
         }
 
-        public void GiveControlTo(uint teamId, bool init)
+        public void GiveControlTo(int teamId, bool init)
         {
             switch (teamId)
             {
@@ -1511,19 +1511,19 @@ namespace Game.BattleFields
                 GiveControlTo(_wg.GetDefenderTeam(), true);
         }
 
-        public uint GetTeamControl() { return _teamControl; }
+        public int GetTeamControl() { return _teamControl; }
 
         BattlefieldWG _wg;                             // Pointer to wintergrasp
         //ObjectGuid _buildGUID;
         WGGameObjectState _state;              // For worldstate
-        uint _teamControl;                            // Team witch control the workshop
+        int _teamControl;                            // Team witch control the workshop
 
         StaticWintergraspWorkshopInfo _staticInfo;
     }
 
     class WintergraspCapturePoint : BfCapturePoint
     {
-        public WintergraspCapturePoint(BattlefieldWG battlefield, uint teamInControl)
+        public WintergraspCapturePoint(BattlefieldWG battlefield, int teamInControl)
             : base(battlefield)
         {
             m_Bf = battlefield;
@@ -1532,12 +1532,12 @@ namespace Game.BattleFields
 
         public void LinkToWorkshop(WGWorkshop workshop) { m_Workshop = workshop; }
 
-        public override void ChangeTeam(uint oldteam)
+        public override void ChangeTeam(int oldteam)
         {
             Cypher.Assert(m_Workshop != null);
             m_Workshop.GiveControlTo(m_team, false);
         }
-        uint GetTeam() { return m_team; }
+        int GetTeam() { return m_team; }
 
         protected WGWorkshop m_Workshop;
     }

@@ -1083,8 +1083,8 @@ namespace Framework.IO
 					// Save the adler32 of the preset dictionary:
 					if(s.strstart!=0)
 					{
-						putShortMSB(s, (uint)(strm.adler>>16));
-						putShortMSB(s, (uint)(strm.adler&0xffff));
+						putShortMSB(s, strm.adler >> 16);
+						putShortMSB(s, strm.adler & 0xffff);
 					}
 					strm.adler=adler32(0, null, 0);
 				}
@@ -1290,8 +1290,8 @@ namespace Framework.IO
 			}
 			else
 			{
-				putShortMSB(s, (uint)(strm.adler>>16));
-				putShortMSB(s, (uint)(strm.adler&0xffff));
+				putShortMSB(s, strm.adler >> 16);
+				putShortMSB(s, strm.adler & 0xffff);
 			}
 
 			flush_pending(strm);
@@ -1434,7 +1434,7 @@ namespace Framework.IO
 
 			deflate_state s=(deflate_state)strm.state;
 
-			if(s.wrap==1) strm.adler=adler32(strm.adler, strm.in_buf, (uint)strm.next_in, len);
+			if(s.wrap==1) strm.adler=adler32(strm.adler, strm.in_buf, strm.next_in, len);
 			else if(s.wrap==2) strm.adler=crc32(strm.adler, strm.in_buf, strm.next_in, len);
 
 			//was memcpy(buf, strm.in_buf+strm.next_in, len);
@@ -1449,7 +1449,7 @@ namespace Framework.IO
 		// Initialize the "longest match" routines for a new zlib stream
 		static void lm_init(deflate_state s)
 		{
-			s.window_size=(uint)2*s.w_size;
+			s.window_size= 2 * s.w_size;
 
 			s.head[s.hash_size-1]=NIL;
 
@@ -1486,7 +1486,7 @@ namespace Framework.IO
 			int len;								// length of current match
 			int best_len=(int)s.prev_length;		// best match length so far
 			int nice_match=s.nice_match;			// stop if match long enough
-			uint limit=s.strstart>(uint)(s.w_size-MIN_LOOKAHEAD)?s.strstart-(uint)(s.w_size-MIN_LOOKAHEAD):NIL;
+			uint limit=s.strstart> s.w_size - MIN_LOOKAHEAD ? s.strstart- (s.w_size - MIN_LOOKAHEAD) : NIL;
 			// Stop when cur_match becomes <= limit. To simplify the code,
 			// we prevent matches with the string of window index 0.
 			ushort[] prev=s.prev;
@@ -1546,7 +1546,7 @@ namespace Framework.IO
 
 				//Assert(scan_ind <= (uint)(s.window_size-1), "wild scan");
 
-				len=MAX_MATCH-(int)(strend_ind-scan_ind);
+				len=MAX_MATCH- (strend_ind - scan_ind);
 				scan_ind=strend_ind-MAX_MATCH;
 
 				if(len>best_len)
@@ -1607,7 +1607,7 @@ namespace Framework.IO
 
 	        //Assert(scan_ind <= (uint)(s.window_size-1), "wild scan");
 
-	        int len = MAX_MATCH - (int) (strend_ind - scan_ind);// length of current match
+	        int len = MAX_MATCH - (strend_ind - scan_ind);// length of current match
 
 	        if (len < MIN_MATCH) return MIN_MATCH - 1;
 
@@ -1632,7 +1632,7 @@ namespace Framework.IO
 
 			do
 			{
-				more=(uint)(s.window_size-(uint)s.lookahead-(uint)s.strstart);
+				more= s.window_size - s.lookahead - s.strstart;
 
 				// If the window is almost full and there is insufficient lookahead,
 				// move the upper half to the lower one to make room in the upper half.
@@ -1791,11 +1791,11 @@ namespace Framework.IO
 
 				// Emit a stored block if pending_buf will be full:
 				max_start=(uint)s.block_start+max_block_size;
-				if(s.strstart==0||(uint)s.strstart>=max_start)
+				if(s.strstart==0|| s.strstart >= max_start)
 				{
 					// strstart == 0 is possible when wraparound on 16-bit machine
-					s.lookahead=(uint)(s.strstart-max_start);
-					s.strstart=(uint)max_start;
+					s.lookahead= s.strstart - max_start;
+					s.strstart= max_start;
 
 					//was FLUSH_BLOCK(s, 0);
 					_tr_flush_block(s, s.block_start>=0?s.window:null, s.block_start>=0?s.block_start:0,

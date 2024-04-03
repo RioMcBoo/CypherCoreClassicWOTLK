@@ -2,12 +2,10 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.Combat;
 using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.AI
 {

@@ -128,7 +128,7 @@ public static class MathFunctions
 
     public static long AddPct(ref long value, float pct)
     {
-        return value += (long)CalculatePct(value, pct);
+        return value += CalculatePct(value, pct);
     }
 
     public static int AddPct(ref int value, float pct)
@@ -242,7 +242,7 @@ public static class MathFunctions
 
     public static ulong MakePair64(uint l, uint h)
     {
-        return (ulong)l | ((ulong)h << 32);
+        return l | ((ulong)h << 32);
     }
     public static long MakePair64(int l, int h)
     {

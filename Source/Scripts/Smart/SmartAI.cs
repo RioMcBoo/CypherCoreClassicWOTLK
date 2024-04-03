@@ -44,28 +44,28 @@ namespace Scripts.Smart
     {
         public SmartScene() : base("SmartScene") { }
 
-        public override void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public override void OnSceneStart(Player player, int sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneStart, player);
         }
 
-        public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
+        public override void OnSceneTriggerEvent(Player player, int sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneTrigger, player, 0, 0, false, null, null, triggerName);
         }
 
-        public override void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public override void OnSceneCancel(Player player, int sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneCancel, player);
         }
 
-        public override void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public override void OnSceneComplete(Player player, int sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(player, null, sceneTemplate);
@@ -121,7 +121,7 @@ namespace Scripts.Smart
     {
         public SmartEventTrigger() : base("SmartEventTrigger") { }
 
-        public override void OnTrigger(WorldObject obj, WorldObject invoker, uint eventId)
+        public override void OnTrigger(WorldObject obj, WorldObject invoker, int eventId)
         {
             Log.outDebug(LogFilter.ScriptsAi, $"Event {eventId} is using SmartEventTrigger script");
             SmartScript script = new();

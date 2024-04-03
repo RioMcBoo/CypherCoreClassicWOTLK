@@ -12,39 +12,39 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
 {
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SayEnergy = 1;
-        public const uint SayOverload = 2;
-        public const uint SayKill = 3;
-        public const uint EmoteDischargeEnergy = 4;
+        public const int SayAggro = 0;
+        public const int SayEnergy = 1;
+        public const int SayOverload = 2;
+        public const int SayKill = 3;
+        public const int EmoteDischargeEnergy = 4;
     }
 
     struct SpellIds
     {
-        public const uint ChainLightning = 44318;
-        public const uint Overload = 44353;
-        public const uint ArcaneShock = 44319;
+        public const int ChainLightning = 44318;
+        public const int Overload = 44353;
+        public const int ArcaneShock = 44319;
 
-        public const uint SummonPureEnergy = 44322; // mod scale -10
-        public const uint HSummonPureEnergy1 = 46154; // mod scale -5
-        public const uint HSummonPureEnergy2 = 46159;  // mod scale -5
+        public const int SummonPureEnergy = 44322; // mod scale -10
+        public const int HSummonPureEnergy1 = 46154; // mod scale -5
+        public const int HSummonPureEnergy2 = 46159;  // mod scale -5
 
         // NpcPureEnergy
-        public const uint EnergyBolt = 46156;
-        public const uint EnergyFeedback = 44335;
-        public const uint PureEnergyPassive = 44326;
+        public const int EnergyBolt = 46156;
+        public const int EnergyFeedback = 44335;
+        public const int PureEnergyPassive = 44326;
     }
 
     struct MiscConst
     {
-        public const uint IntervalModifier = 15;
-        public const uint IntervalSwitch = 6;
+        public const int IntervalModifier = 15;
+        public const int IntervalSwitch = 6;
     }
 
     [Script]
     class boss_vexallus : BossAI
     {
-        uint _intervalHealthAmount;
+        int _intervalHealthAmount;
         bool _enraged;
 
         public boss_vexallus(Creature creature) : base(creature, DataTypes.Vexallus)
@@ -95,13 +95,13 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
             summons.Summon(summoned);
         }
 
-        public override void DamageTaken(Unit who, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit who, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (_enraged)
                 return;
 
             // 85%, 70%, 55%, 40%, 25%
-            if (!HealthAbovePct((int)(100 - MiscConst.IntervalModifier * _intervalHealthAmount)))
+            if (!HealthAbovePct(100 - MiscConst.IntervalModifier * _intervalHealthAmount))
             {
                 // increase amount, unless we're at 10%, then we switch and return
                 if (_intervalHealthAmount == MiscConst.IntervalSwitch)

@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
-	public static class MontgomeryOperations
+    public static class MontgomeryOperations
 	{
 		public static void scalarmult(
 			byte[] q, int qoffset,

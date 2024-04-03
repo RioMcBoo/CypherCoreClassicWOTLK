@@ -14,68 +14,68 @@ namespace Scripts.Events.LunarFestival
 {
     struct CreatureIds
     {
-        public const uint Omen = 15467;
-        public const uint MinionOfOmen = 15466;
-        public const uint FireworkBlue = 15879;
-        public const uint FireworkGreen = 15880;
-        public const uint FireworkPurple = 15881;
-        public const uint FireworkRed = 15882;
-        public const uint FireworkYellow = 15883;
-        public const uint FireworkWhite = 15884;
-        public const uint FireworkBigBlue = 15885;
-        public const uint FireworkBigGreen = 15886;
-        public const uint FireworkBigPurple = 15887;
-        public const uint FireworkBigRed = 15888;
-        public const uint FireworkBigYellow = 15889;
-        public const uint FireworkBigWhite = 15890;
+        public const int Omen = 15467;
+        public const int MinionOfOmen = 15466;
+        public const int FireworkBlue = 15879;
+        public const int FireworkGreen = 15880;
+        public const int FireworkPurple = 15881;
+        public const int FireworkRed = 15882;
+        public const int FireworkYellow = 15883;
+        public const int FireworkWhite = 15884;
+        public const int FireworkBigBlue = 15885;
+        public const int FireworkBigGreen = 15886;
+        public const int FireworkBigPurple = 15887;
+        public const int FireworkBigRed = 15888;
+        public const int FireworkBigYellow = 15889;
+        public const int FireworkBigWhite = 15890;
 
-        public const uint ClusterBlue = 15872;
-        public const uint ClusterRed = 15873;
-        public const uint ClusterGreen = 15874;
-        public const uint ClusterPurple = 15875;
-        public const uint ClusterWhite = 15876;
-        public const uint ClusterYellow = 15877;
-        public const uint ClusterBigBlue = 15911;
-        public const uint ClusterBigGreen = 15912;
-        public const uint ClusterBigPurple = 15913;
-        public const uint ClusterBigRed = 15914;
-        public const uint ClusterBigWhite = 15915;
-        public const uint ClusterBigYellow = 15916;
-        public const uint ClusterElune = 15918;
+        public const int ClusterBlue = 15872;
+        public const int ClusterRed = 15873;
+        public const int ClusterGreen = 15874;
+        public const int ClusterPurple = 15875;
+        public const int ClusterWhite = 15876;
+        public const int ClusterYellow = 15877;
+        public const int ClusterBigBlue = 15911;
+        public const int ClusterBigGreen = 15912;
+        public const int ClusterBigPurple = 15913;
+        public const int ClusterBigRed = 15914;
+        public const int ClusterBigWhite = 15915;
+        public const int ClusterBigYellow = 15916;
+        public const int ClusterElune = 15918;
     }
 
     struct GameObjectIds
     {
-        public const uint FireworkLauncher1 = 180771;
-        public const uint FireworkLauncher2 = 180868;
-        public const uint FireworkLauncher3 = 180850;
-        public const uint ClusterLauncher1 = 180772;
-        public const uint ClusterLauncher2 = 180859;
-        public const uint ClusterLauncher3 = 180869;
-        public const uint ClusterLauncher4 = 180874;
+        public const int FireworkLauncher1 = 180771;
+        public const int FireworkLauncher2 = 180868;
+        public const int FireworkLauncher3 = 180850;
+        public const int ClusterLauncher1 = 180772;
+        public const int ClusterLauncher2 = 180859;
+        public const int ClusterLauncher3 = 180869;
+        public const int ClusterLauncher4 = 180874;
     }
 
     struct SpellIds
     {
-        public const uint RocketBlue = 26344;
-        public const uint RocketGreen = 26345;
-        public const uint RocketPurple = 26346;
-        public const uint RocketRed = 26347;
-        public const uint RocketWhite = 26348;
-        public const uint RocketYellow = 26349;
-        public const uint RocketBigBlue = 26351;
-        public const uint RocketBigGreen = 26352;
-        public const uint RocketBigPurple = 26353;
-        public const uint RocketBigRed = 26354;
-        public const uint RocketBigWhite = 26355;
-        public const uint RocketBigYellow = 26356;
-        public const uint LunarFortune = 26522;
+        public const int RocketBlue = 26344;
+        public const int RocketGreen = 26345;
+        public const int RocketPurple = 26346;
+        public const int RocketRed = 26347;
+        public const int RocketWhite = 26348;
+        public const int RocketYellow = 26349;
+        public const int RocketBigBlue = 26351;
+        public const int RocketBigGreen = 26352;
+        public const int RocketBigPurple = 26353;
+        public const int RocketBigRed = 26354;
+        public const int RocketBigWhite = 26355;
+        public const int RocketBigYellow = 26356;
+        public const int LunarFortune = 26522;
     }
 
     struct Misc
     {
-        public const uint AnimGoLaunchFirework = 3;
-        public const uint ZoneMoonglade = 493;
+        public const int AnimGoLaunchFirework = 3;
+        public const int ZoneMoonglade = 493;
     }
 
     [Script]
@@ -157,7 +157,7 @@ namespace Scripts.Events.LunarFestival
             return launcher;
         }
 
-        uint GetFireworkSpell(uint entry)
+        int GetFireworkSpell(int entry)
         {
             switch (entry)
             {
@@ -190,9 +190,9 @@ namespace Scripts.Events.LunarFestival
             }
         }
 
-        uint GetFireworkGameObjectId()
+        int GetFireworkGameObjectId()
         {
-            uint spellId = 0;
+            int spellId = 0;
 
             switch (me.GetEntry())
             {
@@ -233,14 +233,14 @@ namespace Scripts.Events.LunarFestival
                     spellId = GetFireworkSpell(CreatureIds.FireworkBigWhite);
                     break;
                 case CreatureIds.ClusterElune:
-                    spellId = GetFireworkSpell(RandomHelper.URand(CreatureIds.FireworkBlue, CreatureIds.FireworkWhite));
+                    spellId = GetFireworkSpell(RandomHelper.IRand(CreatureIds.FireworkBlue, CreatureIds.FireworkWhite));
                     break;
             }
 
             SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, Difficulty.None);
 
             if (spellInfo != null && spellInfo.GetEffect(0).Effect == SpellEffectName.SummonObjectWild)
-                return (uint)spellInfo.GetEffect(0).MiscValue;
+                return spellInfo.GetEffect(0).MiscValue;
 
             return 0;
         }
@@ -251,7 +251,7 @@ namespace Scripts.Events.LunarFestival
             if (launcher != null)
             {
                 launcher.SendCustomAnim(Misc.AnimGoLaunchFirework);
-                me.SetOrientation(launcher.GetOrientation() + (float)(MathF.PI) / 2);
+                me.SetOrientation(launcher.GetOrientation() + MathF.PI / 2);
             }
             else
                 return;
@@ -295,10 +295,10 @@ namespace Scripts.Events.LunarFestival
     [Script]
     class npc_omen : ScriptedAI
     {
-        const uint SpellOmenCleave = 15284;
-        const uint SpellOmenStarfall = 26540;
-        const uint SpellOmenSummonSpotlight = 26392;
-        const uint SpellEluneCandle = 26374;
+        const int SpellOmenCleave = 15284;
+        const int SpellOmenStarfall = 26540;
+        const int SpellOmenSummonSpotlight = 26392;
+        const int SpellEluneCandle = 26374;
 
         public npc_omen(Creature creature) : base(creature)
         {
@@ -306,7 +306,7 @@ namespace Scripts.Events.LunarFestival
             me.GetMotionMaster().MovePoint(1, 7549.977f, -2855.137f, 456.9678f);
         }
 
-        public override void MovementInform(MovementGeneratorType type, uint pointId)
+        public override void MovementInform(MovementGeneratorType type, int pointId)
         {
             if (type != MovementGeneratorType.Point)
                 return;
@@ -368,8 +368,8 @@ namespace Scripts.Events.LunarFestival
     [Script]
     class npc_giant_spotlight : ScriptedAI
     {
-        const uint GoEluneTrap1 = 180876;
-        const uint GoEluneTrap2 = 180877;
+        const int GoEluneTrap1 = 180876;
+        const int GoEluneTrap2 = 180877;
 
         public npc_giant_spotlight(Creature creature) : base(creature) { }
 
@@ -403,11 +403,11 @@ namespace Scripts.Events.LunarFestival
     [Script] // 26374 - Elune's Candle
     class spell_lunar_festival_elune_candle : SpellScript
     {
-        const uint SpellEluneCandleOmenHead = 26622;
-        const uint SpellEluneCandleOmenChest = 26624;
-        const uint SpellEluneCandleOmenHandR = 26625;
-        const uint SpellEluneCandleOmenHandL = 26649;
-        const uint SpellEluneCandleNormal = 26636;
+        const int SpellEluneCandleOmenHead = 26622;
+        const int SpellEluneCandleOmenChest = 26624;
+        const int SpellEluneCandleOmenHandR = 26625;
+        const int SpellEluneCandleOmenHandL = 26649;
+        const int SpellEluneCandleNormal = 26636;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -419,9 +419,9 @@ namespace Scripts.Events.LunarFestival
            );
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
-            uint spellId = 0;
+            int spellId = 0;
 
             if (GetHitUnit().GetEntry() == CreatureIds.Omen)
             {

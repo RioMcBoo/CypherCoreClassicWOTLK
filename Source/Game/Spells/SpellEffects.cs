@@ -669,9 +669,9 @@ namespace Game.Spells
             // register target/effect on aura
             AuraApplication aurApp = spellAura.GetApplicationOfTarget(unitTarget.GetGUID());
             if (aurApp == null)
-                aurApp = unitTarget._CreateAuraApplication(spellAura, 1u << (int)effectInfo.EffectIndex);
+                aurApp = unitTarget._CreateAuraApplication(spellAura, 1u << effectInfo.EffectIndex);
             else
-                aurApp.UpdateApplyEffectMask(aurApp.GetEffectsToApply() | 1u << (int)effectInfo.EffectIndex, false);
+                aurApp.UpdateApplyEffectMask(aurApp.GetEffectsToApply() | 1u << effectInfo.EffectIndex, false);
         }
 
         [SpellEffectHandler(SpellEffectName.UnlearnSpecialization)]
@@ -1147,11 +1147,11 @@ namespace Game.Spells
             {
                 case 24571:                                         // Blood Fury
                                                                     // Instantly increases your rage by ${(300-10*$max(0,$PL-60))/10}.
-                    damage -= 10 * (int)Math.Max(0, Math.Min(30, unitCaster.GetLevel() - 60));
+                    damage -= 10 * Math.Max(0, Math.Min(30, unitCaster.GetLevel() - 60));
                     break;
                 case 24532:                                         // Burst of Energy
                                                                     // Instantly increases your energy by ${60-4*$max(0,$min(15,$PL-60))}.
-                    damage -= 4 * (int)Math.Max(0, Math.Min(15, unitCaster.GetLevel() - 60));
+                    damage -= 4 * Math.Max(0, Math.Min(15, unitCaster.GetLevel() - 60));
                     break;
                 case 67490:                                         // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
                     {
@@ -1309,7 +1309,7 @@ namespace Game.Spells
                     }
                 }
             }
-            ExecuteLogEffectOpenLock(effectInfo.Effect, gameObjTarget != null ? gameObjTarget : (WorldObject)itemTarget);
+            ExecuteLogEffectOpenLock(effectInfo.Effect, gameObjTarget != null ? gameObjTarget : itemTarget);
         }
 
         [SpellEffectHandler(SpellEffectName.SummonChangeItem)]
@@ -2579,7 +2579,7 @@ namespace Game.Spells
                         && curSpellInfo.CanBeInterrupted(m_caster, unitTarget))
                     {
                         int duration = m_spellInfo.GetDuration();
-                        duration = unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, 1u << (int)effectInfo.EffectIndex);
+                        duration = unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, 1u << effectInfo.EffectIndex);
                         unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), TimeSpan.FromMilliseconds(duration));
                         m_hitMask |= ProcFlagsHit.Interrupt;
                         SendSpellInterruptLog(unitTarget, curSpellInfo.Id);
@@ -3331,7 +3331,7 @@ namespace Game.Spells
                 return;
 
             int health = (int)player.CountPctFromMaxHealth(damage);
-            int mana = (int)MathFunctions.CalculatePct(player.GetMaxPower(PowerType.Mana), damage);
+            int mana = MathFunctions.CalculatePct(player.GetMaxPower(PowerType.Mana), damage);
 
             ExecuteLogEffectResurrect(effectInfo.Effect, player);
 
@@ -3527,7 +3527,7 @@ namespace Game.Spells
                 return;
 
             Creature creature = unitTarget.ToCreature();
-            int targetLevel = (int)creature.GetLevelForTarget(m_caster);
+            int targetLevel = creature.GetLevelForTarget(m_caster);
 
             SkillType skill = creature.GetCreatureDifficulty().GetRequiredLootSkill();
 
@@ -4072,7 +4072,7 @@ namespace Game.Spells
             if (item != null)
             {
                 unitTarget.ToPlayer().DurabilityPointsLoss(item, damage);
-                ExecuteLogEffectDurabilityDamage(effectInfo.Effect, unitTarget, (int)item.GetEntry(), slot);
+                ExecuteLogEffectDurabilityDamage(effectInfo.Effect, unitTarget, item.GetEntry(), slot);
             }
         }
 
@@ -5456,7 +5456,7 @@ namespace Game.Spells
                 return false;
 
             foreach (SpellEffectInfo spellEffectInfo in spell.GetSpellInfo().GetEffects())
-                if ((target.EffectMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0 && spellEffectInfo.IsUnitOwnedAuraEffect())
+                if ((target.EffectMask & (1 << spellEffectInfo.EffectIndex)) != 0 && spellEffectInfo.IsUnitOwnedAuraEffect())
                     return true;
 
             return false;

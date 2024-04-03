@@ -271,7 +271,7 @@ namespace Scripts.Spells.Azerite
     {
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            int diff = (int)(GetUnitOwner().GetLevel() - 60);
+            int diff = GetUnitOwner().GetLevel() - 60;
             if (diff > 0)
                 amount += 2 * diff;
         }
@@ -2858,7 +2858,7 @@ namespace Scripts.Spells.Azerite
         void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
-            caster.SetFacingTo(RandomHelper.FRand(0.0f, 2.0f * (float)(MathF.PI)));
+            caster.SetFacingTo(RandomHelper.FRand(0.0f, 2.0f * MathF.PI));
         }
 
         public override void Register()

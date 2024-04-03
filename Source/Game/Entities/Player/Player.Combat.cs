@@ -182,7 +182,7 @@ namespace Game.Entities
             if (apply)
             {
                 if (!HasAura(m_titanGripPenaltySpellId))
-                    CastSpell((Unit)null, m_titanGripPenaltySpellId, true);
+                    CastSpell(null, m_titanGripPenaltySpellId, true);
             }
             else
                 RemoveAurasDueToSpell(m_titanGripPenaltySpellId);

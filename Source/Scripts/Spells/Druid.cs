@@ -15,92 +15,92 @@ namespace Scripts.Spells.Druid
 {
     struct SpellIds
     {
-        public const uint Abundance = 207383;
-        public const uint AbundanceEffect = 207640;
-        public const uint BalanceT10Bonus = 70718;
-        public const uint BalanceT10BonusProc = 70721;
-        public const uint BearForm = 5487;
-        public const uint BlessingOfCenarius = 40452;
-        public const uint BlessingOfElune = 40446;
-        public const uint BlessingOfRemulos = 40445;
-        public const uint BlessingOfTheClaw = 28750;
-        public const uint BloodFrenzyAura = 203962;
-        public const uint BloodFrenzyRageGain = 203961;
-        public const uint BramblesDamageAura = 213709;
-        public const uint BramblesPassive = 203953;
-        public const uint BramblesReflect = 203958;
-        public const uint BristlingFurGainRage = 204031;
-        public const uint CatForm = 768;
-        public const uint Cultivation = 200390;
-        public const uint CultivationHeal = 200389;
-        public const uint CuriousBramblepatch = 330670;
-        public const uint EarthwardenAura = 203975;
-        public const uint EclipseDummy = 79577;
-        public const uint EclipseLunarAura = 48518;
-        public const uint EclipseLunarSpellCnt = 326055;
-        public const uint EclipseOoc = 329910;
-        public const uint EclipseSolarAura = 48517;
-        public const uint EclipseSolarSpellCnt = 326053;
-        public const uint EfflorescenceAura = 81262;
-        public const uint EfflorescenceHeal = 81269;
-        public const uint EmbraceOfTheDreamEffect = 392146;
-        public const uint EmbraceOfTheDreamHeal = 392147;
-        public const uint EntanglingRoots = 339;
-        public const uint Exhilarate = 28742;
-        public const uint FormAquaticPassive = 276012;
-        public const uint FormAquatic = 1066;
-        public const uint FormFlight = 33943;
-        public const uint FormStag = 165961;
-        public const uint FormSwiftFlight = 40120;
-        public const uint FormsTrinketBear = 37340;
-        public const uint FormsTrinketCat = 37341;
-        public const uint FormsTrinketMoonkin = 37343;
-        public const uint FormsTrinketNone = 37344;
-        public const uint FormsTrinketTree = 37342;
-        public const uint GalacticGuardianAura = 213708;
-        public const uint Germination = 155675;
-        public const uint GlyphOfStars = 114301;
-        public const uint GlyphOfStarsVisual = 114302;
-        public const uint GoreProc = 93622;
-        public const uint Growl = 6795;
-        public const uint IdolOfFeralShadows = 34241;
-        public const uint IdolOfWorship = 60774;
-        public const uint Incarnation = 117679;
-        public const uint IncarnationKingOfTheJungle = 102543;
-        public const uint IncarnationTreeOfLife = 33891;
-        public const uint InnerPeace = 197073;
-        public const uint Innervate = 29166;
-        public const uint InnervateRank2 = 326228;
-        public const uint Infusion = 37238;
-        public const uint Languish = 71023;
-        public const uint LifebloomFinalHeal = 33778;
-        public const uint LunarInspirationOverride = 155627;
-        public const uint Mangle = 33917;
-        public const uint MassEntanglement = 102359;
-        public const uint MoonfireDamage = 164812;
-        public const uint PowerOfTheArchdruid = 392302;
-        public const uint Prowl = 5215;
-        public const uint Regrowth = 8936;
-        public const uint Rejuvenation = 774;
-        public const uint RejuvenationGermination = 155777;
-        public const uint RejuvenationT10Proc = 70691;
-        public const uint RestorationT102PBonus = 70658;
-        public const uint SavageRoar = 62071;
-        public const uint ShootingStars = 202342;
-        public const uint ShootingStarsDamage = 202497;
-        public const uint SkullBashCharge = 221514;
-        public const uint SkullBashInterrupt = 93985;
-        public const uint SpringBlossoms = 207385;
-        public const uint SpringBlossomsHeal = 207386;
-        public const uint SunfireDamage = 164815;
-        public const uint SurvivalInstincts = 50322;
-        public const uint TravelForm = 783;
-        public const uint TreeOfLife = 33891;
-        public const uint ThrashBear = 77758;
-        public const uint ThrashBearAura = 192090;
-        public const uint ThrashCat = 106830;
-        public const uint YserasGiftHealParty = 145110;
-        public const uint YserasGiftHealSelf = 145109;
+        public const int Abundance = 207383;
+        public const int AbundanceEffect = 207640;
+        public const int BalanceT10Bonus = 70718;
+        public const int BalanceT10BonusProc = 70721;
+        public const int BearForm = 5487;
+        public const int BlessingOfCenarius = 40452;
+        public const int BlessingOfElune = 40446;
+        public const int BlessingOfRemulos = 40445;
+        public const int BlessingOfTheClaw = 28750;
+        public const int BloodFrenzyAura = 203962;
+        public const int BloodFrenzyRageGain = 203961;
+        public const int BramblesDamageAura = 213709;
+        public const int BramblesPassive = 203953;
+        public const int BramblesReflect = 203958;
+        public const int BristlingFurGainRage = 204031;
+        public const int CatForm = 768;
+        public const int Cultivation = 200390;
+        public const int CultivationHeal = 200389;
+        public const int CuriousBramblepatch = 330670;
+        public const int EarthwardenAura = 203975;
+        public const int EclipseDummy = 79577;
+        public const int EclipseLunarAura = 48518;
+        public const int EclipseLunarSpellCnt = 326055;
+        public const int EclipseOoc = 329910;
+        public const int EclipseSolarAura = 48517;
+        public const int EclipseSolarSpellCnt = 326053;
+        public const int EfflorescenceAura = 81262;
+        public const int EfflorescenceHeal = 81269;
+        public const int EmbraceOfTheDreamEffect = 392146;
+        public const int EmbraceOfTheDreamHeal = 392147;
+        public const int EntanglingRoots = 339;
+        public const int Exhilarate = 28742;
+        public const int FormAquaticPassive = 276012;
+        public const int FormAquatic = 1066;
+        public const int FormFlight = 33943;
+        public const int FormStag = 165961;
+        public const int FormSwiftFlight = 40120;
+        public const int FormsTrinketBear = 37340;
+        public const int FormsTrinketCat = 37341;
+        public const int FormsTrinketMoonkin = 37343;
+        public const int FormsTrinketNone = 37344;
+        public const int FormsTrinketTree = 37342;
+        public const int GalacticGuardianAura = 213708;
+        public const int Germination = 155675;
+        public const int GlyphOfStars = 114301;
+        public const int GlyphOfStarsVisual = 114302;
+        public const int GoreProc = 93622;
+        public const int Growl = 6795;
+        public const int IdolOfFeralShadows = 34241;
+        public const int IdolOfWorship = 60774;
+        public const int Incarnation = 117679;
+        public const int IncarnationKingOfTheJungle = 102543;
+        public const int IncarnationTreeOfLife = 33891;
+        public const int InnerPeace = 197073;
+        public const int Innervate = 29166;
+        public const int InnervateRank2 = 326228;
+        public const int Infusion = 37238;
+        public const int Languish = 71023;
+        public const int LifebloomFinalHeal = 33778;
+        public const int LunarInspirationOverride = 155627;
+        public const int Mangle = 33917;
+        public const int MassEntanglement = 102359;
+        public const int MoonfireDamage = 164812;
+        public const int PowerOfTheArchdruid = 392302;
+        public const int Prowl = 5215;
+        public const int Regrowth = 8936;
+        public const int Rejuvenation = 774;
+        public const int RejuvenationGermination = 155777;
+        public const int RejuvenationT10Proc = 70691;
+        public const int RestorationT102PBonus = 70658;
+        public const int SavageRoar = 62071;
+        public const int ShootingStars = 202342;
+        public const int ShootingStarsDamage = 202497;
+        public const int SkullBashCharge = 221514;
+        public const int SkullBashInterrupt = 93985;
+        public const int SpringBlossoms = 207385;
+        public const int SpringBlossomsHeal = 207386;
+        public const int SunfireDamage = 164815;
+        public const int SurvivalInstincts = 50322;
+        public const int TravelForm = 783;
+        public const int TreeOfLife = 33891;
+        public const int ThrashBear = 77758;
+        public const int ThrashBearAura = 192090;
+        public const int ThrashCat = 106830;
+        public const int YserasGiftHealParty = 145110;
+        public const int YserasGiftHealSelf = 145109;
     }
 
     // 774 - Rejuvenation
@@ -205,19 +205,19 @@ namespace Scripts.Spells.Druid
             return ValidateSpellInfo(SpellIds.BramblesReflect, SpellIds.BramblesDamageAura);
         }
 
-        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
         {
             // Prevent Removal
             PreventDefaultAction();
         }
 
-        void HandleAfterAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        void HandleAfterAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
         {
             // reflect back damage to the attacker
             Unit target = GetTarget();
             Unit attacker = dmgInfo.GetAttacker();
             if (attacker != null)
-                target.CastSpell(attacker, SpellIds.BramblesReflect, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)absorbAmount));
+                target.CastSpell(attacker, SpellIds.BramblesReflect, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, absorbAmount));
         }
 
         public override void Register()
@@ -242,7 +242,7 @@ namespace Scripts.Spells.Druid
             if (damageInfo != null)
             {
                 Unit target = GetTarget();
-                uint rage = (uint)(target.GetMaxPower(PowerType.Rage) * (float)damageInfo.GetDamage() / (float)target.GetMaxHealth());
+                uint rage = (uint)(target.GetMaxPower(PowerType.Rage) * (float)damageInfo.GetDamage() / target.GetMaxHealth());
                 if (rage > 0)
                     target.CastSpell(target, SpellIds.BristlingFurGainRage, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)rage));
             }
@@ -339,11 +339,11 @@ namespace Scripts.Spells.Druid
 
     class spell_dru_eclipse_common
     {
-        public static void SetSpellCount(Unit unitOwner, uint spellId, uint amount)
+        public static void SetSpellCount(Unit unitOwner, int spellId, int amount)
         {
             Aura aura = unitOwner.GetAura(spellId);
             if (aura == null)
-                unitOwner.CastSpell(unitOwner, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, (int)amount));
+                unitOwner.CastSpell(unitOwner, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, amount));
             else
                 aura.SetStackAmount((byte)amount);
         }
@@ -363,8 +363,8 @@ namespace Scripts.Spells.Druid
             if (auraEffDummy == null)
                 return;
 
-            uint spellId = GetSpellInfo().Id == SpellIds.EclipseSolarAura ? SpellIds.EclipseLunarSpellCnt : SpellIds.EclipseSolarSpellCnt;
-            spell_dru_eclipse_common.SetSpellCount(GetTarget(), spellId, (uint)auraEffDummy.GetAmount());
+            int spellId = GetSpellInfo().Id == SpellIds.EclipseSolarAura ? SpellIds.EclipseLunarSpellCnt : SpellIds.EclipseSolarSpellCnt;
+            spell_dru_eclipse_common.SetSpellCount(GetTarget(), spellId, auraEffDummy.GetAmount());
         }
 
         public override void Register()
@@ -379,15 +379,15 @@ namespace Scripts.Spells.Druid
         class InitializeEclipseCountersEvent : BasicEvent
         {
             Unit _owner;
-            uint _count;
+            int _count;
 
-            public InitializeEclipseCountersEvent(Unit owner, uint count)
+            public InitializeEclipseCountersEvent(Unit owner, int count)
             {
                 _owner = owner;
                 _count = count;
             }
 
-            public override bool Execute(ulong e_time, uint p_time)
+            public override bool Execute(long e_time, uint p_time)
             {
                 spell_dru_eclipse_common.SetSpellCount(_owner, SpellIds.EclipseSolarSpellCnt, _count);
                 spell_dru_eclipse_common.SetSpellCount(_owner, SpellIds.EclipseLunarSpellCnt, _count);
@@ -415,7 +415,7 @@ namespace Scripts.Spells.Druid
         void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // counters are applied with a delay
-            GetTarget().m_Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), (uint)aurEff.GetAmount()), TimeSpan.FromSeconds(1));
+            GetTarget().m_Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), aurEff.GetAmount()), TimeSpan.FromSeconds(1));
         }
 
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -438,7 +438,7 @@ namespace Scripts.Spells.Druid
             OnEnterLeaveCombat.Add(new(OnOwnerOutOfCombat));
         }
 
-        void OnSpellCast(uint cntSpellId, uint otherCntSpellId, uint eclipseAuraSpellId)
+        void OnSpellCast(int cntSpellId, int otherCntSpellId, int eclipseAuraSpellId)
         {
             Unit target = GetTarget();
             Aura aura = target.GetAura(cntSpellId);
@@ -482,8 +482,8 @@ namespace Scripts.Spells.Druid
             if (!owner.IsInCombat() && (!owner.HasAura(SpellIds.EclipseSolarSpellCnt) || !owner.HasAura(SpellIds.EclipseLunarSpellCnt)))
             {
                 // Restore 2 stacks to each spell when out of combat
-                spell_dru_eclipse_common.SetSpellCount(owner, SpellIds.EclipseSolarSpellCnt, (uint)auraEffDummy.GetAmount());
-                spell_dru_eclipse_common.SetSpellCount(owner, SpellIds.EclipseLunarSpellCnt, (uint)auraEffDummy.GetAmount());
+                spell_dru_eclipse_common.SetSpellCount(owner, SpellIds.EclipseSolarSpellCnt, auraEffDummy.GetAmount());
+                spell_dru_eclipse_common.SetSpellCount(owner, SpellIds.EclipseLunarSpellCnt, auraEffDummy.GetAmount());
             }
         }
 
@@ -496,7 +496,7 @@ namespace Scripts.Spells.Druid
     [Script] // 145205 - Efflorescence
     class spell_dru_efflorescence : SpellScript
     {
-        void RemoveOldAreaTrigger(uint effIndex)
+        void RemoveOldAreaTrigger(int effIndex)
         {
             // if caster has any Efflorescence areatrigger, we Remove it.
             GetCaster().RemoveAreaTrigger(GetSpellInfo().Id);
@@ -601,7 +601,7 @@ namespace Scripts.Spells.Druid
             targets.RemoveAll(target => target.ToUnit()?.GetAuraEffect(AuraType.PeriodicHeal, SpellFamilyNames.Druid, new FlagArray128(0x50, 0, 0, 0), GetCaster().GetGUID()) == null);
         }
 
-        void HandleEffect(uint effIndex)
+        void HandleEffect(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.EmbraceOfTheDreamHeal,
                 new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
@@ -680,19 +680,19 @@ namespace Scripts.Spells.Druid
             return ValidateSpellEffect((SpellIds.IncarnationKingOfTheJungle, 1));
         }
 
-        void HandleHitTargetBurn(uint effIndex)
+        void HandleHitTargetBurn(int effIndex)
         {
-            int newValue = (int)((float)(GetEffectValue()) * _damageMultiplier);
+            int newValue = (int)(GetEffectValue() * _damageMultiplier);
             SetEffectValue(newValue);
         }
 
-        void HandleHitTargetDmg(uint effIndex)
+        void HandleHitTargetDmg(int effIndex)
         {
-            int newValue = (int)((float)(GetHitDamage()) * (1.0f + _damageMultiplier));
+            int newValue = (int)(GetHitDamage() * (1.0f + _damageMultiplier));
             SetHitDamage(newValue);
         }
 
-        void HandleLaunchTarget(uint effIndex)
+        void HandleLaunchTarget(int effIndex)
         {
             Unit caster = GetCaster();
 
@@ -701,8 +701,8 @@ namespace Scripts.Spells.Druid
             AuraEffect auraEffect = caster.GetAuraEffect(SpellIds.IncarnationKingOfTheJungle, 1);
             if (auraEffect != null)
             {
-                float multiplier = 1.0f + (float)(auraEffect.GetAmount()) / 100.0f;
-                maxExtraConsumedPower = (int)((float)(maxExtraConsumedPower) * multiplier);
+                float multiplier = 1.0f + auraEffect.GetAmount() / 100.0f;
+                maxExtraConsumedPower = (int)(maxExtraConsumedPower * multiplier);
                 SetEffectValue(maxExtraConsumedPower);
             }
 
@@ -741,7 +741,7 @@ namespace Scripts.Spells.Druid
             PreventDefaultAction();
             Unit target = eventInfo.GetActor();
 
-            uint triggerspell = target.GetShapeshiftForm() switch
+            int triggerspell = target.GetShapeshiftForm() switch
             {
                 ShapeShiftForm.BearForm or ShapeShiftForm.DireBearForm => SpellIds.FormsTrinketBear,
                 ShapeShiftForm.CatForm => SpellIds.FormsTrinketCat,
@@ -917,7 +917,7 @@ namespace Scripts.Spells.Druid
                 return SpellCastResult.BadTargets;
 
             var spec = target.GetPrimarySpecializationEntry();
-            if (spec == null || spec.Role() != ChrSpecializationRole.Healer)
+            if (spec == null || spec.Role != ChrSpecializationRole.Healer)
                 return SpellCastResult.BadTargets;
 
             return SpellCastResult.SpellCastOk;
@@ -1024,7 +1024,7 @@ namespace Scripts.Spells.Druid
             if (spellInfo == null)
                 return;
 
-            uint spellId;
+            int spellId;
             int chance;
 
             // Starfire
@@ -1150,7 +1150,7 @@ namespace Scripts.Spells.Druid
             return ValidateSpellInfo(SpellIds.MoonfireDamage);
         }
 
-        void HandleOnHit(uint effIndex)
+        void HandleOnHit(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.MoonfireDamage, true);
         }
@@ -1217,7 +1217,7 @@ namespace Scripts.Spells.Druid
             // max. targets is SpellPowerOfTheArchdruid's 0 BasePoints.
             int maxTargets = powerOfTheArchdruidEffect.GetAmount();
 
-            targetList.RandomResize((uint)maxTargets);
+            targetList.RandomResize(maxTargets);
 
             foreach (Unit chosenTarget in targetList)
                 druid.CastSpell(chosenTarget, eventInfo.GetProcSpell().GetSpellInfo().Id, aurEff);
@@ -1371,7 +1371,7 @@ namespace Scripts.Spells.Druid
             return ValidateSpellInfo(SpellIds.SkullBashCharge, SpellIds.SkullBashInterrupt);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.SkullBashCharge, true);
             GetCaster().CastSpell(GetHitUnit(), SpellIds.SkullBashInterrupt, true);
@@ -1391,7 +1391,7 @@ namespace Scripts.Spells.Druid
             return ValidateSpellInfo(SpellIds.SpringBlossoms, SpellIds.SpringBlossomsHeal);
         }
 
-        void HandleOnHit(uint effIndex)
+        void HandleOnHit(int effIndex)
         {
             if (GetCaster().HasAura(SpellIds.SpringBlossoms))
                 GetCaster().CastSpell(GetHitUnit(), SpellIds.SpringBlossomsHeal, TriggerCastFlags.DontReportCastError);
@@ -1431,7 +1431,7 @@ namespace Scripts.Spells.Druid
             targets.RandomResize(2);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             // Shapeshifting into an animal form or mounting cancels the effect
@@ -1447,7 +1447,7 @@ namespace Scripts.Spells.Druid
             if (caster.HasUnitState(UnitState.Controlled))
                 return;
 
-            caster.CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
+            caster.CastSpell(GetHitUnit(), GetEffectValue(), true);
         }
 
         public override void Register()
@@ -1483,7 +1483,7 @@ namespace Scripts.Spells.Druid
     [Script] //  93402 - Sunfire
     class spell_dru_sunfire : SpellScript
     {
-        void HandleOnHit(uint effIndex)
+        void HandleOnHit(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.SunfireDamage, true);
         }
@@ -1635,10 +1635,10 @@ namespace Scripts.Spells.Druid
             Unit target = eventInfo.GetProcTarget();
 
             SpellInfo spellInfo = SpellMgr.GetSpellInfo(SpellIds.Languish, GetCastDifficulty());
-            int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+            int amount = MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
 
             Cypher.Assert(spellInfo.GetMaxTicks() > 0);
-            amount /= (int)spellInfo.GetMaxTicks();
+            amount /= spellInfo.GetMaxTicks();
 
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);
@@ -1723,7 +1723,7 @@ namespace Scripts.Spells.Druid
             PreventDefaultAction();
 
             CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)eventInfo.GetHealInfo().GetHeal());
+            args.AddSpellMod(SpellValueMod.BasePoint0, eventInfo.GetHealInfo().GetHeal());
             eventInfo.GetActor().CastSpell(null, SpellIds.RejuvenationT10Proc, args);
         }
 
@@ -1742,7 +1742,7 @@ namespace Scripts.Spells.Druid
             return ValidateSpellInfo(SpellIds.ThrashBearAura);
         }
 
-        void HandleOnHitTarget(uint effIndex)
+        void HandleOnHitTarget(int effIndex)
         {
             Unit hitUnit = GetHitUnit();
             if (hitUnit != null)
@@ -1783,7 +1783,7 @@ namespace Scripts.Spells.Druid
     [Script] // 165961 - Stag Form
     class spell_dru_travel_form : AuraScript
     {
-        uint triggeredSpellId;
+        int triggeredSpellId;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1831,7 +1831,7 @@ namespace Scripts.Spells.Druid
             AfterEffectRemove.Add(new(AfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
         }
 
-        public static uint GetFormSpellId(Player player, Difficulty difficulty, bool requiresOutdoor)
+        public static int GetFormSpellId(Player player, Difficulty difficulty, bool requiresOutdoor)
         {
             // Check what form is appropriate
             if (player.HasSpell(SpellIds.FormAquaticPassive) && player.IsInWater()) // Aquatic form
@@ -1846,7 +1846,7 @@ namespace Scripts.Spells.Druid
             return 0;
         }
 
-        static SpellCastResult CheckLocationForForm(Player targetPlayer, Difficulty difficulty, bool requireOutdoors, uint spellId)
+        static SpellCastResult CheckLocationForForm(Player targetPlayer, Difficulty difficulty, bool requireOutdoors, int spellId)
         {
             SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, difficulty);
 
@@ -1871,7 +1871,7 @@ namespace Scripts.Spells.Druid
             if (player == null)
                 return SpellCastResult.CustomError;
 
-            uint spellId = (player.HasSpell(SpellIds.FormAquaticPassive) && player.IsInWater()) ? SpellIds.FormAquatic : SpellIds.FormStag;
+            int spellId = (player.HasSpell(SpellIds.FormAquaticPassive) && player.IsInWater()) ? SpellIds.FormAquatic : SpellIds.FormStag;
 
             SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, GetCastDifficulty());
             return spellInfo.CheckLocation(player.GetMapId(), player.GetZoneId(), player.GetAreaId(), player);
@@ -1901,7 +1901,7 @@ namespace Scripts.Spells.Druid
             Player player = GetTarget().ToPlayer();
 
             // Outdoor check already passed - Travel Form (dummy) has SpellAttr0OutdoorsOnly attribute.
-            uint triggeredSpellId = spell_dru_travel_form.GetFormSpellId(player, GetCastDifficulty(), false);
+            int triggeredSpellId = spell_dru_travel_form.GetFormSpellId(player, GetCastDifficulty(), false);
 
             player.CastSpell(player, triggeredSpellId, aurEff);
         }
@@ -1979,7 +1979,7 @@ namespace Scripts.Spells.Druid
                 maxTargets += treeOfLife.GetAmount();
 
             // Note: Wild Growth became a smart heal which prioritizes players and their pets in their group before any unit outside their group.
-            SelectRandomInjuredTargets(targets, (uint)maxTargets, true, caster);
+            SelectRandomInjuredTargets(targets, maxTargets, true, caster);
         }
 
         public override void Register()

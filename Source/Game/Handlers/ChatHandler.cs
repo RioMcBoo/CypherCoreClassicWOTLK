@@ -556,7 +556,7 @@ namespace Game
             if (em == null)
                 return;
 
-            Emote emote = (Emote)em.EmoteId;
+            Emote emote = em.EmoteId;
 
             switch (emote)
             {

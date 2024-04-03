@@ -3,7 +3,6 @@
 
 using Framework.Collections;
 using Framework.Constants;
-using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
@@ -445,7 +444,7 @@ namespace Game.Misc
             packet.QuestGiverGUID = npcGUID;
             packet.InformUnit = _session.GetPlayer().GetPlayerSharingQuest();
             packet.QuestID = quest.Id;
-            packet.QuestPackageID = (int)quest.PackageID;
+            packet.QuestPackageID = quest.PackageID;
             packet.PortraitGiver = quest.QuestGiverPortrait;
             packet.PortraitGiverMount = quest.QuestGiverPortraitMount;
             packet.PortraitGiverModelSceneID = quest.QuestGiverPortraitModelSceneId;
@@ -461,7 +460,7 @@ namespace Game.Misc
             // Is there a better way? what about game objects?
             Creature creature = ObjectAccessor.GetCreature(_session.GetPlayer(), npcGUID);
             if (creature != null)
-                packet.QuestGiverCreatureID = (int)creature.GetCreatureTemplate().Entry;
+                packet.QuestGiverCreatureID = creature.GetCreatureTemplate().Entry;
 
             // RewardSpell can teach multiple spells in trigger spell effects. But not all effects must be SPELL_EFFECT_LEARN_SPELL. See example spell 33950
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell, Difficulty.None);
@@ -476,7 +475,7 @@ namespace Game.Misc
 
             for (int i = 0; i < SharedConst.QuestEmoteCount; ++i)
             {
-                var emote = new QuestDescEmote((int)quest.DetailsEmote[i], quest.DetailsEmoteDelay[i]);
+                var emote = new QuestDescEmote(quest.DetailsEmote[i], quest.DetailsEmoteDelay[i]);
                 packet.DescEmotes.Add(emote);
             }
 

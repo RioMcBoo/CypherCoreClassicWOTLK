@@ -12,9 +12,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.MotherSmolder
 {
     struct SpellIds
     {
-        public const uint Crystalize = 16104;
-        public const uint Mothersmilk = 16468;
-        public const uint SummonSpireSpiderling = 16103;
+        public const int Crystalize = 16104;
+        public const int Mothersmilk = 16468;
+        public const int SummonSpireSpiderling = 16103;
     }
 
     [Script]
@@ -47,7 +47,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.MotherSmolder
             _JustDied();
         }
 
-        public override void DamageTaken(Unit done_by, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit done_by, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.GetHealth() <= damage)
                 DoCast(me, SpellIds.SummonSpireSpiderling, new CastSpellExtraArgs(true));

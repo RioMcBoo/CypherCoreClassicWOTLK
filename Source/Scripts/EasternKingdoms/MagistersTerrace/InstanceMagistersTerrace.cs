@@ -13,66 +13,66 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
     struct DataTypes
     {
         // Encounter states
-        public const uint SelinFireheart = 0;
-        public const uint Vexallus = 1;
-        public const uint PriestessDelrissa = 2;
-        public const uint KaelthasSunstrider = 3;
+        public const int SelinFireheart = 0;
+        public const int Vexallus = 1;
+        public const int PriestessDelrissa = 2;
+        public const int KaelthasSunstrider = 3;
 
         // Encounter related
-        public const uint KaelthasIntro = 4;
-        public const uint DelrissaDeathCount = 5;
+        public const int KaelthasIntro = 4;
+        public const int DelrissaDeathCount = 5;
 
         // Additional data
-        public const uint Kalecgos = 6;
-        public const uint EscapeOrb = 7;
+        public const int Kalecgos = 6;
+        public const int EscapeOrb = 7;
     }
 
     struct CreatureIds
     {
         // Bosses
-        public const uint KaelthasSunstrider = 24664;
-        public const uint SelinFireheart = 24723;
-        public const uint Vexallus = 24744;
-        public const uint PriestessDelrissa = 24560;
+        public const int KaelthasSunstrider = 24664;
+        public const int SelinFireheart = 24723;
+        public const int Vexallus = 24744;
+        public const int PriestessDelrissa = 24560;
 
         // Encounter related
         // Kael'thas Sunstrider
-        public const uint ArcaneSphere = 24708;
-        public const uint FlameStrike = 24666;
-        public const uint Phoenix = 24674;
-        public const uint PhoenixEgg = 24675;
+        public const int ArcaneSphere = 24708;
+        public const int FlameStrike = 24666;
+        public const int Phoenix = 24674;
+        public const int PhoenixEgg = 24675;
 
         // Selin Fireheart
-        public const uint FelCrystal = 24722;
+        public const int FelCrystal = 24722;
 
         // Event related
-        public const uint Kalecgos = 24844;
-        public const uint HumanKalecgos = 24848;
-        public const uint CoilskarWitch = 24696;
-        public const uint SunbladeWarlock = 24686;
-        public const uint SunbladeMageGuard = 24683;
-        public const uint SisterOfTorment = 24697;
-        public const uint EthereumSmuggler = 24698;
-        public const uint SunbladeBloodKnight = 24684;
+        public const int Kalecgos = 24844;
+        public const int HumanKalecgos = 24848;
+        public const int CoilskarWitch = 24696;
+        public const int SunbladeWarlock = 24686;
+        public const int SunbladeMageGuard = 24683;
+        public const int SisterOfTorment = 24697;
+        public const int EthereumSmuggler = 24698;
+        public const int SunbladeBloodKnight = 24684;
     }
 
     struct GameObjectIds
     {
-        public const uint AssemblyChamberDoor = 188065;
-        public const uint SunwellRaidGate2 = 187979;
-        public const uint SunwellRaidGate4 = 187770;
-        public const uint SunwellRaidGate5 = 187896;
-        public const uint AsylumDoor = 188064;
-        public const uint EscapeOrb = 188173;
+        public const int AssemblyChamberDoor = 188065;
+        public const int SunwellRaidGate2 = 187979;
+        public const int SunwellRaidGate4 = 187770;
+        public const int SunwellRaidGate5 = 187896;
+        public const int AsylumDoor = 188064;
+        public const int EscapeOrb = 188173;
     }
 
     struct MiscConst
     {
-        public const uint EventSpawnKalecgos = 16547;
+        public const int EventSpawnKalecgos = 16547;
 
-        public const uint SayKalecgosSpawn = 0;
+        public const int SayKalecgosSpawn = 0;
 
-        public const uint PathKalecgosFlight = 1987520;
+        public const int PathKalecgosFlight = 1987520;
 
         public static ObjectData[] creatureData =
         {
@@ -129,7 +129,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                 LoadDungeonEncounterData(encounters);
             }
 
-            public override uint GetData(uint type)
+            public override int GetData(int type)
             {
                 switch (type)
                 {
@@ -141,7 +141,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                 return 0;
             }
 
-            public override void SetData(uint type, uint data)
+            public override void SetData(int type, int data)
             {
                 switch (type)
                 {
@@ -196,7 +196,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                             {
                                 Creature kaelthas = GetCreature(DataTypes.KaelthasSunstrider);
                                 if (kaelthas != null)
-                                    kaelthas.GetAI().SetData(DataTypes.KaelthasIntro, (uint)EncounterState.InProgress);
+                                    kaelthas.GetAI().SetData(DataTypes.KaelthasIntro, (int)EncounterState.InProgress);
                             }
                         }
                         break;
@@ -220,7 +220,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                 }
             }
 
-            public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker)
+            public override void ProcessEvent(WorldObject obj, int eventId, WorldObject invoker)
             {
                 if (eventId == MiscConst.EventSpawnKalecgos)
                     if (GetCreature(DataTypes.Kalecgos) == null && _events.Empty())
@@ -242,7 +242,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                 }
             }
 
-            public override bool SetBossState(uint type, EncounterState state)
+            public override bool SetBossState(int type, EncounterState state)
             {
                 if (!base.SetBossState(type, state))
                     return false;

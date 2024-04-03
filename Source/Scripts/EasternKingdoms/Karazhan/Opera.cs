@@ -13,118 +13,118 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 {
     struct TextIds
     {
-        public const uint SayDorotheeDeath = 0;
-        public const uint SayDorotheeSummon = 1;
-        public const uint SayDorotheeTitoDeath = 2;
-        public const uint SayDorotheeAggro = 3;
+        public const int SayDorotheeDeath = 0;
+        public const int SayDorotheeSummon = 1;
+        public const int SayDorotheeTitoDeath = 2;
+        public const int SayDorotheeAggro = 3;
 
-        public const uint SayRoarAggro = 0;
-        public const uint SayRoarDeath = 1;
-        public const uint SayRoarSlay = 2;
+        public const int SayRoarAggro = 0;
+        public const int SayRoarDeath = 1;
+        public const int SayRoarSlay = 2;
 
-        public const uint SayStrawmanAggro = 0;
-        public const uint SayStrawmanDeath = 1;
-        public const uint SayStrawmanSlay = 2;
+        public const int SayStrawmanAggro = 0;
+        public const int SayStrawmanDeath = 1;
+        public const int SayStrawmanSlay = 2;
 
-        public const uint SayTinheadAggro = 0;
-        public const uint SayTinheadDeath = 1;
-        public const uint SayTinheadSlay = 2;
-        public const uint EmoteRust = 3;
+        public const int SayTinheadAggro = 0;
+        public const int SayTinheadDeath = 1;
+        public const int SayTinheadSlay = 2;
+        public const int EmoteRust = 3;
 
-        public const uint SayCroneAggro = 0;
-        public const uint SayCroneDeath = 1;
-        public const uint SayCroneSlay = 2;
+        public const int SayCroneAggro = 0;
+        public const int SayCroneDeath = 1;
+        public const int SayCroneSlay = 2;
 
         //RedRidingHood
-        public const uint SayWolfAggro = 0;
-        public const uint SayWolfSlay = 1;
-        public const uint SayWolfHood = 2;
-        public const uint OptionWhatPhatLewtsYouHave = 7443;
+        public const int SayWolfAggro = 0;
+        public const int SayWolfSlay = 1;
+        public const int SayWolfHood = 2;
+        public const int OptionWhatPhatLewtsYouHave = 7443;
 
         //Romulo & Julianne
-        public const uint SayJulianneAggro = 0;
-        public const uint SayJulianneEnter = 1;
-        public const uint SayJulianneDeath01 = 2;
-        public const uint SayJulianneDeath02 = 3;
-        public const uint SayJulianneResurrect = 4;
-        public const uint SayJulianneSlay = 5;
+        public const int SayJulianneAggro = 0;
+        public const int SayJulianneEnter = 1;
+        public const int SayJulianneDeath01 = 2;
+        public const int SayJulianneDeath02 = 3;
+        public const int SayJulianneResurrect = 4;
+        public const int SayJulianneSlay = 5;
 
-        public const uint SayRomuloAggro = 0;
-        public const uint SayRomuloDeath = 1;
-        public const uint SayRomuloEnter = 2;
-        public const uint SayRomuloResurrect = 3;
-        public const uint SayRomuloSlay = 4;
+        public const int SayRomuloAggro = 0;
+        public const int SayRomuloDeath = 1;
+        public const int SayRomuloEnter = 2;
+        public const int SayRomuloResurrect = 3;
+        public const int SayRomuloSlay = 4;
     }
 
     struct SpellIds
     {
         // Dorothee
-        public const uint Waterbolt = 31012;
-        public const uint Scream = 31013;
-        public const uint Summontito = 31014;
+        public const int Waterbolt = 31012;
+        public const int Scream = 31013;
+        public const int Summontito = 31014;
 
         // Tito
-        public const uint Yipping = 31015;
+        public const int Yipping = 31015;
 
         // Strawman
-        public const uint BrainBash = 31046;
-        public const uint BrainWipe = 31069;
-        public const uint BurningStraw = 31075;
+        public const int BrainBash = 31046;
+        public const int BrainWipe = 31069;
+        public const int BurningStraw = 31075;
 
         // Tinhead
-        public const uint Cleave = 31043;
-        public const uint Rust = 31086;
+        public const int Cleave = 31043;
+        public const int Rust = 31086;
 
         // Roar
-        public const uint Mangle = 31041;
-        public const uint Shred = 31042;
-        public const uint FrightenedScream = 31013;
+        public const int Mangle = 31041;
+        public const int Shred = 31042;
+        public const int FrightenedScream = 31013;
 
         // Crone
-        public const uint ChainLightning = 32337;
+        public const int ChainLightning = 32337;
 
         // Cyclone
-        public const uint Knockback = 32334;
-        public const uint CycloneVisual = 32332;
+        public const int Knockback = 32334;
+        public const int CycloneVisual = 32332;
 
         //Red Riding Hood
-        public const uint LittleRedRidingHood = 30768;
-        public const uint TerrifyingHowl = 30752;
-        public const uint WideSwipe = 30761;
+        public const int LittleRedRidingHood = 30768;
+        public const int TerrifyingHowl = 30752;
+        public const int WideSwipe = 30761;
 
         //Romulo & Julianne
-        public const uint BlindingPassion = 30890;
-        public const uint Devotion = 30887;
-        public const uint EternalAffection = 30878;
-        public const uint PowerfulAttraction = 30889;
-        public const uint DrinkPoison = 30907;
+        public const int BlindingPassion = 30890;
+        public const int Devotion = 30887;
+        public const int EternalAffection = 30878;
+        public const int PowerfulAttraction = 30889;
+        public const int DrinkPoison = 30907;
 
-        public const uint BackwardLunge = 30815;
-        public const uint Daring = 30841;
-        public const uint DeadlySwathe = 30817;
-        public const uint PoisonThrust = 30822;
+        public const int BackwardLunge = 30815;
+        public const int Daring = 30841;
+        public const int DeadlySwathe = 30817;
+        public const int PoisonThrust = 30822;
 
-        public const uint UndyingLove = 30951;
-        public const uint ResVisual = 24171;
+        public const int UndyingLove = 30951;
+        public const int ResVisual = 24171;
     }
 
     struct CreatureIds
     {
-        public const uint Tito = 17548;
-        public const uint Cyclone = 18412;
-        public const uint Crone = 18168;
+        public const int Tito = 17548;
+        public const int Cyclone = 18412;
+        public const int Crone = 18168;
 
         //Red Riding Hood
-        public const uint BigBadWolf = 17521;
+        public const int BigBadWolf = 17521;
 
         //Romulo & Julianne
-        public const uint Romulo = 17533;
+        public const int Romulo = 17533;
     }
 
     struct MiscConst
     {
         //Red Riding Hood
-        public const uint SoundWolfDeath = 9275;
+        public const int SoundWolfDeath = 9275;
 
         //Romulo & Julianne
         public const int RomuloX = -10900;
@@ -132,7 +132,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         public static void SummonCroneIfReady(InstanceScript instance, Creature creature)
         {
-            instance.SetData(DataTypes.OperaOzDeathcount, (uint)EncounterState.Special);  // Increment DeathCount
+            instance.SetData(DataTypes.OperaOzDeathcount, (int)EncounterState.Special);  // Increment DeathCount
 
             if (instance.GetData(DataTypes.OperaOzDeathcount) == 4)
             {
@@ -789,7 +789,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     {
         public npc_grandmother(Creature creature) : base(creature) { }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
             if (menuId == TextIds.OptionWhatPhatLewtsYouHave && gossipListId == 0)
             {
@@ -1018,7 +1018,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             }
         }
 
-        public override void DamageTaken(Unit done_by, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit done_by, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (damage < me.GetHealth())
                 return;
@@ -1110,7 +1110,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 {
                     Talk(TextIds.SayJulianneAggro);
                     me.RemoveUnitFlag(UnitFlags.NonAttackable);
-                    me.SetFaction((uint)FactionTemplates.Monster2);
+                    me.SetFaction(FactionTemplates.Monster2);
                     AggroYellTimer = 0;
                 }
                 else AggroYellTimer -= diff;
@@ -1141,7 +1141,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                         pRomulo.GetAI<boss_romulo>().Phase = RAJPhase.Romulo;
                         DoZoneInCombat(pRomulo);
 
-                        pRomulo.SetFaction((uint)FactionTemplates.Monster2);
+                        pRomulo.SetFaction(FactionTemplates.Monster2);
                     }
                     SummonedRomulo = true;
                 }
@@ -1272,7 +1272,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             me.DespawnOrUnsummon();
         }
 
-        public override void DamageTaken(Unit done_by, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit done_by, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (damage < me.GetHealth())
                 return;

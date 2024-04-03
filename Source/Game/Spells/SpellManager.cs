@@ -8,7 +8,6 @@ using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.DataStorage;
-using Game.Miscellaneous;
 using Game.Movement;
 using Game.Spells;
 using System;
@@ -1397,7 +1396,7 @@ namespace Game.Entities
                         if (procEntry.HitMask != 0 && !(procEntry.ProcFlags.HasFlag(ProcFlags.TakenHitMask) || (procEntry.ProcFlags.HasFlag(ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || Convert.ToBoolean(procEntry.SpellPhaseMask & (ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish))))))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `HitMask` value defined, but it won't be used for defined `ProcFlags` and `SpellPhaseMask` values", spellInfo.Id);
                         foreach (var spellEffectInfo in spellInfo.GetEffects())
-                            if ((procEntry.DisableEffectsMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsAura())
+                            if ((procEntry.DisableEffectsMask & (1u << spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsAura())
                                 Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has DisableEffectsMask with effect {spellEffectInfo.EffectIndex}, but effect {spellEffectInfo.EffectIndex} is not an aura effect");
 
                         if (procEntry.AttributesMask.HasFlag(ProcAttributes.ReqSpellmod))
@@ -1471,7 +1470,7 @@ namespace Game.Entities
                     if (!IsTriggerAura(auraName))
                     {
                         // explicitly disable non proccing auras to avoid losing charges on self proc
-                        nonProcMask |= 1u << (int)spellEffectInfo.EffectIndex;
+                        nonProcMask |= 1u << spellEffectInfo.EffectIndex;
                         continue;
                     }
 
@@ -2210,7 +2209,7 @@ namespace Game.Entities
                 if (effect.Effect == SpellEffectName.Language)
                     Global.LanguageMgr.LoadSpellEffectLanguage(effect);
 
-                switch ((AuraType)effect.EffectAura)
+                switch (effect.EffectAura)
                 {
                     case AuraType.AddFlatModifier:
                     case AuraType.AddPctModifier:
@@ -2301,7 +2300,7 @@ namespace Game.Entities
 
             foreach (var data in loadData)
             {
-                SpellNameRecord spellNameEntry = CliDB.SpellNameStorage.LookupByKey((int)data.Key.Id);
+                SpellNameRecord spellNameEntry = CliDB.SpellNameStorage.LookupByKey(data.Key.Id);
                 if (spellNameEntry == null)
                     continue;
 
@@ -2922,7 +2921,7 @@ namespace Game.Entities
                 {
                     bool visualNeedsAmmo(SpellXSpellVisualRecord spellXspellVisual)
                     {
-                        SpellVisualRecord spellVisual = CliDB.SpellVisualStorage.LookupByKey((int)spellXspellVisual.SpellVisualID);
+                        SpellVisualRecord spellVisual = CliDB.SpellVisualStorage.LookupByKey(spellXspellVisual.SpellVisualID);
                         if (spellVisual == null)
                             return false;
 
@@ -4993,7 +4992,7 @@ namespace Game.Entities
                         return false;
 
                     // team that controls the workshop in the specified area
-                    uint team = bf.GetData(newArea);
+                    int team = bf.GetData(newArea);
 
                     if (team == BatttleGroundTeamId.Horde)
                         return spellId == 56618;

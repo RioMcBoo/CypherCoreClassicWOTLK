@@ -707,7 +707,7 @@ namespace Game.Entities
                 }
             }
 
-            m_traitConfigStates[(int)configId] = PlayerSpellState.Changed;
+            m_traitConfigStates[configId] = PlayerSpellState.Changed;
         }
 
         void AddTraitConfig(TraitConfigPacket traitConfig)
@@ -896,7 +896,7 @@ namespace Game.Entities
                 }
             }
 
-            m_traitConfigStates[(int)editedConfigId] = PlayerSpellState.Changed;
+            m_traitConfigStates[editedConfigId] = PlayerSpellState.Changed;
         }
 
         public void RenameTraitConfig(int editedConfigId, string newName)
@@ -988,7 +988,7 @@ namespace Game.Entities
                 RemoveUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.StarterBuild);
             }
 
-            m_traitConfigStates[(int)traitConfigId] = PlayerSpellState.Changed;
+            m_traitConfigStates[traitConfigId] = PlayerSpellState.Changed;
         }
 
         public void SetTraitConfigUseSharedActionBars(int traitConfigId, bool usesSharedActionBars, bool isLastSelectedSavedConfig)

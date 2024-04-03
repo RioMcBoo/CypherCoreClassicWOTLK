@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
@@ -266,7 +265,7 @@ namespace Game.Loots
 
                 StartLootRoll startLootRoll = new();
                 startLootRoll.LootObj = m_loot.GetGUID();
-                startLootRoll.MapID = (int)m_map.GetId();
+                startLootRoll.MapID = m_map.GetId();
                 startLootRoll.RollTime = (uint)LOOT_ROLL_TIMEOUT.TotalMilliseconds;
                 startLootRoll.Method = m_loot.GetLootMethod();
                 startLootRoll.ValidRolls = m_voteMask;
@@ -735,7 +734,7 @@ namespace Game.Loots
         public LootItem GetItemInSlot(int lootListId)
         {
             if (lootListId < items.Count)
-                return items[(int)lootListId];
+                return items[lootListId];
 
             return null;
         }

@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System.IO;
-using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {

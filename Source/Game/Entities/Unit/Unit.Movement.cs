@@ -2,8 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
-using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Movement;
@@ -791,7 +789,7 @@ namespace Game.Entities
             {
                 AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(areaId);
                 if (areaTable != null)
-                    mountFlags = (AreaMountFlags)areaTable.MountFlags;
+                    mountFlags = areaTable.MountFlags;
             }
 
             ZLiquidStatus liquidStatus = GetMap().GetLiquidStatus(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids);
@@ -1577,7 +1575,7 @@ namespace Game.Entities
                 {
                     MoveApplyMovementForce applyMovementForce = new();
                     applyMovementForce.MoverGUID = GetGUID();
-                    applyMovementForce.SequenceIndex = (int)m_movementCounter++;
+                    applyMovementForce.SequenceIndex = m_movementCounter++;
                     applyMovementForce.Force = force;
                     movingPlayer.SendPacket(applyMovementForce);
                 }
@@ -1603,7 +1601,7 @@ namespace Game.Entities
                 {
                     MoveRemoveMovementForce moveRemoveMovementForce = new();
                     moveRemoveMovementForce.MoverGUID = GetGUID();
-                    moveRemoveMovementForce.SequenceIndex = (int)m_movementCounter++;
+                    moveRemoveMovementForce.SequenceIndex = m_movementCounter++;
                     moveRemoveMovementForce.ID = id;
                     movingPlayer.SendPacket(moveRemoveMovementForce);
                 }

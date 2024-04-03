@@ -12,27 +12,27 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
 {
     struct SpellIds
     {
-        public const uint SummonRagnaros = 19774;
-        public const uint BlastWave = 20229;
-        public const uint Teleport = 20618;
-        public const uint MagicReflection = 20619;
-        public const uint AegisOfRagnaros = 20620;
-        public const uint DamageReflection = 21075;
+        public const int SummonRagnaros = 19774;
+        public const int BlastWave = 20229;
+        public const int Teleport = 20618;
+        public const int MagicReflection = 20619;
+        public const int AegisOfRagnaros = 20620;
+        public const int DamageReflection = 21075;
     }
 
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SaySpawn = 1;
-        public const uint SaySlay = 2;
-        public const uint SaySpecial = 3;
-        public const uint SayDefeat = 4;
+        public const int SayAggro = 0;
+        public const int SaySpawn = 1;
+        public const int SaySlay = 2;
+        public const int SaySpecial = 3;
+        public const int SayDefeat = 4;
 
-        public const uint SaySummonMaj = 5;
-        public const uint SayArrival2Maj = 6;
+        public const int SaySummonMaj = 5;
+        public const int SayArrival2Maj = 6;
 
-        public const uint OptionIdYouChallengedUs = 0;
-        public const uint MenuOptionYouChallengedUs = 4108;
+        public const int OptionIdYouChallengedUs = 0;
+        public const int MenuOptionYouChallengedUs = 4108;
     }
 
     [Script]
@@ -86,14 +86,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
 
                 if (me.FindNearestCreature(MCCreatureIds.FlamewakerHealer, 100.0f) == null && me.FindNearestCreature(MCCreatureIds.FlamewakerElite, 100.0f) == null)
                 {
-                    me.SetFaction((uint)FactionTemplates.Friendly);
+                    me.SetFaction(FactionTemplates.Friendly);
                     EnterEvadeMode();
                     Talk(TextIds.SayDefeat);
                     _JustDied();
                     _scheduler.Schedule(TimeSpan.FromSeconds(32), task =>
                     {
                         me.NearTeleportTo(MCMiscConst.RagnarosTelePos.GetPositionX(), MCMiscConst.RagnarosTelePos.GetPositionY(), MCMiscConst.RagnarosTelePos.GetPositionZ(), MCMiscConst.RagnarosTelePos.GetOrientation());
-                        me.SetNpcFlag(NPCFlags.Gossip);
+                        me.SetNpcFlag(NPCFlags1.Gossip);
                     });
                     return;
                 }
@@ -110,7 +110,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
         {
             if (action == ActionIds.StartRagnaros)
             {
-                me.RemoveNpcFlag(NPCFlags.Gossip);
+                me.RemoveNpcFlag(NPCFlags1.Gossip);
                 Talk(TextIds.SaySummonMaj);
 
                 _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
@@ -124,12 +124,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
             }
             else if (action == ActionIds.StartRagnarosAlt)
             {
-                me.SetFaction((uint)FactionTemplates.Friendly);
-                me.SetNpcFlag(NPCFlags.Gossip);
+                me.SetFaction(FactionTemplates.Friendly);
+                me.SetNpcFlag(NPCFlags1.Gossip);
             }
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
             if (menuId == TextIds.MenuOptionYouChallengedUs && gossipListId == TextIds.OptionIdYouChallengedUs)
             {

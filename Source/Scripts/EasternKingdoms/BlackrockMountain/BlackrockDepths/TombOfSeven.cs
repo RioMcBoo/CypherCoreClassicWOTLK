@@ -14,29 +14,29 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
     struct SpellIds
     {
         //Gloomrel
-        public const uint SmeltDarkIron = 14891;
-        public const uint LearnSmelt = 14894;
+        public const int SmeltDarkIron = 14891;
+        public const int LearnSmelt = 14894;
 
         //Doomrel
-        public const uint Shadowboltvolley = 15245;
-        public const uint Immolate = 12742;
-        public const uint Curseofweakness = 12493;
-        public const uint Demonarmor = 13787;
-        public const uint SummonVoidwalkers = 15092;
+        public const int Shadowboltvolley = 15245;
+        public const int Immolate = 12742;
+        public const int Curseofweakness = 12493;
+        public const int Demonarmor = 13787;
+        public const int SummonVoidwalkers = 15092;
     }
 
     struct QuestIds
     {
-        public const uint SpectralChalice = 4083;
+        public const int SpectralChalice = 4083;
     }
 
     struct TextIds
     {
-        public const uint GossipSelectDoomrel = 1828;
-        public const uint GossipMenuIdContinue = 1;
+        public const int GossipSelectDoomrel = 1828;
+        public const int GossipMenuIdContinue = 1;
 
-        public const uint GossipMenuChallenge = 1947;
-        public const uint GossipMenuIdChallenge = 0;
+        public const int GossipMenuChallenge = 1947;
+        public const int GossipMenuIdChallenge = 0;
     }
 
     struct MiscConst
@@ -65,9 +65,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
             instance = creature.GetInstanceScript();
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            int action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             switch (action)
             {
@@ -126,15 +126,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
         {
             Initialize();
 
-            me.SetFaction((uint)FactionTemplates.Friendly);
+            me.SetFaction(FactionTemplates.Friendly);
 
             // was set before event start, so set again
             me.SetImmuneToPC(true);
 
             if (_instance.GetData(DataTypes.DataGhostkill) >= 7)
-                me.ReplaceAllNpcFlags(NPCFlags.None);
+                me.ReplaceAllNpcFlags(NPCFlags1.None);
             else
-                me.ReplaceAllNpcFlags(NPCFlags.Gossip);
+                me.ReplaceAllNpcFlags(NPCFlags1.Gossip);
         }
 
         public override void JustEngagedWith(Unit who)
@@ -163,7 +163,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
             });
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!_voidwalkers && !HealthAbovePct(50))
             {
@@ -192,9 +192,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
             _scheduler.Update(diff);
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            int action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
 
             switch (action)

@@ -504,7 +504,7 @@ namespace Game.Entities
 
         public static ObjectGuid CreateClientActor(ushort ownerType, ushort ownerId, uint counter)
         {
-            return new ObjectGuid(((long)HighGuid.ClientActor << 58) | (((long)ownerType & 0x1FFF) << 42) | (((long)ownerId & 0xFFFFFF) << 26), (long)counter);
+            return new ObjectGuid(((long)HighGuid.ClientActor << 58) | (((long)ownerType & 0x1FFF) << 42) | (((long)ownerId & 0xFFFFFF) << 26), counter);
         }
 
         public static ObjectGuid CreateChatChannel(int realmId, bool builtIn, bool trade, ushort zoneId, byte factionGroupMask, long counter)
@@ -544,12 +544,12 @@ namespace Game.Entities
 
         public static ObjectGuid CreateClient(HighGuid type, int realmId, int arg1, long counter)
         {
-            return new ObjectGuid(((long)type << 58) | (((long)GetRealmIdForObjectGuid(realmId) & 0x1FFF) << 42) | (((long)arg1 & 0xFFFFFFFF) << 10), counter);
+            return new ObjectGuid(((long)type << 58) | (((long)GetRealmIdForObjectGuid(realmId) & 0x1FFF) << 42) | ((arg1 & 0xFFFFFFFF) << 10), counter);
         }
 
         public static ObjectGuid CreateClubFinder(int realmId, byte type, int clubFinderId, long dbId)
         {
-            return new ObjectGuid(((long)HighGuid.ClubFinder << 58) | (type == 1 ? (((long)GetRealmIdForObjectGuid(realmId) & 0x1FFF) << 42) : 0) | (((long)type & 0xFF) << 33) | ((long)clubFinderId & 0xFFFFFFFF), dbId);
+            return new ObjectGuid(((long)HighGuid.ClubFinder << 58) | (type == 1 ? (((long)GetRealmIdForObjectGuid(realmId) & 0x1FFF) << 42) : 0) | (((long)type & 0xFF) << 33) | (clubFinderId & 0xFFFFFFFF), dbId);
         }
 
         public static ObjectGuid CreateToolsClient(int mapId, int serverId, long counter)
@@ -566,7 +566,7 @@ namespace Game.Entities
         {
             return new ObjectGuid(((long)HighGuid.LMMLobby << 58)
                 | ((long)GetRealmIdForObjectGuid(realmId) << 42)
-                | (((long)arg2 & 0xFFFFFFFF) << 26)
+                | ((arg2 & 0xFFFFFFFF) << 26)
                 | (((long)arg3 & 0xFF) << 18)
                 | (((long)arg4 & 0xFF) << 10),
                 counter);

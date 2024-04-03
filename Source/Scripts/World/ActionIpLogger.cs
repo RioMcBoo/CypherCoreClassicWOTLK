@@ -1,15 +1,9 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Configuration;
-using Framework.Constants;
 using Framework.Database;
-using Framework.Networking;
 using Game.Entities;
-using System.Collections.Generic;
-using Game.AI;
 using Game.Scripting;
-using Game.Spells;
 
 namespace Scripts.World.Achievements
 {
@@ -41,52 +35,52 @@ namespace Scripts.World.Achievements
 
         // We log last_ip instead of last_attempt_ip, as login was successful
         // AccountLogin = 0
-        public override void OnAccountLogin(uint accountId)
+        public override void OnAccountLogin(int accountId)
         {
             AccountIPLogAction(accountId, IPLoggingTypes.AccountLogin);
         }
 
         // We log last_attempt_ip instead of last_ip, as failed login doesn't necessarily mean approperiate user
         // AccountFailLogin = 1
-        public override void OnFailedAccountLogin(uint accountId)
+        public override void OnFailedAccountLogin(int accountId)
         {
             AccountIPLogAction(accountId, IPLoggingTypes.AccountFailLogin);
         }
 
         // AccountChangePw = 2
-        public override void OnPasswordChange(uint accountId)
+        public override void OnPasswordChange(int accountId)
         {
             AccountIPLogAction(accountId, IPLoggingTypes.AccountChangePw);
         }
 
         // AccountChangePwFail = 3
-        public override void OnFailedPasswordChange(uint accountId)
+        public override void OnFailedPasswordChange(int accountId)
         {
             AccountIPLogAction(accountId, IPLoggingTypes.AccountChangePwFail);
         }
 
         // Registration Email can Not be changed apart from Gm level users. Thus, we do not require to log them...
         // AccountChangeEmail = 4
-        public override void OnEmailChange(uint accountId)
+        public override void OnEmailChange(int accountId)
         {
             AccountIPLogAction(accountId, IPLoggingTypes.AccountChangeEmail); // ... they get logged by gm command logger anyway
         }
 
         // AccountChangeEmailFail = 5
-        public override void OnFailedEmailChange(uint accountId)
+        public override void OnFailedEmailChange(int accountId)
         {
             AccountIPLogAction(accountId, IPLoggingTypes.AccountChangeEmailFail);
         }
 
         // AccountLogout = 6
-        void AccountIPLogAction(uint accountId, IPLoggingTypes aType)
+        void AccountIPLogAction(int accountId, IPLoggingTypes aType)
         {
             // Action Ip Logger is only intialized if config is set up
             // Else, this script isn't loaded in the first place: We require no config check.
 
             // We declare all the required variables
-            uint playerGuid = accountId;
-            uint realmId = Global.WorldMgr.GetRealmId().Index;
+            int playerGuid = accountId;
+            int realmId = Global.WorldMgr.GetRealmId().Index;
             string systemNote = "Error"; // "Error" is a placeholder here. We change it later.
 
             // With this switch, we change systemNote so that we have a more accurate phraMath.Sing of what type it is.
@@ -192,8 +186,8 @@ namespace Scripts.World.Achievements
             // Else, this script isn't loaded in the first place: We require no config check.
 
             // We declare all the required variables
-            uint playerGuid = player.GetSession().GetAccountId();
-            uint realmId = Global.WorldMgr.GetRealmId().Index;
+            int playerGuid = player.GetSession().GetAccountId();
+            int realmId = Global.WorldMgr.GetRealmId().Index;
             string currentIp = player.GetSession().GetRemoteAddress();
             string systemNote;
 
@@ -245,23 +239,23 @@ namespace Scripts.World.Achievements
         public CharacterDeleteActionIpLogger() : base("CharacterDeleteActionIpLogger") { }
 
         // CharacterDelete = 10
-        public override void OnDelete(ObjectGuid guid, uint accountId)
+        public override void OnDelete(ObjectGuid guid, int accountId)
         {
             DeleteIPLogAction(guid, accountId, IPLoggingTypes.CharacterDelete);
         }
 
         // CharacterFailedDelete = 11
-        public override void OnFailedDelete(ObjectGuid guid, uint accountId)
+        public override void OnFailedDelete(ObjectGuid guid, int accountId)
         {
             DeleteIPLogAction(guid, accountId, IPLoggingTypes.CharacterFailedDelete);
         }
 
-        void DeleteIPLogAction(ObjectGuid guid, uint playerGuid, IPLoggingTypes aType)
+        void DeleteIPLogAction(ObjectGuid guid, int playerGuid, IPLoggingTypes aType)
         {
             // Action Ip Logger is only intialized if config is set up
             // Else, this script isn't loaded in the first place: We require no config check.
 
-            uint realmId = Global.WorldMgr.GetRealmId().Index;
+            int realmId = Global.WorldMgr.GetRealmId().Index;
             // Query playerGuid/accountId, as we only have characterGuid
             string systemNote;
 

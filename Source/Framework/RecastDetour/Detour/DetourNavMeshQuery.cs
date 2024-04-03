@@ -36,7 +36,6 @@ using System;
 using System.Diagnostics;
 using dtPolyRef = System.UInt64;
 using dtStatus = System.UInt32;
-using System.Collections.Generic;
 
 // Define DT_VIRTUAL_QUERYFILTER if you wish to derive a custom filter from dtQueryFilter.
 // On certain platforms indirect or virtual function call is expensive. The default
@@ -669,7 +668,7 @@ public static partial class Detour
             float[] edged = new float[DT_VERTS_PER_POLYGON];
             float[] edget = new float[DT_VERTS_PER_POLYGON];
             int nv = 0;
-            for (int i = 0; i < (int)poly.vertCount; ++i)
+            for (int i = 0; i < poly.vertCount; ++i)
             {
                 dtVcopy(verts, nv * 3, tile.verts, poly.verts[i] * 3);
                 nv++;
@@ -1941,7 +1940,7 @@ public static partial class Detour
                                                 straightPath, straightPathFlags, straightPathRefs,
                                                 ref straightPathCount, maxStraightPath);
 
-                            return DT_SUCCESS | DT_PARTIAL_RESULT | ((straightPathCount >= maxStraightPath) ? DT_BUFFER_TOO_SMALL : (uint)0);
+                            return DT_SUCCESS | DT_PARTIAL_RESULT | ((straightPathCount >= maxStraightPath) ? DT_BUFFER_TOO_SMALL : 0);
                         }
 
                         // If starting really close the portal, advance.
@@ -2188,7 +2187,7 @@ public static partial class Detour
                 }
 
                 // Find wall edges and find nearest point inside the walls.
-                for (int i = 0, j = (int)curPoly.vertCount - 1; i < (int)curPoly.vertCount; j = i++)
+                for (int i = 0, j = curPoly.vertCount - 1; i < curPoly.vertCount; j = i++)
                 {
                     // Find links to neighbours.
                     const int MAX_NEIS = 8;
@@ -2388,7 +2387,7 @@ public static partial class Detour
 
             // Find portal vertices.
             int v0 = fromPoly.verts[link.edge];
-            int v1 = fromPoly.verts[(link.edge + 1) % (int)fromPoly.vertCount];
+            int v1 = fromPoly.verts[(link.edge + 1) % fromPoly.vertCount];
             dtVcopy(left, 0, fromTile.verts, v0 * 3);
             dtVcopy(right, 0, fromTile.verts, v1 * 3);
 
@@ -2593,7 +2592,7 @@ public static partial class Detour
 
                 // Collect vertices.
                 int nv = 0;
-                for (int i = 0; i < (int)poly.vertCount; ++i)
+                for (int i = 0; i < poly.vertCount; ++i)
                 {
                     dtVcopy(verts, nv * 3, tile.verts, poly.verts[i] * 3);
                     nv++;
@@ -2640,7 +2639,7 @@ public static partial class Detour
                     dtLink link = tile.links[i];
 
                     // Find link which contains this edge.
-                    if ((int)link.edge != segMax)
+                    if (link.edge != segMax)
                         continue;
 
                     // Get pointer to the next polygon.
@@ -3467,7 +3466,7 @@ public static partial class Detour
 
             dtStatus status = DT_SUCCESS;
 
-            for (int i = 0, j = (int)poly.vertCount - 1; i < (int)poly.vertCount; j = i++)
+            for (int i = 0, j = poly.vertCount - 1; i < poly.vertCount; j = i++)
             {
                 // Skip non-solid edges.
                 nints = 0;
@@ -3666,7 +3665,7 @@ public static partial class Detour
                     m_nav.getTileAndPolyByRefUnsafe(parentRef, ref parentTile, ref parentPoly);
 
                 // Hit test walls.
-                for (int i = 0, j = (int)bestPoly.vertCount - 1; i < (int)bestPoly.vertCount; j = i++)
+                for (int i = 0, j = bestPoly.vertCount - 1; i < bestPoly.vertCount; j = i++)
                 {
                     // Skip non-solid edges.
                     if ((bestPoly.neis[j] & DT_EXT_LINK) != 0)

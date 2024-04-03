@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using static Game.AI.SmartAction;
 
 namespace Game.Entities
 {
@@ -3022,7 +3021,7 @@ namespace Game.Entities
                     if (bgPlayer != null)
                     {
                         AddBattlegroundQueueId(bgPlayer.queueTypeId);
-                        m_bgData.bgTypeID = (BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId;
+                        m_bgData.bgTypeID = bgPlayer.queueTypeId.BattlemasterListId;
 
                         //join player to Battlegroundgroup
                         currentBg.EventPlayerLoggedIn(this);

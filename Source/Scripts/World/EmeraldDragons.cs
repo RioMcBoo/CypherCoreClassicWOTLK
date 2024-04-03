@@ -13,71 +13,71 @@ namespace Scripts.World.Achievements
 {
     struct CreatureIds
     {
-        public const uint DragonYsondre = 14887;
-        public const uint DragonLethon = 14888;
-        public const uint DragonEmeriss = 14889;
-        public const uint DragonTaerar = 14890;
-        public const uint DreamFog = 15224;
+        public const int DragonYsondre = 14887;
+        public const int DragonLethon = 14888;
+        public const int DragonEmeriss = 14889;
+        public const int DragonTaerar = 14890;
+        public const int DreamFog = 15224;
 
         //Ysondre
-        public const uint DementedDruid = 15260;
+        public const int DementedDruid = 15260;
 
         //Lethon
-        public const uint SpiritShade = 15261;
+        public const int SpiritShade = 15261;
     }
 
     struct SpellIds
     {
-        public const uint TailSweep = 15847;    // Tail Sweep - Slap Everything Behind Dragon (2 Seconds Interval)
-        public const uint SummonPlayer = 24776;    // Teleport Highest Threat Player In Front Of Dragon If Wandering Off
-        public const uint DreamFog = 24777;    // Auraspell For Dream Fog Npc (15224)
-        public const uint Sleep = 24778;    // Sleep Triggerspell (Used For Dream Fog)
-        public const uint SeepingFogLeft = 24813;    // Dream Fog - Summon Left
-        public const uint SeepingFogRight = 24814;    // Dream Fog - Summon Right
-        public const uint NoxiousBreath = 24818;
-        public const uint MarkOfNature = 25040;    // Mark Of Nature Trigger (Applied On Target Death - 15 Minutes Of Being Suspectible To Aura Of Nature)
-        public const uint MarkOfNatureAura = 25041;    // Mark Of Nature (Passive Marker-Test; Ticks Every 10 Seconds From Boss; Triggers Spellid 25042 (Scripted)
-        public const uint AuraOfNature = 25043;    // Stun For 2 Minutes (Used When public const uint MarkOfNature Exists On The Target)
+        public const int TailSweep = 15847;    // Tail Sweep - Slap Everything Behind Dragon (2 Seconds Interval)
+        public const int SummonPlayer = 24776;    // Teleport Highest Threat Player In Front Of Dragon If Wandering Off
+        public const int DreamFog = 24777;    // Auraspell For Dream Fog Npc (15224)
+        public const int Sleep = 24778;    // Sleep Triggerspell (Used For Dream Fog)
+        public const int SeepingFogLeft = 24813;    // Dream Fog - Summon Left
+        public const int SeepingFogRight = 24814;    // Dream Fog - Summon Right
+        public const int NoxiousBreath = 24818;
+        public const int MarkOfNature = 25040;    // Mark Of Nature Trigger (Applied On Target Death - 15 Minutes Of Being Suspectible To Aura Of Nature)
+        public const int MarkOfNatureAura = 25041;    // Mark Of Nature (Passive Marker-Test; Ticks Every 10 Seconds From Boss; Triggers Spellid 25042 (Scripted)
+        public const int AuraOfNature = 25043;    // Stun For 2 Minutes (Used When public const int MarkOfNature Exists On The Target)
 
         //Ysondre
-        public const uint LightningWave = 24819;
-        public const uint SummonDruidSpirits = 24795;
+        public const int LightningWave = 24819;
+        public const int SummonDruidSpirits = 24795;
 
         //Lethon
-        public const uint DrawSpirit = 24811;
-        public const uint ShadowBoltWhirl = 24834;
-        public const uint DarkOffering = 24804;
+        public const int DrawSpirit = 24811;
+        public const int ShadowBoltWhirl = 24834;
+        public const int DarkOffering = 24804;
 
         //Emeriss
-        public const uint PutridMushroom = 24904;
-        public const uint CorruptionOfEarth = 24910;
-        public const uint VolatileInfection = 24928;
+        public const int PutridMushroom = 24904;
+        public const int CorruptionOfEarth = 24910;
+        public const int VolatileInfection = 24928;
 
         //Taerar
-        public const uint BellowingRoar = 22686;
-        public const uint Shade = 24313;
-        public const uint ArcaneBlast = 24857;
+        public const int BellowingRoar = 22686;
+        public const int Shade = 24313;
+        public const int ArcaneBlast = 24857;
 
-        public static uint[] TaerarShadeSpells = new uint[] { 24841, 24842, 24843 };
+        public static int[] TaerarShadeSpells = [24841, 24842, 24843];
     }
 
     struct TextIds
     {
         //Ysondre
-        public const uint SayYsondreAggro = 0;
-        public const uint SayYsondreSummonDruids = 1;
+        public const int SayYsondreAggro = 0;
+        public const int SayYsondreSummonDruids = 1;
 
         //Lethon
-        public const uint SayLethonAggro = 0;
-        public const uint SayLethonDrawSpirit = 1;
+        public const int SayLethonAggro = 0;
+        public const int SayLethonDrawSpirit = 1;
 
         //Emeriss
-        public const uint SayEmerissAggro = 0;
-        public const uint SayEmerissCastCorruption = 1;
+        public const int SayEmerissAggro = 0;
+        public const int SayEmerissCastCorruption = 1;
 
         //Taerar
-        public const uint SayTaerarAggro = 0;
-        public const uint SayTaerarSummonShades = 1;
+        public const int SayTaerarAggro = 0;
+        public const int SayTaerarSummonShades = 1;
     }
 
     class emerald_dragon : WorldBossAI
@@ -217,7 +217,7 @@ namespace Scripts.World.Achievements
         }
 
         // Summon druid spirits on 75%, 50% and 25% health
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthAbovePct(100 - 25 * _stage))
             {
@@ -262,7 +262,7 @@ namespace Scripts.World.Achievements
             base.JustEngagedWith(who);
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthAbovePct(100 - 25 * _stage))
             {
@@ -299,7 +299,7 @@ namespace Scripts.World.Achievements
             me.GetMotionMaster().MoveFollow(summoner, 0.0f, 0.0f);
         }
 
-        public override void MovementInform(MovementGeneratorType moveType, uint data)
+        public override void MovementInform(MovementGeneratorType moveType, int data)
         {
             if (moveType == MovementGeneratorType.Follow && data == _summonerGuid.GetCounter())
             {
@@ -350,7 +350,7 @@ namespace Scripts.World.Achievements
             base.JustEngagedWith(who);
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthAbovePct(100 - 25 * _stage))
             {
@@ -413,7 +413,7 @@ namespace Scripts.World.Achievements
             --_shades;
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             // At 75, 50 or 25 percent health, we need to activate the shades and go "banished"
             // Note: _stage holds the amount of times they have been summoned
@@ -512,7 +512,7 @@ namespace Scripts.World.Achievements
             });
         }
 
-        void HandleEffect(uint effIndex)
+        void HandleEffect(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             GetHitUnit().CastSpell(GetHitUnit(), SpellIds.AuraOfNature, true);

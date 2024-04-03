@@ -18,509 +18,509 @@ namespace Scripts.Spells.Items
     struct SpellIds
     {
         //Aegisofpreservation
-        public const uint AegisHeal = 23781;
+        public const int AegisHeal = 23781;
 
         //ZezzaksShard
-        public const uint EyeOfGrillok = 38495;
+        public const int EyeOfGrillok = 38495;
 
         // LowerCityPrayerbook
-        public const uint BlessingOfLowerCityDruid = 37878;
-        public const uint BlessingOfLowerCityPaladin = 37879;
-        public const uint BlessingOfLowerCityPriest = 37880;
-        public const uint BlessingOfLowerCityShaman = 37881;
+        public const int BlessingOfLowerCityDruid = 37878;
+        public const int BlessingOfLowerCityPaladin = 37879;
+        public const int BlessingOfLowerCityPriest = 37880;
+        public const int BlessingOfLowerCityShaman = 37881;
 
         //Alchemiststone
-        public const uint AlchemistStoneExtraHeal = 21399;
-        public const uint AlchemistStoneExtraMana = 21400;
+        public const int AlchemistStoneExtraHeal = 21399;
+        public const int AlchemistStoneExtraMana = 21400;
 
         //Angercapacitor
-        public const uint MoteOfAnger = 71432;
-        public const uint ManifestAngerMainHand = 71433;
-        public const uint ManifestAngerOffHand = 71434;
+        public const int MoteOfAnger = 71432;
+        public const int ManifestAngerMainHand = 71433;
+        public const int ManifestAngerOffHand = 71434;
 
         //Auraofmadness
-        public const uint Sociopath = 39511; // Sociopath: +35 Strength(Paladin; Rogue; Druid; Warrior)
-        public const uint Delusional = 40997; // Delusional: +70 Attack Power(Rogue; Hunter; Paladin; Warrior; Druid)
-        public const uint Kleptomania = 40998; // Kleptomania: +35 Agility(Warrior; Rogue; Paladin; Hunter; Druid)
-        public const uint Megalomania = 40999; // Megalomania: +41 Damage / Healing(Druid; Shaman; Priest; Warlock; Mage; Paladin)
-        public const uint Paranoia = 41002; // Paranoia: +35 Spell / Melee / Ranged Crit Strike Rating(All Classes)
-        public const uint Manic = 41005; // Manic: +35 Haste(Spell; Melee And Ranged) (All Classes)
-        public const uint Narcissism = 41009; // Narcissism: +35 Intellect(Druid; Shaman; Priest; Warlock; Mage; Paladin; Hunter)
-        public const uint MartyrComplex = 41011; // Martyr Complex: +35 Stamina(All Classes)
-        public const uint Dementia = 41404; // Dementia: Every 5 Seconds Either Gives You +5/-5%  Damage/Healing. (Druid; Shaman; Priest; Warlock; Mage; Paladin)
-        public const uint DementiaPos = 41406;
-        public const uint DementiaNeg = 41409;
+        public const int Sociopath = 39511; // Sociopath: +35 Strength(Paladin; Rogue; Druid; Warrior)
+        public const int Delusional = 40997; // Delusional: +70 Attack Power(Rogue; Hunter; Paladin; Warrior; Druid)
+        public const int Kleptomania = 40998; // Kleptomania: +35 Agility(Warrior; Rogue; Paladin; Hunter; Druid)
+        public const int Megalomania = 40999; // Megalomania: +41 Damage / Healing(Druid; Shaman; Priest; Warlock; Mage; Paladin)
+        public const int Paranoia = 41002; // Paranoia: +35 Spell / Melee / Ranged Crit Strike Rating(All Classes)
+        public const int Manic = 41005; // Manic: +35 Haste(Spell; Melee And Ranged) (All Classes)
+        public const int Narcissism = 41009; // Narcissism: +35 Intellect(Druid; Shaman; Priest; Warlock; Mage; Paladin; Hunter)
+        public const int MartyrComplex = 41011; // Martyr Complex: +35 Stamina(All Classes)
+        public const int Dementia = 41404; // Dementia: Every 5 Seconds Either Gives You +5/-5%  Damage/Healing. (Druid; Shaman; Priest; Warlock; Mage; Paladin)
+        public const int DementiaPos = 41406;
+        public const int DementiaNeg = 41409;
 
         // BrittleArmor
-        public const uint BrittleArmor = 24575;
+        public const int BrittleArmor = 24575;
 
         //Blessingofancientkings
-        public const uint ProtectionOfAncientKings = 64413;
+        public const int ProtectionOfAncientKings = 64413;
 
         //Deadlyprecision
-        public const uint DeadlyPrecision = 71564;
+        public const int DeadlyPrecision = 71564;
 
         //Deathbringerswill
-        public const uint StrengthOfTheTaunka = 71484; // +600 Strength
-        public const uint AgilityOfTheVrykul = 71485; // +600 Agility
-        public const uint PowerOfTheTaunka = 71486; // +1200 Attack Power
-        public const uint AimOfTheIronDwarves = 71491; // +600 Critical
-        public const uint SpeedOfTheVrykul = 71492; // +600 Haste
-        public const uint AgilityOfTheVrykulHero = 71556; // +700 Agility
-        public const uint PowerOfTheTaunkaHero = 71558; // +1400 Attack Power
-        public const uint AimOfTheIronDwarvesHero = 71559; // +700 Critical
-        public const uint SpeedOfTheVrykulHero = 71560; // +700 Haste
-        public const uint StrengthOfTheTaunkaHero = 71561;  // +700 Strength
+        public const int StrengthOfTheTaunka = 71484; // +600 Strength
+        public const int AgilityOfTheVrykul = 71485; // +600 Agility
+        public const int PowerOfTheTaunka = 71486; // +1200 Attack Power
+        public const int AimOfTheIronDwarves = 71491; // +600 Critical
+        public const int SpeedOfTheVrykul = 71492; // +600 Haste
+        public const int AgilityOfTheVrykulHero = 71556; // +700 Agility
+        public const int PowerOfTheTaunkaHero = 71558; // +1400 Attack Power
+        public const int AimOfTheIronDwarvesHero = 71559; // +700 Critical
+        public const int SpeedOfTheVrykulHero = 71560; // +700 Haste
+        public const int StrengthOfTheTaunkaHero = 71561;  // +700 Strength
 
         //GoblinBombDispenser
-        public const uint SummonGoblinBomb = 13258;
-        public const uint MalfunctionExplosion = 13261;
+        public const int SummonGoblinBomb = 13258;
+        public const int MalfunctionExplosion = 13261;
 
         //GoblinWeatherMachine
-        public const uint PersonalizedWeather1 = 46740;
-        public const uint PersonalizedWeather2 = 46739;
-        public const uint PersonalizedWeather3 = 46738;
-        public const uint PersonalizedWeather4 = 46736;
+        public const int PersonalizedWeather1 = 46740;
+        public const int PersonalizedWeather2 = 46739;
+        public const int PersonalizedWeather3 = 46738;
+        public const int PersonalizedWeather4 = 46736;
 
         //Defibrillate
-        public const uint GoblinJumperCablesFail = 8338;
-        public const uint GoblinJumperCablesXlFail = 23055;
+        public const int GoblinJumperCablesFail = 8338;
+        public const int GoblinJumperCablesXlFail = 23055;
 
         //Desperatedefense
-        public const uint DesperateRage = 33898;
+        public const int DesperateRage = 33898;
 
         //Deviatefishspells
-        public const uint Sleepy = 8064;
-        public const uint Invigorate = 8065;
-        public const uint Shrink = 8066;
-        public const uint PartyTime = 8067;
-        public const uint HealthySpirit = 8068;
-        public const uint Rejuvenation = 8070;
+        public const int Sleepy = 8064;
+        public const int Invigorate = 8065;
+        public const int Shrink = 8066;
+        public const int PartyTime = 8067;
+        public const int HealthySpirit = 8068;
+        public const int Rejuvenation = 8070;
 
         //Discerningeyebeastmisc
-        public const uint DiscerningEyeBeast = 59914;
+        public const int DiscerningEyeBeast = 59914;
 
         //Fateruneofunsurpassedvigor
-        public const uint UnsurpassedVigor = 25733;
+        public const int UnsurpassedVigor = 25733;
 
         //Flaskofthenorthspells
-        public const uint FlaskOfTheNorthSp = 67016;
-        public const uint FlaskOfTheNorthAp = 67017;
-        public const uint FlaskOfTheNorthStr = 67018;
+        public const int FlaskOfTheNorthSp = 67016;
+        public const int FlaskOfTheNorthAp = 67017;
+        public const int FlaskOfTheNorthStr = 67018;
 
         //Frozenshadoweave
-        public const uint Shadowmend = 39373;
+        public const int Shadowmend = 39373;
 
         //Gnomishdeathray
-        public const uint GnomishDeathRaySelf = 13493;
-        public const uint GnomishDeathRayTarget = 13279;
+        public const int GnomishDeathRaySelf = 13493;
+        public const int GnomishDeathRayTarget = 13279;
 
         //Heartpierce
-        public const uint InvigorationMana = 71881;
-        public const uint InvigorationEnergy = 71882;
-        public const uint InvigorationRage = 71883;
-        public const uint InvigorationRp = 71884;
-        public const uint InvigorationRpHero = 71885;
-        public const uint InvigorationRageHero = 71886;
-        public const uint InvigorationEnergyHero = 71887;
-        public const uint InvigorationManaHero = 71888;
+        public const int InvigorationMana = 71881;
+        public const int InvigorationEnergy = 71882;
+        public const int InvigorationRage = 71883;
+        public const int InvigorationRp = 71884;
+        public const int InvigorationRpHero = 71885;
+        public const int InvigorationRageHero = 71886;
+        public const int InvigorationEnergyHero = 71887;
+        public const int InvigorationManaHero = 71888;
 
         //HourglassSand
-        public const uint BroodAfflictionBronze = 23170;
+        public const int BroodAfflictionBronze = 23170;
 
         //Makeawish
-        public const uint MrPinchysBlessing = 33053;
-        public const uint SummonMightyMrPinchy = 33057;
-        public const uint SummonFuriousMrPinchy = 33059;
-        public const uint TinyMagicalCrawdad = 33062;
-        public const uint MrPinchysGift = 33064;
+        public const int MrPinchysBlessing = 33053;
+        public const int SummonMightyMrPinchy = 33057;
+        public const int SummonFuriousMrPinchy = 33059;
+        public const int TinyMagicalCrawdad = 33062;
+        public const int MrPinchysGift = 33064;
 
         //Markofconquest
-        public const uint MarkOfConquestEnergize = 39599;
+        public const int MarkOfConquestEnergize = 39599;
 
         // MercurialShield
-        public const uint MercurialShield = 26464;
+        public const int MercurialShield = 26464;
 
         //MingoFortune
-        public const uint CreateFortune1 = 40804;
-        public const uint CreateFortune2 = 40805;
-        public const uint CreateFortune3 = 40806;
-        public const uint CreateFortune4 = 40807;
-        public const uint CreateFortune5 = 40808;
-        public const uint CreateFortune6 = 40809;
-        public const uint CreateFortune7 = 40908;
-        public const uint CreateFortune8 = 40910;
-        public const uint CreateFortune9 = 40911;
-        public const uint CreateFortune10 = 40912;
-        public const uint CreateFortune11 = 40913;
-        public const uint CreateFortune12 = 40914;
-        public const uint CreateFortune13 = 40915;
-        public const uint CreateFortune14 = 40916;
-        public const uint CreateFortune15 = 40918;
-        public const uint CreateFortune16 = 40919;
-        public const uint CreateFortune17 = 40920;
-        public const uint CreateFortune18 = 40921;
-        public const uint CreateFortune19 = 40922;
-        public const uint CreateFortune20 = 40923;
+        public const int CreateFortune1 = 40804;
+        public const int CreateFortune2 = 40805;
+        public const int CreateFortune3 = 40806;
+        public const int CreateFortune4 = 40807;
+        public const int CreateFortune5 = 40808;
+        public const int CreateFortune6 = 40809;
+        public const int CreateFortune7 = 40908;
+        public const int CreateFortune8 = 40910;
+        public const int CreateFortune9 = 40911;
+        public const int CreateFortune10 = 40912;
+        public const int CreateFortune11 = 40913;
+        public const int CreateFortune12 = 40914;
+        public const int CreateFortune13 = 40915;
+        public const int CreateFortune14 = 40916;
+        public const int CreateFortune15 = 40918;
+        public const int CreateFortune16 = 40919;
+        public const int CreateFortune17 = 40920;
+        public const int CreateFortune18 = 40921;
+        public const int CreateFortune19 = 40922;
+        public const int CreateFortune20 = 40923;
 
         //Necrotictouch
-        public const uint ItemNecroticTouchProc = 71879;
+        public const int ItemNecroticTouchProc = 71879;
 
         //Netomaticspells
-        public const uint NetOMaticTriggered1 = 16566;
-        public const uint NetOMaticTriggered2 = 13119;
-        public const uint NetOMaticTriggered3 = 13099;
+        public const int NetOMaticTriggered1 = 16566;
+        public const int NetOMaticTriggered2 = 13119;
+        public const int NetOMaticTriggered3 = 13099;
 
         //Noggenfoggerelixirspells
-        public const uint NoggenfoggerElixirTriggered1 = 16595;
-        public const uint NoggenfoggerElixirTriggered2 = 16593;
-        public const uint NoggenfoggerElixirTriggered3 = 16591;
+        public const int NoggenfoggerElixirTriggered1 = 16595;
+        public const int NoggenfoggerElixirTriggered2 = 16593;
+        public const int NoggenfoggerElixirTriggered3 = 16591;
 
         //Persistentshieldmisc
-        public const uint PersistentShieldTriggered = 26470;
+        public const int PersistentShieldTriggered = 26470;
 
         //Pethealing
-        public const uint HealthLink = 37382;
+        public const int HealthLink = 37382;
 
         //PowerCircle
-        public const uint LimitlessPower = 45044;
+        public const int LimitlessPower = 45044;
 
         //Savorydeviatedelight
-        public const uint FlipOutMale = 8219;
-        public const uint FlipOutFemale = 8220;
-        public const uint YaaarrrrMale = 8221;
-        public const uint YaaarrrrFemale = 8222;
+        public const int FlipOutMale = 8219;
+        public const int FlipOutFemale = 8220;
+        public const int YaaarrrrMale = 8221;
+        public const int YaaarrrrFemale = 8222;
 
         //Scrollofrecall
-        public const uint ScrollOfRecallI = 48129;
-        public const uint ScrollOfRecallII = 60320;
-        public const uint ScrollOfRecallIII = 60321;
-        public const uint Lost = 60444;
-        public const uint ScrollOfRecallFailAlliance1 = 60323;
-        public const uint ScrollOfRecallFailHorde1 = 60328;
+        public const int ScrollOfRecallI = 48129;
+        public const int ScrollOfRecallII = 60320;
+        public const int ScrollOfRecallIII = 60321;
+        public const int Lost = 60444;
+        public const int ScrollOfRecallFailAlliance1 = 60323;
+        public const int ScrollOfRecallFailHorde1 = 60328;
 
         // TransporterSpells
-        public const uint EvilTwin = 23445;
-        public const uint TransporterMalfunctionFire = 23449;
-        public const uint TransporterMalfunctionSmaller = 36893;
-        public const uint TransporterMalfunctionBigger = 36895;
-        public const uint TransporterMalfunctionChicken = 36940;
-        public const uint TransformHorde = 36897;
-        public const uint TransformAlliance = 36899;
-        public const uint SoulSplitEvil = 36900;
-        public const uint SoulSplitGood = 36901;
+        public const int EvilTwin = 23445;
+        public const int TransporterMalfunctionFire = 23449;
+        public const int TransporterMalfunctionSmaller = 36893;
+        public const int TransporterMalfunctionBigger = 36895;
+        public const int TransporterMalfunctionChicken = 36940;
+        public const int TransformHorde = 36897;
+        public const int TransformAlliance = 36899;
+        public const int SoulSplitEvil = 36900;
+        public const int SoulSplitGood = 36901;
 
         //Shadowsfate
-        public const uint SoulFeast = 71203;
+        public const int SoulFeast = 71203;
 
         //Shadowmourne
-        public const uint ShadowmourneChaosBaneDamage = 71904;
-        public const uint ShadowmourneSoulFragment = 71905;
-        public const uint ShadowmourneVisualLow = 72521;
-        public const uint ShadowmourneVisualHigh = 72523;
-        public const uint ShadowmourneChaosBaneBuff = 73422;
+        public const int ShadowmourneChaosBaneDamage = 71904;
+        public const int ShadowmourneSoulFragment = 71905;
+        public const int ShadowmourneVisualLow = 72521;
+        public const int ShadowmourneVisualHigh = 72523;
+        public const int ShadowmourneChaosBaneBuff = 73422;
 
         //Sixdemonbagspells
-        public const uint Frostbolt = 11538;
-        public const uint Polymorph = 14621;
-        public const uint SummonFelhoundMinion = 14642;
-        public const uint Fireball = 15662;
-        public const uint ChainLightning = 21179;
-        public const uint EnvelopingWinds = 25189;
+        public const int Frostbolt = 11538;
+        public const int Polymorph = 14621;
+        public const int SummonFelhoundMinion = 14642;
+        public const int Fireball = 15662;
+        public const int ChainLightning = 21179;
+        public const int EnvelopingWinds = 25189;
 
         //Swifthandjusticemisc
-        public const uint SwiftHandOfJusticeHeal = 59913;
+        public const int SwiftHandOfJusticeHeal = 59913;
 
         //Underbellyelixirspells
-        public const uint UnderbellyElixirTriggered1 = 59645;
-        public const uint UnderbellyElixirTriggered2 = 59831;
-        public const uint UnderbellyElixirTriggered3 = 59843;
+        public const int UnderbellyElixirTriggered1 = 59645;
+        public const int UnderbellyElixirTriggered2 = 59831;
+        public const int UnderbellyElixirTriggered3 = 59843;
 
         //Wormholegeneratorpandariaspell
-        public const uint Wormholepandariaisleofreckoning = 126756;
-        public const uint Wormholepandariakunlaiunderwater = 126757;
-        public const uint Wormholepandariasravess = 126758;
-        public const uint Wormholepandariarikkitunvillage = 126759;
-        public const uint Wormholepandariazanvesstree = 126760;
-        public const uint Wormholepandariaanglerswharf = 126761;
-        public const uint Wormholepandariacranestatue = 126762;
-        public const uint Wormholepandariaemperorsomen = 126763;
-        public const uint Wormholepandariawhitepetallake = 126764;
+        public const int Wormholepandariaisleofreckoning = 126756;
+        public const int Wormholepandariakunlaiunderwater = 126757;
+        public const int Wormholepandariasravess = 126758;
+        public const int Wormholepandariarikkitunvillage = 126759;
+        public const int Wormholepandariazanvesstree = 126760;
+        public const int Wormholepandariaanglerswharf = 126761;
+        public const int Wormholepandariacranestatue = 126762;
+        public const int Wormholepandariaemperorsomen = 126763;
+        public const int Wormholepandariawhitepetallake = 126764;
 
         //Airriflespells
-        public const uint AirRifleHoldVisual = 65582;
-        public const uint AirRifleShoot = 67532;
-        public const uint AirRifleShootSelf = 65577;
+        public const int AirRifleHoldVisual = 65582;
+        public const int AirRifleShoot = 67532;
+        public const int AirRifleShootSelf = 65577;
 
         //Genericdata
-        public const uint ArcaniteDragonling = 19804;
-        public const uint BattleChicken = 13166;
-        public const uint MechanicalDragonling = 4073;
-        public const uint MithrilMechanicalDragonling = 12749;
+        public const int ArcaniteDragonling = 19804;
+        public const int BattleChicken = 13166;
+        public const int MechanicalDragonling = 4073;
+        public const int MithrilMechanicalDragonling = 12749;
 
         //Vanquishedclutchesspells
-        public const uint Crusher = 64982;
-        public const uint Constrictor = 64983;
-        public const uint Corruptor = 64984;
+        public const int Crusher = 64982;
+        public const int Constrictor = 64983;
+        public const int Corruptor = 64984;
 
         //Magiceater
-        public const uint WildMagic = 58891;
-        public const uint WellFed1 = 57288;
-        public const uint WellFed2 = 57139;
-        public const uint WellFed3 = 57111;
-        public const uint WellFed4 = 57286;
-        public const uint WellFed5 = 57291;
+        public const int WildMagic = 58891;
+        public const int WellFed1 = 57288;
+        public const int WellFed2 = 57139;
+        public const int WellFed3 = 57111;
+        public const int WellFed4 = 57286;
+        public const int WellFed5 = 57291;
 
         //Purifyhelboarmeat
-        public const uint SummonPurifiedHelboarMeat = 29277;
-        public const uint SummonToxicHelboarMeat = 29278;
+        public const int SummonPurifiedHelboarMeat = 29277;
+        public const int SummonToxicHelboarMeat = 29278;
 
         //Nighinvulnerability
-        public const uint NighInvulnerability = 30456;
-        public const uint CompleteVulnerability = 30457;
+        public const int NighInvulnerability = 30456;
+        public const int CompleteVulnerability = 30457;
 
         //Poultryzer
-        public const uint PoultryizerSuccess = 30501;
-        public const uint PoultryizerBackfire = 30504;
+        public const int PoultryizerSuccess = 30501;
+        public const int PoultryizerBackfire = 30504;
 
         //Socretharsstone
-        public const uint SocretharToSeat = 35743;
-        public const uint SocretharFromSeat = 35744;
+        public const int SocretharToSeat = 35743;
+        public const int SocretharFromSeat = 35744;
 
         //Demonbroiledsurprise
-        public const uint CreateDemonBroiledSurprise = 43753;
+        public const int CreateDemonBroiledSurprise = 43753;
 
         //Completeraptorcapture
-        public const uint RaptorCaptureCredit = 42337;
+        public const int RaptorCaptureCredit = 42337;
 
         //Impaleleviroth
-        public const uint LevirothSelfImpale = 49882;
+        public const int LevirothSelfImpale = 49882;
 
         //LifegivingGem
-        public const uint GiftOfLife1 = 23782;
-        public const uint GiftOfLife2 = 23783;
+        public const int GiftOfLife1 = 23782;
+        public const int GiftOfLife2 = 23783;
 
         //Nitroboots
-        public const uint NitroBoostsSuccess = 54861;
-        public const uint NitroBoostsBackfire = 46014;
-        public const uint NitroBoostsParachute = 54649;
+        public const int NitroBoostsSuccess = 54861;
+        public const int NitroBoostsBackfire = 46014;
+        public const int NitroBoostsParachute = 54649;
 
         //Teachlanguage
-        public const uint LearnGnomishBinary = 50242;
-        public const uint LearnGoblinBinary = 50246;
+        public const int LearnGnomishBinary = 50242;
+        public const int LearnGoblinBinary = 50246;
 
         //Rocketboots
-        public const uint RocketBootsProc = 30452;
+        public const int RocketBootsProc = 30452;
 
         //Pygmyoil
-        public const uint PygmyOilPygmyAura = 53806;
-        public const uint PygmyOilSmallerAura = 53805;
+        public const int PygmyOilPygmyAura = 53806;
+        public const int PygmyOilSmallerAura = 53805;
 
         //Chickencover
-        public const uint ChickenNet = 51959;
-        public const uint CaptureChickenEscape = 51037;
+        public const int ChickenNet = 51959;
+        public const int CaptureChickenEscape = 51037;
 
         //Greatmotherssoulcather
-        public const uint ForceCastSummonGnomeSoul = 46486;
+        public const int ForceCastSummonGnomeSoul = 46486;
 
         //Shardofthescale
-        public const uint PurifiedCauterizingHeal = 69733;
-        public const uint PurifiedSearingFlames = 69729;
-        public const uint ShinyCauterizingHeal = 69734;
-        public const uint ShinySearingFlames = 69730;
+        public const int PurifiedCauterizingHeal = 69733;
+        public const int PurifiedSearingFlames = 69729;
+        public const int ShinyCauterizingHeal = 69734;
+        public const int ShinySearingFlames = 69730;
 
         //Soulpreserver
-        public const uint SoulPreserverDruid = 60512;
-        public const uint SoulPreserverPaladin = 60513;
-        public const uint SoulPreserverPriest = 60514;
-        public const uint SoulPreserverShaman = 60515;
+        public const int SoulPreserverDruid = 60512;
+        public const int SoulPreserverPaladin = 60513;
+        public const int SoulPreserverPriest = 60514;
+        public const int SoulPreserverShaman = 60515;
 
         //ExaltedSunwellNeck
-        public const uint LightsWrath = 45479; // Light'S Wrath If Exalted By Aldor
-        public const uint ArcaneBolt = 45429; // Arcane Bolt If Exalted By Scryers
+        public const int LightsWrath = 45479; // Light'S Wrath If Exalted By Aldor
+        public const int ArcaneBolt = 45429; // Arcane Bolt If Exalted By Scryers
 
-        public const uint LightsStrength = 45480; // Light'S Strength If Exalted By Aldor
-        public const uint ArcaneStrike = 45428; // Arcane Strike If Exalted By Scryers
+        public const int LightsStrength = 45480; // Light'S Strength If Exalted By Aldor
+        public const int ArcaneStrike = 45428; // Arcane Strike If Exalted By Scryers
 
-        public const uint LightsWard = 45432; // Light'S Ward If Exalted By Aldor
-        public const uint ArcaneInsight = 45431; // Arcane Insight If Exalted By Scryers
+        public const int LightsWard = 45432; // Light'S Ward If Exalted By Aldor
+        public const int ArcaneInsight = 45431; // Arcane Insight If Exalted By Scryers
 
-        public const uint LightsSalvation = 45478; // Light'S Salvation If Exalted By Aldor
-        public const uint ArcaneSurge = 45430; // Arcane Surge If Exalted By Scryers
+        public const int LightsSalvation = 45478; // Light'S Salvation If Exalted By Aldor
+        public const int ArcaneSurge = 45430; // Arcane Surge If Exalted By Scryers
 
         //Deathchoicespells
-        public const uint DeathChoiceNormalAura = 67702;
-        public const uint DeathChoiceNormalAgility = 67703;
-        public const uint DeathChoiceNormalStrength = 67708;
-        public const uint DeathChoiceHeroicAura = 67771;
-        public const uint DeathChoiceHeroicAgility = 67772;
-        public const uint DeathChoiceHeroicStrength = 67773;
+        public const int DeathChoiceNormalAura = 67702;
+        public const int DeathChoiceNormalAgility = 67703;
+        public const int DeathChoiceNormalStrength = 67708;
+        public const int DeathChoiceHeroicAura = 67771;
+        public const int DeathChoiceHeroicAgility = 67772;
+        public const int DeathChoiceHeroicStrength = 67773;
 
         //Trinketstackspells
-        public const uint LightningCapacitorAura = 37657;  // Lightning Capacitor
-        public const uint LightningCapacitorStack = 37658;
-        public const uint LightningCapacitorTrigger = 37661;
-        public const uint ThunderCapacitorAura = 54841;  // Thunder Capacitor
-        public const uint ThunderCapacitorStack = 54842;
-        public const uint ThunderCapacitorTrigger = 54843;
-        public const uint Toc25CasterTrinketNormalAura = 67712;  // Item - Coliseum 25 Normal Caster Trinket
-        public const uint Toc25CasterTrinketNormalStack = 67713;
-        public const uint Toc25CasterTrinketNormalTrigger = 67714;
-        public const uint Toc25CasterTrinketHeroicAura = 67758;  // Item - Coliseum 25 Heroic Caster Trinket
-        public const uint Toc25CasterTrinketHeroicStack = 67759;
-        public const uint Toc25CasterTrinketHeroicTrigger = 67760;
+        public const int LightningCapacitorAura = 37657;  // Lightning Capacitor
+        public const int LightningCapacitorStack = 37658;
+        public const int LightningCapacitorTrigger = 37661;
+        public const int ThunderCapacitorAura = 54841;  // Thunder Capacitor
+        public const int ThunderCapacitorStack = 54842;
+        public const int ThunderCapacitorTrigger = 54843;
+        public const int Toc25CasterTrinketNormalAura = 67712;  // Item - Coliseum 25 Normal Caster Trinket
+        public const int Toc25CasterTrinketNormalStack = 67713;
+        public const int Toc25CasterTrinketNormalTrigger = 67714;
+        public const int Toc25CasterTrinketHeroicAura = 67758;  // Item - Coliseum 25 Heroic Caster Trinket
+        public const int Toc25CasterTrinketHeroicStack = 67759;
+        public const int Toc25CasterTrinketHeroicTrigger = 67760;
 
         //Darkmooncardspells
-        public const uint DarkmoonCardStrenght = 60229;
-        public const uint DarkmoonCardAgility = 60233;
-        public const uint DarkmoonCardIntellect = 60234;
-        public const uint DarkmoonCardVersatility = 60235;
+        public const int DarkmoonCardStrenght = 60229;
+        public const int DarkmoonCardAgility = 60233;
+        public const int DarkmoonCardIntellect = 60234;
+        public const int DarkmoonCardVersatility = 60235;
 
         //Manadrainspells
-        public const uint ManaDrainEnergize = 29471;
-        public const uint ManaDrainLeech = 27526;
+        public const int ManaDrainEnergize = 29471;
+        public const int ManaDrainLeech = 27526;
 
         //Tauntflag
-        public const uint TauntFlag = 51657;
+        public const int TauntFlag = 51657;
 
         //MirrensDrinkingHat
-        public const uint LochModanLager = 29827;
-        public const uint StouthammerLite = 29828;
-        public const uint AeriePeakPaleAle = 29829;
+        public const int LochModanLager = 29827;
+        public const int StouthammerLite = 29828;
+        public const int AeriePeakPaleAle = 29829;
 
         //MindControlCap
-        public const uint GnomishMindControlCap = 13181;
-        public const uint Dullard = 67809;
+        public const int GnomishMindControlCap = 13181;
+        public const int Dullard = 67809;
 
         //UniversalRemote
-        public const uint ControlMachine = 8345;
-        public const uint MobilityMalfunction = 8346;
-        public const uint TargetLock = 8347;
+        public const int ControlMachine = 8345;
+        public const int MobilityMalfunction = 8346;
+        public const int TargetLock = 8347;
 
         //Zandalariancharms
-        public const uint UnstablePowerAuraStack = 24659;
-        public const uint RestlessStrengthAuraStack = 24662;
+        public const int UnstablePowerAuraStack = 24659;
+        public const int RestlessStrengthAuraStack = 24662;
 
         // AuraprocRemovespells        
-        public const uint TalismanOfAscendance = 28200;
-        public const uint JomGabbar = 29602;
-        public const uint BattleTrance = 45040;
-        public const uint WorldQuellerFocus = 90900;
-        public const uint BrutalKinship1 = 144671;
-        public const uint BrutalKinship2 = 145738;
+        public const int TalismanOfAscendance = 28200;
+        public const int JomGabbar = 29602;
+        public const int BattleTrance = 45040;
+        public const int WorldQuellerFocus = 90900;
+        public const int BrutalKinship1 = 144671;
+        public const int BrutalKinship2 = 145738;
 
         // Eggnog
-        public const uint EggNogReindeer = 21936;
-        public const uint EggNogSnowman = 21980;
+        public const int EggNogReindeer = 21936;
+        public const int EggNogSnowman = 21980;
     }
 
     struct TextIds
     {
         //Auraofmadness
-        public const uint SayMadness = 21954;
+        public const int SayMadness = 21954;
 
         //Roll Dice
-        public const uint DecahedralDwarvenDice = 26147;
+        public const int DecahedralDwarvenDice = 26147;
 
         //Roll 'dem Bones
-        public const uint WornTrollDice = 26152;
+        public const int WornTrollDice = 26152;
 
         //TauntFlag
-        public const uint EmotePlantsFlag = 28008;
+        public const int EmotePlantsFlag = 28008;
 
         //Feast
-        public const uint GreatFeast = 31843;
-        public const uint TextFishFeast = 31844;
-        public const uint TextGiganticFeast = 31846;
-        public const uint SmallFeast = 31845;
-        public const uint BountifulFeast = 35153;
+        public const int GreatFeast = 31843;
+        public const int TextFishFeast = 31844;
+        public const int TextGiganticFeast = 31846;
+        public const int SmallFeast = 31845;
+        public const int BountifulFeast = 35153;
     }
 
     struct FactionIds
     {
         //ExaltedSunwellNeck
-        public const uint Aldor = 932;
-        public const uint Scryers = 934;
+        public const int Aldor = 932;
+        public const int Scryers = 934;
     }
 
     struct ObjectIds
     {
         //Crystalprison
-        public const uint ImprisonedDoomguard = 179644;
+        public const int ImprisonedDoomguard = 179644;
     }
 
     struct CreatureIds
     {
         //Shadowsfate
-        public const uint Sindragosa = 36853;
+        public const int Sindragosa = 36853;
 
         //Giftoftheharvester
-        public const uint Ghoul = 28845;
-        public const uint MaxGhouls = 5;
+        public const int Ghoul = 28845;
+        public const int MaxGhouls = 5;
 
         //Sinkholes
-        public const uint SouthSinkhole = 25664;
-        public const uint NortheastSinkhole = 25665;
-        public const uint NorthwestSinkhole = 25666;
+        public const int SouthSinkhole = 25664;
+        public const int NortheastSinkhole = 25665;
+        public const int NorthwestSinkhole = 25666;
 
         //Demonbroiledsurprise
-        public const uint AbyssalFlamebringer = 19973;
+        public const int AbyssalFlamebringer = 19973;
 
         //Impaleleviroth
-        public const uint Leviroth = 26452;
+        public const int Leviroth = 26452;
     }
 
     struct ItemIds
     {
         //Createheartcandy
-        public const uint HeartCandy1 = 21818;
-        public const uint HeartCandy2 = 21817;
-        public const uint HeartCandy3 = 21821;
-        public const uint HeartCandy4 = 21819;
-        public const uint HeartCandy5 = 21816;
-        public const uint HeartCandy6 = 21823;
-        public const uint HeartCandy7 = 21822;
-        public const uint HeartCandy8 = 21820;
+        public const int HeartCandy1 = 21818;
+        public const int HeartCandy2 = 21817;
+        public const int HeartCandy3 = 21821;
+        public const int HeartCandy4 = 21819;
+        public const int HeartCandy5 = 21816;
+        public const int HeartCandy6 = 21823;
+        public const int HeartCandy7 = 21822;
+        public const int HeartCandy8 = 21820;
     }
 
     struct QuestIds
     {
         //Demonbroiledsurprise
-        public const uint SuperHotStew = 11379;
+        public const int SuperHotStew = 11379;
 
         //Chickencover
-        public const uint ChickenParty = 12702;
-        public const uint FlownTheCoop = 12532;
+        public const int ChickenParty = 12702;
+        public const int FlownTheCoop = 12532;
     }
 
     struct SoundIds
     {
         //Ashbringersounds
-        public const uint Ashbringer1 = 8906;                             // "I Was Pure Once"
-        public const uint Ashbringer2 = 8907;                             // "Fought For Righteousness"
-        public const uint Ashbringer3 = 8908;                             // "I Was Once Called Ashbringer"
-        public const uint Ashbringer4 = 8920;                             // "Betrayed By My Order"
-        public const uint Ashbringer5 = 8921;                             // "Destroyed By Kel'Thuzad"
-        public const uint Ashbringer6 = 8922;                             // "Made To Serve"
-        public const uint Ashbringer7 = 8923;                             // "My Son Watched Me Die"
-        public const uint Ashbringer8 = 8924;                             // "Crusades Fed His Rage"
-        public const uint Ashbringer9 = 8925;                             // "Truth Is Unknown To Him"
-        public const uint Ashbringer10 = 8926;                             // "Scarlet Crusade  Is Pure No Longer"
-        public const uint Ashbringer11 = 8927;                             // "Balnazzar'S Crusade Corrupted My Son"
-        public const uint Ashbringer12 = 8928;                             // "Kill Them All!"
+        public const int Ashbringer1 = 8906;                             // "I Was Pure Once"
+        public const int Ashbringer2 = 8907;                             // "Fought For Righteousness"
+        public const int Ashbringer3 = 8908;                             // "I Was Once Called Ashbringer"
+        public const int Ashbringer4 = 8920;                             // "Betrayed By My Order"
+        public const int Ashbringer5 = 8921;                             // "Destroyed By Kel'Thuzad"
+        public const int Ashbringer6 = 8922;                             // "Made To Serve"
+        public const int Ashbringer7 = 8923;                             // "My Son Watched Me Die"
+        public const int Ashbringer8 = 8924;                             // "Crusades Fed His Rage"
+        public const int Ashbringer9 = 8925;                             // "Truth Is Unknown To Him"
+        public const int Ashbringer10 = 8926;                             // "Scarlet Crusade  Is Pure No Longer"
+        public const int Ashbringer11 = 8927;                             // "Balnazzar'S Crusade Corrupted My Son"
+        public const int Ashbringer12 = 8928;                             // "Kill Them All!"
     }
 
     struct ModelIds
     {
         //DireBrew
-        public const uint ClassClothMale = 25229;
-        public const uint ClassClothFemale = 25233;
-        public const uint ClassLeatherMale = 25230;
-        public const uint ClassLeatherFemale = 25234;
-        public const uint ClassMailMale = 25231;
-        public const uint ClassMailFemale = 25235;
-        public const uint ClassPlateMale = 25232;
-        public const uint ClassPlateFemale = 25236;
+        public const int ClassClothMale = 25229;
+        public const int ClassClothFemale = 25233;
+        public const int ClassLeatherMale = 25230;
+        public const int ClassLeatherFemale = 25234;
+        public const int ClassMailMale = 25231;
+        public const int ClassMailFemale = 25235;
+        public const int ClassPlateMale = 25232;
+        public const int ClassPlateFemale = 25236;
     }
 
     // 23074 Arcanite Dragonling
@@ -533,7 +533,7 @@ namespace Scripts.Spells.Items
     [Script("spell_item_mithril_mechanical_dragonling", SpellIds.MithrilMechanicalDragonling)]
     class spell_item_trigger_spell : SpellScript
     {
-        public spell_item_trigger_spell(uint triggeredSpellId)
+        public spell_item_trigger_spell(int triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
         }
@@ -543,11 +543,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(_triggeredSpellId);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Item item = GetCastItem();
-            if (item)
+            if (item != null)
                 caster.CastSpell(caster, _triggeredSpellId, new CastSpellExtraArgs(item));
         }
 
@@ -556,7 +556,7 @@ namespace Scripts.Spells.Items
             OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
 
-        uint _triggeredSpellId;
+        int _triggeredSpellId;
     }
 
     [Script] // 23780 - Aegis of Preservation
@@ -591,7 +591,7 @@ namespace Scripts.Spells.Items
         {
             PreventDefaultAction();
 
-            if (!GetCaster() || !GetTarget().IsTypeId(TypeId.Unit))
+            if (GetCaster() == null || !GetTarget().IsTypeId(TypeId.Unit))
                 return;
 
             GetCaster().CastSpell(GetCaster(), SpellIds.EyeOfGrillok, new CastSpellExtraArgs(aurEff));
@@ -612,12 +612,12 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.BlessingOfLowerCityDruid, SpellIds.BlessingOfLowerCityPaladin, SpellIds.BlessingOfLowerCityPriest, SpellIds.BlessingOfLowerCityShaman);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit unitTarget = GetHitUnit();
             if (unitTarget != null)
             {
-                uint spellId = 0;
+                int spellId = 0;
                 switch (unitTarget.GetClass())
                 {
                     case Class.Druid:
@@ -672,7 +672,7 @@ namespace Scripts.Spells.Items
         {
             PreventDefaultAction();
 
-            uint spellId = 0;
+            int spellId = 0;
             int amount = (int)(eventInfo.GetDamageInfo().GetDamage() * 0.4f);
 
             if (eventInfo.GetDamageInfo().GetSpellInfo().HasEffect(SpellEffectName.Heal))
@@ -686,7 +686,7 @@ namespace Scripts.Spells.Items
             Unit caster = eventInfo.GetActionTarget();
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);
-            caster.CastSpell((Unit)null, spellId, args);
+            caster.CastSpell(null, spellId, args);
         }
 
         public override void Register()
@@ -720,16 +720,16 @@ namespace Scripts.Spells.Items
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
 
-            caster.CastSpell((Unit)null, SpellIds.MoteOfAnger, true);
+            caster.CastSpell(null, SpellIds.MoteOfAnger, true);
             Aura motes = caster.GetAura(SpellIds.MoteOfAnger);
             if (motes == null || motes.GetStackAmount() < _stackAmount)
                 return;
 
             caster.RemoveAurasDueToSpell(SpellIds.MoteOfAnger);
-            uint spellId = SpellIds.ManifestAngerMainHand;
+            int spellId = SpellIds.ManifestAngerMainHand;
             Player player = caster.ToPlayer();
-            if (player)
-                if (player.GetWeaponForAttack(WeaponAttackType.OffAttack, true) && RandomHelper.URand(0, 1) != 0)
+            if (player != null)
+                if (player.GetWeaponForAttack(WeaponAttackType.OffAttack, true) != null && RandomHelper.IRand(0, 1) != 0)
                     spellId = SpellIds.ManifestAngerOffHand;
 
             caster.CastSpell(target, spellId, new CastSpellExtraArgs(aurEff));
@@ -754,7 +754,7 @@ namespace Scripts.Spells.Items
     {
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            int diff = (int)GetUnitOwner().GetLevel() - 60;
+            int diff = GetUnitOwner().GetLevel() - 60;
             if (diff > 0)
                 amount += 2 * diff;
         }
@@ -777,37 +777,37 @@ namespace Scripts.Spells.Items
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            uint[][] triggeredSpells =
+            int[][] triggeredSpells =
             {
                     //CLASS_NONE
-                    Array.Empty<uint>(),
+                    [],
                     //CLASS_WARRIOR
-                    new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex },
+                    [SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex],
                     //CLASS_PALADIN
-                    new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    [SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia],
                     //CLASS_HUNTER
-                    new uint[] {SpellIds.Delusional, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    [SpellIds.Delusional, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia],
                     //CLASS_ROGUE
-                    new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex },
+                    [SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex],
                     //CLASS_PRIEST
-                    new uint[] {SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    [SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia],
                     //CLASS_DEATH_KNIGHT
-                    new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex },
+                    [SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex],
                     //CLASS_SHAMAN
-                    new uint[] {SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    [SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia],
                     //CLASS_MAGE
-                    new uint[] {SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    [SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia],
                     //CLASS_WARLOCK
-                    new uint[] {SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    [SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia],
                     //CLASS_UNK
-                    Array.Empty<uint>(),
+                    [],
                     //CLASS_DRUID
-                    new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia }
+                    [SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia]
                 };
 
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
-            uint spellId = triggeredSpells[(int)caster.GetClass()].SelectRandom();
+            int spellId = triggeredSpells[(int)caster.GetClass()].SelectRandom();
             caster.CastSpell(caster, spellId, new CastSpellExtraArgs(aurEff));
 
             if (RandomHelper.randChance(10))
@@ -848,7 +848,7 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.BrittleArmor);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetHitUnit().RemoveAuraFromStack(SpellIds.BrittleArmor);
         }
@@ -880,7 +880,7 @@ namespace Scripts.Spells.Items
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return;
 
-            int absorb = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), 15.0f);
+            int absorb = MathFunctions.CalculatePct(healInfo.GetHeal(), 15.0f);
             AuraEffect protEff = eventInfo.GetProcTarget().GetAuraEffect(SpellIds.ProtectionOfAncientKings, 0, eventInfo.GetActor().GetGUID());
             if (protEff != null)
             {
@@ -942,11 +942,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.DeadlyPrecision);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DeadlyPrecision, GetCastDifficulty());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.AddSpellMod(SpellValueMod.AuraStack, (int)spellInfo.StackAmount);
+            args.AddSpellMod(SpellValueMod.AuraStack, spellInfo.StackAmount);
             GetCaster().CastSpell(GetCaster(), spellInfo.Id, args);
         }
 
@@ -965,7 +965,7 @@ namespace Scripts.Spells.Items
     [Script("spell_item_deathbringers_will_heroic", SpellIds.StrengthOfTheTaunkaHero, SpellIds.AgilityOfTheVrykulHero, SpellIds.PowerOfTheTaunkaHero, SpellIds.AimOfTheIronDwarvesHero, SpellIds.SpeedOfTheVrykulHero)]
     class spell_item_deathbringers_will : AuraScript
     {
-        public spell_item_deathbringers_will(uint strengthSpellId, uint agilitySpellId, uint apSpellId, uint criticalSpellId, uint hasteSpellId)
+        public spell_item_deathbringers_will(int strengthSpellId, int agilitySpellId, int apSpellId, int criticalSpellId, int hasteSpellId)
         {
             _strengthSpellId = strengthSpellId;
             _agilitySpellId = agilitySpellId;
@@ -981,32 +981,32 @@ namespace Scripts.Spells.Items
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            uint[][] triggeredSpells =
+            int[][] triggeredSpells =
             {
                     //CLASS_NONE
-                     Array.Empty<uint>(),
+                    [],
                     //CLASS_WARRIOR
-                    new uint[] {_strengthSpellId, _criticalSpellId, _hasteSpellId },
+                    [_strengthSpellId, _criticalSpellId, _hasteSpellId],
                     //CLASS_PALADIN
-                    new uint[] { _strengthSpellId, _criticalSpellId, _hasteSpellId },
+                    [_strengthSpellId, _criticalSpellId, _hasteSpellId],
                     //CLASS_HUNTER
-                    new uint[] {_agilitySpellId, _criticalSpellId, _apSpellId },
+                    [_agilitySpellId, _criticalSpellId, _apSpellId],
                     //CLASS_ROGUE
-                    new uint[] {_agilitySpellId, _hasteSpellId, _apSpellId },
+                    [_agilitySpellId, _hasteSpellId, _apSpellId],
                     //CLASS_PRIEST
-                    Array.Empty<uint>(),
+                    [],
                     //CLASS_DEATH_KNIGHT
-                    new uint[] {_strengthSpellId, _criticalSpellId, _hasteSpellId },
+                    [_strengthSpellId, _criticalSpellId, _hasteSpellId],
                     //CLASS_SHAMAN
-                    new uint[] {_agilitySpellId, _hasteSpellId, _apSpellId },
+                    [_agilitySpellId, _hasteSpellId, _apSpellId],
                     //CLASS_MAGE
-                    Array.Empty<uint>(),
+                    [],
                     //CLASS_WARLOCK
-                    Array.Empty<uint>(),
+                    [],
                     //CLASS_UNK
-                    Array.Empty<uint>(),
+                    [],
                     //CLASS_DRUID
-                    new uint[] {_strengthSpellId, _agilitySpellId, _hasteSpellId }
+                    [_strengthSpellId, _agilitySpellId, _hasteSpellId]
                 };
 
             PreventDefaultAction();
@@ -1015,7 +1015,7 @@ namespace Scripts.Spells.Items
             if (randomSpells.Empty())
                 return;
 
-            uint spellId = randomSpells.SelectRandom();
+            int spellId = randomSpells.SelectRandom();
             caster.CastSpell(caster, spellId, new CastSpellExtraArgs(aurEff));
         }
 
@@ -1024,11 +1024,11 @@ namespace Scripts.Spells.Items
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
 
-        uint _strengthSpellId;
-        uint _agilitySpellId;
-        uint _apSpellId;
-        uint _criticalSpellId;
-        uint _hasteSpellId;
+        int _strengthSpellId;
+        int _agilitySpellId;
+        int _apSpellId;
+        int _criticalSpellId;
+        int _hasteSpellId;
     }
 
     [Script] // 47770 - Roll Dice
@@ -1046,12 +1046,12 @@ namespace Scripts.Spells.Items
             return GetCaster().GetTypeId() == TypeId.Player;
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetCaster().TextEmote(TextIds.DecahedralDwarvenDice, GetHitUnit());
 
-            uint minimum = 1;
-            uint maximum = 100;
+            int minimum = 1;
+            int maximum = 100;
 
             GetCaster().ToPlayer().DoRandomRoll(minimum, maximum);
         }
@@ -1070,7 +1070,7 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.SummonGoblinBomb, SpellIds.MalfunctionExplosion);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Item item = GetCastItem();
             if (item != null)
@@ -1086,11 +1086,11 @@ namespace Scripts.Spells.Items
     [Script] // 46203 - Goblin Weather Machine
     class spell_item_goblin_weather_machine : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
 
-            uint spellId = RandomHelper.RAND(SpellIds.PersonalizedWeather1, SpellIds.PersonalizedWeather2, SpellIds.PersonalizedWeather3, SpellIds.PersonalizedWeather4);
+            int spellId = RandomHelper.RAND(SpellIds.PersonalizedWeather1, SpellIds.PersonalizedWeather2, SpellIds.PersonalizedWeather3, SpellIds.PersonalizedWeather4);
             target.CastSpell(target, spellId, new CastSpellExtraArgs(GetSpell()));
         }
 
@@ -1108,7 +1108,7 @@ namespace Scripts.Spells.Items
     [Script("spell_item_gnomish_army_knife", 67u, 0u)]
     class spell_item_defibrillate : SpellScript
     {
-        public spell_item_defibrillate(uint chance, uint failSpell)
+        public spell_item_defibrillate(int chance, int failSpell)
         {
             _chance = chance;
             _failSpell = failSpell;
@@ -1121,7 +1121,7 @@ namespace Scripts.Spells.Items
             return true;
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             if (RandomHelper.randChance(_chance))
             {
@@ -1136,8 +1136,8 @@ namespace Scripts.Spells.Items
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Resurrect));
         }
 
-        uint _chance;
-        uint _failSpell;
+        int _chance;
+        int _failSpell;
     }
 
     [Script] // 33896 - Desperate Defense
@@ -1174,10 +1174,10 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.Sleepy, SpellIds.Invigorate, SpellIds.Shrink, SpellIds.PartyTime, SpellIds.HealthySpirit, SpellIds.Rejuvenation);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
-            uint spellId = RandomHelper.RAND(SpellIds.Sleepy, SpellIds.Invigorate, SpellIds.Shrink, SpellIds.PartyTime, SpellIds.HealthySpirit, SpellIds.Rejuvenation);
+            int spellId = RandomHelper.RAND(SpellIds.Sleepy, SpellIds.Invigorate, SpellIds.Shrink, SpellIds.PartyTime, SpellIds.HealthySpirit, SpellIds.Rejuvenation);
             caster.CastSpell(caster, spellId, true);
         }
 
@@ -1196,7 +1196,7 @@ namespace Scripts.Spells.Items
             _player = player;
         }
 
-        public override bool Execute(ulong time, uint diff)
+        public override bool Execute(long time, uint diff)
         {
             if (!_player.HasAura(SpellIds.PartyTime))
                 return true;
@@ -1237,9 +1237,9 @@ namespace Scripts.Spells.Items
         {
             Unit target = GetTarget();
 
-            uint model = 0;
+            int model = 0;
             var gender = target.GetGender();
-            var chrClass = CliDB.ChrClassesStorage.LookupByKey(target.GetClass());
+            var chrClass = CliDB.ChrClassesStorage.LookupByKey((int)target.GetClass());
             if ((chrClass.ArmorTypeMask & (1 << (int)ItemSubClassArmor.Plate)) != 0)
                 model = gender == Gender.Male ? ModelIds.ClassPlateMale : ModelIds.ClassPlateFemale;
             else if ((chrClass.ArmorTypeMask & (1 << (int)ItemSubClassArmor.Mail)) != 0)
@@ -1270,7 +1270,7 @@ namespace Scripts.Spells.Items
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            eventInfo.GetActor().CastSpell((Unit)null, SpellIds.DiscerningEyeBeast, new CastSpellExtraArgs(aurEff));
+            eventInfo.GetActor().CastSpell(null, SpellIds.DiscerningEyeBeast, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1356,9 +1356,9 @@ namespace Scripts.Spells.Items
     [Script("spell_item_bountiful_feast", TextIds.BountifulFeast)]
     class spell_item_feast : SpellScript
     {
-        uint _text;
+        int _text;
 
-        public spell_item_feast(uint text)
+        public spell_item_feast(int text)
         {
             _text = text;
         }
@@ -1368,7 +1368,7 @@ namespace Scripts.Spells.Items
             return CliDB.BroadcastTextStorage.ContainsKey(_text);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit caster = GetCaster();
             caster.TextEmote(_text, caster, false);
@@ -1389,10 +1389,10 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.FlaskOfTheNorthSp, SpellIds.FlaskOfTheNorthAp, SpellIds.FlaskOfTheNorthStr);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
-            List<uint> possibleSpells = new();
+            List<int> possibleSpells = new();
             switch (caster.GetClass())
             {
                 case Class.Warlock:
@@ -1452,8 +1452,8 @@ namespace Scripts.Spells.Items
 
             Unit caster = eventInfo.GetActor();
             CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
-            caster.CastSpell((Unit)null, SpellIds.Shadowmend, args);
+            args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+            caster.CastSpell(null, SpellIds.Shadowmend, args);
         }
 
         public override void Register()
@@ -1471,11 +1471,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.GnomishDeathRaySelf, SpellIds.GnomishDeathRayTarget);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
             {
                 if (RandomHelper.URand(0, 99) < 15)
                     caster.CastSpell(caster, SpellIds.GnomishDeathRaySelf, true);    // failure
@@ -1499,7 +1499,7 @@ namespace Scripts.Spells.Items
     [Script("spell_item_heartpierce_hero", SpellIds.InvigorationEnergyHero, SpellIds.InvigorationManaHero, SpellIds.InvigorationRageHero, SpellIds.InvigorationRpHero)]
     class spell_item_heartpierce : AuraScript
     {
-        public spell_item_heartpierce(uint energySpellId, uint manaSpellId, uint rageSpellId, uint rpSpellId)
+        public spell_item_heartpierce(int energySpellId, int manaSpellId, int rageSpellId, int rpSpellId)
         {
             _energySpellId = energySpellId;
             _manaSpellId = manaSpellId;
@@ -1517,7 +1517,7 @@ namespace Scripts.Spells.Items
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
 
-            uint spellId;
+            int spellId;
             switch (caster.GetPowerType())
             {
                 case PowerType.Mana:
@@ -1537,7 +1537,7 @@ namespace Scripts.Spells.Items
                     return;
             }
 
-            caster.CastSpell((Unit)null, spellId, new CastSpellExtraArgs(aurEff));
+            caster.CastSpell(null, spellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1545,10 +1545,10 @@ namespace Scripts.Spells.Items
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
 
-        uint _energySpellId;
-        uint _manaSpellId;
-        uint _rageSpellId;
-        uint _rpSpellId;
+        int _energySpellId;
+        int _manaSpellId;
+        int _rageSpellId;
+        int _rpSpellId;
     }
 
     [Script] // 23645 - Hourglass Sand
@@ -1559,7 +1559,7 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.BroodAfflictionBronze);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().RemoveAurasDueToSpell(SpellIds.BroodAfflictionBronze);
         }
@@ -1585,7 +1585,7 @@ namespace Scripts.Spells.Items
             if (healInfo != null)
             {
                 Unit healTarget = healInfo.GetTarget();
-                if (healTarget)
+                if (healTarget != null)
                     if (healTarget.GetHealth() - healInfo.GetEffectiveHeal() <= healTarget.CountPctFromMaxHealth(pct))
                         return true;
             }
@@ -1613,11 +1613,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.MrPinchysBlessing, SpellIds.SummonMightyMrPinchy, SpellIds.SummonFuriousMrPinchy, SpellIds.TinyMagicalCrawdad, SpellIds.MrPinchysGift);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
-            uint spellId = SpellIds.MrPinchysGift;
-            switch (RandomHelper.URand(1, 5))
+            int spellId = SpellIds.MrPinchysGift;
+            switch (RandomHelper.IRand(1, 5))
             {
                 case 1:
                     spellId = SpellIds.MrPinchysBlessing;
@@ -1658,7 +1658,7 @@ namespace Scripts.Spells.Items
                 // in that case, do not cast heal spell
                 PreventDefaultAction();
                 // but mana instead
-                eventInfo.GetActor().CastSpell((Unit)null, SpellIds.MarkOfConquestEnergize, new CastSpellExtraArgs(aurEff));
+                eventInfo.GetActor().CastSpell(null, SpellIds.MarkOfConquestEnergize, new CastSpellExtraArgs(aurEff));
             }
         }
 
@@ -1676,7 +1676,7 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.MercurialShield);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetHitUnit().RemoveAuraFromStack(SpellIds.MercurialShield);
         }
@@ -1691,7 +1691,7 @@ namespace Scripts.Spells.Items
     [Script] // 40802 Mingo's Fortune Generator
     class spell_item_mingos_fortune_generator : SpellScript
     {
-        uint[] CreateFortuneSpells =
+        int[] CreateFortuneSpells =
         {
             SpellIds.CreateFortune1, SpellIds.CreateFortune2, SpellIds.CreateFortune3, SpellIds.CreateFortune4, SpellIds.CreateFortune5,
             SpellIds.CreateFortune6, SpellIds.CreateFortune7, SpellIds.CreateFortune8, SpellIds.CreateFortune9, SpellIds.CreateFortune10,
@@ -1704,7 +1704,7 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(CreateFortuneSpells);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().CastSpell(GetCaster(), CreateFortuneSpells.SelectRandom(), true);
         }
@@ -1725,7 +1725,7 @@ namespace Scripts.Spells.Items
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            return eventInfo.GetProcTarget() && eventInfo.GetProcTarget().IsAlive();
+            return eventInfo.GetProcTarget() != null && eventInfo.GetProcTarget().IsAlive();
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1736,8 +1736,8 @@ namespace Scripts.Spells.Items
                 return;
 
             CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
-            GetTarget().CastSpell((Unit)null, SpellIds.ItemNecroticTouchProc, args);
+            args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+            GetTarget().CastSpell(null, SpellIds.ItemNecroticTouchProc, args);
         }
 
         public override void Register()
@@ -1756,13 +1756,13 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.NetOMaticTriggered1, SpellIds.NetOMaticTriggered2, SpellIds.NetOMaticTriggered3);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
             {
-                uint spellId = SpellIds.NetOMaticTriggered3;
-                uint roll = RandomHelper.URand(0, 99);
+                int spellId = SpellIds.NetOMaticTriggered3;
+                int roll = RandomHelper.URand(0, 99);
                 if (roll < 2)                            // 2% for 30 sec self root (off-like Chance unknown)
                     spellId = SpellIds.NetOMaticTriggered1;
                 else if (roll < 4)                       // 2% for 20 sec root, charge to target (off-like Chance unknown)
@@ -1792,10 +1792,10 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.NoggenfoggerElixirTriggered1, SpellIds.NoggenfoggerElixirTriggered2, SpellIds.NoggenfoggerElixirTriggered3);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
-            uint spellId = SpellIds.NoggenfoggerElixirTriggered3;
+            int spellId = SpellIds.NoggenfoggerElixirTriggered3;
             switch (RandomHelper.URand(1, 3))
             {
                 case 1:
@@ -1855,7 +1855,7 @@ namespace Scripts.Spells.Items
         {
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
-            int bp0 = (int)MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), 15);
+            int bp0 = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), 15);
 
             // Scarab Brooch does not replace stronger shields
             AuraEffect shield = target.GetAuraEffect(SpellIds.PersistentShieldTriggered, 0, caster.GetGUID());
@@ -1893,8 +1893,8 @@ namespace Scripts.Spells.Items
                 return;
 
             CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
-            eventInfo.GetActor().CastSpell((Unit)null, SpellIds.HealthLink, args);
+            args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+            eventInfo.GetActor().CastSpell(null, SpellIds.HealthLink, args);
         }
 
         public override void Register()
@@ -1906,11 +1906,11 @@ namespace Scripts.Spells.Items
     [Script] // 17512 - Piccolo of the Flaming Fire
     class spell_item_piccolo_of_the_flaming_fire : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             Player target = GetHitPlayer();
-            if (target)
+            if (target != null)
                 target.HandleEmoteCommand(Emote.StateDance);
         }
 
@@ -1968,10 +1968,10 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.FlipOutMale, SpellIds.FlipOutFemale, SpellIds.YaaarrrrMale, SpellIds.YaaarrrrFemale);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
-            uint spellId = 0;
+            int spellId = 0;
             switch (RandomHelper.URand(1, 2))
             {
                 // Flip Out - ninja
@@ -1998,7 +1998,7 @@ namespace Scripts.Spells.Items
             return GetCaster().GetTypeId() == TypeId.Player;
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit caster = GetCaster();
             byte maxSafeLevel = 0;
@@ -2022,11 +2022,11 @@ namespace Scripts.Spells.Items
                 caster.CastSpell(caster, SpellIds.Lost, true);
 
                 // ALLIANCE from 60323 to 60330 - HORDE from 60328 to 60335
-                uint spellId = SpellIds.ScrollOfRecallFailAlliance1;
+                int spellId = SpellIds.ScrollOfRecallFailAlliance1;
                 if (GetCaster().ToPlayer().GetTeam() == Team.Horde)
                     spellId = SpellIds.ScrollOfRecallFailHorde1;
 
-                GetCaster().CastSpell(GetCaster(), spellId + RandomHelper.URand(0, 7), true);
+                GetCaster().CastSpell(GetCaster(), spellId + RandomHelper.IRand(0, 7), true);
 
                 PreventHitDefaultEffect(effIndex);
             }
@@ -2051,7 +2051,7 @@ namespace Scripts.Spells.Items
             return GetCaster().IsPlayer();
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             int r = RandomHelper.IRand(0, 119);
             if (r <= 70)                               // 7/12 success
@@ -2084,14 +2084,14 @@ namespace Scripts.Spells.Items
             return GetCaster().IsPlayer();
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             if (!RandomHelper.randChance(50)) // 50% success
                 return;
 
             Unit caster = GetCaster();
 
-            uint spellId = 0;
+            int spellId = 0;
             switch (RandomHelper.URand(0, 6))
             {
                 case 0:
@@ -2142,14 +2142,14 @@ namespace Scripts.Spells.Items
             return GetCaster().IsPlayer();
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             if (!RandomHelper.randChance(50)) // 50% success
                 return;
 
             Unit caster = GetCaster();
 
-            uint spellId = 0;
+            int spellId = 0;
             switch (RandomHelper.URand(0, 3))
             {
                 case 0:
@@ -2184,11 +2184,11 @@ namespace Scripts.Spells.Items
         bool CheckProc(ProcEventInfo procInfo)
         {
             Unit caster = procInfo.GetActor();
-            if (!caster || caster.GetTypeId() != TypeId.Player)
+            if (caster == null || caster.GetTypeId() != TypeId.Player)
                 return false;
 
             Unit target = procInfo.GetActionTarget();
-            if (!target || target.GetTypeId() != TypeId.Unit || target.IsCritter() || (target.GetEntry() != CreatureIds.Sindragosa && target.IsSummon()))
+            if (target == null || target.GetTypeId() != TypeId.Unit || target.IsCritter() || (target.GetEntry() != CreatureIds.Sindragosa && target.IsSummon()))
                 return false;
 
             return true;
@@ -2209,7 +2209,7 @@ namespace Scripts.Spells.Items
 
             Unit caster = procInfo.GetActor();
             Unit target = GetCaster();
-            if (!caster || !target)
+            if (caster == null || target == null)
                 return;
 
             caster.CastSpell(target, SpellIds.SoulFeast, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
@@ -2233,7 +2233,7 @@ namespace Scripts.Spells.Items
         {
             if (GetTarget().HasAura(SpellIds.ShadowmourneChaosBaneBuff)) // cant collect shards while under effect of Chaos Bane buff
                 return false;
-            return eventInfo.GetProcTarget() && eventInfo.GetProcTarget().IsAlive();
+            return eventInfo.GetProcTarget() != null && eventInfo.GetProcTarget().IsAlive();
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -2318,14 +2318,14 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.Frostbolt, SpellIds.Polymorph, SpellIds.SummonFelhoundMinion, SpellIds.Fireball, SpellIds.ChainLightning, SpellIds.EnvelopingWinds);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
             {
-                uint spellId;
-                uint rand = RandomHelper.URand(0, 99);
+                int spellId;
+                int rand = RandomHelper.IRand(0, 99);
                 if (rand < 25)                      // Fireball (25% Chance)
                     spellId = SpellIds.Fireball;
                 else if (rand < 50)                 // Frostball (25% Chance)
@@ -2371,7 +2371,7 @@ namespace Scripts.Spells.Items
             Unit caster = eventInfo.GetActor();
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)caster.CountPctFromMaxHealth(aurEff.GetAmount()));
-            caster.CastSpell((Unit)null, SpellIds.SwiftHandOfJusticeHeal, args);
+            caster.CastSpell(null, SpellIds.SwiftHandOfJusticeHeal, args);
         }
 
         public override void Register()
@@ -2385,7 +2385,7 @@ namespace Scripts.Spells.Items
     {
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            int diff = (int)GetUnitOwner().GetLevel() - 60;
+            int diff = GetUnitOwner().GetLevel() - 60;
             if (diff > 0)
                 amount += diff;
         }
@@ -2410,10 +2410,10 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.UnderbellyElixirTriggered1, SpellIds.UnderbellyElixirTriggered2, SpellIds.UnderbellyElixirTriggered3);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
-            uint spellId = SpellIds.UnderbellyElixirTriggered3;
+            int spellId = SpellIds.UnderbellyElixirTriggered3;
             switch (RandomHelper.URand(1, 3))
             {
                 case 1:
@@ -2435,7 +2435,7 @@ namespace Scripts.Spells.Items
     [Script] // 126755 - Wormhole: Pandaria
     class spell_item_wormhole_pandaria : SpellScript
     {
-        uint[] WormholeTargetLocations =
+        int[] WormholeTargetLocations =
         {
             SpellIds.Wormholepandariaisleofreckoning,
             SpellIds. Wormholepandariakunlaiunderwater,
@@ -2453,10 +2453,10 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(WormholeTargetLocations);
         }
 
-        void HandleTeleport(uint effIndex)
+        void HandleTeleport(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            uint spellId = WormholeTargetLocations.SelectRandom();
+            int spellId = WormholeTargetLocations.SelectRandom();
             GetCaster().CastSpell(GetHitUnit(), spellId, true);
         }
 
@@ -2481,12 +2481,12 @@ namespace Scripts.Spells.Items
             return GetCaster().GetTypeId() == TypeId.Player;
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetCaster().TextEmote(TextIds.WornTrollDice, GetHitUnit());
 
-            uint minimum = 1;
-            uint maximum = 6;
+            int minimum = 1;
+            int maximum = 6;
 
             // roll twice
             GetCaster().ToPlayer().DoRandomRoll(minimum, maximum);
@@ -2507,17 +2507,17 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.AirRifleHoldVisual, SpellIds.AirRifleShoot, SpellIds.AirRifleShootSelf);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
             {
                 caster.CastSpell(caster, SpellIds.AirRifleHoldVisual, true);
                 // needed because this spell shares GCD with its triggered spells (which must not be cast with triggered flag)
                 Player player = caster.ToPlayer();
-                if (player)
+                if (player != null)
                     player.GetSpellHistory().CancelGlobalCooldown(GetSpellInfo());
                 if (RandomHelper.URand(0, 4) != 0)
                     caster.CastSpell(target, SpellIds.AirRifleShoot, false);
@@ -2551,13 +2551,13 @@ namespace Scripts.Spells.Items
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Player caster = GetCaster().ToPlayer();
-            uint spellId = GetSpellInfo().Id;
+            int spellId = GetSpellInfo().Id;
 
             // learn random explicit discovery recipe (if any)
-            uint discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
+            int discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
             if (discoveredSpellId != 0)
                 caster.LearnSpell(discoveredSpellId, false);
         }
@@ -2597,9 +2597,9 @@ namespace Scripts.Spells.Items
         SpellCastResult CheckSinkholes()
         {
             Unit caster = GetCaster();
-            if (caster.FindNearestCreature(CreatureIds.SouthSinkhole, 30.0f, true) ||
-                caster.FindNearestCreature(CreatureIds.NortheastSinkhole, 30.0f, true) ||
-                caster.FindNearestCreature(CreatureIds.NorthwestSinkhole, 30.0f, true))
+            if (caster.FindNearestCreature(CreatureIds.SouthSinkhole, 30.0f, true) != null ||
+                caster.FindNearestCreature(CreatureIds.NortheastSinkhole, 30.0f, true) != null ||
+                caster.FindNearestCreature(CreatureIds.NorthwestSinkhole, 30.0f, true) != null)
                 return SpellCastResult.SpellCastOk;
 
             SetCustomCastResultMessage(SpellCustomErrors.MustBeCloseToSinkhole);
@@ -2620,9 +2620,9 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.Crusher, SpellIds.Constrictor, SpellIds.Corruptor);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
-            uint spellId = RandomHelper.RAND(SpellIds.Crusher, SpellIds.Constrictor, SpellIds.Corruptor);
+            int spellId = RandomHelper.RAND(SpellIds.Crusher, SpellIds.Constrictor, SpellIds.Corruptor);
             Unit caster = GetCaster();
             caster.CastSpell(caster, spellId, true);
         }
@@ -2641,16 +2641,16 @@ namespace Scripts.Spells.Items
             return GetCaster().GetTypeId() == TypeId.Player;
         }
 
-        void OnDummyEffect(uint effIndex)
+        void OnDummyEffect(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
             Player player = GetCaster().ToPlayer();
-            uint sound_id = RandomHelper.RAND(SoundIds.Ashbringer1, SoundIds.Ashbringer2, SoundIds.Ashbringer3, SoundIds.Ashbringer4, SoundIds.Ashbringer5, SoundIds.Ashbringer6,
+            int sound_id = RandomHelper.RAND(SoundIds.Ashbringer1, SoundIds.Ashbringer2, SoundIds.Ashbringer3, SoundIds.Ashbringer4, SoundIds.Ashbringer5, SoundIds.Ashbringer6,
                             SoundIds.Ashbringer7, SoundIds.Ashbringer8, SoundIds.Ashbringer9, SoundIds.Ashbringer10, SoundIds.Ashbringer11, SoundIds.Ashbringer12);
 
             // Ashbringers effect (SpellIds.ID 28441) retriggers every 5 seconds, with a Chance of making it say one of the above 12 sounds
-            if (RandomHelper.URand(0, 60) < 1)
+            if (RandomHelper.IRand(0, 60) < 1)
                 player.PlayDirectSound(sound_id, player);
         }
 
@@ -2709,7 +2709,7 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.SummonPurifiedHelboarMeat, SpellIds.SummonToxicHelboarMeat);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             caster.CastSpell(caster, RandomHelper.randChance(50) ? SpellIds.SummonPurifiedHelboarMeat : SpellIds.SummonToxicHelboarMeat, true);
@@ -2729,11 +2729,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.NighInvulnerability, SpellIds.CompleteVulnerability);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Item castItem = GetCastItem();
-            if (castItem)
+            if (castItem != null)
             {
                 if (RandomHelper.randChance(86))                  // Nigh-Invulnerability   - success
                     caster.CastSpell(caster, SpellIds.NighInvulnerability, new CastSpellExtraArgs(castItem));
@@ -2756,9 +2756,9 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.PoultryizerSuccess, SpellIds.PoultryizerBackfire);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
-            if (GetCastItem() && GetHitUnit())
+            if (GetCastItem() != null && GetHitUnit() != null)
                 GetCaster().CastSpell(GetHitUnit(), RandomHelper.randChance(80) ? SpellIds.PoultryizerSuccess : SpellIds.PoultryizerBackfire, new CastSpellExtraArgs(GetCastItem()));
         }
 
@@ -2781,7 +2781,7 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.SocretharToSeat, SpellIds.SocretharFromSeat);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             switch (caster.GetAreaId())
@@ -2818,7 +2818,7 @@ namespace Scripts.Spells.Items
             return GetCaster().GetTypeId() == TypeId.Player;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit player = GetCaster();
             player.CastSpell(player, SpellIds.CreateDemonBroiledSurprise, false);
@@ -2831,7 +2831,7 @@ namespace Scripts.Spells.Items
                 return SpellCastResult.CantDoThatRightNow;
 
             Creature creature = player.FindNearestCreature(CreatureIds.AbyssalFlamebringer, 10, false);
-            if (creature)
+            if (creature != null)
                 if (creature.IsDead())
                     return SpellCastResult.SpellCastOk;
             return SpellCastResult.NotHere;
@@ -2852,10 +2852,10 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.RaptorCaptureCredit);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
-            if (GetHitCreature())
+            if (GetHitCreature() != null)
             {
                 GetHitCreature().DespawnOrUnsummon();
 
@@ -2880,10 +2880,10 @@ namespace Scripts.Spells.Items
             return true;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Creature target = GetHitCreature();
-            if (target)
+            if (target != null)
                 if (target.GetEntry() == CreatureIds.Leviroth && !target.HealthBelowPct(95))
                 {
                     target.CastSpell(target, SpellIds.LevirothSelfImpale, true);
@@ -2905,7 +2905,7 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.GiftOfLife1, SpellIds.GiftOfLife2);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             caster.CastSpell(caster, SpellIds.GiftOfLife1, true);
@@ -2923,7 +2923,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Load()
         {
-            if (!GetCastItem())
+            if (GetCastItem() == null)
                 return false;
             return true;
         }
@@ -2933,12 +2933,12 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.NitroBoostsSuccess, SpellIds.NitroBoostsBackfire);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(caster.GetAreaId());
             bool success = true;
-            if (areaEntry != null && areaEntry.IsFlyable() && !caster.GetMap().IsDungeon())
+            if (areaEntry != null && areaEntry.IsFlyable && !caster.GetMap().IsDungeon())
                 success = RandomHelper.randChance(95);
             caster.CastSpell(caster, success ? SpellIds.NitroBoostsSuccess : SpellIds.NitroBoostsBackfire, new CastSpellExtraArgs(GetCastItem()));
         }
@@ -2998,12 +2998,12 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.RocketBootsProc);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Player caster = GetCaster().ToPlayer();
 
             Battleground bg = caster.GetBattleground();
-            if (bg)
+            if (bg != null)
                 bg.EventPlayerDroppedFlag(caster);
 
             caster.GetSpellHistory().ResetCooldown(SpellIds.RocketBootsProc);
@@ -3032,7 +3032,7 @@ namespace Scripts.Spells.Items
             return GetCaster().IsPlayer();
         }
 
-        void HandleHeal(uint effIndex)
+        void HandleHeal(int effIndex)
         {
             Player caster = GetCaster().ToPlayer();
             if (caster != null)
@@ -3054,7 +3054,7 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.PygmyOilPygmyAura, SpellIds.PygmyOilSmallerAura);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Aura aura = caster.GetAura(SpellIds.PygmyOilPygmyAura);
@@ -3082,7 +3082,7 @@ namespace Scripts.Spells.Items
     [Script]
     class spell_item_unusual_compass : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             caster.SetFacingTo(RandomHelper.FRand(0.0f, 2.0f * (float)Math.PI));
@@ -3109,11 +3109,11 @@ namespace Scripts.Spells.Items
                 && ValidateSpellInfo(SpellIds.ChickenNet, SpellIds.CaptureChickenEscape);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Player caster = GetCaster().ToPlayer();
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
             {
                 if (!target.HasAura(SpellIds.ChickenNet) && (caster.GetQuestStatus(QuestIds.ChickenParty) == QuestStatus.Incomplete || caster.GetQuestStatus(QuestIds.FlownTheCoop) == QuestStatus.Incomplete))
                 {
@@ -3132,10 +3132,10 @@ namespace Scripts.Spells.Items
     [Script]
     class spell_item_muisek_vessel : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Creature target = GetHitCreature();
-            if (target)
+            if (target != null)
                 if (target.IsDead())
                     target.DespawnOrUnsummon();
         }
@@ -3149,9 +3149,9 @@ namespace Scripts.Spells.Items
     [Script]
     class spell_item_greatmothers_soulcatcher : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
-            if (GetHitUnit())
+            if (GetHitUnit() != null)
                 GetCaster().CastSpell(GetCaster(), SpellIds.ForceCastSummonGnomeSoul);
         }
 
@@ -3170,7 +3170,7 @@ namespace Scripts.Spells.Items
     [Script("spell_item_shiny_shard_of_the_scale", SpellIds.ShinyCauterizingHeal, SpellIds.ShinySearingFlames)]
     class spell_item_shard_of_the_scale : AuraScript
     {
-        public spell_item_shard_of_the_scale(uint healProcSpellId, uint damageProcSpellId)
+        public spell_item_shard_of_the_scale(int healProcSpellId, int damageProcSpellId)
         {
             _healProcSpellId = healProcSpellId;
             _damageProcSpellId = damageProcSpellId;
@@ -3199,8 +3199,8 @@ namespace Scripts.Spells.Items
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
 
-        uint _healProcSpellId;
-        uint _damageProcSpellId;
+        int _healProcSpellId;
+        int _damageProcSpellId;
     }
 
     [Script]
@@ -3248,7 +3248,7 @@ namespace Scripts.Spells.Items
     [Script("spell_item_sunwell_exalted_healer_neck", SpellIds.LightsSalvation, SpellIds.ArcaneSurge)]
     class spell_item_sunwell_neck : AuraScript
     {
-        public spell_item_sunwell_neck(uint aldorSpellId, uint scryersSpellId)
+        public spell_item_sunwell_neck(int aldorSpellId, int scryersSpellId)
         {
             _aldorSpellId = aldorSpellId;
             _scryersSpellId = scryersSpellId;
@@ -3287,20 +3287,20 @@ namespace Scripts.Spells.Items
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
 
-        uint _aldorSpellId;
-        uint _scryersSpellId;
+        int _aldorSpellId;
+        int _scryersSpellId;
     }
 
     [Script]
     class spell_item_toy_train_set_pulse : SpellScript
     {
-        void HandleDummy(uint index)
+        void HandleDummy(int index)
         {
             Player target = GetHitUnit().ToPlayer();
-            if (target)
+            if (target != null)
             {
                 target.HandleEmoteCommand(Emote.OneshotTrain);
-                EmotesTextSoundRecord soundEntry = Global.DB2Mgr.GetTextSoundEmoteFor((uint)TextEmotes.Train, target.GetRace(), target.GetNativeGender(), target.GetClass());
+                EmotesTextSoundRecord soundEntry = Global.DB2Mgr.GetTextSoundEmoteFor((int)TextEmotes.Train, target.GetRace(), target.GetNativeGender(), target.GetClass());
                 if (soundEntry != null)
                     target.PlayDistanceSound(soundEntry.SoundId);
             }
@@ -3369,7 +3369,7 @@ namespace Scripts.Spells.Items
     [Script("spell_item_toc25_heroic_caster_trinket", SpellIds.Toc25CasterTrinketHeroicStack, SpellIds.Toc25CasterTrinketHeroicTrigger)]
     class spell_item_trinket_stack : AuraScript
     {
-        public spell_item_trinket_stack(uint stackSpell, uint triggerSpell)
+        public spell_item_trinket_stack(int stackSpell, int triggerSpell)
         {
             _stackSpell = stackSpell;
             _triggerSpell = triggerSpell;
@@ -3397,7 +3397,7 @@ namespace Scripts.Spells.Items
             // if right amount, Remove the aura and cast real trigger
             caster.RemoveAurasDueToSpell(_stackSpell);
             Unit target = eventInfo.GetActionTarget();
-            if (target)
+            if (target != null)
                 caster.CastSpell(target, _triggerSpell, new CastSpellExtraArgs(aurEff));
         }
 
@@ -3412,8 +3412,8 @@ namespace Scripts.Spells.Items
             AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
         }
 
-        uint _stackSpell;
-        uint _triggerSpell;
+        int _stackSpell;
+        int _triggerSpell;
     }
 
     [Script] // 57345 - Darkmoon Card: Greatness
@@ -3435,7 +3435,7 @@ namespace Scripts.Spells.Items
             float vers = 0.0f; // caster.GetStat(STAT_VERSATILITY);
             float stat = 0.0f;
 
-            uint spellTrigger = SpellIds.DarkmoonCardStrenght;
+            int spellTrigger = SpellIds.DarkmoonCardStrenght;
 
             if (str > stat)
             {
@@ -3488,7 +3488,7 @@ namespace Scripts.Spells.Items
             if (caster.IsAlive())
                 caster.CastSpell(caster, SpellIds.ManaDrainEnergize, new CastSpellExtraArgs(aurEff));
 
-            if (target && target.IsAlive())
+            if (target!= null && target.IsAlive())
                 caster.CastSpell(target, SpellIds.ManaDrainLeech, new CastSpellExtraArgs(aurEff));
         }
 
@@ -3519,7 +3519,7 @@ namespace Scripts.Spells.Items
             targets.RandomResize(1);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             // we *really* want the unit implementation here
             // it sends a packet like seen on sniff
@@ -3538,10 +3538,10 @@ namespace Scripts.Spells.Items
     [Script] // 29830 - Mirren's Drinking Hat
     class spell_item_mirrens_drinking_hat : SpellScript
     {
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
-            uint spellId = 0;
-            switch (RandomHelper.URand(1, 6))
+            int spellId = 0;
+            switch (RandomHelper.IRand(1, 6))
             {
                 case 1:
                 case 2:
@@ -3574,7 +3574,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Load()
         {
-            if (!GetCastItem())
+            if (GetCastItem() == null)
                 return false;
             return true;
         }
@@ -3584,11 +3584,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.GnomishMindControlCap, SpellIds.Dullard);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
             {
                 if (RandomHelper.randChance(95))
                     caster.CastSpell(target, RandomHelper.randChance(32) ? SpellIds.Dullard : SpellIds.GnomishMindControlCap, new CastSpellExtraArgs(GetCastItem()));
@@ -3608,7 +3608,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Load()
         {
-            if (!GetCastItem())
+            if (GetCastItem() == null)
                 return false;
             return true;
         }
@@ -3618,12 +3618,12 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.ControlMachine, SpellIds.MobilityMalfunction, SpellIds.TargetLock);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
             {
-                uint chance = RandomHelper.URand(0, 99);
+                int chance = RandomHelper.IRand(0, 99);
                 if (chance < 15)
                     GetCaster().CastSpell(target, SpellIds.TargetLock, new CastSpellExtraArgs(GetCastItem()));
                 else if (chance < 25)
@@ -3647,7 +3647,7 @@ namespace Scripts.Spells.Items
     [Script("spell_item_restless_strength", SpellIds.RestlessStrengthAuraStack)]
     class spell_item_zandalarian_charm : AuraScript
     {
-        public spell_item_zandalarian_charm(uint SpellId)
+        public spell_item_zandalarian_charm(int SpellId)
         {
             _spellId = SpellId;
         }
@@ -3679,7 +3679,7 @@ namespace Scripts.Spells.Items
             OnEffectProc.Add(new EffectProcHandler(HandleStackDrop, 0, AuraType.Dummy));
         }
 
-        uint _spellId;
+        int _spellId;
     }
 
     [Script] // 28200 - Ascendance
@@ -3806,7 +3806,7 @@ namespace Scripts.Spells.Items
     {
         void SecondaryEffect()
         {
-            List<uint> availableElixirs = new()
+            List<int> availableElixirs = new()
             {
                 // Battle Elixirs
                 33720, // Onslaught Elixir (28102)
@@ -3836,7 +3836,7 @@ namespace Scripts.Spells.Items
             if (target.GetPowerType() == PowerType.Mana)
                 availableElixirs.Add(28509); // Elixir of Major Mageblood (22840)
 
-            uint chosenElixir = availableElixirs.SelectRandom();
+            int chosenElixir = availableElixirs.SelectRandom();
 
             bool useElixir = true;
 
@@ -3851,7 +3851,7 @@ namespace Scripts.Spells.Items
                 var Auras = target.GetAppliedAuras();
                 foreach (var pair in Auras)
                 {
-                    uint spell_id = pair.Value.GetBase().GetId();
+                    int spell_id = pair.Value.GetBase().GetId();
                     if (Global.SpellMgr.IsSpellMemberOfSpellGroup(spell_id, chosenSpellGroup) && spell_id != chosenElixir)
                     {
                         useElixir = false;
@@ -3875,7 +3875,7 @@ namespace Scripts.Spells.Items
     {
         void SecondaryEffect()
         {
-            List<uint> availableElixirs = new()
+            List<int> availableElixirs = new()
             {
                 43185, // Runic Healing Potion (33447)
                 53750, // Crazy Alchemist's Potion (40077)
@@ -3897,7 +3897,7 @@ namespace Scripts.Spells.Items
             if (target.GetPowerType() == PowerType.Mana)
                 availableElixirs.Add(43186); // Runic Mana Potion(33448)
 
-            uint chosenElixir = availableElixirs.SelectRandom();
+            int chosenElixir = availableElixirs.SelectRandom();
 
             target.CastSpell(target, chosenElixir, new CastSpellExtraArgs(GetCastItem()));
         }
@@ -3916,7 +3916,7 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.EggNogReindeer, SpellIds.EggNogSnowman);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             if (RandomHelper.randChance(40))
                 GetCaster().CastSpell(GetHitUnit(), RandomHelper.randChance(50) ? SpellIds.EggNogReindeer : SpellIds.EggNogSnowman, GetCastItem());

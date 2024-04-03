@@ -15,33 +15,33 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 {
     struct SpellIds
     {
-        public const uint MoleMachineEmerge = 50313;
-        public const uint DirebrewDisarmPreCast = 47407;
-        public const uint MoleMachineTargetPicker = 47691;
-        public const uint MoleMachineMinionSummoner = 47690;
-        public const uint DirebrewDisarmGrow = 47409;
-        public const uint DirebrewDisarm = 47310;
-        public const uint ChuckMug = 50276;
-        public const uint PortToCoren = 52850;
-        public const uint SendMugControlAura = 47369;
-        public const uint SendMugTargetPicker = 47370;
-        public const uint SendFirstMug = 47333;
-        public const uint SendSecondMug = 47339;
-        public const uint RequestSecondMug = 47344;
-        public const uint HasDarkBrewmaidensBrew = 47331;
-        public const uint BarreledControlAura = 50278;
-        public const uint Barreled = 47442;
+        public const int MoleMachineEmerge = 50313;
+        public const int DirebrewDisarmPreCast = 47407;
+        public const int MoleMachineTargetPicker = 47691;
+        public const int MoleMachineMinionSummoner = 47690;
+        public const int DirebrewDisarmGrow = 47409;
+        public const int DirebrewDisarm = 47310;
+        public const int ChuckMug = 50276;
+        public const int PortToCoren = 52850;
+        public const int SendMugControlAura = 47369;
+        public const int SendMugTargetPicker = 47370;
+        public const int SendFirstMug = 47333;
+        public const int SendSecondMug = 47339;
+        public const int RequestSecondMug = 47344;
+        public const int HasDarkBrewmaidensBrew = 47331;
+        public const int BarreledControlAura = 50278;
+        public const int Barreled = 47442;
     }
 
     struct TextIds
     {
-        public const uint SayIntro = 0;
-        public const uint SayIntro1 = 1;
-        public const uint SayIntro2 = 2;
-        public const uint SayInsult = 3;
-        public const uint SayAntagonist1 = 0;
-        public const uint SayAntagonist2 = 1;
-        public const uint SayAntagonistCombat = 2;
+        public const int SayIntro = 0;
+        public const int SayIntro1 = 1;
+        public const int SayIntro2 = 2;
+        public const int SayInsult = 3;
+        public const int SayAntagonist1 = 0;
+        public const int SayAntagonist2 = 1;
+        public const int SayAntagonistCombat = 2;
     }
 
     struct ActionIds
@@ -54,9 +54,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
     struct CreatureIds
     {
-        public const uint IlsaDirebrew = 26764;
-        public const uint UrsulaDirebrew = 26822;
-        public const uint Antagonist = 23795;
+        public const int IlsaDirebrew = 26764;
+        public const int UrsulaDirebrew = 26822;
+        public const int Antagonist = 23795;
     }
 
     enum DirebrewPhases
@@ -70,12 +70,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
     struct MiscConst
     {
-        public const uint GossipId = 11388;
-        public const uint GoMoleMachineTrap = 188509;
-        public const uint GossipOptionFight = 0;
-        public const uint GossipOptionApologize = 1;
+        public const int GossipId = 11388;
+        public const int GoMoleMachineTrap = 188509;
+        public const int GossipOptionFight = 0;
+        public const int GossipOptionApologize = 1;
         public const int DataTargetGuid = 1;
-        public const uint MaxAntagonists = 3;
+        public const int MaxAntagonists = 3;
 
         public static Position[] AntagonistPos =
         {
@@ -92,7 +92,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
         public boss_coren_direbrew(Creature creature) : base(creature, DataTypes.DataCoren) { }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
             if (menuId != MiscConst.GossipId)
                 return false;
@@ -112,7 +112,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         {
             _Reset();
             me.SetImmuneToPC(true);
-            me.SetFaction((uint)FactionTemplates.Friendly);
+            me.SetFaction(FactionTemplates.Friendly);
             phase = DirebrewPhases.All;
             _scheduler.CancelAll();
 
@@ -158,7 +158,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
                 phase = DirebrewPhases.One;
                 //events.SetPhase(PhaseOne);
                 me.SetImmuneToPC(false);
-                me.SetFaction((uint)FactionTemplates.GoblinDarkIronBarPatron);
+                me.SetFaction(FactionTemplates.GoblinDarkIronBarPatron);
                 DoZoneInCombat();
 
                 EntryCheckPredicate pred = new(CreatureIds.Antagonist);
@@ -179,7 +179,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             }
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.HealthBelowPctDamaged(66, damage) && phase == DirebrewPhases.One)
             {
@@ -225,7 +225,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             }
         }
 
-        void SummonSister(uint entry)
+        void SummonSister(int entry)
         {
             Creature sister = me.SummonCreature(entry, me.GetPosition(), TempSummonType.DeadDespawn);
             if (sister != null)
@@ -274,7 +274,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
             _scheduler.Schedule(TimeSpan.FromSeconds(2), mugChuck =>
             {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, false, true, -(int)SpellIds.HasDarkBrewmaidensBrew);
+                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, false, true, -SpellIds.HasDarkBrewmaidensBrew);
                 if (target != null)
                     DoCast(target, SpellIds.ChuckMug);
                 mugChuck.Repeat(TimeSpan.FromSeconds(4));
@@ -298,7 +298,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
         public override void Reset()
         {
-            me.SetFaction((uint)FactionTemplates.GoblinDarkIronBarPatron);
+            me.SetFaction(FactionTemplates.GoblinDarkIronBarPatron);
             DoZoneInCombat();
         }
 
@@ -326,7 +326,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
                     break;
                 case ActionIds.AntagonistHostile:
                     me.SetImmuneToPC(false);
-                    me.SetFaction((uint)FactionTemplates.GoblinDarkIronBarPatron);
+                    me.SetFaction(FactionTemplates.GoblinDarkIronBarPatron);
                     DoZoneInCombat();
                     break;
                 default:
@@ -378,7 +378,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             return ValidateSpellInfo(SpellIds.MoleMachineMinionSummoner);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.MoleMachineMinionSummoner, true);
         }
@@ -416,7 +416,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             targets.Add(target);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             caster.GetAI().SetGUID(GetHitUnit().GetGUID(), MiscConst.DataTargetGuid);
@@ -438,7 +438,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             return ValidateSpellInfo(SpellIds.SendSecondMug);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             GetHitUnit().CastSpell(GetCaster(), SpellIds.SendSecondMug, true);
         }

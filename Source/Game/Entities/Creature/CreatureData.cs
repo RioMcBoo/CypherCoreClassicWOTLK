@@ -429,7 +429,7 @@ namespace Game.Entities
             if (slot >= m_items.Count)
                 return null;
 
-            return m_items[(int)slot];
+            return m_items[slot];
         }
 
         public bool Empty()

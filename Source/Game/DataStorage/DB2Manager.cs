@@ -585,7 +585,7 @@ namespace Game.DataStorage
                     bounds.Bounds[3] = uiMapLink.UiMax.X;
                 }
 
-                _uiMapBounds[(int)uiMap.Id] = bounds;
+                _uiMapBounds[uiMap.Id] = bounds;
             }
 
             foreach (UiMapXMapArtRecord uiMapArt in UiMapXMapArtStorage.Values)
@@ -1406,7 +1406,7 @@ namespace Game.DataStorage
                 }
             }
 
-            difficulty = (Difficulty)dicMapDiff.First().Key;
+            difficulty = dicMapDiff.First().Key;
 
             return dicMapDiff.First().Value;
         }
@@ -1874,7 +1874,7 @@ namespace Game.DataStorage
             AreaTableRecord areaEntry = AreaTableStorage.LookupByKey(areaId);
             while (areaEntry != null)
             {
-                iterateUiMapAssignments(_uiMapAssignmentByArea[(int)system], (int)areaEntry.Id);
+                iterateUiMapAssignments(_uiMapAssignmentByArea[(int)system], areaEntry.Id);
                 areaEntry = AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
             }
 
@@ -1883,7 +1883,7 @@ namespace Game.DataStorage
                 MapRecord mapEntry = MapStorage.LookupByKey(mapId.Value);
                 if (mapEntry != null)
                 {
-                    iterateUiMapAssignments(_uiMapAssignmentByMap[(int)system], (int)mapEntry.Id);
+                    iterateUiMapAssignments(_uiMapAssignmentByMap[(int)system], mapEntry.Id);
                     if (mapEntry.ParentMapID >= 0)
                         iterateUiMapAssignments(_uiMapAssignmentByMap[(int)system], mapEntry.ParentMapID);
                     if (mapEntry.CosmeticParentMapID >= 0)

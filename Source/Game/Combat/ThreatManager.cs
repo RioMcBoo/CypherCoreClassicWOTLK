@@ -951,7 +951,7 @@ namespace Game.Combat
 
         public Creature GetOwner() { return _owner; }
         public Unit GetVictim() { return _victim; }
-        public float GetThreat() { return Math.Max(_baseAmount + (float)TempModifier, 0.0f); }
+        public float GetThreat() { return Math.Max(_baseAmount + TempModifier, 0.0f); }
         public OnlineState GetOnlineState() { return Online; }
         public bool IsOnline() { return Online >= OnlineState.Online; }
         public bool IsAvailable() { return Online > OnlineState.Offline; }

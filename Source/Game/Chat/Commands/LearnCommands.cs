@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Spells;
@@ -96,7 +95,7 @@ namespace Game.Chat.Commands
                 Player target = player.GetConnectedPlayer();
                 foreach (var (_, skillInfo) in CliDB.SkillLineStorage)
                     if ((skillInfo.CategoryID == SkillCategory.Profession || skillInfo.CategoryID == SkillCategory.Secondary) && skillInfo.CanLink != 0) // only prof. with recipes have
-                        HandleLearnSkillRecipesHelper(target, (SkillType)skillInfo.Id);
+                        HandleLearnSkillRecipesHelper(target, skillInfo.Id);
 
                 handler.SendSysMessage(CypherStrings.CommandLearnAllCraft);
                 return true;
@@ -180,7 +179,7 @@ namespace Game.Chat.Commands
 
                     if (locale < Locale.Total)
                     {
-                        skillId = (SkillType)skillInfo.Id;
+                        skillId = skillInfo.Id;
                         break;
                     }
                 }
@@ -190,8 +189,8 @@ namespace Game.Chat.Commands
 
                 HandleLearnSkillRecipesHelper(target, skillId);
 
-                ushort maxLevel = target.GetPureMaxSkillValue((SkillType)skillId);
-                target.SetSkill(skillId, target.GetSkillStep((SkillType)skillId), maxLevel, maxLevel);
+                ushort maxLevel = target.GetPureMaxSkillValue(skillId);
+                target.SetSkill(skillId, target.GetSkillStep(skillId), maxLevel, maxLevel);
                 handler.SendSysMessage(CypherStrings.CommandLearnAllRecipes, name);
                 return true;
             }

@@ -4,7 +4,6 @@
 
 using Framework.Configuration;
 using Framework.Constants;
-using Framework.Cryptography;
 using Framework.Database;
 using Framework.Networking;
 using Game.Chat;
@@ -13,7 +12,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Networking
 {

@@ -93,7 +93,7 @@ namespace Game.Spells
 
                     var mountCapability = GetBase().GetUnitOwner().GetMountCapability(mountType);
                     if (mountCapability != null)
-                        amount = (int)mountCapability.Id;
+                        amount = mountCapability.Id;
                     break;
                 case AuraType.ShowConfirmationPromptWithDifficulty:
                     if (caster != null)
@@ -3129,7 +3129,7 @@ namespace Game.Spells
                 {
                     if (spellGroupVal != 0)
                     {
-                        target.HandleStatFlatModifier((UnitMods.StatStart + (int)i), UnitModifierFlatType.Total, (float)spellGroupVal, !apply);
+                        target.HandleStatFlatModifier((UnitMods.StatStart + (int)i), UnitModifierFlatType.Total, spellGroupVal, !apply);
                         if (target.IsTypeId(TypeId.Player) || target.IsPet())
                             target.UpdateStatBuffMod(i);
                     }
@@ -3410,7 +3410,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             PowerType power = (PowerType)GetMiscValue();
-            UnitMods unitMod = (UnitMods)(UnitMods.PowerStart + (int)power);
+            UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
             target.HandleStatFlatModifier(unitMod, UnitModifierFlatType.Total, GetAmount(), apply);
         }
@@ -5525,7 +5525,7 @@ namespace Game.Spells
 
         void HandleBreakableCCAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
-            int damageLeft = (int)(GetAmount() - eventInfo.GetDamageInfo().GetDamage());
+            int damageLeft = GetAmount() - eventInfo.GetDamageInfo().GetDamage();
 
             if (damageLeft <= 0)
                 aurApp.GetTarget().RemoveAura(aurApp);

@@ -8,10 +8,8 @@ using Game.Movement;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
-using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 
 namespace Game.Entities

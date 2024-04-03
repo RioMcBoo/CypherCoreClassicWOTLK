@@ -147,9 +147,9 @@ namespace Game.BattleGrounds.Zones
                             m_TeamScores[team] = MaxTeamScore;
 
                         if (team == BatttleGroundTeamId.Alliance)
-                            UpdateWorldState(ABWorldStates.ResourcesAlly, (int)m_TeamScores[team]);
+                            UpdateWorldState(ABWorldStates.ResourcesAlly, m_TeamScores[team]);
                         else
-                            UpdateWorldState(ABWorldStates.ResourcesHorde, (int)m_TeamScores[team]);
+                            UpdateWorldState(ABWorldStates.ResourcesHorde, m_TeamScores[team]);
                         // update achievement flags
                         // we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
                         int otherTeam = (team + 1) % SharedConst.PvpTeamsCount;

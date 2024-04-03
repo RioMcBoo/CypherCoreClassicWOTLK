@@ -1,7 +1,6 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
@@ -167,11 +166,11 @@ namespace Game.Maps
             {
                 SharedInstanceLockData sharedData = new();
                 _instanceLockDataById[instanceId] = sharedData;
-                instanceLock = new SharedInstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
+                instanceLock = new SharedInstanceLock(entries.MapDifficulty.MapID, entries.MapDifficulty.DifficultyID,
                     GetNextResetTime(entries), instanceId, sharedData);
             }
             else
-                instanceLock = new InstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
+                instanceLock = new InstanceLock(entries.MapDifficulty.MapID, entries.MapDifficulty.DifficultyID,
                     GetNextResetTime(entries), instanceId);
 
             instanceLock.SetIsNew(true);
@@ -222,12 +221,12 @@ namespace Game.Maps
                     var sharedDataItr = _instanceLockDataById.LookupByKey(updateEvent.InstanceId);
                     Cypher.Assert(sharedDataItr != null);
 
-                    instanceLock = new SharedInstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
+                    instanceLock = new SharedInstanceLock(entries.MapDifficulty.MapID, entries.MapDifficulty.DifficultyID,
                         GetNextResetTime(entries), updateEvent.InstanceId, sharedDataItr);
                     Cypher.Assert((instanceLock as SharedInstanceLock).GetSharedData().InstanceId == updateEvent.InstanceId);
                 }
                 else
-                    instanceLock = new InstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
+                    instanceLock = new InstanceLock(entries.MapDifficulty.MapID, entries.MapDifficulty.DifficultyID,
                         GetNextResetTime(entries), updateEvent.InstanceId);
 
                 lock(_lockObject)

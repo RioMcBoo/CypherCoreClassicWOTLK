@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Spells;
 using System;
@@ -1213,7 +1212,7 @@ namespace Game.Networking.Packets
     {
         public void Initialize(Unit unit)
         {
-            Health = (long)unit.GetHealth();
+            Health = unit.GetHealth();
             AttackPower = (int)unit.GetTotalAttackPowerValue(unit.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
             SpellPower = unit.SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
             Armor = unit.GetArmor();
@@ -1232,7 +1231,7 @@ namespace Game.Networking.Packets
                 bool primaryPowerAdded = false;
                 foreach (SpellPowerCost cost in spell.GetPowerCost())
                 {
-                    PowerData.Add(new SpellLogPowerData((int)cost.Power, unitCaster.GetPower(cost.Power), (int)cost.Amount));
+                    PowerData.Add(new SpellLogPowerData((int)cost.Power, unitCaster.GetPower(cost.Power), cost.Amount));
                     if (cost.Power == primaryPowerType)
                         primaryPowerAdded = true;
                 }

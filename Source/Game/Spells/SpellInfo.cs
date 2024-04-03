@@ -135,7 +135,7 @@ namespace Game.Spells
             SpellClassOptionsRecord _class = data.ClassOptions;
             if (_class != null)
             {
-                SpellFamilyName = (SpellFamilyNames)_class.SpellClassSet;
+                SpellFamilyName = _class.SpellClassSet;
                 SpellFamilyFlags = _class.SpellClassMask;
             }
 
@@ -2880,14 +2880,14 @@ namespace Game.Spells
                                 powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetMaxHealth(), power.PowerCostPct);
                             break;
                         case PowerType.Mana:
-                            powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetCreateMana(), power.PowerCostPct);
+                            powerCost += MathFunctions.CalculatePct(unitCaster.GetCreateMana(), power.PowerCostPct);
                             break;
                         default:
                         {
                             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(power.PowerType);
                             if (powerTypeEntry != null)
                             {
-                                powerCost += (int)MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, power.PowerCostPct);
+                                powerCost += MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, power.PowerCostPct);
                                 break;
                             }
 
@@ -3936,7 +3936,7 @@ namespace Game.Spells
                 || HasChannelInterruptFlag(SpellAuraInterruptFlags.Damage | SpellAuraInterruptFlags.EnteringCombat)
                 || (interruptTarget.IsPlayer() && InterruptFlags.HasFlag(SpellInterruptFlags.DamageCancelsPlayerOnly))
                 || InterruptFlags.HasFlag(SpellInterruptFlags.DamageCancels)
-                || (interruptCaster != null && interruptCaster.IsUnit() && interruptCaster.ToUnit().HasAuraTypeWithMiscvalue(AuraType.AllowInterruptSpell, (int)Id))
+                || (interruptCaster != null && interruptCaster.IsUnit() && interruptCaster.ToUnit().HasAuraTypeWithMiscvalue(AuraType.AllowInterruptSpell, Id))
                 || (((interruptTarget.GetMechanicImmunityMask() & (1 << (int)Mechanics.Interrupt)) == 0 || ignoreImmunity)
                     && !interruptTarget.HasAuraTypeWithAffectMask(AuraType.PreventInterrupt, this)
                     && PreventionType.HasAnyFlag(SpellPreventionType.Silence));

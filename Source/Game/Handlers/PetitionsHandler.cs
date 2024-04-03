@@ -7,7 +7,6 @@ using Game.Entities;
 using Game.Guilds;
 using Game.Networking;
 using Game.Networking.Packets;
-using System.Collections.Generic;
 
 namespace Game
 {

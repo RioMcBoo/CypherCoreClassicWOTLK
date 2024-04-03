@@ -253,7 +253,7 @@ namespace Game.Movement
         public void ComputeIndex(float t, ref int index, ref float u)
         {
             //ASSERT(t >= 0.f && t <= 1.f);
-            T length_ = t * (dynamic)Length();
+            T length_ = t * Length();
             index = ComputeIndexInBounds(length_);
             //ASSERT(index < index_hi);
             u = (float)(length_ - Length(index)) / (float)Length(index, index + 1);

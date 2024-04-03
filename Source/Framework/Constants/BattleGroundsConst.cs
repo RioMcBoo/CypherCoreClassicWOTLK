@@ -43,10 +43,10 @@ namespace Framework.Constants
         public const int BerserkerBuff = 179905;
 
         //QueueGroupTypes
-        public const uint BgQueuePremadeAlliance = 0;
-        public const uint BgQueuePremadeHorde = 1;
-        public const uint BgQueueNormalAlliance = 2;
-        public const uint BgQueueNormalHorde = 3;
+        public const int BgQueuePremadeAlliance = 0;
+        public const int BgQueuePremadeHorde = 1;
+        public const int BgQueueNormalAlliance = 2;
+        public const int BgQueueNormalHorde = 3;
         public const int BgQueueTypesCount = 4;
 
         //PlayerPosition

@@ -332,6 +332,7 @@ namespace Game.BattleGrounds.Zones
         void HandleFlagRoomCapturePoint(int team)
         {
             Player flagCarrier = Global.ObjAccessor.GetPlayer(GetBgMap(), GetFlagPickerGUID(team));
+
             int areaTrigger = team == BatttleGroundTeamId.Alliance ? 3647 : 3646;
             if (flagCarrier != null && flagCarrier.IsInAreaTriggerRadius(CliDB.AreaTriggerStorage.LookupByKey(areaTrigger)))
                 EventPlayerCapturedFlag(flagCarrier);
@@ -601,9 +602,9 @@ namespace Game.BattleGrounds.Zones
         void UpdateTeamScore(int team)
         {
             if (team == BatttleGroundTeamId.Alliance)
-                UpdateWorldState(WSGWorldStates.FlagCapturesAlliance, (int)GetTeamScore(team));
+                UpdateWorldState(WSGWorldStates.FlagCapturesAlliance, GetTeamScore(team));
             else
-                UpdateWorldState(WSGWorldStates.FlagCapturesHorde, (int)GetTeamScore(team));
+                UpdateWorldState(WSGWorldStates.FlagCapturesHorde, GetTeamScore(team));
         }
 
         public override void HandleAreaTrigger(Player player, int trigger, bool entered)

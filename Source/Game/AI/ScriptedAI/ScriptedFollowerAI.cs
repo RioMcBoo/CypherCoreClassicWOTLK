@@ -4,8 +4,6 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
-using Game.Maps;
-using System;
 
 namespace Game.AI
 {

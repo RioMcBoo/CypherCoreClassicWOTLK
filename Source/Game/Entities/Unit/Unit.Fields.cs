@@ -258,7 +258,7 @@ namespace Game.Entities
             m_damage = dmgInfo.Damage;
             m_originalDamage = dmgInfo.Damage;
             m_spellInfo = null;
-            m_schoolMask = (SpellSchoolMask)dmgInfo.DamageSchoolMask;
+            m_schoolMask = dmgInfo.DamageSchoolMask;
             m_damageType = DamageEffectType.Direct;
             m_attackType = dmgInfo.AttackType;
             m_absorb = dmgInfo.Absorb;

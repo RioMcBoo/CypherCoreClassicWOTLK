@@ -239,7 +239,7 @@ namespace Scripts.Spells.Priest
                 return;
 
             CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct((int)(healInfo.GetHeal()), 10));
+            args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(healInfo.GetHeal(), 10));
             caster.CastSpell(caster, SpellIds.OracularHeal, args);
         }
 
@@ -308,7 +308,7 @@ namespace Scripts.Spells.Priest
             CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
 
             // Note: atonementEffect holds the correct amount Since we passed the effect in the AuraScript that calls this method.
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), atonementEffect.GetAmount()));
+            args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(damageInfo.GetDamage(), atonementEffect.GetAmount()));
 
             args.SetCustomArg(new TriggerArgs() { TriggeredBy = eventInfo.GetSpellInfo(), DamageSchoolMask = eventInfo.GetDamageInfo().GetSchoolMask() });
 
@@ -730,7 +730,7 @@ namespace Scripts.Spells.Priest
             {
                 Aura prayerOfMending = victim.GetAura(SpellIds.PrayerOfMendingAura, GetCaster().GetGUID());
                 if (prayerOfMending != null)
-                    MathFunctions.AddPct(ref pctMod, (int)(divineServiceEffect.GetAmount() * prayerOfMending.GetStackAmount()));
+                    MathFunctions.AddPct(ref pctMod, divineServiceEffect.GetAmount() * prayerOfMending.GetStackAmount());
             }
         }
 
@@ -784,7 +784,7 @@ namespace Scripts.Spells.Priest
             _casterCurrentPosition = caster.GetPosition();
 
             // Note: max. distance at which the Divine Star can travel to is 1's BasePoints yards.
-            _maxTravelDistance = (float)(spellInfo.GetEffect(1).CalcValue(caster));
+            _maxTravelDistance = spellInfo.GetEffect(1).CalcValue(caster);
 
             Position destPos = _casterCurrentPosition;
             at.MovePositionToFirstCollision(destPos, _maxTravelDistance, 0.0f);
@@ -2475,10 +2475,10 @@ namespace Scripts.Spells.Priest
                 return;
 
             SpellInfo spellInfo = SpellMgr.GetSpellInfo(SpellIds.BlessedHealing, GetCastDifficulty());
-            int amount = MathFunctions.CalculatePct((int)(healInfo.GetHeal()), aurEff.GetAmount());
+            int amount = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 
             Cypher.Assert(spellInfo.GetMaxTicks() > 0);
-            amount /= (int)spellInfo.GetMaxTicks();
+            amount /= spellInfo.GetMaxTicks();
 
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
@@ -2585,7 +2585,7 @@ namespace Scripts.Spells.Priest
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int selfHeal = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+            int selfHeal = MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             int teamHeal = selfHeal / 2;
 
             CastSpellExtraArgs args = new(aurEff);

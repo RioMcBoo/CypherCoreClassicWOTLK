@@ -10,12 +10,12 @@ namespace Scripts.World.Achievements
     [Script]
     class scene_deathwing_simulator : SceneScript
     {
-        const uint SpellDeathwingSimulator = 201184;
+        const int SpellDeathwingSimulator = 201184;
 
         public scene_deathwing_simulator() : base("scene_deathwing_simulator") { }
 
         // Called when a player receive trigger from scene
-        public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
+        public override void OnSceneTriggerEvent(Player player, int sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             if (triggerName == "Burn Player")
                 player.CastSpell(player, SpellDeathwingSimulator, true); // Deathwing Simulator Burn player

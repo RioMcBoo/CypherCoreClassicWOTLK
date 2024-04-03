@@ -521,7 +521,7 @@ namespace Game.BattleGrounds.Zones
                                 GateStatus[gate.GateId] = Attackers == BatttleGroundTeamId.Horde ? SAGateState.AllianceGateDestroyed : SAGateState.HordeGateDestroyed;
 
                                 if (gateId < 5)
-                                    DelObject((int)gateId + 14);
+                                    DelObject(gateId + 14);
 
                                 Creature creature = obj.FindNearestCreature(SharedConst.WorldTrigger, 500.0f);
                                 if (creature != null)

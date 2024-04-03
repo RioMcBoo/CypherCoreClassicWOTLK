@@ -192,7 +192,7 @@ namespace Game.Movement
             if (actualDuration != thisLink.ExpectedDuration)
             {
                 Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::SendSplineFor: sent spline on index: {index}, duration: {actualDuration} ms. Expected duration: {thisLink.ExpectedDuration} ms (delta {actualDuration - thisLink.ExpectedDuration} ms). Adjusting. ({owner.GetGUID()})");
-                duration = (uint)((double)actualDuration / (double)thisLink.ExpectedDuration * duration);
+                duration = (uint)(actualDuration / (double)thisLink.ExpectedDuration * duration);
             }
             else
             {

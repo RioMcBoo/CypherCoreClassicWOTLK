@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Movement;
 using System;
@@ -58,7 +57,7 @@ namespace Game.Networking.Packets
             if (splineFlags.HasFlag(SplineFlag.Animation))
             {
                 MonsterSplineAnimTierTransition animTierTransition = new();
-                animTierTransition.TierTransitionID = (int)moveSpline.anim_tier.TierTransitionId;
+                animTierTransition.TierTransitionID = moveSpline.anim_tier.TierTransitionId;
                 animTierTransition.StartTime = (uint)moveSpline.effect_start_time;
                 animTierTransition.AnimTier = moveSpline.anim_tier.AnimTier;
                 movementSpline.AnimTierTransition = animTierTransition;

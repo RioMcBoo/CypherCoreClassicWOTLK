@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
-using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Chat
 {

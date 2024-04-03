@@ -405,7 +405,7 @@ namespace Game
         void HandleSelfRes(SelfRes selfRes)
         {
             List<int> selfResSpells = _player.m_activePlayerData.SelfResSpells;
-            if (!selfResSpells.Contains((int)selfRes.SpellId))
+            if (!selfResSpells.Contains(selfRes.SpellId))
                 return;
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(selfRes.SpellId, _player.GetMap().GetDifficultyID());
@@ -457,7 +457,7 @@ namespace Game
             {
                 MirrorImageComponentedData mirrorImageComponentedData = new();
                 mirrorImageComponentedData.UnitGUID = guid;
-                mirrorImageComponentedData.DisplayID = (int)creator.GetDisplayId();
+                mirrorImageComponentedData.DisplayID = creator.GetDisplayId();
                 mirrorImageComponentedData.RaceID = (byte)creator.GetRace();
                 mirrorImageComponentedData.Gender = (byte)creator.GetGender();
                 mirrorImageComponentedData.ClassID = (byte)creator.GetClass();

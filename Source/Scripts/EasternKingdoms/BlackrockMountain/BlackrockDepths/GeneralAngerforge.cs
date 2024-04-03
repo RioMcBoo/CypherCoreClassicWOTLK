@@ -12,9 +12,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.GeneralAnger
 {
     struct SpellIds
     {
-        public const uint Mightyblow = 14099;
-        public const uint Hamstring = 9080;
-        public const uint Cleave = 20691;
+        public const int Mightyblow = 14099;
+        public const int Hamstring = 9080;
+        public const int Cleave = 20691;
     }
 
     enum Phases
@@ -55,7 +55,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.GeneralAnger
             });
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.HealthBelowPctDamaged(20, damage) && phase == Phases.One)
             {

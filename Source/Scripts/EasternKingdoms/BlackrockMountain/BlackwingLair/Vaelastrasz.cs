@@ -12,24 +12,24 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
 {
     struct SpellIds
     {
-        public const uint Essenceofthered = 23513;
-        public const uint Flamebreath = 23461;
-        public const uint Firenova = 23462;
-        public const uint Tailswipe = 15847;
-        public const uint Burningadrenaline = 18173;  //Cast this one. It's what 3.3.5 Dbm expects.
-        public const uint BurningadrenalineExplosion = 23478;
-        public const uint Cleave = 19983;  //Chain cleave is most likely named something different and contains a dummy effect
+        public const int Essenceofthered = 23513;
+        public const int Flamebreath = 23461;
+        public const int Firenova = 23462;
+        public const int Tailswipe = 15847;
+        public const int Burningadrenaline = 18173;  //Cast this one. It's what 3.3.5 Dbm expects.
+        public const int BurningadrenalineExplosion = 23478;
+        public const int Cleave = 19983;  //Chain cleave is most likely named something different and contains a dummy effect
     }
 
     struct TextIds
     {
-        public const uint SayLine1 = 0;
-        public const uint SayLine2 = 1;
-        public const uint SayLine3 = 2;
-        public const uint SayHalflife = 3;
-        public const uint SayKilltarget = 4;
+        public const int SayLine1 = 0;
+        public const int SayLine2 = 1;
+        public const int SayLine3 = 2;
+        public const int SayHalflife = 3;
+        public const int SayKilltarget = 4;
 
-        public const uint GossipId = 6101;
+        public const int GossipId = 6101;
     }
 
     [Script]
@@ -41,8 +41,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
         public boss_vaelastrasz(Creature creature) : base(creature, DataTypes.VaelastrazTheCorrupt)
         {
             Initialize();
-            creature.SetNpcFlag(NPCFlags.Gossip);
-            creature.SetFaction((uint)FactionTemplates.Friendly);
+            creature.SetNpcFlag(NPCFlags1.Gossip);
+            creature.SetFaction(FactionTemplates.Friendly);
             creature.SetUninteractible(false);
         }
 
@@ -114,7 +114,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
         void BeginSpeech(Unit target)
         {
             PlayerGUID = target.GetGUID();
-            me.RemoveNpcFlag(NPCFlags.Gossip);
+            me.RemoveNpcFlag(NPCFlags1.Gossip);
             _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
             {
                 Talk(TextIds.SayLine1);
@@ -130,7 +130,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
                         me.HandleEmoteCommand(Emote.OneshotTalk);
                         speechTask3.Schedule(TimeSpan.FromSeconds(16), speechTask4 =>
                         {
-                            me.SetFaction((uint)FactionTemplates.DragonflightBlack);
+                            me.SetFaction(FactionTemplates.DragonflightBlack);
                             Player player = Global.ObjAccessor.GetPlayer(me, PlayerGUID);
                             if (player != null)
                                 AttackStart(player);
@@ -166,7 +166,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
             }
         }
 
-        public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool OnGossipSelect(Player player, int menuId, int gossipListId)
         {
             if (menuId == TextIds.GossipId && gossipListId == 0)
             {

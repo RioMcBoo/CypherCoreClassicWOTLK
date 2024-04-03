@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
-	/*
+    /*
 	ge means group element.
 
 	Here the group is the set of pairs (x,y) of field elements (see fe.h)
@@ -16,7 +14,7 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 	  ge_precomp (Duif): (y+x,y-x,2dxy)
 	*/
 
-	internal struct GroupElementP2
+    internal struct GroupElementP2
 	{
 		public FieldElement X;
 		public FieldElement Y;

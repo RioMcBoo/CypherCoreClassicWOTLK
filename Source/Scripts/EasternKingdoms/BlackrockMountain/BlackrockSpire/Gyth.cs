@@ -11,19 +11,19 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
 {
     struct SpellIds
     {
-        public const uint RendMounts = 16167; // Change model
-        public const uint CorrosiveAcid = 16359; // Combat (self cast)
-        public const uint Flamebreath = 16390; // Combat (Self cast)
-        public const uint Freeze = 16350; // Combat (Self cast)
-        public const uint KnockAway = 10101; // Combat
-        public const uint SummonRend = 16328;  // Summons Rend near death
+        public const int RendMounts = 16167; // Change model
+        public const int CorrosiveAcid = 16359; // Combat (self cast)
+        public const int Flamebreath = 16390; // Combat (Self cast)
+        public const int Freeze = 16350; // Combat (Self cast)
+        public const int KnockAway = 10101; // Combat
+        public const int SummonRend = 16328;  // Summons Rend near death
     }
 
     struct MiscConst
     {
-        public const uint NefariusPath2 = 1379671;
-        public const uint NefariusPath3 = 1379672;
-        public const uint GythPath1 = 11037448;
+        public const int NefariusPath2 = 1379671;
+        public const int NefariusPath3 = 1379672;
+        public const int GythPath1 = 11037448;
     }
 
     [Script]
@@ -83,7 +83,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
             instance.SetBossState(DataTypes.Gyth, EncounterState.Done);
         }
 
-        public override void SetData(uint type, uint data)
+        public override void SetData(int type, int data)
         {
             switch (data)
             {

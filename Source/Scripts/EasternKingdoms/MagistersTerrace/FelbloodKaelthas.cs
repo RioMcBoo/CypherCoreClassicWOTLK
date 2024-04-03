@@ -14,55 +14,55 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
     struct TextIds
     {
         // Kael'thas Sunstrider
-        public const uint SayIntro1 = 0;
-        public const uint SayIntro2 = 1;
-        public const uint SayGravityLapse1 = 2;
-        public const uint SayGravityLapse2 = 3;
-        public const uint SayPowerFeedback = 4;
-        public const uint SaySummonPhoenix = 5;
-        public const uint SayAnnouncePyroblast = 6;
-        public const uint SayFlameStrike = 7;
-        public const uint SayDeath = 8;
+        public const int SayIntro1 = 0;
+        public const int SayIntro2 = 1;
+        public const int SayGravityLapse1 = 2;
+        public const int SayGravityLapse2 = 3;
+        public const int SayPowerFeedback = 4;
+        public const int SaySummonPhoenix = 5;
+        public const int SayAnnouncePyroblast = 6;
+        public const int SayFlameStrike = 7;
+        public const int SayDeath = 8;
     }
 
     struct SpellIds
     {
         // Kael'thas Sunstrider
-        public const uint Fireball = 44189;
-        public const uint GravityLapse = 49887;
-        public const uint HGravityLapse = 44226;
-        public const uint GravityLapseCenterTeleport = 44218;
-        public const uint GravityLapseLeftTeleport = 44219;
-        public const uint GravityLapseFrontLeftTeleport = 44220;
-        public const uint GravityLapseFrontTeleport = 44221;
-        public const uint GravityLapseFrontRightTeleport = 44222;
-        public const uint GravityLapseRightTeleport = 44223;
-        public const uint GravityLapseInitial = 44224;
-        public const uint GravityLapseFly = 44227;
-        public const uint GravityLapseBeamVisualPeriodic = 44251;
-        public const uint SummonArcaneSphere = 44265;
-        public const uint FlameStrike = 46162;
-        public const uint ShockBarrier = 46165;
-        public const uint PowerFeedback = 44233;
-        public const uint HPowerFeedback = 47109;
-        public const uint Pyroblast = 36819;
-        public const uint Phoenix = 44194;
-        public const uint EmoteTalkExclamation = 48348;
-        public const uint EmotePoint = 48349;
-        public const uint EmoteRoar = 48350;
-        public const uint ClearFlight = 44232;
-        public const uint QuiteSuicide = 3617; // Serverside public const uint 
+        public const int Fireball = 44189;
+        public const int GravityLapse = 49887;
+        public const int HGravityLapse = 44226;
+        public const int GravityLapseCenterTeleport = 44218;
+        public const int GravityLapseLeftTeleport = 44219;
+        public const int GravityLapseFrontLeftTeleport = 44220;
+        public const int GravityLapseFrontTeleport = 44221;
+        public const int GravityLapseFrontRightTeleport = 44222;
+        public const int GravityLapseRightTeleport = 44223;
+        public const int GravityLapseInitial = 44224;
+        public const int GravityLapseFly = 44227;
+        public const int GravityLapseBeamVisualPeriodic = 44251;
+        public const int SummonArcaneSphere = 44265;
+        public const int FlameStrike = 46162;
+        public const int ShockBarrier = 46165;
+        public const int PowerFeedback = 44233;
+        public const int HPowerFeedback = 47109;
+        public const int Pyroblast = 36819;
+        public const int Phoenix = 44194;
+        public const int EmoteTalkExclamation = 48348;
+        public const int EmotePoint = 48349;
+        public const int EmoteRoar = 48350;
+        public const int ClearFlight = 44232;
+        public const int QuiteSuicide = 3617; // Serverside public const int 
 
         // Flame Strike
-        public const uint FlameStrikeDummy = 44191;
-        public const uint FlameStrikeDamage = 44190;
+        public const int FlameStrikeDummy = 44191;
+        public const int FlameStrikeDamage = 44190;
 
         // Phoenix
-        public const uint Rebirth = 44196;
-        public const uint Burn = 44197;
-        public const uint EmberBlast = 44199;
-        public const uint SummonPhoenixEgg = 44195; // Serverside public const uint 
-        public const uint FullHeal = 17683;
+        public const int Rebirth = 44196;
+        public const int Burn = 44197;
+        public const int EmberBlast = 44199;
+        public const int SummonPhoenixEgg = 44195; // Serverside public const int 
+        public const int FullHeal = 17683;
     }
 
     enum Phase
@@ -75,7 +75,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 
     struct MiscConst
     {
-        public static uint[] GravityLapseTeleportSpells =
+        public static int[] GravityLapseTeleportSpells =
         {
             SpellIds.GravityLapseLeftTeleport,
             SpellIds.GravityLapseFrontLeftTeleport,
@@ -170,7 +170,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
             _DespawnAtEvade();
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             // Checking for lethal damage first so we trigger the outro phase without triggering phase two in case of oneshot attacks
             if (damage >= me.GetHealth() && _phase != Phase.Outro)
@@ -251,10 +251,10 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 
             // Kael'thas may only kill himself via Quite Suicide
             if (damage >= me.GetHealth() && attacker != me)
-                damage = (uint)(me.GetHealth() - 1);
+                damage = (int)(me.GetHealth() - 1);
         }
 
-        public override void SetData(uint type, uint data)
+        public override void SetData(int type, int data)
         {
             if (type == DataTypes.KaelthasIntro)
             {
@@ -369,7 +369,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 
         public override void JustEngagedWith(Unit who) { }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (damage >= me.GetHealth())
             {
@@ -414,7 +414,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                     });
                     _isInEgg = true;
                 }
-                damage = (uint)(me.GetHealth() - 1);
+                damage = (int)(me.GetHealth() - 1);
             }
 
         }

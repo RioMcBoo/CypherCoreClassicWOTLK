@@ -146,7 +146,7 @@ namespace Scripts.Spells.Warrior
             {
                 for (int i = 0; i < 5; ++i)
                 {
-                    int timeOffset = (int)(6 * i * aurEff.GetPeriod() / 25);
+                    int timeOffset = 6 * i * aurEff.GetPeriod() / 25;
                     Vector4 loc = GetTarget().MoveSpline.ComputePosition(timeOffset);
                     GetTarget().SendPlaySpellVisual(new Position(loc.X, loc.Y, loc.Z), SpellIds.VisualBlazingCharge, 0, 0, 1.0f, true);
                 }
@@ -677,7 +677,7 @@ namespace Scripts.Spells.Warrior
                 else
                 {
                     CastSpellExtraArgs args = new(aurEff);
-                    args.AddSpellMod(SpellValueMod.BasePoint0, (int)damageInfo.GetDamage());
+                    args.AddSpellMod(SpellValueMod.BasePoint0, damageInfo.GetDamage());
                     GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack1, args);
                 }
             }

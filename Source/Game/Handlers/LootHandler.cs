@@ -132,7 +132,7 @@ namespace Game
                 {
                     long goldMod = MathFunctions.CalculatePct(loot.gold, player.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
 
-                    player.ModifyMoney((long)(loot.gold + goldMod));
+                    player.ModifyMoney(loot.gold + goldMod);
                     player.UpdateCriteria(CriteriaType.MoneyLootedFromCreatures, loot.gold);
 
                     LootMoneyNotify packet = new();
@@ -450,6 +450,7 @@ namespace Game
                 }
 
                 // now move item from loot to target inventory
+
                 Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomProperties, item.GetAllowedLooters(), item.context);
                 if (newitem != null)
                     aeResult.Add(newitem, item.count, loot.loot_type, loot.GetDungeonEncounterId());

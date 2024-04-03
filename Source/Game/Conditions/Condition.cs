@@ -5,7 +5,6 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Miscellaneous;
 using Game.Scenarios;
 using System;
 using System.Collections.Generic;
@@ -88,7 +87,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.WorldState:
                 {
-                    condMeets = Global.WorldStateMgr.GetValue((int)ConditionValue1, map) == ConditionValue2;
+                    condMeets = Global.WorldStateMgr.GetValue(ConditionValue1, map) == ConditionValue2;
                     break;
                 }
                 case ConditionTypes.RealmAchievement:
@@ -324,7 +323,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Title:
                     if (player != null)
-                        condMeets = player.HasTitle((int)ConditionValue1);
+                        condMeets = player.HasTitle(ConditionValue1);
                     break;
                 case ConditionTypes.UnitState:
                     if (unit != null)

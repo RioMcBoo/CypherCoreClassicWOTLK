@@ -474,8 +474,8 @@ namespace Game.Maps
             int doubleGridX = (int)(Math.Floor(-(x - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
             int doubleGridY = (int)(Math.Floor(-(y - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
 
-            float gx = x - ((int)gridCoord.X_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
-            float gy = y - ((int)gridCoord.Y_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
+            float gx = x - (gridCoord.X_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
+            float gy = y - (gridCoord.Y_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
 
             uint quarterIndex;
             if (Convert.ToBoolean(doubleGridY & 1))

@@ -16,7 +16,6 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Game.Entities
 {
@@ -801,18 +800,18 @@ namespace Game.Entities
                 ToCreature().GetAI().JustUnregisteredAreaTrigger(areaTrigger);
         }
 
-        public AreaTrigger GetAreaTrigger(uint spellId)
+        public AreaTrigger GetAreaTrigger(int spellId)
         {
             List<AreaTrigger> areaTriggers = GetAreaTriggers(spellId);
             return areaTriggers.Empty() ? null : areaTriggers[0];
         }
 
-        public List<AreaTrigger> GetAreaTriggers(uint spellId)
+        public List<AreaTrigger> GetAreaTriggers(int spellId)
         {
             return m_areaTrigger.Where(trigger => trigger.GetSpellId() == spellId).ToList();
         }
 
-        public void RemoveAreaTrigger(uint spellId)
+        public void RemoveAreaTrigger(int spellId)
         {
             for (var i = 0; i < m_areaTrigger.Count; ++i)
             {
@@ -2248,7 +2247,7 @@ namespace Game.Entities
         {
             if (HasAuraType(AuraType.ModFaction))
             {
-                SetFaction((int)GetAuraEffectsByType(AuraType.ModFaction).LastOrDefault().GetMiscValue());
+                SetFaction(GetAuraEffectsByType(AuraType.ModFaction).LastOrDefault().GetMiscValue());
                 return;
             }
 
@@ -2795,7 +2794,7 @@ namespace Game.Entities
                             absorbLog.Caster = baseAura.GetCasterGUID();
                             absorbLog.AbsorbedSpellID = spellProto != null ? spellProto.Id : 0;
                             absorbLog.AbsorbSpellID = baseAura.GetId();
-                            absorbLog.Absorbed = (int)currentAbsorb;
+                            absorbLog.Absorbed = currentAbsorb;
                             absorbLog.OriginalDamage = damageInfo.GetOriginalDamage();
                             absorbLog.LogData.Initialize(victim);
                             victim.SendCombatLogMessage(absorbLog);
@@ -2816,7 +2815,7 @@ namespace Game.Entities
                 if (victim.IsTypeId(TypeId.Player))
                     victim.ToPlayer().UpdateCriteria(CriteriaType.TotalDamageTaken, damageTaken);
 
-                victim.ModifyHealth(-(int)damageTaken);
+                victim.ModifyHealth(-damageTaken);
 
                 if (damagetype == DamageEffectType.Direct || damagetype == DamageEffectType.SpellDirect)
                     victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NonPeriodicDamage, spellProto);
@@ -2973,7 +2972,7 @@ namespace Game.Entities
 
             // Call default DealDamage
             CleanDamage cleanDamage = new(damageInfo.CleanDamage, damageInfo.Absorb, damageInfo.AttackType, damageInfo.HitOutCome);
-            DealDamage(this, victim, damageInfo.Damage, cleanDamage, DamageEffectType.Direct, (SpellSchoolMask)damageInfo.DamageSchoolMask, null, durabilityLoss);
+            DealDamage(this, victim, damageInfo.Damage, cleanDamage, DamageEffectType.Direct, damageInfo.DamageSchoolMask, null, durabilityLoss);
 
             // If this is a creature and it attacks from behind it has a probability to daze it's victim
             if ((damageInfo.HitOutCome == MeleeHitOutcome.Crit || damageInfo.HitOutCome == MeleeHitOutcome.Crushing || damageInfo.HitOutCome == MeleeHitOutcome.Normal || damageInfo.HitOutCome == MeleeHitOutcome.Glancing) &&
@@ -3069,7 +3068,7 @@ namespace Game.Entities
             if (dVal == 0)
                 return 0;
 
-            long curHealth = (long)GetHealth();
+            long curHealth = GetHealth();
 
             long val = dVal + curHealth;
             if (val <= 0)
@@ -3466,7 +3465,7 @@ namespace Game.Entities
             // level-based resistance does not apply to binary spells, and cannot be overcome by spell penetration
             // gameobject caster -- should it have level based resistance?
             if (caster != null && !caster.IsGameObject() && (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell)))
-                victimResistance += Math.Max(((float)victim.GetLevelForTarget(caster) - (float)caster.GetLevelForTarget(victim)) * 5.0f, 0.0f);
+                victimResistance += Math.Max((victim.GetLevelForTarget(caster) - (float)caster.GetLevelForTarget(victim)) * 5.0f, 0.0f);
 
             var bossLevel = 83;
             float bossResistanceConstant = 510.0f;
@@ -3497,7 +3496,7 @@ namespace Game.Entities
 
             MathFunctions.RoundToInterval(ref auraAbsorbMod, 0.0f, 100.0f);
 
-            int absorbIgnoringDamage = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), auraAbsorbMod);
+            int absorbIgnoringDamage = MathFunctions.CalculatePct(damageInfo.GetDamage(), auraAbsorbMod);
             if (spell != null)
                 spell.CallScriptOnResistAbsorbCalculateHandlers(damageInfo, ref resistedDamage, ref absorbIgnoringDamage);
 
@@ -3867,7 +3866,7 @@ namespace Game.Entities
             int DoneFlatBenefit = 0;
 
             // ..done
-            DoneFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, (uint)creatureTypeMask);
+            DoneFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, creatureTypeMask);
 
             // ..done
             // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
@@ -3880,14 +3879,14 @@ namespace Game.Entities
                 APbonus += victim.GetTotalAuraModifier(AuraType.RangedAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature Type)
-                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (uint)creatureTypeMask);
+                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, creatureTypeMask);
             }
             else
             {
                 APbonus += victim.GetTotalAuraModifier(AuraType.MeleeAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature Type)
-                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (uint)creatureTypeMask);
+                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, creatureTypeMask);
             }
 
             if (APbonus != 0)                                       // Can be negative
@@ -3960,7 +3959,7 @@ namespace Game.Entities
             else if (aurEff != null)
                 aurEff.GetBase().CallScriptCalcDamageAndHealingHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref damage, ref DoneFlatBenefit, ref DoneTotalMod);
 
-            float damageF = (float)(damage + DoneFlatBenefit) * DoneTotalMod;
+            float damageF = (damage + DoneFlatBenefit) * DoneTotalMod;
 
             // apply spellmod to Done damage
             if (spellProto != null)
@@ -4067,7 +4066,7 @@ namespace Game.Entities
                 TakenTotalMod = 1.0f - damageReduction;
             }
 
-            float tmpDamage = (float)(pdamage + TakenFlatBenefit) * TakenTotalMod;
+            float tmpDamage = (pdamage + TakenFlatBenefit) * TakenTotalMod;
             return (int)Math.Max(tmpDamage, 0.0f);
         }
 

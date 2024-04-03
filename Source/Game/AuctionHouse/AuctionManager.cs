@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.BattlePets;
 using Game.DataStorage;
 using Game.Entities;
@@ -357,7 +356,7 @@ namespace Game
             }
 
             _pendingAuctionsByPlayer.Remove(player.GetGUID());
-            player.ModifyMoney(-(long)totaldeposit);
+            player.ModifyMoney(-totaldeposit);
         }
 
         public void UpdatePendingAuctions()
@@ -562,7 +561,7 @@ namespace Game
                         bucket.SortLevel = (byte)key.ItemLevel;
                         break;
                     case ItemClass.Container:
-                        bucket.SortLevel = (byte)itemTemplate.GetContainerSlots();
+                        bucket.SortLevel = itemTemplate.GetContainerSlots();
                         break;
                     case ItemClass.Gem:
                     case ItemClass.ItemEnhancement:
@@ -923,7 +922,7 @@ namespace Game
 
                             var battlePetSpecies = BattlePetMgr.GetBattlePetSpeciesBySpell(itemTemplate.Effects[1].SpellID);
                             if (battlePetSpecies != null)
-                                if (knownPetSpecies.Get((int)battlePetSpecies.Id))
+                                if (knownPetSpecies.Get(battlePetSpecies.Id))
                                     continue;
                         }
                     }
@@ -1324,7 +1323,7 @@ namespace Game
                     .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(auction.Owner), auction.Owner), new MailSender(this), MailCheckFlags.Copied, WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay));
             }
 
-            player.ModifyMoney(-(long)totalPrice);
+            player.ModifyMoney(-totalPrice);
             player.SaveGoldToDB(trans);
 
             foreach (MailedItemsBatch batch in items)
@@ -1821,7 +1820,7 @@ namespace Game
             {
                 foreach (Item item in auction.Items)
                 {
-                    bucketInfo.TotalQuantity += (int)item.GetCount();
+                    bucketInfo.TotalQuantity += item.GetCount();
 
                     if (Key.BattlePetSpeciesId != 0)
                     {
@@ -1879,7 +1878,7 @@ namespace Game
                     case AuctionHouseSortOrder.Price:
                     case AuctionHouseSortOrder.Bid:
                     case AuctionHouseSortOrder.Buyout:
-                        return (long)(left.MinPrice - right.MinPrice);
+                        return left.MinPrice - right.MinPrice;
                     case AuctionHouseSortOrder.Name:
                         return left.FullName[(int)_locale].CompareTo(right.FullName[(int)_locale]);
                     case AuctionHouseSortOrder.Level:
@@ -2040,7 +2039,7 @@ namespace Game
         public Span<T> GetResultRange()
         {
             Span<T> h = _items.ToArray();
-            return h[(int)_offset..];
+            return h[_offset..];
         }
 
         public bool HasMoreResults()

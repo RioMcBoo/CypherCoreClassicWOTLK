@@ -13,14 +13,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
     struct SpellIds
     {
         // Garr
-        public const uint AntimagicPulse = 19492;
-        public const uint MagmaShackles = 19496;
-        public const uint Enrage = 19516;
-        public const uint SeparationAnxiety = 23492;
+        public const int AntimagicPulse = 19492;
+        public const int MagmaShackles = 19496;
+        public const int Enrage = 19516;
+        public const int SeparationAnxiety = 23492;
 
         // Adds
-        public const uint Eruption = 19497;
-        public const uint Immolate = 15732;
+        public const int Eruption = 19497;
+        public const int Immolate = 15732;
     }
 
     [Script]
@@ -93,10 +93,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
             ScheduleTasks();
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
-            ulong health10pct = me.CountPctFromMaxHealth(10);
-            ulong health = me.GetHealth();
+            long health10pct = me.CountPctFromMaxHealth(10);
+            long health = me.GetHealth();
             if (health - damage < health10pct)
             {
                 damage = 0;

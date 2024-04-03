@@ -14,7 +14,6 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Game.AI.SmartTarget;
 
 namespace Game.Entities
 {
@@ -225,7 +224,7 @@ namespace Game.Entities
 
             // equal to player Race field, but creature does not have race
             SetRace(0);
-            SetClass((Class)creatureInfo.UnitClass);
+            SetClass(creatureInfo.UnitClass);
 
             // Cancel load if no model defined
             if (creatureInfo.GetFirstValidModel() == null)
@@ -274,7 +273,7 @@ namespace Game.Entities
             SetCanDualWield(creatureInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.UseOffhandAttack));
 
             // checked at loading
-            DefaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : creatureInfo.MovementType);
+            DefaultMovementType = data != null ? data.movementType : creatureInfo.MovementType;
             if (m_wanderDistance == 0 && DefaultMovementType == MovementGeneratorType.Random)
                 DefaultMovementType = MovementGeneratorType.Idle;
 
@@ -346,7 +345,7 @@ namespace Game.Entities
                 if (previousHealth > 0)
                     SetHealth(previousHealth);
             
-                SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
+                SetMeleeDamageSchool(cInfo.DmgSchool);
                 SetStatFlatModifier(UnitMods.ResistanceHoly, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Holy]);
                 SetStatFlatModifier(UnitMods.ResistanceFire, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Fire]);
                 SetStatFlatModifier(UnitMods.ResistanceNature, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Nature]);
@@ -688,7 +687,7 @@ namespace Game.Entities
                     addvalue = (int)(Spirit * 0.80 * HealthIncreaseRate);
             }
             else
-                addvalue = (long)maxValue / 3;
+                addvalue = maxValue / 3;
 
             // Apply modifiers (if any).
             addvalue *= (int)GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
@@ -1763,7 +1762,7 @@ namespace Game.Entities
                         curhealth = 1;
                 }
 
-                SetPower(PowerType.Mana, (int)m_creatureData.curmana);
+                SetPower(PowerType.Mana, m_creatureData.curmana);
             }
             else
             {
@@ -1932,9 +1931,9 @@ namespace Game.Entities
             float maxRadius = 45.0f * aggroRate;
             float minRadius = 5.0f * aggroRate;
 
-            int expansionMaxLevel = (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)GetCreatureTemplate().RequiredExpansion);
-            int playerLevel = (int)player.GetLevelForTarget(this);
-            int creatureLevel = (int)GetLevelForTarget(player);
+            int expansionMaxLevel = (int)Global.ObjectMgr.GetMaxLevelForExpansion(GetCreatureTemplate().RequiredExpansion);
+            int playerLevel = player.GetLevelForTarget(this);
+            int creatureLevel = GetLevelForTarget(player);
             int levelDifference = creatureLevel - playerLevel;
 
             // The aggro radius for creatures with equal level as the player is 20 yards.
@@ -1942,7 +1941,7 @@ namespace Game.Entities
             float baseAggroDistance = 20.0f - GetCombatReach();
 
             // + - 1 yard for each level difference between player and creature
-            float aggroRadius = baseAggroDistance + (float)levelDifference;
+            float aggroRadius = baseAggroDistance + levelDifference;
 
             // detect range auras
             if ((creatureLevel + 5) <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
@@ -1955,7 +1954,7 @@ namespace Game.Entities
             // This makes sure that creatures such as bosses wont have a bigger aggro range than the rest of the npc's
             // The following code is used for blizzlike behaviour such as skippable bosses
             if (creatureLevel > expansionMaxLevel)
-                aggroRadius = baseAggroDistance + (float)(expansionMaxLevel - playerLevel);
+                aggroRadius = baseAggroDistance + (expansionMaxLevel - playerLevel);
 
             // Make sure that we wont go over the total range limits
             if (aggroRadius > maxRadius)
@@ -2512,9 +2511,9 @@ namespace Game.Entities
             if (creatureAddon.mount != 0)
                 Mount(creatureAddon.mount);
 
-            SetStandState((UnitStandStateType)creatureAddon.standState);
+            SetStandState(creatureAddon.standState);
             ReplaceAllVisFlags((UnitVisFlags)creatureAddon.visFlags);
-            SetAnimTier((AnimTier)creatureAddon.animTier, false);
+            SetAnimTier(creatureAddon.animTier, false);
 
             //! Suspected correlation between UNIT_FIELD_BYTES_1, offset 3, value 0x2:
             //! If no inhabittype_fly (if no MovementFlag_DisableGravity or MovementFlag_CanFly flag found in sniffs)
@@ -2524,7 +2523,7 @@ namespace Game.Entities
             if (CanHover())
                 AddUnitMovementFlag(MovementFlag.Hover);
 
-            SetSheath((SheathState)creatureAddon.sheathState);
+            SetSheath(creatureAddon.sheathState);
             ReplaceAllPvpFlags((UnitPVPStateFlags)creatureAddon.pvpFlags);
 
             // These fields must only be handled by core internals and must not be modified via scripts/DB dat
@@ -2763,7 +2762,7 @@ namespace Game.Entities
             {
                 if (IsWorldBoss())
                 {
-                    int level = (int)(unitTarget.GetLevel() + WorldConfig.GetIntValue(WorldCfg.WorldBossLevelDiff));
+                    int level = unitTarget.GetLevel() + WorldConfig.GetIntValue(WorldCfg.WorldBossLevelDiff);
                     return MathFunctions.RoundToInterval(ref level, 1u, 255u);
                 }
             }
@@ -2972,7 +2971,7 @@ namespace Game.Entities
                     targetLevel = target.ToCreature().GetLevelForTarget(this);
 
                 int myLevel = GetLevelForTarget(target);
-                int levelDiff = (int)(targetLevel - myLevel);
+                int levelDiff = targetLevel - myLevel;
 
                 // The maximum Aggro Radius is capped at 45 yards (25 level difference)
                 if (levelDiff < -25)
@@ -3365,7 +3364,7 @@ namespace Game.Entities
             SelectWildBattlePetLevel();
 
             // checked at creature_template loading
-            DefaultMovementType = (MovementGeneratorType)data.movementType;
+            DefaultMovementType = data.movementType;
 
             m_stringIds[1] = data.StringId;
 

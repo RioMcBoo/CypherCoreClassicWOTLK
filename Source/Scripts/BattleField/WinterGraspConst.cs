@@ -9,7 +9,7 @@ namespace Game.BattleFields
 {
     static class WGConst
     {
-        public const uint MapId = 571;               // Northrend
+        public const int MapId = 571;               // Northrend
 
         public const byte MaxOutsideNpcs = 14;
         public const byte OutsideAllianceNpc = 7;
@@ -28,7 +28,7 @@ namespace Game.BattleFields
         };
 
         public static WorldStates[] ClockWorldState = { WorldStates.BattlefieldWgTimeBattleEnd, WorldStates.BattlefieldWgTimeNextBattle };
-        public static uint[] WintergraspFaction = { 1732, 1735, 35 };
+        public static int[] WintergraspFaction = { 1732, 1735, 35 };
 
         public static Position WintergraspStalkerPos = new(4948.985f, 2937.789f, 550.5172f, 1.815142f);
 
@@ -360,106 +360,106 @@ namespace Game.BattleFields
 
     struct WGAchievements
     {
-        public const uint WinWg = 1717;
-        public const uint WinWg100 = 1718; // @Todo: Has To Be Implemented
-        public const uint WgGnomeslaughter = 1723; // @Todo: Has To Be Implemented
-        public const uint WgTowerDestroy = 1727;
-        public const uint DestructionDerbyA = 1737; // @Todo: Has To Be Implemented
-        public const uint WgTowerCannonKill = 1751; // @Todo: Has To Be Implemented
-        public const uint WgMasterA = 1752; // @Todo: Has To Be Implemented
-        public const uint WinWgTimer10 = 1755;
-        public const uint StoneKeeper50 = 2085; // @Todo: Has To Be Implemented
-        public const uint StoneKeeper100 = 2086; // @Todo: Has To Be Implemented
-        public const uint StoneKeeper250 = 2087; // @Todo: Has To Be Implemented
-        public const uint StoneKeeper500 = 2088; // @Todo: Has To Be Implemented
-        public const uint StoneKeeper1000 = 2089; // @Todo: Has To Be Implemented
-        public const uint WgRanger = 2199; // @Todo: Has To Be Implemented
-        public const uint DestructionDerbyH = 2476; // @Todo: Has To Be Implemented
-        public const uint WgMasterH = 2776;  // @Todo: Has To Be Implemented
+        public const int WinWg = 1717;
+        public const int WinWg100 = 1718; // @Todo: Has To Be Implemented
+        public const int WgGnomeslaughter = 1723; // @Todo: Has To Be Implemented
+        public const int WgTowerDestroy = 1727;
+        public const int DestructionDerbyA = 1737; // @Todo: Has To Be Implemented
+        public const int WgTowerCannonKill = 1751; // @Todo: Has To Be Implemented
+        public const int WgMasterA = 1752; // @Todo: Has To Be Implemented
+        public const int WinWgTimer10 = 1755;
+        public const int StoneKeeper50 = 2085; // @Todo: Has To Be Implemented
+        public const int StoneKeeper100 = 2086; // @Todo: Has To Be Implemented
+        public const int StoneKeeper250 = 2087; // @Todo: Has To Be Implemented
+        public const int StoneKeeper500 = 2088; // @Todo: Has To Be Implemented
+        public const int StoneKeeper1000 = 2089; // @Todo: Has To Be Implemented
+        public const int WgRanger = 2199; // @Todo: Has To Be Implemented
+        public const int DestructionDerbyH = 2476; // @Todo: Has To Be Implemented
+        public const int WgMasterH = 2776;  // @Todo: Has To Be Implemented
     }
 
     struct WGSpells
     {
         // Wartime Auras
-        public const uint Recruit = 37795;
-        public const uint Corporal = 33280;
-        public const uint Lieutenant = 55629;
-        public const uint Tenacity = 58549;
-        public const uint TenacityVehicle = 59911;
-        public const uint TowerControl = 62064;
-        public const uint SpiritualImmunity = 58729;
-        public const uint GreatHonor = 58555;
-        public const uint GreaterHonor = 58556;
-        public const uint GreatestHonor = 58557;
-        public const uint AllianceFlag = 14268;
-        public const uint HordeFlag = 14267;
-        public const uint GrabPassenger = 61178;
+        public const int Recruit = 37795;
+        public const int Corporal = 33280;
+        public const int Lieutenant = 55629;
+        public const int Tenacity = 58549;
+        public const int TenacityVehicle = 59911;
+        public const int TowerControl = 62064;
+        public const int SpiritualImmunity = 58729;
+        public const int GreatHonor = 58555;
+        public const int GreaterHonor = 58556;
+        public const int GreatestHonor = 58557;
+        public const int AllianceFlag = 14268;
+        public const int HordeFlag = 14267;
+        public const int GrabPassenger = 61178;
 
         // Reward Spells
-        public const uint VictoryReward = 56902;
-        public const uint DefeatReward = 58494;
-        public const uint DamagedTower = 59135;
-        public const uint DestroyedTower = 59136;
-        public const uint DamagedBuilding = 59201;
-        public const uint IntactBuilding = 59203;
+        public const int VictoryReward = 56902;
+        public const int DefeatReward = 58494;
+        public const int DamagedTower = 59135;
+        public const int DestroyedTower = 59136;
+        public const int DamagedBuilding = 59201;
+        public const int IntactBuilding = 59203;
 
-        public const uint TeleportBridge = 59096;
-        public const uint TeleportFortress = 60035;
+        public const int TeleportBridge = 59096;
+        public const int TeleportFortress = 60035;
 
-        public const uint TeleportDalaran = 53360;
-        public const uint VictoryAura = 60044;
+        public const int TeleportDalaran = 53360;
+        public const int VictoryAura = 60044;
 
         // Other Spells
-        public const uint WintergraspWater = 36444;
-        public const uint EssenceOfWintergrasp = 58045;
-        public const uint WintergraspRestrictedFlightArea = 91604;
+        public const int WintergraspWater = 36444;
+        public const int EssenceOfWintergrasp = 58045;
+        public const int WintergraspRestrictedFlightArea = 91604;
 
         // Phasing Spells
-        public const uint HordeControlsFactoryPhaseShift = 56618; // Adds Phase 16
-        public const uint AllianceControlsFactoryPhaseShift = 56617; // Adds Phase 32
+        public const int HordeControlsFactoryPhaseShift = 56618; // Adds Phase 16
+        public const int AllianceControlsFactoryPhaseShift = 56617; // Adds Phase 32
 
-        public const uint HordeControlPhaseShift = 55773; // Adds Phase 64
-        public const uint AllianceControlPhaseShift = 55774;  // Adds Phase 128
+        public const int HordeControlPhaseShift = 55773; // Adds Phase 64
+        public const int AllianceControlPhaseShift = 55774;  // Adds Phase 128
     }
 
     struct WGNpcs
     {
-        public const uint GuardH = 30739;
-        public const uint GuardA = 30740;
-        public const uint Stalker = 15214;
+        public const int GuardH = 30739;
+        public const int GuardA = 30740;
+        public const int Stalker = 15214;
 
-        public const uint TaunkaSpiritGuide = 31841; // Horde Spirit Guide For Wintergrasp
-        public const uint DwarvenSpiritGuide = 31842; // Alliance Spirit Guide For Wintergrasp
+        public const int TaunkaSpiritGuide = 31841; // Horde Spirit Guide For Wintergrasp
+        public const int DwarvenSpiritGuide = 31842; // Alliance Spirit Guide For Wintergrasp
 
-        public const uint SiegeEngineAlliance = 28312;
-        public const uint SiegeEngineHorde = 32627;
-        public const uint Catapult = 27881;
-        public const uint Demolisher = 28094;
-        public const uint TowerCannon = 28366;
+        public const int SiegeEngineAlliance = 28312;
+        public const int SiegeEngineHorde = 32627;
+        public const int Catapult = 27881;
+        public const int Demolisher = 28094;
+        public const int TowerCannon = 28366;
     }
 
     struct WGGameObjects
     {
-        public const uint FactoryBannerNe = 190475;
-        public const uint FactoryBannerNw = 190487;
-        public const uint FactoryBannerSe = 194959;
-        public const uint FactoryBannerSw = 194962;
+        public const int FactoryBannerNe = 190475;
+        public const int FactoryBannerNw = 190487;
+        public const int FactoryBannerSe = 194959;
+        public const int FactoryBannerSw = 194962;
 
-        public const uint TitanSRelic = 192829;
+        public const int TitanSRelic = 192829;
 
-        public const uint FortressTower1 = 190221;
-        public const uint FortressTower2 = 190373;
-        public const uint FortressTower3 = 190377;
-        public const uint FortressTower4 = 190378;
+        public const int FortressTower1 = 190221;
+        public const int FortressTower2 = 190373;
+        public const int FortressTower3 = 190377;
+        public const int FortressTower4 = 190378;
 
-        public const uint ShadowsightTower = 190356;
-        public const uint WinterSEdgeTower = 190357;
-        public const uint FlamewatchTower = 190358;
+        public const int ShadowsightTower = 190356;
+        public const int WinterSEdgeTower = 190357;
+        public const int FlamewatchTower = 190358;
 
-        public const uint FortressGate = 190375;
-        public const uint VaultGate = 191810;
+        public const int FortressGate = 190375;
+        public const int VaultGate = 191810;
 
-        public const uint KeepCollisionWall = 194323;
+        public const int KeepCollisionWall = 194323;
     }
 
     struct WintergraspTowerIds
@@ -496,22 +496,22 @@ namespace Game.BattleFields
 
     struct WGGraveyardId
     {
-        public const uint WorkshopNE = 0;
-        public const uint WorkshopNW = 1;
-        public const uint WorkshopSE = 2;
-        public const uint WorkshopSW = 3;
-        public const uint Keep = 4;
-        public const uint Horde = 5;
-        public const uint Alliance = 6;
-        public const uint Max = 7;
+        public const int WorkshopNE = 0;
+        public const int WorkshopNW = 1;
+        public const int WorkshopSE = 2;
+        public const int WorkshopSW = 3;
+        public const int Keep = 4;
+        public const int Horde = 5;
+        public const int Alliance = 6;
+        public const int Max = 7;
     }
 
     struct WintergraspQuests
     {
-        public const uint VictoryAlliance = 13181;
-        public const uint VictoryHorde = 13183;
-        public const uint CreditTowersDestroyed = 35074;
-        public const uint CreditDefendSiege = 31284;
+        public const int VictoryAlliance = 13181;
+        public const int VictoryHorde = 13183;
+        public const int CreditTowersDestroyed = 35074;
+        public const int CreditDefendSiege = 31284;
     }
 
     struct WintergraspText
@@ -587,7 +587,7 @@ namespace Game.BattleFields
     //Data Structs
     struct BfWGCoordGY
     {
-        public BfWGCoordGY(float x, float y, float z, float o, uint graveyardId, int textId, uint startControl)
+        public BfWGCoordGY(float x, float y, float z, float o, int graveyardId, int textId, int startControl)
         {
             pos = new Position(x, y, z, o);
             GraveyardID = graveyardId;
@@ -596,14 +596,14 @@ namespace Game.BattleFields
         }
 
         public Position pos;
-        public uint GraveyardID;
+        public int GraveyardID;
         public int TextId;// for gossip menu
-        public uint StartControl;
+        public int StartControl;
     }
 
     struct WintergraspBuildingSpawnData
     {
-        public WintergraspBuildingSpawnData(uint entry, uint worldstate, float x, float y, float z, float o, float rX, float rY, float rZ, float rW, WGGameObjectBuildingType type)
+        public WintergraspBuildingSpawnData(int entry, int worldstate, float x, float y, float z, float o, float rX, float rY, float rZ, float rW, WGGameObjectBuildingType type)
         {
             Entry = entry;
             WorldState = worldstate;
@@ -612,8 +612,8 @@ namespace Game.BattleFields
             BuildingType = type;
         }
 
-        public uint Entry;
-        public uint WorldState;
+        public int Entry;
+        public int WorldState;
         public Position Pos;
         public Quaternion Rot;
         public WGGameObjectBuildingType BuildingType;
@@ -621,7 +621,7 @@ namespace Game.BattleFields
 
     struct WintergraspGameObjectData
     {
-        public WintergraspGameObjectData(float x, float y, float z, float o, float rX, float rY, float rZ, float rW, uint hordeEntry, uint allianceEntry)
+        public WintergraspGameObjectData(float x, float y, float z, float o, float rX, float rY, float rZ, float rW, int hordeEntry, int allianceEntry)
         {
             Pos = new Position(x, y, z, o);
             Rot = new Quaternion(rX, rY, rZ, rW);
@@ -631,13 +631,13 @@ namespace Game.BattleFields
 
         public Position Pos;
         public Quaternion Rot;
-        public uint HordeEntry;
-        public uint AllianceEntry;
+        public int HordeEntry;
+        public int AllianceEntry;
     }
 
     class WintergraspTowerData
     {
-        public uint towerEntry;                  // Gameobject id of tower
+        public int towerEntry;                  // Gameobject id of tower
         public WintergraspGameObjectData[] GameObject = new WintergraspGameObjectData[6];   // Gameobject position and entry (Horde/Alliance)
 
         // Creature: Turrets and Guard // @todo: Killed on Tower destruction ? Tower damage ? Requires confirming
@@ -646,7 +646,7 @@ namespace Game.BattleFields
 
     struct WintergraspObjectPositionData
     {
-        public WintergraspObjectPositionData(float x, float y, float z, float o, uint hordeEntry, uint allianceEntry)
+        public WintergraspObjectPositionData(float x, float y, float z, float o, int hordeEntry, int allianceEntry)
         {
             Pos = new Position(x, y, z, o);
             HordeEntry = hordeEntry;
@@ -654,8 +654,8 @@ namespace Game.BattleFields
         }
 
         public Position Pos;
-        public uint HordeEntry;
-        public uint AllianceEntry;
+        public int HordeEntry;
+        public int AllianceEntry;
     }
 
     class WintergraspTowerCannonData

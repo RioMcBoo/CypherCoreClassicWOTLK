@@ -4,7 +4,6 @@
 using Framework.Constants;
 using Framework.Database;
 using Game.AI;
-using Game.Conditions;
 using Game.DataStorage;
 using Game.Groups;
 using Game.Mails;
@@ -15,7 +14,6 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace Game.Entities
 {
@@ -1700,7 +1698,7 @@ namespace Game.Entities
                 return true;
             }
 
-            return m_activePlayerData.DailyQuestsCompleted.FindIndex((int)qInfo.Id) == -1;
+            return m_activePlayerData.DailyQuestsCompleted.FindIndex(qInfo.Id) == -1;
         }
 
         public bool SatisfyQuestWeek(Quest qInfo, bool msg)
@@ -2193,7 +2191,7 @@ namespace Game.Entities
                     {
                         int reqItemCount = obj.Amount;
                         int curItemCount = GetItemCount(obj.ObjectID, true);
-                        SetQuestObjectiveData(obj, (int)Math.Min(curItemCount, reqItemCount));
+                        SetQuestObjectiveData(obj, Math.Min(curItemCount, reqItemCount));
                     }
                     else if (obj.Type == QuestObjectiveType.HaveCurrency)
                     {
@@ -2382,7 +2380,7 @@ namespace Game.Entities
                 objectiveFilter = boundItemFlagRequirement.Value ? QuestBoundItemFunc : NotQuestBoundItemFunc;
 
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(entry);
-            UpdateQuestObjectiveProgress(QuestObjectiveType.Item, (int)itemTemplate.GetId(), count, ObjectGuid.Empty, updatedObjectives, objectiveFilter);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.Item, itemTemplate.GetId(), count, ObjectGuid.Empty, updatedObjectives, objectiveFilter);
             if (itemTemplate.QuestLogItemId != 0 && (updatedObjectives.Count != 1 || !updatedObjectives[0].Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem)))
                 UpdateQuestObjectiveProgress(QuestObjectiveType.Item, itemTemplate.QuestLogItemId, count, ObjectGuid.Empty, updatedObjectives, objectiveFilter);
 
@@ -3201,7 +3199,7 @@ namespace Game.Entities
                         ObjectFieldData objMask = new();
                         GameObjectFieldData goMask = new();
 
-                        if (m_questObjectiveStatus.ContainsKey((QuestObjectiveType.GameObject, (int)obj.GetEntry())))
+                        if (m_questObjectiveStatus.ContainsKey((QuestObjectiveType.GameObject, obj.GetEntry())))
                             objMask.MarkChanged(obj.m_objectData.DynamicFlags);
 
                         switch (obj.GetGoType())
@@ -3257,7 +3255,7 @@ namespace Game.Entities
             {
                 if (!qQuest.IsDFQuest())
                 {
-                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), (int)quest_id);
+                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), quest_id);
                     m_lastDailyQuestTime = GameTime.GetGameTime();              // last daily quest time
                     m_DailyQuestChanged = true;
 
@@ -3273,7 +3271,7 @@ namespace Game.Entities
 
         public bool IsDailyQuestDone(int quest_id)
         {
-            return m_activePlayerData.DailyQuestsCompleted.FindIndex((int)quest_id) >= 0;
+            return m_activePlayerData.DailyQuestsCompleted.FindIndex(quest_id) >= 0;
         }
 
         void SetWeeklyQuestStatus(int quest_id)

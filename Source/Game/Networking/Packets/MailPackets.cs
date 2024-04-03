@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Mails;
 using System;
@@ -381,7 +380,7 @@ namespace Game.Networking.Packets
             SentMoney = mail.money;
             Flags = (int)mail.checkMask;
             DaysLeft = (float)(mail.expire_time - GameTime.GetGameTime()) / Time.Day;
-            MailTemplateID = (int)mail.mailTemplateId;
+            MailTemplateID = mail.mailTemplateId;
             Subject = mail.subject;
             Body = mail.body;
 

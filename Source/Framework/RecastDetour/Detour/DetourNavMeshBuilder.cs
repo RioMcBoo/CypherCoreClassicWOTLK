@@ -159,25 +159,25 @@ public static partial class Detour
         public void setArea(byte a)
         {
             //Bitwise operators are done on ints in C#
-            areaAndtype = (byte)(((int)areaAndtype & 0xc0) | ((int)a & 0x3f));
+            areaAndtype = (byte)((areaAndtype & 0xc0) | (a & 0x3f));
         }
 
         /// Sets the polygon type. (See: #dtPolyTypes.)
         public void setType(byte t)
         {
-            areaAndtype = (byte)(((int)areaAndtype & 0x3f) | (t << 6));
+            areaAndtype = (byte)((areaAndtype & 0x3f) | (t << 6));
         }
 
         /// Gets the user defined area id.
         public byte getArea()
         {
-            return (byte)((int)areaAndtype & 0x3f);
+            return (byte)(areaAndtype & 0x3f);
         }
 
         /// Gets the polygon type. (See: #dtPolyTypes)
         public byte getType()
         {
-            return (byte)((int)areaAndtype >> 6);
+            return (byte)(areaAndtype >> 6);
         }
     };
 
@@ -981,8 +981,8 @@ public static partial class Detour
                     if (z > it.bmax[2]) it.bmax[2] = z;
                 }
                 // Remap y
-                it.bmin[1] = (ushort)MathF.Floor((float)it.bmin[1] * createParams.ch / createParams.cs);
-                it.bmax[1] = (ushort)MathF.Ceiling((float)it.bmax[1] * createParams.ch / createParams.cs);
+                it.bmin[1] = (ushort)MathF.Floor(it.bmin[1] * createParams.ch / createParams.cs);
+                it.bmax[1] = (ushort)MathF.Ceiling(it.bmax[1] * createParams.ch / createParams.cs);
             }
         }
 
@@ -1390,9 +1390,9 @@ public static partial class Detour
                 int vb = (int)createParams.detailMeshes[i * 4 + 0];
                 int ndv = (int)createParams.detailMeshes[i * 4 + 1];
                 int nv = navPolys[i].vertCount;
-                dtl.vertBase = (uint)vbase;
+                dtl.vertBase = vbase;
                 dtl.vertCount = (byte)(ndv - nv);
-                dtl.triBase = (uint)createParams.detailMeshes[i * 4 + 2];
+                dtl.triBase = createParams.detailMeshes[i * 4 + 2];
                 dtl.triCount = (byte)createParams.detailMeshes[i * 4 + 3];
                 // Copy vertices except the first 'nv' verts which are equal to nav poly verts.
                 if (ndv - nv != 0)

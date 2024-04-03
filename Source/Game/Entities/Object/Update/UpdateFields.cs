@@ -2,8 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
-using Game.AI;
 using Game.DataStorage;
 using Game.Networking;
 using Game.Networking.Packets;
@@ -73,7 +71,7 @@ namespace Game.Entities
             {
                 if (unit.ToTempSummon() is TempSummon summon)
                     if (summon.GetSummonerGUID() == receiver.GetGUID() && summon.GetCreatureIdVisibleToSummoner().HasValue)
-                        entryId = (int)summon.GetCreatureIdVisibleToSummoner().Value;
+                        entryId = summon.GetCreatureIdVisibleToSummoner().Value;
             }
 
             return entryId;
@@ -1941,7 +1939,7 @@ namespace Game.Entities
                             cinfo = Global.ObjectMgr.GetCreatureTemplate(summon.GetCreatureIdVisibleToSummoner().Value);
 
                         if (summon.GetDisplayIdVisibleToSummoner().HasValue)
-                            displayId = (int)summon.GetDisplayIdVisibleToSummoner().Value;
+                            displayId = summon.GetDisplayIdVisibleToSummoner().Value;
                     }
                 }
 
@@ -1965,7 +1963,7 @@ namespace Game.Entities
 
                 if (cinfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Trigger))
                     if (receiver.IsGameMaster())
-                        displayId = (int)cinfo.GetFirstVisibleModel().CreatureDisplayID;
+                        displayId = cinfo.GetFirstVisibleModel().CreatureDisplayID;
             }
 
             return displayId;
@@ -1989,7 +1987,7 @@ namespace Game.Entities
                 FactionTemplateRecord ft2 = receiver.GetFactionTemplateEntry();
                 if (ft1 != null && ft2 != null && !ft1.IsFriendlyTo(ft2))
                     // pretend that all other HOSTILE players have own faction, to allow follow, heal, rezz (trade wont work)
-                    factionTemplate = (int)receiver.GetFaction();
+                    factionTemplate = receiver.GetFaction();
             }
 
             return factionTemplate;

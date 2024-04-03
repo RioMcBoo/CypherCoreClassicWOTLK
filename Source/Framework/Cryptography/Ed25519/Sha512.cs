@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using Framework.Cryptography.Ed25519.Internal;
-using System.Diagnostics.Contracts;
 
 namespace Framework.Cryptography.Ed25519
 {

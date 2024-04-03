@@ -126,7 +126,7 @@ namespace System.Collections.Generic
         {
             for (int n = array.Count; n > 1;)
             {
-                int k = (int)RandomHelper.Rand32(n);
+                int k = RandomHelper.Rand32(n);
                 --n;
                 T temp = array[n];
                 array[n] = array[k];
@@ -138,7 +138,7 @@ namespace System.Collections.Generic
         {
             for (int n = count; n > 1;)
             {
-                int k = (int)RandomHelper.Rand32(n);
+                int k = RandomHelper.Rand32(n);
                 --n;
                 T temp = array[n + first];
                 array[n + first] = array[k + first];
@@ -153,7 +153,7 @@ namespace System.Collections.Generic
 
         public static IEnumerable<T> SelectRandom<T>(this IEnumerable<T> source, int count)
         {
-            return source.Shuffle().Take((int)count);
+            return source.Shuffle().Take(count);
         }
 
         public static T SelectRandomElementByWeight<T>(this IEnumerable<T> sequence, Func<T, float> weightSelector)

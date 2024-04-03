@@ -1,10 +1,7 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Configuration;
 using Framework.Constants;
-using Framework.Database;
-using Framework.Networking;
 using Game.Entities;
 using System.Collections.Generic;
 using Game.AI;
@@ -18,59 +15,59 @@ namespace Scripts.Events.ZalazaneFall
     struct TextIds
     {
         // Tiger Matriarch Credit
-        public const uint SayMatriarchAggro = 0;
+        public const int SayMatriarchAggro = 0;
 
         // Troll Volunteer
-        public const uint SayVolunteerStart = 0;
-        public const uint SayVolunteerEnd = 1;
+        public const int SayVolunteerStart = 0;
+        public const int SayVolunteerEnd = 1;
     }
 
     struct SpellIds
     {
         // Tiger Matriarch Credit
-        public const uint SummonMatriarch = 75187;
-        public const uint NoSummonAura = 75213;
-        public const uint DetectInvis = 75180;
-        public const uint SummonZentabraTrigger = 75212;
+        public const int SummonMatriarch = 75187;
+        public const int NoSummonAura = 75213;
+        public const int DetectInvis = 75180;
+        public const int SummonZentabraTrigger = 75212;
 
         // Tiger Matriarch
-        public const uint Pounce = 61184;
-        public const uint FuriousBite = 75164;
-        public const uint SummonZentabra = 75181;
-        public const uint SpiritOfTheTigerRider = 75166;
-        public const uint EjectPassengers = 50630;
+        public const int Pounce = 61184;
+        public const int FuriousBite = 75164;
+        public const int SummonZentabra = 75181;
+        public const int SpiritOfTheTigerRider = 75166;
+        public const int EjectPassengers = 50630;
 
         // Troll Volunteer
-        public const uint VolunteerAura = 75076;
-        public const uint PetactAura = 74071;
-        public const uint QuestCredit = 75106;
-        public const uint MountingCheck = 75420;
-        public const uint Turnin = 73953;
-        public const uint AoeTurnin = 75107;
+        public const int VolunteerAura = 75076;
+        public const int PetactAura = 74071;
+        public const int QuestCredit = 75106;
+        public const int MountingCheck = 75420;
+        public const int Turnin = 73953;
+        public const int AoeTurnin = 75107;
 
         // Vol'jin War Drums
-        public const uint Motivate1 = 75088;
-        public const uint Motivate2 = 75086;
+        public const int Motivate1 = 75088;
+        public const int Motivate2 = 75086;
     }
 
     struct CreatureIds
     {
         // Tiger Matriarch Credit
-        public const uint TigerVehicle = 40305;
+        public const int TigerVehicle = 40305;
 
         // Troll Volunteer
-        public const uint Uruzin = 40253;
-        public const uint Volunteer1 = 40264;
-        public const uint Volunteer2 = 40260;
+        public const int Uruzin = 40253;
+        public const int Volunteer1 = 40264;
+        public const int Volunteer2 = 40260;
 
         // Vol'jin War Drums
-        public const uint Citizen1 = 40256;
-        public const uint Citizen2 = 40257;
+        public const int Citizen1 = 40256;
+        public const int Citizen2 = 40257;
     }
 
     struct Misc
     {
-        public const uint PointUruzin = 4026400;
+        public const int PointUruzin = 4026400;
     }
 
     [Script]
@@ -173,7 +170,7 @@ namespace Scripts.Events.ZalazaneFall
             me.DespawnOrUnsummon();
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref int damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (attacker == null || !attacker.IsSummon())
                 return;
@@ -215,14 +212,14 @@ namespace Scripts.Events.ZalazaneFall
     {
         // These models was found in sniff.
         // @todo generalize these models with race from dbc
-        uint[] trollmodel =
+        int[] trollmodel =
         {
             11665, 11734, 11750, 12037, 12038, 12042, 12049, 12849, 13529, 14759, 15570, 15701,
             15702, 1882, 1897, 1976, 2025, 27286, 2734, 2735, 4084, 4085, 4087, 4089, 4231, 4357,
             4358, 4360, 4361, 4362, 4363, 4370, 4532, 4537, 4540, 4610, 6839, 7037, 9767, 9768
         };
 
-        uint _mountModel;
+        int _mountModel;
         bool _complete;
 
         public npc_troll_volunteer(Creature creature) : base(creature)
@@ -258,7 +255,7 @@ namespace Scripts.Events.ZalazaneFall
                     _mountModel = 6472;
                     break;
             }
-            me.SetDisplayId(trollmodel[RandomHelper.URand(0, 39)]);
+            me.SetDisplayId(trollmodel[RandomHelper.IRand(0, 39)]);
             Player player = me.GetOwner().ToPlayer();
             if (player != null)
                 me.GetMotionMaster().MoveFollow(player, 5.0f, (RandomHelper.NextSingle() + 1.0f) * (MathF.PI) / 3.0f * 4.0f);
@@ -275,12 +272,12 @@ namespace Scripts.Events.ZalazaneFall
         }
 
         // This is needed for mount check aura to know what mountmodel the npc got stored
-        public uint GetMountId()
+        public int GetMountId()
         {
             return _mountModel;
         }
 
-        public override void MovementInform(MovementGeneratorType type, uint id)
+        public override void MovementInform(MovementGeneratorType type, int id)
         {
             if (type != MovementGeneratorType.Point)
                 return;
@@ -346,13 +343,13 @@ namespace Scripts.Events.ZalazaneFall
             return ValidateSpellInfo(SpellIds.Motivate1, SpellIds.Motivate2);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
             if (target != null)
             {
-                uint motivate = 0;
+                int motivate = 0;
                 if (target.GetEntry() == CreatureIds.Citizen1)
                     motivate = SpellIds.Motivate1;
                 else if (target.GetEntry() == CreatureIds.Citizen2)
