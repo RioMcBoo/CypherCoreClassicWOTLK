@@ -1598,8 +1598,10 @@ namespace Game.Spells
                                     summon.SetTempSummonType(summonType);
                                     if (properties.Control == SummonCategory.Ally)
                                         summon.SetOwnerGUID(caster.GetGUID());
+                                    else if (properties.Control == SummonCategory.Wild && caster.IsPlayer()) // there might be more conditions involved
+                                        summon.SetDemonCreatorGUID(caster.GetGUID());
 
-                                    ExecuteLogEffectSummonObject(effectInfo.Effect, summon);
+                                ExecuteLogEffectSummonObject(effectInfo.Effect, summon);
                                 }
                                 return;
                             }

@@ -2073,6 +2073,8 @@ namespace Game.Entities
         public void SetBattlePetCompanionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionGUID), guid); }
         public ObjectGuid GetDemonCreatorGUID() { return m_unitData.DemonCreator; }
         public void SetDemonCreatorGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DemonCreator), guid); }
+        public Unit GetDemonCreator() => Global.ObjAccessor.GetUnit(this, GetDemonCreatorGUID());
+        public Player GetDemonCreatorPlayer() => Global.ObjAccessor.GetPlayer(this, GetDemonCreatorGUID());
 
         public ObjectGuid GetCharmerGUID() { return m_unitData.CharmedBy; }
 
