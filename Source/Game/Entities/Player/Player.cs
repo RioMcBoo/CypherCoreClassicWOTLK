@@ -6167,7 +6167,7 @@ namespace Game.Entities
                 SetGroupUpdateFlag(GroupUpdateFlags.Position);
 
             if (GetTrader() != null && !IsWithinDistInMap(GetTrader(), SharedConst.InteractionDistance))
-                GetSession().SendCancelTrade();
+                GetSession().SendCancelTrade(TradeStatus.TooFarAway);
 
             CheckAreaExploreAndOutdoor();
 
