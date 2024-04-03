@@ -621,7 +621,7 @@ namespace Game.Spells
                 Log.outError(LogFilter.Spells, "Spell.EffectTeleportUnits - spellId {0} attempted to teleport creature to a different map.", m_spellInfo.Id);
         }
 
-        [SpellEffectHandler(SpellEffectName.TeleportWithSpellVisualKitLoadingScreen)]
+        [SpellEffectHandler(SpellEffectName.RitualActivatePortal)]
         void EffectTeleportUnitsWithVisualLoadingScreen()
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
@@ -1801,6 +1801,13 @@ namespace Game.Spells
             m_hitMask |= ProcFlagsHit.Dispel;
         }
 
+        [SpellEffectHandler(SpellEffectName.Pull)]
+        void EffectPull()
+        {
+            /// @todo create a proper pull towards distract spell center for distract
+            Log.outDebug(LogFilter.Spells, "spells", "WORLD: Spell Effect DUMMY");
+        }
+
         [SpellEffectHandler(SpellEffectName.DualWield)]
         void EffectDualWield()
         {
@@ -2856,6 +2863,26 @@ namespace Game.Spells
 
             // makes spells cast before this time fizzle
             unitTarget.LastSanctuaryTime = GameTime.GetGameTimeMS();
+        }
+
+        [SpellEffectHandler(SpellEffectName.AddComboPoints)]
+        void EffectAddComboPoints()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (unitTarget == null)
+                return;
+
+            /*
+            if (!m_caster.m_playerMovingMe)
+                return;
+
+            if (damage <= 0)
+                return;
+
+            m_caster.m_playerMovingMe.AddComboPoints(damage, this);
+            */
         }
 
         [SpellEffectHandler(SpellEffectName.Duel)]
@@ -4540,6 +4567,47 @@ namespace Game.Spells
             }
         }
 
+        [SpellEffectHandler(SpellEffectName.ActivateRune)]
+        void EffectActivateRune()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
+                return;
+
+            if (m_caster.GetTypeId() != TypeId.Player)
+                return;
+
+            /*
+            Player* player = m_caster->ToPlayer();
+
+            if (player->getClass() != CLASS_DEATH_KNIGHT)
+                return;
+
+            // needed later
+            m_runesState = m_caster->ToPlayer()->GetRunesState();
+
+            uint32 count = damage;
+            if (count == 0)
+                count = 1;
+
+            // first restore fully depleted runes
+            for (int32 j = 0; j < player->GetMaxPower(POWER_RUNES) && count > 0; ++j)
+            {
+                if (player->GetRuneCooldown(j) == player->GetRuneBaseCooldown())
+                {
+                    player->SetRuneCooldown(j, 0);
+                    --count;
+                }
+            }
+
+            // then the rest if we still got something left
+            for (int32 j = 0; j < player->GetMaxPower(POWER_RUNES) && count > 0; ++j)
+            {
+                player->SetRuneCooldown(j, 0);
+                --count;
+            }
+            */
+        }
+
         [SpellEffectHandler(SpellEffectName.CreateTamedPet)]
         void EffectCreateTamedPet()
         {
@@ -4947,7 +5015,7 @@ namespace Game.Spells
             player.SendPlayerBound(m_caster.GetGUID(), areaId);
         }
 
-        [SpellEffectHandler(SpellEffectName.TeleportToReturnPoint)]
+        [SpellEffectHandler(SpellEffectName.RitualBase)]
         void EffectTeleportToReturnPoint()
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
@@ -4960,18 +5028,6 @@ namespace Game.Spells
                 if (dest != null)
                     player.TeleportTo(dest, unitTarget == m_caster ? TeleportToOptions.Spell | TeleportToOptions.NotLeaveCombat : 0);
             }
-        }
-
-        [SpellEffectHandler(SpellEffectName.IncreseCurrencyCap)]
-        void EffectIncreaseCurrencyCap()
-        {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            if (damage <= 0)
-                return;
-
-            unitTarget.ToPlayer()?.IncreaseCurrencyCap(effectInfo.MiscValue, damage);
         }
 
         [SpellEffectHandler(SpellEffectName.SummonRafFriend)]
@@ -5157,28 +5213,6 @@ namespace Game.Spells
                 return;
 
             Conversation.CreateConversation(effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), ObjectGuid.Empty, GetSpellInfo());
-        }
-
-        [SpellEffectHandler(SpellEffectName.CancelConversation)]
-        void EffectCancelConversation()
-        {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            if (unitTarget == null)
-                return;
-
-            List<WorldObject> objs = new();
-            ObjectEntryAndPrivateOwnerIfExistsCheck check = new(unitTarget.GetGUID(), effectInfo.MiscValue);
-            WorldObjectListSearcher checker = new(unitTarget, objs, check, GridMapTypeMask.Conversation);
-            Cell.VisitGridObjects(unitTarget, checker, 100.0f);
-
-            foreach (WorldObject obj in objs)
-            {
-                Conversation convo = obj.ToConversation();
-                if (convo != null)
-                    convo.Remove();
-            }
         }
 
         [SpellEffectHandler(SpellEffectName.CreateHeirloomItem)]

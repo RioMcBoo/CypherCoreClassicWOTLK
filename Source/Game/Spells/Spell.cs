@@ -979,7 +979,7 @@ namespace Game.Spells
                     if (st != null)
                     {
                         // @todo fix this check
-                        if (m_spellInfo.HasEffect(SpellEffectName.TeleportUnits) || m_spellInfo.HasEffect(SpellEffectName.TeleportWithSpellVisualKitLoadingScreen) || m_spellInfo.HasEffect(SpellEffectName.Bind))
+                        if (m_spellInfo.HasEffect(SpellEffectName.TeleportUnits) || m_spellInfo.HasEffect(SpellEffectName.RitualActivatePortal) || m_spellInfo.HasEffect(SpellEffectName.Bind))
                             dest = new SpellDestination(st.target_X, st.target_Y, st.target_Z, st.target_Orientation, st.target_mapId);
                         else if (st.target_mapId == m_caster.GetMapId())
                             dest = new SpellDestination(st.target_X, st.target_Y, st.target_Z, st.target_Orientation);
@@ -3921,6 +3921,9 @@ namespace Game.Spells
                 castFlags |= SpellCastFlags.NoGCD;                   // same as in SMSG_SPELL_START
                 castFlags |= SpellCastFlags.RuneList;                    // rune cooldowns list
             }
+
+            if (m_spellInfo.HasEffect(SpellEffectName.ActivateRune))
+                castFlags |= SpellCastFlags.RuneList;
 
             if (m_targets.HasTraj())
                 castFlags |= SpellCastFlags.AdjustMissile;
