@@ -419,7 +419,9 @@ DROP TABLE IF EXISTS `battlenet_accounts`;
 CREATE TABLE `battlenet_accounts` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Identifier',
   `email` varchar(320) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `sha_pass_hash` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `srp_version` tinyint(3) NOT NULL DEFAULT '1',
+  `salt` binary(32) NOT NULL,
+  `verifier` blob NOT NULL,
   `joindate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_ip` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '127.0.0.1',
   `failed_logins` int unsigned NOT NULL DEFAULT '0',
@@ -746,7 +748,9 @@ INSERT INTO `build_info` VALUES
 (52095,10,2,0,NULL,NULL,'BA36382887D16D274EA9149695F0C9C8',NULL,NULL,NULL),
 (52106,10,2,0,NULL,NULL,'95F43869B7D881212CBC1690B8F393ED',NULL,NULL,NULL),
 (52129,10,2,0,NULL,NULL,'02DD842F2A7162EEB8FD5B9D325606F8',NULL,NULL,NULL),
-(52237,3,4,3,NULL,NULL,'3BA993D54FD86EE03E6F81C8FBCE26B7',NULL,NULL,NULL);
+(52237,3,4,3,NULL,NULL,'3BA993D54FD86EE03E6F81C8FBCE26B7',NULL,NULL,NULL),
+(53622,3,4,3,NULL,NULL,'CCC0A843915F46992BB1A650B18CFD67',NULL,NULL,NULL),
+(53788,3,4,3,NULL,NULL,'E8F11A6A011B4ED7C20D055221DBCF8F',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `build_info` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -939,6 +943,8 @@ INSERT INTO `rbac_linked_permissions` VALUES
 (192,792),
 (192,793),
 (192,794),
+(192,795),
+(192,796),
 (192,835),
 (192,844),
 (192,845),
@@ -2155,7 +2161,7 @@ INSERT INTO `rbac_permissions` VALUES
 (702,'Command: reload spell_threats'),
 (703,'Command: reload spell_group_stack_rules'),
 (704,'Command: reload trinity_string'),
-(707,'Command: reload waypoint_data'),
+(707,'Command: reload waypoint_path'),
 (708,'Command: reload vehicle_accessory'),
 (709,'Command: reload vehicle_template_accessory'),
 (710,'Command: reset'),
@@ -2227,6 +2233,8 @@ INSERT INTO `rbac_permissions` VALUES
 (792,'Command: ahbot reload'),
 (793,'Command: ahbot status'),
 (794,'Command: .guild info'),
+(795,'Command: instance setbossstate'),
+(796,'Command: instance getbossstate'),
 (797,'Command: pvpstats'),
 (798,'Command: .mod xp'),
 (802,'Command: .ticket bug'),
@@ -2352,7 +2360,7 @@ CREATE TABLE `realmlist` (
   `timezone` tinyint unsigned NOT NULL DEFAULT '0',
   `allowedSecurityLevel` tinyint unsigned NOT NULL DEFAULT '0',
   `population` float unsigned NOT NULL DEFAULT '0',
-  `gamebuild` int unsigned NOT NULL DEFAULT '52237',
+  `gamebuild` int unsigned NOT NULL DEFAULT '53788',
   `Region` tinyint unsigned NOT NULL DEFAULT '1',
   `Battlegroup` tinyint unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
@@ -2367,7 +2375,7 @@ CREATE TABLE `realmlist` (
 LOCK TABLES `realmlist` WRITE;
 /*!40000 ALTER TABLE `realmlist` DISABLE KEYS */;
 INSERT INTO `realmlist` VALUES
-(1,'Trinity','127.0.0.1','127.0.0.1','255.255.255.0',8085,0,0,1,0,0,52237,1,1);
+(1,'Trinity','127.0.0.1','127.0.0.1','255.255.255.0',8085,0,0,1,0,0,53788,1,1);
 /*!40000 ALTER TABLE `realmlist` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2761,7 +2769,12 @@ INSERT INTO `updates` VALUES
 ('2023_11_21_00_auth.sql','146E5E6EF94C5DB78343372A8FDB32B062B80040','ARCHIVED','2023-11-21 11:24:11',0),
 ('2023_11_23_00_auth.sql','EC3D1289A07E387BF4D2AC94EEBE3A29483EAD3A','ARCHIVED','2023-11-23 02:39:18',0),
 ('2023_11_24_00_auth.sql','AC1B5136CC97264A21933BD1074D02E88D819488','ARCHIVED','2023-11-24 19:37:38',0),
-('2023_12_20_00_auth.sql','D4AB92FEB9FECC1EE35BB9A734B2E95A44C43CD4','ARCHIVED','2023-12-20 21:51:28',0);
+('2023_12_20_00_auth.sql','D4AB92FEB9FECC1EE35BB9A734B2E95A44C43CD4','ARCHIVED','2023-12-20 21:51:28',0),
+('2024_01_09_00_auth_2023_12_24_00_auth.sql', 'F59B3A895750FD83177324B89BFCEBD8A43DD577', 'RELEASED', '2024-01-09 12:02:27', 0),
+('2024_01_09_01_auth_2023_12_26_00_auth.sql', '5C8716F7F6E2792E15A42BDA8F2D855A7DE95FC5', 'RELEASED', '2024-01-09 12:06:46', 0),
+('2024_01_09_02_auth_2024_01_05_00_auth.sql', '7F401D473B08BBE5212551E96A86F85107CE7C8E', 'RELEASED', '2024-01-09 13:15:10', 0),
+('2024_03_06_00_auth.sql','334C87686F810ABE867E3C224077CAB4BE223B93','RELEASED','2024-03-06 22:48:47',0),
+('2024_03_21_00_auth.sql','E5119C5B44278C55E8D8B0B5569EA92FFC517913','RELEASED','2024-03-21 03:31:23',0);
 /*!40000 ALTER TABLE `updates` ENABLE KEYS */;
 UNLOCK TABLES;
 
