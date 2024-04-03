@@ -36,14 +36,15 @@ namespace Game.Spells
     {
         None = 0x00,
         NoCaster = 0x01,
-        Positive = 0x02,
+        Cancelable = 0x02,
         Duration = 0x04,
         Scalable = 0x08,
         Negative = 0x10,
         Unk20 = 0x20,
         Unk40 = 0x40,
         Unk80 = 0x80,
-        MawPower = 0x100
+        Positive = 0x100,
+        Passive = 0x200,
     }
 
     public class AuraApplication
@@ -141,10 +142,18 @@ namespace Game.Spells
                 _flags |= positiveFound ? AuraFlags.Positive : AuraFlags.Negative;
             }
 
-            bool effectNeedsAmount(AuraEffect effect) => effect != null && (GetEffectsToApply() & (1 << effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
+            bool effectNeedsAmount(AuraEffect effect) => 
+                effect != null && (GetEffectsToApply() & (1 << effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
 
             if (GetBase().GetSpellInfo().HasAttribute(SpellAttr8.AuraPointsOnClient) || GetBase().GetAuraEffects().Any(effectNeedsAmount))
                 _flags |= AuraFlags.Scalable;
+
+            if (_flags.HasFlag(AuraFlags.Positive))
+                if (!GetBase().GetSpellInfo().IsPassive() && !GetBase().GetSpellInfo().HasAttribute(SpellAttr1.NoAuraIcon) && GetBase().GetOwner().GetGUID() == GetTarget().GetGUID())
+                    _flags |= AuraFlags.Cancelable;
+
+            if (GetBase().GetSpellInfo().IsPassive())
+                _flags |= AuraFlags.Passive;
         }
 
         public void _HandleEffect(int effIndex, bool apply)
