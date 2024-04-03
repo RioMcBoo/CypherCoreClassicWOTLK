@@ -54,7 +54,9 @@ namespace Game.Entities
             playScene.SceneInstanceID = sceneInstanceID;
             playScene.SceneScriptPackageID = sceneTemplate.ScenePackageId;
             playScene.Location = position;
-            playScene.TransportGUID = GetPlayer().GetTransGUID();
+            if (GetPlayer().GetVehicle() == null) // skip vehicles passed as transport here until further research
+                playScene.TransportGUID = GetPlayer().GetTransGUID();
+
             playScene.Encrypted = sceneTemplate.Encrypted;
             playScene.Write();
 
