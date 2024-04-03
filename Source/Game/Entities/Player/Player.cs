@@ -3514,7 +3514,7 @@ namespace Game.Entities
             else
                 addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[powerIndex]) * 0.001f * RegenTimer;
 
-            if (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) < GameTime.Now())
+            if (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) >= GameTime.Now())
                 return;
 
             WorldCfg[] RatesForPower =
