@@ -16,41 +16,41 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
         // These spells are actually called elemental shield
         // What they do is decrease all damage by 75% then they increase
         // One school of damage by 1100%
-        public const uint FireVulnerability = 22277;
-        public const uint FrostVulnerability = 22278;
-        public const uint ShadowVulnerability = 22279;
-        public const uint NatureVulnerability = 22280;
-        public const uint ArcaneVulnerability = 22281;
+        public const int FireVulnerability = 22277;
+        public const int FrostVulnerability = 22278;
+        public const int ShadowVulnerability = 22279;
+        public const int NatureVulnerability = 22280;
+        public const int ArcaneVulnerability = 22281;
         // Other spells
-        public const uint Incinerate = 23308;   //Incinerate 23308; 23309
-        public const uint Timelapse = 23310;   //Time lapse 23310; 23311(old threat mod that was removed in 2.01)
-        public const uint Corrosiveacid = 23313;   //Corrosive Acid 23313; 23314
-        public const uint Igniteflesh = 23315;   //Ignite Flesh 23315; 23316
-        public const uint Frostburn = 23187;   //Frost burn 23187; 23189
+        public const int Incinerate = 23308;   //Incinerate 23308; 23309
+        public const int Timelapse = 23310;   //Time lapse 23310; 23311(old threat mod that was removed in 2.01)
+        public const int Corrosiveacid = 23313;   //Corrosive Acid 23313; 23314
+        public const int Igniteflesh = 23315;   //Ignite Flesh 23315; 23316
+        public const int Frostburn = 23187;   //Frost burn 23187; 23189
                                                // Brood Affliction 23173 - Scripted Spell that cycles through all targets within 100 yards and has a Chance to cast one of the afflictions on them
                                                // Since Scripted spells arn't coded I'll just write a function that does the same thing
-        public const uint BroodafBlue = 23153;   //Blue affliction 23153
-        public const uint BroodafBlack = 23154;   //Black affliction 23154
-        public const uint BroodafRed = 23155;   //Red affliction 23155 (23168 on death)
-        public const uint BroodafBronze = 23170;   //Bronze Affliction  23170
-        public const uint BroodafGreen = 23169;   //Brood Affliction Green 23169
-        public const uint ChromaticMut1 = 23174;   //Spell cast on player if they get all 5 debuffs
-        public const uint Frenzy = 28371;   //The frenzy spell may be wrong
-        public const uint Enrage = 28747;
+        public const int BroodafBlue = 23153;   //Blue affliction 23153
+        public const int BroodafBlack = 23154;   //Black affliction 23154
+        public const int BroodafRed = 23155;   //Red affliction 23155 (23168 on death)
+        public const int BroodafBronze = 23170;   //Bronze Affliction  23170
+        public const int BroodafGreen = 23169;   //Brood Affliction Green 23169
+        public const int ChromaticMut1 = 23174;   //Spell cast on player if they get all 5 debuffs
+        public const int Frenzy = 28371;   //The frenzy spell may be wrong
+        public const int Enrage = 28747;
     }
 
     struct TextIds
     {
-        public const uint EmoteFrenzy = 0;
-        public const uint EmoteShimmer = 1;
+        public const int EmoteFrenzy = 0;
+        public const int EmoteShimmer = 1;
     }
 
     [Script]
     class boss_chromaggus : BossAI
     {
-        uint Breath1_Spell;
-        uint Breath2_Spell;
-        uint CurrentVurln_Spell;
+        int Breath1_Spell;
+        int Breath2_Spell;
+        int CurrentVurln_Spell;
         bool Enraged;
 
         public boss_chromaggus(Creature creature) : base(creature, DataTypes.Chromaggus)
@@ -182,7 +182,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                     me.RemoveAurasDueToSpell(CurrentVurln_Spell);
 
                 // Cast new random vulnerabilty on self
-                uint spell = RandomHelper.RAND(SpellIds.FireVulnerability, SpellIds.FrostVulnerability, SpellIds.ShadowVulnerability, SpellIds.NatureVulnerability, SpellIds.ArcaneVulnerability);
+                int spell = RandomHelper.RAND(SpellIds.FireVulnerability, SpellIds.FrostVulnerability, SpellIds.ShadowVulnerability, SpellIds.NatureVulnerability, SpellIds.ArcaneVulnerability);
                 DoCast(me, spell);
                 CurrentVurln_Spell = spell;
                 Talk(TextIds.EmoteShimmer);

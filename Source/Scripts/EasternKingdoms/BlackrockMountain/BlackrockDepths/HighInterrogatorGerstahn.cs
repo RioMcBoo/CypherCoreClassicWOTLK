@@ -11,10 +11,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.HighInterrog
 {
     struct SpellIds
     {
-        public const uint Shadowwordpain = 10894;
-        public const uint Manaburn = 10876;
-        public const uint Psychicscream = 8122;
-        public const uint Shadowshield = 22417;
+        public const int Shadowwordpain = 10894;
+        public const int Manaburn = 10876;
+        public const int Psychicscream = 8122;
+        public const int Shadowshield = 22417;
     }
 
     [Script]

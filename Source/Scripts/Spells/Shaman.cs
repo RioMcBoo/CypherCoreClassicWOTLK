@@ -197,11 +197,11 @@ namespace Scripts.Spells.Shaman
     class spell_sha_earthquake : SpellScript
     {
         (int, int)[] DamageBuffs =
-        {
+        [
             (SpellIds.EchoesOfGreatSunderingLegendary, 1),
             (SpellIds.EchoesOfGreatSunderingTalent, 0),
             (SpellIds.T292PElementalDamageBuff, 0)
-        };
+        ];
 
         public override bool Validate(SpellInfo spellInfo)
         {

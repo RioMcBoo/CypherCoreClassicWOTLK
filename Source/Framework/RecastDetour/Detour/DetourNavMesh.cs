@@ -572,7 +572,7 @@ public static partial class Detour
                 if (targetPoly.firstLink == DT_NULL_LINK)
                     continue;
 
-                float[] halfExtents = new float[] { targetCon.rad, target.header.walkableClimb, targetCon.rad };
+                float[] halfExtents = [targetCon.rad, target.header.walkableClimb, targetCon.rad];
 
                 // Find polygon to connect to.
                 //const float* p = &targetCon.pos[3];
@@ -678,7 +678,7 @@ public static partial class Detour
                 dtOffMeshConnection con = tile.offMeshCons[i];
                 dtPoly poly = tile.polys[con.poly];
 
-                float[] halfExtents = new float[] { con.rad, tile.header.walkableClimb, con.rad };
+                float[] halfExtents = [con.rad, tile.header.walkableClimb, con.rad];
 
                 // Find polygon to connect to.
                 //const float* p = &con.pos[0]; // First vertex
@@ -778,7 +778,7 @@ public static partial class Detour
                 }
             }
 
-            dtVlerp(closest, 0, new float[] { v[pmin].X, v[pmin].Y, v[pmin].Z }, 0, new float[] { v[pmax].X, v[pmax].Y, v[pmax].Z }, 0, tmin);
+            dtVlerp(closest, 0, [v[pmin].X, v[pmin].Y, v[pmin].Z], 0, [v[pmax].X, v[pmax].Y, v[pmax].Z], 0, tmin);
         }
 
         public bool getPolyHeight(dtMeshTile tile, dtPoly poly, float[] pos, ref float height)

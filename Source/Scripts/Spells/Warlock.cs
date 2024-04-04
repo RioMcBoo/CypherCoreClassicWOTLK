@@ -13,43 +13,43 @@ namespace Scripts.Spells.Warlock
 {
     struct SpellIds
     {
-        public const uint CreateHealthstone = 23517;
-        public const uint DemonicCircleAllowCast = 62388;
-        public const uint DemonicCircleSummon = 48018;
-        public const uint DemonicCircleTeleport = 48020;
-        public const uint DevourMagicHeal = 19658;
-        public const uint DrainSoulEnergize = 205292;
-        public const uint GlyphOfDemonTraining = 56249;
-        public const uint GlyphOfSoulSwap = 56226;
-        public const uint GlyphOfSuccubus = 56250;
-        public const uint ImmolatePeriodic = 157736;
-        public const uint ImprovedHealthFunnelBuffR1 = 60955;
-        public const uint ImprovedHealthFunnelBuffR2 = 60956;
-        public const uint ImprovedHealthFunnelR1 = 18703;
-        public const uint ImprovedHealthFunnelR2 = 18704;
-        public const uint RainOfFire = 5740;
-        public const uint RainOfFireDamage = 42223;
-        public const uint SeedOfCorruptionDamage = 27285;
-        public const uint SeedOfCorruptionGeneric = 32865;
-        public const uint ShadowBoltEnergize = 194192;
-        public const uint SoulshatterEffect = 32835;
-        public const uint SoulSwapCdMarker = 94229;
-        public const uint SoulSwapOverride = 86211;
-        public const uint SoulSwapModCost = 92794;
-        public const uint SoulSwapDotMarker = 92795;
-        public const uint UnstableAffliction = 30108;
-        public const uint UnstableAfflictionDispel = 31117;
-        public const uint Shadowflame = 37378;
-        public const uint Flameshadow = 37379;
-        public const uint SummonSuccubus = 712;
-        public const uint SummonIncubus = 365349;
-        public const uint StrengthenPactSuccubus = 366323;
-        public const uint StrengthenPactIncubus = 366325;
-        public const uint SuccubusPact = 365360;
-        public const uint IncubusPact = 365355;
+        public const int CreateHealthstone = 23517;
+        public const int DemonicCircleAllowCast = 62388;
+        public const int DemonicCircleSummon = 48018;
+        public const int DemonicCircleTeleport = 48020;
+        public const int DevourMagicHeal = 19658;
+        public const int DrainSoulEnergize = 205292;
+        public const int GlyphOfDemonTraining = 56249;
+        public const int GlyphOfSoulSwap = 56226;
+        public const int GlyphOfSuccubus = 56250;
+        public const int ImmolatePeriodic = 157736;
+        public const int ImprovedHealthFunnelBuffR1 = 60955;
+        public const int ImprovedHealthFunnelBuffR2 = 60956;
+        public const int ImprovedHealthFunnelR1 = 18703;
+        public const int ImprovedHealthFunnelR2 = 18704;
+        public const int RainOfFire = 5740;
+        public const int RainOfFireDamage = 42223;
+        public const int SeedOfCorruptionDamage = 27285;
+        public const int SeedOfCorruptionGeneric = 32865;
+        public const int ShadowBoltEnergize = 194192;
+        public const int SoulshatterEffect = 32835;
+        public const int SoulSwapCdMarker = 94229;
+        public const int SoulSwapOverride = 86211;
+        public const int SoulSwapModCost = 92794;
+        public const int SoulSwapDotMarker = 92795;
+        public const int UnstableAffliction = 30108;
+        public const int UnstableAfflictionDispel = 31117;
+        public const int Shadowflame = 37378;
+        public const int Flameshadow = 37379;
+        public const int SummonSuccubus = 712;
+        public const int SummonIncubus = 365349;
+        public const int StrengthenPactSuccubus = 366323;
+        public const int StrengthenPactIncubus = 366325;
+        public const int SuccubusPact = 365360;
+        public const int IncubusPact = 365355;
 
-        public const uint GenReplenishment = 57669;
-        public const uint PriestShadowWordDeath = 32409;
+        public const int GenReplenishment = 57669;
+        public const int PriestShadowWordDeath = 32409;
     }
 
     [Script] // 710 - Banish
@@ -131,7 +131,7 @@ namespace Scripts.Spells.Warlock
             return GetCaster().IsPlayer();
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             SetHitDamage(GetHitDamage() + MathFunctions.CalculatePct(GetHitDamage(), GetCaster().ToPlayer().m_activePlayerData.SpellCritPercentage[(int)SpellSchools.Normal]));
         }
@@ -151,7 +151,7 @@ namespace Scripts.Spells.Warlock
     [Script] // 77220 - Mastery: Chaotic Energies
     class spell_warl_chaotic_energies : AuraScript
     {
-        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
         {
             AuraEffect effect1 = GetEffect(1);
             if (effect1 == null || !GetTargetApplication().HasEffect(1))
@@ -187,7 +187,7 @@ namespace Scripts.Spells.Warlock
             return GetCaster().IsPlayer();
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.CreateHealthstone, true);
         }
@@ -213,7 +213,7 @@ namespace Scripts.Spells.Warlock
             if (caster != null)
             {
                 float extraAmount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 2.5f;
-                ulong absorb = caster.CountPctFromCurHealth(GetEffectInfo(1).CalcValue(caster));
+                long absorb = caster.CountPctFromCurHealth(GetEffectInfo(1).CalcValue(caster));
                 caster.SetHealth(caster.GetHealth() - absorb);
                 amount = (int)(MathFunctions.CalculatePct(absorb, GetEffectInfo(2).CalcValue(caster)) + extraAmount);
             }
@@ -297,7 +297,7 @@ namespace Scripts.Spells.Warlock
             && ValidateSpellEffect((spellInfo.Id, 1));
         }
 
-        void OnSuccessfulDispel(uint effIndex)
+        void OnSuccessfulDispel(int effIndex)
         {
             Unit caster = GetCaster();
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
@@ -390,7 +390,7 @@ namespace Scripts.Spells.Warlock
             if (caster == null)
                 return;
             //! Hack for self damage, is not blizz :/
-            uint damage = (uint)caster.CountPctFromMaxHealth(aurEff.GetBaseAmount());
+            int damage = (int)caster.CountPctFromMaxHealth(aurEff.GetBaseAmount());
 
             Player modOwner = caster.GetSpellModOwner();
             if (modOwner != null)
@@ -434,7 +434,7 @@ namespace Scripts.Spells.Warlock
             return ValidateSpellInfo(SpellIds.ImmolatePeriodic);
         }
 
-        void HandleOnEffectHit(uint effIndex)
+        void HandleOnEffectHit(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.ImmolatePeriodic, GetSpell());
         }
@@ -453,7 +453,7 @@ namespace Scripts.Spells.Warlock
             return ValidateSpellInfo(SpellIds.SuccubusPact, SpellIds.IncubusPact);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
 
@@ -513,7 +513,7 @@ namespace Scripts.Spells.Warlock
             return ValidateSpellInfo(SpellIds.GlyphOfSuccubus, SpellIds.PriestShadowWordDeath);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -667,7 +667,7 @@ namespace Scripts.Spells.Warlock
             return ValidateSpellInfo(SpellIds.GlyphOfSoulSwap, SpellIds.SoulSwapCdMarker, SpellIds.SoulSwapOverride);
         }
 
-        void HandleHit(uint effIndex)
+        void HandleHit(int effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.SoulSwapOverride, true);
             GetHitUnit().CastSpell(GetCaster(), SpellIds.SoulSwapDotMarker, true);
@@ -682,15 +682,15 @@ namespace Scripts.Spells.Warlock
     [Script] // 86211 - Soul Swap Override - Also acts as a dot container
     class spell_warl_soul_swap_override : AuraScript
     {
-        List<uint> _dotList = new();
+        List<int> _dotList = new();
         Unit _swapCaster;
 
         //! Forced to, pure virtual functions must have a body when linking
         public override void Register() { }
 
-        public void AddDot(uint id) { _dotList.Add(id); }
+        public void AddDot(int id) { _dotList.Add(id); }
 
-        public List<uint> GetDotList() { return _dotList; }
+        public List<int> GetDotList() { return _dotList; }
 
         public Unit GetOriginalSwapSource() { return _swapCaster; }
 
@@ -700,7 +700,7 @@ namespace Scripts.Spells.Warlock
     [Script] //! Soul Swap Copy Spells - 92795 - Simply copies spell IDs.
     class spell_warl_soul_swap_dot_marker : SpellScript
     {
-        void HandleHit(uint effIndex)
+        void HandleHit(int effIndex)
         {
             Unit swapVictim = GetCaster();
             Unit warlock = GetHitUnit();
@@ -762,12 +762,12 @@ namespace Scripts.Spells.Warlock
             return SpellCastResult.SpellCastOk;
         }
 
-        void OnEffectHitTargetTemp(uint effIndex)
+        void OnEffectHitTargetTemp(int effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.SoulSwapModCost, true);
             bool hasGlyph = GetCaster().HasAura(SpellIds.GlyphOfSoulSwap);
 
-            List<uint> dotList = new();
+            List<int> dotList = new();
             Unit swapSource = null;
             Aura swapOverride = GetCaster().GetAura(SpellIds.SoulSwapOverride);
             if (swapOverride != null)
@@ -811,7 +811,7 @@ namespace Scripts.Spells.Warlock
             return ValidateSpellInfo(SpellIds.SoulshatterEffect);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -834,7 +834,7 @@ namespace Scripts.Spells.Warlock
             return ValidateSpellInfo(SpellIds.SuccubusPact, SpellIds.SummonSuccubus);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
 
@@ -856,7 +856,7 @@ namespace Scripts.Spells.Warlock
             return ValidateSpellInfo(SpellIds.IncubusPact, SpellIds.SummonIncubus);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
 
@@ -878,7 +878,7 @@ namespace Scripts.Spells.Warlock
             return ValidateSpellInfo(SpellIds.SummonSuccubus, SpellIds.SummonIncubus);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().CastSpell(null, RandomHelper.randChance(50) ? SpellIds.SummonSuccubus : SpellIds.SummonIncubus, TriggerCastFlags.FullMask);
         }
@@ -895,9 +895,9 @@ namespace Scripts.Spells.Warlock
     [Script("spell_warl_t4_2p_bonus_fire", SpellIds.Shadowflame)]
     class spell_warl_t4_2p_bonus : AuraScript
     {
-        uint _triggerId;
+        int _triggerId;
 
-        public spell_warl_t4_2p_bonus(uint triggerId)
+        public spell_warl_t4_2p_bonus(int triggerId)
         {
             _triggerId = triggerId;
         }

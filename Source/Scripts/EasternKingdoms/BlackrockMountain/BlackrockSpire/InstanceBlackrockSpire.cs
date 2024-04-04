@@ -112,17 +112,17 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 
         //uint const DragonspireRunes[7] = { GoHallRune1, GoHallRune2, GoHallRune3, GoHallRune4, GoHallRune5, GoHallRune6, GoHallRune7 }
 
-        public static int[] DragonspireMobs = { CreaturesIds.BlackhandDreadweaver, CreaturesIds.BlackhandSummoner, CreaturesIds.BlackhandVeteran };
+        public static int[] DragonspireMobs = [CreaturesIds.BlackhandDreadweaver, CreaturesIds.BlackhandSummoner, CreaturesIds.BlackhandVeteran];
 
         public static DoorData[] doorData =
-        {
+        [
             new DoorData(GameObjectsIds.Doors, DataTypes.PyrogaurdEmberseer, EncounterDoorBehavior.OpenWhenNotInProgress),
             new DoorData(GameObjectsIds.EmberseerOut, DataTypes.PyrogaurdEmberseer, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(GameObjectsIds.DrakkisathDoor1, DataTypes.GeneralDrakkisath, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(GameObjectsIds.DrakkisathDoor2, DataTypes.GeneralDrakkisath, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(GameObjectsIds.PortcullisActive, DataTypes.WarchiefRendBlackhand, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(GameObjectsIds.PortcullisTobossrooms, DataTypes.WarchiefRendBlackhand, EncounterDoorBehavior.OpenWhenDone),
-        };
+        ];
     }
 
     struct EventIds

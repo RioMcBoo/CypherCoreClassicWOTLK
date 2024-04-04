@@ -17,18 +17,18 @@ namespace Game.BattleFields
 
         #region Data
         public static BfWGCoordGY[] WGGraveYard =
-        {
-            new BfWGCoordGY(5104.750f, 2300.940f, 368.579f, 0.733038f, 1329, WGGossipText.GYNE, TeamId.Neutral),
-            new BfWGCoordGY(5099.120f, 3466.036f, 368.484f, 5.317802f, 1330, WGGossipText.GYNW, TeamId.Neutral),
-            new BfWGCoordGY(4314.648f, 2408.522f, 392.642f, 6.268125f, 1333, WGGossipText.GYSE, TeamId.Neutral),
-            new BfWGCoordGY(4331.716f, 3235.695f, 390.251f, 0.008500f, 1334, WGGossipText.GYSW, TeamId.Neutral),
-            new BfWGCoordGY(5537.986f, 2897.493f, 517.057f, 4.819249f, 1285, WGGossipText.GYKeep, TeamId.Neutral),
-            new BfWGCoordGY(5032.454f, 3711.382f, 372.468f, 3.971623f, 1331, WGGossipText.GYHorde, TeamId.Horde),
-            new BfWGCoordGY(5140.790f, 2179.120f, 390.950f, 1.972220f, 1332, WGGossipText.GYAlliance, TeamId.Alliance),
-        };
+        [
+            new BfWGCoordGY(5104.750f, 2300.940f, 368.579f, 0.733038f, 1329, WGGossipText.GYNE, BatttleGroundTeamId.Neutral),
+            new BfWGCoordGY(5099.120f, 3466.036f, 368.484f, 5.317802f, 1330, WGGossipText.GYNW, BatttleGroundTeamId.Neutral),
+            new BfWGCoordGY(4314.648f, 2408.522f, 392.642f, 6.268125f, 1333, WGGossipText.GYSE, BatttleGroundTeamId.Neutral),
+            new BfWGCoordGY(4331.716f, 3235.695f, 390.251f, 0.008500f, 1334, WGGossipText.GYSW, BatttleGroundTeamId.Neutral),
+            new BfWGCoordGY(5537.986f, 2897.493f, 517.057f, 4.819249f, 1285, WGGossipText.GYKeep, BatttleGroundTeamId.Neutral),
+            new BfWGCoordGY(5032.454f, 3711.382f, 372.468f, 3.971623f, 1331, WGGossipText.GYHorde, BatttleGroundTeamId.Horde),
+            new BfWGCoordGY(5140.790f, 2179.120f, 390.950f, 1.972220f, 1332, WGGossipText.GYAlliance, BatttleGroundTeamId.Alliance),
+        ];
 
-        public static WorldStates[] ClockWorldState = { WorldStates.BattlefieldWgTimeBattleEnd, WorldStates.BattlefieldWgTimeNextBattle };
-        public static int[] WintergraspFaction = { 1732, 1735, 35 };
+        public static WorldStates[] ClockWorldState = [WorldStates.BattlefieldWgTimeBattleEnd, WorldStates.BattlefieldWgTimeNextBattle];
+        public static int[] WintergraspFaction = [1732, 1735, 35];
 
         public static Position WintergraspStalkerPos = new(4948.985f, 2937.789f, 550.5172f, 1.815142f);
 
@@ -37,7 +37,7 @@ namespace Game.BattleFields
 
         //Destructible (Wall, Tower..)
         public static WintergraspBuildingSpawnData[] WGGameObjectBuilding =
-        {
+        [
             // Wall (Not spawned in db)
             // Entry  WS      X          Y          Z           O                rX   rY   rZ             rW             Type
             new WintergraspBuildingSpawnData(190219, 3749, 5371.457f, 3047.472f, 407.5710f,  3.14159300f, 0.0f, 0.0f, -1.000000000f, 0.00000000f,  WGGameObjectBuildingType.Wall),
@@ -82,10 +82,10 @@ namespace Game.BattleFields
 
             // Last door (Not spawned in db)
             new WintergraspBuildingSpawnData(WGGameObjects.VaultGate, 3773, 5397.108f, 2841.54f, 425.9014f, 3.141593f, 0.0f, 0.0f, -1.0f, 0.0f,  WGGameObjectBuildingType.DoorLast),
-        };
+        ];
 
         public static StaticWintergraspTowerInfo[] TowerData =
-        {
+        [
             new StaticWintergraspTowerInfo(WintergraspTowerIds.FortressNW, WintergraspText.NwKeeptowerDamage, WintergraspText.NwKeeptowerDestroy),
             new StaticWintergraspTowerInfo(WintergraspTowerIds.FortressSW,WintergraspText.SwKeeptowerDamage,WintergraspText.SwKeeptowerDestroy),
             new StaticWintergraspTowerInfo(WintergraspTowerIds.FortressSE,WintergraspText.SeKeeptowerDamage,WintergraspText.SeKeeptowerDestroy),
@@ -93,10 +93,10 @@ namespace Game.BattleFields
             new StaticWintergraspTowerInfo(WintergraspTowerIds.Shadowsight,WintergraspText.WesternTowerDamage,WintergraspText.WesternTowerDestroy),
             new StaticWintergraspTowerInfo(WintergraspTowerIds.WintersEdge,WintergraspText.SouthernTowerDamage,WintergraspText.SouthernTowerDestroy),
             new StaticWintergraspTowerInfo(WintergraspTowerIds.Flamewatch,WintergraspText.EasternTowerDamage,WintergraspText.EasternTowerDestroy)
-        };
+        ];
 
         public static Position[] WGTurret =
-        {
+        [
             new Position(5391.19f, 3060.8f,  419.616f, 1.69557f),
             new Position(5266.75f, 2976.5f,  421.067f, 3.20354f),
             new Position(5234.86f, 2948.8f,  420.88f,  1.61311f),
@@ -112,10 +112,10 @@ namespace Game.BattleFields
             new Position(5390.95f, 2615.5f,  421.126f, 4.6409f),
             new Position(5148.8f,  2820.24f, 421.621f, 3.16043f),
             new Position(5147.98f, 2861.93f, 421.63f,  3.18792f),
-        };
+        ];
 
         public static WintergraspGameObjectData[] WGPortalDefenderData =
-        {
+        [
             // Player teleporter
             new WintergraspGameObjectData(5153.408f, 2901.349f, 409.1913f, -0.06981169f, 0.0f, 0.0f, -0.03489876f, 0.9993908f, 190763, 191575),
             new WintergraspGameObjectData(5268.698f, 2666.421f, 409.0985f, -0.71558490f, 0.0f, 0.0f, -0.35020730f, 0.9366722f, 190763, 191575),
@@ -132,165 +132,165 @@ namespace Game.BattleFields
             // Vehicle teleporter
             new WintergraspGameObjectData(5314.515f, 2703.687f, 408.5502f, -0.89011660f, 0.0f, 0.0f, -0.43051050f, 0.9025856f, 192951, 192951),
             new WintergraspGameObjectData(5316.252f, 2977.042f, 408.5385f, -0.82030330f, 0.0f, 0.0f, -0.39874840f, 0.9170604f, 192951, 192951)
-        };
+        ];
 
         public static WintergraspTowerData[] AttackTowers =
-        {
+        [
             //West Tower
             new WintergraspTowerData()
             {
                 towerEntry = 190356,
-                GameObject = new WintergraspGameObjectData[]
-                {
+                GameObject =
+                [
                     new WintergraspGameObjectData(4559.113f, 3606.216f, 419.9992f, 4.799657f, 0.0f, 0.0f, -0.67558960f, 0.73727790f, 192488, 192501),    // Flag on tower
                     new WintergraspGameObjectData(4539.420f, 3622.490f, 420.0342f, 3.211419f, 0.0f, 0.0f, -0.99939060f, 0.03490613f, 192488, 192501),    // Flag on tower
                     new WintergraspGameObjectData(4555.258f, 3641.648f, 419.9740f, 1.675514f, 0.0f, 0.0f,  0.74314400f, 0.66913150f, 192488, 192501),    // Flag on tower
                     new WintergraspGameObjectData(4574.872f, 3625.911f, 420.0792f, 0.087266f, 0.0f, 0.0f,  0.04361916f, 0.99904820f, 192488, 192501),    // Flag on tower
                     new WintergraspGameObjectData(4433.899f, 3534.142f, 360.2750f, 4.433136f, 0.0f, 0.0f, -0.79863550f, 0.60181500f, 192269, 192278),    // Flag near workshop
                     new WintergraspGameObjectData(4572.933f, 3475.519f, 363.0090f, 1.422443f, 0.0f, 0.0f,  0.65275960f, 0.75756520f, 192269, 192277)     // Flag near bridge
-                },
-                CreatureBottom = new WintergraspObjectPositionData[]
-                {
+                ],
+                CreatureBottom =
+                [
                     new WintergraspObjectPositionData(4418.688477f, 3506.251709f, 358.975494f, 4.293305f, WGNpcs.GuardH, WGNpcs.GuardA),     // Roaming Guard
-                }
+                ]
             },
 
             //South Tower
             new WintergraspTowerData()
             {
                 towerEntry = 190357,
-                GameObject = new WintergraspGameObjectData[]
-                {
+                GameObject =
+                [
                     new WintergraspGameObjectData(4416.004f, 2822.666f, 429.8512f, 6.2657330f, 0.0f, 0.0f, -0.00872612f, 0.99996190f, 192488, 192501),    // Flag on tower
                     new WintergraspGameObjectData(4398.819f, 2804.698f, 429.7920f, 4.6949370f, 0.0f, 0.0f, -0.71325020f, 0.70090960f, 192488, 192501),    // Flag on tower
                     new WintergraspGameObjectData(4387.622f, 2719.566f, 389.9351f, 4.7385700f, 0.0f, 0.0f, -0.69779010f, 0.71630230f, 192366, 192414),    // Flag near tower
                     new WintergraspGameObjectData(4464.124f, 2855.453f, 406.1106f, 0.8290324f, 0.0f, 0.0f,  0.40274720f, 0.91531130f, 192366, 192429),    // Flag near tower
                     new WintergraspGameObjectData(4526.457f, 2810.181f, 391.1997f, 3.2899610f, 0.0f, 0.0f, -0.99724960f, 0.07411628f, 192269, 192278)     // Flag near bridge
-                },
-                CreatureBottom = new WintergraspObjectPositionData[]
-                {
+                ],
+                CreatureBottom =
+                [
                     new WintergraspObjectPositionData(4452.859863f, 2808.870117f, 402.604004f, 6.056290f, WGNpcs.GuardH, WGNpcs.GuardA),     // Standing Guard
                     new WintergraspObjectPositionData(4455.899902f, 2835.958008f, 401.122559f, 0.034907f, WGNpcs.GuardH, WGNpcs.GuardA),     // Standing Guard
                     new WintergraspObjectPositionData(4412.649414f, 2953.792236f, 374.799957f, 0.980838f, WGNpcs.GuardH, WGNpcs.GuardA),     // Roaming Guard
                     new WintergraspObjectPositionData(4362.089844f, 2811.510010f, 407.337006f, 3.193950f, WGNpcs.GuardH, WGNpcs.GuardA),     // Standing Guard
                     new WintergraspObjectPositionData(4412.290039f, 2753.790039f, 401.015015f, 5.829400f, WGNpcs.GuardH, WGNpcs.GuardA),     // Standing Guard
                     new WintergraspObjectPositionData(4421.939941f, 2773.189941f, 400.894989f, 5.707230f, WGNpcs.GuardH, WGNpcs.GuardA),     // Standing Guard
-                }
+                ]
             },
 
             //East Tower
             new WintergraspTowerData()
             {
                 towerEntry = 190358,
-                GameObject = new WintergraspGameObjectData[]
-                {
+                GameObject =
+                [
                     new WintergraspGameObjectData(4466.793f, 1960.418f, 459.1437f, 1.151916f, 0.0f, 0.0f,  0.5446386f, 0.8386708f, 192488, 192501),     // Flag on tower
                     new WintergraspGameObjectData(4475.351f, 1937.031f, 459.0702f, 5.846854f, 0.0f, 0.0f, -0.2164392f, 0.9762961f, 192488, 192501),     // Flag on tower
                     new WintergraspGameObjectData(4451.758f, 1928.104f, 459.0759f, 4.276057f, 0.0f, 0.0f, -0.8433914f, 0.5372996f, 192488, 192501),     // Flag on tower
                     new WintergraspGameObjectData(4442.987f, 1951.898f, 459.0930f, 2.740162f, 0.0f, 0.0f,  0.9799242f, 0.1993704f, 192488, 192501)      // Flag on tower
-                },
-                CreatureBottom = new WintergraspObjectPositionData[]
-                {
+                ],
+                CreatureBottom =
+                [
                     new WintergraspObjectPositionData(4501.060059f, 1990.280029f, 431.157013f, 1.029740f, WGNpcs.GuardH, WGNpcs.GuardA),     // Standing Guard
                     new WintergraspObjectPositionData(4463.830078f, 2015.180054f, 430.299988f, 1.431170f, WGNpcs.GuardH, WGNpcs.GuardA),     // Standing Guard
                     new WintergraspObjectPositionData(4494.580078f, 1943.760010f, 435.627014f, 6.195920f, WGNpcs.GuardH, WGNpcs.GuardA),     // Standing Guard
                     new WintergraspObjectPositionData(4450.149902f, 1897.579956f, 435.045013f, 4.398230f, WGNpcs.GuardH, WGNpcs.GuardA),     // Standing Guard
                     new WintergraspObjectPositionData(4428.870117f, 1906.869995f, 432.648010f, 3.996800f, WGNpcs.GuardH, WGNpcs.GuardA),     // Standing Guard
-                }
+                ]
             }
-        };
+        ];
 
         public static WintergraspTowerCannonData[] TowerCannon =
-        {
+        [
             new WintergraspTowerCannonData()
             {
                 towerEntry = 190221,
-                TurretTop = new Position[]
-                {
+                TurretTop =
+                [
                     new Position(5255.88f, 3047.63f, 438.499f, 3.13677f),
                     new Position(5280.9f, 3071.32f, 438.499f, 1.62879f),
-                },
+                ],
             },
 
             new WintergraspTowerCannonData()
             {
                 towerEntry = 190373,
-                TurretTop = new Position[]
-                {
+                TurretTop =
+                [
                     new Position(5138.59f, 2935.16f, 439.845f, 3.11723f),
                     new Position(5163.06f, 2959.52f, 439.846f, 1.47258f),
-                },
+                ],
             },
 
             new WintergraspTowerCannonData()
             {
                 towerEntry = 190377,
-                TurretTop = new Position[]
-                {
+                TurretTop =
+                [
                     new Position(5163.84f, 2723.74f, 439.844f, 1.3994f),
                     new Position(5139.69f, 2747.4f, 439.844f, 3.17221f),
-                },
+                ],
             },
 
             new WintergraspTowerCannonData()
             {
                 towerEntry = 190378,
-                TurretTop = new Position[]
-                {
+                TurretTop =
+                [
                     new Position(5278.21f, 2607.23f, 439.755f, 4.71944f),
                     new Position(5255.01f, 2631.98f, 439.755f, 3.15257f),
-                },
+                ],
             },
 
             new WintergraspTowerCannonData()
             {
                 towerEntry = 190356,
-                TowerCannonBottom = new Position[]
-                {
+                TowerCannonBottom =
+                [
                     new Position(4537.380371f, 3599.531738f, 402.886993f, 3.998462f),
                     new Position(4581.497559f, 3604.087158f, 402.886963f, 5.651723f),
-                },
-                TurretTop = new Position[]
-                {
+                ],
+                TurretTop =
+                [
                     new Position(4469.448242f, 1966.623779f, 465.647217f, 1.153573f),
                     new Position(4581.895996f, 3626.438477f, 426.539062f, 0.117806f),
-                },
+                ],
             },
 
             new WintergraspTowerCannonData()
             {
                 towerEntry = 190357,
-                TowerCannonBottom = new Position[]
-                {
+                TowerCannonBottom =
+                [
                     new Position(4421.640137f, 2799.935791f, 412.630920f, 5.459298f),
                     new Position(4420.263184f, 2845.340332f, 412.630951f, 0.742197f),
-                },
-                TurretTop = new Position[]
-                {
+                ],
+                TurretTop =
+                [
                     new Position(4423.430664f, 2822.762939f, 436.283142f, 6.223487f),
                     new Position(4397.825684f, 2847.629639f, 436.283325f, 1.579430f),
                     new Position(4398.814941f, 2797.266357f, 436.283051f, 4.703747f),
-                },
+                ],
             },
 
             new WintergraspTowerCannonData()
             {
                 towerEntry = 190358,
-                TowerCannonBottom = new Position[]
-                {
+                TowerCannonBottom =
+                [
                     new Position(4448.138184f, 1974.998779f, 441.995911f, 1.967238f),
                     new Position(4448.713379f, 1955.148682f, 441.995178f, 0.380733f),
-                },
-                TurretTop = new Position[]
-                {
+                ],
+                TurretTop =
+                [
                     new Position(4469.448242f, 1966.623779f, 465.647217f, 1.153573f),
                     new Position(4481.996582f, 1933.658325f, 465.647186f, 5.873029f),
-                },
+                ],
             }
-        };
+        ];
 
         public static StaticWintergraspWorkshopInfo[] WorkshopData =
-        {
+        [
             new StaticWintergraspWorkshopInfo()
             {
                 WorkshopId =  WGWorkshopIds.Ne,
@@ -341,7 +341,7 @@ namespace Game.BattleFields
                 WorkshopId = WGWorkshopIds.KeepEast,
                 WorldStateId = WorldStates.BattlefieldWgWorkshopKE
             }
-        };
+        ];
         #endregion
     }
 

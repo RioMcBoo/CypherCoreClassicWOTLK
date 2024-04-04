@@ -184,7 +184,7 @@ namespace Game.PvP
         Dictionary<(Map map, int zoneId), OutdoorPvP> m_OutdoorPvPMap = new();
 
         // Holds the outdoor PvP templates
-        int[] m_OutdoorMapIds = { 0, 530, 530, 530, 530, 1 };
+        int[] m_OutdoorMapIds = [0, 530, 530, 530, 530, 1];
         Dictionary<OutdoorPvPTypes, int> m_OutdoorPvPDatas = new();
 
         // update interval

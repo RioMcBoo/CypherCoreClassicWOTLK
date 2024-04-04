@@ -75,28 +75,28 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
         public const int PathKalecgosFlight = 1987520;
 
         public static ObjectData[] creatureData =
-        {
+        [
             new ObjectData(CreatureIds.SelinFireheart, DataTypes.SelinFireheart),
             new ObjectData(CreatureIds.Vexallus, DataTypes.Vexallus),
             new ObjectData(CreatureIds.PriestessDelrissa, DataTypes.PriestessDelrissa),
             new ObjectData(CreatureIds.KaelthasSunstrider, DataTypes.KaelthasSunstrider),
             new ObjectData(CreatureIds.Kalecgos, DataTypes.Kalecgos),
             new ObjectData(CreatureIds.HumanKalecgos, DataTypes.Kalecgos),
-        };
+        ];
 
         public static ObjectData[] gameObjectData =
-        {
+        [
             new ObjectData(GameObjectIds.EscapeOrb, DataTypes.EscapeOrb),
-        };
+        ];
 
         public static DoorData[] doorData =
-        {
+        [
             new DoorData(GameObjectIds.SunwellRaidGate2, DataTypes.SelinFireheart, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(GameObjectIds.AssemblyChamberDoor, DataTypes.SelinFireheart, EncounterDoorBehavior.OpenWhenNotInProgress),
             new DoorData(GameObjectIds.SunwellRaidGate5, DataTypes.Vexallus, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(GameObjectIds.SunwellRaidGate4, DataTypes.PriestessDelrissa, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(GameObjectIds.AsylumDoor, DataTypes.KaelthasSunstrider, EncounterDoorBehavior.OpenWhenNotInProgress),
-        };
+        ];
 
         public static Position KalecgosSpawnPos = new Position(164.3747f, -397.1197f, 2.151798f, 1.66219f);
         public static Position KaelthasTrashGroupDistanceComparisonPos = new Position(150.0f, 141.0f, -14.4f);
@@ -106,12 +106,12 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
     class instance_magisters_terrace : InstanceMapScript
     {
         static DungeonEncounterData[] encounters =
-        {
+        [
             new DungeonEncounterData(DataTypes.SelinFireheart, 1897),
             new DungeonEncounterData(DataTypes.Vexallus, 1898),
             new DungeonEncounterData(DataTypes.PriestessDelrissa, 1895),
             new DungeonEncounterData(DataTypes.KaelthasSunstrider, 1894)
-        };
+        ];
         
         public instance_magisters_terrace() : base(nameof(instance_magisters_terrace), 585) { }
 

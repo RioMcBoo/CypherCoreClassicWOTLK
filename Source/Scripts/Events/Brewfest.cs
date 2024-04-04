@@ -11,59 +11,59 @@ namespace Scripts.Events.Brewfest
 {
     struct SpellIds
     {
-        public const uint Giddyup = 42924;
-        public const uint RentalRacingRam = 43883;
-        public const uint SwiftWorkRam = 43880;
-        public const uint RentalRacingRamAura = 42146;
-        public const uint RamLevelNeutral = 43310;
-        public const uint RamTrot = 42992;
-        public const uint RamCanter = 42993;
-        public const uint RamGallop = 42994;
-        public const uint RamFatigue = 43052;
-        public const uint ExhaustedRam = 43332;
-        public const uint RelayRaceTurnIn = 44501;
+        public const int Giddyup = 42924;
+        public const int RentalRacingRam = 43883;
+        public const int SwiftWorkRam = 43880;
+        public const int RentalRacingRamAura = 42146;
+        public const int RamLevelNeutral = 43310;
+        public const int RamTrot = 42992;
+        public const int RamCanter = 42993;
+        public const int RamGallop = 42994;
+        public const int RamFatigue = 43052;
+        public const int ExhaustedRam = 43332;
+        public const int RelayRaceTurnIn = 44501;
 
         // Quest
-        public const uint BrewfestQuestSpeedBunnyGreen = 43345;
-        public const uint BrewfestQuestSpeedBunnyYellow = 43346;
-        public const uint BrewfestQuestSpeedBunnyRed = 43347;
+        public const int BrewfestQuestSpeedBunnyGreen = 43345;
+        public const int BrewfestQuestSpeedBunnyYellow = 43346;
+        public const int BrewfestQuestSpeedBunnyRed = 43347;
     }
 
     struct QuestIds
     {
         // Horde
-        public const uint BarkForDrohnsDistillery = 11407;
-        public const uint BarkForTchalisVoodooBrewery = 11408;
+        public const int BarkForDrohnsDistillery = 11407;
+        public const int BarkForTchalisVoodooBrewery = 11408;
 
         // Alliance
-        public const uint BarkBarleybrew = 11293;
-        public const uint BarkForThunderbrews = 11294;
+        public const int BarkBarleybrew = 11293;
+        public const int BarkForThunderbrews = 11294;
     }
     struct TextIds
     {
         // Bark for Drohn's Distillery!
-        public const uint SayDrohnDistillery1 = 23520;
-        public const uint SayDrohnDistillery2 = 23521;
-        public const uint SayDrohnDistillery3 = 23522;
-        public const uint SayDrohnDistillery4 = 23523;
+        public const int SayDrohnDistillery1 = 23520;
+        public const int SayDrohnDistillery2 = 23521;
+        public const int SayDrohnDistillery3 = 23522;
+        public const int SayDrohnDistillery4 = 23523;
 
         // Bark for T'chali's Voodoo Brewery!
-        public const uint SayTchalisVoodoo1 = 23524;
-        public const uint SayTchalisVoodoo2 = 23525;
-        public const uint SayTchalisVoodoo3 = 23526;
-        public const uint SayTchalisVoodoo4 = 23527;
+        public const int SayTchalisVoodoo1 = 23524;
+        public const int SayTchalisVoodoo2 = 23525;
+        public const int SayTchalisVoodoo3 = 23526;
+        public const int SayTchalisVoodoo4 = 23527;
 
         // Bark for the Barleybrews!
-        public const uint SayBarleybrew1 = 23464;
-        public const uint SayBarleybrew2 = 23465;
-        public const uint SayBarleybrew3 = 23466;
-        public const uint SayBarleybrew4 = 22941;
+        public const int SayBarleybrew1 = 23464;
+        public const int SayBarleybrew2 = 23465;
+        public const int SayBarleybrew3 = 23466;
+        public const int SayBarleybrew4 = 22941;
 
         // Bark for the Thunderbrews!
-        public const uint SayThunderbrews1 = 23467;
-        public const uint SayThunderbrews2 = 23468;
-        public const uint SayThunderbrews3 = 23469;
-        public const uint SayThunderbrews4 = 22942;
+        public const int SayThunderbrews1 = 23467;
+        public const int SayThunderbrews2 = 23468;
+        public const int SayThunderbrews3 = 23469;
+        public const int SayThunderbrews4 = 22942;
     }
 
     [Script] // 42924 - Giddyup!
@@ -238,7 +238,7 @@ namespace Scripts.Events.Brewfest
     [Script] // 43714 - Brewfest - Relay Race - Intro - Force - Player to throw- Dnd
     class spell_brewfest_relay_race_intro_force_player_to_throw : SpellScript
     {
-        void HandleForceCast(uint effIndex)
+        void HandleForceCast(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             // All this spells trigger a spell that requires reagents; if the
@@ -255,7 +255,7 @@ namespace Scripts.Events.Brewfest
     [Script] // 43755 - Brewfest - Daily - Relay Race - Player - Increase Mount Duration - Dnd
     class spell_brewfest_relay_race_turn_in : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
@@ -276,7 +276,7 @@ namespace Scripts.Events.Brewfest
     [Script] // 43876 - Dismount Ram
     class spell_brewfest_dismount_ram : SpellScript
     {
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetCaster().RemoveAura(SpellIds.RentalRacingRam);
         }
@@ -302,7 +302,7 @@ namespace Scripts.Events.Brewfest
         {
             Player target = GetTarget().ToPlayer();
 
-            uint BroadcastTextId = 0;
+            int BroadcastTextId = 0;
 
             if (target.GetQuestStatus(QuestIds.BarkForDrohnsDistillery) == QuestStatus.Incomplete ||
                 target.GetQuestStatus(QuestIds.BarkForDrohnsDistillery) == QuestStatus.Complete)
@@ -334,25 +334,25 @@ namespace Scripts.Events.Brewfest
     [Script] // 52845 - Brewfest Mount Transformation (Faction Swap)
     class spell_brewfest_mount_transformation : SpellScript
     {
-        const uint SpellMountRam100 = 43900;
-        const uint SpellMountRam60 = 43899;
-        const uint SpellMountKodo100 = 49379;
-        const uint SpellMountKodo60 = 49378;
-        const uint SpellBrewfestMountTransform = 49357;
-        const uint SpellBrewfestMountTransformReverse = 52845;
+        const int SpellMountRam100 = 43900;
+        const int SpellMountRam60 = 43899;
+        const int SpellMountKodo100 = 49379;
+        const int SpellMountKodo60 = 49378;
+        const int SpellBrewfestMountTransform = 49357;
+        const int SpellBrewfestMountTransformReverse = 52845;
 
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellMountRam100, SpellMountRam60, SpellMountKodo100, SpellMountKodo60);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Player caster = GetCaster().ToPlayer();
             if (caster.HasAuraType(AuraType.Mounted))
             {
                 caster.RemoveAurasByType(AuraType.Mounted);
-                uint spell_id;
+                int spell_id;
 
                 switch (GetSpellInfo().Id)
                 {
@@ -384,7 +384,7 @@ namespace Scripts.Events.Brewfest
     [Script] // 50098 - The Beast Within
     class spell_brewfest_botm_the_beast_within : AuraScript
     {
-        const uint SpellBotmUnleashTheBeast = 50099;
+        const int SpellBotmUnleashTheBeast = 50099;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -405,7 +405,7 @@ namespace Scripts.Events.Brewfest
     [Script] // 49864 - Gassy
     class spell_brewfest_botm_gassy : AuraScript
     {
-        const uint SpellBotmBelchBrewBelchVisual = 49860;
+        const int SpellBotmBelchBrewBelchVisual = 49860;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -426,7 +426,7 @@ namespace Scripts.Events.Brewfest
     [Script] // 49822 - Bloated
     class spell_brewfest_botm_bloated : AuraScript
     {
-        const uint SpellBotmBubbleBrewTriggerMissile = 50072;
+        const int SpellBotmBubbleBrewTriggerMissile = 50072;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -447,7 +447,7 @@ namespace Scripts.Events.Brewfest
     [Script] // 49738 - Internal Combustion
     class spell_brewfest_botm_internal_combustion : AuraScript
     {
-        const uint SpellBotmBelchFireVisual = 49737;
+        const int SpellBotmBelchFireVisual = 49737;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -468,7 +468,7 @@ namespace Scripts.Events.Brewfest
     [Script] // 49962 - Jungle Madness!
     class spell_brewfest_botm_jungle_madness : SpellScript
     {
-        const uint SpellBotmJungleBrewVisionEffect = 50010;
+        const int SpellBotmJungleBrewVisionEffect = 50010;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -489,15 +489,15 @@ namespace Scripts.Events.Brewfest
     [Script] // 50243 - Teach Language
     class spell_brewfest_botm_teach_language : SpellScript
     {
-        const uint SpellLearnGnomishBinary = 50242;
-        const uint SpellLearnGoblinBinary = 50246;
+        const int SpellLearnGnomishBinary = 50242;
+        const int SpellLearnGoblinBinary = 50246;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellLearnGnomishBinary, SpellLearnGoblinBinary);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Player caster = GetCaster().ToPlayer();
             if (caster != null)
@@ -513,7 +513,7 @@ namespace Scripts.Events.Brewfest
     [Script] // 42254, 42255, 42256, 42257, 42258, 42259, 42260, 42261, 42263, 42264, 43959, 43961 - Weak Alcohol
     class spell_brewfest_botm_weak_alcohol : SpellScript
     {
-        const uint SpellBotmCreateEmptyBrewBottle = 51655;
+        const int SpellBotmCreateEmptyBrewBottle = 51655;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -534,15 +534,15 @@ namespace Scripts.Events.Brewfest
     [Script] // 51694 - Botm - Empty Bottle Throw - Resolve
     class spell_brewfest_botm_empty_bottle_throw_resolve : SpellScript
     {
-        const uint SpellBotmEmptyBottleThrowImpactCreature = 51695;   // Just unit, not creature
-        const uint SpellBotmEmptyBottleThrowImpactGround = 51697;
+        const int SpellBotmEmptyBottleThrowImpactCreature = 51695;   // Just unit, not creature
+        const int SpellBotmEmptyBottleThrowImpactGround = 51697;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellBotmEmptyBottleThrowImpactCreature, SpellBotmEmptyBottleThrowImpactGround);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
 

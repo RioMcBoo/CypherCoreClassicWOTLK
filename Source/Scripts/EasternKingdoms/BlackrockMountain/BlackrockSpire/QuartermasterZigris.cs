@@ -10,10 +10,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Quartermaster
 {
     struct SpellIds
     {
-        public const uint Shoot = 16496;
-        public const uint Stunbomb = 16497;
-        public const uint HealingPotion = 15504;
-        public const uint Hookednet = 15609;
+        public const int Shoot = 16496;
+        public const int Stunbomb = 16497;
+        public const int HealingPotion = 15504;
+        public const int Hookednet = 15609;
     }
 
     [Script]

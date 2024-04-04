@@ -108,7 +108,7 @@ namespace Game.Networking
     {
         public PacketHandler(MethodInfo info, SessionStatus status, PacketProcessing processingplace, Type type)
         {
-            methodCaller = (Action<WorldSession, ClientPacket>)GetType().GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(type).Invoke(null, new object[] { info });
+            methodCaller = (Action<WorldSession, ClientPacket>)GetType().GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(type).Invoke(null, [info]);
             sessionStatus = status;
             ProcessingPlace = processingplace;
             packetType = type;

@@ -46,7 +46,7 @@ namespace Framework.Collections
         /// Buffer capacity. Must be positive.
         /// </param>
         public CircularBuffer(int capacity)
-            : this(capacity, new T[] { })
+            : this(capacity, [])
         {
         }
 
@@ -375,7 +375,7 @@ namespace Framework.Collections
         {
             if (IsEmpty)
             {
-                return new ArraySegment<T>(new T[0]);
+                return new ArraySegment<T>([]);
             }
             else if (_start < _end)
             {
@@ -391,7 +391,7 @@ namespace Framework.Collections
         {
             if (IsEmpty)
             {
-                return new ArraySegment<T>(new T[0]);
+                return new ArraySegment<T>([]);
             }
             else if (_start < _end)
             {

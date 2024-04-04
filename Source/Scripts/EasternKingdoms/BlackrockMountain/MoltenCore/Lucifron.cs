@@ -10,9 +10,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Lucifron
 {
     struct SpellIds
     {
-        public const uint ImpendingDoom = 19702;
-        public const uint LucifronCurse = 19703;
-        public const uint ShadowShock = 20603;
+        public const int ImpendingDoom = 19702;
+        public const int LucifronCurse = 19703;
+        public const int ShadowShock = 20603;
     }
 
     [Script]

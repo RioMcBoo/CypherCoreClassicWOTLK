@@ -778,7 +778,7 @@ namespace Scripts.Spells.Items
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             int[][] triggeredSpells =
-            {
+            [
                     //CLASS_NONE
                     [],
                     //CLASS_WARRIOR
@@ -803,7 +803,7 @@ namespace Scripts.Spells.Items
                     [],
                     //CLASS_DRUID
                     [SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia]
-                };
+                ];
 
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
@@ -982,7 +982,7 @@ namespace Scripts.Spells.Items
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             int[][] triggeredSpells =
-            {
+            [
                     //CLASS_NONE
                     [],
                     //CLASS_WARRIOR
@@ -1007,7 +1007,7 @@ namespace Scripts.Spells.Items
                     [],
                     //CLASS_DRUID
                     [_strengthSpellId, _agilitySpellId, _hasteSpellId]
-                };
+                ];
 
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
@@ -1692,12 +1692,12 @@ namespace Scripts.Spells.Items
     class spell_item_mingos_fortune_generator : SpellScript
     {
         int[] CreateFortuneSpells =
-        {
+        [
             SpellIds.CreateFortune1, SpellIds.CreateFortune2, SpellIds.CreateFortune3, SpellIds.CreateFortune4, SpellIds.CreateFortune5,
             SpellIds.CreateFortune6, SpellIds.CreateFortune7, SpellIds.CreateFortune8, SpellIds.CreateFortune9, SpellIds.CreateFortune10,
             SpellIds.CreateFortune11, SpellIds.CreateFortune12, SpellIds.CreateFortune13, SpellIds.CreateFortune14, SpellIds.CreateFortune15,
             SpellIds.CreateFortune16, SpellIds.CreateFortune17, SpellIds.CreateFortune18, SpellIds.CreateFortune19, SpellIds.CreateFortune20
-        };
+        ];
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1762,7 +1762,7 @@ namespace Scripts.Spells.Items
             if (target != null)
             {
                 int spellId = SpellIds.NetOMaticTriggered3;
-                int roll = RandomHelper.URand(0, 99);
+                int roll = RandomHelper.IRand(0, 99);
                 if (roll < 2)                            // 2% for 30 sec self root (off-like Chance unknown)
                     spellId = SpellIds.NetOMaticTriggered1;
                 else if (roll < 4)                       // 2% for 20 sec root, charge to target (off-like Chance unknown)
@@ -2107,7 +2107,7 @@ namespace Scripts.Spells.Items
                     spellId = SpellIds.SoulSplitGood;
                     break;
                 case 4:
-                    if (caster.ToPlayer().GetBatttleGroundTeamId() == TeamId.Alliance)
+                    if (caster.ToPlayer().GetBatttleGroundTeamId() == BatttleGroundTeamId.Alliance)
                         spellId = SpellIds.TransformHorde;
                     else
                         spellId = SpellIds.TransformAlliance;
@@ -2162,7 +2162,7 @@ namespace Scripts.Spells.Items
                     spellId = SpellIds.SoulSplitGood;
                     break;
                 case 3:
-                    if (caster.ToPlayer().GetBatttleGroundTeamId() == TeamId.Alliance)
+                    if (caster.ToPlayer().GetBatttleGroundTeamId() == BatttleGroundTeamId.Alliance)
                         spellId = SpellIds.TransformHorde;
                     else
                         spellId = SpellIds.TransformAlliance;
@@ -2436,7 +2436,7 @@ namespace Scripts.Spells.Items
     class spell_item_wormhole_pandaria : SpellScript
     {
         int[] WormholeTargetLocations =
-        {
+        [
             SpellIds.Wormholepandariaisleofreckoning,
             SpellIds. Wormholepandariakunlaiunderwater,
             SpellIds.Wormholepandariasravess,
@@ -2446,7 +2446,7 @@ namespace Scripts.Spells.Items
             SpellIds.Wormholepandariacranestatue,
             SpellIds.Wormholepandariaemperorsomen,
             SpellIds.Wormholepandariawhitepetallake
-        };
+        ];
 
         public override bool Validate(SpellInfo spellInfo)
         {

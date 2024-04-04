@@ -104,8 +104,8 @@ namespace Game.Chat
             }
 
             float[] min = navmesh.getParams().orig;
-            float[] location = { y, z, x };
-            float[] extents = { 3.0f, 5.0f, 3.0f };
+            float[] location = [y, z, x];
+            float[] extents = [3.0f, 5.0f, 3.0f];
 
             int tilex = (int)((y - min[0]) / MapConst.SizeofGrids);
             int tiley = (int)((x - min[2]) / MapConst.SizeofGrids);

@@ -11,72 +11,72 @@ namespace Scripts.Events
     struct SpellIds
     {
         // Pilgrims Bounty Buff Food
-        public const uint WellFedApTrigger = 65414;
-        public const uint WellFedZmTrigger = 65412;
-        public const uint WellFedHitTrigger = 65416;
-        public const uint WellFedHasteTrigger = 65410;
-        public const uint WellFedSpiritTrigger = 65415;
+        public const int WellFedApTrigger = 65414;
+        public const int WellFedZmTrigger = 65412;
+        public const int WellFedHitTrigger = 65416;
+        public const int WellFedHasteTrigger = 65410;
+        public const int WellFedSpiritTrigger = 65415;
 
         // FeastSpells
-        public const uint FeastOnTurkey = 61784;
-        public const uint FeastOnCranberries = 61785;
-        public const uint FeastOnSweetPotatoes = 61786;
-        public const uint FeastOnPie = 61787;
-        public const uint FeastOnStuffing = 61788;
-        public const uint CranberryHelpins = 61841;
-        public const uint TurkeyHelpins = 61842;
-        public const uint StuffingHelpins = 61843;
-        public const uint SweetPotatoHelpins = 61844;
-        public const uint PieHelpins = 61845;
-        public const uint OnPlateEatVisual = 61826;
+        public const int FeastOnTurkey = 61784;
+        public const int FeastOnCranberries = 61785;
+        public const int FeastOnSweetPotatoes = 61786;
+        public const int FeastOnPie = 61787;
+        public const int FeastOnStuffing = 61788;
+        public const int CranberryHelpins = 61841;
+        public const int TurkeyHelpins = 61842;
+        public const int StuffingHelpins = 61843;
+        public const int SweetPotatoHelpins = 61844;
+        public const int PieHelpins = 61845;
+        public const int OnPlateEatVisual = 61826;
 
         // TheTurkinator
-        public const uint KillCounterVisual = 62015;
-        public const uint KillCounterVisualMax = 62021;
+        public const int KillCounterVisual = 62015;
+        public const int KillCounterVisualMax = 62021;
 
         // SpiritOfSharing
-        public const uint TheSpiritOfSharing = 61849;
+        public const int TheSpiritOfSharing = 61849;
 
         // BountifulTableMisc
-        public const uint OnPlateTurkey = 61928;
-        public const uint OnPlateCranberries = 61925;
-        public const uint OnPlateStuffing = 61927;
-        public const uint OnPlateSweetPotatoes = 61929;
-        public const uint OnPlatePie = 61926;
-        public const uint PassTheTurkey = 66373;
-        public const uint PassTheCranberries = 66372;
-        public const uint PassTheStuffing = 66375;
-        public const uint PassTheSweetPotatoes = 66376;
-        public const uint PassThePie = 66374;
-        public const uint OnPlateVisualPie = 61825;
-        public const uint OnPlateVisualCranberries = 61821;
-        public const uint OnPlateVisualPotatoes = 61824;
-        public const uint OnPlateVisualTurkey = 61822;
-        public const uint OnPlateVisualStuffing = 61823;
-        public const uint AServingOfCranberriesPlate = 61833;
-        public const uint AServingOfTurkeyPlate = 61835;
-        public const uint AServingOfStuffingPlate = 61836;
-        public const uint AServingOfSweetPotatoesPlate = 61837;
-        public const uint AServingOfPiePlate = 61838;
-        public const uint AServingOfCranberriesChair = 61804;
-        public const uint AServingOfTurkeyChair = 61807;
-        public const uint AServingOfStuffingChair = 61806;
-        public const uint AServingOfSweetPotatoesChair = 61808;
-        public const uint AServingOfPieChair = 61805;
+        public const int OnPlateTurkey = 61928;
+        public const int OnPlateCranberries = 61925;
+        public const int OnPlateStuffing = 61927;
+        public const int OnPlateSweetPotatoes = 61929;
+        public const int OnPlatePie = 61926;
+        public const int PassTheTurkey = 66373;
+        public const int PassTheCranberries = 66372;
+        public const int PassTheStuffing = 66375;
+        public const int PassTheSweetPotatoes = 66376;
+        public const int PassThePie = 66374;
+        public const int OnPlateVisualPie = 61825;
+        public const int OnPlateVisualCranberries = 61821;
+        public const int OnPlateVisualPotatoes = 61824;
+        public const int OnPlateVisualTurkey = 61822;
+        public const int OnPlateVisualStuffing = 61823;
+        public const int AServingOfCranberriesPlate = 61833;
+        public const int AServingOfTurkeyPlate = 61835;
+        public const int AServingOfStuffingPlate = 61836;
+        public const int AServingOfSweetPotatoesPlate = 61837;
+        public const int AServingOfPiePlate = 61838;
+        public const int AServingOfCranberriesChair = 61804;
+        public const int AServingOfTurkeyChair = 61807;
+        public const int AServingOfStuffingChair = 61806;
+        public const int AServingOfSweetPotatoesChair = 61808;
+        public const int AServingOfPieChair = 61805;
     }
 
     struct Misc
     {
         // TheTurkinator
-        public const uint EmoteTurkeyHunter = 0;
-        public const uint EmoteTurkeyDomination = 1;
-        public const uint EmoteTurkeySlaughter = 2;
-        public const uint EmoteTurkeyTriumph = 3;
+        public const int EmoteTurkeyHunter = 0;
+        public const int EmoteTurkeyDomination = 1;
+        public const int EmoteTurkeySlaughter = 2;
+        public const int EmoteTurkeyTriumph = 3;
 
         // BountifulTableMisc
         public const sbyte SeatPlayer = 0;
         public const sbyte SeatPlateHolder = 6;
-        public const uint NpcBountifulTable = 32823;
+        public const int NpcBountifulTable = 32823;
 
     }
 
@@ -87,9 +87,9 @@ namespace Scripts.Events
     [Script("spell_gen_candied_sweet_potato", SpellIds.WellFedHasteTrigger)]
     class spell_pilgrims_bounty_buff_food : AuraScript
     {
-        uint _triggeredSpellId;
+        int _triggeredSpellId;
 
-        public spell_pilgrims_bounty_buff_food(uint triggeredSpellId)
+        public spell_pilgrims_bounty_buff_food(int triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
         }
@@ -117,14 +117,14 @@ namespace Scripts.Events
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellEffect((spellInfo.Id, 0)) && ValidateSpellEffect(((uint)spellInfo.GetEffect(0).CalcValue(), 0));
+            return ValidateSpellEffect((spellInfo.Id, 0)) && ValidateSpellEffect((spellInfo.GetEffect(0).CalcValue(), 0));
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
 
-            uint spellId = GetSpellInfo().Id switch
+            int spellId = GetSpellInfo().Id switch
             {
                 SpellIds.FeastOnTurkey => SpellIds.TurkeyHelpins,
                 SpellIds.FeastOnCranberries => SpellIds.CranberryHelpins,
@@ -153,11 +153,11 @@ namespace Scripts.Events
                 }
             }
 
-            Aura aura = caster.GetAura((uint)GetEffectValue());
+            Aura aura = caster.GetAura(GetEffectValue());
             if (aura != null)
             {
                 if (aura.GetStackAmount() == 1)
-                    caster.RemoveAurasDueToSpell((uint)aura.GetSpellInfo().GetEffect(0).CalcValue());
+                    caster.RemoveAurasDueToSpell(aura.GetSpellInfo().GetEffect(0).CalcValue());
                 aura.ModStackAmount(-1);
             }
         }
@@ -176,7 +176,7 @@ namespace Scripts.Events
             return ValidateSpellInfo(SpellIds.KillCounterVisual, SpellIds.KillCounterVisualMax);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Creature caster = GetCaster().ToCreature();
             Unit target = GetHitUnit();
@@ -226,9 +226,9 @@ namespace Scripts.Events
     [Script("spell_pilgrims_bounty_well_fed_pie", SpellIds.WellFedSpiritTrigger)]
     class spell_pilgrims_bounty_well_fed : SpellScript
     {
-        uint _triggeredSpellId;
+        int _triggeredSpellId;
 
-        public spell_pilgrims_bounty_well_fed(uint triggeredSpellId)
+        public spell_pilgrims_bounty_well_fed(int triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
         }
@@ -239,7 +239,7 @@ namespace Scripts.Events
             return ValidateSpellInfo(_triggeredSpellId);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             Player target = GetHitPlayer();
@@ -284,12 +284,12 @@ namespace Scripts.Events
     [Script("spell_pilgrims_bounty_on_plate_pie", SpellIds.OnPlatePie, SpellIds.PassThePie, SpellIds.OnPlateVisualPie, SpellIds.AServingOfPieChair)]
     class spell_pilgrims_bounty_on_plate : SpellScript
     {
-        uint _triggeredSpellId1;
-        uint _triggeredSpellId2;
-        uint _triggeredSpellId3;
-        uint _triggeredSpellId4;
+        int _triggeredSpellId1;
+        int _triggeredSpellId2;
+        int _triggeredSpellId3;
+        int _triggeredSpellId4;
 
-        public spell_pilgrims_bounty_on_plate(uint triggeredSpellId1, uint triggeredSpellId2, uint triggeredSpellId3, uint triggeredSpellId4)
+        public spell_pilgrims_bounty_on_plate(int triggeredSpellId1, int triggeredSpellId2, int triggeredSpellId3, int triggeredSpellId4)
         {
             _triggeredSpellId1 = triggeredSpellId1;
             _triggeredSpellId2 = triggeredSpellId2;
@@ -343,7 +343,7 @@ namespace Scripts.Events
             return null;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -400,9 +400,9 @@ namespace Scripts.Events
     [Script("spell_pilgrims_bounty_a_serving_of_pie", SpellIds.AServingOfPiePlate)]
     class spell_pilgrims_bounty_a_serving_of : AuraScript
     {
-        uint _triggeredSpellId;
+        int _triggeredSpellId;
 
-        public spell_pilgrims_bounty_a_serving_of(uint triggeredSpellId)
+        public spell_pilgrims_bounty_a_serving_of(int triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
         }
@@ -415,14 +415,14 @@ namespace Scripts.Events
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.CastSpell(target, (uint)aurEff.GetAmount(), true);
+            target.CastSpell(target, aurEff.GetAmount(), true);
             HandlePlate(target, true);
         }
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.RemoveAurasDueToSpell((uint)aurEff.GetAmount());
+            target.RemoveAurasDueToSpell(aurEff.GetAmount());
             HandlePlate(target, false);
         }
 

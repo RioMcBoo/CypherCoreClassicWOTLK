@@ -203,11 +203,11 @@ namespace Game.Chat
             int type;
 
             string[] guidKeys =
-            {
+            [
                 "Hplayer",
                 "Hcreature",
                 "Hgameobject"
-            };
+            ];
             // |color|Hcreature:creature_guid|h[name]|h|r
             // |color|Hgameobject:go_guid|h[name]|h|r
             // |color|Hplayer:name|h[name]|h|r
@@ -254,13 +254,13 @@ namespace Game.Chat
         }
 
         static string[] spellKeys =
-        {
+        [
             "Hspell",                                               // normal spell
             "Htalent",                                              // talent spell
             "Henchant",                                             // enchanting recipe spell
             "Htrade",                                               // profession/skill spell
             "Hglyph",                                               // glyph
-        };
+        ];
         public int ExtractSpellIdFromLink(StringArguments args)
         {
             // number or [name] Shift-click form |color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r

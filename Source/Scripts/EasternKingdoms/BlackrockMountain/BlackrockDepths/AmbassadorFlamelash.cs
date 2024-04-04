@@ -10,7 +10,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.AmbassadorFl
 {
     struct SpellIds
     {
-        public const uint Fireblast = 15573;
+        public const int Fireblast = 15573;
     }
 
     [Script]

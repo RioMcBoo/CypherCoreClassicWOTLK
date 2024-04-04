@@ -33,12 +33,12 @@ namespace Scripts.World.Achievements
     [Script]
     class achievement_tilted : AchievementCriteriaScript
     {
-        const uint AreaArgentTournamentFields = 4658;
-        const uint AreaRingOfAspirants = 4670;
-        const uint AreaRingOfArgentValiants = 4671;
-        const uint AreaRingOfAllianceValiants = 4672;
-        const uint AreaRingOfHordeValiants = 4673;
-        const uint AreaRingOfChapions = 4669;
+        const int AreaArgentTournamentFields = 4658;
+        const int AreaRingOfAspirants = 4670;
+        const int AreaRingOfArgentValiants = 4671;
+        const int AreaRingOfAllianceValiants = 4672;
+        const int AreaRingOfHordeValiants = 4673;
+        const int AreaRingOfChapions = 4669;
 
         public achievement_tilted() : base("achievement_tilted") { }
 
@@ -61,9 +61,9 @@ namespace Scripts.World.Achievements
     [Script]
     class achievement_flirt_with_disaster_perf_check : AchievementCriteriaScript
     {
-        const uint AuraPerfumeForever = 70235;
-        const uint AuraPerfumeEnchantress = 70234;
-        const uint AuraPerfumeVictory = 70233;
+        const int AuraPerfumeForever = 70235;
+        const int AuraPerfumeEnchantress = 70234;
+        const int AuraPerfumeVictory = 70233;
 
         public achievement_flirt_with_disaster_perf_check() : base("achievement_flirt_with_disaster_perf_check") { }
 

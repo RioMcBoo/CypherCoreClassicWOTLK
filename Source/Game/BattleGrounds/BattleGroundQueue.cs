@@ -519,8 +519,8 @@ namespace Game.BattleGrounds
                     }
                 }
                 //count diffs after small update
-                diffAli = (int)(aliFree - m_SelectionPools[BatttleGroundTeamId.Alliance].GetPlayerCount());
-                diffHorde = (int)(hordeFree - m_SelectionPools[BatttleGroundTeamId.Horde].GetPlayerCount());
+                diffAli = aliFree - m_SelectionPools[BatttleGroundTeamId.Alliance].GetPlayerCount();
+                diffHorde = hordeFree - m_SelectionPools[BatttleGroundTeamId.Horde].GetPlayerCount();
             }
         }
 
@@ -573,7 +573,7 @@ namespace Game.BattleGrounds
             // this could be 2 cycles but i'm checking only first team in queue - it can cause problem -
             // if first is invited to BG and seconds timer expired, but we can ignore it, because players have only 80 seconds to click to enter bg
             // and when they click or after 80 seconds the queue info is removed from queue
-            uint time_before = (uint)(GameTime.GetGameTimeMS() - WorldConfig.GetUIntValue(WorldCfg.BattlegroundPremadeGroupWaitForMatch));
+            uint time_before = GameTime.GetGameTimeMS() - WorldConfig.GetUIntValue(WorldCfg.BattlegroundPremadeGroupWaitForMatch);
             for (int i = 0; i < SharedConst.PvpTeamsCount; i++)
             {
                 if (!m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueuePremadeAlliance + i].Empty())
@@ -877,7 +877,7 @@ namespace Game.BattleGrounds
                 byte found = 0;
                 byte team = 0;
 
-                for (byte i = (byte)BattlegroundConst.BgQueuePremadeAlliance; i < BattlegroundConst.BgQueueNormalAlliance; i++)
+                for (byte i = BattlegroundConst.BgQueuePremadeAlliance; i < BattlegroundConst.BgQueueNormalAlliance; i++)
                 {
                     // take the group that joined first
                     foreach (var queueInfo in m_QueuedGroups[(int)bracket_id][i])

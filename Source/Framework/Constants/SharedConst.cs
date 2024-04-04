@@ -255,7 +255,7 @@ namespace Framework.Constants
         public const int DisplayIdHiddenMount = 73200;
 
         public static float[] baseMoveSpeed =
-        {
+        [
             2.5f,                  // MOVE_WALK
             7.0f,                  // MOVE_RUN
             4.5f,                  // MOVE_RUN_BACK
@@ -265,10 +265,10 @@ namespace Framework.Constants
             7.0f,                  // MOVE_FLIGHT
             4.5f,                  // MOVE_FLIGHT_BACK
             3.14f                  // MOVE_PITCH_RATE
-        };
+        ];
 
         public static float[] playerBaseMoveSpeed =
-        {
+        [
             2.5f,                  // MOVE_WALK
             7.0f,                  // MOVE_RUN
             4.5f,                  // MOVE_RUN_BACK
@@ -278,25 +278,25 @@ namespace Framework.Constants
             7.0f,                  // MOVE_FLIGHT
             4.5f,                  // MOVE_FLIGHT_BACK
             3.14f                  // MOVE_PITCH_RATE
-        };
+        ];
 
         public static float[] VisibilityDistances =
-        {
+        [
             DefaultVisibilityDistance,
             VisibilityDistanceTiny,
             VisibilityDistanceSmall,
             VisibilityDistanceLarge,
             VisibilityDistanceGigantic,
             MaxVisibilityDistance
-        };
+        ];
 
         static int[] raceBits =
-        {
+        [
             0, 0, 1, 2, 3, 4, 5, 6, 7, 8,
             9, 10, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, 21, -1, 23, 24, 25, 26, 27, 28,
             29, 30, 31, -1, 11, 12, 13, 14
-        };               
+        ];               
 
         public static SkillType SkillByQuestSort(int sort)
         {
@@ -382,7 +382,7 @@ namespace Framework.Constants
         }
 
         public static CascLocaleBit[] WowLocaleToCascLocaleBit =
-        {
+        [
             CascLocaleBit.enUS,
             CascLocaleBit.koKR,
             CascLocaleBit.frFR,
@@ -395,7 +395,7 @@ namespace Framework.Constants
             CascLocaleBit.None,
             CascLocaleBit.ptBR,
             CascLocaleBit.itIT
-        };
+        ];
 
         public static bool IsActivePetSlot(PetSaveMode slot)
         {

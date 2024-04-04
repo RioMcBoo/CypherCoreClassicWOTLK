@@ -11,39 +11,39 @@ namespace Scripts.EasternKingdoms.AlteracValley
 {
     struct SpellIds
     {
-        public const uint Charge = 22911;
-        public const uint Cleave = 40504;
-        public const uint DemoralizingShout = 23511;
-        public const uint Enrage = 8599;
-        public const uint Whirlwind = 13736;
+        public const int Charge = 22911;
+        public const int Cleave = 40504;
+        public const int DemoralizingShout = 23511;
+        public const int Enrage = 8599;
+        public const int Whirlwind = 13736;
 
-        public const uint NorthMarshal = 45828;
-        public const uint SouthMarshal = 45829;
-        public const uint StonehearthMarshal = 45830;
-        public const uint IcewingMarshal = 45831;
-        public const uint IcebloodWarmaster = 45822;
-        public const uint TowerPointWarmaster = 45823;
-        public const uint WestFrostwolfWarmaster = 45824;
-        public const uint EastFrostwolfWarmaster = 45826;
+        public const int NorthMarshal = 45828;
+        public const int SouthMarshal = 45829;
+        public const int StonehearthMarshal = 45830;
+        public const int IcewingMarshal = 45831;
+        public const int IcebloodWarmaster = 45822;
+        public const int TowerPointWarmaster = 45823;
+        public const int WestFrostwolfWarmaster = 45824;
+        public const int EastFrostwolfWarmaster = 45826;
     }
 
     struct CreatureIds
     {
-        public const uint NorthMarshal = 14762;
-        public const uint SouthMarshal = 14763;
-        public const uint IcewingMarshal = 14764;
-        public const uint StonehearthMarshal = 14765;
-        public const uint EastFrostwolfWarmaster = 14772;
-        public const uint IcebloodWarmaster = 14773;
-        public const uint TowerPointWarmaster = 14776;
-        public const uint WestFrostwolfWarmaster = 14777;
+        public const int NorthMarshal = 14762;
+        public const int SouthMarshal = 14763;
+        public const int IcewingMarshal = 14764;
+        public const int StonehearthMarshal = 14765;
+        public const int EastFrostwolfWarmaster = 14772;
+        public const int IcebloodWarmaster = 14773;
+        public const int TowerPointWarmaster = 14776;
+        public const int WestFrostwolfWarmaster = 14777;
     }
 
     [Script]
     class npc_av_marshal_or_warmaster : ScriptedAI
     {
-        (uint npcEntry, uint spellId)[] _auraPairs =
-        {
+        (int npcEntry, int spellId)[] _auraPairs =
+        [
             new (CreatureIds.NorthMarshal, SpellIds.NorthMarshal),
             new (CreatureIds.SouthMarshal, SpellIds.SouthMarshal),
             new (CreatureIds.StonehearthMarshal, SpellIds.StonehearthMarshal),
@@ -52,7 +52,7 @@ namespace Scripts.EasternKingdoms.AlteracValley
             new (CreatureIds.WestFrostwolfWarmaster, SpellIds.WestFrostwolfWarmaster),
             new (CreatureIds.TowerPointWarmaster, SpellIds.TowerPointWarmaster),
             new (CreatureIds.IcebloodWarmaster, SpellIds.IcebloodWarmaster)
-        };
+        ];
 
         bool _hasAura;
 

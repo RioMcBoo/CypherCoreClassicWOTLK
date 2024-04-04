@@ -140,7 +140,7 @@ namespace Game
             var ltime = Time.UnixTimeToDateTime(gtime).ToLocalTime();
             uint season = (uint)((ltime.DayOfYear - 78 + 365) / 91) % 4;
 
-            string[] seasonName = { "spring", "summer", "fall", "winter" };
+            string[] seasonName = ["spring", "summer", "fall", "winter"];
 
             Log.outInfo(LogFilter.Server, "Generating a change in {0} weather for zone {1}.", seasonName[season], m_zone);
 

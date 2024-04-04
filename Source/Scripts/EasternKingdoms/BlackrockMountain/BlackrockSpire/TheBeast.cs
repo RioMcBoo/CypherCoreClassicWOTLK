@@ -11,9 +11,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Thebeast
 {
     struct SpellIds
     {
-        public const uint Flamebreak = 16785;
-        public const uint Immolate = 20294;
-        public const uint Terrifyingroar = 14100;
+        public const int Flamebreak = 16785;
+        public const int Immolate = 20294;
+        public const int Terrifyingroar = 14100;
     }
 
     [Script]

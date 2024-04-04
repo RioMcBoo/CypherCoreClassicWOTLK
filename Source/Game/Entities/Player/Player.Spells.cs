@@ -353,7 +353,7 @@ namespace Game.Entities
             // levels sync. with spell requirement for skill levels to learn
             // bonus abilities in sSkillLineAbilityStore
             // Used only to avoid scan DBC at each skill grow
-            uint[] bonusSkillLevels = { 75, 150, 225, 300, 375, 450, 525, 600, 700, 850 };
+            uint[] bonusSkillLevels = [75, 150, 225, 300, 375, 450, 525, 600, 700, 850];
 
             Log.outDebug(LogFilter.Player, "UpdateSkillPro(SkillId {0}, Chance {0:D3}%)", skillId, chance / 10.0f);
             if (skillId == 0)
@@ -1481,7 +1481,7 @@ namespace Game.Entities
             if (Condition == null)
                 return true;
 
-            byte[] curcount = { 0, 0, 0, 0 };
+            byte[] curcount = [0, 0, 0, 0];
 
             //counting current equipped gem colors
             for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)

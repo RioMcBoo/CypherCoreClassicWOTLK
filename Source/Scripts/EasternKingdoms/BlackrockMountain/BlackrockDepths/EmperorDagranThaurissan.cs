@@ -12,16 +12,16 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthauri
 {
     struct SpellIds
     {
-        public const uint Handofthaurissan = 17492;
-        public const uint Avatarofflame = 15636;
+        public const int Handofthaurissan = 17492;
+        public const int Avatarofflame = 15636;
     }
 
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SaySlay = 1;
+        public const int SayAggro = 0;
+        public const int SaySlay = 1;
 
-        public const uint EmoteShaken = 0;
+        public const int EmoteShaken = 0;
     }
 
     [Script]
@@ -69,7 +69,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthauri
             if (moira != null)
             {
                 moira.GetAI().EnterEvadeMode();
-                moira.SetFaction((uint)FactionTemplates.Friendly);
+                moira.SetFaction(FactionTemplates.Friendly);
                 moira.GetAI().Talk(TextIds.EmoteShaken);
             }
         }

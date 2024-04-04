@@ -13,12 +13,12 @@ namespace Scripts.Events.LoveIsInTheAir
     [Script] // 45102 - Romantic Picnic
     class spell_love_is_in_the_air_romantic_picnic : AuraScript
     {
-        const uint SpellBasketCheck = 45119; // Holiday - Valentine - Romantic Picnic Near Basket Check
-        const uint SpellMealPeriodic = 45103; // Holiday - Valentine - Romantic Picnic Meal Periodic - effect dummy
-        const uint SpellMealEatVisual = 45120; // Holiday - Valentine - Romantic Picnic Meal Eat Visual
-        // const uint SpellMealParticle          = 45114; // Holiday - Valentine - Romantic Picnic Meal Particle - unused
-        const uint SpellDrinkVisual = 45121; // Holiday - Valentine - Romantic Picnic Drink Visual
-        const uint SpellRomanticPicnicAchiev = 45123; // Romantic Picnic periodic = 5000
+        const int SpellBasketCheck = 45119; // Holiday - Valentine - Romantic Picnic Near Basket Check
+        const int SpellMealPeriodic = 45103; // Holiday - Valentine - Romantic Picnic Meal Periodic - effect dummy
+        const int SpellMealEatVisual = 45120; // Holiday - Valentine - Romantic Picnic Meal Eat Visual
+        // const int SpellMealParticle          = 45114; // Holiday - Valentine - Romantic Picnic Meal Particle - unused
+        const int SpellDrinkVisual = 45121; // Holiday - Valentine - Romantic Picnic Drink Visual
+        const int SpellRomanticPicnicAchiev = 45123; // Romantic Picnic periodic = 5000
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -83,14 +83,14 @@ namespace Scripts.Events.LoveIsInTheAir
     [Script] // 26678 - Create Heart Candy
     class spell_love_is_in_the_air_create_heart_candy : SpellScript
     {
-        uint[] CreateHeartCandySpells = { 26668, 26670, 26671, 26672, 26673, 26674, 26675, 26676 };
+        int[] CreateHeartCandySpells = [26668, 26670, 26671, 26672, 26673, 26674, 26675, 26676];
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(CreateHeartCandySpells);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetCaster().CastSpell(GetCaster(), CreateHeartCandySpells.SelectRandom());
         }
@@ -106,12 +106,12 @@ namespace Scripts.Events.LoveIsInTheAir
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+            return ValidateSpellInfo(spellInfo.GetEffect(0).CalcValue());
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
-            GetHitUnit().RemoveAurasDueToSpell((uint)GetEffectValue());
+            GetHitUnit().RemoveAurasDueToSpell(GetEffectValue());
         }
 
         public override void Register()
@@ -125,12 +125,12 @@ namespace Scripts.Events.LoveIsInTheAir
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+            return ValidateSpellInfo(spellInfo.GetEffect(0).CalcValue());
         }
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().CastSpell(GetTarget(), (uint)GetEffectInfo(0).CalcValue());
+            GetTarget().CastSpell(GetTarget(), GetEffectInfo(0).CalcValue());
         }
 
         public override void Register()
@@ -142,7 +142,7 @@ namespace Scripts.Events.LoveIsInTheAir
     [Script] // 71508 - Recently Analyzed
     class spell_love_is_in_the_air_recently_analyzed : AuraScript
     {
-        const uint SpellHeavilyPerfumed = 71507;
+        const int SpellHeavilyPerfumed = 71507;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -180,12 +180,12 @@ namespace Scripts.Events.LoveIsInTheAir
     [Script] // 71450 - Crown Parcel Service Uniform
     class spell_love_is_in_the_air_service_uniform : AuraScript
     {
-        const uint ModelGoblinMale = 31002;
-        const uint ModelGoblinFemale = 31003;
+        const int ModelGoblinMale = 31002;
+        const int ModelGoblinFemale = 31003;
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+            return ValidateSpellInfo(spellInfo.GetEffect(0).CalcValue());
         }
 
         void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -202,7 +202,7 @@ namespace Scripts.Events.LoveIsInTheAir
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().RemoveAurasDueToSpell((uint)GetEffectInfo(0).CalcValue());
+            GetTarget().RemoveAurasDueToSpell(GetEffectInfo(0).CalcValue());
         }
 
         public override void Register()
@@ -216,14 +216,14 @@ namespace Scripts.Events.LoveIsInTheAir
     [Script] // 71539 - Crown Chemical Co. Supplies
     class spell_love_is_in_the_air_cancel_service_uniform : SpellScript
     {
-        const uint SpellServiceUniform = 71450;
+        const int SpellServiceUniform = 71450;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellServiceUniform);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetHitUnit().RemoveAurasDueToSpell(SpellServiceUniform);
         }
@@ -241,12 +241,12 @@ namespace Scripts.Events.LoveIsInTheAir
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue(), (uint)spellInfo.GetEffect(1).CalcValue());
+            return ValidateSpellInfo(spellInfo.GetEffect(0).CalcValue(), spellInfo.GetEffect(1).CalcValue());
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
-            GetCaster().RemoveAurasDueToSpell((uint)GetEffectValue());
+            GetCaster().RemoveAurasDueToSpell(GetEffectValue());
         }
 
         public override void Register()

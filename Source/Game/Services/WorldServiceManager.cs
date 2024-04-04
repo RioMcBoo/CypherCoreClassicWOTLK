@@ -83,9 +83,9 @@ namespace Game.Services
                 responseType = parameters[1].ParameterType;
 
             if (responseType != null)
-                methodCaller = info.CreateDelegate(Expression.GetDelegateType(new[] { typeof(WorldSession), requestType, responseType, info.ReturnType }));
+                methodCaller = info.CreateDelegate(Expression.GetDelegateType([typeof(WorldSession), requestType, responseType, info.ReturnType]));
             else
-                methodCaller = info.CreateDelegate(Expression.GetDelegateType(new[] { typeof(WorldSession), requestType, info.ReturnType }));
+                methodCaller = info.CreateDelegate(Expression.GetDelegateType([typeof(WorldSession), requestType, info.ReturnType]));
         }
 
         public void Invoke(WorldSession session, MethodCall methodCall, CodedInputStream stream)

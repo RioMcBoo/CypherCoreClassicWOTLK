@@ -57,7 +57,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
         public const int DataRagnarosAdds = 0;
 
         public static Position[] SummonPositions =
-        {
+        [
             new Position(737.850f, -1145.35f, -120.288f, 4.71368f),
             new Position(744.162f, -1151.63f, -119.726f, 4.58204f),
             new Position(751.247f, -1152.82f, -119.744f, 4.49673f),
@@ -68,7 +68,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
             new Position(722.408f, -1152.41f, -120.029f, 5.33087f),
             new Position(718.994f, -1156.36f, -119.805f, 5.75738f),
             new Position(838.510f, -829.840f, -232.000f, 2.00000f),
-        };
+        ];
 
         public static Position RagnarosTelePos = new Position(829.159f, -815.773f, -228.972f, 5.30500f);
         public static Position RagnarosSummonPos = new Position(838.510f, -829.840f, -232.000f, 2.00000f);
@@ -78,7 +78,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
     class instance_molten_core : InstanceMapScript
     {
         static DungeonEncounterData[] encounters =
-        {
+        [
             new DungeonEncounterData(DataTypes.Lucifron, 663),
             new DungeonEncounterData(DataTypes.Magmadar, 664),
             new DungeonEncounterData(DataTypes.Gehennas, 665),
@@ -89,7 +89,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
             new DungeonEncounterData(DataTypes.GolemaggTheIncinerator, 670),
             new DungeonEncounterData(DataTypes.MajordomoExecutus, 671),
             new DungeonEncounterData(DataTypes.Ragnaros, 672)
-        };
+        ];
 
         public instance_molten_core() : base(nameof(instance_molten_core), 409) { }
 

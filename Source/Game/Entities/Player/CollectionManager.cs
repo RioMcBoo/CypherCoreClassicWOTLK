@@ -496,7 +496,7 @@ namespace Game.Entities
         }
 
         ClassMask[] PlayerClassByArmorSubclass =
-        {
+        [
             ClassMask.Playable,                                                                //ITEM_SUBCLASS_ARMOR_MISCELLANEOUS
             ClassMask.Priest | ClassMask.Mage | ClassMask.Warlock,                             //ITEM_SUBCLASS_ARMOR_CLOTH
             ClassMask.Rogue | ClassMask.Monk | ClassMask.Druid | ClassMask.DemonHunter,        //ITEM_SUBCLASS_ARMOR_LEATHER
@@ -509,7 +509,7 @@ namespace Game.Entities
             ClassMask.Shaman,                                                                  //ITEM_SUBCLASS_ARMOR_TOTEM
             ClassMask.Deathknight,                                                             //ITEM_SUBCLASS_ARMOR_SIGIL
             ClassMask.Paladin | ClassMask.Deathknight | ClassMask.Shaman | ClassMask.Druid,    //ITEM_SUBCLASS_ARMOR_RELIC
-        };
+        ];
 
         public void AddItemAppearance(Item item)
         {

@@ -10,18 +10,18 @@ namespace Scripts.EasternKingdoms.AlteracValley.Galvangar
 {
     struct SpellIds
     {
-        public const uint Cleave = 15284;
-        public const uint FrighteningShout = 19134;
-        public const uint Whirlwind1 = 15589;
-        public const uint Whirlwind2 = 13736;
-        public const uint MortalStrike = 16856;
+        public const int Cleave = 15284;
+        public const int FrighteningShout = 19134;
+        public const int Whirlwind1 = 15589;
+        public const int Whirlwind2 = 13736;
+        public const int MortalStrike = 16856;
     }
 
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SayEvade = 1;
-        public const uint SayBuff = 2;
+        public const int SayAggro = 0;
+        public const int SayEvade = 1;
+        public const int SayBuff = 2;
     }
 
     struct ActionIds

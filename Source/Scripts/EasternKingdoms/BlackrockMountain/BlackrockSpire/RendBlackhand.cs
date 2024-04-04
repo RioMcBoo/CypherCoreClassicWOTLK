@@ -53,45 +53,45 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
         public const int RendPath2 = 11037448;
 
         public static Wave[] Wave2 = // 22 sec
-        {
+        [
             new Wave(10447, 209.8637f, -428.2729f, 110.9877f, 0.6632251f),
             new Wave(10442, 209.3122f, -430.8724f, 110.9814f, 2.9147f),
             new Wave(10442, 211.3309f, -425.9111f, 111.0006f, 1.727876f)
-        };
+        ];
 
         public static Wave[] Wave3 = // 60 sec
-        {
+        [
             new Wave(10742, 208.6493f, -424.5787f, 110.9872f, 5.8294f),
             new Wave(10447, 203.9482f, -428.9446f, 110.982f,  4.677482f),
             new Wave(10442, 203.3441f, -426.8668f, 110.9772f, 4.712389f),
             new Wave(10442, 206.3079f, -424.7509f, 110.9943f, 4.08407f)
-        };
+        ];
 
         public static Wave[] Wave4 = // 49 sec
-        {
+        [
             new Wave(10742, 212.3541f, -412.6826f, 111.0352f, 5.88176f),
             new Wave(10447, 212.5754f, -410.2841f, 111.0296f, 2.740167f),
             new Wave(10442, 212.3449f, -414.8659f, 111.0348f, 2.356194f),
             new Wave(10442, 210.6568f, -412.1552f, 111.0124f, 0.9773844f)
-        };
+        ];
 
         public static Wave[] Wave5 = // 60 sec
-        {
+        [
             new Wave(10742, 210.2188f, -410.6686f, 111.0211f, 5.8294f),
             new Wave(10447, 209.4078f, -414.13f,   111.0264f, 4.677482f),
             new Wave(10442, 208.0858f, -409.3145f, 111.0118f, 4.642576f),
             new Wave(10442, 207.9811f, -413.0728f, 111.0098f, 5.288348f),
             new Wave(10442, 208.0854f, -412.1505f, 111.0057f, 4.08407f)
-        };
+        ];
 
         public static Wave[] Wave6 = // 27 sec
-        {
+        [
             new Wave(10742, 213.9138f, -426.512f,  111.0013f, 3.316126f),
             new Wave(10447, 213.7121f, -429.8102f, 110.9888f, 1.413717f),
             new Wave(10447, 213.7157f, -424.4268f, 111.009f,  3.001966f),
             new Wave(10442, 210.8935f, -423.913f,  111.0125f, 5.969026f),
             new Wave(10442, 212.2642f, -430.7648f, 110.9807f, 5.934119f)
-        };
+        ];
 
         public static Position GythLoc = new Position(211.762f, -397.5885f, 111.1817f, 4.747295f);
         public static Position Teleport1Loc = new Position(194.2993f, -474.0814f, 121.4505f, -0.01225555f);

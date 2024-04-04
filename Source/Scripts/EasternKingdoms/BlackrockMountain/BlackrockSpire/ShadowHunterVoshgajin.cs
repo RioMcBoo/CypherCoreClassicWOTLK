@@ -11,9 +11,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.ShadowHunterV
 {
     struct SpellIds
     {
-        public const uint Curseofblood = 24673;
-        public const uint Hex = 16708;
-        public const uint Cleave = 20691;
+        public const int Curseofblood = 24673;
+        public const int Hex = 16708;
+        public const int Cleave = 20691;
     }
 
     [Script]

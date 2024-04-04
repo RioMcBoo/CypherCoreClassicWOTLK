@@ -15,11 +15,11 @@ namespace Scripts.World.NpcGuard
     [Script]
     class npc_guard_generic : GuardAI
     {
-        const uint SayGuardSilAggro = 0;
-        const uint NpcCenarionHoldInfantry = 15184;
-        const uint NpcStormwindCityGuard = 68;
-        const uint NpcStormwindCityPatroller = 1976;
-        const uint NpcOrgrimmarGrunt = 3296;
+        const int SayGuardSilAggro = 0;
+        const int NpcCenarionHoldInfantry = 15184;
+        const int NpcStormwindCityGuard = 68;
+        const int NpcStormwindCityPatroller = 1976;
+        const int NpcOrgrimmarGrunt = 3296;
 
         TaskScheduler _combatScheduler = new();
 
@@ -154,11 +154,11 @@ namespace Scripts.World.NpcGuard
     [Script]
     class npc_guard_shattrath_faction : GuardAI
     {
-        const uint NpcAldorVindicator = 18549;
-        const uint SpellBanishedShattrathA = 36642;
-        const uint SpellBanishedShattrathS = 36671;
-        const uint SpellBanishTeleport = 36643;
-        const uint SpellExile = 39533;
+        const int NpcAldorVindicator = 18549;
+        const int SpellBanishedShattrathA = 36642;
+        const int SpellBanishedShattrathS = 36671;
+        const int SpellBanishTeleport = 36643;
+        const int SpellExile = 39533;
 
         public npc_guard_shattrath_faction(Creature creature) : base(creature)
         {

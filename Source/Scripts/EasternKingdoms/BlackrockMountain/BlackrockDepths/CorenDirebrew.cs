@@ -78,11 +78,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         public const int MaxAntagonists = 3;
 
         public static Position[] AntagonistPos =
-        {
+        [
             new Position(895.3782f, -132.1722f, -49.66423f, 2.6529f),
             new Position(893.9837f, -133.2879f, -49.66541f, 2.583087f),
             new Position(896.2667f, -130.483f,  -49.66249f, 2.600541f)
-        };
+        ];
     }
 
     [Script]

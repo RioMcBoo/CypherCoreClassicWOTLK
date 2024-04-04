@@ -147,7 +147,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Broodlord
 
         public override void OnLootStateChanged(LootState state, Unit unit)
         {
-            switch ((LootState)state)
+            switch (state)
             {
                 case LootState.Activated:
                     Deactivate();

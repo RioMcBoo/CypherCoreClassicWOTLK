@@ -110,8 +110,8 @@ namespace Game.Movement
             // we don't have it in our old path
             // try to get it by findNearestPoly()
             // first try with low search box
-            float[] extents = { 3.0f, 5.0f, 3.0f };    // bounds of poly search area
-            float[] closestPoint = { 0.0f, 0.0f, 0.0f };
+            float[] extents = [3.0f, 5.0f, 3.0f];    // bounds of poly search area
+            float[] closestPoint = [0.0f, 0.0f, 0.0f];
             if (Detour.dtStatusSucceed(_navMeshQuery.findNearestPoly(point, extents, _filter, ref polyRef, ref closestPoint)) && polyRef != 0)
             {
                 distance = Detour.dtVdist(closestPoint, point);
@@ -138,8 +138,8 @@ namespace Game.Movement
 
             float distToStartPoly = 0;
             float distToEndPoly = 0;
-            float[] startPoint = { startPos.Y, startPos.Z, startPos.X };
-            float[] endPoint = { endPos.Y, endPos.Z, endPos.X };
+            float[] startPoint = [startPos.Y, startPos.Z, startPos.X];
+            float[] endPoint = [endPos.Y, endPos.Z, endPos.X];
 
             ulong startPoly = GetPolyByLocation(startPoint, ref distToStartPoly);
             ulong endPoly = GetPolyByLocation(endPoint, ref distToEndPoly);
@@ -1009,7 +1009,7 @@ namespace Game.Movement
         bool HaveTile(Vector3 p)
         {
             int tx = -1, ty = -1;
-            float[] point = { p.Y, p.Z, p.X };
+            float[] point = [p.Y, p.Z, p.X];
 
             _navMesh.calcTileLoc(point, ref tx, ref ty);
 

@@ -3023,7 +3023,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_spectator_cheer_trigger : SpellScript
     {
-        Emote[] EmoteArray = { Emote.OneshotCheer, Emote.OneshotExclamation, Emote.OneshotApplaud };
+        Emote[] EmoteArray = [Emote.OneshotCheer, Emote.OneshotExclamation, Emote.OneshotApplaud];
 
         void HandleDummy(int effIndex)
         {
@@ -3317,7 +3317,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_upper_deck_create_foam_sword : SpellScript
     {
-        int[] itemId = { 45061, 45176, 45177, 45178, 45179 };
+        int[] itemId = [45061, 45176, 45177, 45178, 45179];
 
         void HandleScript(int effIndex)
         {
@@ -4713,7 +4713,7 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellRictusOfTheLaughingSkull, SpellZealOfTheBurningBlade, SpellFerocityOfTheFrostwolf, SpellMightOfTheBlackrock);
         }
 
-        int[] AncestralCallBuffs = { SpellRictusOfTheLaughingSkull, SpellZealOfTheBurningBlade, SpellFerocityOfTheFrostwolf, SpellMightOfTheBlackrock };
+        int[] AncestralCallBuffs = [SpellRictusOfTheLaughingSkull, SpellZealOfTheBurningBlade, SpellFerocityOfTheFrostwolf, SpellMightOfTheBlackrock];
 
         void HandleOnCast()
         {

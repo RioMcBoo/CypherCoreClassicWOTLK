@@ -10,22 +10,22 @@ namespace Scripts.EasternKingdoms.AlteracValley.Drekthar
 {
     struct SpellIds
     {
-        public const uint Whirlwind = 15589;
-        public const uint Whirlwind2 = 13736;
-        public const uint Knockdown = 19128;
-        public const uint Frenzy = 8269;
-        public const uint SweepingStrikes = 18765; // not sure
-        public const uint Cleave = 20677; // not sure
-        public const uint Windfury = 35886; // not sure
-        public const uint Stormpike = 51876;  // not sure
+        public const int Whirlwind = 15589;
+        public const int Whirlwind2 = 13736;
+        public const int Knockdown = 19128;
+        public const int Frenzy = 8269;
+        public const int SweepingStrikes = 18765; // not sure
+        public const int Cleave = 20677; // not sure
+        public const int Windfury = 35886; // not sure
+        public const int Stormpike = 51876;  // not sure
     }
 
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SayEvade = 1;
-        public const uint SayRespawn = 2;
-        public const uint SayRandom = 3;
+        public const int SayAggro = 0;
+        public const int SayEvade = 1;
+        public const int SayRespawn = 2;
+        public const int SayRandom = 3;
     }
 
     [Script]

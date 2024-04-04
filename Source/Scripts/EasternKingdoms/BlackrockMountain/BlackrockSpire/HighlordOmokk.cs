@@ -10,8 +10,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.HighlordOmokk
 {
     struct SpellIds
     {
-        public const uint Frenzy = 8269;
-        public const uint KnockAway = 10101;
+        public const int Frenzy = 8269;
+        public const int KnockAway = 10101;
     }
 
     [Script]

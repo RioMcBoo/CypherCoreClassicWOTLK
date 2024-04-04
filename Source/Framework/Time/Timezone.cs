@@ -25,7 +25,7 @@ namespace Framework
         }
 
         static (TimeSpan, string)[] _clientSupportedTimezones =
-        {
+        [
             (TimeSpan.FromMinutes(-480), "America/Los_Angeles"),
             ( TimeSpan.FromMinutes(-420), "America/Denver" ),
             ( TimeSpan.FromMinutes(-360), "America/Chicago" ),
@@ -37,7 +37,7 @@ namespace Framework
             ( TimeSpan.FromMinutes(480), "Asia/Taipei" ),
             ( TimeSpan.FromMinutes(540), "Asia/Seoul" ),
             ( TimeSpan.FromMinutes(600), "Australia/Melbourne" ),
-        };
+        ];
 
         public static TimeSpan GetOffsetByHash(uint hash)
         {

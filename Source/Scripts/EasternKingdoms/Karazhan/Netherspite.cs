@@ -14,20 +14,20 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 {
     struct SpellIds
     {
-        public const uint NetherburnAura = 30522;
-        public const uint Voidzone = 37063;
-        public const uint NetherInfusion = 38688;
-        public const uint Netherbreath = 38523;
-        public const uint BanishVisual = 39833;
-        public const uint BanishRoot = 42716;
-        public const uint Empowerment = 38549;
-        public const uint NetherspiteRoar = 38684;
+        public const int NetherburnAura = 30522;
+        public const int Voidzone = 37063;
+        public const int NetherInfusion = 38688;
+        public const int Netherbreath = 38523;
+        public const int BanishVisual = 39833;
+        public const int BanishRoot = 42716;
+        public const int Empowerment = 38549;
+        public const int NetherspiteRoar = 38684;
     }
 
     struct TextIds
     {
-        public const uint EmotePhasePortal = 0;
-        public const uint EmotePhaseBanish = 1;
+        public const int EmotePhasePortal = 0;
+        public const int EmotePhaseBanish = 1;
     }
 
     enum Portals
@@ -40,18 +40,18 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
     struct MiscConst
     {
         public static Vector3[] PortalCoord =
-        {
+        [
             new Vector3(-11195.353516f, -1613.237183f, 278.237258f), // Left side
             new Vector3(-11137.846680f, -1685.607422f, 278.239258f), // Right side
             new Vector3(-11094.493164f, -1591.969238f, 279.949188f)  // Back side
-        };
+        ];
 
-        public static uint[] PortalID = { 17369, 17367, 17368 };
-        public static uint[] PortalVisual = { 30487, 30490, 30491 };
-        public static uint[] PortalBeam = { 30465, 30464, 30463 };
-        public static uint[] PlayerBuff = { 30421, 30422, 30423 };
-        public static uint[] NetherBuff = { 30466, 30467, 30468 };
-        public static uint[] PlayerDebuff = { 38637, 38638, 38639 };
+        public static int[] PortalID = [17369, 17367, 17368];
+        public static int[] PortalVisual = [30487, 30490, 30491];
+        public static int[] PortalBeam = [30465, 30464, 30463];
+        public static int[] PlayerBuff = [30421, 30422, 30423];
+        public static int[] NetherBuff = [30466, 30467, 30468];
+        public static int[] PlayerDebuff = [38637, 38638, 38639];
     }
 
     [Script]
@@ -125,12 +125,13 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 
         void SummonPortals()
         {
-            uint r = RandomHelper.Rand32() % 4;
-            int[] pos = new int[3];
-            pos[(int)Portals.Red] = ((r % 2) != 0 ? (r > 1 ? 2 : 1) : 0);
-            pos[(int)Portals.Green] = ((r % 2) != 0 ? 0 : (r > 1 ? 2 : 1));
-            pos[(int)Portals.Blue] = (r > 1 ? 1 : 2); // Blue Portal not on the left side (0)
-
+            int r = RandomHelper.Rand32() % 4;
+            int[] pos =
+            [
+                ((r % 2) != 0 ? (r > 1 ? 2 : 1) : 0),
+                ((r % 2) != 0 ? 0 : (r > 1 ? 2 : 1)),
+                (r > 1 ? 1 : 2), // Blue Portal not on the left side (0)
+            ];
             for (int i = 0; i < 3; ++i)
             {
                 Creature portal = me.SummonCreature(MiscConst.PortalID[i], MiscConst.PortalCoord[pos[i]].X, MiscConst.PortalCoord[pos[i]].Y, MiscConst.PortalCoord[pos[i]].Z, 0, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));

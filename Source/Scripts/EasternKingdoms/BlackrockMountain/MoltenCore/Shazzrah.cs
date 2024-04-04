@@ -13,22 +13,22 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
 {
     struct SpellIds
     {
-        public const uint ArcaneExplosion = 19712;
-        public const uint ShazzrahCurse = 19713;
-        public const uint MagicGrounding = 19714;
-        public const uint Counterspell = 19715;
-        public const uint ShazzrahGateDummy = 23138; // Teleports to and attacks a random target.
-        public const uint ShazzrahGate = 23139;
+        public const int ArcaneExplosion = 19712;
+        public const int ShazzrahCurse = 19713;
+        public const int MagicGrounding = 19714;
+        public const int Counterspell = 19715;
+        public const int ShazzrahGateDummy = 23138; // Teleports to and attacks a random target.
+        public const int ShazzrahGate = 23139;
     }
 
     struct EventIds
     {
-        public const uint ArcaneExplosion = 1;
-        public const uint ArcaneExplosionTriggered = 2;
-        public const uint ShazzrahCurse = 3;
-        public const uint MagicGrounding = 4;
-        public const uint Counterspell = 5;
-        public const uint ShazzrahGate = 6;
+        public const int ArcaneExplosion = 1;
+        public const int ArcaneExplosionTriggered = 2;
+        public const int ShazzrahCurse = 3;
+        public const int MagicGrounding = 4;
+        public const int Counterspell = 5;
+        public const int ShazzrahGate = 6;
     }
 
     [Script]
@@ -69,7 +69,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
                         DoCastVictim(SpellIds.ArcaneExplosion);
                         break;
                     case EventIds.ShazzrahCurse:
-                        Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -(int)SpellIds.ShazzrahCurse);
+                        Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -SpellIds.ShazzrahCurse);
                         if (target != null)
                             DoCast(target, SpellIds.ShazzrahCurse);
                         _events.ScheduleEvent(EventIds.ShazzrahCurse, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(30));
@@ -117,7 +117,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
             targets.Add(target);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
             if (target != null)

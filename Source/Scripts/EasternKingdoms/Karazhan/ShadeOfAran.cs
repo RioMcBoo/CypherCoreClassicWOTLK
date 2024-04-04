@@ -69,12 +69,12 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
     class boss_aran : ScriptedAI
     {
         static int[] AtieshStaves =
-        {
+        [
             22589, //ItemAtieshMage,
             22630, //ItemAtieshWarlock,
             22631, //ItemAtieshPriest,
             22632 //ItemAtieshDruid,
-        };
+        ];
 
         InstanceScript instance;
 

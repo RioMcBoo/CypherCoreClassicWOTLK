@@ -107,18 +107,18 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
         public const int NefariusPath3 = 11037376;
 
         public static Position[] DrakeSpawnLoc = // drakonid
-        {
+        [
             new Position(-7591.151855f, -1204.051880f, 476.800476f, 3.0f),
             new Position(-7514.598633f, -1150.448853f, 476.796570f, 3.0f)
-        };
+        ];
 
         public static Position[] NefarianLoc =
-        {
+        [
             new Position(-7449.763672f, -1387.816040f, 526.783691f, 3.0f), // nefarian spawn
             new Position(-7535.456543f, -1279.562500f, 476.798706f, 3.0f)  // nefarian move
-        };
+        ];
 
-        public static int[] Entry = { CreatureIds.BronzeDrakanoid, CreatureIds.BlueDrakanoid, CreatureIds.RedDrakanoid, CreatureIds.GreenDrakanoid, CreatureIds.BlackDrakanoid };
+        public static int[] Entry = [CreatureIds.BronzeDrakanoid, CreatureIds.BlueDrakanoid, CreatureIds.RedDrakanoid, CreatureIds.GreenDrakanoid, CreatureIds.BlackDrakanoid];
     }
 
     struct EventIds

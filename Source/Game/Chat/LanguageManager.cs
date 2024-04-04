@@ -236,12 +236,12 @@ namespace Game.Chat
         }
 
         static uint[] s_hashtable =
-        {
+        [
             0x486E26EE, 0xDCAA16B3, 0xE1918EEF, 0x202DAFDB,
             0x341C7DC7, 0x1C365303, 0x40EF2D37, 0x65FD5E49,
             0xD6057177, 0x904ECE93, 0x1C38024F, 0x98FD323B,
             0xE3061AE7, 0xA39B0FA1, 0x9797F25F, 0xE4444563,
-        };
+        ];
 
         uint SStrHash(string str, bool caseInsensitive, uint seed = 0x7FED7FED)
         {

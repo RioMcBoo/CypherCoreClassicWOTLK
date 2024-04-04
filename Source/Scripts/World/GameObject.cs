@@ -60,10 +60,10 @@ namespace Scripts.World.GameObjects
         const int SpellRepSpor = 39476;
 
         int[] NpcPrisonEntry =
-        {
+        [
             22810, 22811, 22812, 22813, 22814, 22815,               //good guys
             20783, 20784, 20785, 20786, 20788, 20789, 20790         //bad guys
-        };
+        ];
 
         public go_ethereum_prison(GameObject go) : base(go) { }
 
@@ -105,7 +105,7 @@ namespace Scripts.World.GameObjects
 
     class go_ethereum_stasis : GameObjectAI
     {
-        int[] NpcStasisEntry = { 22825, 20888, 22827, 22826, 22828 };
+        int[] NpcStasisEntry = [22825, 20888, 22827, 22826, 22828];
 
         public go_ethereum_stasis(GameObject go) : base(go) { }
 
@@ -330,11 +330,11 @@ namespace Scripts.World.GameObjects
         const int ActionCosmeticFires = 0;
 
         int[] RibbonPoleSpells =
-        {
+        [
             SpellTestRibbonPole1,
             SpellTestRibbonPole2,
             SpellTestRibbonPole3
-        };
+        ];
 
         public go_midsummer_ribbon_pole(GameObject go) : base(go) { }
 

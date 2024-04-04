@@ -10,9 +10,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Firemaw
 {
     struct SpellIds
     {
-        public const uint Shadowflame = 22539;
-        public const uint Wingbuffet = 23339;
-        public const uint Flamebuffet = 23341;
+        public const int Shadowflame = 22539;
+        public const int Wingbuffet = 23339;
+        public const int Flamebuffet = 23341;
     }
 
     [Script]

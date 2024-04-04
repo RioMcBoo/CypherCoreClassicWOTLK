@@ -10,12 +10,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.WarmasterVoon
 {
     struct SpellIds
     {
-        public const uint Snapkick = 15618;
-        public const uint Cleave = 15284;
-        public const uint Uppercut = 10966;
-        public const uint Mortalstrike = 16856;
-        public const uint Pummel = 15615;
-        public const uint Throwaxe = 16075;
+        public const int Snapkick = 15618;
+        public const int Cleave = 15284;
+        public const int Uppercut = 10966;
+        public const int Mortalstrike = 16856;
+        public const int Pummel = 15615;
+        public const int Throwaxe = 16075;
     }
 
     [Script]

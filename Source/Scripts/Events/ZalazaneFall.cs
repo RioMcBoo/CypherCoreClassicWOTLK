@@ -213,11 +213,11 @@ namespace Scripts.Events.ZalazaneFall
         // These models was found in sniff.
         // @todo generalize these models with race from dbc
         int[] trollmodel =
-        {
+        [
             11665, 11734, 11750, 12037, 12038, 12042, 12049, 12849, 13529, 14759, 15570, 15701,
             15702, 1882, 1897, 1976, 2025, 27286, 2734, 2735, 4084, 4085, 4087, 4089, 4231, 4357,
             4358, 4360, 4361, 4362, 4363, 4370, 4532, 4537, 4540, 4610, 6839, 7037, 9767, 9768
-        };
+        ];
 
         int _mountModel;
         bool _complete;

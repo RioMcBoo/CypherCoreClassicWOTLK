@@ -93,14 +93,14 @@ namespace Scripts.EasternKingdoms.Karazhan
     class instance_karazhan : InstanceMapScript
     {
         public static Position[] OptionalSpawn =
-        {
+        [
             new Position(-10960.981445f, -1940.138428f, 46.178097f, 4.12f), // Hyakiss the Lurker
             new Position(-10945.769531f, -2040.153320f, 49.474438f, 0.077f), // Shadikith the Glider
             new Position(-10899.903320f, -2085.573730f, 49.474449f, 1.38f)  // Rokad the Ravager
-        };
+        ];
 
         static DungeonEncounterData[] encounters =
-        {
+        [
             new DungeonEncounterData(DataTypes.Attumen, 652),
             new DungeonEncounterData(DataTypes.Moroes, 653),
             new DungeonEncounterData(DataTypes.MaidenOfVirtue, 654),
@@ -112,7 +112,7 @@ namespace Scripts.EasternKingdoms.Karazhan
             new DungeonEncounterData(DataTypes.Chess, 660),
             new DungeonEncounterData(DataTypes.Malchezzar, 661),
             new DungeonEncounterData(DataTypes.Nightbane, 662)
-        };
+        ];
 
         public instance_karazhan() : base(nameof(instance_karazhan), 532) { }
 

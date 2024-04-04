@@ -15,109 +15,109 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 {
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SayDeath = 10;
+        public const int SayAggro = 0;
+        public const int SayDeath = 10;
     }
 
     struct SpellIds
     {
-        public const uint DispelMagic = 27609;
-        public const uint FlashHeal = 17843;
-        public const uint SwPainNormal = 14032;
-        public const uint SwPainHeroic = 15654;
-        public const uint Shield = 44291;
-        public const uint RenewNormal = 44174;
-        public const uint RenewHeroic = 46192;
+        public const int DispelMagic = 27609;
+        public const int FlashHeal = 17843;
+        public const int SwPainNormal = 14032;
+        public const int SwPainHeroic = 15654;
+        public const int Shield = 44291;
+        public const int RenewNormal = 44174;
+        public const int RenewHeroic = 46192;
 
         // Apoko
-        public const uint WindfuryTotem = 27621;
-        public const uint WarStomp = 46026;
-        public const uint Purge = 27626;
-        public const uint LesserHealingWave = 44256;
-        public const uint FrostShock = 21401;
-        public const uint FireNovaTotem = 44257;
-        public const uint EarthbindTotem = 15786;
+        public const int WindfuryTotem = 27621;
+        public const int WarStomp = 46026;
+        public const int Purge = 27626;
+        public const int LesserHealingWave = 44256;
+        public const int FrostShock = 21401;
+        public const int FireNovaTotem = 44257;
+        public const int EarthbindTotem = 15786;
 
-        public const uint HealingPotion = 15503;
+        public const int HealingPotion = 15503;
 
         // RogueSpells
-        public const uint KidneyShot = 27615;
-        public const uint Gouge = 12540;
-        public const uint Kick = 27613;
-        public const uint Vanish = 44290;
-        public const uint Backstab = 15657;
-        public const uint Eviscerate = 27611;
+        public const int KidneyShot = 27615;
+        public const int Gouge = 12540;
+        public const int Kick = 27613;
+        public const int Vanish = 44290;
+        public const int Backstab = 15657;
+        public const int Eviscerate = 27611;
 
         // WarlockSpells
-        public const uint Immolate = 44267;
-        public const uint ShadowBolt = 12471;
-        public const uint SeedOfCorruption = 44141;
-        public const uint CurseOfAgony = 14875;
-        public const uint Fear = 38595;
-        public const uint ImpFireball = 44164;
-        public const uint SummonImp = 44163;
+        public const int Immolate = 44267;
+        public const int ShadowBolt = 12471;
+        public const int SeedOfCorruption = 44141;
+        public const int CurseOfAgony = 14875;
+        public const int Fear = 38595;
+        public const int ImpFireball = 44164;
+        public const int SummonImp = 44163;
 
         // KickDown
-        public const uint Knockdown = 11428;
-        public const uint SnapKick = 46182;
+        public const int Knockdown = 11428;
+        public const int SnapKick = 46182;
 
         // MageSpells
-        public const uint Polymorph = 13323;
-        public const uint IceBlock = 27619;
-        public const uint Blizzard = 44178;
-        public const uint IceLance = 46194;
-        public const uint ConeOfCold = 38384;
-        public const uint Frostbolt = 15043;
-        public const uint Blink = 14514;
+        public const int Polymorph = 13323;
+        public const int IceBlock = 27619;
+        public const int Blizzard = 44178;
+        public const int IceLance = 46194;
+        public const int ConeOfCold = 38384;
+        public const int Frostbolt = 15043;
+        public const int Blink = 14514;
 
         // WarriorSpells
-        public const uint InterceptStun = 27577;
-        public const uint Disarm = 27581;
-        public const uint PiercingHowl = 23600;
-        public const uint FrighteningShout = 19134;
-        public const uint Hamstring = 27584;
-        public const uint BattleShout = 27578;
-        public const uint MortalStrike = 44268;
+        public const int InterceptStun = 27577;
+        public const int Disarm = 27581;
+        public const int PiercingHowl = 23600;
+        public const int FrighteningShout = 19134;
+        public const int Hamstring = 27584;
+        public const int BattleShout = 27578;
+        public const int MortalStrike = 44268;
 
         // HunterSpells
-        public const uint AimedShot = 44271;
-        public const uint Shoot = 15620;
-        public const uint ConcussiveShot = 27634;
-        public const uint MultiShot = 31942;
-        public const uint WingClip = 44286;
-        public const uint FreezingTrap = 44136;
+        public const int AimedShot = 44271;
+        public const int Shoot = 15620;
+        public const int ConcussiveShot = 27634;
+        public const int MultiShot = 31942;
+        public const int WingClip = 44286;
+        public const int FreezingTrap = 44136;
 
         // EngineerSpells
-        public const uint GoblinDragonGun = 44272;
-        public const uint RocketLaunch = 44137;
-        public const uint Recombobulate = 44274;
-        public const uint HighExplosiveSheep = 44276;
-        public const uint FelIronBomb = 46024;
-        public const uint SheepExplosion = 44279;
+        public const int GoblinDragonGun = 44272;
+        public const int RocketLaunch = 44137;
+        public const int Recombobulate = 44274;
+        public const int HighExplosiveSheep = 44276;
+        public const int FelIronBomb = 46024;
+        public const int SheepExplosion = 44279;
     }
 
     struct CreatureIds
     {
-        public const uint Sliver = 24552;
+        public const int Sliver = 24552;
     }
 
     struct MiscConst
     {
-        public const uint MaxActiveLackey = 4;
+        public const int MaxActiveLackey = 4;
 
         public const float fOrientation = 4.98f;
         public const float fZLocation = -19.921f;
 
         public static float[][] LackeyLocations =
-        {
-            new float[] {123.77f, 17.6007f},
-            new float[] {131.731f, 15.0827f},
-            new float[] {121.563f, 15.6213f},
-            new float[] {129.988f, 17.2355f},
-        };
+        [
+            [123.77f, 17.6007f],
+            [131.731f, 15.0827f],
+            [121.563f, 15.6213f],
+            [129.988f, 17.2355f],
+        ];
 
-        public static uint[] m_auiAddEntries =
-        {
+        public static int[] m_auiAddEntries =
+        [
             24557,                                                  //Kagani Nightstrike
             24558,                                                  //Elris Duskhallow
             24554,                                                  //Eramas Brightblaze
@@ -126,17 +126,17 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             24555,                                                  //Garaxxas
             24553,                                                  //Apoko
             24556,                                                  //Zelfan
-        };
+        ];
 
-        public static uint[] LackeyDeath = { 1, 2, 3, 4, };
+        public static int[] LackeyDeath = [1, 2, 3, 4,];
 
-        public static uint[] PlayerDeath = { 5, 6, 7, 8, 9, };
+        public static int[] PlayerDeath = [5, 6, 7, 8, 9,];
     }
 
     [Script]
     class boss_priestess_delrissa : BossAI
     {
-        List<uint> LackeyEntryList = new();
+        List<int> LackeyEntryList = new();
         public ObjectGuid[] m_auiLackeyGUID = new ObjectGuid[MiscConst.MaxActiveLackey];
 
         byte PlayersKilled;
@@ -153,7 +153,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
             _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
             {
-                ulong health = me.GetHealth();
+                long health = me.GetHealth();
                 Unit target = me;
                 for (byte i = 0; i < m_auiLackeyGUID.Length; ++i)
                 {
@@ -408,7 +408,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         public override void JustDied(Unit killer)
         {
             Creature delrissa = instance.GetCreature(DataTypes.PriestessDelrissa);
-            uint uiLackeyDeathCount = instance.GetData(DataTypes.DelrissaDeathCount);
+            int uiLackeyDeathCount = instance.GetData(DataTypes.DelrissaDeathCount);
 
             if (delrissa == null)
                 return;
@@ -416,7 +416,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             //should delrissa really yell if dead?
             delrissa.GetAI().Talk(MiscConst.LackeyDeath[uiLackeyDeathCount]);
 
-            instance.SetData(DataTypes.DelrissaDeathCount, (uint)EncounterState.Special);
+            instance.SetData(DataTypes.DelrissaDeathCount, (int)EncounterState.Special);
 
             //increase local var, since we now may have four dead
             ++uiLackeyDeathCount;

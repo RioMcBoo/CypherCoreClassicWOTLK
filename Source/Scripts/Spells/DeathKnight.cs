@@ -161,14 +161,14 @@ namespace Scripts.Spells.DeathKnight
     class spell_dk_army_transform : SpellScript
     {
         int[] ArmyTransforms =
-        {
+        [
             SpellIds.ArmyFleshBeastTransform,
             SpellIds.ArmyGeistTransform,
             SpellIds. ArmyNorthrendSkeletonTransform,
             SpellIds.ArmySkeletonTransform,
             SpellIds.ArmySpikedGhoulTransform,
             SpellIds. ArmySuperZombieTransform,
-        };
+        ];
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -264,7 +264,7 @@ namespace Scripts.Spells.DeathKnight
                 return;
 
             int amount = damageInfo.GetDamage() / 2;
-            SpellNonMeleeDamage log = new(drw, drw.GetVictim(), spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw), 0), spellInfo.GetSchoolMask());
+            SpellNonMeleeDamage log = new(drw, drw.GetVictim(), spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw)), spellInfo.GetSchoolMask());
             log.damage = amount;
             Unit.DealDamage(drw, drw.GetVictim(), amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
             drw.SendSpellNonMeleeDamageLog(log);

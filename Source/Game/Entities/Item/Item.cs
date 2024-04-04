@@ -206,7 +206,7 @@ namespace Game.Entities
                     }
 
                     ItemModifier[] transmogMods =
-                    {
+                    [
                         ItemModifier.TransmogAppearanceAllSpecs,
                         ItemModifier.TransmogAppearanceSpec1,
                         ItemModifier.TransmogAppearanceSpec2,
@@ -227,7 +227,7 @@ namespace Game.Entities
                         ItemModifier.TransmogSecondaryAppearanceSpec3,
                         ItemModifier.TransmogSecondaryAppearanceSpec4,
                         ItemModifier.TransmogSecondaryAppearanceSpec5
-                    };
+                    ];
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
                     stmt.AddValue(0, GetGUID().GetCounter());
@@ -1323,7 +1323,7 @@ namespace Game.Entities
         }
 
         public static int[] ItemTransmogrificationSlots =
-        {
+        [
             -1,                                                     // INVTYPE_NON_EQUIP
             EquipmentSlot.Head,                                    // INVTYPE_HEAD
             -1,                                                    // INVTYPE_NECK
@@ -1359,7 +1359,7 @@ namespace Game.Entities
             -1,                                                     // INVTYPE_EQUIPABLE_SPELL_UTILITY
             -1,                                                     // INVTYPE_EQUIPABLE_SPELL_DEFENSIVE
             -1                                                      // INVTYPE_EQUIPABLE_SPELL_MOBILITY
-        };
+        ];
 
         public static bool CanTransmogrifyItemWithItem(Item item, ItemModifiedAppearanceRecord itemModifiedAppearance)
         {

@@ -139,29 +139,29 @@ namespace Game.Maps
                 short[] minHeights = reader.ReadArray<short>(3 * 3);
 
                 uint[][] indices =
-                {
-                    new uint[] { 3, 0, 4 },
-                    new uint[] { 0, 1, 4 },
-                    new uint[] { 1, 2, 4 },
-                    new uint[] { 2, 5, 4 },
-                    new uint[] { 5, 8, 4 },
-                    new uint[] { 8, 7, 4 },
-                    new uint[] { 7, 6, 4 },
-                    new uint[] { 6, 3, 4 }
-                };
+                [
+                    [3, 0, 4],
+                    [0, 1, 4],
+                    [1, 2, 4],
+                    [2, 5, 4],
+                    [5, 8, 4],
+                    [8, 7, 4],
+                    [7, 6, 4],
+                    [6, 3, 4]
+                ];
 
                 float[][] boundGridCoords =
-                {
-                    new [] { 0.0f, 0.0f },
-                    new [] { 0.0f, -266.66666f },
-                    new [] { 0.0f, -533.33331f },
-                    new [] { -266.66666f, 0.0f },
-                    new [] { -266.66666f, -266.66666f },
-                    new [] { -266.66666f, -533.33331f },
-                    new [] { -533.33331f, 0.0f },
-                    new [] { -533.33331f, -266.66666f },
-                    new [] { -533.33331f, -533.33331f }
-                };
+                [
+                    [0.0f, 0.0f],
+                    [0.0f, -266.66666f],
+                    [0.0f, -533.33331f],
+                    [-266.66666f, 0.0f],
+                    [-266.66666f, -266.66666f],
+                    [-266.66666f, -533.33331f],
+                    [-533.33331f, 0.0f],
+                    [-533.33331f, -266.66666f],
+                    [-533.33331f, -533.33331f]
+                ];
 
                 _minHeightPlanes = new Plane[8];
                 for (uint quarterIndex = 0; quarterIndex < 8; ++quarterIndex)

@@ -77,7 +77,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
         public const int DataEggEvent = 2;
 
         public static DoorData[] doorData =
-        {
+        [
             new DoorData(BWLGameObjectIds.PortcullisRazorgore, DataTypes.RazorgoreTheUntamed, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(BWLGameObjectIds.PortcullisVaelastrasz, DataTypes.VaelastrazTheCorrupt, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(BWLGameObjectIds.PortcullisBroodlord, DataTypes.BroodlordLashlayer, EncounterDoorBehavior.OpenWhenDone),
@@ -86,10 +86,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
             new DoorData(BWLGameObjectIds.PortcullisThreedragons, DataTypes.Flamegor, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(BWLGameObjectIds.PortcullisChromaggus, DataTypes.Chromaggus, EncounterDoorBehavior.OpenWhenDone),
             new DoorData(BWLGameObjectIds.PortcullisNefarian, DataTypes.Nefarian, EncounterDoorBehavior.OpenWhenNotInProgress),
-        };
+        ];
 
         public static ObjectData[] creatureData =
-        {
+        [
             new ObjectData(BWLCreatureIds.Razorgore, DataTypes.RazorgoreTheUntamed),
             new ObjectData(BWLCreatureIds.Vaelastraz, DataTypes.VaelastrazTheCorrupt),
             new ObjectData(BWLCreatureIds.Broodlord, DataTypes.BroodlordLashlayer),
@@ -99,15 +99,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
             new ObjectData(BWLCreatureIds.Chromaggus, DataTypes.Chromaggus),
             new ObjectData(BWLCreatureIds.Nefarian, DataTypes.Nefarian),
             new ObjectData(BWLCreatureIds.VictorNefarius, DataTypes.LordVictorNefarius),
-        };
+        ];
 
         public static ObjectData[] gameObjectData =
-        {
+        [
             new ObjectData(BWLGameObjectIds.ChromaggusDoor, DataTypes.GoChromaggusDoor),
-        };
+        ];
 
         public static Position[] SummonPosition =
-        {
+        [
             new Position(-7661.207520f, -1043.268188f, 407.199554f, 6.280452f),
             new Position(-7644.145020f, -1065.628052f, 407.204956f, 0.501492f),
             new Position(-7624.260742f, -1095.196899f, 407.205017f, 0.544694f),
@@ -116,16 +116,16 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
             new Position(-7547.319336f, -1040.971924f, 407.205078f, 3.789175f),
             new Position(-7568.547852f, -1013.112488f, 407.204926f, 3.773467f),
             new Position(-7584.175781f, -989.6691289f, 407.199585f, 4.527447f),
-        };
+        ];
 
-        public static int[] Entry = { 12422, 12458, 12416, 12420, 12459 };
+        public static int[] Entry = [12422, 12458, 12416, 12420, 12459];
     }
 
     [Script]
     class instance_blackwing_lair : InstanceMapScript
     {
         static DungeonEncounterData[] encounters =
-        {
+        [
             new DungeonEncounterData(DataTypes.RazorgoreTheUntamed, 610),
             new DungeonEncounterData(DataTypes.VaelastrazTheCorrupt, 611),
             new DungeonEncounterData(DataTypes.BroodlordLashlayer, 612),
@@ -134,7 +134,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
             new DungeonEncounterData(DataTypes.Flamegor, 615),
             new DungeonEncounterData(DataTypes.Chromaggus, 616),
             new DungeonEncounterData(DataTypes.Nefarian, 617)
-        };
+        ];
 
         public instance_blackwing_lair() : base(nameof(instance_blackwing_lair), 469) { }
 

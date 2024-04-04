@@ -379,8 +379,8 @@ namespace Framework.IO
 			}
 		}
 
-		static readonly config[] configuration_table=new config[] 
-		{ // good lazy nice chain
+		static readonly config[] configuration_table=
+        [ // good lazy nice chain
 			new config( 0,   0,   0,    0, deflate_stored),	// store only
 			new config( 4,   4,   8,    4, deflate_fast),	// max speed, no lazy matches
 			new config( 4,   5,  16,    8, deflate_fast),
@@ -391,7 +391,7 @@ namespace Framework.IO
 			new config( 8,  32, 128,  256, deflate_slow),
 			new config(32, 128, 258, 1024, deflate_slow),
 			new config(32, 258, 258, 4096, deflate_slow)	// max compression
-		};
+		];
 
 		// Note: the deflate() code requires max_lazy >= MIN_MATCH and max_chain >= 4
 		// For deflate_fast() (levels <= 3) good is ignored and lazy has a different

@@ -9,7 +9,7 @@ namespace Framework.Cryptography.Ed25519
         private readonly byte[] _buffer;
         private ulong _totalBytes;
         public const int BlockSize = 128;
-        private static readonly byte[] _padding = new byte[] { 0x80 };
+        private static readonly byte[] _padding = [0x80];
 
         /// <summary>
         /// Allocation and initialization of the new SHA-512 object.

@@ -12,36 +12,36 @@ namespace Scripts.Spells.Hunter
 {
     struct SpellIds
     {
-        public const uint AMurderOfCrowsDamage = 131900;
-        public const uint AMurderOfCrowsVisual1 = 131637;
-        public const uint AMurderOfCrowsVisual2 = 131951;
-        public const uint AMurderOfCrowsVisual3 = 131952;
-        public const uint AspectCheetahSlow = 186258;
-        public const uint Exhilaration = 109304;
-        public const uint ExhilarationPet = 128594;
-        public const uint ExhilarationR2 = 231546;
-        public const uint ExplosiveShotDamage = 212680;
-        public const uint LatentPoisonStack = 378015;
-        public const uint LatentPoisonDamage = 378016;
-        public const uint LatentPoisonInjectorsStack = 336903;
-        public const uint LatentPoisonInjectorsDamage = 336904;
-        public const uint LoneWolf = 155228;
-        public const uint MastersCallTriggered = 62305;
-        public const uint Misdirection = 34477;
-        public const uint MisdirectionProc = 35079;
-        public const uint MultiShotFocus = 213363;
-        public const uint PetLastStandTriggered = 53479;
-        public const uint PetHeartOfThePhoenixTriggered = 54114;
-        public const uint PetHeartOfThePhoenixDebuff = 55711;
-        public const uint PosthasteIncreaseSpeed = 118922;
-        public const uint PosthasteTalent = 109215;
-        public const uint RapidFireDamage = 257045;
-        public const uint RapidFireEnergize = 263585;
-        public const uint SteadyShotFocus = 77443;
-        public const uint T94PGreatness = 68130;
-        public const uint T292PMarksmanshipDamage = 394371;
-        public const uint RoarOfSacrificeTriggered = 67481;
-        public const uint DraeneiGiftOfTheNaaru = 59543;
+        public const int AMurderOfCrowsDamage = 131900;
+        public const int AMurderOfCrowsVisual1 = 131637;
+        public const int AMurderOfCrowsVisual2 = 131951;
+        public const int AMurderOfCrowsVisual3 = 131952;
+        public const int AspectCheetahSlow = 186258;
+        public const int Exhilaration = 109304;
+        public const int ExhilarationPet = 128594;
+        public const int ExhilarationR2 = 231546;
+        public const int ExplosiveShotDamage = 212680;
+        public const int LatentPoisonStack = 378015;
+        public const int LatentPoisonDamage = 378016;
+        public const int LatentPoisonInjectorsStack = 336903;
+        public const int LatentPoisonInjectorsDamage = 336904;
+        public const int LoneWolf = 155228;
+        public const int MastersCallTriggered = 62305;
+        public const int Misdirection = 34477;
+        public const int MisdirectionProc = 35079;
+        public const int MultiShotFocus = 213363;
+        public const int PetLastStandTriggered = 53479;
+        public const int PetHeartOfThePhoenixTriggered = 54114;
+        public const int PetHeartOfThePhoenixDebuff = 55711;
+        public const int PosthasteIncreaseSpeed = 118922;
+        public const int PosthasteTalent = 109215;
+        public const int RapidFireDamage = 257045;
+        public const int RapidFireEnergize = 263585;
+        public const int SteadyShotFocus = 77443;
+        public const int T94PGreatness = 68130;
+        public const int T292PMarksmanshipDamage = 394371;
+        public const int RoarOfSacrificeTriggered = 67481;
+        public const int DraeneiGiftOfTheNaaru = 59543;
     }
 
     [Script] // 131894 - A Murder of Crows
@@ -192,7 +192,7 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.PetLastStandTriggered);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
@@ -304,7 +304,7 @@ namespace Scripts.Spells.Hunter
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellEffect((spellInfo.Id, 0))
-            && ValidateSpellInfo(SpellIds.MastersCallTriggered, (uint)spellInfo.GetEffect(0).CalcValue());
+            && ValidateSpellInfo(SpellIds.MastersCallTriggered, spellInfo.GetEffect(0).CalcValue());
         }
 
         public override bool Load()
@@ -345,12 +345,12 @@ namespace Scripts.Spells.Hunter
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
-            GetCaster().ToPlayer().GetPet().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
+            GetCaster().ToPlayer().GetPet().CastSpell(GetHitUnit(), GetEffectValue(), true);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             GetHitUnit().CastSpell(null, SpellIds.MastersCallTriggered, true);
         }
@@ -449,7 +449,7 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.PetHeartOfThePhoenixTriggered, SpellIds.PetHeartOfThePhoenixDebuff);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit caster = GetCaster();
             Unit owner = caster.GetOwner();
@@ -523,7 +523,7 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.RapidFireEnergize);
         }
 
-        void HandleHit(uint effIndex)
+        void HandleHit(int effIndex)
         {
             GetCaster().CastSpell(null, SpellIds.RapidFireEnergize, true);
         }
@@ -578,7 +578,7 @@ namespace Scripts.Spells.Hunter
             return GetCaster().IsPlayer();
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Player caster = GetCaster().ToPlayer();
             // break var Shot and autohit
@@ -620,7 +620,7 @@ namespace Scripts.Spells.Hunter
     [Script] // 1515 - Tame Beast
     class spell_hun_tame_beast : SpellScript
     {
-        uint[] CallPetSpellIds = { 883, 83242, 83243, 83244, 83245, };
+        int[] CallPetSpellIds = [883, 83242, 83243, 83244, 83245,];
 
         SpellCastResult CheckCast()
         {
@@ -727,12 +727,12 @@ namespace Scripts.Spells.Hunter
             PreventDefaultAction();
 
             Unit caster = eventInfo.GetActor();
-            uint ticks = SpellMgr.GetSpellInfo(SpellIds.T292PMarksmanshipDamage, Difficulty.None).GetMaxTicks();
-            uint damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
+            int ticks = SpellMgr.GetSpellInfo(SpellIds.T292PMarksmanshipDamage, Difficulty.None).GetMaxTicks();
+            int damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
 
             caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.T292PMarksmanshipDamage, new CastSpellExtraArgs(aurEff)
                 .SetTriggeringSpell(eventInfo.GetProcSpell())
-                .AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
+                .AddSpellMod(SpellValueMod.BasePoint0, damage));
         }
 
         public override void Register()

@@ -334,7 +334,7 @@ public static partial class Detour
         {
             int vaStart = j * 3;
             int vbStart = i * 3;
-            float[] n = new float[] { polya[vbStart + 2] - polya[vaStart + 2], 0, -(polya[vbStart + 0] - polya[vaStart + 0]) };
+            float[] n = [polya[vbStart + 2] - polya[vaStart + 2], 0, -(polya[vbStart + 0] - polya[vaStart + 0])];
             float amin = 0.0f, amax = 0.0f, bmin = 0.0f, bmax = 0.0f;
             projectPoly(n, polya, npolya, ref amin, ref amax);
             projectPoly(n, polyb, npolyb, ref bmin, ref bmax);
@@ -348,7 +348,7 @@ public static partial class Detour
         {
             int vaStart = j * 3;
             int vbStart = i * 3;
-            float[] n = new float[] { polyb[vbStart + 2] - polyb[vaStart + 2], 0, -(polyb[vbStart + 0] - polyb[vaStart + 0]) };
+            float[] n = [polyb[vbStart + 2] - polyb[vaStart + 2], 0, -(polyb[vbStart + 0] - polyb[vaStart + 0])];
             float amin = 0.0f, amax = 0.0f, bmin = 0.0f, bmax = 0.0f;
             projectPoly(n, polya, npolya, ref amin, ref amax);
             projectPoly(n, polyb, npolyb, ref bmin, ref bmax);

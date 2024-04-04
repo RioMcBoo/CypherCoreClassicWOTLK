@@ -52,17 +52,17 @@ namespace Framework.IO
 		private const int REPZ_11_138=18;
 
 		// extra bits for each length code
-		private static readonly int[] extra_lbits=new int[LENGTH_CODES] { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0 };
+		private static readonly int[] extra_lbits=[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0];
 
 		// extra bits for each distance code
-		private static readonly int[] extra_dbits=new int[D_CODES] { 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13 };
+		private static readonly int[] extra_dbits=[0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13];
 
 		// extra bits for each bit length code
-		private static readonly int[] extra_blbits=new int[BL_CODES] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7 };
+		private static readonly int[] extra_blbits=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7];
 
 		// The lengths of the bit length codes are sent in order of decreasing
 		// probability, to avoid transmitting the lengths for unused bit length codes.
-		private static readonly byte[] bl_order=new byte[BL_CODES] { 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 };
+		private static readonly byte[] bl_order=[16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
 
 		// Number of bits used within bi_buf. (bi_buf might be implemented on
 		// more than 16 bits on some systems.)
@@ -75,9 +75,9 @@ namespace Framework.IO
 		private const int DIST_CODE_LEN=512;
 
 		#region Tables
-		private static readonly ct_data[] static_ltree=new ct_data[L_CODES+2]
-		{
-			new ct_data( 12, 8), new ct_data(140, 8), new ct_data( 76, 8), new ct_data(204, 8),
+		private static readonly ct_data[] static_ltree=
+        [
+            new ct_data( 12, 8), new ct_data(140, 8), new ct_data( 76, 8), new ct_data(204, 8),
 			new ct_data( 44, 8), new ct_data(172, 8), new ct_data(108, 8), new ct_data(236, 8), 
 			new ct_data( 28, 8), new ct_data(156, 8), new ct_data( 92, 8), new ct_data(220, 8),
 			new ct_data( 60, 8), new ct_data(188, 8), new ct_data(124, 8), new ct_data(252, 8),
@@ -149,21 +149,21 @@ namespace Framework.IO
 			new ct_data( 20, 7), new ct_data( 84, 7), new ct_data( 52, 7), new ct_data(116, 7),
 			new ct_data(  3, 8), new ct_data(131, 8), new ct_data( 67, 8), new ct_data(195, 8),
 			new ct_data( 35, 8), new ct_data(163, 8), new ct_data( 99, 8), new ct_data(227, 8)
-		};
+		];
 
-		private static readonly ct_data[] static_dtree=new ct_data[D_CODES]
-		{
-			new ct_data( 0, 5), new ct_data(16, 5), new ct_data( 8, 5), new ct_data(24, 5), new ct_data( 4, 5),
+		private static readonly ct_data[] static_dtree=
+        [
+            new ct_data( 0, 5), new ct_data(16, 5), new ct_data( 8, 5), new ct_data(24, 5), new ct_data( 4, 5),
 			new ct_data(20, 5), new ct_data(12, 5), new ct_data(28, 5), new ct_data( 2, 5), new ct_data(18, 5),
 			new ct_data(10, 5), new ct_data(26, 5), new ct_data( 6, 5), new ct_data(22, 5), new ct_data(14, 5),
 			new ct_data(30, 5), new ct_data( 1, 5), new ct_data(17, 5), new ct_data( 9, 5), new ct_data(25, 5),
 			new ct_data( 5, 5), new ct_data(21, 5), new ct_data(13, 5), new ct_data(29, 5), new ct_data( 3, 5),
 			new ct_data(19, 5), new ct_data(11, 5), new ct_data(27, 5), new ct_data( 7, 5), new ct_data(23, 5)
-		};
+		];
 
-		private static readonly byte[] _dist_code=new byte[DIST_CODE_LEN]
-		{
-			 0,  1,  2,  3,  4,  4,  5,  5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  8,
+		private static readonly byte[] _dist_code=
+        [
+             0,  1,  2,  3,  4,  4,  5,  5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  8,
 			 8,  8,  8,  8,  9,  9,  9,  9,  9,  9,  9,  9, 10, 10, 10, 10, 10, 10, 10, 10,
 			10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
 			11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
@@ -189,11 +189,11 @@ namespace Framework.IO
 			29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29,
 			29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29,
 			29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29
-		};
+		];
 
-		private static readonly byte[] _length_code=new byte[MAX_MATCH-MIN_MATCH+1]
-		{
-			 0,  1,  2,  3,  4,  5,  6,  7,  8,  8,  9,  9, 10, 10, 11, 11, 12, 12, 12, 12,
+		private static readonly byte[] _length_code=
+        [
+             0,  1,  2,  3,  4,  5,  6,  7,  8,  8,  9,  9, 10, 10, 11, 11, 12, 12, 12, 12,
 			13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 16, 16, 16, 16,
 			17, 17, 17, 17, 17, 17, 17, 17, 18, 18, 18, 18, 18, 18, 18, 18, 19, 19, 19, 19,
 			19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
@@ -206,20 +206,20 @@ namespace Framework.IO
 			26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
 			26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
 			27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28
-		};
+		];
 
-		private static readonly int[] base_length=new int[LENGTH_CODES]
-		{
-			0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40, 48, 56,
+		private static readonly int[] base_length=
+        [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40, 48, 56,
 			64, 80, 96, 112, 128, 160, 192, 224, 0
-		};
+		];
 
-		private static readonly int[] base_dist=new int[D_CODES]
-		{
-			   0,     1,     2,     3,     4,     6,     8,    12,    16,    24,
+		private static readonly int[] base_dist=
+        [
+               0,     1,     2,     3,     4,     6,     8,    12,    16,    24,
 			  32,    48,    64,    96,   128,   192,   256,   384,   512,   768,
 			1024,  1536,  2048,  3072,  4096,  6144,  8192, 12288, 16384, 24576
-		};
+		];
 		#endregion
 
 		class static_tree_desc

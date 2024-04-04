@@ -15,7 +15,7 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_coilfang_waterfall : AreaTriggerScript
     {
-        const uint GoCoilfangWaterfall = 184212;
+        const int GoCoilfangWaterfall = 184212;
 
         public AreaTrigger_at_coilfang_waterfall() : base("at_coilfang_waterfall") { }
 
@@ -33,11 +33,11 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_legion_teleporter : AreaTriggerScript
     {
-        const uint SpellTeleATo = 37387;
-        const uint QuestGainingAccessA = 10589;
+        const int SpellTeleATo = 37387;
+        const int QuestGainingAccessA = 10589;
 
-        const uint SpellTeleHTo = 37389;
-        const uint QuestGainingAccessH = 10604;
+        const int SpellTeleHTo = 37389;
+        const int QuestGainingAccessH = 10604;
 
         public AreaTrigger_at_legion_teleporter() : base("at_legion_teleporter") { }
 
@@ -66,8 +66,8 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_scent_larkorwi : AreaTriggerScript
     {
-        const uint QuestScentOfLarkorwi = 4291;
-        const uint NpcLarkorwiMate = 9683;
+        const int QuestScentOfLarkorwi = 4291;
+        const int NpcLarkorwiMate = 9683;
 
         public AreaTrigger_at_scent_larkorwi() : base("at_scent_larkorwi") { }
 
@@ -86,15 +86,15 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_sholazar_waygate : AreaTriggerScript
     {
-        const uint SpellSholazarToUngoroTeleport = 52056;
-        const uint SpellUngoroToSholazarTeleport = 52057;
+        const int SpellSholazarToUngoroTeleport = 52056;
+        const int SpellUngoroToSholazarTeleport = 52057;
 
-        const uint AtSholazar = 5046;
-        const uint AtUngoro = 5047;
+        const int AtSholazar = 5046;
+        const int AtUngoro = 5047;
 
-        const uint QuestTheMakersOverlook = 12613;
-        const uint QuestTheMakersPerch = 12559;
-        const uint QuestMeetingAGreatOne = 13956;
+        const int QuestTheMakersOverlook = 12613;
+        const int QuestTheMakersPerch = 12559;
+        const int QuestMeetingAGreatOne = 13956;
 
         public AreaTrigger_at_sholazar_waygate() : base("at_sholazar_waygate") { }
 
@@ -122,9 +122,9 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_nats_landing : AreaTriggerScript
     {
-        const uint QuestNatsBargain = 11209;
-        const uint SpellFishPaste = 42644;
-        const uint NpcLurkingShark = 23928;
+        const int QuestNatsBargain = 11209;
+        const int SpellFishPaste = 42644;
+        const int NpcLurkingShark = 23928;
 
         public AreaTrigger_at_nats_landing() : base("at_nats_landing") { }
 
@@ -151,17 +151,17 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_brewfest : AreaTriggerScript
     {
-        const uint NpcTapperSwindlekeg = 24711;
-        const uint NpcIpfelkoferIronkeg = 24710;
+        const int NpcTapperSwindlekeg = 24711;
+        const int NpcIpfelkoferIronkeg = 24710;
 
-        const uint AtBrewfestDurotar = 4829;
-        const uint AtBrewfestDunMorogh = 4820;
+        const int AtBrewfestDurotar = 4829;
+        const int AtBrewfestDunMorogh = 4820;
 
-        const uint SayWelcome = 4;
+        const int SayWelcome = 4;
 
-        const uint AreatriggerTalkCooldown = 5; // in seconds
+        const int AreatriggerTalkCooldown = 5; // in seconds
 
-        Dictionary<uint, long> _triggerTimes = new();
+        Dictionary<int, long> _triggerTimes = new();
 
         public AreaTrigger_at_brewfest() : base("at_brewfest")
         {
@@ -171,7 +171,7 @@ namespace Scripts.World.Areatriggers
 
         public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
-            uint triggerId = trigger.Id;
+            int triggerId = trigger.Id;
             // Second trigger happened too early after first, skip for now
             if (GameTime.GetGameTime() - _triggerTimes[triggerId] < AreatriggerTalkCooldown)
                 return false;
@@ -200,16 +200,16 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_area_52_entrance : AreaTriggerScript
     {
-        const uint SpellA52Neuralyzer = 34400;
-        const uint NpcSpotlight = 19913;
-        const uint SummonCooldown = 5;
+        const int SpellA52Neuralyzer = 34400;
+        const int NpcSpotlight = 19913;
+        const int SummonCooldown = 5;
 
-        const uint AtArea52South = 4472;
-        const uint AtArea52North = 4466;
-        const uint AtArea52West = 4471;
-        const uint AtArea52East = 4422;
+        const int AtArea52South = 4472;
+        const int AtArea52North = 4466;
+        const int AtArea52West = 4471;
+        const int AtArea52East = 4422;
 
-        Dictionary<uint, long> _triggerTimes = new();
+        Dictionary<int, long> _triggerTimes = new();
 
         public AreaTrigger_at_area_52_entrance() : base("at_area_52_entrance")
         {
@@ -223,7 +223,7 @@ namespace Scripts.World.Areatriggers
             if (!player.IsAlive())
                 return false;
 
-            uint triggerId = trigger.Id;
+            int triggerId = trigger.Id;
             if (GameTime.GetGameTime() - _triggerTimes[triggerId] < SummonCooldown)
                 return false;
 
@@ -260,10 +260,10 @@ namespace Scripts.World.Areatriggers
 
     class AreaTrigger_at_frostgrips_hollow : AreaTriggerScript
     {
-        const uint QuestTheLonesomeWatcher = 12877;
+        const int QuestTheLonesomeWatcher = 12877;
 
-        const uint NpcStormforgedMonitor = 29862;
-        const uint NpcStormforgedEradictor = 29861;
+        const int NpcStormforgedMonitor = 29862;
+        const int NpcStormforgedEradictor = 29861;
 
         Position stormforgedMonitorPosition = new(6963.95f, 45.65f, 818.71f, 4.948f);
         Position stormforgedEradictorPosition = new(6983.18f, 7.15f, 806.33f, 2.228f);
@@ -313,8 +313,8 @@ namespace Scripts.World.Areatriggers
 
     class areatrigger_stormwind_teleport_unit : AreaTriggerAI
     {
-        const uint SpellDustInTheStormwind = 312593;
-        const uint NpcKillCreditTeleportStormwind = 160561;
+        const int SpellDustInTheStormwind = 312593;
+        const int NpcKillCreditTeleportStormwind = 160561;
 
         public areatrigger_stormwind_teleport_unit(AreaTrigger areatrigger) : base(areatrigger) { }
 

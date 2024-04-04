@@ -91,6 +91,6 @@ namespace Game.Networking.Packets
 
         public uint TimeToTarget;
         public uint ElapsedTimeForMovement;
-        public Vector3[] Points = new Vector3[0];
+        public Vector3[] Points = [];
     }
 }

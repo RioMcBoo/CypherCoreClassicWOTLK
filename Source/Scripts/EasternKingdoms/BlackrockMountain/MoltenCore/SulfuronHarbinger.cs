@@ -13,16 +13,16 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Sulfuron
     struct SpellIds
     {
         // Sulfuron Harbringer
-        public const uint DarkStrike = 19777;
-        public const uint DemoralizingShout = 19778;
-        public const uint Inspire = 19779;
-        public const uint Knockdown = 19780;
-        public const uint Flamespear = 19781;
+        public const int DarkStrike = 19777;
+        public const int DemoralizingShout = 19778;
+        public const int Inspire = 19779;
+        public const int Knockdown = 19780;
+        public const int Flamespear = 19781;
 
         // Adds
-        public const uint Heal = 19775;
-        public const uint Shadowwordpain = 19776;
-        public const uint Immolate = 20294;
+        public const int Heal = 19775;
+        public const int Shadowwordpain = 19776;
+        public const int Immolate = 20294;
     }
 
     [Script]
@@ -106,14 +106,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Sulfuron
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
             {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -(int)SpellIds.Shadowwordpain);
+                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -SpellIds.Shadowwordpain);
                 if (target != null)
                     DoCast(target, SpellIds.Shadowwordpain);
                 task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(26));
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
             {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -(int)SpellIds.Immolate);
+                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -SpellIds.Immolate);
                 if (target != null)
                     DoCast(target, SpellIds.Immolate);
                 task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));

@@ -27,9 +27,9 @@ namespace Framework.Constants
         public const int EventLogMaxRecords = 100;
         public const int NewsLogMaxRecords = 250;
 
-        public static int[] ChallengeGoldReward = { 0, 250, 1000, 500, 250, 500 };
-        public static int[] ChallengeMaxLevelGoldReward = { 0, 125, 500, 250, 125, 250 };
-        public static int[] ChallengesMaxCount = { 0, 7, 1, 3, 0, 3 };
+        public static int[] ChallengeGoldReward = [0, 250, 1000, 500, 250, 500];
+        public static int[] ChallengeMaxLevelGoldReward = [0, 125, 500, 250, 125, 250];
+        public static int[] ChallengesMaxCount = [0, 7, 1, 3, 0, 3];
 
         public static int MinNewsItemLevel = 353;
 

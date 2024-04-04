@@ -15,49 +15,49 @@ namespace Scripts.Spells.Warrior
 {
     struct SpellIds
     {
-        public const uint BladestormPeriodicWhirlwind = 50622;
-        public const uint BloodthirstHeal = 117313;
-        public const uint Charge = 34846;
-        public const uint ChargeEffect = 218104;
-        public const uint ChargeEffectBlazingTrail = 198337;
-        public const uint ChargePauseRageDecay = 109128;
-        public const uint ChargeRootEffect = 105771;
-        public const uint ChargeSlowEffect = 236027;
-        public const uint ColossusSmash = 167105;
-        public const uint ColossusSmashAura = 208086;
-        public const uint CriticalThinkingEnergize = 392776;
-        public const uint Execute = 20647;
-        public const uint FueledByViolenceHeal = 383104;
-        public const uint GlyphOfTheBlazingTrail = 123779;
-        public const uint GlyphOfHeroicLeap = 159708;
-        public const uint GlyphOfHeroicLeapBuff = 133278;
-        public const uint HeroicLeapJump = 178368;
-        public const uint IgnorePain = 190456;
-        public const uint InForTheKill = 248621;
-        public const uint InForTheKillHaste = 248622;
-        public const uint ImpendingVictory = 202168;
-        public const uint ImpendingVictoryHeal = 202166;
-        public const uint ImprovedHeroicLeap = 157449;
-        public const uint MortalStrike = 12294;
-        public const uint MortalWounds = 213667;
-        public const uint RallyingCry = 97463;
-        public const uint ShieldBlockAura = 132404;
-        public const uint ShieldChargeEffect = 385953;
-        public const uint ShieldSlam = 23922;
-        public const uint ShieldSlamMarker = 224324;
-        public const uint Shockwave = 46968;
-        public const uint ShockwaveStun = 132168;
-        public const uint Stoicism = 70845;
-        public const uint StormBoltStun = 132169;
-        public const uint Strategist = 384041;
-        public const uint SweepingStrikesExtraAttack1 = 12723;
-        public const uint SweepingStrikesExtraAttack2 = 26654;
-        public const uint Taunt = 355;
-        public const uint TraumaEffect = 215537;
-        public const uint Victorious = 32216;
-        public const uint VictoryRushHeal = 118779;
+        public const int BladestormPeriodicWhirlwind = 50622;
+        public const int BloodthirstHeal = 117313;
+        public const int Charge = 34846;
+        public const int ChargeEffect = 218104;
+        public const int ChargeEffectBlazingTrail = 198337;
+        public const int ChargePauseRageDecay = 109128;
+        public const int ChargeRootEffect = 105771;
+        public const int ChargeSlowEffect = 236027;
+        public const int ColossusSmash = 167105;
+        public const int ColossusSmashAura = 208086;
+        public const int CriticalThinkingEnergize = 392776;
+        public const int Execute = 20647;
+        public const int FueledByViolenceHeal = 383104;
+        public const int GlyphOfTheBlazingTrail = 123779;
+        public const int GlyphOfHeroicLeap = 159708;
+        public const int GlyphOfHeroicLeapBuff = 133278;
+        public const int HeroicLeapJump = 178368;
+        public const int IgnorePain = 190456;
+        public const int InForTheKill = 248621;
+        public const int InForTheKillHaste = 248622;
+        public const int ImpendingVictory = 202168;
+        public const int ImpendingVictoryHeal = 202166;
+        public const int ImprovedHeroicLeap = 157449;
+        public const int MortalStrike = 12294;
+        public const int MortalWounds = 213667;
+        public const int RallyingCry = 97463;
+        public const int ShieldBlockAura = 132404;
+        public const int ShieldChargeEffect = 385953;
+        public const int ShieldSlam = 23922;
+        public const int ShieldSlamMarker = 224324;
+        public const int Shockwave = 46968;
+        public const int ShockwaveStun = 132168;
+        public const int Stoicism = 70845;
+        public const int StormBoltStun = 132169;
+        public const int Strategist = 384041;
+        public const int SweepingStrikesExtraAttack1 = 12723;
+        public const int SweepingStrikesExtraAttack2 = 26654;
+        public const int Taunt = 355;
+        public const int TraumaEffect = 215537;
+        public const int Victorious = 32216;
+        public const int VictoryRushHeal = 118779;
 
-        public const uint VisualBlazingCharge = 26423;
+        public const int VisualBlazingCharge = 26423;
     }
 
     [Script] // 23881 - Bloodthirst
@@ -68,7 +68,7 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.BloodthirstHeal);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.BloodthirstHeal, true);
         }
@@ -82,7 +82,7 @@ namespace Scripts.Spells.Warrior
     [Script] // 384036 - Brutal Vitality
     class spell_warr_brutal_vitality : AuraScript
     {
-        uint _damageAmount;
+        int _damageAmount;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -101,7 +101,7 @@ namespace Scripts.Spells.Warrior
 
             AuraEffect ignorePainAura = GetTarget().GetAuraEffect(SpellIds.IgnorePain, 0);
             if (ignorePainAura != null)
-                ignorePainAura.ChangeAmount((int)(ignorePainAura.GetAmount() + _damageAmount));
+                ignorePainAura.ChangeAmount(ignorePainAura.GetAmount() + _damageAmount);
 
             _damageAmount = 0;
         }
@@ -121,9 +121,9 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.ChargeEffect, SpellIds.ChargeEffectBlazingTrail);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
-            uint spellId = SpellIds.ChargeEffect;
+            int spellId = SpellIds.ChargeEffect;
             if (GetCaster().HasAura(SpellIds.GlyphOfTheBlazingTrail))
                 spellId = SpellIds.ChargeEffectBlazingTrail;
 
@@ -168,7 +168,7 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.ChargePauseRageDecay, SpellIds.ChargeRootEffect, SpellIds.ChargeSlowEffect);
         }
 
-        void HandleCharge(uint effIndex)
+        void HandleCharge(int effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
@@ -285,7 +285,7 @@ namespace Scripts.Spells.Warrior
     [Script] // 383103  - Fueled by Violence
     class spell_warr_fueled_by_violence : AuraScript
     {
-        uint _nextHealAmount = 0;
+        int _nextHealAmount = 0;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -306,7 +306,7 @@ namespace Scripts.Spells.Warrior
 
             Unit target = GetTarget();
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)_nextHealAmount);
+            args.AddSpellMod(SpellValueMod.BasePoint0, _nextHealAmount);
 
             target.CastSpell(target, SpellIds.FueledByViolenceHeal, args);
             _nextHealAmount = 0;
@@ -357,7 +357,7 @@ namespace Scripts.Spells.Warrior
             return SpellCastResult.NoValidTargets;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             WorldLocation dest = GetHitDest();
             if (dest != null)
@@ -379,7 +379,7 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.GlyphOfHeroicLeap, SpellIds.GlyphOfHeroicLeapBuff, SpellIds.ImprovedHeroicLeap, SpellIds.Taunt);
         }
 
-        void AfterJump(uint effIndex)
+        void AfterJump(int effIndex)
         {
             if (GetCaster().HasAura(SpellIds.GlyphOfHeroicLeap))
                 GetCaster().CastSpell(GetCaster(), SpellIds.GlyphOfHeroicLeapBuff, true);
@@ -463,7 +463,7 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.MortalWounds);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit target = GetHitUnit();
             if (target != null)
@@ -489,7 +489,7 @@ namespace Scripts.Spells.Warrior
             return GetCaster().IsPlayer();
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));
@@ -511,7 +511,7 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.ShieldBlockAura);
         }
 
-        void HandleHitTarget(uint effIndex)
+        void HandleHitTarget(int effIndex)
         {
             GetCaster().CastSpell(null, SpellIds.ShieldBlockAura, true);
         }
@@ -530,7 +530,7 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.ShieldChargeEffect);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.ShieldChargeEffect, true);
         }
@@ -544,7 +544,7 @@ namespace Scripts.Spells.Warrior
     [Script] // 46968 - Shockwave
     class spell_warr_shockwave : SpellScript
     {
-        uint _targetCount;
+        int _targetCount;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -557,7 +557,7 @@ namespace Scripts.Spells.Warrior
             return GetCaster().IsPlayer();
         }
 
-        void HandleStun(uint effIndex)
+        void HandleStun(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.ShockwaveStun, true);
             ++_targetCount;
@@ -566,7 +566,7 @@ namespace Scripts.Spells.Warrior
         // Cooldown reduced by 20 sec if it strikes at least 3 targets.
         void HandleAfterCast()
         {
-            if (_targetCount >= (uint)GetEffectInfo(0).CalcValue())
+            if (_targetCount >= GetEffectInfo(0).CalcValue())
                 GetCaster().ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, TimeSpan.FromSeconds(-GetEffectInfo(3).CalcValue()));
         }
 
@@ -585,7 +585,7 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.StormBoltStun);
         }
 
-        void HandleOnHit(uint effIndex)
+        void HandleOnHit(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.StormBoltStun, true);
         }
@@ -702,7 +702,7 @@ namespace Scripts.Spells.Warrior
         {
             Unit target = eventInfo.GetActionTarget();
             //Get 25% of damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
-            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks());
+            int damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks();
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, damage);
             GetCaster().CastSpell(target, SpellIds.TraumaEffect, args);

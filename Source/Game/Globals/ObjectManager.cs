@@ -1515,7 +1515,7 @@ namespace Game
                         _eventStorage.Add(criteria.Entry.Asset);
             };
 
-            CriteriaType[] eventCriteriaTypes = { CriteriaType.PlayerTriggerGameEvent, CriteriaType.AnyoneTriggerGameEventScenario };
+            CriteriaType[] eventCriteriaTypes = [CriteriaType.PlayerTriggerGameEvent, CriteriaType.AnyoneTriggerGameEventScenario];
             foreach (CriteriaType criteriaType in eventCriteriaTypes)
             {
                 addCriteriaEventsToStore(Global.CriteriaMgr.GetPlayerCriteriaByType(criteriaType, 0));
@@ -5198,13 +5198,13 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {sparseCount} item templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        static float[] qualityMultipliers = new float[]
-        {
+        static float[] qualityMultipliers =
+        [
             0.92f, 0.92f, 0.92f, 1.11f, 1.32f, 1.61f, 0.0f, 0.0f
-        };
+        ];
 
-        static float[] armorMultipliers = new float[]
-        {
+        static float[] armorMultipliers =
+        [
             0.00f, // INVTYPE_NON_EQUIP
             0.60f, // INVTYPE_HEAD
             0.00f, // INVTYPE_NECK
@@ -5240,10 +5240,10 @@ namespace Game
             0.00f, // INVTYPE_EQUIPABLE_SPELL_UTILITY
             0.00f, // INVTYPE_EQUIPABLE_SPELL_DEFENSIVE
             0.00f, // INVTYPE_EQUIPABLE_SPELL_MOBILITY
-        };
+        ];
 
-        static float[] weaponMultipliers = new float[]
-        {
+        static float[] weaponMultipliers =
+        [
             0.91f, // ITEM_SUBCLASS_WEAPON_AXE
             1.00f, // ITEM_SUBCLASS_WEAPON_AXE2
             1.00f, // ITEM_SUBCLASS_WEAPON_BOW
@@ -5265,7 +5265,7 @@ namespace Game
             1.00f, // ITEM_SUBCLASS_WEAPON_CROSSBOW
             0.66f, // ITEM_SUBCLASS_WEAPON_WAND
             0.66f, // ITEM_SUBCLASS_WEAPON_FISHING_POLE
-        };
+        ];
 
         int FillMaxDurability(ItemClass itemClass, ItemSubClass itemSubClass, InventoryType inventoryType, ItemQuality quality, int itemLevel)
         {

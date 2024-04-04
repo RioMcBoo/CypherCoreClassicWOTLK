@@ -474,7 +474,7 @@ namespace Game
                 mirrorImageComponentedData.GuildGUID = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
 
                 byte[] itemSlots =
-                {
+                [
                     EquipmentSlot.Head,
                     EquipmentSlot.Shoulders,
                     EquipmentSlot.Shirt,
@@ -486,7 +486,7 @@ namespace Game
                     EquipmentSlot.Hands,
                     EquipmentSlot.Tabard,
                     EquipmentSlot.Cloak
-                };
+                ];
 
                 // Display items in visible slots
                 foreach (var slot in itemSlots)

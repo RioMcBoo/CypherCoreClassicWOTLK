@@ -40,7 +40,7 @@ namespace Game.Networking
                 _socket.Receive(_receiveBuffer);
 
                 // Send the end-of-negotiation packet
-                byte[] reply = { 0xFF, 0xF0 };
+                byte[] reply = [0xFF, 0xF0];
                 _socket.Send(reply);
             }
 

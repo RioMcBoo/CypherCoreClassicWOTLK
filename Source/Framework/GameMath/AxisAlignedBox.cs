@@ -112,18 +112,17 @@ namespace Framework.GameMath
         /// <returns>An array of <see cref="Vector3"/> containing the box vertices.</returns> 
         public Vector3[] ComputeVertices()
         {
-            Vector3[] vertices = new Vector3[8];
-
-            vertices[0] = _lo;
-            vertices[1] = new Vector3(_hi.X, _lo.Y, _lo.Z);
-            vertices[2] = new Vector3(_hi.X, _hi.Y, _lo.Z);
-            vertices[3] = new Vector3(_lo.X, _hi.Y, _lo.Z);
-
-            vertices[4] = new Vector3(_lo.X, _lo.Y, _hi.Z);
-            vertices[5] = new Vector3(_hi.X, _lo.Y, _hi.Z);
-            vertices[6] = _hi;
-            vertices[7] = new Vector3(_lo.X, _hi.Y, _hi.Z);
-
+            Vector3[] vertices =
+            [
+                _lo,
+                new Vector3(_hi.X, _lo.Y, _lo.Z),
+                new Vector3(_hi.X, _hi.Y, _lo.Z),
+                new Vector3(_lo.X, _hi.Y, _lo.Z),
+                new Vector3(_lo.X, _lo.Y, _hi.Z),
+                new Vector3(_hi.X, _lo.Y, _hi.Z),
+                _hi,
+                new Vector3(_lo.X, _hi.Y, _hi.Z),
+            ];
             return vertices;
         }
 

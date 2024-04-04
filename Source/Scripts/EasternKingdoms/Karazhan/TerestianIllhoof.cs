@@ -12,32 +12,32 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
 {
     struct SpellIds
     {
-        public const uint ShadowBolt = 30055;
-        public const uint SummonImp = 30066;
-        public const uint FiendishPortal1 = 30171;
-        public const uint FiendishPortal2 = 30179;
-        public const uint Berserk = 32965;
-        public const uint SummonFiendishImp = 30184;
-        public const uint BrokenPact = 30065;
-        public const uint AmplifyFlames = 30053;
-        public const uint Firebolt = 30050;
-        public const uint SummonDemonchains = 30120;
-        public const uint DemonChains = 30206;
-        public const uint Sacrifice = 30115;
+        public const int ShadowBolt = 30055;
+        public const int SummonImp = 30066;
+        public const int FiendishPortal1 = 30171;
+        public const int FiendishPortal2 = 30179;
+        public const int Berserk = 32965;
+        public const int SummonFiendishImp = 30184;
+        public const int BrokenPact = 30065;
+        public const int AmplifyFlames = 30053;
+        public const int Firebolt = 30050;
+        public const int SummonDemonchains = 30120;
+        public const int DemonChains = 30206;
+        public const int Sacrifice = 30115;
     }
 
     struct TextIds
     {
-        public const uint SaySlay = 0;
-        public const uint SayDeath = 1;
-        public const uint SayAggro = 2;
-        public const uint SaySacrifice = 3;
-        public const uint SaySummonPortal = 4;
+        public const int SaySlay = 0;
+        public const int SayDeath = 1;
+        public const int SayAggro = 2;
+        public const int SaySacrifice = 3;
+        public const int SaySummonPortal = 4;
     }
 
     struct MiscConst
     {
-        public const uint NpcFiendishPortal = 17265;
+        public const int NpcFiendishPortal = 17265;
         public const int ActionDespawnImps = 1;
     }
 

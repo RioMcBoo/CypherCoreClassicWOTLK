@@ -13,11 +13,11 @@ namespace Scripts.Pets.Hunter
     [Script]
     class npc_pet_hunter_snake_trap : ScriptedAI
     {
-        const uint SpellHunterCripplingPoison = 30981; // Viper
-        const uint SpellHunterDeadlyPoisonPassive = 34657; // Venomous Snake
-        const uint SpellHunterMindNumbingPoison = 25810;  // Viper
+        const int SpellHunterCripplingPoison = 30981; // Viper
+        const int SpellHunterDeadlyPoisonPassive = 34657; // Venomous Snake
+        const int SpellHunterMindNumbingPoison = 25810;  // Viper
 
-        const uint NpcHunterViper = 19921;
+        const int NpcHunterViper = 19921;
 
         bool _isViper;
         uint _spellTimer;
@@ -30,7 +30,7 @@ namespace Scripts.Pets.Hunter
         {
             _isViper = me.GetEntry() == NpcHunterViper ? true : false;
 
-            me.SetMaxHealth((uint)(107 * (me.GetLevel() - 40) * 0.025f));
+            me.SetMaxHealth((int)(107 * (me.GetLevel() - 40) * 0.025f));
             // Add delta to make them not all hit the same time
             me.SetBaseAttackTime(WeaponAttackType.BaseAttack, me.GetBaseAttackTime(WeaponAttackType.BaseAttack) + RandomHelper.URand(0, 6));
 

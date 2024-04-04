@@ -10,19 +10,19 @@ namespace Scripts.EasternKingdoms.AlteracValley.Vanndar
 {
     struct SpellIds
     {
-        public const uint Avatar = 19135;
-        public const uint Thunderclap = 15588;
-        public const uint Stormbolt = 20685; // not sure
+        public const int Avatar = 19135;
+        public const int Thunderclap = 15588;
+        public const int Stormbolt = 20685; // not sure
     }
 
     struct TextIds
     {
-        public const uint YellAggro = 0;
-        public const uint YellEvade = 1;
-        //public const uint YellRespawn1                                 = -1810010; // Missing in database
-        //public const uint YellRespawn2                                 = -1810011; // Missing in database
-        public const uint YellRandom = 2;
-        public const uint YellSpell = 3;
+        public const int YellAggro = 0;
+        public const int YellEvade = 1;
+        //public const int YellRespawn1                                 = -1810010; // Missing in database
+        //public const int YellRespawn2                                 = -1810011; // Missing in database
+        public const int YellRandom = 2;
+        public const int YellSpell = 3;
     }
 
     [Script]

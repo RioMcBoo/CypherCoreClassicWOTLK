@@ -10,15 +10,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.UrokDoomhowl
 {
     struct SpellIds
     {
-        public const uint Rend = 16509;
-        public const uint Strike = 15580;
-        public const uint IntimidatingRoar = 16508;
+        public const int Rend = 16509;
+        public const int Strike = 15580;
+        public const int IntimidatingRoar = 16508;
     }
 
     struct TextIds
     {
-        public const uint SaySummon = 0;
-        public const uint SayAggro = 1;
+        public const int SaySummon = 0;
+        public const int SayAggro = 1;
     }
 
     [Script]

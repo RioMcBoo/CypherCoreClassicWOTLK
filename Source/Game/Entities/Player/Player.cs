@@ -2789,7 +2789,7 @@ namespace Game.Entities
                 else
                 {
                     PlayerInteractionType[] GossipOptionNpcToInteractionType =
-                    {
+                    [
                         PlayerInteractionType.None, PlayerInteractionType.Vendor, PlayerInteractionType.TaxiNode,
                         PlayerInteractionType.Trainer, PlayerInteractionType.SpiritHealer, PlayerInteractionType.Binder,
                         PlayerInteractionType.Banker, PlayerInteractionType.PetitionVendor, PlayerInteractionType.GuildTabardVendor,
@@ -2809,7 +2809,7 @@ namespace Game.Entities
                         PlayerInteractionType.ProfessionsCraftingOrder, PlayerInteractionType.Professions, PlayerInteractionType.ProfessionsCustomerOrder,
                         PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown,
                         PlayerInteractionType.PersonalTabardVendor
-                    };
+                    ];
 
                     PlayerInteractionType interactionType = GossipOptionNpcToInteractionType[(int)gossipOptionNpc];
                     if (interactionType != PlayerInteractionType.None)
@@ -3516,7 +3516,7 @@ namespace Game.Entities
                 return;
 
             WorldCfg[] RatesForPower =
-            {
+            [
                 WorldCfg.RatePowerMana,
                 WorldCfg.RatePowerRageLoss,
                 WorldCfg.RatePowerFocus,
@@ -3543,7 +3543,7 @@ namespace Game.Entities
                 0, // alternate
                 0, // alternate
                 0, // alternate
-            };
+            ];
 
             if (RatesForPower[(int)power] != 0)
                 addvalue *= WorldConfig.GetFloatValue(RatesForPower[(int)power]);
@@ -5569,11 +5569,11 @@ namespace Game.Entities
             // SendMessageToSet not send it to player not it map, only for aura that not changed anything at re-apply
             // same auras state lost at far teleport, send it one more time in this case also
             AuraType[] auratypes =
-            {
+            [
                 AuraType.ModFear, AuraType.Transform, AuraType.WaterWalk,
                 AuraType.FeatherFall, AuraType.Hover, AuraType.SafeFall,
                 AuraType.Fly, AuraType.ModIncreaseMountedFlightSpeed, AuraType.None
-            };
+            ];
             foreach (var aura in auratypes)
             {
                 var auraList = GetAuraEffectsByType(aura);

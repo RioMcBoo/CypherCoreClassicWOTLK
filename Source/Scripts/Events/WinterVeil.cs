@@ -12,21 +12,21 @@ namespace Scripts.Events
     [Script] // 26218 - Mistletoe
     class spell_winter_veil_mistletoe : SpellScript
     {
-        const uint SpellCreateMistletoe = 26206;
-        const uint SpellCreateHolly = 26207;
-        const uint SpellCreateSnowflakes = 45036;
+        const int SpellCreateMistletoe = 26206;
+        const int SpellCreateHolly = 26207;
+        const int SpellCreateSnowflakes = 45036;
 
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellCreateMistletoe, SpellCreateHolly, SpellCreateSnowflakes);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Player target = GetHitPlayer();
             if (target != null)
             {
-                uint spellId = RandomHelper.RAND(SpellCreateHolly, SpellCreateMistletoe, SpellCreateSnowflakes);
+                int spellId = RandomHelper.RAND(SpellCreateHolly, SpellCreateMistletoe, SpellCreateSnowflakes);
                 GetCaster().CastSpell(target, spellId, true);
             }
         }
@@ -40,21 +40,21 @@ namespace Scripts.Events
     [Script] // 26275 - Px-238 Winter Wondervolt Trap
     class spell_winter_veil_px_238_winter_wondervolt : SpellScript
     {
-        uint[] WonderboltTransformSpells = { 26157, 26272, 26273, 26274 };
+        int[] WonderboltTransformSpells = [26157, 26272, 26273, 26274];
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(WonderboltTransformSpells);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
             Unit target = GetHitUnit();
             if (target != null)
             {
-                foreach (uint spell in WonderboltTransformSpells)
+                foreach (var spell in WonderboltTransformSpells)
                     if (target.HasAura(spell))
                         return;
 
@@ -71,18 +71,18 @@ namespace Scripts.Events
     [Script] // 25860 - Reindeer Transformation
     class spell_winter_veil_reindeer_transformation : SpellScript
     {
-        const uint SpellFlyingReindeer310 = 44827;
-        const uint SpellFlyingReindeer280 = 44825;
-        const uint SpellFlyingReindeer60 = 44824;
-        const uint SpellReindeer100 = 25859;
-        const uint SpellReindeer60 = 25858;
+        const int SpellFlyingReindeer310 = 44827;
+        const int SpellFlyingReindeer280 = 44825;
+        const int SpellFlyingReindeer60 = 44824;
+        const int SpellReindeer100 = 25859;
+        const int SpellReindeer60 = 25858;
 
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellFlyingReindeer310, SpellFlyingReindeer280, SpellFlyingReindeer60, SpellReindeer100, SpellReindeer60);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
             if (caster.HasAuraType(AuraType.Mounted))

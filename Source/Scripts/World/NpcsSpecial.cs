@@ -45,7 +45,7 @@ namespace Scripts.World.NpcsSpecial
         List<ObjectGuid> _toAttack = new();
 
         AirForceSpawn[] airforceSpawns =
-        {
+        [
             new AirForceSpawn(2614, 15241, AirForceBots.Alarmbot), // Air Force Alarm Bot (Alliance)
             new AirForceSpawn(2615, 15242, AirForceBots.Alarmbot), // Air Force Alarm Bot (Horde)
             new AirForceSpawn(21974, 21976, AirForceBots.Alarmbot), // Air Force Alarm Bot (Area 52)
@@ -73,7 +73,7 @@ namespace Scripts.World.NpcsSpecial
             new AirForceSpawn(22124, 22122, AirForceBots.Alarmbot), // Air Force Alarm Bot (Cenarion)
             new AirForceSpawn(22125, 22122, AirForceBots.Alarmbot), // Air Force Guard Post (Cenarion - Stormcrow)
             new AirForceSpawn(22126, 22122, AirForceBots.Alarmbot)  // Air Force Trip Wire - Rooftop (Cenarion Expedition)
-        };
+        ];
 
         float RangeTripwire = 15.0f;
         float RangeAlarmbot = 100.0f;
@@ -418,7 +418,7 @@ namespace Scripts.World.NpcsSpecial
         public const int DoctorHorde = 12920;
 
         public static Position[] AllianceCoords =
-        {
+        [
             new Position(-3757.38f, -4533.05f, 14.16f, 3.62f),                      // Top-far-right bunk as seen from entrance
             new Position(-3754.36f, -4539.13f, 14.16f, 5.13f),                      // Top-far-left bunk
             new Position(-3749.54f, -4540.25f, 14.28f, 3.34f),                      // Far-right bunk
@@ -426,37 +426,37 @@ namespace Scripts.World.NpcsSpecial
             new Position(-3755.89f, -4529.07f, 14.05f, 0.57f),                      // Far-left bunk
             new Position(-3749.51f, -4527.08f, 14.07f, 5.26f),                      // Mid-left bunk
             new Position(-3746.37f, -4525.35f, 14.16f, 5.22f),                      // Left bunk near entrance
-        };
+        ];
 
         //alliance run to where
         public static Position ARunTo = new Position(-3742.96f, -4531.52f, 11.91f);
 
         public static Position[] HordeCoords =
-        {
+        [
             new Position(-1013.75f, -3492.59f, 62.62f, 4.34f),                      // Left, Behind
             new Position(-1017.72f, -3490.92f, 62.62f, 4.34f),                      // Right, Behind
             new Position(-1015.77f, -3497.15f, 62.82f, 4.34f),                      // Left, Mid
             new Position(-1019.51f, -3495.49f, 62.82f, 4.34f),                      // Right, Mid
             new Position(-1017.25f, -3500.85f, 62.98f, 4.34f),                      // Left, front
             new Position(-1020.95f, -3499.21f, 62.98f, 4.34f)                       // Right, Front
-        };
+        ];
 
         //horde run to where
         public static Position HRunTo = new Position(-1016.44f, -3508.48f, 62.96f);
 
         public static int[] AllianceSoldierId =
-        {
+        [
             12938,                                                  // 12938 Injured Alliance Soldier
             12936,                                                  // 12936 Badly injured Alliance Soldier
             12937                                                   // 12937 Critically injured Alliance Soldier
-        };
+        ];
 
         public static int[] HordeSoldierId =
-        {
+        [
             12923,                                                  //12923 Injured Soldier
             12924,                                                  //12924 Badly injured Soldier
             12925                                                   //12925 Critically injured Soldier
-        };
+        ];
     }
 
     [Script]
@@ -1216,13 +1216,13 @@ namespace Scripts.World.NpcsSpecial
     class npc_brewfest_reveler_2 : ScriptedAI
     {
         Emote[] BrewfestRandomEmote =
-        {
+        [
             Emote.OneshotQuestion,
             Emote.OneshotApplaud,
             Emote.OneshotShout,
             Emote.OneshotEatNoSheathe,
             Emote.OneshotLaughNoSheathe
-        };
+        ];
 
         const int SpellBrewfestToast = 41586;
         const int NpcBrewfestReveler = 24484;
@@ -1688,13 +1688,13 @@ namespace Scripts.World.NpcsSpecial
         public const int AchievementPonyUp = 3736;
 
         public static (int, int)[] bannerSpells =
-        {
+        [
             (SpellDarnassusPennant, SpellSenjinPennant),
             (SpellExodarPennant, SpellUndercityPennant),
             (SpellGnomereganPennant, SpellOrgrimmarPennant),
             (SpellIronforgePennant, SpellSilvermoonPennant),
             (SpellStormwindPennant, SpellThunderbluffPennant)
-        };
+        ];
     }
 
     [Script]

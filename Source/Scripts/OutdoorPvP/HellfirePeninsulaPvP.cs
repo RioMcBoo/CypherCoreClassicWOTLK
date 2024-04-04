@@ -341,7 +341,7 @@ namespace Scripts.OutdoorPVP.HellfirePeninsula
     struct Misc
     {
         //  HP, citadel, ramparts, blood furnace, shattered halls, mag's lair
-        public static int[] BuffZones = { 3483, 3563, 3562, 3713, 3714, 3836 };
+        public static int[] BuffZones = [3483, 3563, 3562, 3713, 3714, 3836];
     }
 
     struct DefenseMessages

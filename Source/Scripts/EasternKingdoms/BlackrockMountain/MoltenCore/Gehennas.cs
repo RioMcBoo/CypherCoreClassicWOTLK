@@ -11,9 +11,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Gehennas
 {
     struct SpellIds
     {
-        public const uint GehennasCurse = 19716;
-        public const uint RainOfFire = 19717;
-        public const uint ShadowBolt = 19728;
+        public const int GehennasCurse = 19716;
+        public const int RainOfFire = 19717;
+        public const int ShadowBolt = 19728;
     }
 
     [Script]

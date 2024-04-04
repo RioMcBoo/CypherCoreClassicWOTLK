@@ -692,7 +692,7 @@ namespace Game.Entities
         static string FormatUniq(HighGuid typeName, ObjectGuid guid)
         {
             string[] uniqNames =
-            {
+            [
                 null,
                 "WOWGUID_UNIQUE_PROBED_DELETE",
                 "WOWGUID_UNIQUE_JAM_TEMP",
@@ -711,7 +711,7 @@ namespace Game.Entities
                 null,
                 null,
                 "WOWGUID_UNIQUE_ACCOUNT_OBJ_INITIALIZATION"
-            };
+            ];
 
             long id = guid.GetCounter();
             if ((int)id >= uniqNames.Length)
@@ -723,7 +723,7 @@ namespace Game.Entities
         static ObjectGuid ParseUniq(HighGuid type, string guidString)
         {
             string[] uniqNames =
-            {
+            [
                 null,
                 "WOWGUID_UNIQUE_PROBED_DELETE",
                 "WOWGUID_UNIQUE_JAM_TEMP",
@@ -742,7 +742,7 @@ namespace Game.Entities
                 null,
                 null,
                 "WOWGUID_UNIQUE_ACCOUNT_OBJ_INITIALIZATION"
-            };
+            ];
 
             for (int id = 0; id < uniqNames.Length; ++id)
             {

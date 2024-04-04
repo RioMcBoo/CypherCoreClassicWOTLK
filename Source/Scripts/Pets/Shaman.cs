@@ -12,7 +12,7 @@ namespace Scripts.Pets.Shaman
     [Script]
     class npc_pet_shaman_earth_elemental : ScriptedAI
     {
-        const uint SpellShamanAngeredearth = 36213;
+        const int SpellShamanAngeredearth = 36213;
 
         public npc_pet_shaman_earth_elemental(Creature creature) : base(creature) { }
 
@@ -38,9 +38,9 @@ namespace Scripts.Pets.Shaman
     [Script]
     class npc_pet_shaman_fire_elemental : ScriptedAI
     {
-        const uint SpellShamanFireblast = 57984;
-        const uint SpellShamanFirenova = 12470;
-        const uint SpellShamanFireshield = 13376;
+        const int SpellShamanFireblast = 57984;
+        const int SpellShamanFirenova = 12470;
+        const int SpellShamanFireshield = 13376;
 
         public npc_pet_shaman_fire_elemental(Creature creature) : base(creature) { }
 

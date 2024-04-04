@@ -32,7 +32,7 @@ namespace Framework.Constants
         public const int MaxVisibleItemOffset = 2;
         public const int MaxSpellEffects = 32;
         public static uint[] ItemQualityColors =
-        {
+        [
             0xff9d9d9d, // GREY
             0xffffffff, // WHITE
             0xff1eff00, // GREEN
@@ -41,25 +41,25 @@ namespace Framework.Constants
             0xffff8000, // ORANGE
             0xffe6cc80, // LIGHT YELLOW
             0xffe6cc80  // LIGHT YELLOW
-        };
+        ];
 
         public static ItemModifier[] AppearanceModifierSlotBySpec =
-        {
+        [
             ItemModifier.TransmogAppearanceSpec1,
             ItemModifier.TransmogAppearanceSpec2,
-        };
+        ];
 
         public static ItemModifier[] IllusionModifierSlotBySpec =
-        {
+        [
             ItemModifier.EnchantIllusionSpec1,
             ItemModifier.EnchantIllusionSpec2,
-        };
+        ];
 
         public static ItemModifier[] SecondaryAppearanceModifierSlotBySpec =
-        {
+        [
             ItemModifier.TransmogSecondaryAppearanceSpec1,
             ItemModifier.TransmogSecondaryAppearanceSpec2,
-        };
+        ];
     }
 
     public struct ProfessionSlots

@@ -57,16 +57,16 @@ namespace Scripts.Events.FireworksShow
 
     struct MiscConst
     {
-        public const uint SoundCheer1 = 8574;
-        public const uint SoundCheer2 = 8573;
-        public const uint SoundCheer3 = 8572;
-        public const uint SoundCheer4 = 8571;
-        public const uint EventCheer = 1;
-        public const uint EventFire = 2;
+        public const int SoundCheer1 = 8574;
+        public const int SoundCheer2 = 8573;
+        public const int SoundCheer3 = 8572;
+        public const int SoundCheer4 = 8571;
+        public const int EventCheer = 1;
+        public const int EventFire = 2;
         public const ushort GameEventNewYear = 6;
 
         static Position[] BootyBayPos =
-        {
+        [
             new(-14358.03f, 515.058f, 34.2664f,   3.68265f),
             new(-14357.49f, 490.8445f, 39.47329f, 0.9773831f),
             new(-14355.49f, 518.5656f, 35.36923f, 4.76475f),
@@ -92,10 +92,10 @@ namespace Scripts.Events.FireworksShow
             new(-14374.91f, 491.508f,  40.34925f, 4.886924f),
             new(-14351.33f, 506.1898f, 28.69684f, 5.846854f),
             new(-14378.1f,  473.5608f, 40.16786f, 0.9773831f)
-        };
+        ];
 
         static Position[] StormwindPos =
-        {
+        [
             new(-8823.592f,    470.316f,    179.2295f,   1.239183f),
             new(-8883.005f,    590.1927f,   163.1264f,   0.9773831f),
             new(-8919.692f,    482.9097f,   185.6471f,   3.735006f),
@@ -213,10 +213,10 @@ namespace Scripts.Events.FireworksShow
             new(-8873.742188f, 599.873718f, 107.512787f, 3.001356f),
             new(-8885.817383f, 586.529175f, 98.614265f,  0.437024f),
             new(-8872.734375f, 573.338440f, 97.723770f,  1.831103f)
-        };
+        ];
 
         static Position[] OrgrimmarPos =
-        {
+        [
             new(1609.075f,    -4383.707f,     90.23414f,  0.3665176f),
             new(1469.648f,    -4371.285f,    113.8313f,   6.073746f),
             new(1391.792f,    -4371.0f,       165.0406f,   3.630291f),
@@ -310,10 +310,10 @@ namespace Scripts.Events.FireworksShow
             new(1497.2632f,   -4401.54637f,   33.805511f, 2.60181f),
             new(1497.9363f,   -4437.58008f,   32.326393f, 4.96205f),
             new(1493.26253f,  -4402.19919f,   59.147816f, 2.2917f)
-        };
+        ];
 
         static Position[] IronForgePos =
-        {
+        [
             new(-5196.038f, -858.4618f, 525.0447f, 6.073746f),
             new(-5195.734f, -887.6441f, 534.168f,  3.68265f),
             new(-5195.063f, -762.2795f, 510.0929f, 4.66003f),
@@ -371,10 +371,10 @@ namespace Scripts.Events.FireworksShow
             new(-5178.493f, -870.8143f, 539.2921f, 3.700105f),
             new(-5206.622f, -741.5938f, 511.1593f, 4.76475f),
             new(-5194.976f, -759.9896f, 517.6288f, 3.630291f)
-        };
+        ];
 
         static Position[] SilvermoonPos =
-        {
+        [
             new(9466.583f, -7307.326f, 107.8366f, 0.1047193f),
             new(9411.616f, -7322.223f, 79.95399f, 2.722713f),
             new(9472.98f,  -7276.879f, 111.8719f, 6.056293f),
@@ -441,10 +441,10 @@ namespace Scripts.Events.FireworksShow
             new(9430.171f, -7231.706f, 114.6874f, 3.42085f),
             new(9404.366f, -7275.19f,  144.4704f, 3.071766f),
             new(9411.504f, -7288.202f, 112.2664f, 2.844883f)
-        };
+        ];
 
         static Position[] ExodarPos =
-        {
+        [
             new(-3992.465f, -11843.86f, 186.4043f, 2.199115f),
             new(-3948.378f, -11854.06f, 135.6206f, 3.47321f),
             new(-3918.684f, -11840.53f, 216.565f,  4.886924f),
@@ -503,10 +503,10 @@ namespace Scripts.Events.FireworksShow
             new(-4043.675f, -11746.47f, 136.9332f, 3.47321f),
             new(-4013.666f, -11817.91f, 169.5565f, 2.111848f),
             new(-4036.461f, -11783.4f,  142.8152f, 4.729844f)
-        };
+        ];
 
         static Position[] ThunderBluffPos =
-        {
+        [
             new(-1234.804f, -19.72239f, 206.5436f, 0.1396245f),
             new(-1244.442f, -35.88308f, 206.82f,   4.729844f),
             new(-1239.212f, -11.25857f, 208.6352f, 3.700105f),
@@ -565,10 +565,10 @@ namespace Scripts.Events.FireworksShow
             new(-1233.765f, -15.5765f,  216.1068f, 3.054327f),
             new(-1233.56f,  -15.80257f, 215.6199f, 0.9773831f),
             new(-1240.617f, -41.39486f, 205.0362f, 5.846854f)
-        };
+        ];
 
         static Position[] UndercityPos =
-        {
+        [
             new(1850.231f, 257.0156f, 124.1743f, 4.729844f),
             new(1863.302f, 193.9063f, 114.5829f, 0.9773831f),
             new(1851.997f, 212.7726f, 127.959f,  5.550147f),
@@ -625,10 +625,10 @@ namespace Scripts.Events.FireworksShow
             new(1863.307f, 259.8038f, 116.5421f, 6.073746f),
             new(1877.592f, 247.3872f, 128.022f,  3.68265f),
             new(1850.288f, 267.309f,  125.0537f, 3.630291f)
-        };
+        ];
 
         static Position[] DarnassusPos =
-        {
+        [
             new(8578.888f, 975.2604f, 42.48742f, 5.846854f),
             new(8574.236f, 944.2083f, 44.71943f, 4.76475f),
             new(8517.067f, 986.0851f, 66.32562f, 4.729844f),
@@ -688,22 +688,22 @@ namespace Scripts.Events.FireworksShow
             new(8523.006f, 907.7413f, 72.85262f, 0.9773831f),
             new(8520.907f, 813.0208f, 81.70242f, 3.68265f),
             new(8554.825f, 813.0746f, 78.88226f, 6.0912f)
-        };
+        ];
 
-        public static Dictionary<uint, Position[]> PositionsByZoneMap = new()
+        public static Dictionary<int, Position[]> PositionsByZoneMap = new()
         {
-            { (uint)ZoneIds.StranglethornVale, BootyBayPos },
-            { (uint)ZoneIds.Stormwind, StormwindPos },
-            { (uint)ZoneIds.Orgrimmar, OrgrimmarPos },
-            { (uint)ZoneIds.Durotar, OrgrimmarPos },
-            { (uint)ZoneIds.DunMorogh, IronForgePos},
-            { (uint)ZoneIds.Ironforge, IronForgePos},
-            { (uint)ZoneIds.EversongWoods, SilvermoonPos},
-            { (uint)ZoneIds.Exodar, ExodarPos},
-            { (uint)ZoneIds.Thunderbluff, ThunderBluffPos},
-            { (uint)ZoneIds.Undercity, UndercityPos},
-            { (uint)ZoneIds.TirisfalGlades, UndercityPos},
-            { (uint)ZoneIds.Teldrassil, DarnassusPos    }
+            { (int)ZoneIds.StranglethornVale, BootyBayPos },
+            { (int)ZoneIds.Stormwind, StormwindPos },
+            { (int)ZoneIds.Orgrimmar, OrgrimmarPos },
+            { (int)ZoneIds.Durotar, OrgrimmarPos },
+            { (int)ZoneIds.DunMorogh, IronForgePos},
+            { (int)ZoneIds.Ironforge, IronForgePos},
+            { (int)ZoneIds.EversongWoods, SilvermoonPos},
+            { (int)ZoneIds.Exodar, ExodarPos},
+            { (int)ZoneIds.Thunderbluff, ThunderBluffPos},
+            { (int)ZoneIds.Undercity, UndercityPos},
+            { (int)ZoneIds.TirisfalGlades, UndercityPos},
+            { (int)ZoneIds.Teldrassil, DarnassusPos    }
         };
     }
 
@@ -715,14 +715,14 @@ namespace Scripts.Events.FireworksShow
 
         public go_cheer_speaker(GameObject go) : base(go) { }
 
-        static uint CheerPicker()
+        static int CheerPicker()
         {
             return RandomHelper.RAND(MiscConst.SoundCheer1, MiscConst.SoundCheer2, MiscConst.SoundCheer3, MiscConst.SoundCheer4);
         }
 
-        static uint FireworksPicker()
+        static int FireworksPicker()
         {
-            return (uint)RandomHelper.RAND(
+            return (int)RandomHelper.RAND(
                 ObjectIds.FireworkShowType1Red,
                 ObjectIds.FireworkShowType2Red,
                 ObjectIds.FireworkShowType1RedBig,
@@ -749,9 +749,9 @@ namespace Scripts.Events.FireworksShow
             );
         }
 
-        static uint FireworksBIGOnlyPicker()
+        static int FireworksBIGOnlyPicker()
         {
-            return (uint)RandomHelper.RAND(
+            return (int)RandomHelper.RAND(
                 ObjectIds.FireworkShowType1RedBig,
                 ObjectIds.FireworkShowType2RedBig,
                 ObjectIds.FireworkShowType1BlueBig,

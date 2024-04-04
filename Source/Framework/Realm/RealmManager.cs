@@ -184,7 +184,7 @@ public class RealmManager : Singleton<RealmManager>
 
     public byte[] GetRealmEntryJSON(RealmId id, uint build)
     {
-        byte[] compressed = new byte[0];
+        byte[] compressed = [];
         Realm realm = GetRealm(id);
         if (realm != null)
         {

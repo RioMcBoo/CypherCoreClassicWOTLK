@@ -15,10 +15,10 @@ namespace Scripts.Pets.DeathKnight
     [Script]
     class npc_pet_dk_ebon_gargoyle : CasterAI
     {
-        const uint SpellSummonGargoyle1 = 49206;
-        const uint SpellSummonGargoyle2 = 50514;
-        const uint SpellDismissGargoyle = 50515;
-        const uint SpellSanctuary = 54661;
+        const int SpellSummonGargoyle1 = 49206;
+        const int SpellSummonGargoyle2 = 50514;
+        const int SpellDismissGargoyle = 50515;
+        const int SpellSanctuary = 54661;
 
         public npc_pet_dk_ebon_gargoyle(Creature creature) : base(creature) { }
 

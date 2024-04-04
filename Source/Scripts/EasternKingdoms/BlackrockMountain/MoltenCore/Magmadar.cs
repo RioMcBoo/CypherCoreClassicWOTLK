@@ -12,15 +12,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Magmadar
 {
     struct SpellIds
     {
-        public const uint Frenzy = 19451;
-        public const uint MagmaSpit = 19449;
-        public const uint Panic = 19408;
-        public const uint LavaBomb = 19428;
+        public const int Frenzy = 19451;
+        public const int MagmaSpit = 19449;
+        public const int Panic = 19408;
+        public const int LavaBomb = 19428;
     }
 
     struct TextIds
     {
-        public const uint EmoteFrenzy = 0;
+        public const int EmoteFrenzy = 0;
     }
 
     [Script]
@@ -51,7 +51,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Magmadar
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
             {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -(int)SpellIds.LavaBomb);
+                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -SpellIds.LavaBomb);
                 if (target != null)
                     DoCast(target, SpellIds.LavaBomb);
                 task.Repeat(TimeSpan.FromSeconds(12));

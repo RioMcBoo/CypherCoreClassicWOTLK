@@ -12,19 +12,19 @@ namespace Scripts.EasternKingdoms.Karazhan.MaidenOfVirtue
 {
     struct SpellIds
     {
-        public const uint Repentance = 29511;
-        public const uint Holyfire = 29522;
-        public const uint Holywrath = 32445;
-        public const uint Holyground = 29523;
-        public const uint Berserk = 26662;
+        public const int Repentance = 29511;
+        public const int Holyfire = 29522;
+        public const int Holywrath = 32445;
+        public const int Holyground = 29523;
+        public const int Berserk = 26662;
     }
 
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SaySlay = 1;
-        public const uint SayRepentance = 2;
-        public const uint SayDeath = 3;
+        public const int SayAggro = 0;
+        public const int SaySlay = 1;
+        public const int SayRepentance = 2;
+        public const int SayDeath = 3;
     }
 
     [Script]

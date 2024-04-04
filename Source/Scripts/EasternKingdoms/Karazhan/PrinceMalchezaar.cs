@@ -113,7 +113,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
     class boss_malchezaar : ScriptedAI
     {
         static Vector2[] InfernalPoints =
-        {
+        [
             new Vector2(-10922.8f, -1985.2f),
             new Vector2(-10916.2f, -1996.2f),
             new Vector2(-10932.2f, -2008.1f),
@@ -132,7 +132,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             new Vector2(-10984.0f, -2019.3f),
             new Vector2(-10932.8f, -1979.6f),
             new Vector2(-10935.7f, -1996.0f)
-        };
+        ];
 
         InstanceScript instance;
         uint EnfeebleTimer;

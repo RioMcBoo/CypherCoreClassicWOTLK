@@ -1847,7 +1847,7 @@ namespace Game.Entities
         float CalculateDiminishingReturns(float[] capArray, Class playerClass, float nonDiminishValue, float diminishValue)
         {
             float[] m_diminishing_k =
-            {
+            [
                 0.9560f,  // Warrior
                 0.9560f,  // Paladin
                 0.9880f,  // Hunter
@@ -1862,7 +1862,7 @@ namespace Game.Entities
                 0.9830f,  // Demon Hunter
                 0.9880f,  // Evoker
                 1.0f,     // Adventurer
-            };
+            ];
 
             //  1     1     k              cx
             // --- = --- + --- <=> x' = --------
@@ -1885,7 +1885,7 @@ namespace Game.Entities
         }
 
         float[] parry_cap =
-        {
+        [
             65.631440f,     // Warrior
             65.631440f,     // Paladin
             145.560408f,    // Hunter
@@ -1900,7 +1900,7 @@ namespace Game.Entities
             65.631440f,     // Demon Hunter
             0.0f,           // Evoker
             0.0f,           // Adventurer
-        };
+        ];
 
         public void UpdateParryPercentage()
         {
@@ -1928,7 +1928,7 @@ namespace Game.Entities
         }
         
         float[] dodge_cap =
-        {
+        [
             65.631440f,     // Warrior            
             65.631440f,     // Paladin
             145.560408f,    // Hunter
@@ -1943,7 +1943,7 @@ namespace Game.Entities
             145.560408f,    // Demon Hunter
             145.560408f,    // Evoker
             0.0f,           // Adventurer
-        };
+        ];
 
         public void UpdateDodgePercentage()
         {

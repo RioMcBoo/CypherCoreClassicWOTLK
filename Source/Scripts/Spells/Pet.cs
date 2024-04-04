@@ -14,58 +14,58 @@ namespace Scripts.Spells.Pets
     struct SpellIds
     {
         //HunterPetCalculate
-        public const uint TamedPetPassive06 = 19591;
-        public const uint TamedPetPassive07 = 20784;
-        public const uint TamedPetPassive08 = 34666;
-        public const uint TamedPetPassive09 = 34667;
-        public const uint TamedPetPassive10 = 34675;
-        public const uint HunterPetScaling01 = 34902;
-        public const uint HunterPetScaling02 = 34903;
-        public const uint HunterPetScaling03 = 34904;
-        public const uint HunterPetScaling04 = 61017;
-        public const uint HunterAnimalHandler = 34453;
+        public const int TamedPetPassive06 = 19591;
+        public const int TamedPetPassive07 = 20784;
+        public const int TamedPetPassive08 = 34666;
+        public const int TamedPetPassive09 = 34667;
+        public const int TamedPetPassive10 = 34675;
+        public const int HunterPetScaling01 = 34902;
+        public const int HunterPetScaling02 = 34903;
+        public const int HunterPetScaling03 = 34904;
+        public const int HunterPetScaling04 = 61017;
+        public const int HunterAnimalHandler = 34453;
 
         //WarlockPetCalculate    
-        public const uint PetPassiveCrit = 35695;
-        public const uint PetPassiveDamageTaken = 35697;
-        public const uint WarlockPetScaling01 = 34947;
-        public const uint WarlockPetScaling02 = 34956;
-        public const uint WarlockPetScaling03 = 34957;
-        public const uint WarlockPetScaling04 = 34958;
-        public const uint WarlockPetScaling05 = 61013;
-        public const uint WarlockGlyphOfVoidwalker = 56247;
+        public const int PetPassiveCrit = 35695;
+        public const int PetPassiveDamageTaken = 35697;
+        public const int WarlockPetScaling01 = 34947;
+        public const int WarlockPetScaling02 = 34956;
+        public const int WarlockPetScaling03 = 34957;
+        public const int WarlockPetScaling04 = 34958;
+        public const int WarlockPetScaling05 = 61013;
+        public const int WarlockGlyphOfVoidwalker = 56247;
 
         //DKPetCalculate    
-        public const uint DeathKnightRuneWeapon02 = 51906;
-        public const uint DeathKnightPetScaling01 = 54566;
-        public const uint DeathKnightPetScaling02 = 51996;
-        public const uint DeathKnightPetScaling03 = 61697;
-        public const uint NightOfTheDead = 55620;
+        public const int DeathKnightRuneWeapon02 = 51906;
+        public const int DeathKnightPetScaling01 = 54566;
+        public const int DeathKnightPetScaling02 = 51996;
+        public const int DeathKnightPetScaling03 = 61697;
+        public const int NightOfTheDead = 55620;
 
         //ShamanPetCalculate    
-        public const uint FeralSpiritPetUnk01 = 35674;
-        public const uint FeralSpiritPetUnk02 = 35675;
-        public const uint FeralSpiritPetUnk03 = 35676;
-        public const uint FeralSpiritPetScaling04 = 61783;
+        public const int FeralSpiritPetUnk01 = 35674;
+        public const int FeralSpiritPetUnk02 = 35675;
+        public const int FeralSpiritPetUnk03 = 35676;
+        public const int FeralSpiritPetScaling04 = 61783;
 
         //MiscPetCalculate    
-        public const uint MagePetPassiveElemental = 44559;
-        public const uint PetHealthScaling = 61679;
-        public const uint PetUnk01 = 67561;
-        public const uint PetUnk02 = 67557;
+        public const int MagePetPassiveElemental = 44559;
+        public const int PetHealthScaling = 61679;
+        public const int PetUnk01 = 67561;
+        public const int PetUnk02 = 67557;
     }
 
     struct CreatureIds
     {
         //WarlockPetCalculate   
-        public const uint EntryFelguard = 17252;
-        public const uint EntryVoidwalker = 1860;
-        public const uint EntryFelhunter = 417;
-        public const uint EntrySuccubus = 1863;
-        public const uint EntryImp = 416;
+        public const int EntryFelguard = 17252;
+        public const int EntryVoidwalker = 1860;
+        public const int EntryFelhunter = 417;
+        public const int EntrySuccubus = 1863;
+        public const int EntryImp = 416;
 
         //DKPetCalculate 
-        public const uint EntryArmyOfTheDeadGhoul = 24207;
+        public const int EntryArmyOfTheDeadGhoul = 24207;
     }
 
     [Script]
@@ -194,7 +194,7 @@ namespace Scripts.Spells.Pets
     [Script]
     class spell_warl_pet_scaling_01 : AuraScript
     {
-        uint _tempBonus;
+        int _tempBonus;
 
         public override bool Load()
         {
@@ -214,7 +214,7 @@ namespace Scripts.Spells.Pets
                     float ownerBonus = MathFunctions.CalculatePct(owner.GetStat(Stats.Stamina), 75);
 
                     amount += (int)ownerBonus;
-                    _tempBonus = (uint)ownerBonus;
+                    _tempBonus = (int)ownerBonus;
                 }
             }
         }
@@ -227,22 +227,22 @@ namespace Scripts.Spells.Pets
                 if (_tempBonus != 0)
                 {
                     PetLevelInfo pInfo = ObjectMgr.GetPetLevelInfo(pet.GetEntry(), pet.GetLevel());
-                    uint healthMod;
-                    uint baseHealth = pInfo.health;
+                    int healthMod;
+                    int baseHealth = pInfo.health;
                     switch (pet.GetEntry())
                     {
                         case CreatureIds.EntryImp:
-                            healthMod = (uint)(_tempBonus * 8.4f);
+                            healthMod = (int)(_tempBonus * 8.4f);
                             break;
                         case CreatureIds.EntryFelguard:
                         case CreatureIds.EntryVoidwalker:
-                            healthMod = _tempBonus * 11;
+                            healthMod = (int)(_tempBonus * 11.0f);
                             break;
                         case CreatureIds.EntrySuccubus:
-                            healthMod = (uint)(_tempBonus * 9.1f);
+                            healthMod = (int)(_tempBonus * 9.1f);
                             break;
                         case CreatureIds.EntryFelhunter:
-                            healthMod = (uint)(_tempBonus * 9.5f);
+                            healthMod = (int)(_tempBonus * 9.5f);
                             break;
                         default:
                             healthMod = 0;
@@ -367,18 +367,18 @@ namespace Scripts.Spells.Pets
                 if (_tempBonus != 0)
                 {
                     PetLevelInfo pInfo = ObjectMgr.GetPetLevelInfo(pet.GetEntry(), pet.GetLevel());
-                    uint manaMod;
-                    uint baseMana = pInfo.mana;
+                    int manaMod;
+                    int baseMana = pInfo.mana;
                     switch (pet.GetEntry())
                     {
                         case CreatureIds.EntryImp:
-                            manaMod = (uint)(_tempBonus * 4.9f);
+                            manaMod = (int)(_tempBonus * 4.9f);
                             break;
                         case CreatureIds.EntryVoidwalker:
                         case CreatureIds.EntrySuccubus:
                         case CreatureIds.EntryFelhunter:
                         case CreatureIds.EntryFelguard:
-                            manaMod = (uint)(_tempBonus * 11.5f);
+                            manaMod = (int)(_tempBonus * 11.5f);
                             break;
                         default:
                             manaMod = 0;

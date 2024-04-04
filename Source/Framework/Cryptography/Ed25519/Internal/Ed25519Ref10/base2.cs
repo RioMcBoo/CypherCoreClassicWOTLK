@@ -2,7 +2,7 @@
 {
     internal static partial class LookupTables
     {
-        internal static readonly GroupElementPreComp[] Base2 = new GroupElementPreComp[]{
+        internal static readonly GroupElementPreComp[] Base2 = [
             new GroupElementPreComp(
               new FieldElement( 25967493,-14356035,29566456,3660896,-12694345,4014787,27544626,-11754271,-6079156,2047605 ),
             new FieldElement( -12545711,934262,-2722910,3049990,-727428,9406986,12720692,5043384,19500929,-15469378 ),
@@ -43,6 +43,6 @@
             new FieldElement( -24326370,15950226,-31801215,-14592823,-11662737,-5090925,1573892,-2625887,2198790,-15804619 ),
             new FieldElement( -3099351,10324967,-2241613,7453183,-5446979,-2735503,-13812022,-16236442,-32461234,-12290683 )
              )
-		};
+		];
     }
 }

@@ -12,16 +12,16 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
 {
     struct SpellIds
     {
-        public const uint Inferno = 19695;
-        public const uint InfernoDmg = 19698;
-        public const uint IgniteMana = 19659;
-        public const uint LivingBomb = 20475;
-        public const uint Armageddon = 20478;
+        public const int Inferno = 19695;
+        public const int InfernoDmg = 19698;
+        public const int IgniteMana = 19659;
+        public const int LivingBomb = 20475;
+        public const int Armageddon = 20478;
     }
 
     struct TextIds
     {
-        public const uint EmoteService = 0;
+        public const int EmoteService = 0;
     }
 
     [Script]
@@ -40,7 +40,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
             {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -(int)SpellIds.IgniteMana);
+                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -SpellIds.IgniteMana);
                 if (target != null)
                     DoCast(target, SpellIds.IgniteMana);
                 task.Repeat(TimeSpan.FromSeconds(30));
@@ -81,7 +81,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
         void OnPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
-            int[] damageForTick = { 500, 500, 1000, 1000, 2000, 2000, 3000, 5000 };
+            int[] damageForTick = [500, 500, 1000, 1000, 2000, 2000, 3000, 5000];
             CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
             args.TriggeringAura = aurEff;
             args.AddSpellMod(SpellValueMod.BasePoint0, damageForTick[aurEff.GetTickNumber() - 1]);

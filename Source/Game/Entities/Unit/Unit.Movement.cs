@@ -1629,10 +1629,10 @@ namespace Game.Entities
                 RemoveUnitMovementFlag2(MovementFlag2.IgnoreMovementForces);
 
             ServerOpcodes[] ignoreMovementForcesOpcodeTable =
-            {
+            [
                 ServerOpcodes.MoveUnsetIgnoreMovementForces,
                 ServerOpcodes.MoveSetIgnoreMovementForces
-            };
+            ];
 
             Player movingPlayer = GetPlayerMovingMe();
             if (movingPlayer != null)

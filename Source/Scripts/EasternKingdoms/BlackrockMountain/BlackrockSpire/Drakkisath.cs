@@ -10,10 +10,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Drakkisath
 {
     struct SpellIds
     {
-        public const uint Firenova = 23462;
-        public const uint Cleave = 20691;
-        public const uint Confliguration = 16805;
-        public const uint Thunderclap = 15548; //Not sure if right Id. 23931 would be a harder possibility.
+        public const int Firenova = 23462;
+        public const int Cleave = 20691;
+        public const int Confliguration = 16805;
+        public const int Thunderclap = 15548; //Not sure if right Id. 23931 would be a harder possibility.
     }
 
     [Script]

@@ -42,7 +42,7 @@ namespace Game.BattleGrounds.Zones
         {
             if (GetStatus() == BattlegroundStatus.InProgress)
             {
-                int[] team_points = { 0, 0 };
+                int[] team_points = [0, 0];
 
                 for (byte node = 0; node < ABBattlegroundNodes.DynamicNodesCount; ++node)
                 {
@@ -282,8 +282,8 @@ namespace Game.BattleGrounds.Zones
         void _SendNodeUpdate(byte node)
         {
             // Send node owner state update to refresh map icons on client
-            int[] idPlusArray = { 0, 2, 3, 0, 1 };
-            int[] statePlusArray = { 0, 2, 0, 2, 0 };
+            int[] idPlusArray = [0, 2, 3, 0, 1];
+            int[] statePlusArray = [0, 2, 0, 2, 0];
 
             if (m_prevNodes[node] != 0)
                 UpdateWorldState(NodeStates[node] + idPlusArray[(int)m_prevNodes[node]], 0);
@@ -720,40 +720,40 @@ namespace Game.BattleGrounds.Zones
         public const int ExploitTeleportLocationHorde = 3706;
 
         public static Position[] NodePositions =
-        {
+        [
             new Position(1166.785f, 1200.132f, -56.70859f, 0.9075713f),         // stables
             new Position(977.0156f, 1046.616f, -44.80923f, -2.600541f),         // blacksmith
             new Position(806.1821f, 874.2723f, -55.99371f, -2.303835f),         // farm
             new Position(856.1419f, 1148.902f, 11.18469f, -2.303835f),          // lumber mill
             new Position(1146.923f, 848.1782f, -110.917f, -0.7330382f)          // gold mine
-        };
+        ];
 
         // x, y, z, o, rot0, rot1, rot2, rot3
         public static float[][] DoorPositions =
-        {
-            new float[] {1284.597f, 1281.167f, -15.97792f, 0.7068594f, 0.012957f, -0.060288f, 0.344959f, 0.93659f },
-            new float[] {708.0903f, 708.4479f, -17.8342f, -2.391099f, 0.050291f, 0.015127f, 0.929217f, -0.365784f}
-        };
+        [
+            [1284.597f, 1281.167f, -15.97792f, 0.7068594f, 0.012957f, -0.060288f, 0.344959f, 0.93659f],
+            [708.0903f, 708.4479f, -17.8342f, -2.391099f, 0.050291f, 0.015127f, 0.929217f, -0.365784f]
+        ];
 
         // Tick intervals and given points: case 0, 1, 2, 3, 4, 5 captured nodes
-        public static uint[] TickIntervals = { 0, 12000, 9000, 6000, 3000, 1000 };
-        public static int[] TickPoints = { 0, 10, 10, 10, 10, 30 };
+        public static uint[] TickIntervals = [0, 12000, 9000, 6000, 3000, 1000];
+        public static int[] TickPoints = [0, 10, 10, 10, 10, 30];
 
         // WorldSafeLocs ids for 5 nodes, and for ally, and horde starting location
-        public static int[] GraveyardIds = { 895, 894, 893, 897, 896, 898, 899 };
+        public static int[] GraveyardIds = [895, 894, 893, 897, 896, 898, 899];
 
         // x, y, z, o
         public static float[][] BuffPositions =
-        {
-            new float[] {1185.566f, 1184.629f, -56.36329f, 2.303831f },         // stables
-            new float[] {990.1131f, 1008.73f, -42.60328f, 0.8203033f },         // blacksmith
-            new float[] {818.0089f, 842.3543f, -56.54062f, 3.176533f },         // farm
-            new float[] {808.8463f, 1185.417f,  11.92161f, 5.619962f },         // lumber mill
-            new float[] {1147.091f, 816.8362f, -98.39896f, 6.056293f }          // gold mine
-        };
+        [
+            [1185.566f, 1184.629f, -56.36329f, 2.303831f],         // stables
+            [990.1131f, 1008.73f, -42.60328f, 0.8203033f],         // blacksmith
+            [818.0089f, 842.3543f, -56.54062f, 3.176533f],         // farm
+            [808.8463f, 1185.417f,  11.92161f, 5.619962f],         // lumber mill
+            [1147.091f, 816.8362f, -98.39896f, 6.056293f]          // gold mine
+        ];
 
         public static Position[] SpiritGuidePos =
-        {
+        [
             new Position(1200.03f, 1171.09f, -56.47f, 5.15f),                   // stables
             new Position(1017.43f, 960.61f, -42.95f, 4.88f),                    // blacksmith
             new Position(833.00f, 793.00f, -57.25f, 5.27f),                     // farm
@@ -761,11 +761,11 @@ namespace Game.BattleGrounds.Zones
             new Position(1207.48f, 787.00f, -83.36f, 5.51f),                    // gold mine
             new Position(1354.05f, 1275.48f, -11.30f, 4.77f),                   // alliance starting base
             new Position(714.61f, 646.15f, -10.87f, 4.34f)                      // horde starting base
-        };
+        ];
 
-        public static int[] NodeStates = { 1767, 1782, 1772, 1792, 1787 };
+        public static int[] NodeStates = [1767, 1782, 1772, 1792, 1787];
 
-        public static int[] NodeIcons = { 1842, 1846, 1845, 1844, 1843 };
+        public static int[] NodeIcons = [1842, 1846, 1845, 1844, 1843];
     }
 
     class BattlegroundABScore : BattlegroundScore
@@ -952,13 +952,13 @@ namespace Game.BattleGrounds.Zones
         public const int HordeNearVictory = 10599;
 
         public static ABNodeInfo[] ABNodes =
-        {
+        [
             new ABNodeInfo(ABBattlegroundNodes.NodeStables,    10199, 10200, 10203, 10204, 10201, 10202, 10286, 10287),
             new ABNodeInfo(ABBattlegroundNodes.NodeBlacksmith, 10211, 10212, 10213, 10214, 10215, 10216, 10290, 10291),
             new ABNodeInfo(ABBattlegroundNodes.NodeFarm,       10217, 10218, 10219, 10220, 10221, 10222, 10288, 10289),
             new ABNodeInfo(ABBattlegroundNodes.NodeLumberMill, 10224, 10225, 10226, 10227, 10228, 10229, 10284, 10285),
             new ABNodeInfo(ABBattlegroundNodes.NodeGoldMine,   10230, 10231, 10232, 10233, 10234, 10235, 10282, 10283)
-        };
+        ];
     }
 
     struct ABNodeInfo

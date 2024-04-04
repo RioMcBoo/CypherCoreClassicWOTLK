@@ -15,7 +15,7 @@ namespace Scripts.Pets.Generic
     [Script]
     class npc_pet_gen_pandaren_monk : NullCreatureAI
     {
-        const uint SpellPandarenMonk = 69800;
+        const int SpellPandarenMonk = 69800;
 
         Action<TaskContext> focusAction;
 
@@ -84,10 +84,10 @@ namespace Scripts.Pets.Generic
     [Script]
     class npc_pet_gen_soul_trader : ScriptedAI
     {
-        const uint SaySoulTraderIntro = 0;
+        const int SaySoulTraderIntro = 0;
 
-        const uint SpellEtherealOnsummon = 50052;
-        const uint SpellEtherealPetRemoveAura = 50055;
+        const int SpellEtherealOnsummon = 50052;
+        const int SpellEtherealPetRemoveAura = 50055;
 
         public npc_pet_gen_soul_trader(Creature creature) : base(creature) { }
 
@@ -112,14 +112,14 @@ namespace Scripts.Pets.Generic
     [Script] // 69735 - Lich Pet OnSummon
     class spell_pet_gen_lich_pet_onsummon : SpellScript
     {
-        const uint SpellLichPetAura = 69732;
+        const int SpellLichPetAura = 69732;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellLichPetAura);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
             target.CastSpell(target, SpellLichPetAura, true);
@@ -134,14 +134,14 @@ namespace Scripts.Pets.Generic
     [Script] // 69736 - Lich Pet Aura Remove
     class spell_pet_gen_lich_pet_aura_Remove : SpellScript
     {
-        const uint SpellLichPetAura = 69732;
+        const int SpellLichPetAura = 69732;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellLichPetAura);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetHitUnit().RemoveAurasDueToSpell(SpellLichPetAura);
         }
@@ -155,9 +155,9 @@ namespace Scripts.Pets.Generic
     [Script] // 69732 - Lich Pet Aura
     class spell_pet_gen_lich_pet_AuraScript : AuraScript
     {
-        const uint SpellLichPetAuraOnkill = 69731;
+        const int SpellLichPetAuraOnkill = 69731;
 
-        const uint NpcLichPet = 36979;
+        const int NpcLichPet = 36979;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -191,7 +191,7 @@ namespace Scripts.Pets.Generic
     [Script] // 70050 - [Dnd] Lich Pet
     class spell_pet_gen_lich_pet_periodic_emote : AuraScript
     {
-        const uint SpellLichPetEmote = 70049;
+        const int SpellLichPetEmote = 70049;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -236,12 +236,12 @@ namespace Scripts.Pets.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+            return ValidateSpellInfo(spellInfo.GetEffect(0).CalcValue());
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue());
+            GetCaster().CastSpell(GetHitUnit(), GetEffectValue());
         }
 
         public override void Register()

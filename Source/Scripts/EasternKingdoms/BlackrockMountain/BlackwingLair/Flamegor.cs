@@ -10,14 +10,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Flamegor
 {
     struct SpellIds
     {
-        public const uint Shadowflame = 22539;
-        public const uint Wingbuffet = 23339;
-        public const uint Frenzy = 23342;  //This spell periodically triggers fire nova
+        public const int Shadowflame = 22539;
+        public const int Wingbuffet = 23339;
+        public const int Frenzy = 23342;  //This spell periodically triggers fire nova
     }
 
     struct TextIds
     {
-        public const uint EmoteFrenzy = 0;
+        public const int EmoteFrenzy = 0;
     }
 
     [Script]

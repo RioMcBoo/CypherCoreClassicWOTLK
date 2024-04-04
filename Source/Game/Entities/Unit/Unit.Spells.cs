@@ -1089,10 +1089,10 @@ namespace Game.Entities
         public uint GetDiseasesByCaster(ObjectGuid casterGUID, bool remove = false)
         {
             AuraType[] diseaseAuraTypes =
-            {
+            [
                 AuraType.PeriodicDamage, // Frost Fever and Blood Plague
                 AuraType.Linked          // Crypt Fever and Ebon Plague
-            };
+            ];
 
             uint diseases = 0;
             foreach (var aType in diseaseAuraTypes)
@@ -1124,11 +1124,11 @@ namespace Game.Entities
         uint GetDoTsByCaster(ObjectGuid casterGUID)
         {
             AuraType[] diseaseAuraTypes =
-            {
+            [
                 AuraType.PeriodicDamage,
                 AuraType.PeriodicDamagePercent,
                 AuraType.None
-            };
+            ];
 
             uint dots = 0;
             foreach (var aura in diseaseAuraTypes)

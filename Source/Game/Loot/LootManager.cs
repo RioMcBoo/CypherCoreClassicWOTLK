@@ -566,8 +566,8 @@ namespace Game.Loots
             return true;                                            // Referenced template existence is checked at whole store level
         }
 
-        public static WorldCfg[] qualityToRate = new WorldCfg[7]
-        {
+        public static WorldCfg[] qualityToRate =
+        [
             WorldCfg.RateDropItemPoor,                                    // ITEM_QUALITY_POOR
             WorldCfg.RateDropItemNormal,                                  // ITEM_QUALITY_NORMAL
             WorldCfg.RateDropItemUncommon,                                // ITEM_QUALITY_UNCOMMON
@@ -575,7 +575,7 @@ namespace Game.Loots
             WorldCfg.RateDropItemEpic,                                    // ITEM_QUALITY_EPIC
             WorldCfg.RateDropItemLegendary,                               // ITEM_QUALITY_LEGENDARY
             WorldCfg.RateDropItemArtifact,                                // ITEM_QUALITY_ARTIFACT
-        };
+        ];
     }
 
     public class LootStore

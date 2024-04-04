@@ -11,11 +11,11 @@ namespace Scripts.Events
     [Script]
     class spell_operation_gnomeregan_basic_orders_emote : AuraScript
     {
-        const uint SpellTestSalute = 73835;
-        const uint SpellTestRoar = 73836;
-        const uint SpellTestCheer = 73725;
-        const uint SpellTestDance = 73837;
-        const uint SpellTestStopDance = 73886;
+        const int SpellTestSalute = 73835;
+        const int SpellTestRoar = 73836;
+        const int SpellTestCheer = 73725;
+        const int SpellTestDance = 73837;
+        const int SpellTestStopDance = 73886;
 
         void HandlePeriodic(AuraEffect aurEff)
         {

@@ -16,53 +16,53 @@ namespace Scripts.Spells.Rogue
 
     struct SpellIds
     {
-        public const uint AdrenalineRush = 13750;
-        public const uint BetweenTheEyes = 199804;
-        public const uint BlackjackTalent = 379005;
-        public const uint Blackjack = 394119;
-        public const uint BladeFlurry = 13877;
-        public const uint BladeFlurryExtraAttack = 22482;
-        public const uint Broadside = 193356;
-        public const uint BuriedTreasure = 199600;
-        public const uint CheatDeathDummy = 31231;
-        public const uint CheatedDeath = 45181;
-        public const uint CheatingDeath = 45182;
-        public const uint DeathFromAbove = 152150;
-        public const uint GrandMelee = 193358;
-        public const uint GrapplingHook = 195457;
-        public const uint KillingSpree = 51690;
-        public const uint KillingSpreeTeleport = 57840;
-        public const uint KillingSpreeWeaponDmg = 57841;
-        public const uint KillingSpreeDmgBuff = 61851;
-        public const uint MarkedForDeath = 137619;
-        public const uint MasterOfSubtletyDamagePercent = 31665;
-        public const uint MasterOfSubtletyPassive = 31223;
-        public const uint MainGauche = 86392;
-        public const uint PremeditationPassive = 343160;
-        public const uint PremeditationAura = 343173;
-        public const uint PreyOnTheWeakTalent = 131511;
-        public const uint PreyOnTheWeak = 255909;
-        public const uint RuthlessPrecision = 193357;
-        public const uint Sanctuary = 98877;
-        public const uint SkullAndCrossbones = 199603;
-        public const uint ShadowFocus = 108209;
-        public const uint ShadowFocusEffect = 112942;
-        public const uint SliceAndDice = 315496;
-        public const uint Sprint = 2983;
-        public const uint Stealth = 1784;
-        public const uint StealthStealthAura = 158185;
-        public const uint StealthShapeshiftAura = 158188;
-        public const uint SymbolsOfDeathCritAura = 227151;
-        public const uint SymbolsOfDeathRank2 = 328077;
-        public const uint TrueBearing = 193359;
-        public const uint TurnTheTablesBuff = 198027;
-        public const uint Vanish = 1856;
-        public const uint VanishAura = 11327;
-        public const uint TricksOfTheTrade = 57934;
-        public const uint TricksOfTheTradeProc = 59628;
-        public const uint HonorAmongThievesEnergize = 51699;
-        public const uint T52PSetBonus = 37169;
-        public const uint VenomousWounds = 79134;
+        public const int AdrenalineRush = 13750;
+        public const int BetweenTheEyes = 199804;
+        public const int BlackjackTalent = 379005;
+        public const int Blackjack = 394119;
+        public const int BladeFlurry = 13877;
+        public const int BladeFlurryExtraAttack = 22482;
+        public const int Broadside = 193356;
+        public const int BuriedTreasure = 199600;
+        public const int CheatDeathDummy = 31231;
+        public const int CheatedDeath = 45181;
+        public const int CheatingDeath = 45182;
+        public const int DeathFromAbove = 152150;
+        public const int GrandMelee = 193358;
+        public const int GrapplingHook = 195457;
+        public const int KillingSpree = 51690;
+        public const int KillingSpreeTeleport = 57840;
+        public const int KillingSpreeWeaponDmg = 57841;
+        public const int KillingSpreeDmgBuff = 61851;
+        public const int MarkedForDeath = 137619;
+        public const int MasterOfSubtletyDamagePercent = 31665;
+        public const int MasterOfSubtletyPassive = 31223;
+        public const int MainGauche = 86392;
+        public const int PremeditationPassive = 343160;
+        public const int PremeditationAura = 343173;
+        public const int PreyOnTheWeakTalent = 131511;
+        public const int PreyOnTheWeak = 255909;
+        public const int RuthlessPrecision = 193357;
+        public const int Sanctuary = 98877;
+        public const int SkullAndCrossbones = 199603;
+        public const int ShadowFocus = 108209;
+        public const int ShadowFocusEffect = 112942;
+        public const int SliceAndDice = 315496;
+        public const int Sprint = 2983;
+        public const int Stealth = 1784;
+        public const int StealthStealthAura = 158185;
+        public const int StealthShapeshiftAura = 158188;
+        public const int SymbolsOfDeathCritAura = 227151;
+        public const int SymbolsOfDeathRank2 = 328077;
+        public const int TrueBearing = 193359;
+        public const int TurnTheTablesBuff = 198027;
+        public const int Vanish = 1856;
+        public const int VanishAura = 11327;
+        public const int TricksOfTheTrade = 57934;
+        public const int TricksOfTheTradeProc = 59628;
+        public const int HonorAmongThievesEnergize = 51699;
+        public const int T52PSetBonus = 37169;
+        public const int VenomousWounds = 79134;
     }
 
     struct Misc
@@ -84,7 +84,7 @@ namespace Scripts.Spells.Rogue
             return ValidateSpellEffect((spellInfo.Id, 3));
         }
 
-        void HandleHitDamage(uint effIndex)
+        void HandleHitDamage(int effIndex)
         {
             Unit hitUnit = GetHitUnit();
             if (hitUnit == null)
@@ -176,7 +176,7 @@ namespace Scripts.Spells.Rogue
                 && ValidateSpellEffect((spellInfo.Id, 1));
         }
 
-        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref int absorbAmount)
         {
             Unit target = GetTarget();
             if (target.HasAura(SpellIds.CheatedDeath))
@@ -253,7 +253,7 @@ namespace Scripts.Spells.Rogue
 
                     for (byte s = 0; s < 3; ++s)
                     {
-                        if (enchant.Effect[s] != ItemEnchantmentType.CombatSpell)
+                        if (enchant.Effect(s) != ItemEnchantmentType.CombatSpell)
                             continue;
 
                         SpellInfo spellInfo = SpellMgr.GetSpellInfo(enchant.EffectArg[s], Difficulty.None);
@@ -449,7 +449,7 @@ namespace Scripts.Spells.Rogue
                 FinishCast(SpellCastResult.OutOfRange);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Aura aura = GetCaster().GetAura(SpellIds.KillingSpree);
             if (aura != null)
@@ -551,7 +551,7 @@ namespace Scripts.Spells.Rogue
     [Script] // 79096 - Restless Blades
     class spell_rog_restless_blades : AuraScript
     {
-        uint[] Spells = { SpellIds.AdrenalineRush, SpellIds.BetweenTheEyes, SpellIds.Sprint, SpellIds.GrapplingHook, SpellIds.Vanish, SpellIds.KillingSpree, SpellIds.MarkedForDeath, SpellIds.DeathFromAbove };
+        int[] Spells = [SpellIds.AdrenalineRush, SpellIds.BetweenTheEyes, SpellIds.Sprint, SpellIds.GrapplingHook, SpellIds.Vanish, SpellIds.KillingSpree, SpellIds.MarkedForDeath, SpellIds.DeathFromAbove];
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -566,7 +566,7 @@ namespace Scripts.Spells.Rogue
                 int cdExtra = -(int)(aurEff.GetAmount() * spentCP.Value * 0.1f);
 
                 SpellHistory history = GetTarget().GetSpellHistory();
-                foreach (uint spellId in Spells)
+                foreach (var spellId in Spells)
                     history.ModifyCooldown(spellId, TimeSpan.FromSeconds(cdExtra), true);
             }
         }
@@ -580,17 +580,17 @@ namespace Scripts.Spells.Rogue
     [Script] // 315508 - Roll the Bones
     class spell_rog_roll_the_bones : SpellScript
     {
-        uint[] Spells = { SpellIds.SkullAndCrossbones, SpellIds.GrandMelee, SpellIds.RuthlessPrecision, SpellIds.TrueBearing, SpellIds.BuriedTreasure, SpellIds.Broadside };
+        int[] Spells = [SpellIds.SkullAndCrossbones, SpellIds.GrandMelee, SpellIds.RuthlessPrecision, SpellIds.TrueBearing, SpellIds.BuriedTreasure, SpellIds.Broadside];
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(Spells);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             int currentDuration = 0;
-            foreach (uint spellId in Spells)
+            foreach (var spellId in Spells)
             {
                 Aura aura = GetCaster().GetAura(spellId);
                 if (aura != null)
@@ -600,7 +600,7 @@ namespace Scripts.Spells.Rogue
                 }
             }
 
-            List<uint> possibleBuffs = new(Spells);
+            List<int> possibleBuffs = new(Spells);
             possibleBuffs.Shuffle();
 
             // https://www.icy-veins.com/wow/outlaw-rogue-pve-dps-rotation-cooldowns-abilities
@@ -616,7 +616,7 @@ namespace Scripts.Spells.Rogue
 
             for (int i = 0; i < numBuffs; ++i)
             {
-                uint spellId = possibleBuffs[i];
+                int spellId = possibleBuffs[i];
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                 args.AddSpellMod(SpellValueMod.Duration, GetSpellInfo().GetDuration() + currentDuration);
                 GetCaster().CastSpell(GetCaster(), spellId, args);
@@ -705,7 +705,7 @@ namespace Scripts.Spells.Rogue
             return SpellCastResult.Success;
         }
 
-        void HandleEnergize(uint effIndex)
+        void HandleEnergize(int effIndex)
         {
             Unit caster = GetCaster();
             if (_hasPremeditationAura)
@@ -745,7 +745,7 @@ namespace Scripts.Spells.Rogue
             return ValidateSpellInfo(SpellIds.T52PSetBonus);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             int damagePerCombo = GetHitDamage();
             AuraEffect t5 = GetCaster().GetAuraEffect(SpellIds.T52PSetBonus, 0);
@@ -842,7 +842,7 @@ namespace Scripts.Spells.Rogue
             return ValidateSpellInfo(SpellIds.SymbolsOfDeathRank2, SpellIds.SymbolsOfDeathCritAura);
         }
 
-        void HandleEffectHitTarget(uint effIndex)
+        void HandleEffectHitTarget(int effIndex)
         {
             if (GetCaster().HasAura(SpellIds.SymbolsOfDeathRank2))
                 GetCaster().CastSpell(GetCaster(), SpellIds.SymbolsOfDeathCritAura, true);
@@ -976,7 +976,7 @@ namespace Scripts.Spells.Rogue
             return ValidateSpellInfo(SpellIds.VanishAura, SpellIds.StealthShapeshiftAura);
         }
 
-        void OnLaunchTarget(uint effIndex)
+        void OnLaunchTarget(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 

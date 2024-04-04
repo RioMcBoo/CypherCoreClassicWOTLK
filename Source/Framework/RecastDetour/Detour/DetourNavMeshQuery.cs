@@ -3028,7 +3028,7 @@ public static partial class Detour
             m_nodePool.clear();
             m_openList.clear();
 
-            float[] centerPos = new float[] { 0, 0, 0 };
+            float[] centerPos = [0, 0, 0];
             for (int i = 0; i < nverts; ++i)
             {
                 dtVadd(centerPos, 0, centerPos, 0, verts, i * 3);

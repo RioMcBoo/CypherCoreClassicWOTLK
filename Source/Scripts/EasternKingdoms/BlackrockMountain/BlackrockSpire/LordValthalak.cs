@@ -11,10 +11,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 {
     struct SpellIds
     {
-        public const uint Frenzy = 8269;
-        public const uint SummonSpectralAssassin = 27249;
-        public const uint ShadowBoltVolley = 27382;
-        public const uint ShadowWrath = 27286;
+        public const int Frenzy = 8269;
+        public const int SummonSpectralAssassin = 27249;
+        public const int ShadowBoltVolley = 27382;
+        public const int ShadowWrath = 27286;
     }
 
     [Script]

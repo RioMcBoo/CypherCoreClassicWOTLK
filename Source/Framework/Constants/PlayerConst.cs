@@ -42,7 +42,7 @@ namespace Framework.Constants
 
         public const int MaxCUFProfiles = 5;
 
-        public static uint[] copseReclaimDelay = { 30, 60, 120 };
+        public static uint[] copseReclaimDelay = [30, 60, 120];
 
         public const int MaxRunes = 7;
         public const int MaxRechargingRunes = 3;

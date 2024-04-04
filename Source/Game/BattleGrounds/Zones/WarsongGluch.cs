@@ -876,10 +876,10 @@ namespace Game.BattleGrounds.Zones
         byte _flagDebuffState;                            // 0 - no debuffs, 1 - focused assault, 2 - brutal assault
 
         int[][] Honor =
-        {
+        [
             [20, 40, 40], // normal honor
             [60, 40, 80]  // holiday
-        };
+        ];
         const int ExploitTeleportLocationAlliance = 3784;
         const int ExploitTeleportLocationHorde = 3785;
     }

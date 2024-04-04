@@ -881,7 +881,7 @@ namespace Game
         #endregion
 
         public static int[] ReputationRankThresholds =
-        {
+        [
             -42000,
             // Hated
             -6000,
@@ -898,13 +898,13 @@ namespace Game
             // Revered
             42000
             // Exalted
-        };
+        ];
 
         public static CypherStrings[] ReputationRankStrIndex =
-        {
+        [
             CypherStrings.RepHated, CypherStrings.RepHostile, CypherStrings.RepUnfriendly, CypherStrings.RepNeutral,
             CypherStrings.RepFriendly, CypherStrings.RepHonored, CypherStrings.RepRevered, CypherStrings.RepExalted
-        };
+        ];
 
         SortedDictionary<int, FactionState> _factions = new();
         Dictionary<int, ReputationRank> _forcedReactions = new();

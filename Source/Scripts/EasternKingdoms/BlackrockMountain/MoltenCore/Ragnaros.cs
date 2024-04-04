@@ -12,48 +12,48 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 {
     struct SpellIds
     {
-        public const uint HandOfRagnaros = 19780;
-        public const uint WrathOfRagnaros = 20566;
-        public const uint LavaBurst = 21158;
-        public const uint MagmaBlast = 20565;                   // Ranged attack
-        public const uint SonsOfFlameDummy = 21108;                   // Server side effect
-        public const uint Ragsubmerge = 21107;                   // Stealth aura
-        public const uint Ragemerge = 20568;
-        public const uint MeltWeapon = 21388;
-        public const uint ElementalFire = 20564;
-        public const uint Erruption = 17731;
+        public const int HandOfRagnaros = 19780;
+        public const int WrathOfRagnaros = 20566;
+        public const int LavaBurst = 21158;
+        public const int MagmaBlast = 20565;                   // Ranged attack
+        public const int SonsOfFlameDummy = 21108;                   // Server side effect
+        public const int Ragsubmerge = 21107;                   // Stealth aura
+        public const int Ragemerge = 20568;
+        public const int MeltWeapon = 21388;
+        public const int ElementalFire = 20564;
+        public const int Erruption = 17731;
     }
 
     struct TextIds
     {
-        public const uint SaySummonMaj = 0;
-        public const uint SayArrival1Rag = 1;
-        public const uint SayArrival2Maj = 2;
-        public const uint SayArrival3Rag = 3;
-        public const uint SayArrival5Rag = 4;
-        public const uint SayReinforcements1 = 5;
-        public const uint SayReinforcements2 = 6;
-        public const uint SayHand = 7;
-        public const uint SayWrath = 8;
-        public const uint SayKill = 9;
-        public const uint SayMagmaburst = 10;
+        public const int SaySummonMaj = 0;
+        public const int SayArrival1Rag = 1;
+        public const int SayArrival2Maj = 2;
+        public const int SayArrival3Rag = 3;
+        public const int SayArrival5Rag = 4;
+        public const int SayReinforcements1 = 5;
+        public const int SayReinforcements2 = 6;
+        public const int SayHand = 7;
+        public const int SayWrath = 8;
+        public const int SayKill = 9;
+        public const int SayMagmaburst = 10;
     }
 
     struct EventIds
     {
-        public const uint Eruption = 1;
-        public const uint WrathOfRagnaros = 2;
-        public const uint HandOfRagnaros = 3;
-        public const uint LavaBurst = 4;
-        public const uint ElementalFire = 5;
-        public const uint MagmaBlast = 6;
-        public const uint Submerge = 7;
+        public const int Eruption = 1;
+        public const int WrathOfRagnaros = 2;
+        public const int HandOfRagnaros = 3;
+        public const int LavaBurst = 4;
+        public const int ElementalFire = 5;
+        public const int MagmaBlast = 6;
+        public const int Submerge = 7;
 
-        public const uint Intro1 = 8;
-        public const uint Intro2 = 9;
-        public const uint Intro3 = 10;
-        public const uint Intro4 = 11;
-        public const uint Intro5 = 12;
+        public const int Intro1 = 8;
+        public const int Intro2 = 9;
+        public const int Intro3 = 10;
+        public const int Intro4 = 11;
+        public const int Intro5 = 12;
     }
 
     [Script]
@@ -160,7 +160,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 {
                     //Become unbanished again
                     me.SetReactState(ReactStates.Aggressive);
-                    me.SetFaction((uint)FactionTemplates.Monster);
+                    me.SetFaction(FactionTemplates.Monster);
                     me.SetUninteractible(false);
                     me.SetEmoteState(Emote.OneshotNone);
                     me.HandleEmoteCommand(Emote.OneshotEmerge);
@@ -239,7 +239,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                                 me.InterruptNonMeleeSpells(false);
                                 //Root self
                                 //DoCast(me, 23973);
-                                me.SetFaction((uint)FactionTemplates.Friendly);
+                                me.SetFaction(FactionTemplates.Friendly);
                                 me.SetUninteractible(true);
                                 me.SetEmoteState(Emote.StateSubmerged);
                                 me.HandleEmoteCommand(Emote.OneshotSubmerge);

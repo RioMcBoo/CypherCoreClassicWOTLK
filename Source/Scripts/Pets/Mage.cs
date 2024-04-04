@@ -11,11 +11,11 @@ namespace Scripts.Pets.Mage
     [Script]
     class npc_pet_mage_mirror_image : ScriptedAI
     {
-        const uint SpellMageCloneMe = 45204;
-        const uint SpellMageFrostBolt = 59638;
-        const uint SpellMageFireBlast = 59637;
+        const int SpellMageCloneMe = 45204;
+        const int SpellMageFrostBolt = 59638;
+        const int SpellMageFireBlast = 59637;
 
-        const uint TimerMirrorImageFireBlast = 6500;
+        const int TimerMirrorImageFireBlast = 6500;
         float ChaseDistance = 35.0f;
 
         uint _fireBlastTimer = 0;

@@ -1045,9 +1045,7 @@ namespace Game.Groups
             if (!IsRaidGroup())
                 return;
 
-            MemberSlot[] slots = new MemberSlot[2];
-            slots[0] = _getMemberSlot(firstGuid);
-            slots[1] = _getMemberSlot(secondGuid);
+            MemberSlot[] slots = [_getMemberSlot(firstGuid), _getMemberSlot(secondGuid)];
             if (slots[0] == null || slots[1] == null)
                 return;
 

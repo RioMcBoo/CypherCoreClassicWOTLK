@@ -11,9 +11,9 @@ namespace Game.BattleFields
 {
     public class BattleFieldManager : Singleton<BattleFieldManager>
     {
-        static int[] BattlefieldIdToMapId = { 0, 571, 732 };
-        static int[] BattlefieldIdToZoneId = { 0, 4197, 5095 }; // imitate World_PVP_Area.db2
-        static int[] BattlefieldIdToScriptId = { 0, 0, 0 };
+        static int[] BattlefieldIdToMapId = [0, 571, 732];
+        static int[] BattlefieldIdToZoneId = [0, 4197, 5095]; // imitate World_PVP_Area.db2
+        static int[] BattlefieldIdToScriptId = [0, 0, 0];
 
         BattleFieldManager() { }
 

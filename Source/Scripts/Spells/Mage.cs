@@ -387,11 +387,11 @@ namespace Scripts.Spells.Mage
     class spell_mage_cold_snap : SpellScript
     {
         int[] SpellsToReset =
-        {
+        [
             SpellIds.ConeOfCold,
             SpellIds.IceBarrier,
             SpellIds.IceBlock,
-        };
+        ];
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1154,14 +1154,14 @@ namespace Scripts.Spells.Mage
         const int NpcAurosalia = 18744;
 
         int[] PolymorhForms =
-        {
+        [
             SpellIds.SquirrelForm,
             SpellIds.GiraffeForm,
             SpellIds.SerpentForm,
             SpellIds.DragonhawkForm,
             SpellIds.WorgenForm,
             SpellIds.SheepForm
-        };
+        ];
 
         public override bool Validate(SpellInfo spellInfo)
         {

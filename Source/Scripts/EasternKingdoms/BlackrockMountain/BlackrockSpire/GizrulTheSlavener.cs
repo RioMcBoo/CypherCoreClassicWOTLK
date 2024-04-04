@@ -10,14 +10,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.GizrulTheSlav
 {
     struct SpellIds
     {
-        public const uint FatalBite = 16495;
-        public const uint InfectedBite = 16128;
-        public const uint Frenzy = 8269;
+        public const int FatalBite = 16495;
+        public const int InfectedBite = 16128;
+        public const int Frenzy = 8269;
     }
 
     struct PathIds
     {
-        public const uint Gizrul = 3219600;
+        public const int Gizrul = 3219600;
     }
 
     [Script]

@@ -306,32 +306,32 @@ namespace Scripts.Spells.Azerite
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             int[][] triggeredSpells =
-            {
+            [
                 //ClassNone
                 Array.Empty<int>(),
                 //ClassWarrior
-                new int[]  { SpellSociopath, SpellDelusional, SpellKleptomania, SpellParanoia, SpellManic, SpellMartyrComplex },
+                [SpellSociopath, SpellDelusional, SpellKleptomania, SpellParanoia, SpellManic, SpellMartyrComplex],
                 //ClassPaladin
-                new int[]  { SpellSociopath, SpellDelusional, SpellKleptomania, SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia },
+                [SpellSociopath, SpellDelusional, SpellKleptomania, SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia],
                 //ClassHunter
-                new int[]  { SpellDelusional, SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia },
+                [SpellDelusional, SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia],
                 //ClassRogue
-                new int[]  { SpellSociopath, SpellDelusional, SpellKleptomania, SpellParanoia, SpellManic, SpellMartyrComplex },
+                [SpellSociopath, SpellDelusional, SpellKleptomania, SpellParanoia, SpellManic, SpellMartyrComplex],
                 //ClassPriest
-                new int[]  { SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia },
+                [SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia],
                 //ClassDeathKnight
-                new int[]  { SpellSociopath, SpellDelusional, SpellKleptomania, SpellParanoia, SpellManic, SpellMartyrComplex },
+                [SpellSociopath, SpellDelusional, SpellKleptomania, SpellParanoia, SpellManic, SpellMartyrComplex],
                 //ClassShaman
-                new int[]  { SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia },
+                [SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia],
                 //ClassMage
-                new int[]  { SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia },
+                [SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia],
                 //ClassWarlock
-                new int[]  { SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia },
+                [SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia],
                 //ClassUnk
                 Array.Empty<int>(),
                 //ClassDruid
-                new int[]  { SpellSociopath, SpellDelusional, SpellKleptomania, SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia }
-            };
+                [SpellSociopath, SpellDelusional, SpellKleptomania, SpellMegalomania, SpellParanoia, SpellManic, SpellNarcissism, SpellMartyrComplex, SpellDementia]
+            ];
 
 
             PreventDefaultAction();
@@ -538,23 +538,23 @@ namespace Scripts.Spells.Azerite
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             int[][] triggeredSpells =
-            {
+            [
                 //ClassNone
                 Array.Empty<int>(),
                 //ClassWarrior
-                new int[]  { _strength, _critical, _haste },
+                [_strength, _critical, _haste],
                 //ClassPaladin
-                new int[] { _strength, _critical, _haste },
+                [_strength, _critical, _haste],
                 //ClassHunter
-                new int[] { _agility, _critical, _attackPower },
+                [_agility, _critical, _attackPower],
                 //ClassRogue
-                new int[]  { _agility, _haste, _attackPower },
+                [_agility, _haste, _attackPower],
                 //ClassPriest
                 Array.Empty<int>(),
                 //ClassDeathKnight
-                new int[]  { _strength, _critical, _haste },
+                [_strength, _critical, _haste],
                 //ClassShaman
-                new int[]  { _agility, _haste, _attackPower },
+                [_agility, _haste, _attackPower],
                 //ClassMage
                 Array.Empty<int>(),
                 //ClassWarlock
@@ -562,8 +562,8 @@ namespace Scripts.Spells.Azerite
                 //ClassUnk
                 Array.Empty<int>(),
                 //ClassDruid
-                new int[]  { _strength, _agility, _haste }
-             };
+                [_strength, _agility, _haste]
+             ];
 
 
             PreventDefaultAction();
@@ -1337,12 +1337,12 @@ namespace Scripts.Spells.Azerite
     class spell_item_mingos_fortune_generator : SpellScript
     {
         int[] CreateFortuneSpells =
-        {
+        [
             40804, 40805, 40806, 40807, 40808,
             40809, 40908, 40910, 40911, 40912,
             40913, 40914, 40915, 40916, 40918,
             40919, 40920, 40921, 40922, 40923
-        };
+        ];
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -2142,7 +2142,7 @@ namespace Scripts.Spells.Azerite
     class spell_item_wormhole_pandaria : SpellScript
     {
         int[] WormholeTargetLocations =
-        {
+        [
             126756, //SpellWormholePandariaIsleOfReckoning
             126757, //SpellWormholePandariaKunlaiUnderwater
             126758, //SpellWormholePandariaSraVess
@@ -2152,7 +2152,7 @@ namespace Scripts.Spells.Azerite
             126762, //SpellWormholePandariaCraneStatue
             126763, //SpellWormholePandariaEmperorsOmen
             126764 //SpellWormholePandariaWhitepetalLake
-        };
+        ];
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -2360,7 +2360,7 @@ namespace Scripts.Spells.Azerite
     class spell_item_ashbringer : SpellScript
     {
         int[] AshbringerSounds =
-        {
+        [
             8906,                             // "I was pure once"
             8907,                             // "Fought for righteousness"
             8908,                             // "I was once called Ashbringer"
@@ -2373,7 +2373,7 @@ namespace Scripts.Spells.Azerite
             8926,                             // "Scarlet Crusade  is pure no longer"
             8927,                             // "Balnazzar's crusade corrupted my son"
             8928                             // "Kill them all!"
-         };
+         ];
 
         public override bool Load()
         {

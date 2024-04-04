@@ -79,9 +79,9 @@ namespace BNetServer
                 responseType = parameters[1].ParameterType;
 
             if (responseType != null)
-                methodCaller = info.CreateDelegate(Expression.GetDelegateType(new[] { typeof(Session), requestType, responseType, info.ReturnType }));
+                methodCaller = info.CreateDelegate(Expression.GetDelegateType([typeof(Session), requestType, responseType, info.ReturnType]));
             else
-                methodCaller = info.CreateDelegate(Expression.GetDelegateType(new[] { typeof(Session), requestType, info.ReturnType }));
+                methodCaller = info.CreateDelegate(Expression.GetDelegateType([typeof(Session), requestType, info.ReturnType]));
         }
 
         public void Invoke(Session session, uint token, CodedInputStream stream)

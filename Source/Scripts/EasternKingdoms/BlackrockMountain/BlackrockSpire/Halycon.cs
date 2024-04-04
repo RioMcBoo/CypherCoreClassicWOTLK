@@ -12,13 +12,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Halycon
 
     struct SpellIds
     {
-        public const uint Rend = 13738;
-        public const uint Thrash = 3391;
+        public const int Rend = 13738;
+        public const int Thrash = 3391;
     }
 
     struct TextIds
     {
-        public const uint EmoteDeath = 0;
+        public const int EmoteDeath = 0;
     }
 
     [Script]

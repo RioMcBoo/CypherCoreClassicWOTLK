@@ -4171,11 +4171,7 @@ namespace Game.Entities
         //Equipment        
         byte FindEquipSlot(Item item, byte slot, bool swap)
         {
-            byte[] slots = new byte[4];
-            slots[0] = ItemSlot.Null;
-            slots[1] = ItemSlot.Null;
-            slots[2] = ItemSlot.Null;
-            slots[3] = ItemSlot.Null;
+            byte[] slots = [ItemSlot.Null, ItemSlot.Null, ItemSlot.Null, ItemSlot.Null];
             switch (item.GetTemplate().GetInventoryType())
             {
                 case InventoryType.Head:

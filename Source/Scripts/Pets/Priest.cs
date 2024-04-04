@@ -11,8 +11,8 @@ namespace Scripts.Pets.Priest
     [Script] // 198236 - Divine Image
     class npc_pet_pri_divine_image : PassiveAI
     {
-        const uint SpellPriestDivineImageSpellCheck = 405216;
-        const uint SpellPriestInvokeTheNaaru = 196687;
+        const int SpellPriestDivineImageSpellCheck = 405216;
+        const int SpellPriestInvokeTheNaaru = 196687;
 
         public npc_pet_pri_divine_image(Creature creature) : base(creature) { }
 
@@ -35,7 +35,7 @@ namespace Scripts.Pets.Priest
     [Script] // 189820 - Lightwell
     class npc_pet_pri_lightwell : PassiveAI
     {
-        const uint SpellPriestLightwellCharges = 59907;
+        const int SpellPriestLightwellCharges = 59907;
 
         public npc_pet_pri_lightwell(Creature creature) : base(creature)
         {
@@ -57,8 +57,8 @@ namespace Scripts.Pets.Priest
     [Script] // 62982 - Mindbender
     class npc_pet_pri_shadowfiend_mindbender : PetAI
     {
-        const uint SpellPriestAtonement = 81749;
-        const uint SpellPriestAtonementPassive = 195178;
+        const int SpellPriestAtonement = 81749;
+        const int SpellPriestAtonementPassive = 195178;
 
         public npc_pet_pri_shadowfiend_mindbender(Creature creature) : base(creature) { }
 

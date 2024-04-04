@@ -10,12 +10,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.MoiraBronzeb
 {
     struct SpellIds
     {
-        public const uint Heal = 10917;
-        public const uint Renew = 10929;
-        public const uint Shield = 10901;
-        public const uint Mindblast = 10947;
-        public const uint Shadowwordpain = 10894;
-        public const uint Smite = 10934;
+        public const int Heal = 10917;
+        public const int Renew = 10929;
+        public const int Shield = 10901;
+        public const int Mindblast = 10947;
+        public const int Shadowwordpain = 10894;
+        public const int Smite = 10934;
     }
 
     [Script]

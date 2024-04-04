@@ -2855,7 +2855,7 @@ namespace Game
         List<int> spellsUsedInSpellClickConditions = new();
 
         public string[] StaticSourceTypeData =
-        {
+        [
             "None",
             "Creature Loot",
             "Disenchant Loot",
@@ -2890,10 +2890,10 @@ namespace Game
             "Trainer Spell",
             "Object Visibility (by ID)",
             "Spawn Group"
-        };
+        ];
 
         public ConditionTypeInfo[] StaticConditionTypeData =
-        {
+        [
             new ConditionTypeInfo("None",                 false, false, false, false),
             new ConditionTypeInfo("Aura",                 true, true,  true, false),
             new ConditionTypeInfo("Item Stored",          true, true,  true, false),
@@ -2952,7 +2952,7 @@ namespace Game
             new ConditionTypeInfo("Scene In Progress",    true, false, false, false),
             new ConditionTypeInfo("Player Condition",     true, false, false, false),
             new ConditionTypeInfo("String ID",            true, false, false, true)
-        };
+        ];
 
         public struct ConditionTypeInfo
         {

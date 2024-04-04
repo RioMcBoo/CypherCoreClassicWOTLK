@@ -13,10 +13,10 @@ namespace Scripts.Events
     [Script] // 45724 - Braziers Hit!
     class spell_midsummer_braziers_hit : AuraScript
     {
-        const uint SpellTorchTossingTraining = 45716;
-        const uint SpellTorchTossingPractice = 46630;
-        const uint SpellTorchTossingTrainingSuccessAlliance = 45719;
-        const uint SpellTorchTossingTrainingSuccessHorde = 46651;
+        const int SpellTorchTossingTraining = 45716;
+        const int SpellTorchTossingPractice = 46630;
+        const int SpellTorchTossingTrainingSuccessAlliance = 45719;
+        const int SpellTorchTossingTrainingSuccessHorde = 46651;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -48,15 +48,15 @@ namespace Scripts.Events
     [Script] // 45907 - Torch Target Picker
     class spell_midsummer_torch_target_picker : SpellScript
     {
-        const uint SpellTargetIndicatorCosmetic = 46901;
-        const uint SpellTargetIndicator = 45723;
+        const int SpellTargetIndicatorCosmetic = 46901;
+        const int SpellTargetIndicator = 45723;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellTargetIndicatorCosmetic, SpellTargetIndicator);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
             target.CastSpell(target, SpellTargetIndicatorCosmetic, true);
@@ -72,14 +72,14 @@ namespace Scripts.Events
     [Script] // 46054 - Torch Toss (land)
     class spell_midsummer_torch_toss_land : SpellScript
     {
-        const uint SpellBraziersHit = 45724;
+        const int SpellBraziersHit = 45724;
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellBraziersHit);
         }
 
-        void HandleScript(uint effIndex)
+        void HandleScript(int effIndex)
         {
             GetHitUnit().CastSpell(GetCaster(), SpellBraziersHit, true);
         }
@@ -93,10 +93,10 @@ namespace Scripts.Events
     [Script] // 29705, 29726, 29727 - Test Ribbon Pole Channel
     class spell_midsummer_test_ribbon_pole_channel : AuraScript
     {
-        const uint SpellHasFullMidsummerSet = 58933;
-        const uint SpellBurningHotPoleDance = 58934;
-        const uint SpellRibbonPolePeriodicVisual = 45406;
-        const uint SpellRibbonDance = 29175;
+        const int SpellHasFullMidsummerSet = 58933;
+        const int SpellBurningHotPoleDance = 58934;
+        const int SpellRibbonPolePeriodicVisual = 45406;
+        const int SpellRibbonDance = 29175;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -136,9 +136,9 @@ namespace Scripts.Events
     [Script] // 45406 - Holiday - Midsummer, Ribbon Pole Periodic Visual
     class spell_midsummer_ribbon_pole_periodic_visual : AuraScript
     {
-        const uint SpellTestRibbonPole1 = 29705;
-        const uint SpellTestRibbonPole2 = 29726;
-        const uint SpellTestRibbonPole3 = 29727;
+        const int SpellTestRibbonPole1 = 29705;
+        const int SpellTestRibbonPole2 = 29726;
+        const int SpellTestRibbonPole3 = 29727;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -160,21 +160,21 @@ namespace Scripts.Events
 
     struct JugglingTorch
     {
-        public const uint SpellJuggleTorchSlow = 45792;
-        public const uint SpellJuggleTorchMedium = 45806;
-        public const uint SpellJuggleTorchFast = 45816;
-        public const uint SpellJuggleTorchSelf = 45638;
+        public const int SpellJuggleTorchSlow = 45792;
+        public const int SpellJuggleTorchMedium = 45806;
+        public const int SpellJuggleTorchFast = 45816;
+        public const int SpellJuggleTorchSelf = 45638;
 
-        public const uint SpellJuggleTorchShadowSlow = 46120;
-        public const uint SpellJuggleTorchShadowMedium = 46118;
-        public const uint SpellJuggleTorchShadowFast = 46117;
-        public const uint SpellJuggleTorchShadowSelf = 46121;
-        public const uint SpellGiveTorch = 45280;
+        public const int SpellJuggleTorchShadowSlow = 46120;
+        public const int SpellJuggleTorchShadowMedium = 46118;
+        public const int SpellJuggleTorchShadowFast = 46117;
+        public const int SpellJuggleTorchShadowSelf = 46121;
+        public const int SpellGiveTorch = 45280;
 
-        public const uint QuestTorchCatchingA = 11657;
-        public const uint QuestTorchCatchingH = 11923;
-        public const uint QuestMoreTorchCatchingA = 11924;
-        public const uint QuestMoreTorchCatchingH = 11925;
+        public const int QuestTorchCatchingA = 11657;
+        public const int QuestTorchCatchingH = 11923;
+        public const int QuestMoreTorchCatchingA = 11924;
+        public const int QuestMoreTorchCatchingH = 11925;
     }
 
     [Script] // 45819 - Throw Torch
@@ -186,7 +186,7 @@ namespace Scripts.Events
                 JugglingTorch.SpellJuggleTorchShadowSlow, JugglingTorch.SpellJuggleTorchShadowMedium, JugglingTorch.SpellJuggleTorchShadowFast, JugglingTorch.SpellJuggleTorchShadowSelf);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             if (GetExplTargetDest() == null)
                 return;
@@ -194,8 +194,8 @@ namespace Scripts.Events
             Position spellDest = GetExplTargetDest();
             float distance = GetCaster().GetExactDist2d(spellDest.GetPositionX(), spellDest.GetPositionY());
 
-            uint torchSpellID;
-            uint torchShadowSpellID;
+            int torchSpellID;
+            int torchShadowSpellID;
 
             if (distance <= 1.5f)
             {
@@ -237,7 +237,7 @@ namespace Scripts.Events
             return ValidateSpellInfo(JugglingTorch.SpellGiveTorch);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Player player = GetHitPlayer();
             if (player == null)
@@ -255,13 +255,13 @@ namespace Scripts.Events
 
     struct FlingTorch
     {
-        public const uint SpellFlingTorchTriggered = 45669;
-        public const uint SpellFlingTorchShadow = 46105;
-        public const uint SpellJuggleTorchMissed = 45676;
-        public const uint SpellTorchesCaught = 45693;
-        public const uint SpellTorchCatchingSuccessAlliance = 46081;
-        public const uint SpellTorchCatchingSuccessHorde = 46654;
-        public const uint SpellTorchCatchingRemoveTorches = 46084;
+        public const int SpellFlingTorchTriggered = 45669;
+        public const int SpellFlingTorchShadow = 46105;
+        public const int SpellJuggleTorchMissed = 45676;
+        public const int SpellTorchesCaught = 45693;
+        public const int SpellTorchCatchingSuccessAlliance = 46081;
+        public const int SpellTorchCatchingSuccessHorde = 46654;
+        public const int SpellTorchCatchingRemoveTorches = 46084;
     }
 
     [Script] // 46747 - Fling torch
@@ -274,7 +274,7 @@ namespace Scripts.Events
             return ValidateSpellInfo(FlingTorch.SpellFlingTorchTriggered, FlingTorch.SpellFlingTorchShadow);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleDummy(int effIndex)
         {
             Position dest = GetCaster().GetFirstCollisionPosition(30.0f, RandomHelper.NextSingle() * (float)(2 * MathF.PI));
             GetCaster().CastSpell(dest, FlingTorch.SpellFlingTorchTriggered, true);
@@ -295,7 +295,7 @@ namespace Scripts.Events
             return ValidateSpellInfo(FlingTorch.SpellJuggleTorchMissed);
         }
 
-        void HandleTriggerMissile(uint effIndex)
+        void HandleTriggerMissile(int effIndex)
         {
             Position pos = GetHitDest();
             if (pos != null)
@@ -323,7 +323,7 @@ namespace Scripts.Events
             return ValidateSpellInfo(FlingTorch.SpellFlingTorchTriggered, FlingTorch.SpellTorchCatchingSuccessAlliance, FlingTorch.SpellTorchCatchingSuccessHorde, FlingTorch.SpellTorchCatchingRemoveTorches, FlingTorch.SpellFlingTorchShadow);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(int effIndex)
         {
             Player player = GetHitPlayer();
             if (player == null)

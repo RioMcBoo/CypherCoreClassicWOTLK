@@ -10,8 +10,8 @@ class ConsoleAppender : Appender
 {
     public ConsoleAppender(byte id, string name, LogLevel level, AppenderFlags flags) : base(id, name, level, flags)
     {
-        _consoleColor = new[]
-        {
+        _consoleColor =
+        [
             ConsoleColor.White,
             ConsoleColor.White,
             ConsoleColor.Gray,
@@ -19,7 +19,7 @@ class ConsoleAppender : Appender
             ConsoleColor.Yellow,
             ConsoleColor.Red,
             ConsoleColor.Blue
-        };
+        ];
     }
 
     public override void _write(LogMessage message)

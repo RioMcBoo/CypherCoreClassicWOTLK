@@ -4690,7 +4690,7 @@ namespace Game.Entities
         }
     }
 
-    class SetControlZoneValue : GameObjectTypeBase.CustomCommand
+    public class SetControlZoneValue : GameObjectTypeBase.CustomCommand
     {
         int? _value;
 

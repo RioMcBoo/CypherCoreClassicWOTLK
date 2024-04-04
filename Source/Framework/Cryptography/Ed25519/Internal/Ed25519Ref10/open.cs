@@ -70,8 +70,8 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
                 var ed25519Ctx = Encoding.ASCII.GetBytes("SigEd25519 no Ed25519 collisions");
 
                 hasher.Update(ed25519Ctx, 0, ed25519Ctx.Length);
-                hasher.Update(new byte[1] { (byte)phflag }, 0, 1);
-                hasher.Update(new byte[1] { ctx != null ? (byte)ctx.Length : (byte)0 }, 0, 1);
+                hasher.Update([(byte)phflag], 0, 1);
+                hasher.Update([ctx != null ? (byte)ctx.Length : (byte)0], 0, 1);
 
                 if (ctx != null)
                     hasher.Update(ctx, 0, ctx.Length);

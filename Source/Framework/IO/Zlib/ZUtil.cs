@@ -11,9 +11,9 @@ namespace Framework.IO
 	{
 		private const int OS_CODE=0x0b;
 
-		static readonly string[] z_errmsg=new string[9]
-		{
-			"need dictionary",		// Z_NEED_DICT       2
+		static readonly string[] z_errmsg=
+        [
+            "need dictionary",		// Z_NEED_DICT       2
 			"stream end",			// Z_STREAM_END      1
 			"",						// Z_OK              0
 			"file error",			// Z_ERRNO          -1
@@ -22,7 +22,7 @@ namespace Framework.IO
 			"insufficient memory",	// Z_MEM_ERROR      -4
 			"buffer error",			// Z_BUF_ERROR      -5
 			"incompatible version"	// Z_VERSION_ERROR  -6
-		};
+		];
 
 		// =========================================================================
 

@@ -76,7 +76,7 @@ namespace Game.Movement
 
         void InitSpline(MoveSplineInitArgs args)
         {
-            EvaluationMode[] modes = new EvaluationMode[2] { EvaluationMode.Linear, EvaluationMode.Catmullrom };
+            EvaluationMode[] modes = [EvaluationMode.Linear, EvaluationMode.Catmullrom];
             if (args.flags.HasFlag(SplineFlag.Cyclic))
             {
                 int cyclic_point = 0;

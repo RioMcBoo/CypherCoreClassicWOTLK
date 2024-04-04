@@ -1383,7 +1383,7 @@ namespace Game.Entities
         void _LoadArenaTeamInfo(SQLResult result)
         {
             // arenateamid, played_week, played_season, personal_rating
-            ushort[] personalRatingCache = { 0, 0, 0 };
+            ushort[] personalRatingCache = [0, 0, 0];
 
             if (!result.IsEmpty())
             {

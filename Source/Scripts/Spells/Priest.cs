@@ -332,7 +332,7 @@ namespace Scripts.Spells.Priest
         void UpdateSinsOfTheManyValue()
         {
             // Note: the damage dimish starts at the 6th application as of 10.0.5.
-            float[] damageByStack = { 40.0f, 40.0f, 40.0f, 40.0f, 40.0f, 35.0f, 30.0f, 25.0f, 20.0f, 15.0f, 11.0f, 8.0f, 5.0f, 4.0f, 3.0f, 2.5f, 2.0f, 1.5f, 1.25f, 1.0f };
+            float[] damageByStack = [40.0f, 40.0f, 40.0f, 40.0f, 40.0f, 35.0f, 30.0f, 25.0f, 20.0f, 15.0f, 11.0f, 8.0f, 5.0f, 4.0f, 3.0f, 2.5f, 2.0f, 1.5f, 1.25f, 1.0f];
 
             foreach (int effectIndex in new[] { 0, 1, 2 })
             {
@@ -861,13 +861,13 @@ namespace Scripts.Spells.Priest
 
                 _casterCurrentPosition = caster.GetPosition();
 
-                Vector3[] returnSplinePoints = new Vector3[4];
-
-                returnSplinePoints[0] = at.GetPosition();
-                returnSplinePoints[1] = at.GetPosition();
-                returnSplinePoints[2] = caster.GetPosition();
-                returnSplinePoints[3] = caster.GetPosition();
-
+                Vector3[] returnSplinePoints =
+                [
+                    at.GetPosition(),
+                    at.GetPosition(),
+                    caster.GetPosition(),
+                    caster.GetPosition(),
+                ];
                 at.InitSplines(returnSplinePoints, (uint)(at.GetDistance(caster) / _maxTravelDistance * 1000));
 
                 task.Repeat(TimeSpan.FromMilliseconds(250));

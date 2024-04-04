@@ -1146,7 +1146,7 @@ namespace Game.BattleGrounds.Zones
     struct SAMiscConst
     {
         public static int[] NpcEntries =
-        {
+        [
             SACreatureIds.AntiPersonnalCannon,
             SACreatureIds.AntiPersonnalCannon,
             SACreatureIds.AntiPersonnalCannon,
@@ -1172,10 +1172,10 @@ namespace Game.BattleGrounds.Zones
             SACreatureIds.GorgrilRigspark,
             // Kanrethad
             SACreatureIds.Kanrethad
-        };
+        ];
 
         public static Position[] NpcSpawnlocs =
-        {
+        [
             // Cannons
             new Position(1436.429f, 110.05f, 41.407f, 5.4f),
             new Position(1404.9023f, 84.758f, 41.183f, 5.46f),
@@ -1201,10 +1201,10 @@ namespace Game.BattleGrounds.Zones
             new Position(1348.644165f, -298.786469f, 31.080130f, 1.710423f),
             new Position(1358.191040f, 195.527786f, 31.018187f, 4.171337f),
             new Position(841.921f, -134.194f, 196.838f, 6.23082f)
-        };
+        ];
 
         public static Position[] ObjSpawnlocs =
-        {
+        [
             new Position(1411.57f, 108.163f, 28.692f, 5.441f),
             new Position(1055.452f, -108.1f, 82.134f, 0.034f),
             new Position(1431.3413f, -219.437f, 30.893f, 0.9736f),
@@ -1304,10 +1304,10 @@ namespace Game.BattleGrounds.Zones
             new Position(987.33f, 4.67389f, 86.8486f, 1.5779f),
             new Position(985.23f, 4.65898f, 86.8368f, 1.5779f),
             new Position(984.556f, 3.54097f, 86.8137f, 1.5779f),
-        };
+        ];
 
         public static int[] ObjEntries =
-        {
+        [
             190722,
             190727,
             190724,
@@ -1334,30 +1334,30 @@ namespace Game.BattleGrounds.Zones
             191306,
             191308,
             190753
-        };
+        ];
 
-        public static int[] Factions = { 1732, 1735, };
+        public static int[] Factions = [1732, 1735,];
 
-        public static int[] GYEntries = { 1350, 1349, 1347, 1346, 1348, };
+        public static int[] GYEntries = [1350, 1349, 1347, 1346, 1348,];
 
         public static float[] GYOrientation =
-        {
+        [
             6.202f,
             1.926f, // right capturable GY
             3.917f, // left capturable GY
             3.104f, // center, capturable
             6.148f, // defender last GY
-        };
+        ];
 
         public static SAGateInfo[] Gates =
-        {
+        [
             new SAGateInfo(SAObjectTypes.GreenGate,   SAGameObjectIds.GateOfTheGreenEmerald,   SAWorldStateIds.GreenGate,   SATextIds.GreenGateUnderAttack,   SATextIds.GreenGateDestroyed),
             new SAGateInfo(SAObjectTypes.YellowGate,  SAGameObjectIds.GateOfTheYellowMoon,     SAWorldStateIds.YellowGate,  SATextIds.YellowGateUnderAttack,  SATextIds.YellowGateDestroyed),
             new SAGateInfo(SAObjectTypes.BlueGate,    SAGameObjectIds.GateOfTheBlueSapphire,   SAWorldStateIds.BlueGate,    SATextIds.BlueGateUnderAttack,    SATextIds.BlueGateDestroyed),
             new SAGateInfo(SAObjectTypes.RedGate,     SAGameObjectIds.GateOfTheRedSun,         SAWorldStateIds.RedGate,     SATextIds.RedGateUnderAttack,     SATextIds.RedGateDestroyed),
             new SAGateInfo(SAObjectTypes.PurpleGate,  SAGameObjectIds.GateOfThePurpleAmethyst, SAWorldStateIds.PurpleGate,  SATextIds.PurpleGateUnderAttack,  SATextIds.PurpleGateDestroyed),
             new SAGateInfo(SAObjectTypes.AncientGate, SAGameObjectIds.ChamberOfAncientRelics,  SAWorldStateIds.AncientGate, SATextIds.AncientGateUnderAttack, SATextIds.AncientGateDestroyed)
-        };
+        ];
     }
 
     struct SABroadcastTexts

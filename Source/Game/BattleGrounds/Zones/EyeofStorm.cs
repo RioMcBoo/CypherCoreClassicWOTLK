@@ -944,37 +944,37 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
         public const int ExploitTeleportLocationHorde = 3772;
 
         public static Position[] TriggerPositions =
-        {
+        [
             new Position(2044.28f, 1729.68f, 1189.96f, 0.017453f),  // FEL_REAVER center
             new Position(2048.83f, 1393.65f, 1194.49f, 0.20944f),   // BLOOD_ELF center
             new Position(2286.56f, 1402.36f, 1197.11f, 3.72381f),   // DRAENEI_RUINS center
             new Position(2284.48f, 1731.23f, 1189.99f, 2.89725f)    // MAGE_TOWER center
-        };
+        ];
 
-        public static byte[] TickPoints = { 1, 2, 5, 10 };
-        public static int[] FlagPoints = { 75, 85, 100, 500 };
+        public static byte[] TickPoints = [1, 2, 5, 10];
+        public static int[] FlagPoints = [75, 85, 100, 500];
 
         public static BgEyeOfStormPointIconsStruct[] m_PointsIconStruct =
-        {
+        [
             new BgEyeOfStormPointIconsStruct(WorldStateIds.FelReaverUncontrol, WorldStateIds.FelReaverAllianceControl, WorldStateIds.FelReaverHordeControl, WorldStateIds.FelReaverAllianceControlState, WorldStateIds.FelReaverHordeControlState),
             new BgEyeOfStormPointIconsStruct(WorldStateIds.BloodElfUncontrol, WorldStateIds.BloodElfAllianceControl, WorldStateIds.BloodElfHordeControl, WorldStateIds.BloodElfAllianceControlState, WorldStateIds.BloodElfHordeControlState),
             new BgEyeOfStormPointIconsStruct(WorldStateIds.DraeneiRuinsUncontrol, WorldStateIds.DraeneiRuinsAllianceControl, WorldStateIds.DraeneiRuinsHordeControl, WorldStateIds.DraeneiRuinsAllianceControlState, WorldStateIds.DraeneiRuinsHordeControlState),
             new BgEyeOfStormPointIconsStruct(WorldStateIds.MageTowerUncontrol, WorldStateIds.MageTowerAllianceControl, WorldStateIds.MageTowerHordeControl, WorldStateIds.MageTowerAllianceControlState, WorldStateIds.MageTowerHordeControlState)
-        };
+        ];
         public static BgEyeOfStormLosingPointStruct[] m_LosingPointTypes =
-        {
+        [
             new BgEyeOfStormLosingPointStruct(ObjectTypes.NBannerFelReaverCenter, ObjectTypes.ABannerFelReaverCenter, BroadcastTextIds.AllianceLostFelReaverRuins, ObjectTypes.HBannerFelReaverCenter, BroadcastTextIds.HordeLostFelReaverRuins),
             new BgEyeOfStormLosingPointStruct(ObjectTypes.NBannerBloodElfCenter, ObjectTypes.ABannerBloodElfCenter, BroadcastTextIds.AllianceLostBloodElfTower, ObjectTypes.HBannerBloodElfCenter, BroadcastTextIds.HordeLostBloodElfTower),
             new BgEyeOfStormLosingPointStruct(ObjectTypes.NBannerDraeneiRuinsCenter, ObjectTypes.ABannerDraeneiRuinsCenter, BroadcastTextIds.AllianceLostDraeneiRuins, ObjectTypes.HBannerDraeneiRuinsCenter, BroadcastTextIds.HordeLostDraeneiRuins),
             new BgEyeOfStormLosingPointStruct(ObjectTypes.NBannerMageTowerCenter, ObjectTypes.ABannerMageTowerCenter, BroadcastTextIds.AllianceLostMageTower, ObjectTypes.HBannerMageTowerCenter, BroadcastTextIds.HordeLostMageTower)
-        };
+        ];
         public static BgEyeOfStormCapturingPointStruct[] m_CapturingPointTypes =
-        {
+        [
             new BgEyeOfStormCapturingPointStruct(ObjectTypes.NBannerFelReaverCenter, ObjectTypes.ABannerFelReaverCenter, BroadcastTextIds.AllianceTakenFelReaverRuins, ObjectTypes.HBannerFelReaverCenter, BroadcastTextIds.HordeTakenFelReaverRuins, GaveyardIds.FelReaver),
             new BgEyeOfStormCapturingPointStruct(ObjectTypes.NBannerBloodElfCenter, ObjectTypes.ABannerBloodElfCenter, BroadcastTextIds.AllianceTakenBloodElfTower, ObjectTypes.HBannerBloodElfCenter, BroadcastTextIds.HordeTakenBloodElfTower, GaveyardIds.BloodElf),
             new BgEyeOfStormCapturingPointStruct(ObjectTypes.NBannerDraeneiRuinsCenter, ObjectTypes.ABannerDraeneiRuinsCenter, BroadcastTextIds.AllianceTakenDraeneiRuins, ObjectTypes.HBannerDraeneiRuinsCenter, BroadcastTextIds.HordeTakenDraeneiRuins, GaveyardIds.DraeneiRuins),
             new BgEyeOfStormCapturingPointStruct(ObjectTypes.NBannerMageTowerCenter, ObjectTypes.ABannerMageTowerCenter, BroadcastTextIds.AllianceTakenMageTower, ObjectTypes.HBannerMageTowerCenter, BroadcastTextIds.HordeTakenMageTower, GaveyardIds.MageTower)
-        };
+        ];
     }
 
     struct BroadcastTextIds

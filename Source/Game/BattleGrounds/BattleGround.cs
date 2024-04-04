@@ -1690,7 +1690,7 @@ namespace Game.BattleGrounds
         void RewardXPAtKill(Player killer, Player victim)
         {
             if (WorldConfig.GetBoolValue(WorldCfg.BgXpForKill) && killer != null && victim != null)
-                new KillRewarder(new[] { killer }, victim, true).Reward();
+                new KillRewarder([killer], victim, true).Reward();
         }
 
         public int GetTeamScore(int teamIndex)
@@ -1918,7 +1918,7 @@ namespace Game.BattleGrounds
         protected ObjectGuid[] BgObjects;// = new Dictionary<int, ObjectGuid>();
         protected ObjectGuid[] BgCreatures;// = new Dictionary<int, ObjectGuid>();
 
-        public int[] Buff_Entries = { BattlegroundConst.SpeedBuff, BattlegroundConst.RegenBuff, BattlegroundConst.BerserkerBuff };
+        public int[] Buff_Entries = [BattlegroundConst.SpeedBuff, BattlegroundConst.RegenBuff, BattlegroundConst.BerserkerBuff];
 
         // Battleground
         int m_InstanceID;                                // Battleground Instance's GUID!

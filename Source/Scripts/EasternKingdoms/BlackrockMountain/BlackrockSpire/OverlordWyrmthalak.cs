@@ -11,16 +11,16 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.OverlordWyrmt
 {
     struct SpellIds
     {
-        public const uint Blastwave = 11130;
-        public const uint Shout = 23511;
-        public const uint Cleave = 20691;
-        public const uint Knockaway = 20686;
+        public const int Blastwave = 11130;
+        public const int Shout = 23511;
+        public const int Cleave = 20691;
+        public const int Knockaway = 20686;
     }
 
     struct MiscConst
     {
-        public const uint NpcSpirestoneWarlord = 9216;
-        public const uint NpcSmolderthornBerserker = 9268;
+        public const int NpcSpirestoneWarlord = 9216;
+        public const int NpcSmolderthornBerserker = 9268;
 
         public static Position SummonLocation1 = new Position(-39.355f, -513.456f, 88.472f, 4.679f);
         public static Position SummonLocation2 = new Position(-49.875f, -511.896f, 88.195f, 4.613f);

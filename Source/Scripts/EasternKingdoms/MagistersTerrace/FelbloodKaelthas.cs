@@ -76,13 +76,13 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
     struct MiscConst
     {
         public static int[] GravityLapseTeleportSpells =
-        {
+        [
             SpellIds.GravityLapseLeftTeleport,
             SpellIds.GravityLapseFrontLeftTeleport,
             SpellIds.GravityLapseFrontTeleport,
             SpellIds.GravityLapseFrontRightTeleport,
             SpellIds.GravityLapseRightTeleport
-        };
+        ];
     }
 
     [Script]

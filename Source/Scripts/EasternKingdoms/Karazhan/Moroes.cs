@@ -15,48 +15,48 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 {
     struct SpellIds
     {
-        public const uint Vanish = 29448;
-        public const uint Garrote = 37066;
-        public const uint Blind = 34694;
-        public const uint Gouge = 29425;
-        public const uint Frenzy = 37023;
+        public const int Vanish = 29448;
+        public const int Garrote = 37066;
+        public const int Blind = 34694;
+        public const int Gouge = 29425;
+        public const int Frenzy = 37023;
 
         // Adds
-        public const uint Manaburn = 29405;
-        public const uint Mindfly = 29570;
-        public const uint Swpain = 34441;
-        public const uint Shadowform = 29406;
+        public const int Manaburn = 29405;
+        public const int Mindfly = 29570;
+        public const int Swpain = 34441;
+        public const int Shadowform = 29406;
 
-        public const uint Hammerofjustice = 13005;
-        public const uint Judgementofcommand = 29386;
-        public const uint Sealofcommand = 29385;
+        public const int Hammerofjustice = 13005;
+        public const int Judgementofcommand = 29386;
+        public const int Sealofcommand = 29385;
 
-        public const uint Dispelmagic = 15090;
-        public const uint Greaterheal = 29564;
-        public const uint Holyfire = 29563;
-        public const uint Pwshield = 29408;
+        public const int Dispelmagic = 15090;
+        public const int Greaterheal = 29564;
+        public const int Holyfire = 29563;
+        public const int Pwshield = 29408;
 
-        public const uint Cleanse = 29380;
-        public const uint Greaterblessofmight = 29381;
-        public const uint Holylight = 29562;
-        public const uint Divineshield = 41367;
+        public const int Cleanse = 29380;
+        public const int Greaterblessofmight = 29381;
+        public const int Holylight = 29562;
+        public const int Divineshield = 41367;
 
-        public const uint Hamstring = 9080;
-        public const uint Mortalstrike = 29572;
-        public const uint Whirlwind = 29573;
+        public const int Hamstring = 9080;
+        public const int Mortalstrike = 29572;
+        public const int Whirlwind = 29573;
 
-        public const uint Disarm = 8379;
-        public const uint Heroicstrike = 29567;
-        public const uint Shieldbash = 11972;
-        public const uint Shieldwall = 29390;
+        public const int Disarm = 8379;
+        public const int Heroicstrike = 29567;
+        public const int Shieldbash = 11972;
+        public const int Shieldwall = 29390;
     }
 
     struct TextIds
     {
-        public const uint SayAggro = 0;
-        public const uint SaySpecial = 1;
-        public const uint SayKill = 2;
-        public const uint SayDeath = 3;
+        public const int SayAggro = 0;
+        public const int SaySpecial = 1;
+        public const int SayKill = 2;
+        public const int SayDeath = 3;
     }
 
     struct MiscConst
@@ -64,29 +64,29 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         public const uint GroupNonEnrage = 1;
 
         public static Position[] Locations =
-        {
+        [
             new Position(-10991.0f, -1884.33f, 81.73f, 0.614315f),
             new Position(-10989.4f, -1885.88f, 81.73f, 0.904913f),
             new Position(-10978.1f, -1887.07f, 81.73f, 2.035550f),
             new Position(-10975.9f, -1885.81f, 81.73f, 2.253890f)
-        };
+        ];
 
-        public static uint[] Adds =
-        {
+        public static int[] Adds =
+        [
             17007,
             19872,
             19873,
             19874,
             19875,
             19876,
-        };
+        ];
     }
 
     [Script]
     class boss_moroes : BossAI
     {
         public ObjectGuid[] AddGUID = new ObjectGuid[4];
-        uint[] AddId = new uint[4];
+        int[] AddId = new int[4];
 
         bool InVanish;
         bool Enrage;
@@ -189,7 +189,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
             if (isAddlistEmpty())
             {
-                List<uint> AddList = MiscConst.Adds.ToList();
+                List<int> AddList = MiscConst.Adds.ToList();
                 AddList.RandomResize(4);
                 
                 for (var i = 0; i < 4; ++i)
