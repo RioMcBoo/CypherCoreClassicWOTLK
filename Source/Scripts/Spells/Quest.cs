@@ -1397,7 +1397,7 @@ namespace Scripts.Spells.Azerite
         void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit().GetCharmerOrOwnerOrSelf();
-            target.CastSpell(target, (uint)GetEffectValue(), true);
+            target.CastSpell(target, GetEffectValue(), true);
         }
 
         public override void Register()

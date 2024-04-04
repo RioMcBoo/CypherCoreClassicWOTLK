@@ -9,6 +9,7 @@ using Game.Entities;
 using Game.Loots;
 using Game.Scripting;
 using Game.Spells;
+using Game.Miscellaneous;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1314,11 +1315,12 @@ namespace Scripts.Spells.Items
             {
                 Player player = GetCaster().ToPlayer();
                 Creature creature = GetTarget().ToCreature();
+                CreatureDifficulty creatureDifficulty = creature.GetCreatureDifficulty();
                 // missing lootid has been reported on startup - just return
-                if (creature.GetCreatureTemplate().SkinLootId == 0)
+                if (creatureDifficulty.SkinLootID == 0)
                     return;
 
-                player.AutoStoreLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, ItemContext.None, true);
+                player.AutoStoreLoot(creatureDifficulty.SkinLootID, LootStorage.Skinning, ItemContext.None, true);
                 creature.DespawnOrUnsummon();
             }
         }
@@ -2938,7 +2940,7 @@ namespace Scripts.Spells.Items
             Unit caster = GetCaster();
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(caster.GetAreaId());
             bool success = true;
-            if (areaEntry != null && areaEntry.IsFlyable && !caster.GetMap().IsDungeon())
+            if (areaEntry != null && areaEntry.HasFlag(AreaMountFlags.AllowFlyingMounts) && !caster.GetMap().IsDungeon())
                 success = RandomHelper.randChance(95);
             caster.CastSpell(caster, success ? SpellIds.NitroBoostsSuccess : SpellIds.NitroBoostsBackfire, new CastSpellExtraArgs(GetCastItem()));
         }
