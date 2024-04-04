@@ -51,12 +51,12 @@ namespace Game.BattleFields
             // If full of players > announce to player that BF is full and kick him after a few second if he desn't leave
             if (IsWarTime())
             {
-                if (m_PlayersInWar[player.GetTeamId()].Count + m_InvitedPlayers[player.GetTeamId()].Count < m_MaxPlayer) // Vacant spaces
+                if (m_PlayersInWar[player.GetBatttleGroundTeamId()].Count + m_InvitedPlayers[player.GetBatttleGroundTeamId()].Count < m_MaxPlayer) // Vacant spaces
                     InvitePlayerToWar(player);
                 else // No more vacant places
                 {
                     // todo Send a packet to announce it to player
-                    m_PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
+                    m_PlayersWillBeKick[player.GetBatttleGroundTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
                     InvitePlayerToQueue(player);
                 }
             }
@@ -68,7 +68,7 @@ namespace Game.BattleFields
             }
 
             // Add player in the list of player in zone
-            m_players[player.GetTeamId()].Add(player.GetGUID());
+            m_players[player.GetBatttleGroundTeamId()].Add(player.GetGUID());
             OnPlayerEnterZone(player);
         }
 
@@ -78,9 +78,9 @@ namespace Game.BattleFields
             if (IsWarTime())
             {
                 // If the player is participating to the battle
-                if (m_PlayersInWar[player.GetTeamId()].Contains(player.GetGUID()))
+                if (m_PlayersInWar[player.GetBatttleGroundTeamId()].Contains(player.GetGUID()))
                 {
-                    m_PlayersInWar[player.GetTeamId()].Remove(player.GetGUID());
+                    m_PlayersInWar[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
                     Group group = player.GetGroup();
                     if (group != null) // Remove the player from the raid group
                         group.RemoveMember(player.GetGUID());
@@ -89,9 +89,9 @@ namespace Game.BattleFields
                 }
             }
 
-            m_InvitedPlayers[player.GetTeamId()].Remove(player.GetGUID());
-            m_PlayersWillBeKick[player.GetTeamId()].Remove(player.GetGUID());
-            m_players[player.GetTeamId()].Remove(player.GetGUID());
+            m_InvitedPlayers[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
+            m_PlayersWillBeKick[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
+            m_players[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
             SendRemoveWorldStates(player);
             OnPlayerLeaveZone(player);
         }
@@ -170,10 +170,10 @@ namespace Game.BattleFields
 
         void InvitePlayerToQueue(Player player)
         {
-            if (m_PlayersInQueue[player.GetTeamId()].Contains(player.GetGUID()))
+            if (m_PlayersInQueue[player.GetBatttleGroundTeamId()].Contains(player.GetGUID()))
                 return;
 
-            if (m_PlayersInQueue[player.GetTeamId()].Count <= m_MinPlayer || m_PlayersInQueue[GetOtherTeam(player.GetTeamId())].Count >= m_MinPlayer)
+            if (m_PlayersInQueue[player.GetBatttleGroundTeamId()].Count <= m_MinPlayer || m_PlayersInQueue[GetOtherTeam(player.GetBatttleGroundTeamId())].Count >= m_MinPlayer)
                 PlayerAcceptInviteToQueue(player);
         }
 
@@ -186,7 +186,7 @@ namespace Game.BattleFields
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player != null)
                     {
-                        if (m_PlayersInWar[player.GetTeamId()].Count + m_InvitedPlayers[player.GetTeamId()].Count < m_MaxPlayer)
+                        if (m_PlayersInWar[player.GetBatttleGroundTeamId()].Count + m_InvitedPlayers[player.GetBatttleGroundTeamId()].Count < m_MaxPlayer)
                             InvitePlayerToWar(player);
                         else
                         {
@@ -207,12 +207,12 @@ namespace Game.BattleFields
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player != null)
                     {
-                        if (m_PlayersInWar[player.GetTeamId()].Contains(player.GetGUID()) || m_InvitedPlayers[player.GetTeamId()].ContainsKey(player.GetGUID()))
+                        if (m_PlayersInWar[player.GetBatttleGroundTeamId()].Contains(player.GetGUID()) || m_InvitedPlayers[player.GetBatttleGroundTeamId()].ContainsKey(player.GetGUID()))
                             continue;
-                        if (m_PlayersInWar[player.GetTeamId()].Count + m_InvitedPlayers[player.GetTeamId()].Count < m_MaxPlayer)
+                        if (m_PlayersInWar[player.GetBatttleGroundTeamId()].Count + m_InvitedPlayers[player.GetBatttleGroundTeamId()].Count < m_MaxPlayer)
                             InvitePlayerToWar(player);
                         else // Battlefield is full of players
-                            m_PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
+                            m_PlayersWillBeKick[player.GetBatttleGroundTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
                     }
                 }
             }
@@ -229,24 +229,24 @@ namespace Game.BattleFields
 
             if (player.InArena() || player.GetBattleground() != null)
             {
-                m_PlayersInQueue[player.GetTeamId()].Remove(player.GetGUID());
+                m_PlayersInQueue[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
                 return;
             }
 
             // If the player does not match minimal level requirements for the battlefield, kick him
             if (player.GetLevel() < m_MinLevel)
             {
-                if (!m_PlayersWillBeKick[player.GetTeamId()].ContainsKey(player.GetGUID()))
-                    m_PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
+                if (!m_PlayersWillBeKick[player.GetBatttleGroundTeamId()].ContainsKey(player.GetGUID()))
+                    m_PlayersWillBeKick[player.GetBatttleGroundTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
                 return;
             }
 
             // Check if player is not already in war
-            if (m_PlayersInWar[player.GetTeamId()].Contains(player.GetGUID()) || m_InvitedPlayers[player.GetTeamId()].ContainsKey(player.GetGUID()))
+            if (m_PlayersInWar[player.GetBatttleGroundTeamId()].Contains(player.GetGUID()) || m_InvitedPlayers[player.GetBatttleGroundTeamId()].ContainsKey(player.GetGUID()))
                 return;
 
-            m_PlayersWillBeKick[player.GetTeamId()].Remove(player.GetGUID());
-            m_InvitedPlayers[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + m_TimeForAcceptInvite;
+            m_PlayersWillBeKick[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
+            m_InvitedPlayers[player.GetBatttleGroundTeamId()][player.GetGUID()] = GameTime.GetGameTime() + m_TimeForAcceptInvite;
             PlayerAcceptInviteToWar(player);
         }
 
@@ -362,21 +362,21 @@ namespace Game.BattleFields
 
         public bool HasPlayer(Player player)
         {
-            return m_players[player.GetTeamId()].Contains(player.GetGUID());
+            return m_players[player.GetBatttleGroundTeamId()].Contains(player.GetGUID());
         }
 
         // Called in WorldSession:HandleBfQueueInviteResponse
         public void PlayerAcceptInviteToQueue(Player player)
         {
             // Add player in queue
-            m_PlayersInQueue[player.GetTeamId()].Add(player.GetGUID());
+            m_PlayersInQueue[player.GetBatttleGroundTeamId()].Add(player.GetGUID());
         }
 
         // Called in WorldSession:HandleBfExitRequest
         public void AskToLeaveQueue(Player player)
         {
             // Remove player from queue
-            m_PlayersInQueue[player.GetTeamId()].Remove(player.GetGUID());
+            m_PlayersInQueue[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
         }
 
         // Called in WorldSession::HandleHearthAndResurrect
@@ -395,8 +395,8 @@ namespace Game.BattleFields
 
             if (AddOrSetPlayerToCorrectBfGroup(player))
             {
-                m_PlayersInWar[player.GetTeamId()].Add(player.GetGUID());
-                m_InvitedPlayers[player.GetTeamId()].Remove(player.GetGUID());
+                m_PlayersInWar[player.GetBatttleGroundTeamId()].Add(player.GetGUID());
+                m_InvitedPlayers[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
 
                 if (player.IsAFK())
                     player.ToggleAFK();
@@ -535,14 +535,14 @@ namespace Game.BattleFields
             if (oldgroup != null)
                 oldgroup.RemoveMember(player.GetGUID());
 
-            Group group = GetFreeBfRaid(player.GetTeamId());
+            Group group = GetFreeBfRaid(player.GetBatttleGroundTeamId());
             if (group == null)
             {
                 group = new Group();
                 group.SetBattlefieldGroup(this);
                 group.Create(player);
                 Global.GroupMgr.AddGroup(group);
-                m_Groups[player.GetTeamId()].Add(group.GetGUID());
+                m_Groups[player.GetBatttleGroundTeamId()].Add(group.GetGUID());
             }
             else if (group.IsMember(player.GetGUID()))
             {
@@ -581,7 +581,7 @@ namespace Game.BattleFields
             {
                 if (m_GraveyardList[i] != null)
                 {
-                    if (m_GraveyardList[i].GetControlTeamId() != player.GetTeamId())
+                    if (m_GraveyardList[i].GetControlTeamId() != player.GetBatttleGroundTeamId())
                         continue;
 
                     float dist = m_GraveyardList[i].GetDistance(player);

@@ -5008,7 +5008,7 @@ namespace Game.Entities
 
                     BattleField battlefieldWG = Global.BattleFieldMgr.GetBattlefieldByBattleId(player.GetMap(), 1);
                     if (battlefieldWG != null)
-                        return battlefieldWG.IsEnabled() && (player.GetTeamId() == battlefieldWG.GetDefenderTeam()) && !battlefieldWG.IsWarTime();
+                        return battlefieldWG.IsEnabled() && (player.GetBatttleGroundTeamId() == battlefieldWG.GetDefenderTeam()) && !battlefieldWG.IsWarTime();
                     break;
                 }
                 case 74411: // Battleground- Dampening

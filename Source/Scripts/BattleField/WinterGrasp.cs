@@ -462,7 +462,7 @@ namespace Game.BattleFields
                         }
 
                         Player creator = Global.ObjAccessor.FindPlayer(creature.ToTempSummon().GetSummonerGUID());
-                        int teamIndex = creator.GetTeamId();
+                        int teamIndex = creator.GetBatttleGroundTeamId();
                         if (teamIndex == TeamId.Horde)
                         {
                             if (GetData(WGData.VehicleH) < GetData(WGData.MaxVehicleH))
@@ -581,7 +581,7 @@ namespace Game.BattleFields
 
         public void HandlePromotion(Player playerKiller, Unit unitKilled)
         {
-            int teamId = playerKiller.GetTeamId();
+            int teamId = playerKiller.GetBatttleGroundTeamId();
 
             foreach (var guid in m_PlayersInWar[teamId])
             {
@@ -647,11 +647,11 @@ namespace Game.BattleFields
 
             if (player.GetZoneId() != m_ZoneId)
             {
-                if (player.GetTeamId() == GetDefenderTeam())
+                if (player.GetBatttleGroundTeamId() == GetDefenderTeam())
                     player.TeleportTo(571, 5345, 2842, 410, 3.14f);
                 else
                 {
-                    if (player.GetTeamId() == TeamId.Horde)
+                    if (player.GetBatttleGroundTeamId() == TeamId.Horde)
                         player.TeleportTo(571, 5025.857422f, 3674.628906f, 362.737122f, 4.135169f);
                     else
                         player.TeleportTo(571, 5101.284f, 2186.564f, 373.549f, 3.812f);
@@ -660,7 +660,7 @@ namespace Game.BattleFields
 
             UpdateTenacity();
 
-            if (player.GetTeamId() == GetAttackerTeam())
+            if (player.GetBatttleGroundTeamId() == GetAttackerTeam())
             {
                 if (GetData(WGData.BrokenTowerAtt) < 3)
                     player.SetAuraStack(WGSpells.TowerControl, player, 3 - GetData(WGData.BrokenTowerAtt));

@@ -5071,7 +5071,7 @@ namespace Game.Entities
         }
 
         public Team GetTeam() { return m_team; }
-        public int GetTeamId() { return m_team == Team.Alliance ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde; }
+        public int GetBatttleGroundTeamId() { return m_team == Team.Alliance ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde; }
 
         public Team GetEffectiveTeam() { return HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode) ? (GetTeam() == Team.Alliance ? Team.Horde : Team.Alliance) : GetTeam(); }
         public int GetEffectiveTeamId() { return GetEffectiveTeam() == Team.Alliance ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde; }

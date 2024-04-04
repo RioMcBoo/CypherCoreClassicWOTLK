@@ -189,7 +189,7 @@ namespace Game.Entities
 
                     if (map == null)
                     {
-                        map = CreateInstance(mapId, newInstanceId, instanceLock, difficulty, player.GetTeamId(), group);
+                        map = CreateInstance(mapId, newInstanceId, instanceLock, difficulty, player.GetBatttleGroundTeamId(), group);
                         if (group != null)
                             group.SetRecentInstance(mapId, instanceOwnerGuid, newInstanceId);
                         else
@@ -200,7 +200,7 @@ namespace Game.Entities
                 {
                     newInstanceId = 0;
                     if (entry.IsSplitByFaction)
-                        newInstanceId = player.GetTeamId();
+                        newInstanceId = player.GetBatttleGroundTeamId();
 
                     map = FindMap_i(mapId, newInstanceId);
                     if (map == null)
@@ -258,7 +258,7 @@ namespace Game.Entities
             else
             {
                 if (entry.IsSplitByFaction)
-                    return player.GetTeamId();
+                    return player.GetBatttleGroundTeamId();
 
                 return 0;
             }

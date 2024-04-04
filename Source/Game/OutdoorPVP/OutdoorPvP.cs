@@ -26,7 +26,7 @@ namespace Game.PvP
 
         public virtual void HandlePlayerEnterZone(Player player, int zone)
         {
-            m_players[player.GetTeamId()].Add(player.GetGUID());
+            m_players[player.GetBatttleGroundTeamId()].Add(player.GetGUID());
         }
 
         public virtual void HandlePlayerLeaveZone(Player player, int zone)
@@ -34,7 +34,7 @@ namespace Game.PvP
             // remove the world state information from the player (we can't keep everyone up to date, so leave out those who are not in the concerning zones)
             if (!player.GetSession().PlayerLogout())
                 SendRemoveWorldStates(player);
-            m_players[player.GetTeamId()].Remove(player.GetGUID());
+            m_players[player.GetBatttleGroundTeamId()].Remove(player.GetGUID());
             Log.outDebug(LogFilter.Outdoorpvp, "Player {0} left an outdoorpvp zone", player.GetName());
         }
 
@@ -139,7 +139,7 @@ namespace Game.PvP
 
         public bool HasPlayer(Player player)
         {
-            return m_players[player.GetTeamId()].Contains(player.GetGUID());
+            return m_players[player.GetBatttleGroundTeamId()].Contains(player.GetGUID());
         }
 
         public void TeamCastSpell(int teamIndex, int spellId)

@@ -2107,7 +2107,7 @@ namespace Scripts.Spells.Items
                     spellId = SpellIds.SoulSplitGood;
                     break;
                 case 4:
-                    if (caster.ToPlayer().GetTeamId() == TeamId.Alliance)
+                    if (caster.ToPlayer().GetBatttleGroundTeamId() == TeamId.Alliance)
                         spellId = SpellIds.TransformHorde;
                     else
                         spellId = SpellIds.TransformAlliance;
@@ -2162,7 +2162,7 @@ namespace Scripts.Spells.Items
                     spellId = SpellIds.SoulSplitGood;
                     break;
                 case 3:
-                    if (caster.ToPlayer().GetTeamId() == TeamId.Alliance)
+                    if (caster.ToPlayer().GetBatttleGroundTeamId() == TeamId.Alliance)
                         spellId = SpellIds.TransformHorde;
                     else
                         spellId = SpellIds.TransformAlliance;

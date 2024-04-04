@@ -2011,7 +2011,7 @@ namespace Game
                 if (player.GetMap().IsBattlegroundOrArena())
                     team = player.m_playerData.ArenaFaction;
                 else
-                    team = (byte)player.GetTeamId();
+                    team = (byte)player.GetBatttleGroundTeamId();
 
                 if (condition.CurrentPvpFaction - 1 != team)
                     return false;

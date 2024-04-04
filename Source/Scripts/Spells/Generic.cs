@@ -4467,7 +4467,7 @@ namespace Scripts.Spells.Generic
             if (target == null)
                 return;
 
-            switch (target.GetTeamId())
+            switch (target.GetBatttleGroundTeamId())
             {
                 case BatttleGroundTeamId.Alliance:
                     amount = WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, target.GetMap());
