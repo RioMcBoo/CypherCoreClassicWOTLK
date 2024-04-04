@@ -744,7 +744,7 @@ namespace Game.BattleFields
         protected int m_DefenderTeam;
 
         // Map of the objectives belonging to this OutdoorPvP
-        Dictionary<int /*control zone entry*/, BattleFieldControlZoneHandler> ControlZoneHandlers = new();
+        protected Dictionary<int /*control zone entry*/, BattleFieldControlZoneHandler> ControlZoneHandlers = new();
 
         // Players info maps
         protected List<ObjectGuid>[] m_players = new List<ObjectGuid>[2];                      // Players in zone
@@ -858,7 +858,7 @@ namespace Game.BattleFields
         protected BattleField m_Bf;
     }
 
-    class BattleFieldControlZoneHandler : ControlZoneHandler
+    public class BattleFieldControlZoneHandler : ControlZoneHandler
     {
         BattleField _battlefield;
 
