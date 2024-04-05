@@ -444,7 +444,7 @@ namespace Framework.Constants
         
         AllLanguages = -1,
         Reserved = Total,
-        Default = enUS,
+        zDefault = enUS,
     }
 
     [Flags]
