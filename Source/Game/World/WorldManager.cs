@@ -450,6 +450,11 @@ namespace Game
             //Load weighted graph on taxi nodes path
             TaxiPathGraph.Initialize();
 
+            // always use declined names in the russian client
+            var category = CliDB.CfgCategoriesStorage.LookupByKey(WorldConfig.GetIntValue(WorldCfg.RealmZone));
+            if (category != null && category.CreateCharsetMask.HasFlag(CfgCategoriesCharsets.Russian))
+                WorldConfig.SetValue(WorldCfg.DeclinedNamesUsed, true);
+
             MultiMap<int, int> mapData = new();
             foreach (MapRecord mapEntry in CliDB.MapStorage.Values)
             {
