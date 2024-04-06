@@ -182,7 +182,7 @@ namespace Game.Maps
 
         string GetDifficultyName()
         { 
-            return CliDB.DifficultyStorage.LookupByKey((int)_instance.instance.GetDifficultyID()).Name[Global.WorldMgr.GetDefaultDbcLocale()]; 
+            return CliDB.DifficultyStorage.LookupByKey(_instance.instance.GetDifficultyID()).Name[Global.WorldMgr.GetDefaultDbcLocale()]; 
         }
     }
 

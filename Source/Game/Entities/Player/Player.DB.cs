@@ -490,7 +490,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey((int)difficulty))
+                    if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey(difficulty))
                     {
                         Log.outError(LogFilter.Player, $"Player._LoadAuras: Player '{GetName()}' ({GetGUID()}) has an invalid aura difficulty {difficulty} (SpellID: {key.SpellId}), ignoring.");
                         continue;

@@ -1364,7 +1364,7 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.LegacyDungeonDifficulty: // 20
                 {
-                    DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey((int)referencePlayer.GetMap().GetDifficultyID());
+                    DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(referencePlayer.GetMap().GetDifficultyID());
                     if (difficulty == null || difficulty.OldEnumValue == -1 || difficulty.OldEnumValue != reqValue)
                         return false;
                     break;

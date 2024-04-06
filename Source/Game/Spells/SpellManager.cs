@@ -433,7 +433,7 @@ namespace Game.Entities
             if (procEntry != null)
                 return procEntry;
 
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey((int)spellInfo.Difficulty);
+            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(spellInfo.Difficulty);
             if (difficulty != null)
             {
                 do
@@ -442,7 +442,7 @@ namespace Game.Entities
                     if (procEntry != null)
                         return procEntry;
 
-                    difficulty = CliDB.DifficultyStorage.LookupByKey((int)difficulty.FallbackDifficultyID);
+                    difficulty = CliDB.DifficultyStorage.LookupByKey(difficulty.FallbackDifficultyID);
                 } while (difficulty != null);
             }
 
@@ -610,7 +610,7 @@ namespace Game.Entities
             if (index != -1)
                 return list[index];
 
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
             if (difficultyEntry != null)
             {
                 do
@@ -619,7 +619,7 @@ namespace Game.Entities
                     if (index != -1)
                         return list[index];
 
-                    difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficultyEntry.FallbackDifficultyID);
+                    difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
                 } while (difficultyEntry != null);
             }
 
@@ -2305,7 +2305,7 @@ namespace Game.Entities
                     continue;
 
                 // fill blanks
-                DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)data.Key.difficulty);
+                DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(data.Key.difficulty);
                 if (difficultyEntry != null)
                 {
                     do
@@ -2378,7 +2378,7 @@ namespace Game.Entities
                                 data.Value.Visuals = fallbackData.Visuals;
                         }
 
-                        difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficultyEntry.FallbackDifficultyID);
+                        difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
                     } while (difficultyEntry != null);
                 }
 

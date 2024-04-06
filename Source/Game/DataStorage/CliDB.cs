@@ -543,7 +543,7 @@ namespace Game.DataStorage
         public static DB6Storage<int, CurveRecord> CurveStorage = new();
         public static DB6Storage<int, CurvePointRecord> CurvePointStorage = new();
         public static DB6Storage<int, DestructibleModelDataRecord> DestructibleModelDataStorage = new();
-        public static DB6Storage<int, DifficultyRecord> DifficultyStorage = new();
+        public static DB6Storage<Difficulty, DifficultyRecord> DifficultyStorage = new();
         public static DB6Storage<int, DungeonEncounterRecord> DungeonEncounterStorage = new();
         public static DB6Storage<int, DurabilityCostsRecord> DurabilityCostsStorage = new();
         public static DB6Storage<int, DurabilityQualityRecord> DurabilityQualityStorage = new();

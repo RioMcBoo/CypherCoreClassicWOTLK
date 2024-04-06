@@ -24,7 +24,7 @@ namespace Game.Entities
             if (defaultDifficulty == null)
                 return m_legacyRaidDifficulty;
 
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey((int)defaultDifficulty.DifficultyID);
+            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(defaultDifficulty.DifficultyID);
             if (difficulty == null || difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy))
                 return m_legacyRaidDifficulty;
 
@@ -39,7 +39,7 @@ namespace Game.Entities
 
         public static Difficulty CheckLoadedDungeonDifficultyID(Difficulty difficulty)
         {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
             if (difficultyEntry == null)
                 return Difficulty.Normal;
 
@@ -53,7 +53,7 @@ namespace Game.Entities
         }
         public static Difficulty CheckLoadedRaidDifficultyID(Difficulty difficulty)
         {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
             if (difficultyEntry == null)
                 return Difficulty.NormalRaid;
 
@@ -67,7 +67,7 @@ namespace Game.Entities
         }
         public static Difficulty CheckLoadedLegacyRaidDifficultyID(Difficulty difficulty)
         {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
             if (difficultyEntry == null)
                 return Difficulty.Raid10N;
 

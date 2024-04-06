@@ -1395,7 +1395,7 @@ namespace Game.DataStorage
 
             foreach (var pair in dicMapDiff)
             {
-                DifficultyRecord difficultyEntry = DifficultyStorage.LookupByKey((int)pair.Key);
+                DifficultyRecord difficultyEntry = DifficultyStorage.LookupByKey(pair.Key);
                 if (difficultyEntry == null)
                     continue;
 
@@ -1426,7 +1426,7 @@ namespace Game.DataStorage
 
         public MapDifficultyRecord GetDownscaledMapDifficultyData(int mapId, ref Difficulty difficulty)
         {
-            DifficultyRecord diffEntry = DifficultyStorage.LookupByKey((int)difficulty);
+            DifficultyRecord diffEntry = DifficultyStorage.LookupByKey(difficulty);
             if (diffEntry == null)
                 return GetDefaultMapDifficulty(mapId, ref difficulty);
 
@@ -1435,7 +1435,7 @@ namespace Game.DataStorage
             while (mapDiff == null)
             {
                 tmpDiff = diffEntry.FallbackDifficultyID;
-                diffEntry = DifficultyStorage.LookupByKey((int)tmpDiff);
+                diffEntry = DifficultyStorage.LookupByKey(tmpDiff);
                 if (diffEntry == null)
                     return GetDefaultMapDifficulty(mapId, ref difficulty);
 

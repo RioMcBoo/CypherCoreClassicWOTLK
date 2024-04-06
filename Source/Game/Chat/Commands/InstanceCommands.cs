@@ -71,7 +71,7 @@ namespace Game.Chat
                 string timeleft = !instanceLock.IsExpired() ? Time.secsToTimeString((long)(instanceLock.GetEffectiveExpiryTime() - now).TotalSeconds) : "-";
                 handler.SendSysMessage(CypherStrings.CommandListBindInfo,
                     entries.Map.Id, entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()],
-                    entries.MapDifficulty.DifficultyID, CliDB.DifficultyStorage.LookupByKey((int)entries.MapDifficulty.DifficultyID).Name,
+                    entries.MapDifficulty.DifficultyID, CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name,
                     instanceLock.GetInstanceId(),
                     handler.GetCypherString(instanceLock.IsExpired() ? CypherStrings.Yes : CypherStrings.No),
                     handler.GetCypherString(instanceLock.IsExtended() ? CypherStrings.Yes : CypherStrings.No),
@@ -153,7 +153,7 @@ namespace Game.Chat
             if (mapArg is int)
                 mapId = (int)mapArg;
 
-            if (difficultyArg.HasValue && CliDB.DifficultyStorage.ContainsKey(difficultyArg.Value))
+            if (difficultyArg.HasValue && CliDB.DifficultyStorage.ContainsKey((Difficulty)difficultyArg.Value))
                 difficulty = (Difficulty)difficultyArg;
 
             List<InstanceLock> locksReset = new();
@@ -168,7 +168,7 @@ namespace Game.Chat
                 string timeleft = !instanceLock.IsExpired() ? Time.secsToTimeString((long)(instanceLock.GetEffectiveExpiryTime() - now).TotalSeconds) : "-";
                 handler.SendSysMessage(CypherStrings.CommandInstUnbindUnbinding,
                     entries.Map.Id, entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()],
-                    entries.MapDifficulty.DifficultyID, CliDB.DifficultyStorage.LookupByKey((int)entries.MapDifficulty.DifficultyID).Name,
+                    entries.MapDifficulty.DifficultyID, CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name,
                     instanceLock.GetInstanceId(),
                     handler.GetCypherString(instanceLock.IsExpired() ? CypherStrings.Yes : CypherStrings.No),
                     handler.GetCypherString(instanceLock.IsExtended() ? CypherStrings.Yes : CypherStrings.No),
@@ -183,7 +183,7 @@ namespace Game.Chat
                 string timeleft = !instanceLock.IsExpired() ? Time.secsToTimeString((long)(instanceLock.GetEffectiveExpiryTime() - now).TotalSeconds) : "-";
                 handler.SendSysMessage(CypherStrings.CommandInstUnbindFailed,
                     entries.Map.Id, entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()],
-                    entries.MapDifficulty.DifficultyID, CliDB.DifficultyStorage.LookupByKey((int)entries.MapDifficulty.DifficultyID).Name,
+                    entries.MapDifficulty.DifficultyID, CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name,
                     instanceLock.GetInstanceId(),
                     handler.GetCypherString(instanceLock.IsExpired() ? CypherStrings.Yes : CypherStrings.No),
                     handler.GetCypherString(instanceLock.IsExtended() ? CypherStrings.Yes : CypherStrings.No),

@@ -227,7 +227,7 @@ namespace Game.Entities
                 return creatureDifficulty;
 
             // If there is no data for the difficulty, try to get data for the fallback difficulty
-            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
             if (difficultyEntry != null)
                 return GetDifficulty(difficultyEntry.FallbackDifficultyID);
 

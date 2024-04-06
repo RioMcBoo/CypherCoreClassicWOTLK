@@ -5102,7 +5102,7 @@ namespace Game
             foreach (string token in tokens)
             {
                 Difficulty difficultyId = (Difficulty)Enum.Parse(typeof(Difficulty), token);
-                if (difficultyId != 0 && !CliDB.DifficultyStorage.ContainsKey((int)difficultyId))
+                if (difficultyId != 0 && !CliDB.DifficultyStorage.ContainsKey(difficultyId))
                 {
                     Log.outError(LogFilter.Sql, $"Table `{table}` has {table} (GUID: {spawnId}) with non invalid difficulty id {difficultyId}, skipped.");
                     continue;
@@ -8733,7 +8733,7 @@ namespace Game
                 return itr;
 
             // If there is no data for the difficulty, try to get data for the fallback difficulty
-            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey((int)difficulty);
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
             if (difficultyEntry != null)
                 return GetCreatureQuestItemList(creatureEntry, difficultyEntry.FallbackDifficultyID);
 

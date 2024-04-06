@@ -890,7 +890,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey((int)difficulty))
+                    if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey(difficulty))
                     {
                         Log.outError(LogFilter.Pet, $"Pet._LoadAuras: Unknown difficulty {difficulty} (spellid {key.SpellId}), ignore.");
                         continue;

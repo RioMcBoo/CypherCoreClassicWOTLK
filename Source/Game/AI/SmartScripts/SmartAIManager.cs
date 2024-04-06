@@ -209,7 +209,7 @@ namespace Game.AI
                         break;
                     }
 
-                    if (difficultyId != 0 && !CliDB.DifficultyStorage.ContainsKey((int)difficultyId))
+                    if (difficultyId != 0 && !CliDB.DifficultyStorage.ContainsKey(difficultyId))
                     {
                         invalidDifficulties = true;
                         Log.outError(LogFilter.Sql, $"SmartAIMgr::LoadFromDB: Invalid difficulty id ({difficultyId}) for entryorguid ({temp.EntryOrGuid}) source_type ({temp.GetScriptType()}) id ({temp.EventId}), skipped loading.");

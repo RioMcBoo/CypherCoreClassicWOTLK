@@ -1701,7 +1701,7 @@ namespace Game
                 case ConditionTypes.PrivateObject:
                     break;
                 case ConditionTypes.DifficultyId:
-                    if (!CliDB.DifficultyStorage.ContainsKey(cond.ConditionValue1))
+                    if (!CliDB.DifficultyStorage.ContainsKey((Difficulty)cond.ConditionValue1))
                     {
                         Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has non existing difficulty in value1 ({cond.ConditionValue1}), skipped.");
                         return false;
@@ -2724,7 +2724,7 @@ namespace Game
                     int currentHour = GameTime.GetDateAndTime().Hour + 1;
                     return currentHour <= 12 ? (currentHour != 0 ? currentHour : 12) : currentHour - 12;
                 case WorldStateExpressionFunctions.OldDifficultyId:
-                    var difficulty = CliDB.DifficultyStorage.LookupByKey((int)map.GetDifficultyID());
+                    var difficulty = CliDB.DifficultyStorage.LookupByKey(map.GetDifficultyID());
                     if (difficulty != null)
                         return difficulty.OldEnumValue;
 
