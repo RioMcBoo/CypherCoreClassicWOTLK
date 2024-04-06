@@ -28,7 +28,7 @@ namespace Game.BattlePets
 
         public static void Initialize()
         {
-            using var result = DB.Login.Query("SELECT MAX(guid) FROM battle_pets");
+            SQLResult result = DB.Login.Query("SELECT MAX(guid) FROM battle_pets");
             if (!result.IsEmpty())
                 Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Set(result.Read<long>(0) + 1);
 
@@ -61,7 +61,7 @@ namespace Game.BattlePets
 
         static void LoadAvailablePetBreeds()
         {
-            using var result = DB.World.Query("SELECT speciesId, breedId FROM battle_pet_breeds");
+            SQLResult result = DB.World.Query("SELECT speciesId, breedId FROM battle_pet_breeds");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 battle pet breeds. DB table `battle_pet_breeds` is empty.");
@@ -91,7 +91,7 @@ namespace Game.BattlePets
 
         static void LoadDefaultPetQualities()
         {
-            using var result = DB.World.Query("SELECT speciesId, quality FROM battle_pet_quality");
+            SQLResult result = DB.World.Query("SELECT speciesId, quality FROM battle_pet_quality");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 battle pet qualities. DB table `battle_pet_quality` is empty.");

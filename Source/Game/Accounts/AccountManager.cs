@@ -63,8 +63,9 @@ namespace Game
             // Check if accounts exists
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_ID);
             stmt.AddValue(0, accountId);
-            using (var result = DB.Login.Query(stmt))
             {
+                SQLResult result = DB.Login.Query(stmt);
+            
                 if (result.IsEmpty())
                     return AccountOpResult.NameNotExist;
             }
@@ -73,8 +74,9 @@ namespace Game
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARS_BY_ACCOUNT_ID);
             stmt.AddValue(0, accountId);
 
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
+            
                 if (!result.IsEmpty())
                 {
                     do
@@ -135,12 +137,12 @@ namespace Game
             return AccountOpResult.Ok;
         }
 
-        public AccountOpResult ChangeUsername(uint accountId, string newUsername, string newPassword)
+        public AccountOpResult ChangeUsername(int accountId, string newUsername, string newPassword)
         {
             // Check if accounts exists
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_ID);
             stmt.AddValue(0, accountId);
-            using var result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
                 return AccountOpResult.NameNotExist;
 
@@ -243,7 +245,7 @@ namespace Game
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_ACCOUNT_ID_BY_USERNAME);
             stmt.AddValue(0, username);
-            using var result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             return !result.IsEmpty() ? result.Read<int>(0) : 0;
         }
 
@@ -252,7 +254,7 @@ namespace Game
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_GMLEVEL_BY_REALMID);
             stmt.AddValue(0, accountId);
             stmt.AddValue(1, realmId);
-            using var result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             return !result.IsEmpty() ? (AccountTypes)result.Read<int>(0) : AccountTypes.Player;
         }
 
@@ -272,7 +274,7 @@ namespace Game
             name = "";
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_USERNAME_BY_ID);
             stmt.AddValue(0, accountId);
-            using var result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
             {
                 name = result.Read<string>(0);
@@ -287,7 +289,7 @@ namespace Game
             email = "";
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
             stmt.AddValue(0, accountId);
-            using var result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
             {
                 email = result.Read<string>(0);
@@ -302,7 +304,7 @@ namespace Game
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_CHECK_PASSWORD_BY_NAME);
             stmt.AddValue(0, username);
 
-            using SQLResult result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
             {
                 byte[] salt = result.Read<byte[]>(0);
@@ -341,7 +343,7 @@ namespace Game
             // check character count
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_SUM_CHARS);
             stmt.AddValue(0, accountId);
-            using var result = DB.Characters.Query(stmt);
+            SQLResult result = DB.Characters.Query(stmt);
             return result.IsEmpty() ? 0 : (int)result.Read<long>(0);
         }
 
@@ -349,7 +351,7 @@ namespace Game
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_USERNAME);
             stmt.AddValue(0, name);
-            using var result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             return !result.IsEmpty();
         }
 
@@ -380,8 +382,9 @@ namespace Game
             uint count3 = 0;
 
             Log.outDebug(LogFilter.Rbac, "AccountMgr:LoadRBAC: Loading permissions");
-            using (var result = DB.Login.Query("SELECT id, name FROM rbac_permissions"))
             {
+                SQLResult result = DB.Login.Query("SELECT id, name FROM rbac_permissions");
+            
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 account permission definitions. DB table `rbac_permissions` is empty.");
@@ -398,8 +401,9 @@ namespace Game
             }
 
             Log.outDebug(LogFilter.Rbac, "AccountMgr:LoadRBAC: Loading linked permissions");
-            using (var result = DB.Login.Query("SELECT id, linkedId FROM rbac_linked_permissions ORDER BY id ASC"))
             {
+                SQLResult result = DB.Login.Query("SELECT id, linkedId FROM rbac_linked_permissions ORDER BY id ASC");
+            
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 linked permissions. DB table `rbac_linked_permissions` is empty.");
@@ -431,8 +435,9 @@ namespace Game
             }
 
             Log.outDebug(LogFilter.Rbac, "AccountMgr:LoadRBAC: Loading default permissions");
-            using (var result = DB.Login.Query("SELECT secId, permissionId FROM rbac_default_permissions ORDER BY secId ASC"))
             {
+                SQLResult result = DB.Login.Query("SELECT secId, permissionId FROM rbac_default_permissions ORDER BY secId ASC");
+            
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 default permission definitions. DB table `rbac_default_permissions` is empty.");

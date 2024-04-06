@@ -94,31 +94,30 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Guilds Definitions...");
             {
-                //                                                      0      1             2              3              4              5              6
-                using (var result = DB.Characters.Query("SELECT g.guildid, g.name, g.leaderguid, g.EmblemStyle, g.EmblemColor, g.BorderStyle, g.BorderColor, " +
+                //                                                  0      1             2              3              4              5              6
+                SQLResult result = DB.Characters.Query("SELECT g.guildid, g.name, g.leaderguid, g.EmblemStyle, g.EmblemColor, g.BorderStyle, g.BorderColor, " +
                     //   7                  8       9       10            11          12
                     "g.BackgroundColor, g.info, g.motd, g.createdate, g.BankMoney, COUNT(gbt.guildid) " +
-                    "FROM guild g LEFT JOIN guild_bank_tab gbt ON g.guildid = gbt.guildid GROUP BY g.guildid ORDER BY g.guildid ASC"))
+                    "FROM guild g LEFT JOIN guild_bank_tab gbt ON g.guildid = gbt.guildid GROUP BY g.guildid ORDER BY g.guildid ASC");
+
+                if (result.IsEmpty())
                 {
-
-                    if (result.IsEmpty())
-                    {
-                        Log.outInfo(LogFilter.Guild, "Loaded 0 guild definitions. DB table `guild` is empty.");
-                        return;
-                    }
-
-                    do
-                    {
-                        Guild guild = new();
-
-                        if (!guild.LoadFromDB(result.GetFields()))
-                            continue;
-
-                        AddGuild(guild);
-                        count++;
-                    } while (result.NextRow());
-                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                    Log.outInfo(LogFilter.Guild, "Loaded 0 guild definitions. DB table `guild` is empty.");
+                    return;
                 }
+
+                do
+                {
+                    Guild guild = new();
+
+                    if (!guild.LoadFromDB(result.GetFields()))
+                        continue;
+
+                    AddGuild(guild);
+                    count++;
+                } while (result.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading guild ranks...");
@@ -129,28 +128,27 @@ namespace Game
                 // Delete orphaned guild rank entries before loading the valid ones
                 DB.Characters.DirectExecute("DELETE gr FROM guild_rank gr LEFT JOIN guild g ON gr.guildId = g.guildId WHERE g.guildId IS NULL");
 
-                //                                                   0    1      2       3      4       5
-                using (var result = DB.Characters.Query("SELECT guildid, rid, RankOrder, rname, rights, BankMoneyPerDay FROM guild_rank ORDER BY guildid ASC, rid ASC"))
+                //                                              0        1      2        3       4        5
+                SQLResult result = DB.Characters.Query("SELECT guildid, rid, RankOrder, rname, rights, BankMoneyPerDay FROM guild_rank ORDER BY guildid ASC, rid ASC");
+
+                if (result.IsEmpty())
                 {
-                    if (result.IsEmpty())
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild ranks. DB table `guild_rank` is empty.");
+                }
+                else
+                {
+                    do
                     {
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild ranks. DB table `guild_rank` is empty.");
-                    }
-                    else
-                    {
-                        do
-                        {
-                            var guildId = result.Read<long>(0);
-                            Guild guild = GetGuildById(guildId);
-                            if (guild != default)
-                                guild.LoadRankFromDB(result.GetFields());
+                        var guildId = result.Read<long>(0);
+                        Guild guild = GetGuildById(guildId);
+                        if (guild != default)
+                            guild.LoadRankFromDB(result.GetFields());
 
-                            ++count;
-                        }
-                        while (result.NextRow());
-
-                        Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild ranks in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                        ++count;
                     }
+                    while (result.NextRow());
+
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild ranks in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
 
@@ -165,30 +163,28 @@ namespace Game
                 DB.Characters.DirectExecute("DELETE gm FROM guild_member_withdraw gm LEFT JOIN guild_member g ON gm.guid = g.guid WHERE g.guid IS NULL");
 
                 //                                                0           1        2     3      4        5       6       7       8       9       10
-                using (var result = DB.Characters.Query("SELECT gm.guildid, gm.guid, `rank`, pnote, offnote, w.tab0, w.tab1, w.tab2, w.tab3, w.tab4, w.tab5, " +
+                SQLResult result = DB.Characters.Query("SELECT gm.guildid, gm.guid, `rank`, pnote, offnote, w.tab0, w.tab1, w.tab2, w.tab3, w.tab4, w.tab5, " +
                     //  11      12      13       14      15       16      17       18        19      20         21
                     "w.tab6, w.tab7, w.money, c.name, c.level, c.race, c.class, c.gender, c.zone, c.account, c.logout_time " +
                     "FROM guild_member gm LEFT JOIN guild_member_withdraw w ON gm.guid = w.guid " +
-                    "LEFT JOIN characters c ON c.guid = gm.guid ORDER BY gm.guildid ASC"))
+                    "LEFT JOIN characters c ON c.guid = gm.guid ORDER BY gm.guildid ASC");
+
+                if (result.IsEmpty())
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild members. DB table `guild_member` is empty.");
+                else
                 {
-
-                    if (result.IsEmpty())
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild members. DB table `guild_member` is empty.");
-                    else
+                    do
                     {
-                        do
-                        {
-                            var guildId = result.Read<long>(0);
-                            Guild guild = GetGuildById(guildId);
-                            if (guild != default)
-                                guild.LoadMemberFromDB(result.GetFields());
+                        var guildId = result.Read<long>(0);
+                        Guild guild = GetGuildById(guildId);
+                        if (guild != default)
+                            guild.LoadMemberFromDB(result.GetFields());
 
-                            ++count;
-                        }
-                        while (result.NextRow());
-
-                        Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild members in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                        ++count;
                     }
+                    while (result.NextRow());
+
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild members in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
 
@@ -202,28 +198,26 @@ namespace Game
                 DB.Characters.DirectExecute("DELETE gbr FROM guild_bank_right gbr LEFT JOIN guild g ON gbr.guildId = g.guildId WHERE g.guildId IS NULL");
 
                 //                                              0        1      2    3        4
-                using (var result = DB.Characters.Query("SELECT guildid, TabId, rid, gbright, SlotPerDay FROM guild_bank_right ORDER BY guildid ASC, TabId ASC"))
+                SQLResult result = DB.Characters.Query("SELECT guildid, TabId, rid, gbright, SlotPerDay FROM guild_bank_right ORDER BY guildid ASC, TabId ASC");
+
+                if (result.IsEmpty())
                 {
-
-                    if (result.IsEmpty())
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank tab rights. DB table `guild_bank_right` is empty.");
+                }
+                else
+                {
+                    do
                     {
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank tab rights. DB table `guild_bank_right` is empty.");
-                    }
-                    else
-                    {
-                        do
-                        {
-                            var guildId = result.Read<long>(0);
-                            Guild guild = GetGuildById(guildId);
-                            if (guild != null)
-                                guild.LoadBankRightFromDB(result.GetFields());
+                        var guildId = result.Read<long>(0);
+                        Guild guild = GetGuildById(guildId);
+                        if (guild != null)
+                            guild.LoadBankRightFromDB(result.GetFields());
 
-                            ++count;
-                        }
-                        while (result.NextRow());
-
-                        Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} bank tab rights in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                        ++count;
                     }
+                    while (result.NextRow());
+
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} bank tab rights in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
 
@@ -236,28 +230,26 @@ namespace Game
                 DB.Characters.DirectExecute($"DELETE FROM guild_eventlog WHERE LogGuid > {GuildConst.EventLogMaxRecords}");
 
                 //                                               0        1        2          3            4            5        6
-                using (var result = DB.Characters.Query("SELECT guildid, LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog ORDER BY TimeStamp DESC, LogGuid DESC"))
+                SQLResult result = DB.Characters.Query("SELECT guildid, LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog ORDER BY TimeStamp DESC, LogGuid DESC");
+
+                if (result.IsEmpty())
                 {
-
-                    if (result.IsEmpty())
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild event logs. DB table `guild_eventlog` is empty.");
+                }
+                else
+                {
+                    do
                     {
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild event logs. DB table `guild_eventlog` is empty.");
-                    }
-                    else
-                    {
-                        do
-                        {
-                            var guildId = result.Read<long>(0);
-                            Guild guild = GetGuildById(guildId);
-                            if (guild != null)
-                                guild.LoadEventLogFromDB(result.GetFields());
+                        var guildId = result.Read<long>(0);
+                        Guild guild = GetGuildById(guildId);
+                        if (guild != null)
+                            guild.LoadEventLogFromDB(result.GetFields());
 
-                            ++count;
-                        }
-                        while (result.NextRow());
-
-                        Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild event logs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                        ++count;
                     }
+                    while (result.NextRow());
+
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild event logs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
 
@@ -271,27 +263,26 @@ namespace Game
                 DB.Characters.DirectExecute($"DELETE FROM guild_bank_eventlog WHERE LogGuid > {GuildConst.BankLogMaxRecords}");
 
                 //                                              0        1      2        3          4           5            6               7          8
-                using (var result = DB.Characters.Query("SELECT guildid, TabId, LogGuid, EventType, PlayerGuid, ItemOrMoney, ItemStackCount, DestTabId, TimeStamp FROM guild_bank_eventlog ORDER BY TimeStamp DESC, LogGuid DESC"))
+                SQLResult result = DB.Characters.Query("SELECT guildid, TabId, LogGuid, EventType, PlayerGuid, ItemOrMoney, ItemStackCount, DestTabId, TimeStamp FROM guild_bank_eventlog ORDER BY TimeStamp DESC, LogGuid DESC");
+
+                if (result.IsEmpty())
                 {
-                    if (result.IsEmpty())
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank event logs. DB table `guild_bank_eventlog` is empty.");
+                }
+                else
+                {
+                    do
                     {
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank event logs. DB table `guild_bank_eventlog` is empty.");
-                    }
-                    else
-                    {
-                        do
-                        {
-                            var guildId = result.Read<long>(0);
-                            Guild guild = GetGuildById(guildId);
-                            if (guild != null)
-                                guild.LoadBankEventLogFromDB(result.GetFields());
+                        var guildId = result.Read<long>(0);
+                        Guild guild = GetGuildById(guildId);
+                        if (guild != null)
+                            guild.LoadBankEventLogFromDB(result.GetFields());
 
-                            ++count;
-                        }
-                        while (result.NextRow());
-
-                        Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank event logs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                        ++count;
                     }
+                    while (result.NextRow());
+
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank event logs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
 
@@ -304,25 +295,24 @@ namespace Game
                 DB.Characters.DirectExecute($"DELETE FROM guild_newslog WHERE LogGuid > {GuildConst.NewsLogMaxRecords}");
 
                 //                                              0        1        2          3           4      5      6
-                using (var result = DB.Characters.Query("SELECT guildid, LogGuid, EventType, PlayerGuid, Flags, Value, Timestamp FROM guild_newslog ORDER BY TimeStamp DESC, LogGuid DESC"))
+                SQLResult result = DB.Characters.Query("SELECT guildid, LogGuid, EventType, PlayerGuid, Flags, Value, Timestamp FROM guild_newslog ORDER BY TimeStamp DESC, LogGuid DESC");
+
+                if (result.IsEmpty())
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild event logs. DB table `guild_newslog` is empty.");
+                else
                 {
-                    if (result.IsEmpty())
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild event logs. DB table `guild_newslog` is empty.");
-                    else
+                    do
                     {
-                        do
-                        {
-                            var guildId = result.Read<long>(0);
-                            Guild guild = GetGuildById(guildId);
-                            if (guild != null)
-                                guild.LoadGuildNewsLogFromDB(result.GetFields());
+                        var guildId = result.Read<long>(0);
+                        Guild guild = GetGuildById(guildId);
+                        if (guild != null)
+                            guild.LoadGuildNewsLogFromDB(result.GetFields());
 
-                            ++count;
-                        }
-                        while (result.NextRow());
-
-                        Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild new logs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                        ++count;
                     }
+                    while (result.NextRow());
+
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild new logs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
 
@@ -336,27 +326,26 @@ namespace Game
                 DB.Characters.DirectExecute("DELETE gbt FROM guild_bank_tab gbt LEFT JOIN guild g ON gbt.guildId = g.guildId WHERE g.guildId IS NULL");
 
                 //                                               0        1      2        3        4
-                using (var result = DB.Characters.Query("SELECT guildid, TabId, TabName, TabIcon, TabText FROM guild_bank_tab ORDER BY guildid ASC, TabId ASC"))
+                SQLResult result = DB.Characters.Query("SELECT guildid, TabId, TabName, TabIcon, TabText FROM guild_bank_tab ORDER BY guildid ASC, TabId ASC");
+
+                if (result.IsEmpty())
                 {
-                    if (result.IsEmpty())
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank tabs. DB table `guild_bank_tab` is empty.");
+                }
+                else
+                {
+                    do
                     {
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank tabs. DB table `guild_bank_tab` is empty.");
-                    }
-                    else
-                    {
-                        do
-                        {
-                            var guildId = result.Read<long>(0);
-                            Guild guild = GetGuildById(guildId);
-                            if (guild != null)
-                                guild.LoadBankTabFromDB(result.GetFields());
+                        var guildId = result.Read<long>(0);
+                        Guild guild = GetGuildById(guildId);
+                        if (guild != null)
+                            guild.LoadBankTabFromDB(result.GetFields());
 
-                            ++count;
-                        }
-                        while (result.NextRow());
-
-                        Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank tabs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                        ++count;
                     }
+                    while (result.NextRow());
+
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank tabs in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
 
@@ -369,27 +358,26 @@ namespace Game
                 // Delete orphan guild bank items
                 DB.Characters.DirectExecute("DELETE gbi FROM guild_bank_item gbi LEFT JOIN guild g ON gbi.guildId = g.guildId WHERE g.guildId IS NULL");
 
-                using (var result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_BANK_ITEMS)))
+                SQLResult result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_BANK_ITEMS));
+
+                if (result.IsEmpty())
                 {
-                    if (result.IsEmpty())
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank tab items. DB table `guild_bank_item` or `item_instance` is empty.");
+                }
+                else
+                {
+                    do
                     {
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank tab items. DB table `guild_bank_item` or `item_instance` is empty.");
-                    }
-                    else
-                    {
-                        do
-                        {
-                            long guildId = result.Read<long>(46);
-                            Guild guild = GetGuildById(guildId);
-                            if (guild != null)
-                                guild.LoadBankItemFromDB(result.GetFields());
+                        long guildId = result.Read<long>(46);
+                        Guild guild = GetGuildById(guildId);
+                        if (guild != null)
+                            guild.LoadBankItemFromDB(result.GetFields());
 
-                            ++count;
-                        }
-                        while (result.NextRow());
-
-                        Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank tab items in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+                        ++count;
                     }
+                    while (result.NextRow());
+
+                    Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} guild bank tab items in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
                 }
             }
 
@@ -405,11 +393,11 @@ namespace Game
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_ACHIEVEMENT);
                     stmt.AddValue(0, pair.Key);
-                    using var achievementResult = DB.Characters.Query(stmt);
+                    SQLResult achievementResult = DB.Characters.Query(stmt);
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_ACHIEVEMENT_CRITERIA);
                     stmt.AddValue(0, pair.Key);
-                    using var criteriaResult = DB.Characters.Query(stmt);
+                    SQLResult criteriaResult = DB.Characters.Query(stmt);
 
                     (achievementCount, criteriaCount) = pair.Value.GetAchievementMgr().LoadFromDB(achievementResult, criteriaResult);
                 }
@@ -448,7 +436,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             //                                            0      1            2         3
-            using var result = DB.World.Query("SELECT ItemID, MinGuildRep, RaceMask, Cost FROM guild_rewards");
+            SQLResult result = DB.World.Query("SELECT ItemID, MinGuildRep, RaceMask, Cost FROM guild_rewards");
 
             if (result.IsEmpty())
             {
@@ -480,7 +468,7 @@ namespace Game
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_GUILD_REWARDS_REQ_ACHIEVEMENTS);
                 stmt.AddValue(0, reward.ItemID);
-                using var reqAchievementResult = DB.World.Query(stmt);
+                SQLResult reqAchievementResult = DB.World.Query(stmt);
                 if (!reqAchievementResult.IsEmpty())
                 {
                     do

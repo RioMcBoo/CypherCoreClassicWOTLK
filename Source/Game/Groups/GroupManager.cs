@@ -104,40 +104,39 @@ namespace Game.Groups
 
             uint count = 0;
             uint oldMSTime = Time.GetMSTime();
-
             {
                 //                                                    0              1           2             3                 4      5          6      7         8       9
-                using (var result = DB.Characters.Query("SELECT g.leaderGuid, g.lootMethod, g.looterGuid, g.lootThreshold, g.icon1, g.icon2, g.icon3, g.icon4, g.icon5, g.icon6" +
+                SQLResult result = DB.Characters.Query("SELECT g.leaderGuid, g.lootMethod, g.looterGuid, g.lootThreshold, g.icon1, g.icon2, g.icon3, g.icon4, g.icon5, g.icon6" +
                     //  10         11          12         13              14                  15                     16             17          18         19
-                    ", g.icon7, g.icon8, g.groupType, g.difficulty, g.raiddifficulty, g.legacyRaidDifficulty, g.masterLooterGuid, g.guid, lfg.dungeon, lfg.state FROM `groups` g LEFT JOIN lfg_data lfg ON lfg.guid = g.guid ORDER BY g.guid ASC"))
+                    ", g.icon7, g.icon8, g.groupType, g.difficulty, g.raiddifficulty, g.legacyRaidDifficulty, g.masterLooterGuid, g.guid, lfg.dungeon, lfg.state FROM `groups` g LEFT JOIN lfg_data lfg ON lfg.guid = g.guid ORDER BY g.guid ASC");
+
+                if (result.IsEmpty())
                 {
-                    if (result.IsEmpty())
-                    {
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 group definitions. DB table `groups` is empty!");
-                        return;
-                    }
-
-                    do
-                    {
-                        Group group = new();
-                        group.LoadGroupFromDB(result.GetFields());
-                        AddGroup(group);
-
-                        // Get the ID used for storing the group in the database and register it in the pool.
-                        int storageId = group.GetDbStoreId();
-
-                        RegisterGroupDbStoreId(storageId, group);
-
-                        // Increase the next available storage ID
-                        if (storageId == NextGroupDbStoreId)
-                            NextGroupDbStoreId++;
-
-                        ++count;
-                    }
-                    while (result.NextRow());
-
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} group definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 group definitions. DB table `groups` is empty!");
+                    return;
                 }
+
+                do
+                {
+                    Group group = new();
+                    group.LoadGroupFromDB(result.GetFields());
+                    AddGroup(group);
+
+                    // Get the ID used for storing the group in the database and register it in the pool.
+                    int storageId = group.GetDbStoreId();
+
+                    RegisterGroupDbStoreId(storageId, group);
+
+                    // Increase the next available storage ID
+                    if (storageId == NextGroupDbStoreId)
+                        NextGroupDbStoreId++;
+
+                    ++count;
+                }
+                while (result.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} group definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Group members...");
@@ -145,30 +144,29 @@ namespace Game.Groups
                 count = 0;
                 oldMSTime = Time.GetMSTime();
 
-                //                                                0        1           2            3       4
-                using (var result = DB.Characters.Query("SELECT guid, memberGuid, memberFlags, subgroup, roles FROM group_member ORDER BY guid"))
-                {
-                    if (result.IsEmpty())
-                    {
-                        Log.outInfo(LogFilter.ServerLoading, "Loaded 0 group members. DB table `group_member` is empty!");
-                        return;
-                    }
+                //                                              0        1           2            3       4
+                SQLResult result = DB.Characters.Query("SELECT guid, memberGuid, memberFlags, subgroup, roles FROM group_member ORDER BY guid");
 
-                    do
-                    {
-                        Group group = GetGroupByDbStoreId(result.Read<int>(0));
+                if (result.IsEmpty())
+                {
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 group members. DB table `group_member` is empty!");
+                    return;
+                }
+
+                do
+                {
+                    Group group = GetGroupByDbStoreId(result.Read<int>(0));
 
                     if (group != null)
                         group.LoadMemberFromDB(result.Read<uint>(1), result.Read<byte>(2), result.Read<byte>(3), (LfgRoles)result.Read<byte>(4));
                     else
                         Log.outError(LogFilter.Server, "GroupMgr:LoadGroups: Consistency failed, can't find group (storage id: {0})", result.Read<uint>(0));
 
-                        ++count;
-                    }
-                    while (result.NextRow());
-
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} group members in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    ++count;
                 }
+                while (result.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} group members in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             }
         }
 

@@ -34,7 +34,7 @@ namespace Game
             }
 
             //                                         0   1     2     3       4        5       6    7
-            using var result = DB.World.Query("SELECT id, Type, data, result, address, length, str, comment FROM warden_checks ORDER BY id ASC");
+            SQLResult result = DB.World.Query("SELECT id, Type, data, result, address, length, str, comment FROM warden_checks ORDER BY id ASC");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Warden checks. DB table `warden_checks` is empty!");
@@ -121,7 +121,7 @@ namespace Game
             }
 
             //                                              0         1
-            using var result = DB.Characters.Query("SELECT wardenId, action FROM warden_action");
+            SQLResult result = DB.Characters.Query("SELECT wardenId, action FROM warden_action");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Warden action overrides. DB table `warden_action` is empty!");

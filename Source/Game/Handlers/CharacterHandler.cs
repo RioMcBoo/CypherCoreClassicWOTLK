@@ -2138,7 +2138,7 @@ namespace Game
                         stmt.AddValue(0, oldReputation);
                         stmt.AddValue(1, lowGuid);
 
-                        using var result1 = DB.Characters.Query(stmt);
+                        SQLResult result1 = DB.Characters.Query(stmt);
                         if (!result1.IsEmpty())
                         {
                             int oldDBRep = result1.Read<int>(0);

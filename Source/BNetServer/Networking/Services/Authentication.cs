@@ -72,8 +72,9 @@ namespace BNetServer.Networking
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_INFO);
             stmt.AddValue(0, verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
 
-            using (var result = DB.Login.Query(stmt))
             {
+                SQLResult result = DB.Login.Query(stmt);
+            
                 if (result.IsEmpty())
                     return BattlenetRpcErrorCode.Denied;
 
@@ -86,8 +87,9 @@ namespace BNetServer.Networking
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_BNET_ID);
             stmt.AddValue(0, accountInfo.Id);
 
-            using (var characterCountsResult = DB.Login.Query(stmt))
             {
+                SQLResult characterCountsResult = DB.Login.Query(stmt);
+            
                 if (!characterCountsResult.IsEmpty())
                 {
                     do
@@ -102,8 +104,9 @@ namespace BNetServer.Networking
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_LAST_PLAYER_CHARACTERS);
             stmt.AddValue(0, accountInfo.Id);
 
-            using (var lastPlayerCharactersResult = DB.Login.Query(stmt))
             {
+                SQLResult lastPlayerCharactersResult = DB.Login.Query(stmt);
+            
                 if (!lastPlayerCharactersResult.IsEmpty())
                 {
                     do

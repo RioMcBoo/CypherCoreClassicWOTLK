@@ -1635,7 +1635,7 @@ namespace Game.Guilds
                 // Player must exist
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_DATA_FOR_GUILD);
                 stmt.AddValue(0, lowguid);
-                using var result = DB.Characters.Query(stmt);
+                SQLResult result = DB.Characters.Query(stmt);
                 if (!result.IsEmpty())
                 {
                     name = result.Read<string>(0);

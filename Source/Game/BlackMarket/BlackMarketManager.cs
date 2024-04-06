@@ -21,7 +21,7 @@ namespace Game.BlackMarket
             // Clear in case we are reloading
             _templates.Clear();
 
-            using var result = DB.World.Query("SELECT marketId, sellerNpc, itemEntry, quantity, minBid, duration, Chance, bonusListIDs FROM blackmarket_template");
+            SQLResult result = DB.World.Query("SELECT marketId, sellerNpc, itemEntry, quantity, minBid, duration, Chance, bonusListIDs FROM blackmarket_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 black market templates. DB table `blackmarket_template` is empty.");
@@ -49,7 +49,7 @@ namespace Game.BlackMarket
             _auctions.Clear();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BLACKMARKET_AUCTIONS);
-            using var result = DB.Characters.Query(stmt);
+            SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 black market auctions. DB table `blackmarket_auctions` is empty.");

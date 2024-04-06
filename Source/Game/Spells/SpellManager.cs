@@ -749,7 +749,7 @@ namespace Game.Entities
             mSpellReq.Clear();                                         // need for reload case
 
             //                                                   0        1
-            using var result = DB.World.Query("SELECT spell_id, req_spell from spell_required");
+            SQLResult result = DB.World.Query("SELECT spell_id, req_spell from spell_required");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell required records. DB table `spell_required` is empty.");
@@ -846,7 +846,7 @@ namespace Game.Entities
             mSpellLearnSpells.Clear();
 
             //                                         0      1        2
-            using var result = DB.World.Query("SELECT entry, SpellID, Active FROM spell_learn_spell");
+            SQLResult result = DB.World.Query("SELECT entry, SpellID, Active FROM spell_learn_spell");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell learn spells. DB table `spell_learn_spell` is empty.");
@@ -988,8 +988,8 @@ namespace Game.Entities
 
             mSpellTargetPositions.Clear();                                // need for reload case
 
-            //                                              0   1            2      3          4          5          6
-            using SQLResult result = DB.World.Query("SELECT ID, EffectIndex, MapID, PositionX, PositionY, PositionZ, Orientation FROM spell_target_position");
+            //                                        0   1            2      3          4          5          6
+            SQLResult result = DB.World.Query("SELECT ID, EffectIndex, MapID, PositionX, PositionY, PositionZ, Orientation FROM spell_target_position");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell target coordinates. DB table `spell_target_position` is empty.");
@@ -1076,8 +1076,8 @@ namespace Game.Entities
             mSpellSpellGroup.Clear();                                  // need for reload case
             mSpellGroupSpell.Clear();
 
-            //                                                0     1
-            using var result = DB.World.Query("SELECT id, spell_id FROM spell_group");
+            //                                         0     1
+            SQLResult result = DB.World.Query("SELECT id, spell_id FROM spell_group");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell group definitions. DB table `spell_group` is empty.");
@@ -1152,7 +1152,7 @@ namespace Game.Entities
             List<SpellGroup> sameEffectGroups = new();
 
             //                                         0         1
-            using var result = DB.World.Query("SELECT group_id, stack_rule FROM spell_group_stack_rules");
+            SQLResult result = DB.World.Query("SELECT group_id, stack_rule FROM spell_group_stack_rules");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell group stack rules. DB table `spell_group_stack_rules` is empty.");
@@ -1293,7 +1293,7 @@ namespace Game.Entities
             mSpellProcMap.Clear();                             // need for reload case
 
             //                                         0        1           2                3                 4                 5                 6
-            using var result = DB.World.Query("SELECT SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, SpellFamilyMask3, " +
+            SQLResult result = DB.World.Query("SELECT SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, SpellFamilyMask3, " +
                 //7          8           9              10              11       12              13                  14              15      16        17
                 "ProcFlags, ProcFlags2, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, DisableEffectsMask, ProcsPerMinute, Chance, Cooldown, Charges FROM spell_proc");
 
@@ -1602,7 +1602,7 @@ namespace Game.Entities
             mSpellThreatMap.Clear();                                // need for reload case
 
             //                                           0      1        2       3
-            using var result = DB.World.Query("SELECT entry, flatMod, pctMod, apPctMod FROM spell_threat");
+            SQLResult result = DB.World.Query("SELECT entry, flatMod, pctMod, apPctMod FROM spell_threat");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 aggro generating spells. DB table `spell_threat` is empty.");
@@ -1649,8 +1649,8 @@ namespace Game.Entities
 
             mSpellPetAuraMap.Clear();                                  // need for reload case
 
-            //                                                  0       1       2    3
-            using var result = DB.World.Query("SELECT spell, effectId, pet, aura FROM spell_pet_auras");
+            //                                          0       1       2    3
+            SQLResult result = DB.World.Query("SELECT spell, effectId, pet, aura FROM spell_pet_auras");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell pet auras. DB table `spell_pet_auras` is empty.");
@@ -1711,7 +1711,7 @@ namespace Game.Entities
             mSpellEnchantProcEventMap.Clear();                             // need for reload case
 
             //                                         0          1       2               3        4
-            using var result = DB.World.Query("SELECT EnchantID, Chance, ProcsPerMinute, HitMask, AttributesMask FROM spell_enchant_proc_data");
+            SQLResult result = DB.World.Query("SELECT EnchantID, Chance, ProcsPerMinute, HitMask, AttributesMask FROM spell_enchant_proc_data");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell enchant proc event conditions. DB table `spell_enchant_proc_data` is empty.");
@@ -1751,7 +1751,7 @@ namespace Game.Entities
             mSpellLinkedMap.Clear();    // need for reload case
 
             //                                                0              1             2
-            using var result = DB.World.Query("SELECT spell_trigger, spell_effect, Type FROM spell_linked_spell");
+            SQLResult result = DB.World.Query("SELECT spell_trigger, spell_effect, Type FROM spell_linked_spell");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 linked spells. DB table `spell_linked_spell` is empty.");
@@ -1974,7 +1974,7 @@ namespace Game.Entities
             mSpellAreaForAuraMap.Clear();
 
             //                                            0     1         2              3               4                 5          6          7       8      9
-            using var result = DB.World.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, gender, flags FROM spell_area");
+            SQLResult result = DB.World.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, gender, flags FROM spell_area");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell area requirements. DB table `spell_area` is empty.");
@@ -2407,7 +2407,7 @@ namespace Game.Entities
 
             {
                 //                                                  0          1            2           3            4               5              6
-                using var effectsResult = DB.World.Query("SELECT SpellID, DifficultyID, EffectIndex, Effect, EffectAmplitude, EffectAttributes, EffectAura, " +
+                SQLResult effectsResult = DB.World.Query("SELECT SpellID, DifficultyID, EffectIndex, Effect, EffectAmplitude, EffectAttributes, EffectAura, " +
                 //         7                 8                 9                       10                    11                  12              13              14
                 "EffectAuraPeriod, EffectBasePoints, EffectBonusCoefficient, EffectChainAmplitude, EffectChainTargets, EffectDieSides, EffectItemType, EffectMechanic, " +
                 //         15                       16               17                        18                  19                    20           21         22
@@ -2518,7 +2518,7 @@ namespace Game.Entities
 
             {
                 //                                               0       1            2         3       4           5           6             7              8
-                using var spellsResult = DB.World.Query("SELECT Id, DifficultyID, CategoryId, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, " +
+                SQLResult spellsResult = DB.World.Query("SELECT Id, DifficultyID, CategoryId, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, " +
                     //   9              10             11             12             13             14             15              16              17              18
                     "AttributesEx4, AttributesEx5, AttributesEx6, AttributesEx7, AttributesEx8, AttributesEx9, AttributesEx10, AttributesEx11, AttributesEx12, AttributesEx13, " +
                     //   19       20          21       22                  23                  24                 25               26
@@ -2636,7 +2636,7 @@ namespace Game.Entities
             uint oldMSTime = Time.GetMSTime();
             uint oldMSTime2 = oldMSTime;
 
-            using var result = DB.World.Query("SELECT entry, attributes FROM spell_custom_attr");
+            SQLResult result = DB.World.Query("SELECT entry, attributes FROM spell_custom_attr");
             if (result.IsEmpty())
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell custom attributes from DB. DB table `spell_custom_attr` is empty.");
             else
@@ -4553,7 +4553,7 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            using var result = DB.World.Query("SELECT SpellID, RaceID, DisplayID from spell_totem_model");
+            SQLResult result = DB.World.Query("SELECT SpellID, RaceID, DisplayID from spell_totem_model");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell totem model records. DB table `spell_totem_model` is empty.");

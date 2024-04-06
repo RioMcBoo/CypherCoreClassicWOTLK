@@ -105,13 +105,13 @@ namespace Game.Chat.Commands
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_DISABLES);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, (byte)disableType);
-                using (var result = DB.World.Query(stmt))
+
+                SQLResult result = DB.World.Query(stmt);
+
+                if (!result.IsEmpty())
                 {
-                    if (!result.IsEmpty())
-                    {
-                        handler.SendSysMessage($"This {disableType} (Id: {entry}) is already disabled.");
-                        return false;
-                    }
+                    handler.SendSysMessage($"This {disableType} (Id: {entry}) is already disabled.");
+                    return false;
                 }
 
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_DISABLES);
@@ -182,13 +182,13 @@ namespace Game.Chat.Commands
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_DISABLES);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, (byte)disableType);
-                using (var result = DB.World.Query(stmt))
+
+                SQLResult result = DB.World.Query(stmt);
+
+                if (result.IsEmpty())
                 {
-                    if (result.IsEmpty())
-                    {
-                        handler.SendSysMessage($"This {disableType} (Id: {entry}) is not disabled.");
-                        return false;
-                    }
+                    handler.SendSysMessage($"This {disableType} (Id: {entry}) is not disabled.");
+                    return false;
                 }
 
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_DISABLES);

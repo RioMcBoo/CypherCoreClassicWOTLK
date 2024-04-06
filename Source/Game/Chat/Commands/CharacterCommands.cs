@@ -102,8 +102,9 @@ namespace Game.Chat
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
                 stmt.AddValue(0, newName);
-                using (var result = DB.Characters.Query(stmt))
                 {
+                    SQLResult result = DB.Characters.Query(stmt);
+                
                     if (!result.IsEmpty())
                     {
                         handler.SendSysMessage(CypherStrings.RenamePlayerAlreadyExists, newName);
@@ -565,7 +566,7 @@ namespace Game.Chat
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO);
                 }
 
-                using var result = DB.Characters.Query(stmt);
+                SQLResult result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                 {

@@ -18,7 +18,7 @@ namespace Game.DataStorage
 
             MultiMap<int, CharacterTemplateClass> characterTemplateClasses = new();
             {
-                using var classesResult = DB.World.Query("SELECT TemplateId, FactionGroup, Class FROM character_template_class");
+                SQLResult classesResult = DB.World.Query("SELECT TemplateId, FactionGroup, Class FROM character_template_class");
                 if (!classesResult.IsEmpty())
                 {
                     do
@@ -50,7 +50,7 @@ namespace Game.DataStorage
             }
 
             {
-                using var templates = DB.World.Query("SELECT Id, Name, Description, Level FROM character_template");
+                SQLResult templates = DB.World.Query("SELECT Id, Name, Description, Level FROM character_template");
                 if (templates.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 character templates. DB table `character_template` is empty.");

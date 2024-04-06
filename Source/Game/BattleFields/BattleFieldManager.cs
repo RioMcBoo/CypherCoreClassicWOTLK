@@ -22,7 +22,7 @@ namespace Game.BattleFields
             uint oldMSTime = Time.GetMSTime();
 
             uint count = 0;
-            using var result = DB.World.Query("SELECT TypeId, ScriptName FROM battlefield_template");
+            SQLResult result = DB.World.Query("SELECT TypeId, ScriptName FROM battlefield_template");
             if (!result.IsEmpty())
             {
                 do

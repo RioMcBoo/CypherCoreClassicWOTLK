@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace Framework.Database
 {
-    public class SQLResult : IDisposable
+    public class SQLResult
     {
         MySqlDataReader _reader;
 
@@ -16,10 +16,7 @@ namespace Framework.Database
         public SQLResult(MySqlDataReader reader)
         {
             _reader = reader;
-            if (!NextRow())
-            {
-                Dispose();
-            }
+            NextRow();
         }
 
         public T Read<T>(int column)
@@ -106,7 +103,7 @@ namespace Framework.Database
 
         public bool IsEmpty()
         {
-            if (_reader is null)
+            if (_reader == null)
                 return true;
 
             return _reader.IsClosed || !_reader.HasRows;
@@ -121,10 +118,19 @@ namespace Framework.Database
 
         public bool NextRow()
         {
-            return _reader.Read();
+            if (_reader == null)
+                return false;
+
+            if (_reader.Read())
+                return true;
+
+            _reader.Close();
+            _reader = null;
+
+            return false;
         }
 
-        public void Dispose()
+        public void Close()
         {
             if (_reader != null)
             {

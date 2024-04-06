@@ -20,7 +20,7 @@ namespace Framework.Database
 
         public bool Populate()
         {
-            using var result = _database.Query("SHOW TABLES");
+            SQLResult result = _database.Query("SHOW TABLES");
             if (!result.IsEmpty())
                 return true;
 
@@ -324,7 +324,7 @@ namespace Framework.Database
         {
             List<FileEntry> fileList = new();
 
-            using var result = _database.Query("SELECT `path`, `state` FROM `updates_include`");
+            SQLResult result = _database.Query("SELECT `path`, `state` FROM `updates_include`");
             if (result.IsEmpty())
                 return fileList;
 
@@ -355,7 +355,7 @@ namespace Framework.Database
         {
             Dictionary<string, AppliedFileEntry> map = new();
 
-            using var result = _database.Query("SELECT `name`, `hash`, `state`, UNIX_TIMESTAMP(`timestamp`) FROM `updates` ORDER BY `name` ASC");
+            SQLResult result = _database.Query("SELECT `name`, `hash`, `state`, UNIX_TIMESTAMP(`timestamp`) FROM `updates` ORDER BY `name` ASC");
             if (result.IsEmpty())
                 return map;
 

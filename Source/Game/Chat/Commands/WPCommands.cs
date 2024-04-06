@@ -28,7 +28,7 @@ namespace Game.Chat.Commands
                 else
                 {
                     stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_NODE_MAX_PATHID);
-                    using SQLResult result1 = DB.World.Query(stmt);
+                    SQLResult result1 = DB.World.Query(stmt);
 
                     int maxpathId = result1.Read<int>(0);
                     pathId = maxpathId + 1;
@@ -49,7 +49,7 @@ namespace Game.Chat.Commands
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_NODE_MAX_NODEID);
             stmt.AddValue(0, pathId);
-            using SQLResult result = DB.World.Query(stmt);
+            SQLResult result = DB.World.Query(stmt);
 
             int nodeId = 0;
             if (result.IsEmpty())
@@ -118,7 +118,7 @@ namespace Game.Chat.Commands
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_ADDON_BY_GUID);
             stmt.AddValue(0, guidLow);
-            using SQLResult result = DB.World.Query(stmt);
+            SQLResult result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
             {

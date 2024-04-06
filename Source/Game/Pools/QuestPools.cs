@@ -64,7 +64,7 @@ namespace Game
 
             // load template data from world DB
             {
-                using var result = DB.World.Query("SELECT qpm.questId, qpm.poolId, qpm.poolIndex, qpt.numActive FROM quest_pool_members qpm LEFT JOIN quest_pool_template qpt ON qpm.poolId = qpt.poolId");
+                SQLResult result = DB.World.Query("SELECT qpm.questId, qpm.poolId, qpm.poolIndex, qpt.numActive FROM quest_pool_members qpm LEFT JOIN quest_pool_template qpt ON qpm.poolId = qpt.poolId");
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest pools. DB table `quest_pool_members` is empty.");
@@ -113,7 +113,7 @@ namespace Game
 
             // load saved spawns from character DB
             {
-                using var result = DB.Characters.Query("SELECT pool_id, quest_id FROM pool_quest_save");
+                SQLResult result = DB.Characters.Query("SELECT pool_id, quest_id FROM pool_quest_save");
                 if (!result.IsEmpty())
                 {
                     List<int> unknownPoolIds = new();

@@ -124,7 +124,7 @@ namespace Game.Chat.Commands
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
             stmt.AddValue(0, battlenetAccountName);
 
-            using var accountList = DB.Login.Query(stmt);
+            SQLResult accountList = DB.Login.Query(stmt);
             if (!accountList.IsEmpty())
             {
                 var formatDisplayName = new Func<string, string>(name =>

@@ -82,7 +82,7 @@ namespace Game
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_CHECK_PASSWORD);
             stmt.AddValue(0, accountId);
-            using SQLResult result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
             {
                 var salt = result.Read<byte[]>(1);
@@ -143,7 +143,7 @@ namespace Game
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_EMAIL);
             stmt.AddValue(0, username);
-            using SQLResult result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
                 return result.Read<int>(0);
 
@@ -155,7 +155,7 @@ namespace Game
             name = "";
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_EMAIL_BY_ID);
             stmt.AddValue(0, accountId);
-            using SQLResult result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
             {
                 name = result.Read<string>(0);
@@ -169,7 +169,7 @@ namespace Game
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_GAME_ACCOUNT);
             stmt.AddValue(0, gameAccountId);
-            using SQLResult result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
                 return result.Read<int>(0);
 
@@ -187,7 +187,7 @@ namespace Game
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_MAX_ACCOUNT_INDEX);
             stmt.AddValue(0, accountId);
-            using SQLResult result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
                 return result.Read<byte>(0);
 

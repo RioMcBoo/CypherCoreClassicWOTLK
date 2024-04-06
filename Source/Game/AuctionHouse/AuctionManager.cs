@@ -144,10 +144,11 @@ namespace Game
 
             // perfomance and quantity counters
             var count = 0;
-            uint oldMSTime = Time.GetMSTime();            
+            uint oldMSTime = Time.GetMSTime();
 
-            using (var result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_ITEMS)))
             {
+                SQLResult result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_ITEMS));
+            
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 auctions. DB table `auctionhouse` is empty.");
@@ -185,8 +186,9 @@ namespace Game
             oldMSTime = Time.GetMSTime();
             count = 0;
 
-            using (var result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_BIDDERS)))
             {
+                SQLResult result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_BIDDERS));
+            
                 if (!result.IsEmpty())
                 {
                     do
@@ -202,8 +204,9 @@ namespace Game
             oldMSTime = Time.GetMSTime();
             count = 0;
 
-            using (var result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTIONS)))
             {
+                SQLResult result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTIONS));
+            
                 if (!result.IsEmpty())
                 {
                     SQLTransaction trans = new();

@@ -80,7 +80,7 @@ namespace Game
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
             stmt.AddValue(0, _realm.Id.Index);
-            using var result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
 
             if (!result.IsEmpty())
                 SetPlayerSecurityLimit((AccountTypes)result.Read<byte>(0));
@@ -1276,7 +1276,7 @@ namespace Game
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_AUTOBROADCAST);
             stmt.AddValue(0, _realm.Id.Index);
 
-            using var result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 autobroadcasts definitions. DB table `autobroadcast` is empty for this realm!");
@@ -1669,7 +1669,7 @@ namespace Game
                     return BanReturn.SyntaxError;
             }
 
-            using var resultAccounts = dataBase.Query(stmt);
+            SQLResult resultAccounts = dataBase.Query(stmt);
 
             if (resultAccounts.IsEmpty())
             {
@@ -2274,7 +2274,7 @@ namespace Game
         {
             var DBVersion = "Unknown world database.";
 
-            using var result = DB.World.Query("SELECT db_version, cache_id FROM version LIMIT 1");
+            SQLResult result = DB.World.Query("SELECT db_version, cache_id FROM version LIMIT 1");
             if (!result.IsEmpty())
             {
                 DBVersion = result.Read<string>(0);
@@ -2325,7 +2325,7 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            using var result = DB.Characters.Query("SELECT ID, Value FROM world_variable");
+            SQLResult result = DB.Characters.Query("SELECT ID, Value FROM world_variable");
             if (!result.IsEmpty())
             {
                 do
@@ -2420,7 +2420,7 @@ namespace Game
 
         public bool LoadRealmInfo()
         {
-            using var result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
+            SQLResult result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
             if (result.IsEmpty())
                 return false;
 
@@ -2456,7 +2456,7 @@ namespace Game
             stmt.AddValue(0, (uint)PlayerFlags.WarModeDesired);
             stmt.AddValue(1, (uint)PlayerFlags.WarModeDesired);
 
-            using var result = DB.Characters.Query(stmt);
+            SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
                 do

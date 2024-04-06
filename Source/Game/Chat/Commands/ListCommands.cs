@@ -31,11 +31,12 @@ namespace Game.Chat.Commands
                 return false;
 
             uint creatureCount = 0;
-            using (var result = DB.World.Query("SELECT COUNT(guid) FROM creature WHERE id='{0}'", creatureId))
-            {
-                if (!result.IsEmpty())
-                    creatureCount = result.Read<uint>(0);
-            }
+
+            SQLResult result1 = DB.World.Query($"SELECT COUNT(guid) FROM creature WHERE id='{creatureId}'");
+
+            if (!result1.IsEmpty())
+                creatureCount = result1.Read<uint>(0);
+
 
             PreparedStatement stmt = null;
 
@@ -51,44 +52,42 @@ namespace Game.Chat.Commands
                     creatureId, count));
             }
 
-            using (var result = DB.World.Query(stmt))
+            SQLResult result2 = DB.World.Query(stmt);
+
+            if (!result2.IsEmpty())
             {
-
-                if (!result.IsEmpty())
+                do
                 {
-                    do
+                    long guid = result2.Read<long>(0);
+                    float x = result2.Read<float>(1);
+                    float y = result2.Read<float>(2);
+                    float z = result2.Read<float>(3);
+                    ushort mapId = result2.Read<ushort>(4);
+                    bool liveFound = false;
+
+                    // Get map (only support base map from console)
+                    Map thisMap = null;
+                    if (handler.GetSession() != null)
+                        thisMap = handler.GetSession().GetPlayer().GetMap();
+
+                    // If map found, try to find active version of this creature
+                    if (thisMap != null)
                     {
-                        long guid = result.Read<long>(0);
-                        float x = result.Read<float>(1);
-                        float y = result.Read<float>(2);
-                        float z = result.Read<float>(3);
-                        ushort mapId = result.Read<ushort>(4);
-                        bool liveFound = false;
-
-                        // Get map (only support base map from console)
-                        Map thisMap = null;
-                        if (handler.GetSession() != null)
-                            thisMap = handler.GetSession().GetPlayer().GetMap();
-
-                        // If map found, try to find active version of this creature
-                        if (thisMap != null)
-                        {
-                            var creBounds = thisMap.GetCreatureBySpawnIdStore().LookupByKey(guid);
-                            foreach (var creature in creBounds)
-                                handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, creature.GetGUID().ToString(), creature.IsAlive() ? "*" : " ");
-                            liveFound = !creBounds.Empty();
-                        }
-
-                        if (!liveFound)
-                        {
-                            if (handler.GetSession() != null)
-                                handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, "", "");
-                            else
-                                handler.SendSysMessage(CypherStrings.CreatureListConsole, guid, cInfo.Name, x, y, z, mapId, "", "");
-                        }
+                        var creBounds = thisMap.GetCreatureBySpawnIdStore().LookupByKey(guid);
+                        foreach (var creature in creBounds)
+                            handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, creature.GetGUID().ToString(), creature.IsAlive() ? "*" : " ");
+                        liveFound = !creBounds.Empty();
                     }
-                    while (result.NextRow());
+
+                    if (!liveFound)
+                    {
+                        if (handler.GetSession() != null)
+                            handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, "", "");
+                        else
+                            handler.SendSysMessage(CypherStrings.CreatureListConsole, guid, cInfo.Name, x, y, z, mapId, "", "");
+                    }
                 }
+                while (result2.NextRow());
             }
 
             handler.SendSysMessage(CypherStrings.CommandListcreaturemessage, creatureId, creatureCount);
@@ -109,8 +108,9 @@ namespace Game.Chat.Commands
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_INVENTORY_COUNT_ITEM);
             stmt.AddValue(0, itemId);
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
+
                 if (!result.IsEmpty())
                     inventoryCount = result.Read<uint>(0);
             }
@@ -118,8 +118,9 @@ namespace Game.Chat.Commands
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_INVENTORY_ITEM_BY_ENTRY);
             stmt.AddValue(0, itemId);
             stmt.AddValue(1, count);
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
+
                 if (!result.IsEmpty())
                 {
                     do
@@ -158,8 +159,8 @@ namespace Game.Chat.Commands
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_COUNT_ITEM);
             stmt.AddValue(0, itemId);
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                     mailCount = result.Read<uint>(0);
@@ -170,7 +171,7 @@ namespace Game.Chat.Commands
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_ITEMS_BY_ENTRY);
                 stmt.AddValue(0, itemId);
                 stmt.AddValue(1, count);
-                using var result = DB.Characters.Query(stmt);
+                SQLResult result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                 {
@@ -199,8 +200,9 @@ namespace Game.Chat.Commands
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTIONHOUSE_COUNT_ITEM);
             stmt.AddValue(0, itemId);
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
+
                 if (!result.IsEmpty())
                     auctionCount = result.Read<uint>(0);
             }
@@ -210,7 +212,7 @@ namespace Game.Chat.Commands
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTIONHOUSE_ITEM_BY_ENTRY);
                 stmt.AddValue(0, itemId);
                 stmt.AddValue(1, count);
-                using var result = DB.Characters.Query(stmt);
+                SQLResult result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                 {
@@ -234,8 +236,9 @@ namespace Game.Chat.Commands
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_BANK_COUNT_ITEM);
             stmt.AddValue(0, itemId);
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
+
                 if (!result.IsEmpty())
                     guildCount = result.Read<int>(0);
             }
@@ -243,8 +246,9 @@ namespace Game.Chat.Commands
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_BANK_ITEM_BY_ENTRY);
             stmt.AddValue(0, itemId);
             stmt.AddValue(1, count);
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
+
                 if (!result.IsEmpty())
                 {
                     do
@@ -283,8 +287,9 @@ namespace Game.Chat.Commands
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_COUNT);
             stmt.AddValue(0, player.GetGUID().GetCounter());
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
+            
                 if (!result.IsEmpty())
                 {
                     uint countMail = result.Read<uint>(0);
@@ -295,8 +300,9 @@ namespace Game.Chat.Commands
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_INFO);
                     stmt.AddValue(0, player.GetGUID().GetCounter());
-                    using (var result1 = DB.Characters.Query(stmt))
                     {
+                        SQLResult result1 = DB.Characters.Query(stmt);
+                    
                         if (!result1.IsEmpty())
                         {
                             do
@@ -322,7 +328,7 @@ namespace Game.Chat.Commands
 
                                 if (hasItem == 1)
                                 {
-                                    using (var result2 = DB.Characters.Query("SELECT item_guid FROM mail_items WHERE mail_id = '{0}'", messageId))
+                                    SQLResult result2 = DB.Characters.Query("SELECT item_guid FROM mail_items WHERE mail_id = '{0}'", messageId);
                                     {
                                         if (!result2.IsEmpty())
                                         {
@@ -331,7 +337,7 @@ namespace Game.Chat.Commands
                                                 int item_guid = result2.Read<int>(0);
                                                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_ITEMS);
                                                 stmt.AddValue(0, item_guid);
-                                                using (var result3 = DB.Characters.Query(stmt))
+                                                SQLResult result3 = DB.Characters.Query(stmt);
                                                 {
                                                     if (!result3.IsEmpty())
                                                     {
@@ -392,8 +398,9 @@ namespace Game.Chat.Commands
                 return false;
 
             uint objectCount = 0;
-            using (var result = DB.World.Query("SELECT COUNT(guid) FROM gameobject WHERE id='{0}'", gameObjectId))
             {
+                SQLResult result = DB.World.Query("SELECT COUNT(guid) FROM gameobject WHERE id='{0}'", gameObjectId);
+            
                 if (!result.IsEmpty())
                     objectCount = result.Read<uint>(0);
             }
@@ -411,8 +418,9 @@ namespace Game.Chat.Commands
                     gameObjectId, count));
             }
 
-            using (var result = DB.World.Query(stmt))
             {
+                SQLResult result = DB.World.Query(stmt);
+            
                 if (!result.IsEmpty())
                 {
                     do

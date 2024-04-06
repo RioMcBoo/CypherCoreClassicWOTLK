@@ -332,7 +332,7 @@ namespace Game
                 Global.ObjectMgr.UnloadPhaseConditions();
             }
 
-            using SQLResult result = DB.World.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, " +
+            SQLResult result = DB.World.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, " +
                 "ConditionValue1, ConditionValue2, ConditionValue3, ConditionStringValue1, NegativeCondition, ErrorType, ErrorTextId, ScriptName FROM conditions");
 
             if (result.IsEmpty())

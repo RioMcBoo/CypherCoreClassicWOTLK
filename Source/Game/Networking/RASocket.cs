@@ -132,7 +132,7 @@ namespace Game.Networking
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS);
             stmt.AddValue(0, user);
-            using SQLResult result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.CommandsRA, $"User {user} does not exist in database");

@@ -21,8 +21,9 @@ namespace Game.Loots
             uint count = 0;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_ITEMS);
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
+            
                 if (!result.IsEmpty())
                 {
                     do
@@ -57,10 +58,11 @@ namespace Game.Loots
                 else
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item loots.");
             }
-
+             
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_MONEY);
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
+
                 if (!result.IsEmpty())
                 {
                     count = 0;

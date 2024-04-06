@@ -172,7 +172,7 @@ namespace Game
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_WHOIS);
             stmt.AddValue(0, player.GetSession().GetAccountId());
 
-            using var result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
             {
                 SendNotification(CypherStrings.AccountForPlayerNotFound, packet.CharName);

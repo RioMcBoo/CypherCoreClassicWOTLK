@@ -3302,7 +3302,7 @@ namespace Game.Achievements
 
             _criteriaDataMap.Clear();                              // need for reload case
 
-            using var result = DB.World.Query("SELECT criteria_id, Type, value1, value2, ScriptName FROM criteria_data");
+            SQLResult result = DB.World.Query("SELECT criteria_id, Type, value1, value2, ScriptName FROM criteria_data");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 additional criteria data. DB table `criteria_data` is empty.");

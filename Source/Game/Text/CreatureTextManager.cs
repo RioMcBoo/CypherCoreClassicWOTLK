@@ -28,7 +28,7 @@ namespace Game
             //all currently used temp texts are NOT reset
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEXT);
-            using var result = DB.World.Query(stmt);
+            SQLResult result = DB.World.Query(stmt);
 
             if (result.IsEmpty())
             {
@@ -123,7 +123,7 @@ namespace Game
 
             mLocaleTextMap.Clear(); // for reload case
 
-            using var result = DB.World.Query("SELECT CreatureId, GroupId, ID, Locale, Text FROM creature_text_locale");
+            SQLResult result = DB.World.Query("SELECT CreatureId, GroupId, ID, Locale, Text FROM creature_text_locale");
 
             if (result.IsEmpty())
                 return;

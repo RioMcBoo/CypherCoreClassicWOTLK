@@ -30,9 +30,10 @@ namespace Game
             _maxEventId = 0;
             _maxInviteId = 0;
 
-            //                                              0        1      2      3            4          5          6     7      8
-            using (var result = DB.Characters.Query("SELECT EventID, Owner, Title, Description, EventType, TextureID, Date, Flags, LockDate FROM calendar_events"))
             {
+                //                                              0        1      2      3            4          5          6     7      8
+                SQLResult result = DB.Characters.Query("SELECT EventID, Owner, Title, Description, EventType, TextureID, Date, Flags, LockDate FROM calendar_events");
+            
                 if (!result.IsEmpty())
                 {
                     do
@@ -66,9 +67,10 @@ namespace Game
             count = 0;
             oldMSTime = Time.GetMSTime();
 
-            //                                    0         1        2        3       4       5             6               7
-            using (var result = DB.Characters.Query("SELECT InviteID, EventID, Invitee, Sender, Status, ResponseTime, ModerationRank, Note FROM calendar_invites"))
             {
+                //                                    0         1        2        3       4       5             6               7
+                SQLResult result = DB.Characters.Query("SELECT InviteID, EventID, Invitee, Sender, Status, ResponseTime, ModerationRank, Note FROM calendar_invites");
+            
                 if (!result.IsEmpty())
                 {
                     do

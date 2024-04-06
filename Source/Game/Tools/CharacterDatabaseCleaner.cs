@@ -55,7 +55,7 @@ namespace Game
 
         static void CheckUnique(string column, string table, CheckFor check)
         {
-            using SQLResult result = DB.Characters.Query("SELECT DISTINCT {0} FROM {1}", column, table);
+            SQLResult result = DB.Characters.Query("SELECT DISTINCT {0} FROM {1}", column, table);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.Sql, "Table {0} is empty.", table);

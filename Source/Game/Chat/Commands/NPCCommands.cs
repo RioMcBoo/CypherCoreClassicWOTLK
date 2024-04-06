@@ -231,7 +231,7 @@ namespace Game.Chat
             stmt.AddValue(5, player.GetPositionY());
             stmt.AddValue(6, player.GetPositionZ());
             stmt.AddValue(7, distance * distance);
-            using var result = DB.World.Query(stmt);
+            SQLResult result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
             {

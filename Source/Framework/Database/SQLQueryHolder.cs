@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Framework.Database
 {
-    public abstract class SQLQueryHolder<T> : IDisposable
+    public abstract class SQLQueryHolder<T>
     {
         public Dictionary<T, PreparedStatement> m_queries = new();
         Dictionary<T, SQLResult> _results = new();
@@ -34,14 +34,6 @@ namespace Framework.Database
 
             return _results[index];
         }
-
-        public void Dispose()
-        {
-            foreach (var res in _results.Values)
-            {
-                res.Dispose();
-            }
-        }
     }
 
     class SQLQueryHolderTask<R> : ISqlOperation
@@ -63,7 +55,7 @@ namespace Framework.Database
             // execute all queries in the holder and pass the results
             foreach (var pair in m_holder.m_queries)
             {
-                var result = mySqlBase.Query(pair.Value);
+                SQLResult result = mySqlBase.Query(pair.Value);
                 m_holder.SetResult(pair.Key, result);
             }
 

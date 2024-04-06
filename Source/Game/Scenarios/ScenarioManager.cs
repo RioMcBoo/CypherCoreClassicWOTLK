@@ -51,7 +51,7 @@ namespace Game.Scenarios
 
             uint oldMSTime = Time.GetMSTime();
 
-            using var result = DB.World.Query("SELECT map, difficulty, scenario_A, scenario_H FROM scenarios");
+            SQLResult result = DB.World.Query("SELECT map, difficulty, scenario_A, scenario_H FROM scenarios");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 scenarios. DB table `scenarios` is empty!");
@@ -137,7 +137,7 @@ namespace Game.Scenarios
             uint count = 0;
 
             //                                            0               1          2     3      4        5         6      7              8                  9
-            using var result = DB.World.Query("SELECT CriteriaTreeID, BlobIndex, Idx1, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, NavigationPlayerConditionID FROM scenario_poi ORDER BY CriteriaTreeID, Idx1");
+            SQLResult result = DB.World.Query("SELECT CriteriaTreeID, BlobIndex, Idx1, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, NavigationPlayerConditionID FROM scenario_poi ORDER BY CriteriaTreeID, Idx1");
 
             if (result.IsEmpty())
             {
@@ -148,7 +148,7 @@ namespace Game.Scenarios
             Dictionary<int, MultiMap<int, ScenarioPOIPoint>> allPoints = new();
 
             //                                                0               1    2  3  4
-            using (var pointsResult = DB.World.Query("SELECT CriteriaTreeID, Idx1, X, Y, Z FROM scenario_poi_points ORDER BY CriteriaTreeID DESC, Idx1, Idx2"))
+            SQLResult pointsResult = DB.World.Query("SELECT CriteriaTreeID, Idx1, X, Y, Z FROM scenario_poi_points ORDER BY CriteriaTreeID DESC, Idx1, Idx2");
             {
                 if (!pointsResult.IsEmpty())
                 {

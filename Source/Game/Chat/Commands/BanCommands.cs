@@ -194,7 +194,7 @@ namespace Game.Chat.Commands
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANINFO);
             stmt.AddValue(0, targetGuid.GetCounter());
-            using var result = DB.Characters.Query(stmt);
+            SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.CharNotBanned, name);
@@ -224,7 +224,7 @@ namespace Game.Chat.Commands
             if (ip.IsEmpty())
                 return false;
 
-            using var result = DB.Login.Query("SELECT ip, FROM_UNIXTIME(bandate), FROM_UNIXTIME(unbandate), unbandate-UNIX_TIMESTAMP(), banreason, bannedby, unbandate-bandate FROM ip_banned WHERE ip = '{0}'", ip);
+            SQLResult result = DB.Login.Query("SELECT ip, FROM_UNIXTIME(bandate), FROM_UNIXTIME(unbandate), unbandate-UNIX_TIMESTAMP(), banreason, bannedby, unbandate-bandate FROM ip_banned WHERE ip = '{0}'", ip);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.BaninfoNoip);
@@ -240,7 +240,7 @@ namespace Game.Chat.Commands
 
         static bool HandleBanInfoHelper(int accountId, string accountName, CommandHandler handler)
         {
-            using var result = DB.Login.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{0}' ORDER BY bandate ASC", accountId);
+            SQLResult result = DB.Login.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{0}' ORDER BY bandate ASC", accountId);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.BaninfoNoaccountban, accountName);
@@ -277,8 +277,9 @@ namespace Game.Chat.Commands
             if (filter.IsEmpty())
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_ALL);
-                using (var result = DB.Login.Query(stmt))
                 {
+                    SQLResult result = DB.Login.Query(stmt);
+                
                     if (result.IsEmpty())
                     {
                         handler.SendSysMessage(CypherStrings.BanlistNoaccount);
@@ -292,8 +293,9 @@ namespace Game.Chat.Commands
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_FILTER);
                 stmt.AddValue(0, filter);
-                using (var result = DB.Login.Query(stmt))
                 {
+                    SQLResult result = DB.Login.Query(stmt);
+                
                     if (result.IsEmpty())
                     {
                         handler.SendSysMessage(CypherStrings.BanlistNoaccount);
@@ -313,8 +315,9 @@ namespace Game.Chat.Commands
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUID_BY_NAME_FILTER);
             stmt.AddValue(0, filter);
-            using (var result = DB.Characters.Query(stmt))
             {
+                SQLResult result = DB.Characters.Query(stmt);
+            
                 if (result.IsEmpty())
                 {
                     handler.SendSysMessage(CypherStrings.BanlistNocharacter);
@@ -331,8 +334,9 @@ namespace Game.Chat.Commands
                     {
                         PreparedStatement stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANNED_NAME);
                         stmt2.AddValue(0, result.Read<ulong>(0));
-                        using (var banResult = DB.Characters.Query(stmt2))
                         {
+                            SQLResult banResult = DB.Characters.Query(stmt2);
+                        
                             if (!banResult.IsEmpty())
                                 handler.SendSysMessage(banResult.Read<string>(0));
                         }
@@ -353,7 +357,7 @@ namespace Game.Chat.Commands
 
                         PreparedStatement stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANINFO_LIST);
                         stmt2.AddValue(0, result.Read<ulong>(0));
-                        using var banInfo = DB.Characters.Query(stmt2);
+                        SQLResult banInfo = DB.Characters.Query(stmt2);
                         if (!banInfo.IsEmpty())
                         {
                             do
@@ -406,7 +410,7 @@ namespace Game.Chat.Commands
                 stmt.AddValue(0, filter);
             }
 
-            using var result = DB.Login.Query(stmt);
+            SQLResult result = DB.Login.Query(stmt);
 
             if (result.IsEmpty())
             {
@@ -474,9 +478,9 @@ namespace Game.Chat.Commands
                 do
                 {
                     uint accountid = result.Read<uint>(0);
-
-                    using (var banResult = DB.Login.Query("SELECT account.username FROM account, account_banned WHERE account_banned.id='{0}' AND account_banned.id=account.id", accountid))
                     {
+                        SQLResult banResult = DB.Login.Query("SELECT account.username FROM account, account_banned WHERE account_banned.id='{0}' AND account_banned.id=account.id", accountid);
+                    
                         if (!banResult.IsEmpty())
                         {
                             handler.SendSysMessage(banResult.Read<string>(0));
@@ -507,7 +511,7 @@ namespace Game.Chat.Commands
                         Global.AccountMgr.GetName(accountId, out accountName);
 
                     // No SQL injection. id is uint32.
-                    using var banInfo = DB.Login.Query("SELECT bandate, unbandate, bannedby, banreason FROM account_banned WHERE id = {0} ORDER BY unbandate", accountId);
+                    SQLResult banInfo = DB.Login.Query("SELECT bandate, unbandate, bannedby, banreason FROM account_banned WHERE id = {0} ORDER BY unbandate", accountId);
                     if (!banInfo.IsEmpty())
                     {
                         do

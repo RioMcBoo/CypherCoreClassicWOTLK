@@ -41,8 +41,9 @@ namespace Game.Chat
                 DB.Characters.Execute(stmt);
             }
 
-            using (var result = DB.Characters.Query("SELECT name, team, announce, ownership, password, bannedList FROM channels"))
             {
+                SQLResult result = DB.Characters.Query("SELECT name, team, announce, ownership, password, bannedList FROM channels");
+            
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 custom chat channels. DB table `channels` is empty.");

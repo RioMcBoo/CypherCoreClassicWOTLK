@@ -17,7 +17,7 @@ namespace Game.Spells
             SkillExtraItemStorage.Clear();                            // need for reload
 
             //                                             0               1                       2                    3
-            using var result = DB.World.Query("SELECT spellId, requiredSpecialization, additionalCreateChance, additionalMaxNum FROM skill_extra_item_template");
+            SQLResult result = DB.World.Query("SELECT spellId, requiredSpecialization, additionalCreateChance, additionalMaxNum FROM skill_extra_item_template");
 
             if (result.IsEmpty())
             {
@@ -118,8 +118,8 @@ namespace Game.Spells
 
             SkillPerfectItemStorage.Clear(); // reload capability
 
-            //                                                  0               1                      2                  3
-            using var result = DB.World.Query("SELECT spellId, requiredSpecialization, perfectCreateChance, perfectItemType FROM skill_perfect_item_template");
+            //                                           0               1                      2                  3
+            SQLResult result = DB.World.Query("SELECT spellId, requiredSpecialization, perfectCreateChance, perfectItemType FROM skill_perfect_item_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell perfection definitions. DB table `skill_perfect_item_template` is empty.");

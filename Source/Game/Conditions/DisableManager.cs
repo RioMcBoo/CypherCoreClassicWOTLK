@@ -31,7 +31,7 @@ namespace Game
             // reload case
             m_DisableMap.Clear();
 
-            using var result = DB.World.Query("SELECT sourceType, entry, flags, params_0, params_1 FROM disables");
+            SQLResult result = DB.World.Query("SELECT sourceType, entry, flags, params_0, params_1 FROM disables");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 disables. DB table `disables` is empty!");

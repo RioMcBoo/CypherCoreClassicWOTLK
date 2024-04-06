@@ -20,7 +20,7 @@ namespace Game.DataStorage
             Dictionary<int, List<ConversationActorTemplate>> actorsByConversation = new();
 
             {
-                using var lineTemplates = DB.World.Query("SELECT Id, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
+                SQLResult lineTemplates = DB.World.Query("SELECT Id, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
                 if (!lineTemplates.IsEmpty())
                 {
                     uint oldMSTime = Time.GetMSTime();
@@ -55,7 +55,7 @@ namespace Game.DataStorage
             }
 
             {
-                using var actorResult = DB.World.Query("SELECT ConversationId, ConversationActorId, ConversationActorGuid, Idx, CreatureId, CreatureDisplayInfoId, NoActorObject, ActivePlayerObject FROM conversation_actors");
+                SQLResult actorResult = DB.World.Query("SELECT ConversationId, ConversationActorId, ConversationActorGuid, Idx, CreatureId, CreatureDisplayInfoId, NoActorObject, ActivePlayerObject FROM conversation_actors");
                 if (!actorResult.IsEmpty())
                 {
                     uint oldMSTime = Time.GetMSTime();
@@ -119,7 +119,7 @@ namespace Game.DataStorage
             }
 
             {
-                using var templateResult = DB.World.Query("SELECT Id, FirstLineId, TextureKitId, Flags, ScriptName FROM conversation_template");
+                SQLResult templateResult = DB.World.Query("SELECT Id, FirstLineId, TextureKitId, Flags, ScriptName FROM conversation_template");
                 if (!templateResult.IsEmpty())
                 {
                     uint oldMSTime = Time.GetMSTime();

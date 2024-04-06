@@ -29,7 +29,7 @@ namespace Game
 
             {
                 //                                         0   1             2       3        4
-                using var result = DB.World.Query("SELECT ID, DefaultValue, MapIDs, AreaIDs, ScriptName FROM world_state");
+                SQLResult result = DB.World.Query("SELECT ID, DefaultValue, MapIDs, AreaIDs, ScriptName FROM world_state");
                 if (result.IsEmpty())
                     return;
 
@@ -130,7 +130,7 @@ namespace Game
             oldMSTime = Time.GetMSTime();
 
             {
-                using var result = DB.Characters.Query("SELECT Id, Value FROM world_state_value");
+                SQLResult result = DB.Characters.Query("SELECT Id, Value FROM world_state_value");
                 uint savedValueCount = 0;
                 if (!result.IsEmpty())
                 {

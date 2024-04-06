@@ -2734,7 +2734,7 @@ namespace Game.Maps
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_RESPAWNS);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, GetInstanceId());
-            using var result = DB.Characters.Query(stmt);
+            SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
                 do
@@ -2799,81 +2799,82 @@ namespace Game.Maps
 
             //        0     1     2     3            4      5          6          7     8      9       10     11        12    13          14          15
             // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, race, class, gender, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
-            using (var result = DB.Characters.Query(stmt))
+            SQLResult result = DB.Characters.Query(stmt);
+
+            if (result.IsEmpty())
+                return;
+
+
+            MultiMap<long, int> phases = new();
+            MultiMap<long, ChrCustomizationChoice> customizations = new();
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CORPSE_PHASES);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
+
+            //        0          1
+            // SELECT OwnerGuid, PhaseId FROM corpse_phases cp LEFT JOIN corpse c ON cp.OwnerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?
             {
-                if (result.IsEmpty())
-                    return;
-
-
-                MultiMap<long, int> phases = new();
-                MultiMap<long, ChrCustomizationChoice> customizations = new();
-
-                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CORPSE_PHASES);
-                stmt.AddValue(0, GetId());
-                stmt.AddValue(1, GetInstanceId());
-
-                //        0          1
-                // SELECT OwnerGuid, PhaseId FROM corpse_phases cp LEFT JOIN corpse c ON cp.OwnerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?
-                using (var phaseResult = DB.Characters.Query(stmt))
+                SQLResult phaseResult = DB.Characters.Query(stmt);
+            
+                if (!phaseResult.IsEmpty())
                 {
-                    if (!phaseResult.IsEmpty())
+                    do
                     {
-                        do
-                        {
-                            var guid = phaseResult.Read<long>(0);
-                            var phaseId = phaseResult.Read<int>(1);
+                        var guid = phaseResult.Read<long>(0);
+                        var phaseId = phaseResult.Read<int>(1);
 
-                            phases.Add(guid, phaseId);
+                        phases.Add(guid, phaseId);
 
-                        } while (phaseResult.NextRow());
-                    }
+                    } while (phaseResult.NextRow());
                 }
-
-                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CORPSE_CUSTOMIZATIONS);
-                stmt.AddValue(0, GetId());
-                stmt.AddValue(1, GetInstanceId());
-
-                //        0             1                            2
-                // SELECT cc.ownerGuid, cc.chrCustomizationOptionID, cc.chrCustomizationChoiceID FROM corpse_customizations cc LEFT JOIN corpse c ON cc.ownerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?
-                using (var customizationResult = DB.Characters.Query(stmt))
-                {
-                    if (!customizationResult.IsEmpty())
-                    {
-                        do
-                        {
-                            long guid = customizationResult.Read<long>(0);
-
-                            ChrCustomizationChoice choice = new();
-                            choice.ChrCustomizationOptionID = customizationResult.Read<int>(1);
-                            choice.ChrCustomizationChoiceID = customizationResult.Read<int>(2);
-                            customizations.Add(guid, choice);
-
-                        } while (customizationResult.NextRow());
-                    }
-                }
-
-                do
-                {
-                    var type = (CorpseType)result.Read<byte>(13);
-                    var guid = result.Read<long>(15);
-                    if (type >= CorpseType.Max || type == CorpseType.Bones)
-                    {
-                        Log.outError(LogFilter.Maps, $"Corpse (guid: {guid}) have wrong corpse Type ({type}), not loading.");
-                        continue;
-                    }
-
-                    Corpse corpse = new(type);
-                    if (!corpse.LoadCorpseFromDB(GenerateLowGuid(HighGuid.Corpse), result.GetFields()))
-                        continue;
-
-                    foreach (var phaseId in phases[guid])
-                        PhasingHandler.AddPhase(corpse, phaseId, false);
-
-                    corpse.SetCustomizations(customizations[guid]);
-
-                    AddCorpse(corpse);
-                } while (result.NextRow());
             }
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CORPSE_CUSTOMIZATIONS);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
+
+            //        0             1                            2
+            // SELECT cc.ownerGuid, cc.chrCustomizationOptionID, cc.chrCustomizationChoiceID FROM corpse_customizations cc LEFT JOIN corpse c ON cc.ownerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?
+            {
+                SQLResult customizationResult = DB.Characters.Query(stmt);
+            
+                if (!customizationResult.IsEmpty())
+                {
+                    do
+                    {
+                        long guid = customizationResult.Read<long>(0);
+
+                        ChrCustomizationChoice choice = new();
+                        choice.ChrCustomizationOptionID = customizationResult.Read<int>(1);
+                        choice.ChrCustomizationChoiceID = customizationResult.Read<int>(2);
+                        customizations.Add(guid, choice);
+
+                    } while (customizationResult.NextRow());
+                }
+            }
+
+            do
+            {
+                var type = (CorpseType)result.Read<byte>(13);
+                var guid = result.Read<long>(15);
+                if (type >= CorpseType.Max || type == CorpseType.Bones)
+                {
+                    Log.outError(LogFilter.Maps, $"Corpse (guid: {guid}) have wrong corpse Type ({type}), not loading.");
+                    continue;
+                }
+
+                Corpse corpse = new(type);
+                if (!corpse.LoadCorpseFromDB(GenerateLowGuid(HighGuid.Corpse), result.GetFields()))
+                    continue;
+
+                foreach (var phaseId in phases[guid])
+                    PhasingHandler.AddPhase(corpse, phaseId, false);
+
+                corpse.SetCustomizations(customizations[guid]);
+
+                AddCorpse(corpse);
+            } while (result.NextRow());
         }
 
         public void DeleteCorpseData()

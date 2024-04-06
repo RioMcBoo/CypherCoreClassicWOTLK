@@ -19,7 +19,7 @@ namespace Game.Entities
             uint oldMSTime = Time.GetMSTime();
             _petitionStorage.Clear();
 
-            using var result = DB.Characters.Query("SELECT petitionguid, ownerguid, name FROM petition");
+            SQLResult result = DB.Characters.Query("SELECT petitionguid, ownerguid, name FROM petition");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 petitions.");
@@ -40,7 +40,7 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            using var result = DB.Characters.Query("SELECT petitionguid, player_account, playerguid FROM petition_sign");
+            SQLResult result = DB.Characters.Query("SELECT petitionguid, player_account, playerguid FROM petition_sign");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Petition signs!");

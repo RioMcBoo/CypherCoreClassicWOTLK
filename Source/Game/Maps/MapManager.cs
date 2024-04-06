@@ -350,14 +350,16 @@ namespace Game.Entities
             _nextInstanceId = 1;
 
             ulong maxExistingInstanceId = 0;
-            using (var result = DB.Characters.Query("SELECT IFNULL(MAX(instanceId), 0) FROM instance"))
             {
+                SQLResult result = DB.Characters.Query("SELECT IFNULL(MAX(instanceId), 0) FROM instance");
+            
                 if (!result.IsEmpty())
                     maxExistingInstanceId = Math.Max(maxExistingInstanceId, result.Read<ulong>(0));
             }
 
-            using (var result = DB.Characters.Query("SELECT IFNULL(MAX(instanceId), 0) FROM character_instance_lock"))
             {
+                SQLResult result = DB.Characters.Query("SELECT IFNULL(MAX(instanceId), 0) FROM character_instance_lock");
+            
                 if (!result.IsEmpty())
                     maxExistingInstanceId = Math.Max(maxExistingInstanceId, result.Read<ulong>(0));
             }

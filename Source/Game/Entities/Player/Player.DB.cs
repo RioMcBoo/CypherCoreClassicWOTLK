@@ -196,7 +196,7 @@ namespace Game.Entities
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_REFUNDS);
                             stmt.AddValue(0, item.GetGUID().GetCounter());
                             stmt.AddValue(1, GetGUID().GetCounter());
-                            using var result = DB.Characters.Query(stmt);
+                            SQLResult result = DB.Characters.Query(stmt);
                             if (!result.IsEmpty())
                             {
                                 item.SetRefundRecipient(GetGUID());
@@ -216,7 +216,7 @@ namespace Game.Entities
                     {
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEM_BOP_TRADE);
                         stmt.AddValue(0, item.GetGUID().ToString());
-                        using var result = DB.Characters.Query(stmt);
+                        SQLResult result = DB.Characters.Query(stmt);
                         if (!result.IsEmpty())
                         {
                             string strGUID = result.Read<string>(0);
@@ -2764,7 +2764,7 @@ namespace Game.Entities
 
         public bool LoadFromDB(ObjectGuid guid, SQLQueryHolder<PlayerLoginQueryLoad> holder)
         {
-            using var result = holder.GetResult(PlayerLoginQueryLoad.From);
+            SQLResult result = holder.GetResult(PlayerLoginQueryLoad.From);
             if (result.IsEmpty())
             {
                 Global.CharacterCacheStorage.GetCharacterNameByGuid(guid, out string cacheName);
@@ -2923,7 +2923,7 @@ namespace Game.Entities
             SetMoney(Math.Min(money, PlayerConst.MaxMoneyAmount));
 
             List<ChrCustomizationChoice> customizations = new();
-            using var customizationsResult = holder.GetResult(PlayerLoginQueryLoad.Customizations);
+            SQLResult customizationsResult = holder.GetResult(PlayerLoginQueryLoad.Customizations);
             if (!customizationsResult.IsEmpty())
             {
                 do
@@ -3925,7 +3925,7 @@ namespace Game.Entities
             long guidLow = guid.GetCounter();
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_ZONE);
             stmt.AddValue(0, guidLow);
-            using var result = DB.Characters.Query(stmt);
+            SQLResult result = DB.Characters.Query(stmt);
 
             if (result.IsEmpty())
                 return 0;
@@ -3936,7 +3936,7 @@ namespace Game.Entities
                 // stored zone is zero, use generic and slow zone detection
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_POSITION_XYZ);
                 stmt.AddValue(0, guidLow);
-                using var posResult = DB.Characters.Query(stmt);
+                SQLResult posResult = DB.Characters.Query(stmt);
 
                 if (posResult.IsEmpty())
                     return 0;
@@ -4022,7 +4022,7 @@ namespace Game.Entities
             // the player was uninvited already on logout so just remove from group
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
             stmt.AddValue(0, guid);
-            using (var resultGroup = DB.Characters.Query(stmt))
+            SQLResult resultGroup = DB.Characters.Query(stmt);
             {
                 if (!resultGroup.IsEmpty())
                 {
@@ -4042,7 +4042,7 @@ namespace Game.Entities
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_COD_ITEM_MAIL);
                     stmt.AddValue(0, guid);
-                    using (var resultMail = DB.Characters.Query(stmt))
+                    SQLResult resultMail = DB.Characters.Query(stmt);
                     {
                         if (!resultMail.IsEmpty())
                         {
@@ -4050,7 +4050,7 @@ namespace Game.Entities
 
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
                             stmt.AddValue(0, guid);
-                            using (var resultItems = DB.Characters.Query(stmt))
+                            SQLResult resultItems = DB.Characters.Query(stmt);
                             {
                                 if (!resultItems.IsEmpty())
                                 {
@@ -4127,7 +4127,7 @@ namespace Game.Entities
                     // NOW we can finally clear other DB data related to character
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_PET_IDS);
                     stmt.AddValue(0, guid);
-                    using (var resultPets = DB.Characters.Query(stmt))
+                    SQLResult resultPets = DB.Characters.Query(stmt);
                     {
 
                         if (!resultPets.IsEmpty())
@@ -4143,7 +4143,7 @@ namespace Game.Entities
                     // Delete char from social list of online chars
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_SOCIAL);
                     stmt.AddValue(0, guid);
-                    using (var resultFriends = DB.Characters.Query(stmt))
+                    SQLResult resultFriends = DB.Characters.Query(stmt);
                     {
                         if (!resultFriends.IsEmpty())
                         {
@@ -4424,7 +4424,7 @@ namespace Game.Entities
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_OLD_CHARS);
             stmt.AddValue(0, (uint)(GameTime.GetGameTime() - keepDays * Time.Day));
-            using var result = DB.Characters.Query(stmt);
+            SQLResult result = DB.Characters.Query(stmt);
 
             if (!result.IsEmpty())
             {
@@ -4456,7 +4456,7 @@ namespace Game.Entities
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_POSITION);
             stmt.AddValue(0, guid.GetCounter());
-            using var result = DB.Characters.Query(stmt);
+            SQLResult result = DB.Characters.Query(stmt);
 
             loc = new WorldLocation();
             inFlight = false;

@@ -518,7 +518,7 @@ namespace BNetServer.REST
 
         void MigrateLegacyPasswordHashes()
         {
-            using SQLResult checkResult = DB.Login.Query("SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = SCHEMA() AND TABLE_NAME = 'battlenet_accounts' " +
+            SQLResult checkResult = DB.Login.Query("SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = SCHEMA() AND TABLE_NAME = 'battlenet_accounts' " +
                 "AND COLUMN_NAME = 'sha_pass_hash'");
 
             if (checkResult.IsEmpty())
@@ -528,7 +528,7 @@ namespace BNetServer.REST
             uint start = Time.GetMSTime();
             // the auth update query nulls salt/verifier if they cannot be converted
             // if they are non-null but s/v have been cleared, that means a legacy tool touched our auth DB (otherwise, the core might've done it itself, it used to use those hacks too)
-            using SQLResult result = DB.Login.Query("SELECT id, sha_pass_hash, IF((salt IS null) OR (verifier IS null), 0, 1) AS " +
+            SQLResult result = DB.Login.Query("SELECT id, sha_pass_hash, IF((salt IS null) OR (verifier IS null), 0, 1) AS " +
                 "shouldWarn FROM battlenet_accounts WHERE sha_pass_hash != DEFAULT(sha_pass_hash) OR salt IS NULL OR verifier IS NULL");
             if (result.IsEmpty())
             {

@@ -17,7 +17,7 @@ namespace Game.Entities
             RandomEnchantmentData.Clear();
 
             //                                         0              1      2
-            using var result = DB.World.Query("SELECT Id, EnchantmentId, Chance FROM item_random_enchantment_template");
+            SQLResult result = DB.World.Query("SELECT Id, EnchantmentId, Chance FROM item_random_enchantment_template");
 
             if (result.IsEmpty())
             {

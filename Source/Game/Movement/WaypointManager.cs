@@ -27,8 +27,8 @@ namespace Game
 
             var oldMSTime = Time.GetMSTime();
 
-            //                                               0       1         2
-            using SQLResult result = DB.World.Query("SELECT  PathId, MoveType, Flags FROM waypoint_path");
+            //                                            0       1         2
+            SQLResult result = DB.World.Query("SELECT  PathId, MoveType, Flags FROM waypoint_path");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 waypoint paths. DB table `waypoint_path` is empty!");
@@ -50,8 +50,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                               0       1          2          3          4            5      6
-            using SQLResult result = DB.World.Query("SELECT PathId, NodeId, PositionX, PositionY, PositionZ, Orientation, Delay FROM waypoint_path_node ORDER BY PathId, NodeId");
+            //                                          0       1          2          3          4            5      6
+            SQLResult result = DB.World.Query("SELECT PathId, NodeId, PositionX, PositionY, PositionZ, Orientation, Delay FROM waypoint_path_node ORDER BY PathId, NodeId");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 waypoint path nodes. DB table `waypoint_path_node` is empty!");
@@ -132,8 +132,9 @@ namespace Game
             // waypoint_path
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_BY_PATHID);
             stmt.AddValue(0, pathId);
-            using (SQLResult result = DB.World.Query(stmt))
             {
+                SQLResult result = DB.World.Query(stmt);
+            
                 if (result.IsEmpty())
                 {
                     Log.outError(LogFilter.Sql, $"PathId {pathId} in `waypoint_path` not found, ignoring");
@@ -149,9 +150,9 @@ namespace Game
             // waypoint_path_data
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_NODE_BY_PATHID);
             stmt.AddValue(0, pathId);
-
-            using (SQLResult result = DB.World.Query(stmt))
             {
+                SQLResult result = DB.World.Query(stmt);
+            
                 if (result.IsEmpty())
                 {
                     Log.outError(LogFilter.Sql, $"PathId {pathId} in `waypoint_path_node` not found, ignoring");

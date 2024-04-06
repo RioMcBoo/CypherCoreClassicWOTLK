@@ -23,8 +23,8 @@ namespace Game.DataStorage
             MultiMap<AreaTriggerId, AreaTriggerAction> actionsByAreaTrigger = new();
 
             {
-                //                                                        0             1         2           3            4
-                using SQLResult templateActions = DB.World.Query("SELECT AreaTriggerId, IsCustom, ActionType, ActionParam, TargetType FROM `areatrigger_template_actions`");
+                //                                                      0             1         2           3            4
+                SQLResult templateActions = DB.World.Query("SELECT AreaTriggerId, IsCustom, ActionType, ActionParam, TargetType FROM `areatrigger_template_actions`");
                 if (!templateActions.IsEmpty())
                 {
                     do
@@ -70,7 +70,7 @@ namespace Game.DataStorage
 
             {
                 //                                           0                             1         2    3         4         5               6
-                using var vertices = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, IsCustom, Idx, VerticeX, VerticeY, VerticeTargetX, VerticeTargetY FROM `areatrigger_create_properties_polygon_vertex` ORDER BY `AreaTriggerCreatePropertiesId`, `IsCustom`, `Idx`");
+                SQLResult vertices = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, IsCustom, Idx, VerticeX, VerticeY, VerticeTargetX, VerticeTargetY FROM `areatrigger_create_properties_polygon_vertex` ORDER BY `AreaTriggerCreatePropertiesId`, `IsCustom`, `Idx`");
                 if (!vertices.IsEmpty())
                 {
                     do
@@ -94,8 +94,8 @@ namespace Game.DataStorage
 
 
             {
-                //                                               0                              1         2  3  4
-                using SQLResult splines = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, IsCustom, X, Y, Z FROM `areatrigger_create_properties_spline_point` ORDER BY `AreaTriggerCreatePropertiesId`, `IsCustom`, `Idx`");
+                //                                         0                              1         2  3  4
+                SQLResult splines = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, IsCustom, X, Y, Z FROM `areatrigger_create_properties_spline_point` ORDER BY `AreaTriggerCreatePropertiesId`, `IsCustom`, `Idx`");
                 if (!splines.IsEmpty())
                 {
                     do
@@ -113,8 +113,8 @@ namespace Game.DataStorage
 
 
             {
-                //                                                 0   1         2
-                using SQLResult templates = DB.World.Query("SELECT Id, IsCustom, Flags FROM `areatrigger_template`");
+                //                                           0   1         2
+                SQLResult templates = DB.World.Query("SELECT Id, IsCustom, Flags FROM `areatrigger_template`");
                 if (!templates.IsEmpty())
                 {
                     do
@@ -132,8 +132,8 @@ namespace Game.DataStorage
 
 
             {
-                //                                                                   0   1         2              3                    4
-                using SQLResult areatriggerCreateProperties = DB.World.Query("SELECT Id, IsCustom, AreaTriggerId, IsAreatriggerCustom, Flags, " +
+                //                                                             0   1         2              3                    4
+                SQLResult areatriggerCreateProperties = DB.World.Query("SELECT Id, IsCustom, AreaTriggerId, IsAreatriggerCustom, Flags, " +
                     //5            6             7             8              9       10         11                 12            13 +
                     "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale, " +
                     //14     15          16          17          18          19          20          21          22          23
@@ -229,8 +229,8 @@ namespace Game.DataStorage
 
             {
 
-                //                                                              0                               1         2           3             4                5             6        7                 8
-                using SQLResult circularMovementInfos = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, IsCustom, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `areatrigger_create_properties_orbit`");
+                //                                                           0                               1         2           3             4                5             6        7                 8
+                SQLResult circularMovementInfos = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, IsCustom, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `areatrigger_create_properties_orbit`");
                 if (!circularMovementInfos.IsEmpty())
                 {
                     do
@@ -290,8 +290,8 @@ namespace Game.DataStorage
 
             uint oldMSTime = Time.GetMSTime();
             // Load area trigger positions (to put them on the server)
-            //                                              0        1                              2         3      4                  5     6     7     8            9              10       11          12               13
-            using SQLResult result = DB.World.Query("SELECT SpawnId, AreaTriggerCreatePropertiesId, IsCustom, MapId, SpawnDifficulties, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, SpellForVisuals, ScriptName FROM `areatrigger`");
+            //                                          0        1                              2         3      4                  5     6     7     8            9              10       11          12               13
+            SQLResult result = DB.World.Query("SELECT SpawnId, AreaTriggerCreatePropertiesId, IsCustom, MapId, SpawnDifficulties, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, SpellForVisuals, ScriptName FROM `areatrigger`");
             if (!result.IsEmpty())
             {
                 do

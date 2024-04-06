@@ -32,7 +32,7 @@ namespace Game.AI
                 _eventMap[i].Clear();  //Drop Existing SmartAI List
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_SMART_SCRIPTS);
-            using var result = DB.World.Query(stmt);
+            SQLResult result = DB.World.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 SmartAI scripts. DB table `smartai_scripts` is empty.");

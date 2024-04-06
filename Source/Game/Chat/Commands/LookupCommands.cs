@@ -898,7 +898,7 @@ namespace Game.Chat
 
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
                 stmt.AddValue(0, ip);
-                using var result = DB.Login.Query(stmt);
+                SQLResult result = DB.Login.Query(stmt);
                 return LookupPlayerSearchCommand(result, limit, handler);
             }
 
@@ -907,7 +907,7 @@ namespace Game.Chat
             {
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME);
                 stmt.AddValue(0, account);
-                using var result = DB.Login.Query(stmt);
+                SQLResult result = DB.Login.Query(stmt);
                 return LookupPlayerSearchCommand(result, limit, handler);
             }
 
@@ -916,7 +916,7 @@ namespace Game.Chat
             {
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_EMAIL);
                 stmt.AddValue(0, email);
-                using var result = DB.Login.Query(stmt);
+                SQLResult result = DB.Login.Query(stmt);
                 return LookupPlayerSearchCommand(result, limit, handler);
             }
 
@@ -942,23 +942,22 @@ namespace Game.Chat
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_GUID_NAME_BY_ACC);
                     stmt.AddValue(0, accountId);
-                    using (var result2 = DB.Characters.Query(stmt))
+                    SQLResult result2 = DB.Characters.Query(stmt);
+
+                    if (!result2.IsEmpty())
                     {
-                        if (!result2.IsEmpty())
+                        handler.SendSysMessage(CypherStrings.LookupPlayerAccount, accountName, accountId);
+
+                        do
                         {
-                            handler.SendSysMessage(CypherStrings.LookupPlayerAccount, accountName, accountId);
+                            ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result2.Read<long>(0));
+                            string name = result2.Read<string>(1);
+                            bool online = result2.Read<bool>(2);
 
-                            do
-                            {
-                                ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result2.Read<long>(0));
-                                string name = result2.Read<string>(1);
-                                bool online = result2.Read<bool>(2);
-
-                                handler.SendSysMessage(CypherStrings.LookupPlayerCharacter, name, guid.ToString(), online ? handler.GetCypherString(CypherStrings.Online) : "");
-                                ++counter;
-                            }
-                            while (result2.NextRow() && (limit == -1 || counter < limit));
+                            handler.SendSysMessage(CypherStrings.LookupPlayerCharacter, name, guid.ToString(), online ? handler.GetCypherString(CypherStrings.Online) : "");
+                            ++counter;
                         }
+                        while (result2.NextRow() && (limit == -1 || counter < limit));
                     }
                 }
                 while (result.NextRow());

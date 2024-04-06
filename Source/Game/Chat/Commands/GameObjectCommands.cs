@@ -252,7 +252,7 @@ namespace Game.Chat
             stmt.AddValue(5, player.GetPositionY());
             stmt.AddValue(6, player.GetPositionZ());
             stmt.AddValue(7, distance * distance);
-            using var result = DB.World.Query(stmt);
+            SQLResult result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
             {
@@ -326,24 +326,24 @@ namespace Game.Chat
         static bool HandleGameObjectTargetCommand(CommandHandler handler, string objectIdStr)
         {
             Player player = handler.GetSession().GetPlayer();
-            
+
             var activeEventsList = Global.GameEventMgr.GetActiveEventList();
             PreparedStatement stmt = null;
 
             if (objectIdStr.IsEmpty())
             {
-                
+
                 if (uint.TryParse(objectIdStr, out uint objectId))
                 {
                     stmt = new PreparedStatement(String.Format("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE map = '{3}' AND id = '{4}' ORDER BY order_ ASC LIMIT 1",
                     player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectId));
-                }                    
+                }
                 else
                 {
                     stmt = new PreparedStatement(String.Format("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - {0}, 2) + POW(position_y - {1}, 2) + POW(position_z - {2}, 2)) AS order_ " +
                         "FROM gameobject LEFT JOIN gameobject_template ON gameobject_template.entry = gameobject.id WHERE map = {3} AND name LIKE CONCAT('%%', '{4}', '%%') ORDER BY order_ ASC LIMIT 1",
-                        player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectIdStr));                    
-                }                
+                        player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectIdStr));
+                }
             }
             else
             {
@@ -374,56 +374,54 @@ namespace Game.Chat
                     handler.GetSession().GetPlayer().GetMapId(), eventFilter.ToString()));
             }
 
-            using (var result = DB.World.Query(stmt))
+            SQLResult result = DB.World.Query(stmt);
+
+            if (result.IsEmpty())
             {
+                handler.SendSysMessage(CypherStrings.CommandTargetobjnotfound);
+                return true;
+            }
 
-                if (result.IsEmpty())
-                {
-                    handler.SendSysMessage(CypherStrings.CommandTargetobjnotfound);
-                    return true;
-                }
+            bool found = false;
+            float x, y, z, o;
+            long guidLow;
+            int id, phaseId, phaseGroup;
+            ushort mapId;
+            int poolId;
 
-                bool found = false;
-                float x, y, z, o;
-                long guidLow;
-                int id, phaseId, phaseGroup;
-                ushort mapId;
-                int poolId;
+            do
+            {
+                guidLow = result.Read<long>(0);
+                id = result.Read<int>(1);
+                x = result.Read<float>(2);
+                y = result.Read<float>(3);
+                z = result.Read<float>(4);
+                o = result.Read<float>(5);
+                mapId = result.Read<ushort>(6);
+                phaseId = result.Read<int>(7);
+                phaseGroup = result.Read<int>(8);
+                poolId = Global.PoolMgr.IsPartOfAPool<GameObject>(guidLow);
+                if (poolId == 0 || Global.PoolMgr.IsSpawnedObject<GameObject>(guidLow))
+                    found = true;
+            } while (result.NextRow() && !found);
 
-                do
-                {
-                    guidLow = result.Read<long>(0);
-                    id = result.Read<int>(1);
-                    x = result.Read<float>(2);
-                    y = result.Read<float>(3);
-                    z = result.Read<float>(4);
-                    o = result.Read<float>(5);
-                    mapId = result.Read<ushort>(6);
-                    phaseId = result.Read<int>(7);
-                    phaseGroup = result.Read<int>(8);
-                    poolId = Global.PoolMgr.IsPartOfAPool<GameObject>(guidLow);
-                    if (poolId == 0 || Global.PoolMgr.IsSpawnedObject<GameObject>(guidLow))
-                        found = true;
-                } while (result.NextRow() && !found);
+            if (!found)
+            {
+                handler.SendSysMessage(CypherStrings.GameobjectNotExist, id);
+                return false;
+            }
 
-                if (!found)
-                {
-                    handler.SendSysMessage(CypherStrings.GameobjectNotExist, id);
-                    return false;
-                }
+            GameObjectTemplate objectInfo = Global.ObjectMgr.GetGameObjectTemplate(id);
 
+            if (objectInfo == null)
+            {
+                handler.SendSysMessage(CypherStrings.GameobjectNotExist, id);
+                return false;
+            }
 
-                GameObjectTemplate objectInfo = Global.ObjectMgr.GetGameObjectTemplate(id);
+            GameObject target = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
 
-                if (objectInfo == null)
-                {
-                    handler.SendSysMessage(CypherStrings.GameobjectNotExist, id);
-                    return false;
-                }
-
-                GameObject target = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-
-                handler.SendSysMessage(CypherStrings.GameobjectDetail, guidLow, objectInfo.name, guidLow, id, x, y, z, mapId, o, phaseId, phaseGroup);
+            handler.SendSysMessage(CypherStrings.GameobjectDetail, guidLow, objectInfo.name, guidLow, id, x, y, z, mapId, o, phaseId, phaseGroup);
 
             if (target != null)
             {
@@ -431,12 +429,12 @@ namespace Game.Chat
                 if (curRespawnDelay < 0)
                     curRespawnDelay = 0;
 
-                    string curRespawnDelayStr = Time.secsToTimeString((uint)curRespawnDelay, TimeFormat.ShortText);
-                    string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
+                string curRespawnDelayStr = Time.secsToTimeString((uint)curRespawnDelay, TimeFormat.ShortText);
+                string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), TimeFormat.ShortText);
 
-                    handler.SendSysMessage(CypherStrings.CommandRawpawntimes, defRespawnDelayStr, curRespawnDelayStr);
-                }
+                handler.SendSysMessage(CypherStrings.CommandRawpawntimes, defRespawnDelayStr, curRespawnDelayStr);
             }
+
             return true;
         }
 

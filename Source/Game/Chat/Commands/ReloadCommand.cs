@@ -209,7 +209,7 @@ namespace Game.Chat
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEMPLATE);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, 0);
-                using var result = DB.World.Query(stmt);
+                SQLResult result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
