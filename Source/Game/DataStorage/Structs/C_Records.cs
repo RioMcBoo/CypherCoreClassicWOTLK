@@ -9,7 +9,7 @@ namespace Game.DataStorage
 {
     public sealed class Cfg_CategoriesRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public ushort LocaleMask;
         private byte _createCharsetMask;
@@ -38,7 +38,7 @@ namespace Game.DataStorage
 
     public sealed class Cfg_RegionsRecord
     {
-        public uint Id;
+        public int Id;
         public string Tag;
         public ushort RegionID;
         /// <summary>
@@ -61,7 +61,7 @@ namespace Game.DataStorage
     public sealed class CharacterLoadoutRecord
     {
         private long _raceMask;
-        public uint Id;
+        public int Id;
         private sbyte _chrClassID;
         public int Purpose;
         private sbyte _itemContext;
@@ -79,7 +79,7 @@ namespace Game.DataStorage
 
     public sealed class CharacterLoadoutItemRecord
     {
-        public uint Id;
+        public int Id;
         public ushort CharacterLoadoutID;
         public int ItemID;
     }
@@ -170,7 +170,7 @@ namespace Game.DataStorage
 
     public sealed class ChrClassesXPowerTypesRecord
     {
-        public uint Id;
+        public int Id;
         public sbyte _powerType;
         public uint ClassID;
 
@@ -439,7 +439,7 @@ namespace Game.DataStorage
 
     public sealed class CinematicCameraRecord
     {
-        public uint Id;
+        public int Id;
         /// <summary>
         /// Position in map used for basis for M2 co-ordinates
         /// </summary>
@@ -570,7 +570,7 @@ namespace Game.DataStorage
 
     public sealed class CreatureDisplayInfoExtraRecord
     {
-        public uint Id;
+        public int Id;
         public sbyte DisplayRaceID;
         public sbyte DisplaySexID;
         public sbyte DisplayClassID;
@@ -606,7 +606,7 @@ namespace Game.DataStorage
 
     public sealed class CreatureModelDataRecord
     {
-        public uint Id;
+        public int Id;
         public float[] GeoBox = new float[6];
         private uint _flags;
         public uint FileDataID;
@@ -655,7 +655,7 @@ namespace Game.DataStorage
 
     public sealed class CreatureTypeRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public byte Flags;
     }

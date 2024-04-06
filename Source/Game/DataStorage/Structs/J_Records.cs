@@ -7,7 +7,7 @@ namespace Game.DataStorage
 {
     public sealed class JournalEncounterRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public LocalizedString Description;
         public Vector2 Map;
@@ -22,7 +22,7 @@ namespace Game.DataStorage
 
     public sealed class JournalEncounterSectionRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Title;
         public LocalizedString BodyText;
         public ushort JournalEncounterID;
@@ -44,7 +44,7 @@ namespace Game.DataStorage
     {        
         public LocalizedString Name;
         public LocalizedString Description;
-        public uint Id;
+        public int Id;
         public ushort MapID;
         public int BackgroundFileDataID;
         public int ButtonFileDataID;
@@ -56,7 +56,7 @@ namespace Game.DataStorage
 
     public sealed class JournalTierRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
     }
 }

@@ -136,7 +136,7 @@ namespace Game.DataStorage
     public sealed class MapChallengeModeRecord
     {
         public LocalizedString Name;
-        public uint Id;
+        public int Id;
         public ushort MapID;
         public byte Flags;
         public uint ExpansionLevel;

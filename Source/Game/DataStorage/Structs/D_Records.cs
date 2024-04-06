@@ -89,14 +89,14 @@ namespace Game.DataStorage
 
     public sealed class DurabilityCostsRecord
     {
-        public uint Id;
+        public int Id;
         public ushort[] WeaponSubClassCost = new ushort[21];
         public ushort[] ArmorSubClassCost = new ushort[8];
     }
 
     public sealed class DurabilityQualityRecord
     {
-        public uint Id;
+        public int Id;
         public float Data;
     }
 }

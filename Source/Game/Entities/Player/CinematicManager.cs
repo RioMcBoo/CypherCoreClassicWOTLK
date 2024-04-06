@@ -48,7 +48,7 @@ namespace Game.Entities
             if (m_activeCinematic == null || m_activeCinematicCameraIndex >= m_activeCinematic.Camera.Length)
                 return;
 
-            uint cinematicCameraId = m_activeCinematic.Camera[++m_activeCinematicCameraIndex];
+            int cinematicCameraId = m_activeCinematic.Camera[++m_activeCinematicCameraIndex];
             if (cinematicCameraId == 0)
                 return;
 

@@ -150,7 +150,7 @@ namespace Game.DataStorage
 
         public LocalizedString Text;
         public LocalizedString Text1;
-        public uint Id;
+        public int Id;
         public int LanguageID;
         public int ConditionID;
         public ushort EmotesID;

@@ -9,7 +9,7 @@ namespace Game.DataStorage
 {
     public sealed class ImportPriceArmorRecord
     {
-        public uint Id;
+        public int Id;
         public float ClothModifier;
         public float LeatherModifier;
         public float ChainModifier;
@@ -18,19 +18,19 @@ namespace Game.DataStorage
 
     public sealed class ImportPriceQualityRecord
     {
-        public uint Id;
+        public int Id;
         public float Data;
     }
 
     public sealed class ImportPriceShieldRecord
     {
-        public uint Id;
+        public int Id;
         public float Data;
     }
 
     public sealed class ImportPriceWeaponRecord
     {
-        public uint Id;
+        public int Id;
         public float Data;
     }
 
@@ -67,7 +67,7 @@ namespace Game.DataStorage
 
     public sealed class ItemAppearanceRecord
     {
-        public uint Id;
+        public int Id;
         public byte DisplayType;
         public int ItemDisplayInfoID;
         public int DefaultIconFileDataID;
@@ -76,20 +76,20 @@ namespace Game.DataStorage
 
     public sealed class ItemArmorQualityRecord
     {
-        public uint Id;
+        public int Id;
         public float[] QualityMod = new float[7];
     }
 
     public sealed class ItemArmorShieldRecord
     {
-        public uint Id;
+        public int Id;
         public float[] Quality = new float[7];
         public ushort ItemLevel;
     }
 
     public sealed class ItemArmorTotalRecord
     {
-        public uint Id;
+        public int Id;
         public short ItemLevel;
         public float Cloth;
         public float Leather;
@@ -262,7 +262,7 @@ namespace Game.DataStorage
 
     public sealed class ItemLevelSelectorRecord
     {
-        public uint Id;
+        public int Id;
         public ushort MinItemLevel;
         public ushort ItemLevelSelectorQualitySetID;
     }
@@ -365,7 +365,7 @@ namespace Game.DataStorage
     {
         private long _raceMask;
         public LocalizedString Display;
-        public uint Id;
+        public int Id;
         public byte OverallQualityID;
         public sbyte ExpansionID;
         public ushort MinFactionID;
@@ -385,7 +385,7 @@ namespace Game.DataStorage
 
     public sealed class ItemSetRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         private uint _setFlags;
         public uint RequiredSkill;
@@ -509,7 +509,7 @@ namespace Game.DataStorage
 
     public sealed class ItemSpecRecord
     {
-        public uint Id;
+        public int Id;
         public byte MinLevel;
         public byte MaxLevel;
         public byte ItemType;

@@ -21,7 +21,7 @@ namespace Game.DataStorage
 
     public sealed class HolidaysRecord
     {
-        public uint Id;
+        public int Id;
         public ushort Region;
         public byte Looping;
         public uint HolidayNameID;

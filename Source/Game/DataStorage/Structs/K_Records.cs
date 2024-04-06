@@ -7,7 +7,7 @@ namespace Game.DataStorage
     {
         public static int KEYCHAIN_SIZE = 32;
 
-        public uint Id;
+        public int Id;
         public byte[] Key = new byte[KEYCHAIN_SIZE];
     }
 
@@ -15,7 +15,7 @@ namespace Game.DataStorage
     {
         public LocalizedString Name;
         public LocalizedString Description;
-        public uint Id;
+        public int Id;
         public int FiledataID;
     }
 }

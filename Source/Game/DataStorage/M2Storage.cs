@@ -188,12 +188,12 @@ namespace Game.DataStorage
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", FlyByCameraStorage.Keys.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public static List<FlyByCamera> GetFlyByCameras(uint cameraId)
+        public static List<FlyByCamera> GetFlyByCameras(int cameraId)
         {
             return FlyByCameraStorage.LookupByKey(cameraId);
         }
 
-        static MultiMap<uint, FlyByCamera> FlyByCameraStorage = new();
+        static MultiMap<int, FlyByCamera> FlyByCameraStorage = new();
     }
 
     public class FlyByCamera

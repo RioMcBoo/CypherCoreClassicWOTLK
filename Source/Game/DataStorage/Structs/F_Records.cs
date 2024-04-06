@@ -23,7 +23,7 @@ namespace Game.DataStorage
         private short[] _reputationClassMask = new short[4];
         public ushort[] ReputationFlags = new ushort[4];
         public int[] ReputationBase = new int[4];
-        public int[] ReputationMax = new int[4];
+        public short[] ReputationMax = new short[4];
         /// <summary>
         /// Faction outputs rep * ParentFactionModOut as spillover reputation
         /// </summary>
@@ -46,7 +46,7 @@ namespace Game.DataStorage
     {
         static int MAX_FACTION_RELATIONS = 8;
 
-        public uint Id;
+        public int Id;
         public ushort Faction;
         private ushort _flags;
         public byte FactionGroup;
@@ -119,7 +119,7 @@ namespace Game.DataStorage
 
     public sealed class FriendshipRepReactionRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Reaction;
         public byte FriendshipRepID;
         public ushort ReactionThreshold;
@@ -128,7 +128,7 @@ namespace Game.DataStorage
     public sealed class FriendshipReputationRecord
     {
         public LocalizedString Description;
-        public uint Id;
+        public int Id;
         public int Field34146722002;
         public int Field34146722003;
     }

@@ -541,7 +541,7 @@ namespace BNetServer.REST
             SQLTransaction tx = new SQLTransaction();
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
 
                 byte[] salt = RandomHelper.GetRandomBytes(SRP6.SaltLength);
                 BigInteger x = new BigInteger(SHA256.HashData(salt.Combine(result.Read<string>(1).ToByteArray(true))), true);
@@ -568,7 +568,7 @@ namespace BNetServer.REST
                 stmt.AddValue(3, id);
                 tx.Append(stmt);
 
-                tx.Append($"UPDATE battlenet_accounts SET sha_pass_hash = DEFAULT(sha_pass_hash) WHERE id = {id}");
+                tx.Append($"UPDATE battlenet_accounts SET sha_pass_hash = DEFAULT(sha_pass_hash) WHERE id = {id}.");
 
                 if (tx.GetSize() >= 10000)
                 {
@@ -580,7 +580,7 @@ namespace BNetServer.REST
             } while (result.NextRow());
             DB.Login.CommitTransaction(tx);
 
-            Log.outInfo(_logger, $"{count} password hashes updated in {Time.GetMSTimeDiffToNow(start)} ms");
+            Log.outInfo(_logger, $"{count} password hashes updated in {Time.GetMSTimeDiffToNow(start)} ms.");
         }
 
         public int GetPort() { return _port; }

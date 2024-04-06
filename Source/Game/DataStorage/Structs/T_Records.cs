@@ -11,7 +11,7 @@ namespace Game.DataStorage
     {
         public const int TACTKEY_SIZE = 16;
 
-        public uint Id;
+        public int Id;
         public byte[] Key = new byte[TACTKEY_SIZE];
     }
 

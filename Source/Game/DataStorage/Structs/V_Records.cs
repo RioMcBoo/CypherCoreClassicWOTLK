@@ -9,7 +9,7 @@ namespace Game.DataStorage
 {
     public sealed class VehicleRecord
     {
-        public uint Id;
+        public int Id;
         private int _flags;
         private int _flagsB;
         public float TurnSpeed;
@@ -60,7 +60,7 @@ namespace Game.DataStorage
 
     public sealed class VehicleSeatRecord
     {
-        public uint Id;
+        public int Id;
         public Vector3 AttachmentOffset;
         public Vector3 CameraOffset;
         private int _flags;

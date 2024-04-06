@@ -218,7 +218,7 @@ namespace Game.DataStorage
 
     public sealed class ArmorLocationRecord
     {
-        public uint Id;
+        public int Id;
         public float Clothmodifier;
         public float Leathermodifier;
         public float Chainmodifier;
@@ -322,7 +322,7 @@ namespace Game.DataStorage
 
     public sealed class ArtifactPowerRankRecord
     {
-        public uint Id;
+        public int Id;
         public byte RankIndex;
         public int SpellID;
         public ushort ItemBonusListID;
@@ -332,13 +332,13 @@ namespace Game.DataStorage
 
     public sealed class ArtifactQuestXPRecord
     {
-        public uint Id;
+        public int Id;
         public uint[] Difficulty = new uint[10];
     }
 
     public sealed class ArtifactTierRecord
     {
-        public uint Id;
+        public int Id;
         public uint ArtifactTier;
         public uint MaxNumTraits;
         public uint MaxArtifactKnowledge;
@@ -348,7 +348,7 @@ namespace Game.DataStorage
 
     public sealed class ArtifactUnlockRecord
     {
-        public uint Id;
+        public int Id;
         public uint PowerID;
         public byte PowerRank;
         public ushort ItemBonusListID;
@@ -399,13 +399,13 @@ namespace Game.DataStorage
 
     public sealed class AzeriteItemRecord
     {
-        public uint Id;
+        public int Id;
         public int ItemID;
     }
 
     public sealed class AzeriteItemMilestonePowerRecord
     {
-        public uint Id;
+        public int Id;
         public int RequiredLevel;
         public int AzeritePowerID;
         public int Type;
@@ -414,13 +414,13 @@ namespace Game.DataStorage
 
     public sealed class AzeriteKnowledgeMultiplierRecord
     {
-        public uint Id;
+        public int Id;
         public float Multiplier;
     }
 
     public sealed class AzeriteLevelInfoRecord
     {
-        public uint Id;
+        public int Id;
         public ulong BaseExperienceToNextLevel;
         public ulong MinimumExperienceToNextLevel;
         public int ItemLevel;
@@ -428,7 +428,7 @@ namespace Game.DataStorage
 
     public sealed class AzeritePowerRecord
     {
-        public uint Id;
+        public int Id;
         public int SpellID;
         public int ItemBonusListID;
         public int SpecSetID;
@@ -437,7 +437,7 @@ namespace Game.DataStorage
 
     public sealed class AzeritePowerSetMemberRecord
     {
-        public uint Id;
+        public int Id;
         public uint AzeritePowerSetID;
         public int AzeritePowerID;
         public int Class;
@@ -447,7 +447,7 @@ namespace Game.DataStorage
 
     public sealed class AzeriteTierUnlockRecord
     {
-        public uint Id;
+        public int Id;
         public byte ItemCreationContext;
         public byte Tier;
         public byte AzeriteLevel;

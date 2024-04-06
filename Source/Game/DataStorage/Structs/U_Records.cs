@@ -49,7 +49,7 @@ namespace Game.DataStorage
         public Vector2 UiMin;
         public Vector2 UiMax;
         public Vector3[] Region = new Vector3[2];
-        public uint Id;
+        public int Id;
         public int UiMapID;
         public int OrderIndex;
         public int MapID;
@@ -62,7 +62,7 @@ namespace Game.DataStorage
     {
         public Vector2 UiMin;
         public Vector2 UiMax;
-        public uint Id;
+        public int Id;
         public int ParentUiMapID;
         public int OrderIndex;
         public int ChildUiMapID;
@@ -74,7 +74,7 @@ namespace Game.DataStorage
 
     public sealed class UiMapXMapArtRecord
     {
-        public uint Id;
+        public int Id;
         public int PhaseID;
         public int UiMapArtID;
         public uint UiMapID;
@@ -84,7 +84,7 @@ namespace Game.DataStorage
     {
         public const int MAX_UNIT_CONDITION_VALUES = 8;
 
-        public uint Id;
+        public int Id;
         private byte _flags;
         public byte[] Variable = new byte[MAX_UNIT_CONDITION_VALUES];
         public sbyte[] Op = new sbyte[MAX_UNIT_CONDITION_VALUES];
@@ -109,7 +109,7 @@ namespace Game.DataStorage
 
     public sealed class UnitPowerBarRecord
     {
-        public uint Id;
+        public int Id;
         public LocalizedString Name;
         public LocalizedString Cost;
         public LocalizedString OutOfError;

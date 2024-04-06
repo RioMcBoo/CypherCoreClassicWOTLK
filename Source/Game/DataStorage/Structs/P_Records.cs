@@ -38,7 +38,7 @@ namespace Game.DataStorage
 
     public sealed class PhaseXPhaseGroupRecord
     {
-        public uint Id;
+        public int Id;
         public ushort PhaseId;
         public int PhaseGroupID;
     }
@@ -47,7 +47,7 @@ namespace Game.DataStorage
     {        
         private long _raceMask;
         public LocalizedString FailureDescription;
-        public uint Id;
+        public int Id;
         public ushort MinLevel;
         public ushort MaxLevel;
         private int _classMask;

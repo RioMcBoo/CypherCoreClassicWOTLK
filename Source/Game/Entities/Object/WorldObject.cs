@@ -401,7 +401,7 @@ namespace Game.Entities
             if (flags.Vehicle)
             {
                 Unit unit = ToUnit();
-                data.WriteUInt32(unit.GetVehicleKit().GetVehicleInfo().Id); // RecID
+                data.WriteInt32(unit.GetVehicleKit().GetVehicleInfo().Id); // RecID
                 data.WriteFloat(unit.GetOrientation());                         // InitialRawFacing
             }
 
