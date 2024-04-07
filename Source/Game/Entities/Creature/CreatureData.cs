@@ -201,7 +201,7 @@ namespace Game.Entities
             if (Global.ObjectMgr.GetCreatureQuestItemList(Entry, difficulty) is List<int> items)
                 stats.QuestItems.AddRange(items);
 
-            if (locale != Locale.zDefault)
+            if (locale != SharedConst.DefaultLocale)
             {
                 CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(Entry);
                 if (creatureLocale != null)

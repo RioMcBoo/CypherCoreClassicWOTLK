@@ -3471,7 +3471,7 @@ namespace Game
                         string localeName = trainerLocalesResult.Read<string>(1);
 
                         Locale locale = localeName.ToEnum<Locale>();
-                        if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                        if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                             continue;
 
                         Trainer trainer = trainers.LookupByKey(trainerId);
@@ -9089,7 +9089,7 @@ namespace Game
                 int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                     continue;
 
                 if (!_creatureLocaleStorage.ContainsKey(id))
@@ -9122,7 +9122,7 @@ namespace Game
                 int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                     continue;
 
                 if (!_gameObjectLocaleStorage.ContainsKey(id))
@@ -9155,7 +9155,7 @@ namespace Game
                 int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                     continue;
 
                 if (!_questTemplateLocaleStorage.ContainsKey(id))
@@ -9191,7 +9191,7 @@ namespace Game
                 int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                     continue;
 
                 if (!_questObjectivesLocaleStorage.ContainsKey(id))
@@ -9245,7 +9245,7 @@ namespace Game
                 string localeName = result.Read<string>(2);
 
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                     continue;
 
                 if (!_questGreetingLocaleStorage[type].ContainsKey(id))
@@ -9275,7 +9275,7 @@ namespace Game
                 int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                     continue;
 
                 if (!_questOfferRewardLocaleStorage.ContainsKey(id))
@@ -9303,7 +9303,7 @@ namespace Game
                 int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                     continue;
 
                 if (!_questRequestItemsLocaleStorage.ContainsKey(id))
@@ -9334,7 +9334,7 @@ namespace Game
                 string localeName = result.Read<string>(2);
 
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                     continue;
 
                 GossipMenuItemsLocale data = new();
@@ -9364,7 +9364,7 @@ namespace Game
                 int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                     continue;
 
                 if (!_pageTextLocaleStorage.ContainsKey(id))
@@ -9393,7 +9393,7 @@ namespace Game
                 int id = result.Read<int>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                     continue;
 
                 if (!_pointOfInterestLocaleStorage.ContainsKey(id))
@@ -10542,7 +10542,7 @@ namespace Game
                         int choiceId = result.Read<int>(0);
                         string localeName = result.Read<string>(1);
                         Locale locale = localeName.ToEnum<Locale>();
-                        if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                        if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                             continue;
 
                         if (GetPlayerChoice(choiceId) == null)
@@ -10578,7 +10578,7 @@ namespace Game
                         int responseId = result.Read<int>(1);
                         string localeName = result.Read<string>(2);
                         Locale locale = localeName.ToEnum<Locale>();
-                        if (!SharedConst.IsValidLocale(locale) || locale == Locale.zDefault)
+                        if (!SharedConst.IsValidLocale(locale) || locale == SharedConst.DefaultLocale)
                             continue;
 
                         var playerChoiceLocale = _playerChoiceLocales.LookupByKey(choiceId);

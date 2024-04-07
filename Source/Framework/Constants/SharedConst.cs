@@ -443,8 +443,6 @@ namespace Framework.Constants
         Total = 12,
         
         AllLanguages = -1,
-        Reserved = Total,
-        zDefault = enUS,
     }
 
     [Flags]
@@ -463,8 +461,6 @@ namespace Framework.Constants
         ptBR = 1 << Locale.ptBR,
         itIT = 1 << Locale.itIT,             
         Total = 1 << Locale.Total,
-
-        Reserved = 1 << Locale.Reserved,
     }
 
     public enum CascLocaleBit

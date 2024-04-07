@@ -320,7 +320,7 @@ namespace Game.DataStorage
             }
 
             foreach (var namesReserved in NamesReservedStorage.Values)
-                _nameValidators[(int)Locale.Reserved].Add(namesReserved.Name);
+                _nameValidators[(int)Locale.Total].Add(namesReserved.Name);
 
             foreach (var namesReserved in NamesReservedLocaleStorage.Values)
             {
