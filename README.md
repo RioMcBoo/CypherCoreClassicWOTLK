@@ -22,8 +22,21 @@ The current support game version is: 3.4.3.53788
 * Create link with next parameters (example for Windows): "<path>\World of Warcraft Classic\Arctium WoW Launcher.exe" --version=Classic
 * Modify your "<path>\World of Warcraft\_classic_\WTF\Config.wtf"  ->  SET portal "127.0.0.1"
 
+### Account creating
+* To create your account:
+    - Type: bnetaccount create
+    - Example: bnetaccount create test@test test
+* To set your account level:
+    - Type: account set gmlevel <user#realm> 3 -1
+    - Example: account set gmlevel 1#1 3 -1
+* Note1:
+    - The username used for setting your gmlevel is not the same as the username you create with bnetaccount.
+    - You must manually find the username in auth.account.username. These are formatted as 1#1, 2#1, etc.
+* Note2:
+    - if you have connected before using this command you will need to relog.
+
 ### Support / General Info
-* Check out our Discord [Here](https://discord.gg/tCx3JbJ5qQ)
+* Check out our Discord [Here](https://discord.com/channels/1228986569629634610/1228986570070298745)
 * Check out Trinity Core Wiki as a few steps are the same [Here](https://trinitycore.atlassian.net/wiki/spaces/tc/pages/2130077/Installation+Guide)
 * The project is currently under development and a lot of things have not been implemented. Updated according to updates in the appropriate branch of [TrinityCore](https://github.com/TrinityCore/TrinityCore/tree/wotlk_classic)
 
