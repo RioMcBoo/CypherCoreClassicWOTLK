@@ -39,10 +39,10 @@ namespace Game.DataStorage
                 if (Header.Signature != WDC4FmtSig)
                     return false;
 
-                Header.RecordCount = reader.ReadUInt32();
-                Header.FieldCount = reader.ReadUInt32();
-                Header.RecordSize = reader.ReadUInt32();
-                Header.StringTableSize = reader.ReadUInt32();
+                Header.RecordCount = reader.ReadInt32();
+                Header.FieldCount = reader.ReadInt32();
+                Header.RecordSize = reader.ReadInt32();
+                Header.StringTableSize = reader.ReadInt32();
                 Header.TableHash = reader.ReadUInt32();
                 Header.LayoutHash = reader.ReadUInt32();
                 Header.MinId = reader.ReadInt32();
@@ -50,13 +50,13 @@ namespace Game.DataStorage
                 Header.Locale = reader.ReadInt32();
                 Header.Flags = (HeaderFlags)reader.ReadUInt16();
                 Header.IdIndex = reader.ReadUInt16();
-                Header.TotalFieldCount = reader.ReadUInt32();
-                Header.BitpackedDataOffset = reader.ReadUInt32();
-                Header.LookupColumnCount = reader.ReadUInt32();
-                Header.ColumnMetaSize = reader.ReadUInt32();
-                Header.CommonDataSize = reader.ReadUInt32();
-                Header.PalletDataSize = reader.ReadUInt32();
-                Header.SectionsCount = reader.ReadUInt32();
+                Header.TotalFieldCount = reader.ReadInt32();
+                Header.BitpackedDataOffset = reader.ReadInt32();
+                Header.LookupColumnCount = reader.ReadInt32();
+                Header.ColumnMetaSize = reader.ReadInt32();
+                Header.CommonDataSize = reader.ReadInt32();
+                Header.PalletDataSize = reader.ReadInt32();
+                Header.SectionsCount = reader.ReadInt32();
 
                 var sections = reader.ReadArray<SectionHeader>(Header.SectionsCount);
 
@@ -94,7 +94,7 @@ namespace Game.DataStorage
                 _encryptedIDs = new();
                 for (int i = 1; i < Header.SectionsCount; i++)
                 {
-                    var encryptedIDCount = reader.ReadUInt32();
+                    var encryptedIDCount = reader.ReadInt32();
 
                     // If tactkey in section header is 0'd out, skip these IDs
                     if (sections[i].TactKeyLookup == 0 || sections[i].TactKeyLookup == 0x5452494E49545900)
@@ -115,7 +115,7 @@ namespace Game.DataStorage
                     if (!Header.HasOffsetTable())
                     {
                         // records data
-                        recordsData = reader.ReadBytes((int)(section.NumRecords * Header.RecordSize));
+                        recordsData = reader.ReadBytes(section.NumRecords * Header.RecordSize);
 
                         // string data
                         stringsTable = new Dictionary<long, string>();
@@ -173,7 +173,7 @@ namespace Game.DataStorage
                     Array.Resize(ref recordsData, recordsData.Length + 8); // pad with extra zeros so we don't crash when reading
 
                     // index data
-                    int[] indexData = reader.ReadArray<int>((uint)(section.IndexDataSize / 4));
+                    int[] indexData = reader.ReadArray<int>(section.IndexDataSize / 4);
                     bool isIndexEmpty = Header.HasIndexTable() && indexData.Count(i => i == 0) == section.NumRecords;
 
                     // duplicate rows data
@@ -183,7 +183,7 @@ namespace Game.DataStorage
                         copyData[reader.ReadInt32()] = reader.ReadInt32();
 
                     if (section.OffsetMapIDCount > 0)
-                        sparseEntries = reader.ReadArray<SparseEntry>((uint)section.OffsetMapIDCount);
+                        sparseEntries = reader.ReadArray<SparseEntry>(section.OffsetMapIDCount);
 
                     // reference data
                     ReferenceData refData = null;
@@ -198,7 +198,7 @@ namespace Game.DataStorage
                         };
 
                         refData.Entries = new Dictionary<int, int>();
-                        ReferenceEntry[] entries = reader.ReadArray<ReferenceEntry>((uint)refData.NumRecords);
+                        ReferenceEntry[] entries = reader.ReadArray<ReferenceEntry>(refData.NumRecords);
                         foreach (var entry in entries)
                             refData.Entries[entry.Index] = entry.Id;
                     }
@@ -212,7 +212,7 @@ namespace Game.DataStorage
 
                     if (section.OffsetMapIDCount > 0)
                     {
-                        int[] sparseIndexData = reader.ReadArray<int>((uint)section.OffsetMapIDCount);
+                        int[] sparseIndexData = reader.ReadArray<int>(section.OffsetMapIDCount);
 
                         if (Header.HasIndexTable() && indexData.Length != sparseIndexData.Length)
                             throw new Exception("indexData.Length != sparseIndexData.Length");
@@ -228,7 +228,7 @@ namespace Game.DataStorage
                         if (Header.HasOffsetTable())
                             bitReader.Offset = sparseEntries[i].Offset - section.FileOffset;
                         else
-                            bitReader.Offset = i * (int)Header.RecordSize;
+                            bitReader.Offset = i * Header.RecordSize;
 
                         bool hasRef = refData.Entries.TryGetValue(i, out int refId);
 
@@ -321,8 +321,10 @@ namespace Game.DataStorage
                         return columnMeta.Common.DefaultValue.As<T>();
                 case DB2ColumnCompression.Pallet:
                 case DB2ColumnCompression.PalletArray:
-                    uint palletIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
-                    return _palletData[fieldIndex][palletIndex].As<T>();
+                    int palletIndex = _data.Read<int>(columnMeta.Pallet.BitWidth);
+                    var result1 = _palletData[fieldIndex][palletIndex];
+                    var result2 = result1.As<T>();
+                    return result2;
             }
             throw new Exception($"Unexpected compression Type {_columnMeta[fieldIndex].CompressionType}");
         }
@@ -627,10 +629,10 @@ namespace Game.DataStorage
         }
 
         public uint Signature;
-        public uint RecordCount;
-        public uint FieldCount;
-        public uint RecordSize;
-        public uint StringTableSize;
+        public int RecordCount;
+        public int FieldCount;
+        public int RecordSize;
+        public int StringTableSize;
 
         public uint TableHash;
         public uint LayoutHash;
@@ -639,13 +641,13 @@ namespace Game.DataStorage
         public int Locale;
         public HeaderFlags Flags;
         public int IdIndex;
-        public uint TotalFieldCount;
-        public uint BitpackedDataOffset;
-        public uint LookupColumnCount;
-        public uint ColumnMetaSize;
-        public uint CommonDataSize;
-        public uint PalletDataSize;
-        public uint SectionsCount;
+        public int TotalFieldCount;
+        public int BitpackedDataOffset;
+        public int LookupColumnCount;
+        public int ColumnMetaSize;
+        public int CommonDataSize;
+        public int PalletDataSize;
+        public int SectionsCount;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -689,7 +691,7 @@ namespace Game.DataStorage
         [FieldOffset(2)]
         public ushort Size;
         [FieldOffset(4)]
-        public uint AdditionalDataSize;
+        public int AdditionalDataSize;
         [FieldOffset(8)]
         public DB2ColumnCompression CompressionType;
         [FieldOffset(12)]

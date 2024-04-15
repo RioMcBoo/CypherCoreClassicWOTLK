@@ -264,10 +264,10 @@ namespace Game.Collision
             var hi = reader.Read<Vector3>();
             bounds = new AxisAlignedBox(lo, hi);
 
-            uint treeSize = reader.ReadUInt32();
+            int treeSize = reader.ReadInt32();
             tree = reader.ReadArray<uint>(treeSize);
 
-            var count = reader.ReadUInt32();
+            var count = reader.ReadInt32();
             objects = reader.ReadArray<uint>(count);
 
             return true;

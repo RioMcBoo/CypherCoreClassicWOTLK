@@ -106,32 +106,32 @@ namespace System
                     return mask.HasFlag(RaceMask.PandarenNeutral);
                 case Race.PandarenAlliance:
                     return mask.HasFlag(RaceMask.PandarenAlliance);
-                case Race.PandarenHorde: 
+                case Race.PandarenHorde:
                     return mask.HasFlag(RaceMask.PandarenHorde);
-                case Race.Nightborne: 
+                case Race.Nightborne:
                     return mask.HasFlag(RaceMask.Nightborne);
-                case Race.HighmountainTauren: 
+                case Race.HighmountainTauren:
                     return mask.HasFlag(RaceMask.HighmountainTauren);
-                case Race.VoidElf: 
+                case Race.VoidElf:
                     return mask.HasFlag(RaceMask.VoidElf);
-                case Race.LightforgedDraenei: 
+                case Race.LightforgedDraenei:
                     return mask.HasFlag(RaceMask.LightforgedDraenei);
-                case Race.ZandalariTroll: 
+                case Race.ZandalariTroll:
                     return mask.HasFlag(RaceMask.ZandalariTroll);
-                case Race.KulTiran: 
+                case Race.KulTiran:
                     return mask.HasFlag(RaceMask.KulTiran);
 
-                case Race.DarkIronDwarf: 
+                case Race.DarkIronDwarf:
                     return mask.HasFlag(RaceMask.DarkIronDwarf);
-                case Race.Vulpera: 
+                case Race.Vulpera:
                     return mask.HasFlag(RaceMask.Vulpera);
-                case Race.MagharOrc: 
+                case Race.MagharOrc:
                     return mask.HasFlag(RaceMask.MagharOrc);
-                case Race.MechaGnome: 
+                case Race.MechaGnome:
                     return mask.HasFlag(RaceMask.MechaGnome);
-                case Race.DracthyrHorde: 
+                case Race.DracthyrHorde:
                     return mask.HasFlag(RaceMask.DracthyrHorde);
-                case Race.DracthyrAlliance: 
+                case Race.DracthyrAlliance:
                     return mask.HasFlag(RaceMask.DracthyrAlliance);
 
                 default: return false;
@@ -145,7 +145,7 @@ namespace System
 
         public static bool HasClass(this ClassMask mask, Class _class)
         {
-            return (mask & (ClassMask)(1 << ((int)_class - 1))) != 0;            
+            return (mask & (ClassMask)(1 << ((int)_class - 1))) != 0;
         }
 
         public static bool HasLocale(this LocaleMask mask, Locale locale)
@@ -155,7 +155,7 @@ namespace System
 
         public static bool HasSchool(this SpellSchoolMask mask, SpellSchools _school)
         {
-            return (mask & (SpellSchoolMask)(1 << (int)_school)) != 0;            
+            return (mask & (SpellSchoolMask)(1 << (int)_school)) != 0;
         }
 
         public static SpellSchoolMask GetSpellSchoolMask(this SpellSchools school)
@@ -170,7 +170,7 @@ namespace System
                     return i;
 
             return SpellSchools.Normal;
-        }        
+        }
 
         public static bool HasState(this EncounterStateMask mask, EncounterState _state)
         {
@@ -635,7 +635,12 @@ namespace System
 
         public static T[] ReadArray<T>(this BinaryReader reader, uint size) where T : struct
         {
-            int numBytes = Unsafe.SizeOf<T>() * (int)size;
+            return ReadArray<T>(reader, (int)size);
+        }
+
+        public static T[] ReadArray<T>(this BinaryReader reader, int size) where T : struct
+        {
+            int numBytes = Unsafe.SizeOf<T>() * size;
 
             byte[] source = reader.ReadBytes(numBytes);
 
