@@ -5364,7 +5364,7 @@ namespace Game.Entities
                 return null;
 
             // alive or spirit healer
-            if (creature.IsAlive() && !creature.GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.InteractWhileDead))
+            if (!creature.IsAlive() && !creature.GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.InteractWhileDead))
                 return null;
 
             // appropriate npc Type
@@ -5383,7 +5383,7 @@ namespace Game.Entities
                 return null;
 
             // not allow interaction under control, but allow with own pets
-            if (creature.GetCharmerGUID().IsEmpty())
+            if (!creature.GetCharmerGUID().IsEmpty())
                 return null;
 
             // not unfriendly/hostile
@@ -5391,7 +5391,7 @@ namespace Game.Entities
                 return null;
 
             // not too far, taken from CGGameUI::SetInteractTarget
-            if (creature.IsWithinDistInMap(this, creature.GetCombatReach() + 4.0f))
+            if (!creature.IsWithinDistInMap(this, creature.GetCombatReach() + 4.0f))
                 return null;
 
             return creature;
