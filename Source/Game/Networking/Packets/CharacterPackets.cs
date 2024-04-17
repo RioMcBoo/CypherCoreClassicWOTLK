@@ -98,7 +98,7 @@ namespace Game.Networking.Packets
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Rename))
                     Flags |= CharacterFlags.Rename;
 
-                if (fields.Read<uint>(18) != 0)
+                if (fields.Read<ulong>(18) != 0)
                     Flags |= CharacterFlags.LockedByBilling;
 
                 if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(28)))
@@ -151,7 +151,7 @@ namespace Game.Networking.Packets
 
                 int equipmentFieldsPerSlot = 5;
 
-                for (var slot = 0; slot < VisualItems.Count && (slot + 1) * equipmentFieldsPerSlot <= equipment.Length; ++slot)
+                for (var slot = 0; slot < VisualItems.Capacity && (slot + 1) * equipmentFieldsPerSlot <= equipment.Length; ++slot)
                 {
                     VisualItemInfo info;
 
@@ -299,6 +299,7 @@ namespace Game.Networking.Packets
                 data.WriteBit(HasExpansion);
                 data.WriteBit(HasAchievement);
                 data.WriteBit(HasHeritageArmor);
+                data.WriteBit(IsLocked);
                 data.FlushBits();
             }
 
@@ -306,6 +307,7 @@ namespace Game.Networking.Packets
             public bool HasExpansion;
             public bool HasAchievement;
             public bool HasHeritageArmor;
+            public bool IsLocked;
         }
 
         public struct UnlockedConditionalAppearance
