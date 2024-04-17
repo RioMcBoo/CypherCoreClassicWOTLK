@@ -176,7 +176,7 @@ namespace Framework.Dynamic
 
                 if (pair.Key > _time)
                     return 0;
-                else if (_phase != 0 && Convert.ToBoolean(pair.Value & 0xFF000000) && !Convert.ToBoolean((pair.Value >> 24) & _phase))
+                else if (_phase != 0 && Convert.ToBoolean(pair.Value & 0xFF000000) && !Convert.ToBoolean(((pair.Value >> 24) & 0x00FFFFFF) & _phase))
                     _eventMap.Remove(pair);
                 else
                 {

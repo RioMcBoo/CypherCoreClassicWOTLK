@@ -480,8 +480,8 @@ namespace Game
             var instanceAddress = Global.WorldMgr.GetRealm().GetAddressForClient(System.Net.IPAddress.Parse(GetRemoteAddress()));
 
             _instanceConnectKey.AccountId = GetAccountId();
-            _instanceConnectKey.connectionType = ConnectionType.Instance;
-            _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
+            _instanceConnectKey.ConnectionType = ConnectionType.Instance;
+            _instanceConnectKey.Key = RandomHelper.IRand(0, 0x7FFFFFFF);
 
             ConnectTo connectTo = new();
             connectTo.Key = _instanceConnectKey.Raw;
@@ -1006,17 +1006,20 @@ namespace Game
     {
         public long Raw
         {
-            get { return (AccountId | ((int)connectionType << 32) | (Key << 33)); }
+            get 
+            {
+                return (long)(((ulong)AccountId & 0xFFFFFFFF) | (((ulong)ConnectionType & 1) << 32) | ((ulong)Key << 33));
+            }
             set
             {
-                AccountId = (int)value;
-                connectionType = (ConnectionType)((value >> 32) & 1);
+                AccountId = (int)((ulong)value & 0xFFFFFFFF);
+                ConnectionType = (ConnectionType)(((ulong)value >> 32) & 1);
                 Key = (long)((ulong)value >> 33);
             }
         }
 
         public int AccountId;
-        public ConnectionType connectionType;
+        public ConnectionType ConnectionType;
         public long Key;
     }
 

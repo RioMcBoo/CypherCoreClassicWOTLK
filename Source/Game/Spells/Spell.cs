@@ -1976,7 +1976,7 @@ namespace Game.Spells
                 target.m_Events.AddEvent(new ProcReflectDelayed(target, m_originalCasterGUID), target.m_Events.CalculateTime(TimeSpan.FromMilliseconds(targetInfo.TimeDelay)));
 
                 // Increase time interval for reflected spells by 1.5
-                targetInfo.TimeDelay += targetInfo.TimeDelay >> 1;
+                targetInfo.TimeDelay += (long)((ulong)targetInfo.TimeDelay >> 1);
             }
             else
                 targetInfo.ReflectResult = SpellMissInfo.None;

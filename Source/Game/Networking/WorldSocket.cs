@@ -675,7 +675,7 @@ namespace Game.Networking
             ConnectToKey key = new();
             _key = key.Raw = authSession.Key;
 
-            _connectType = key.connectionType;
+            _connectType = key.ConnectionType;
             if (_connectType != ConnectionType.Instance)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);

@@ -1847,8 +1847,8 @@ namespace Game
             creature.RequiredExpansion = (Expansion)fields.Read<int>(8);
             creature.VignetteID = fields.Read<int>(9);
             creature.Faction = fields.Read<int>(10);
-            creature.Npcflag = (NPCFlags1)(fields.Read<long>(11) & 0xFFFFFFFF);
-            creature.Npcflag2 = (NPCFlags2)(fields.Read<long>(11) >> 32);
+            creature.Npcflag = (NPCFlags1)(fields.Read<ulong>(11) & 0xFFFFFFFF);
+            creature.Npcflag2 = (NPCFlags2)((fields.Read<ulong>(11) >> 32) & 0xFFFFFFFF);
             creature.SpeedWalk = fields.Read<float>(12);
             creature.SpeedRun = fields.Read<float>(13);
             creature.Scale = fields.Read<float>(14);
@@ -3723,7 +3723,7 @@ namespace Game
                 if (!result.IsNull(18))
                 {
                     data.npcflag = (NPCFlags1)(result.Read<ulong>(18) & 0xFFFFFFFF);
-                    data.npcflag2 = (NPCFlags2)(result.Read<ulong>(18) >> 32);
+                    data.npcflag2 = (NPCFlags2)((result.Read<ulong>(18) >> 32) & 0xFFFFFFFF);
                 }
                 if (!result.IsNull(19))
                     data.unit_flags = (UnitFlags)result.Read<uint>(19);

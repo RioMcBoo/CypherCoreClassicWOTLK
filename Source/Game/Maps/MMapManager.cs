@@ -209,8 +209,8 @@ namespace Game
             MMapData mmap = loadedMMaps.LookupByKey(mapId);
             foreach (var i in mmap.loadedTileRefs)
             {
-                uint x = (i.Key >> 16);
-                uint y = (i.Key & 0x0000FFFF);
+                uint x = (i.Key >> 16) & 0x0000FFFF;
+                uint y = i.Key & 0x0000FFFF;
                 if (Detour.dtStatusFailed(mmap.navMesh.removeTile(i.Value, out _)))
                     Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}{1:D2}{2:D2}.mmtile from navmesh", mapId, x, y);
                 else

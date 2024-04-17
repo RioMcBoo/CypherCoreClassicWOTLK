@@ -129,7 +129,7 @@ namespace Game.Chat
             target.SetFaction(factionid.Value);
             target.ReplaceAllUnitFlags((UnitFlags)flag);
             target.ReplaceAllNpcFlags((NPCFlags1)(npcflag & 0xFFFFFFFF));
-            target.ReplaceAllNpcFlags2((NPCFlags2)(npcflag >> 32));
+            target.ReplaceAllNpcFlags2((NPCFlags2)((npcflag >> 32) & 0xFFFFFFFF));
             target.ReplaceAllDynamicFlags((UnitDynFlags)dyflag);
 
             return true;

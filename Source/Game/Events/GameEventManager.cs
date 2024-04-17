@@ -696,7 +696,7 @@ namespace Game
                         long guid = result.Read<long>(0);
                         ushort event_id = result.Read<byte>(1);
                         NPCFlags1 npcflag1 = (NPCFlags1)(result.Read<ulong>(2) & 0xFFFFFFFF);
-                        NPCFlags2 npcflag2 = (NPCFlags2)(result.Read<ulong>(2) >> 32);
+                        NPCFlags2 npcflag2 = (NPCFlags2)((result.Read<ulong>(2) >> 32) & 0xFFFFFFFF);
 
                         if (event_id >= mGameEvent.Length)
                         {

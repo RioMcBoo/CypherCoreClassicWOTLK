@@ -173,7 +173,7 @@ namespace Game.Networking
                     result[resultSize++] = (byte)(value & 0xFF);
                 }
 
-                value >>= 8;
+                value = (long)((ulong)value >> 8);
             }
 
             return resultSize;
