@@ -60,13 +60,13 @@ namespace Game.Chat
 
         public ChatCommandResult TryConsume(CommandHandler handler, string args)
         {
-            ChatCommandResult next = CommandArgs.TryConsume(out dynamic tempVal, typeof(ulong), handler, args);
+            ChatCommandResult next = CommandArgs.TryConsume(out dynamic tempVal, typeof(long), handler, args);
             if (!next.IsSuccessful())
                 next = CommandArgs.TryConsume(out tempVal, typeof(string), handler, args);
             if (!next.IsSuccessful())
                 return next;
 
-            if (tempVal is ulong)
+            if (tempVal is long)
             {
                 _guid = ObjectGuid.Create(HighGuid.Player, tempVal);
                 if ((_player = Global.ObjAccessor.FindPlayerByLowGUID(_guid.GetCounter())) != null)
