@@ -9,15 +9,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Game.DataStorage
 {
     class DBReader
     {
-        private const uint WDC3FmtSig = 0x34434457; // WDC3
+        private const uint WDC4FmtSig = 0x34434457; // WDC4
 
         public WDCHeader Header;
         public FieldMetaData[] FieldMeta;
@@ -34,7 +36,7 @@ namespace Game.DataStorage
             {
                 Header = new WDCHeader();
                 Header.Signature = reader.ReadUInt32();
-                if (Header.Signature != WDC3FmtSig)
+                if (Header.Signature != WDC4FmtSig)
                     return false;
 
                 Header.RecordCount = reader.ReadUInt32();
@@ -365,12 +367,12 @@ namespace Game.DataStorage
                     if (arraySize != cardinality)
                         throw new Exception("Struct missmatch for pallet array field?");
 
-                    uint palletArrayIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
+                    int palletArrayIndex = _data.Read<int>(columnMeta.Pallet.BitWidth);
 
                     T[] arr4 = new T[cardinality];
 
                     for (int i = 0; i < arr4.Length; i++)
-                        arr4[i] = _palletData[fieldIndex][i + cardinality * (int)palletArrayIndex].As<T>();
+                        arr4[i] = _palletData[fieldIndex][i + cardinality * palletArrayIndex].As<T>();
 
                     return arr4;
             }
@@ -383,22 +385,66 @@ namespace Game.DataStorage
             _data.Offset = _dataOffset;
 
             int fieldIndex = 0;
+
             T obj = new();
 
-            foreach (var f in typeof(T).GetFields())
+            foreach (var f in typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 Type type = f.FieldType;
 
-                if (f.Name == "Id" && !_dataHasId)
+                int? Id_or_Ref = default;
+
+                if (Regex.IsMatch(f.Name, "^_?id$", RegexOptions.IgnoreCase))
                 {
-                    f.SetValue(obj, (uint)Id);
-                    continue;
+                    if (!_dataHasId)
+                        Id_or_Ref = Id;
+                }
+                else if (fieldIndex >= _fieldMeta.Length)
+                {
+                    if (_refId == -1)
+                        continue;
+
+                    Id_or_Ref = _refId;
                 }
 
-                if (fieldIndex >= _fieldMeta.Length)
+                if (Id_or_Ref.HasValue)
                 {
-                    if (_refId != -1)
-                        f.SetValue(obj, (uint)_refId);
+                    if (type.IsEnum)
+                        type = type.GetEnumUnderlyingType();
+
+                    switch (Type.GetTypeCode(type))
+                    {
+                        case TypeCode.Single:
+                            Cypher.Assert(Id_or_Ref >= float.MinValue && Id_or_Ref <= float.MaxValue, $"Record's Id value will lost data!");
+                            f.SetValue(obj, (float)Id_or_Ref);
+                            break;
+                        case TypeCode.Int32:
+                            Cypher.Assert(Id_or_Ref >= int.MinValue && Id_or_Ref <= int.MaxValue, $"Record's Id value will lost data!");
+                            f.SetValue(obj, (int)Id_or_Ref);
+                            break;
+                        case TypeCode.UInt32:
+                            Cypher.Assert(Id_or_Ref >= uint.MinValue && Id_or_Ref <= uint.MaxValue, $"Record's Id value will lost data!");
+                            f.SetValue(obj, (uint)Id_or_Ref);
+                            break;
+                        case TypeCode.Int16:
+                            Cypher.Assert(Id_or_Ref >= short.MinValue && Id_or_Ref <= short.MaxValue, $"Record's Id value will lost data!");
+                            f.SetValue(obj, (short)Id_or_Ref);
+                            break;
+                        case TypeCode.UInt16:
+                            Cypher.Assert(Id_or_Ref >= ushort.MinValue && Id_or_Ref <= ushort.MaxValue, $"Record's Id value will lost data!");
+                            f.SetValue(obj, (ushort)Id_or_Ref);
+                            break;
+                        case TypeCode.Byte:
+                            Cypher.Assert(Id_or_Ref >= byte.MinValue && Id_or_Ref <= byte.MaxValue, $"Record's Id value will lost data!");
+                            f.SetValue(obj, (byte)Id_or_Ref);
+                            break;
+                        case TypeCode.SByte:
+                            Cypher.Assert(Id_or_Ref >= sbyte.MinValue && Id_or_Ref <= sbyte.MaxValue, $"Record's Id value will lost data!");
+                            f.SetValue(obj, (sbyte)Id_or_Ref);
+                            break;
+                        default:
+                            throw new Exception($"Unhandled Type: {type}");
+                    }
                     continue;
                 }
 
@@ -712,11 +758,11 @@ namespace Game.DataStorage
 
     public struct Value32
     {
-        private uint Value;
+        private int Value;
 
         public T As<T>() where T : unmanaged
         {
-            return Unsafe.As<uint, T>(ref Value);
+            return Unsafe.As<int, T>(ref Value);
         }
     }
 

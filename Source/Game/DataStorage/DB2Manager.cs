@@ -2066,7 +2066,7 @@ namespace Game.DataStorage
 
         public Dictionary<int, Dictionary<Difficulty, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
 
-        public void AddDB2<T>(uint tableHash, DB6Storage<T> store) where T : new()
+        public void AddDB2<TKey, TRecord>(uint tableHash, DB6Storage<TKey, TRecord> store) where TRecord : new() where TKey : struct
         {
             _storage[tableHash] = store;
         }

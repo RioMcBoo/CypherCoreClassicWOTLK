@@ -27,12 +27,42 @@ namespace Game.DataStorage
     }
 
     [Serializable]
-    public class DB6Storage<T> : Dictionary<int, T>, IDB2Storage where T : new()
+    public class DB6Storage<TKey, TRecord> : Dictionary<TKey, TRecord>, IDB2Storage where TRecord : new() where TKey: struct
     {
         WDCHeader _header;
-        string _tableName = typeof(T).Name;
+        string _tableName = typeof(TRecord).Name;
 
-        public bool LoadData(string fullFileName)
+        TKey ConvertKey(dynamic id)
+        {
+            Type type = typeof(TKey);
+
+            if (type.IsEnum)
+                type = type.GetEnumUnderlyingType();
+
+            TypeCode typeCode = Type.GetTypeCode(type);
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Single: Cypher.Assert(id >= float.MinValue && id <= float.MaxValue, $"DB6Storage's Key value will lost data!"); break;
+                case TypeCode.Int32: Cypher.Assert(id >= int.MinValue && id <= int.MaxValue, $"DB6Storage's Key value will lost data!"); break;
+                case TypeCode.UInt32: Cypher.Assert(id >= uint.MinValue && id <= uint.MaxValue, $"DB6Storage's Key value will lost data!"); break;
+                case TypeCode.Int16: Cypher.Assert(id >= short.MinValue && id <= short.MaxValue, $"DB6Storage's Key value will lost data!"); break;
+                case TypeCode.UInt16: Cypher.Assert(id >= ushort.MinValue && id <= ushort.MaxValue, $"DB6Storage's Key value will lost data!"); break;
+                case TypeCode.Byte: Cypher.Assert(id >= byte.MinValue && id <= byte.MaxValue, $"DB6Storage's Key value will lost data!"); break;
+                case TypeCode.SByte: Cypher.Assert(id >= sbyte.MinValue && id <= sbyte.MaxValue, $"DB6Storage's Key value will lost data!"); break;
+                default:
+                    throw new Exception($"Unhandled DB6Storage's TKey type: {type}");
+            }
+
+            return (TKey)id;
+        }
+
+        int ConvertKey(TKey key)
+        {
+            return Convert.ToInt32(key);
+        }
+
+        bool LoadData(string fullFileName)
         {
             if (!File.Exists(fullFileName))
             {
@@ -50,15 +80,15 @@ namespace Game.DataStorage
                 }
             }
 
-            _header = reader.Header;
+            _header = reader.Header;           
 
             foreach (var b in reader.Records)
-                Add(b.Key, b.Value.As<T>());
+                Add(ConvertKey(b.Key), b.Value.As<TRecord>());
 
             return true;
         }
 
-        public void LoadHotfixData(BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
+        void LoadHotfixData(BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
         {
             LoadFromDB(false, preparedStatement);
             LoadFromDB(true, preparedStatement);
@@ -74,7 +104,7 @@ namespace Game.DataStorage
                 LoadStringsFromDB(false, locale, preparedStatementLocale);
                 LoadStringsFromDB(true, locale, preparedStatementLocale);
             }
-        }
+        }        
 
         void LoadFromDB(bool custom, HotfixStatements preparedStatement)
         {
@@ -87,10 +117,10 @@ namespace Game.DataStorage
 
             do
             {
-                var obj = new T();
+                var obj = new TRecord();
 
                 int dbIndex = 0;
-                var fields = typeof(T).GetFields();
+                var fields = typeof(TRecord).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                 foreach (var f in fields)
                 {
                     Type type = f.FieldType;
@@ -149,7 +179,7 @@ namespace Game.DataStorage
                                 }
                                 continue;
                             default:
-                                Log.outError(LogFilter.ServerLoading, "Wrong Array Type: {0}", arrayElementType.Name);
+                                Log.outError(LogFilter.ServerLoading, $"Not implemented DB2 Record's field array type: {arrayElementType.Name}. Cannot be read!");
                                 break;
                         }
 
@@ -218,14 +248,14 @@ namespace Game.DataStorage
                                 }
                                 break;
                             default:
-                                Log.outError(LogFilter.ServerLoading, "Wrong Type: {0}", type.Name);
+                                Log.outError(LogFilter.ServerLoading, $"Not implemented DB2 Record's field type: {type.Name}. Cannot be read!");
                                 break;
                         }
                     }
                 }
 
-                var id = (int)fields[_header.IdIndex == -1 ? 0 : _header.IdIndex].GetValue(obj);
-                base[id] = obj;
+                var id = fields[_header.IdIndex == -1 ? 0 : _header.IdIndex].GetValue(obj);                
+                base[ConvertKey(id)] = obj;
             }
             while (result.NextRow());
         }
@@ -242,11 +272,11 @@ namespace Game.DataStorage
             do
             {
                 int index = 0;
-                var obj = this.LookupByKey(result.Read<int>(index++));
+                var obj = this.LookupByKey(ConvertKey(result.Read<int>(index++)));
                 if (obj == null)
                     continue;
 
-                foreach (var f in typeof(T).GetFields())
+                foreach (var f in typeof(TRecord).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 {
                     if (f.FieldType != typeof(LocalizedString))
                         continue;
@@ -268,14 +298,24 @@ namespace Game.DataStorage
 
         public bool HasRecord(int id)
         {
+            return ContainsKey(ConvertKey(id));
+        }
+
+        public bool HasRecord(TKey id)
+        {
             return ContainsKey(id);
         }
 
         public void WriteRecord(int id, Locale locale, ByteBuffer buffer)
         {
-            T entry = this.LookupByKey(id);
+            WriteRecord(ConvertKey(id), locale, buffer);
+        }
 
-            foreach (var fieldInfo in entry.GetType().GetFields())
+        public void WriteRecord(TKey id, Locale locale, ByteBuffer buffer)
+        {
+            TRecord entry = this.LookupByKey(id);
+
+            foreach (var fieldInfo in entry.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 if (fieldInfo.Name == "Id" && _header.HasIndexTable())
                     continue;
@@ -411,16 +451,43 @@ namespace Game.DataStorage
 
         public void EraseRecord(int id)
         {
+            Remove(ConvertKey(id));
+        }
+
+        public void EraseRecord(TKey id)
+        {
             Remove(id);
         }
 
         public uint GetTableHash() { return _header.TableHash; }
 
-        public int GetNumRows() { return Keys.Max() + 1; }
+        public int GetNumRows() { return ConvertKey(Keys.Max()) + 1; }
 
         public string GetName()
         {
             return _tableName;
         }
+
+        public void ReadDB2(DB2LoadData data, string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale = HotfixStatements.None)
+        {
+            if (!LoadData($"{data.path}/{fileName}"))
+            {
+                Log.outError(LogFilter.ServerLoading, "Error loading DB2 files");
+                Environment.Exit(1);
+                return;
+            }
+
+            LoadHotfixData(data.availableLocales, preparedStatement, preparedStatementLocale);
+
+            Global.DB2Mgr.AddDB2(GetTableHash(), this);
+            data.counter++;
+        }        
+    }
+
+    public class DB2LoadData
+    {
+        public string path = string.Empty;
+        public BitSet availableLocales;
+        public int counter;
     }
 }
