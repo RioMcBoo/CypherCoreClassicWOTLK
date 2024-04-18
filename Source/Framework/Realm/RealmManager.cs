@@ -18,7 +18,7 @@ using System.Timers;
 
 public class RealmManager : Singleton<RealmManager>
 {
-    public static uint HardcodedDevelopmentRealmCategoryId = 1;
+    public static int HardcodedDevelopmentRealmCategoryId = 1;
 
     RealmManager() { }
 

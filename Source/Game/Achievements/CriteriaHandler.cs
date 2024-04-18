@@ -446,7 +446,7 @@ namespace Game.Achievements
 
         public void UpdateTimedCriteria(TimeSpan timeDiff)
         {
-            List<int> toRemove = null;            
+            List<int> toRemove = new();
 
             foreach (var item in _startedCriteria)
             {

@@ -86,7 +86,7 @@ namespace Game.Networking.Packets
             DataBuild = _worldPacket.ReadUInt32();
 
             uint hotfixCount = _worldPacket.ReadUInt32();
-            Cypher.Assert(DB2Manager.Instance.GetHotfixCount() <= hotfixCount,
+            Cypher.Assert(DB2Manager.Instance.GetHotfixCount() >= hotfixCount,
                 "PacketArrayMaxCapacityException", "HotfixRequest : ClientPacket");
             
             for (var i = 0; i < hotfixCount; ++i)

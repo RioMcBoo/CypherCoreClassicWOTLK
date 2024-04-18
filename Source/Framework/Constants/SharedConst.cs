@@ -459,8 +459,8 @@ namespace Framework.Constants
         ruRU = 1 << Locale.ruRU,
         None = 1 << Locale.None,
         ptBR = 1 << Locale.ptBR,
-        itIT = 1 << Locale.itIT,             
-        Total = 1 << Locale.Total,
+        itIT = 1 << Locale.itIT,
+        Total = (1 << Locale.Total) - 1,
     }
 
     public enum CascLocaleBit

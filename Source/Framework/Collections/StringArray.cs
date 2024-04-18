@@ -11,9 +11,6 @@ namespace Framework.Collections
         public StringArray(int size)
         {
             _str = new string[size];
-
-            for (var i = 0; i < size; ++i)
-                _str[i] = string.Empty;
         }
 
         public StringArray(string str, params string[] separator)

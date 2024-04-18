@@ -140,11 +140,14 @@ namespace Game.Networking.Packets
                     SpecID = (short)spec.Id;
 
                 LastLoginVersion = fields.Read<int>(22);
-                PersonalTabard.EmblemStyle = fields.Read<int>(23);
-                PersonalTabard.EmblemColor = fields.Read<int>(24);
-                PersonalTabard.BorderStyle = fields.Read<int>(25);
-                PersonalTabard.BorderColor = fields.Read<int>(26);
-                PersonalTabard.BackgroundColor = fields.Read<int>(27);
+                PersonalTabard = new()
+                {
+                    EmblemStyle = fields.Read<int>(23),
+                    EmblemColor = fields.Read<int>(24),
+                    BorderStyle = fields.Read<int>(25),
+                    BorderColor = fields.Read<int>(26),
+                    BackgroundColor = fields.Read<int>(27)
+                };
 
                 int equipmentFieldsPerSlot = 5;
 
@@ -1101,6 +1104,9 @@ namespace Game.Networking.Packets
             BorderColor = data.ReadInt32();
             BackgroundColor = data.ReadInt32();
         }
+
+        public CustomTabardInfo() { }
+
         public int EmblemStyle = -1;
         public int EmblemColor = -1;
         public int BorderStyle = -1;

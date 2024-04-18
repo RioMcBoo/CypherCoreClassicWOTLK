@@ -148,6 +148,11 @@ namespace System
             return (mask & (ClassMask)(1 << ((int)_class - 1))) != 0;            
         }
 
+        public static bool HasLocale(this LocaleMask mask, Locale locale)
+        {
+            return (mask & (LocaleMask)(1 << (ushort)locale)) != 0;
+        }
+
         public static bool HasSchool(this SpellSchoolMask mask, SpellSchools _school)
         {
             return (mask & (SpellSchoolMask)(1 << (int)_school)) != 0;            

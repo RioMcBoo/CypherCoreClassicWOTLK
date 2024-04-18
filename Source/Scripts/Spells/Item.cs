@@ -15,7 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Global;
 
-namespace Scripts.Spells.Azerite
+namespace Scripts.Spells.Items
 {
     // 23074 Arcanite Dragonling
     [Script("spell_item_arcanite_dragonling", SpellArcaniteDragonling)]

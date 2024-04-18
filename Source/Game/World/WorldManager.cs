@@ -380,8 +380,7 @@ namespace Game
 
         public void SetInitialWorldSettings()
         {
-            LoadRealmInfo();
-
+            _realm = Global.RealmMgr.GetRealms().First();
             Log.SetRealmId(_realm.Id.Index);
 
             LoadConfigSettings();
@@ -2416,28 +2415,7 @@ namespace Game
             return WorldConfig.GetIntValue(WorldCfg.GameType) == (int)RealmType.FFAPVP;
         }
 
-        public Locale GetDefaultDbcLocale() { return m_defaultDbcLocale; }
-
-        public bool LoadRealmInfo()
-        {
-            SQLResult result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
-            if (result.IsEmpty())
-                return false;
-
-            _realm.SetName(result.Read<string>(1));
-            _realm.Addresses.Add(System.Net.IPAddress.Parse(result.Read<string>(2)));
-            _realm.Addresses.Add(System.Net.IPAddress.Parse(result.Read<string>(3)));
-            _realm.Port = result.Read<ushort>(4);
-            _realm.Type = result.Read<byte>(5);
-            _realm.Flags = (RealmFlags)result.Read<byte>(6);
-            _realm.Timezone = result.Read<byte>(7);
-            _realm.AllowedSecurityLevel = (AccountTypes)result.Read<byte>(8);
-            _realm.PopulationLevel = result.Read<float>(9);
-            _realm.Build = result.Read<uint>(10);
-            _realm.Id.Region = result.Read<byte>(11);
-            _realm.Id.Site = result.Read<byte>(12);
-            return true;
-        }
+        public Locale GetDefaultDbcLocale() { return m_defaultDbcLocale; }        
 
         public Realm GetRealm() { return _realm; }
         public RealmId GetRealmId() { return _realm.Id; }

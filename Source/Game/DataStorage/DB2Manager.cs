@@ -310,12 +310,12 @@ namespace Game.DataStorage
                 if (namesProfanity.Language != Locale.AllLanguages)
                     _nameValidators[(int)namesProfanity.Language].Add(namesProfanity.Name);
                 else
-                    for (int i = 0; i < (int)Locale.Total; ++i)
+                    for (Locale i = 0; i < Locale.Total; ++i)
                     {
-                        if (i == (int)Locale.None)
+                        if (i == Locale.None)
                             continue;
 
-                        _nameValidators[i].Add(namesProfanity.Name);
+                        _nameValidators[(int)i].Add(namesProfanity.Name);
                     }
             }
 
@@ -324,14 +324,14 @@ namespace Game.DataStorage
 
             foreach (var namesReserved in NamesReservedLocaleStorage.Values)
             {
-                Cypher.Assert(namesReserved.LocaleMask.HasAnyFlag(LocaleMask.Total - 1));
-                for (int i = 1; i < (int)LocaleMask.Total; i = i << 1)
+                Cypher.Assert(namesReserved.LocaleMask.HasAnyFlag(LocaleMask.Total));
+                for (Locale i = 0; i < Locale.Total; i++)
                 {
-                    if (i.HasFlag((int)LocaleMask.None))
+                    if (LocaleMask.None.HasLocale(i))
                         continue;
 
-                    if (((int)namesReserved.LocaleMask).HasFlag(i))
-                        _nameValidators[i].Add(namesReserved.Name);
+                    if (namesReserved.LocaleMask.HasLocale(i))
+                        _nameValidators[(int)i].Add(namesReserved.Name);
                 }
             }
 
@@ -415,6 +415,18 @@ namespace Game.DataStorage
             foreach (ScalingStatValuesRecord scalingStatValue in ScalingStatValuesStorage.Values)
                 _scalingStatValuesByLevel.Add(scalingStatValue.Charlevel, scalingStatValue);
 
+            for (var i = 0; i < (int)Class.Max; ++i)
+            {
+                _talentsByPosition[i] = new List<TalentRecord>[PlayerConst.MaxTalentTiers][];
+                for (var x = 0; x < PlayerConst.MaxTalentTiers; ++x)
+                {
+                    _talentsByPosition[i][x] = new List<TalentRecord>[PlayerConst.MaxTalentColumns];
+
+                    for (var c = 0; c < PlayerConst.MaxTalentColumns; ++c)
+                        _talentsByPosition[i][x][c] = new List<TalentRecord>();
+                }
+            }
+
             foreach (TalentRecord talentInfo in TalentStorage.Values)
             {
                 Cypher.Assert(talentInfo.ClassID < Class.Max);
@@ -422,18 +434,6 @@ namespace Game.DataStorage
                 Cypher.Assert(talentInfo.ColumnIndex < PlayerConst.MaxTalentColumns);
                 _talentsByPosition[(int)talentInfo.ClassID][talentInfo.TierID][talentInfo.ColumnIndex].Add(talentInfo);
             }
-
-            //for (var i = 0; i < (int)Class.Max; ++i)
-            //{
-            //    _talentsByPosition[i] = new List<TalentRecord>[PlayerConst.MaxTalentTiers][];
-            //    for (var x = 0; x < PlayerConst.MaxTalentTiers; ++x)
-            //    {
-            //        _talentsByPosition[i][x] = new List<TalentRecord>[PlayerConst.MaxTalentColumns];
-
-            //        for (var c = 0; c < PlayerConst.MaxTalentColumns; ++c)
-            //            _talentsByPosition[i][x][c] = new List<TalentRecord>();
-            //    }
-            //}
 
             //// create talent spells set
             //foreach (TalentRecord talentInfo in TalentStorage.Values)
@@ -929,7 +929,7 @@ namespace Game.DataStorage
                     return specialization;
             }
 
-            return new ChrSpecializationRecord();
+            return null;
         }
 
         public ChrSpecializationRecord GetDefaultChrSpecializationForClass(Class class_)

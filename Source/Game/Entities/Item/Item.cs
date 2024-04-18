@@ -419,9 +419,6 @@ namespace Game.Entities
                     SetGem(i, gemData[i]);
             }
 
-            SetModifier(ItemModifier.TimewalkerLevel, fields.Read<int>(50));
-            SetModifier(ItemModifier.ArtifactKnowledgeLevel, fields.Read<int>(51));
-
             // Enchants must be loaded after all other bonus/scaling data
             var enchantmentTokens = new StringArray(fields.Read<string>(8), ' ');
             if (enchantmentTokens.Length == (int)EnchantmentSlot.Max * 3)

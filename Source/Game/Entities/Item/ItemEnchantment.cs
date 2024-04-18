@@ -186,7 +186,7 @@ namespace Game.Entities
             return properties;
         }
 
-        public static Dictionary<int, List<(int EnchantmentID, float Chance)>> RandomEnchantmentData;
+        public static Dictionary<int, List<(int EnchantmentID, float Chance)>> RandomEnchantmentData = new();
     }
 
     public struct ItemRandomProperties

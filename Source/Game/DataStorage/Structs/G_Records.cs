@@ -18,12 +18,24 @@ namespace Game.DataStorage
     {
         public int Id;
         public string ModelName;
-        public Vector3 GeoBoxMin;
-        public Vector3 GeoBoxMax;
+        public Vector3[] GeoBoxes = new Vector3[2];
         public int FileDataID;
         public short ObjectEffectPackageID;
         public float OverrideLootEffectScale;
         public float OverrideNameScale;
+
+        #region Properties
+        public Vector3 GeoBoxMin
+        {
+            get { return GeoBoxes[0]; } 
+            set { GeoBoxes[0] = value; }
+        }
+        public Vector3 GeoBoxMax
+        {
+            get { return GeoBoxes[1]; }
+            set { GeoBoxes[1] = value; }
+        }
+        #endregion
     }
 
     public sealed class GameObjectsRecord

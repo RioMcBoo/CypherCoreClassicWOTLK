@@ -355,7 +355,8 @@ namespace Game
                 if (!result.IsEmpty())
                 {
                     Dictionary<Race, Dictionary<Class, (Expansion activeExpansionLevel, Expansion accountExpansionLevel)>> temp = new();
-                    Dictionary<Class, Expansion> minRequirementForClass = new((int)Expansion.MaxAccountExpansions);
+                    Array<Expansion> minRequirementForClass = new ((int)Class.Max, Expansion.MaxAccountExpansions);
+
                     uint count = 0;
                     do
                     {
@@ -396,7 +397,7 @@ namespace Game
                             temp[raceID] = new();
 
                         temp[raceID][classID] = (activeExpansionLevel, accountExpansionLevel);
-                        minRequirementForClass[classID] = (Expansion)Math.Min((int)minRequirementForClass[classID], (int)activeExpansionLevel);
+                        minRequirementForClass[(int)classID] = (Expansion)Math.Min((int)minRequirementForClass[(int)classID], (int)activeExpansionLevel);
 
                         ++count;
                     }
@@ -413,7 +414,7 @@ namespace Game
                             classAvailability.ClassID = class_.Key;
                             classAvailability.ActiveExpansionLevel = class_.Value.activeExpansionLevel;
                             classAvailability.AccountExpansionLevel = class_.Value.accountExpansionLevel;
-                            classAvailability.MinActiveExpansionLevel = minRequirementForClass[class_.Key];
+                            classAvailability.MinActiveExpansionLevel = minRequirementForClass[(int)class_.Key];
 
                             raceClassAvailability.Classes.Add(classAvailability);
                         }
