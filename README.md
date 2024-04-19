@@ -36,7 +36,7 @@ The current support game version is: 3.4.3.54261
     - if you have connected before using this command you will need to relog.
 
 ### Support / General Info
-* Check out our Discord [Here](https://discord.com/channels/1228986569629634610/1228986570070298745)
+* Check out our Discord [Here](https://discord.gg/3skVwCay7z)
 * Check out Trinity Core Wiki as a few steps are the same [Here](https://trinitycore.atlassian.net/wiki/spaces/tc/pages/2130077/Installation+Guide)
 * The project is currently under development and a lot of things have not been implemented. Updated according to updates in the appropriate branch of [TrinityCore](https://github.com/TrinityCore/TrinityCore/tree/wotlk_classic)
 
