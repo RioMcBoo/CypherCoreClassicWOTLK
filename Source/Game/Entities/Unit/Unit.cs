@@ -2445,7 +2445,7 @@ namespace Game.Entities
 
             WorldPacket buffer = new();
 
-            UpdateMask mask = new(207);
+            UpdateMask mask = m_unitData.GetStaticUpdateMask();
             m_unitData.AppendAllowedFieldsMaskForFlag(mask, flags);
             m_unitData.WriteUpdate(buffer, mask, true, this, target);
 

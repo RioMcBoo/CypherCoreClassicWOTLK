@@ -1076,7 +1076,7 @@ namespace Game.Entities
             valuesMask.Set((int)TypeId.Item);
 
             WorldPacket buffer = new();
-            UpdateMask mask = new(43);
+            UpdateMask mask = m_itemData.GetStaticUpdateMask();
 
             buffer.WriteUInt32(valuesMask.GetBlock(0));
             m_itemData.AppendAllowedFieldsMaskForFlag(mask, flags);
