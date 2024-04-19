@@ -3804,7 +3804,7 @@ namespace Game.Spells
             if (target.IsTypeId(TypeId.Player))
                 target.ToPlayer().UpdateSpellHitChances();
             else
-                target.ModSpellHitChance += (apply) ? GetAmount() : (-GetAmount());
+                target.ModSpellHitChance += apply ? GetAmount() : (-GetAmount());
         }
 
         [AuraEffectHandler(AuraType.ModSpellCritChance)]
@@ -3818,7 +3818,7 @@ namespace Game.Spells
             if (target.IsTypeId(TypeId.Player))
                 target.ToPlayer().UpdateSpellCritChance();
             else
-                target.BaseSpellCritChance += (apply) ? GetAmount() : -GetAmount();
+                target.BaseSpellCritChance += apply ? GetAmount() : -GetAmount();
         }
 
         [AuraEffectHandler(AuraType.ModCritPct)]
@@ -3831,7 +3831,7 @@ namespace Game.Spells
 
             if (!target.IsTypeId(TypeId.Player))
             {
-                target.BaseSpellCritChance += (apply) ? GetAmount() : -GetAmount();
+                target.BaseSpellCritChance += apply ? GetAmount() : -GetAmount();
                 return;
             }
 
