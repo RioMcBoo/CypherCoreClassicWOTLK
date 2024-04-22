@@ -51,12 +51,12 @@ namespace Game.Arenas
 
         public int GenerateArenaTeamId()
         {
-            if (NextArenaTeamId >= -2)
+            if (NextArenaTeamId < 0 && NextArenaTeamId >= -2)
             {
                 Log.outError(LogFilter.Battleground, "Arena team ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
-            return NextArenaTeamId++;
+            return unchecked(NextArenaTeamId++);
         }
 
         public void LoadArenaTeams()

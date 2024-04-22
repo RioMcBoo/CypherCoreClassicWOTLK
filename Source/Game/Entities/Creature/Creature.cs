@@ -461,7 +461,14 @@ namespace Game.Entities
                             ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.Creature, GetMapId(), GetEntry(), m_spawnId);
                             long linkedRespawnTime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
                             if (linkedRespawnTime == 0)             // Can respawn
+                        {
                                 Respawn();
+                            break;
+                        }
+
+                        // linked guid can be a boss, uses std::numeric_limits<time_t>::max to never respawn in that instance
+                        if (linkedRespawnTime == -1)
+                            m_respawnTime = long.MaxValue;
                             else                                // the master is dead
                             {
                                 ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
@@ -473,16 +480,16 @@ namespace Game.Entities
                                     long baseRespawnTime = Math.Max(linkedRespawnTime, now);
                                     long offset = RandomHelper.URand(5, Time.Minute);
 
-                                    // linked guid can be a boss, uses std::numeric_limits<time_t>::max to never respawn in that instance
                                     // we shall inherit it instead of adding and causing an overflow
                                     if (baseRespawnTime <= long.MaxValue - offset)
                                         m_respawnTime = baseRespawnTime + offset;
                                     else
                                         m_respawnTime = long.MaxValue;
                                 }
+                            
+                        }
                                 SaveRespawnTime(); // also save to DB immediately
                             }
-                        }
                         break;
                     }
                 case DeathState.Corpse:

@@ -33,12 +33,12 @@ namespace Game
 
         public long GenerateGuildId()
         {
-            if (NextGuildId >= -2)
+            if (NextGuildId < 0 && NextGuildId >= -2)
             {
                 Log.outError(LogFilter.Guild, "Guild ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
-            return NextGuildId++;
+            return unchecked(NextGuildId++);
         }
 
         public Guild GetGuildById(long guildId)

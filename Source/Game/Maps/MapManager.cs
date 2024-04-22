@@ -390,7 +390,7 @@ namespace Game.Entities
             }
 
             int newInstanceId = _nextInstanceId;
-            Cypher.Assert(newInstanceId < _freeInstanceIds.Length);
+            Cypher.Assert(newInstanceId < _freeInstanceIds.Length && newInstanceId > 1);
             _freeInstanceIds[newInstanceId] = false;
 
             // Find the lowest available id starting from the current NextInstanceId (which should be the lowest according to the logic in FreeInstanceId()

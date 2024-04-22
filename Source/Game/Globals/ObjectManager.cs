@@ -10888,72 +10888,72 @@ namespace Game
 
         public int GenerateAuctionID()
         {
-            if (_auctionId >= -2)
+            if (_auctionId < 0 && _auctionId >= -2)
             {
                 Log.outError(LogFilter.Server, "Auctions ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
-            return _auctionId++;
+            return unchecked(_auctionId++);
         }
 
         public long GenerateEquipmentSetGuid()
         {
-            if (_equipmentSetGuid >= -2)
+            if (_equipmentSetGuid < 0 && _equipmentSetGuid >= -2)
             {
                 Log.outError(LogFilter.Server, "EquipmentSet guid overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
-            return _equipmentSetGuid++;
+            return unchecked(_equipmentSetGuid++);
         }
 
         public long GenerateMailID()
         {
-            if (_mailId >= -2)
+            if (_mailId < 0 && _mailId >= -2)
             {
                 Log.outError(LogFilter.Server, "Mail ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
-            return _mailId++;
+            return unchecked(_mailId++);
         }
 
         public int GeneratePetNumber()
         {
-            if (_hiPetNumber >= -2)
+            if (_hiPetNumber < 0 && _hiPetNumber >= -2)
             {
                 Log.outError(LogFilter.Misc, "_hiPetNumber Id overflow!! Can't continue, shutting down server.");
                 Global.WorldMgr.StopNow(ShutdownExitCode.Error);
             }
-            return _hiPetNumber++;
+            return unchecked(_hiPetNumber++);
         }
 
         public long GenerateVoidStorageItemId()
         {
-            if (_voidItemId >= -2)
+            if (_voidItemId < 0 && _voidItemId >= -2)
             {
                 Log.outError(LogFilter.Misc, "_voidItemId overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow(ShutdownExitCode.Error);
             }
-            return _voidItemId++;
+            return unchecked(_voidItemId++);
         }
 
         public long GenerateCreatureSpawnId()
         {
-            if (_creatureSpawnId >= -2)
+            if (_creatureSpawnId < 0 && _creatureSpawnId >= -2)
             {
                 Log.outFatal(LogFilter.Server, "Creature spawn id overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
-            return _creatureSpawnId++;
+            return unchecked(_creatureSpawnId++);
         }
 
         public long GenerateGameObjectSpawnId()
         {
-            if (_gameObjectSpawnId >= -2)
+            if (_gameObjectSpawnId < 0 && _gameObjectSpawnId >= -2)
             {
                 Log.outFatal(LogFilter.Server, "GameObject spawn id overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
-            return _gameObjectSpawnId++;
+            return unchecked(_gameObjectSpawnId++);
         }
 
         public ObjectGuidGenerator GetGenerator(HighGuid high)
