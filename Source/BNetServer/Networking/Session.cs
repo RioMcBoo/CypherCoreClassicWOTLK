@@ -50,8 +50,8 @@ namespace BNetServer.Networking
             DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DEL_EXPIRED_IP_BANS));
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_INFO);
-            stmt.AddValue(0, ipAddress);
-            stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpAddress().GetAddressBytes(), 0));
+            stmt.SetString(0, ipAddress);
+            stmt.SetUInt32(1, BitConverter.ToUInt32(GetRemoteIpAddress().GetAddressBytes(), 0));
 
             queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(async result =>
             {

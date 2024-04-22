@@ -126,24 +126,24 @@ namespace Game.Groups
 
                 byte index = 0;
 
-                stmt.AddValue(index++, m_dbStoreId);
-                stmt.AddValue(index++, m_leaderGuid.GetCounter());
-                stmt.AddValue(index++, (byte)m_lootMethod);
-                stmt.AddValue(index++, m_looterGuid.GetCounter());
-                stmt.AddValue(index++, (byte)m_lootThreshold);
-                stmt.AddValue(index++, m_targetIcons[0].GetRawValue());
-                stmt.AddValue(index++, m_targetIcons[1].GetRawValue());
-                stmt.AddValue(index++, m_targetIcons[2].GetRawValue());
-                stmt.AddValue(index++, m_targetIcons[3].GetRawValue());
-                stmt.AddValue(index++, m_targetIcons[4].GetRawValue());
-                stmt.AddValue(index++, m_targetIcons[5].GetRawValue());
-                stmt.AddValue(index++, m_targetIcons[6].GetRawValue());
-                stmt.AddValue(index++, m_targetIcons[7].GetRawValue());
-                stmt.AddValue(index++, (ushort)m_groupFlags);
-                stmt.AddValue(index++, (byte)m_dungeonDifficulty);
-                stmt.AddValue(index++, (byte)m_raidDifficulty);
-                stmt.AddValue(index++, (byte)m_legacyRaidDifficulty);
-                stmt.AddValue(index++, m_masterLooterGuid.GetCounter());
+                stmt.SetInt32(index++, m_dbStoreId);
+                stmt.SetInt64(index++, m_leaderGuid.GetCounter());
+                stmt.SetUInt8(index++, (byte)m_lootMethod);
+                stmt.SetInt64(index++, m_looterGuid.GetCounter());
+                stmt.SetUInt8(index++, (byte)m_lootThreshold);
+                stmt.SetBytes(index++, m_targetIcons[0].GetRawValue());
+                stmt.SetBytes(index++, m_targetIcons[1].GetRawValue());
+                stmt.SetBytes(index++, m_targetIcons[2].GetRawValue());
+                stmt.SetBytes(index++, m_targetIcons[3].GetRawValue());
+                stmt.SetBytes(index++, m_targetIcons[4].GetRawValue());
+                stmt.SetBytes(index++, m_targetIcons[5].GetRawValue());
+                stmt.SetBytes(index++, m_targetIcons[6].GetRawValue());
+                stmt.SetBytes(index++, m_targetIcons[7].GetRawValue());
+                stmt.SetUInt16(index++, (ushort)m_groupFlags);
+                stmt.SetUInt8(index++, (byte)m_dungeonDifficulty);
+                stmt.SetUInt8(index++, (byte)m_raidDifficulty);
+                stmt.SetUInt8(index++, (byte)m_legacyRaidDifficulty);
+                stmt.SetInt64(index++, m_masterLooterGuid.GetCounter());
 
                 DB.Characters.Execute(stmt);
 
@@ -203,7 +203,7 @@ namespace Game.Groups
             if (character == null)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GROUP_MEMBER);
-                stmt.AddValue(0, guidLow);
+                stmt.SetInt64(0, guidLow);
                 DB.Characters.Execute(stmt);
                 return;
             }
@@ -235,8 +235,8 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (ushort)m_groupFlags);
-                stmt.AddValue(1, m_dbStoreId);
+                stmt.SetUInt16(0, (ushort)m_groupFlags);
+                stmt.SetInt32(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
             }
@@ -254,8 +254,8 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (ushort)m_groupFlags);
-                stmt.AddValue(1, m_dbStoreId);
+                stmt.SetUInt16(0, (ushort)m_groupFlags);
+                stmt.SetInt32(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
             }
@@ -284,8 +284,8 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (ushort)m_groupFlags);
-                stmt.AddValue(1, m_dbStoreId);
+                stmt.SetUInt16(0, (ushort)m_groupFlags);
+                stmt.SetInt32(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
             }
@@ -432,11 +432,11 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GROUP_MEMBER);
 
-                stmt.AddValue(0, m_dbStoreId);
-                stmt.AddValue(1, member.guid.GetCounter());
-                stmt.AddValue(2, (byte)member.flags);
-                stmt.AddValue(3, member.group);
-                stmt.AddValue(4, (byte)member.roles);
+                stmt.SetInt32(0, m_dbStoreId);
+                stmt.SetInt64(1, member.guid.GetCounter());
+                stmt.SetUInt8(2, (byte)member.flags);
+                stmt.SetUInt8(3, member.group);
+                stmt.SetUInt8(4, (byte)member.roles);
 
                 DB.Characters.Execute(stmt);
 
@@ -580,7 +580,7 @@ namespace Game.Groups
                 if (!IsBGGroup() && !IsBFGroup())
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GROUP_MEMBER);
-                    stmt.AddValue(0, guid.GetCounter());
+                    stmt.SetInt64(0, guid.GetCounter());
                     DB.Characters.Execute(stmt);
                     DelinkMember(guid);
                 }
@@ -659,8 +659,8 @@ namespace Game.Groups
                 // Update the group leader
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_LEADER);
 
-                stmt.AddValue(0, newLeader.GetGUID().GetCounter());
-                stmt.AddValue(1, m_dbStoreId);
+                stmt.SetInt64(0, newLeader.GetGUID().GetCounter());
+                stmt.SetInt32(1, m_dbStoreId);
 
                 trans.Append(stmt);
 
@@ -730,15 +730,15 @@ namespace Game.Groups
                 SQLTransaction trans = new();
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GROUP);
-                stmt.AddValue(0, m_dbStoreId);
+                stmt.SetInt32(0, m_dbStoreId);
                 trans.Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GROUP_MEMBER_ALL);
-                stmt.AddValue(0, m_dbStoreId);
+                stmt.SetInt32(0, m_dbStoreId);
                 trans.Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_LFG_DATA);
-                stmt.AddValue(0, m_dbStoreId);
+                stmt.SetInt32(0, m_dbStoreId);
                 trans.Append(stmt);
 
                 DB.Characters.CommitTransaction(trans);
@@ -967,8 +967,8 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_MEMBER_SUBGROUP);
 
-                stmt.AddValue(0, group);
-                stmt.AddValue(1, guid.GetCounter());
+                stmt.SetUInt8(0, group);
+                stmt.SetInt64(1, guid.GetCounter());
 
                 DB.Characters.Execute(stmt);
             }
@@ -1017,8 +1017,8 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_MEMBER_SUBGROUP);
 
-                stmt.AddValue(0, group);
-                stmt.AddValue(1, guid.GetCounter());
+                stmt.SetUInt8(0, group);
+                stmt.SetInt64(1, guid.GetCounter());
 
                 DB.Characters.Execute(stmt);
             }
@@ -1063,8 +1063,8 @@ namespace Game.Groups
                 if (!IsBGGroup() && !IsBFGroup())
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_MEMBER_SUBGROUP);
-                    stmt.AddValue(0, slots[i].group);
-                    stmt.AddValue(1, slots[i].guid.GetCounter());
+                    stmt.SetUInt8(0, slots[i].group);
+                    stmt.SetInt64(1, slots[i].guid.GetCounter());
 
                     trans.Append(stmt);
                 }
@@ -1251,8 +1251,8 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_DIFFICULTY);
 
-                stmt.AddValue(0, (byte)m_dungeonDifficulty);
-                stmt.AddValue(1, m_dbStoreId);
+                stmt.SetUInt8(0, (byte)m_dungeonDifficulty);
+                stmt.SetInt32(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
             }
@@ -1275,8 +1275,8 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_RAID_DIFFICULTY);
 
-                stmt.AddValue(0, (byte)m_raidDifficulty);
-                stmt.AddValue(1, m_dbStoreId);
+                stmt.SetUInt8(0, (byte)m_raidDifficulty);
+                stmt.SetInt32(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
             }
@@ -1299,8 +1299,8 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_LEGACY_RAID_DIFFICULTY);
 
-                stmt.AddValue(0, (byte)m_legacyRaidDifficulty);
-                stmt.AddValue(1, m_dbStoreId);
+                stmt.SetUInt8(0, (byte)m_legacyRaidDifficulty);
+                stmt.SetInt32(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
             }
@@ -1771,8 +1771,8 @@ namespace Game.Groups
             // Preserve the new setting in the db
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_MEMBER_FLAG);
 
-            stmt.AddValue(0, (byte)slot.flags);
-            stmt.AddValue(1, guid.GetCounter());
+            stmt.SetUInt8(0, (byte)slot.flags);
+            stmt.SetInt64(1, guid.GetCounter());
 
             DB.Characters.Execute(stmt);
 
@@ -1870,8 +1870,8 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (ushort)m_groupFlags);
-                stmt.AddValue(1, m_dbStoreId);
+                stmt.SetUInt16(0, (ushort)m_groupFlags);
+                stmt.SetInt32(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
             }
@@ -1895,8 +1895,8 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (ushort)m_groupFlags);
-                stmt.AddValue(1, m_dbStoreId);
+                stmt.SetUInt16(0, (ushort)m_groupFlags);
+                stmt.SetInt32(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
             }

@@ -122,10 +122,10 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.WowServicesDeniedRealmListTicket;
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_LAST_LOGIN_INFO);
-            stmt.AddValue(0, GetRemoteIpAddress().ToString());
-            stmt.AddValue(1, (byte)locale.ToEnum<Locale>());
-            stmt.AddValue(2, os);
-            stmt.AddValue(3, accountInfo.Id);
+            stmt.SetString(0, GetRemoteIpAddress().ToString());
+            stmt.SetUInt8(1, (byte)locale.ToEnum<Locale>());
+            stmt.SetString(2, os);
+            stmt.SetInt32(3, accountInfo.Id);
 
             DB.Login.Execute(stmt);
 

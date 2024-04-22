@@ -553,23 +553,23 @@ namespace Game
             if (isdeclined)
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_PET_DECLINEDNAME);
-                stmt.AddValue(0, pet.GetCharmInfo().GetPetNumber());
+                stmt.SetInt32(0, pet.GetCharmInfo().GetPetNumber());
                 trans.Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_PET_DECLINEDNAME);
-                stmt.AddValue(0, pet.GetCharmInfo().GetPetNumber());
-                stmt.AddValue(1, GetPlayer().GetGUID().ToString());
+                stmt.SetInt32(0, pet.GetCharmInfo().GetPetNumber());
+                stmt.SetString(1, GetPlayer().GetGUID().ToString());
 
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                    stmt.AddValue(i + 1, packet.RenameData.DeclinedNames.Name[i]);
+                    stmt.SetString(i + 1, packet.RenameData.DeclinedNames.Name[i]);
 
                 trans.Append(stmt);
             }
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_PET_NAME);
-            stmt.AddValue(0, name);
-            stmt.AddValue(1, GetPlayer().GetGUID().ToString());
-            stmt.AddValue(2, pet.GetCharmInfo().GetPetNumber());
+            stmt.SetString(0, name);
+            stmt.SetString(1, GetPlayer().GetGUID().ToString());
+            stmt.SetInt32(2, pet.GetCharmInfo().GetPetNumber());
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);

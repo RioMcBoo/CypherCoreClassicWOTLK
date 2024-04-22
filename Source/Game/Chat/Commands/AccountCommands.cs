@@ -41,7 +41,7 @@ namespace Game.Chat
                 int accountId = session.GetAccountId();
 
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
-                stmt.AddValue(0, accountId);
+                stmt.SetInt32(0, accountId);
                 SQLResult result = DB.Login.Query(stmt);
 
                 if (!result.IsEmpty())
@@ -188,8 +188,8 @@ namespace Game.Chat
             }
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_EXPANSION);
-            stmt.AddValue(0, expansion);
-            stmt.AddValue(1, handler.GetSession().GetAccountId());
+            stmt.SetUInt8(0, expansion);
+            stmt.SetInt32(1, handler.GetSession().GetAccountId());
             DB.Login.Execute(stmt);
 
             handler.SendSysMessage(CypherStrings.AccountAddon, expansion);
@@ -429,8 +429,8 @@ namespace Game.Chat
                 else
                 {
                     PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK_COUNTRY);
-                    stmt.AddValue(0, "00");
-                    stmt.AddValue(1, handler.GetSession().GetAccountId());
+                    stmt.SetString(0, "00");
+                    stmt.SetInt32(1, handler.GetSession().GetAccountId());
                     DB.Login.Execute(stmt);
                     handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
                 }
@@ -444,16 +444,16 @@ namespace Game.Chat
 
                 if (state)
                 {
-                    stmt.AddValue(0, true);                                     // locked
+                    stmt.SetBool(0, true);                                     // locked
                     handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
                 }
                 else
                 {
-                    stmt.AddValue(0, false);                                    // unlocked
+                    stmt.SetBool(0, false);                                    // unlocked
                     handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
                 }
 
-                stmt.AddValue(1, handler.GetSession().GetAccountId());
+                stmt.SetInt32(1, handler.GetSession().GetAccountId());
 
                 DB.Login.Execute(stmt);
                 return true;
@@ -650,8 +650,8 @@ namespace Game.Chat
 
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_EXPANSION);
 
-                stmt.AddValue(0, expansion);
-                stmt.AddValue(1, accountId);
+                stmt.SetUInt8(0, expansion);
+                stmt.SetInt32(1, accountId);
 
                 DB.Login.Execute(stmt);
 
@@ -753,8 +753,8 @@ namespace Game.Chat
                 if (realmID == -1 && !Global.AccountMgr.IsConsoleAccount(playerSecurity))
                 {
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS_SECLEVEL_TEST);
-                    stmt.AddValue(0, accountId);
-                    stmt.AddValue(1, securityLevel);
+                    stmt.SetInt32(0, accountId);
+                    stmt.SetUInt8(1, securityLevel);
 
                     SQLResult result = DB.Login.Query(stmt);
 

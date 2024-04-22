@@ -46,16 +46,16 @@ namespace Game.Arenas
 
             // Save arena team to db
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ARENA_TEAM);
-            stmt.AddValue(0, teamId);
-            stmt.AddValue(1, TeamName);
-            stmt.AddValue(2, captainLowGuid);
-            stmt.AddValue(3, type);
-            stmt.AddValue(4, stats.Rating);
-            stmt.AddValue(5, BackgroundColor);
-            stmt.AddValue(6, EmblemStyle);
-            stmt.AddValue(7, EmblemColor);
-            stmt.AddValue(8, BorderStyle);
-            stmt.AddValue(9, BorderColor);
+            stmt.SetInt32(0, teamId);
+            stmt.SetString(1, TeamName);
+            stmt.SetInt64(2, captainLowGuid);
+            stmt.SetUInt8(3, type);
+            stmt.SetUInt16(4, stats.Rating);
+            stmt.SetUInt32(5, BackgroundColor);
+            stmt.SetUInt8(6, EmblemStyle);
+            stmt.SetUInt32(7, EmblemColor);
+            stmt.SetUInt8(8, BorderStyle);
+            stmt.SetUInt32(9, BorderColor);
             DB.Characters.Execute(stmt);
 
             // Add captain as member
@@ -107,8 +107,8 @@ namespace Game.Arenas
 
             // Try to get player's match maker rating from db and fall back to config setting if not found
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MATCH_MAKER_RATING);
-            stmt.AddValue(0, playerGuid.GetCounter());
-            stmt.AddValue(1, GetSlot());
+            stmt.SetInt64(0, playerGuid.GetCounter());
+            stmt.SetUInt8(1, GetSlot());
             SQLResult result = DB.Characters.Query(stmt);
 
             uint matchMakerRating;
@@ -138,9 +138,9 @@ namespace Game.Arenas
 
             // Save player's arena team membership to db
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ARENA_TEAM_MEMBER);
-            stmt.AddValue(0, teamId);
-            stmt.AddValue(1, playerGuid.GetCounter());
-            stmt.AddValue(2, (ushort)personalRating);
+            stmt.SetInt32(0, teamId);
+            stmt.SetInt64(1, playerGuid.GetCounter());
+            stmt.SetUInt16(2, (ushort)personalRating);
             DB.Characters.Execute(stmt);
 
             // Inform player if online
@@ -244,8 +244,8 @@ namespace Game.Arenas
 
             TeamName = name;
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_NAME);
-            stmt.AddValue(0, TeamName);
-            stmt.AddValue(1, GetId());
+            stmt.SetString(0, TeamName);
+            stmt.SetInt32(1, GetId());
             DB.Characters.Execute(stmt);
             return true;
         }
@@ -262,8 +262,8 @@ namespace Game.Arenas
 
             // Update database
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_CAPTAIN);
-            stmt.AddValue(0, guid.GetCounter());
-            stmt.AddValue(1, GetId());
+            stmt.SetInt64(0, guid.GetCounter());
+            stmt.SetInt32(1, GetId());
             DB.Characters.Execute(stmt);
 
             // Enable remove/promote buttons
@@ -307,8 +307,8 @@ namespace Game.Arenas
             if (cleanDb)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM_MEMBER);
-                stmt.AddValue(0, GetId());
-                stmt.AddValue(1, guid.GetCounter());
+                stmt.SetInt32(0, GetId());
+                stmt.SetInt64(1, guid.GetCounter());
                 DB.Characters.Execute(stmt);
             }
         }
@@ -331,11 +331,11 @@ namespace Game.Arenas
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM);
-            stmt.AddValue(0, teamId);
+            stmt.SetInt32(0, teamId);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM_MEMBERS);
-            stmt.AddValue(0, teamId);
+            stmt.SetInt32(0, teamId);
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);
@@ -354,11 +354,11 @@ namespace Game.Arenas
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM);
-            stmt.AddValue(0, teamId);
+            stmt.SetInt32(0, teamId);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM_MEMBERS);
-            stmt.AddValue(0, teamId);
+            stmt.SetInt32(0, teamId);
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);
@@ -680,13 +680,13 @@ namespace Game.Arenas
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_STATS);
-            stmt.AddValue(0, stats.Rating);
-            stmt.AddValue(1, stats.WeekGames);
-            stmt.AddValue(2, stats.WeekWins);
-            stmt.AddValue(3, stats.SeasonGames);
-            stmt.AddValue(4, stats.SeasonWins);
-            stmt.AddValue(5, stats.Rank);
-            stmt.AddValue(6, GetId());
+            stmt.SetUInt16(0, stats.Rating);
+            stmt.SetUInt16(1, stats.WeekGames);
+            stmt.SetUInt16(2, stats.WeekWins);
+            stmt.SetUInt16(3, stats.SeasonGames);
+            stmt.SetUInt16(4, stats.SeasonWins);
+            stmt.SetUInt32(5, stats.Rank);
+            stmt.SetInt32(6, GetId());
             trans.Append(stmt);
 
             foreach (var member in Members)
@@ -696,19 +696,19 @@ namespace Game.Arenas
                     continue;
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_MEMBER);
-                stmt.AddValue(0, member.PersonalRating);
-                stmt.AddValue(1, member.WeekGames);
-                stmt.AddValue(2, member.WeekWins);
-                stmt.AddValue(3, member.SeasonGames);
-                stmt.AddValue(4, member.SeasonWins);
-                stmt.AddValue(5, GetId());
-                stmt.AddValue(6, member.Guid.GetCounter());
+                stmt.SetUInt16(0, member.PersonalRating);
+                stmt.SetUInt16(1, member.WeekGames);
+                stmt.SetUInt16(2, member.WeekWins);
+                stmt.SetUInt16(3, member.SeasonGames);
+                stmt.SetUInt16(4, member.SeasonWins);
+                stmt.SetInt32(5, GetId());
+                stmt.SetInt64(6, member.Guid.GetCounter());
                 trans.Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_CHARACTER_ARENA_STATS);
-                stmt.AddValue(0, member.Guid.GetCounter());
-                stmt.AddValue(1, GetSlot());
-                stmt.AddValue(2, member.MatchMakerRating);
+                stmt.SetInt64(0, member.Guid.GetCounter());
+                stmt.SetUInt8(1, GetSlot());
+                stmt.SetUInt16(2, member.MatchMakerRating);
                 trans.Append(stmt);
             }
 

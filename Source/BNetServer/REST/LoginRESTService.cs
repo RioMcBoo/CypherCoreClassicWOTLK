@@ -146,7 +146,7 @@ namespace BNetServer.REST
                 return dispatcherService.HandleUnauthorized(session, context);
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
-            stmt.AddValue(0, ticket);
+            stmt.SetString(0, ticket);
             session.QueueQuery(DB.Login.AsyncQuery(stmt).WithCallback(result =>
             {
                 GameAccountList gameAccounts = new();
@@ -225,7 +225,7 @@ namespace BNetServer.REST
             string login = getInputValue(loginForm, "account_name").ToUpper();
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_AUTHENTICATION);
-            stmt.AddValue(0, login);
+            stmt.SetString(0, login);
 
             session.QueueQuery(DB.Login.AsyncQuery(stmt).WithChainingCallback((callback, result) =>
             {
@@ -290,7 +290,7 @@ namespace BNetServer.REST
                         {
                             SQLTransaction trans = new();
                             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_FAILED_LOGINS);
-                            stmt.AddValue(0, accountId);
+                            stmt.SetUInt32(0, accountId);
                             trans.Append(stmt);
 
                             ++failedLogins;
@@ -305,19 +305,19 @@ namespace BNetServer.REST
                                 if (banType == BanMode.Account)
                                 {
                                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_ACCOUNT_AUTO_BANNED);
-                                    stmt.AddValue(0, accountId);
+                                    stmt.SetUInt32(0, accountId);
                                 }
                                 else
                                 {
                                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_IP_AUTO_BANNED);
-                                    stmt.AddValue(0, ip_address);
+                                    stmt.SetString(0, ip_address);
                                 }
 
-                                stmt.AddValue(1, banTime);
+                                stmt.SetInt32(1, banTime);
                                 trans.Append(stmt);
 
                                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_RESET_FAILED_LOGINS);
-                                stmt.AddValue(0, accountId);
+                                stmt.SetUInt32(0, accountId);
                                 trans.Append(stmt);
                             }
 
@@ -338,9 +338,9 @@ namespace BNetServer.REST
                     loginTicket = "TC-" + RandomHelper.GetRandomBytes(20).ToHexString();
 
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_AUTHENTICATION);
-                stmt.AddValue(0, loginTicket);
-                stmt.AddValue(1, Time.UnixTime + _loginTicketDuration);
-                stmt.AddValue(2, accountId);
+                stmt.SetString(0, loginTicket);
+                stmt.SetInt64(1, Time.UnixTime + _loginTicketDuration);
+                stmt.SetUInt32(2, accountId);
                 callback.WithCallback(_ =>
                 {
                     LoginResult loginResult = new();
@@ -387,7 +387,7 @@ namespace BNetServer.REST
             login = login.ToUpper();
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_CHECK_PASSWORD_BY_EMAIL);
-            stmt.AddValue(0, login);
+            stmt.SetString(0, login);
 
             session.QueueQuery(DB.Login.AsyncQuery(stmt).WithCallback(result =>
             {
@@ -452,7 +452,7 @@ namespace BNetServer.REST
                 return dispatcherService.HandleUnauthorized(session, context);
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_EXISTING_AUTHENTICATION);
-            stmt.AddValue(0, ticket);
+            stmt.SetString(0, ticket);
             session.QueueQuery(DB.Login.AsyncQuery(stmt).WithCallback(result =>
             {
                 LoginRefreshResult loginRefreshResult = new();
@@ -465,8 +465,8 @@ namespace BNetServer.REST
                         loginRefreshResult.LoginTicketExpiry = (now + _loginTicketDuration);
 
                         PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_EXISTING_AUTHENTICATION);
-                        stmt.AddValue(0, (uint)(now + _loginTicketDuration));
-                        stmt.AddValue(1, ticket);
+                        stmt.SetUInt32(0, (uint)(now + _loginTicketDuration));
+                        stmt.SetString(1, ticket);
                         DB.Login.Execute(stmt);
                     }
                     else
@@ -562,10 +562,10 @@ namespace BNetServer.REST
                 }
 
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_LOGON);
-                stmt.AddValue(0, (sbyte)SrpVersion.v1);
-                stmt.AddValue(1, salt);
-                stmt.AddValue(2, verifier);
-                stmt.AddValue(3, id);
+                stmt.SetInt8(0, (sbyte)SrpVersion.v1);
+                stmt.SetBytes(1, salt);
+                stmt.SetBytes(2, verifier);
+                stmt.SetInt32(3, id);
                 tx.Append(stmt);
 
                 tx.Append($"UPDATE battlenet_accounts SET sha_pass_hash = DEFAULT(sha_pass_hash) WHERE id = {id}.");

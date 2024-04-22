@@ -237,7 +237,7 @@ namespace Game.Chat
                     else
                     {
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
-                        stmt.AddValue(0, player.GetGUID().GetCounter());
+                        stmt.SetInt64(0, player.GetGUID().GetCounter());
                         SQLResult result = DB.Characters.Query(stmt);
 
                         if (!result.IsEmpty())

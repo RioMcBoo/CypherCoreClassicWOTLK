@@ -74,8 +74,8 @@ namespace Game.Networking
             string ip_address = GetRemoteIpAddress().ToString();
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_INFO);
-            stmt.AddValue(0, ip_address);
-            stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpAddress().Address.GetAddressBytes(), 0));
+            stmt.SetString(0, ip_address);
+            stmt.SetUInt32(1, BitConverter.ToUInt32(GetRemoteIpAddress().Address.GetAddressBytes(), 0));
 
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(CheckIpCallback));
         }
@@ -458,8 +458,8 @@ namespace Game.Networking
         {
             // Get the account information from the realmd database
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO_BY_NAME);
-            stmt.AddValue(0, Global.WorldMgr.GetRealm().Id.Index);
-            stmt.AddValue(1, authSession.RealmJoinTicket);
+            stmt.SetInt32(0, Global.WorldMgr.GetRealm().Id.Index);
+            stmt.SetString(1, authSession.RealmJoinTicket);
 
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleAuthSessionCallback, authSession));
         }
@@ -540,15 +540,15 @@ namespace Game.Networking
             {
                 // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
-                stmt.AddValue(0, address.Address.ToString());
-                stmt.AddValue(1, authSession.RealmJoinTicket);
+                stmt.SetString(0, address.Address.ToString());
+                stmt.SetString(1, authSession.RealmJoinTicket);
                 DB.Login.Execute(stmt);
                 // This also allows to check for possible "hack" attempts on account
             }
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_INFO_CONTINUED_SESSION);
-            stmt.AddValue(0, _sessionKey);
-            stmt.AddValue(1, account.game.Id);
+            stmt.SetBytes(0, _sessionKey);
+            stmt.SetInt32(1, account.game.Id);
             DB.Login.Execute(stmt);
 
             // First reject the connection if packet contains invalid data or realm state doesn't allow logging in
@@ -612,8 +612,8 @@ namespace Game.Networking
                 mutetime = GameTime.GetGameTime() + mutetime;
 
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME_LOGIN);
-                stmt.AddValue(0, mutetime);
-                stmt.AddValue(1, account.game.Id);
+                stmt.SetInt64(0, mutetime);
+                stmt.SetInt32(1, account.game.Id);
                 DB.Login.Execute(stmt);
             }
 
@@ -643,8 +643,8 @@ namespace Game.Networking
             {
                 // Update the last_ip in the database
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LAST_IP);
-                stmt.AddValue(0, address.Address.ToString());
-                stmt.AddValue(1, authSession.RealmJoinTicket);
+                stmt.SetString(0, address.Address.ToString());
+                stmt.SetString(1, authSession.RealmJoinTicket);
                 DB.Login.Execute(stmt);
             }
 
@@ -685,7 +685,7 @@ namespace Game.Networking
 
             int accountId = key.AccountId;
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO_CONTINUED_SESSION);
-            stmt.AddValue(0, accountId);
+            stmt.SetInt32(0, accountId);
 
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleAuthContinuedSessionCallback, authSession));
         }

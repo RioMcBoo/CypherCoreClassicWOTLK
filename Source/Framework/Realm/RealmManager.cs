@@ -308,12 +308,12 @@ public class RealmManager : Singleton<RealmManager>
             byte[] keyData = clientSecret.Combine(serverSecret);
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
-            stmt.AddValue(0, keyData);
-            stmt.AddValue(1, clientAddress.ToString());
-            stmt.AddValue(2, (byte)locale);
-            stmt.AddValue(3, os);
-            stmt.AddValue(4, (short)timezoneOffset.TotalMinutes);
-            stmt.AddValue(5, accountName);
+            stmt.SetBytes(0, keyData);
+            stmt.SetString(1, clientAddress.ToString());
+            stmt.SetUInt8(2, (byte)locale);
+            stmt.SetString(3, os);
+            stmt.SetInt16(4, (short)timezoneOffset.TotalMinutes);
+            stmt.SetString(5, accountName);
             DB.Login.DirectExecute(stmt);
 
             Bgs.Protocol.Attribute attribute = new();

@@ -110,7 +110,7 @@ namespace Game.DataStorage
         {
             // Even though this query is executed only once, prepared statement is used to send data from mysql server in binary format
             PreparedStatement stmt = HotfixDatabase.GetPreparedStatement(preparedStatement);
-            stmt.AddValue(0, !custom);
+            stmt.SetBool(0, !custom);
             SQLResult result = DB.Hotfix.Query(stmt);
             if (result.IsEmpty())
                 return;
@@ -263,8 +263,8 @@ namespace Game.DataStorage
         void LoadStringsFromDB(bool custom, Locale locale, HotfixStatements preparedStatement)
         {
             PreparedStatement stmt = HotfixDatabase.GetPreparedStatement(preparedStatement);
-            stmt.AddValue(0, !custom);
-            stmt.AddValue(1, locale.ToString());
+            stmt.SetBool(0, !custom);
+            stmt.SetString(1, locale.ToString());
             SQLResult result = DB.Hotfix.Query(stmt);
             if (result.IsEmpty())
                 return;

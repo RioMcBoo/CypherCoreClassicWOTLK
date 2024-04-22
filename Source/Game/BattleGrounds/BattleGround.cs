@@ -606,10 +606,10 @@ namespace Game.BattleGrounds
                     battlegroundId = result.Read<ulong>(0) + 1;
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PVPSTATS_BATTLEGROUND);
-                stmt.AddValue(0, battlegroundId);
-                stmt.AddValue(1, (byte)GetWinner());
-                stmt.AddValue(2, GetUniqueBracketId());
-                stmt.AddValue(3, (uint)GetTypeID());
+                stmt.SetUInt64(0, battlegroundId);
+                stmt.SetUInt8(1, (byte)GetWinner());
+                stmt.SetUInt8(2, GetUniqueBracketId());
+                stmt.SetUInt32(3, (uint)GetTypeID());
                 DB.Characters.Execute(stmt);
             }
 
@@ -658,20 +658,20 @@ namespace Game.BattleGrounds
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PVPSTATS_PLAYER);
                     var score = PlayerScores.LookupByKey(player.GetGUID());
 
-                    stmt.AddValue(0, battlegroundId);
-                    stmt.AddValue(1, player.GetGUID().GetCounter());
-                    stmt.AddValue(2, team == winner);
-                    stmt.AddValue(3, score.KillingBlows);
-                    stmt.AddValue(4, score.Deaths);
-                    stmt.AddValue(5, score.HonorableKills);
-                    stmt.AddValue(6, score.BonusHonor);
-                    stmt.AddValue(7, score.DamageDone);
-                    stmt.AddValue(8, score.HealingDone);
-                    stmt.AddValue(9, score.GetAttr1());
-                    stmt.AddValue(10, score.GetAttr2());
-                    stmt.AddValue(11, score.GetAttr3());
-                    stmt.AddValue(12, score.GetAttr4());
-                    stmt.AddValue(13, score.GetAttr5());
+                    stmt.SetUInt64(0, battlegroundId);
+                    stmt.SetInt64(1, player.GetGUID().GetCounter());
+                    stmt.SetBool(2, team == winner);
+                    stmt.SetInt32(3, score.KillingBlows);
+                    stmt.SetInt32(4, score.Deaths);
+                    stmt.SetInt32(5, score.HonorableKills);
+                    stmt.SetInt32(6, score.BonusHonor);
+                    stmt.SetInt32(7, score.DamageDone);
+                    stmt.SetInt32(8, score.HealingDone);
+                    stmt.SetInt32(9, score.GetAttr1());
+                    stmt.SetInt32(10, score.GetAttr2());
+                    stmt.SetInt32(11, score.GetAttr3());
+                    stmt.SetInt32(12, score.GetAttr4());
+                    stmt.SetInt32(13, score.GetAttr5());
 
                     DB.Characters.Execute(stmt);
                 }

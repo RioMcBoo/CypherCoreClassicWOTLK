@@ -132,8 +132,8 @@ namespace Game.Chat
             else
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                stmt.AddValue(0, (ushort)AtLoginFlags.ResetSpells);
-                stmt.AddValue(1, player.GetGUID().GetCounter());
+                stmt.SetUInt16(0, (ushort)AtLoginFlags.ResetSpells);
+                stmt.SetInt64(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
 
                 handler.SendSysMessage(CypherStrings.ResetSpellsOffline, player.GetName());
@@ -191,8 +191,8 @@ namespace Game.Chat
             else if (!player.GetGUID().IsEmpty())
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                stmt.AddValue(0, (ushort)(AtLoginFlags.None | AtLoginFlags.ResetPetTalents));
-                stmt.AddValue(1, player.GetGUID().GetCounter());
+                stmt.SetUInt16(0, (ushort)(AtLoginFlags.None | AtLoginFlags.ResetPetTalents));
+                stmt.SetInt64(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
 
                 string nameLink = handler.PlayerLink(player.GetName());
@@ -231,7 +231,7 @@ namespace Game.Chat
             }
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ALL_AT_LOGIN_FLAGS);
-            stmt.AddValue(0, (ushort)atLogin);
+            stmt.SetUInt16(0, (ushort)atLogin);
             DB.Characters.Execute(stmt);
 
             var plist = Global.ObjAccessor.GetPlayers();

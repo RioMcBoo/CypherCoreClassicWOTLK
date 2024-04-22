@@ -31,7 +31,7 @@ namespace BNetServer.REST
             DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DEL_EXPIRED_IP_BANS));
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_INFO);
-            stmt.AddValue(0, ip_address);
+            stmt.SetString(0, ip_address);
 
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(CheckIpCallback));
         }

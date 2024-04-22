@@ -70,7 +70,7 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.Denied;
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_INFO);
-            stmt.AddValue(0, verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
+            stmt.SetString(0, verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
 
             {
                 SQLResult result = DB.Login.Query(stmt);
@@ -85,7 +85,7 @@ namespace BNetServer.Networking
             }
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_BNET_ID);
-            stmt.AddValue(0, accountInfo.Id);
+            stmt.SetInt32(0, accountInfo.Id);
 
             {
                 SQLResult characterCountsResult = DB.Login.Query(stmt);
@@ -102,7 +102,7 @@ namespace BNetServer.Networking
             }
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_LAST_PLAYER_CHARACTERS);
-            stmt.AddValue(0, accountInfo.Id);
+            stmt.SetInt32(0, accountInfo.Id);
 
             {
                 SQLResult lastPlayerCharactersResult = DB.Login.Query(stmt);
@@ -201,7 +201,7 @@ namespace BNetServer.Networking
             }
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_EXISTING_AUTHENTICATION_BY_ID);
-            stmt.AddValue(0, accountInfo.Id);
+            stmt.SetInt32(0, accountInfo.Id);
 
             queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(result =>
             {

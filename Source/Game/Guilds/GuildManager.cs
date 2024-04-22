@@ -392,11 +392,11 @@ namespace Game
                 foreach (var pair in GuildStore)
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_ACHIEVEMENT);
-                    stmt.AddValue(0, pair.Key);
+                    stmt.SetInt64(0, pair.Key);
                     SQLResult achievementResult = DB.Characters.Query(stmt);
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_ACHIEVEMENT_CRITERIA);
-                    stmt.AddValue(0, pair.Key);
+                    stmt.SetInt64(0, pair.Key);
                     SQLResult criteriaResult = DB.Characters.Query(stmt);
 
                     (achievementCount, criteriaCount) = pair.Value.GetAchievementMgr().LoadFromDB(achievementResult, criteriaResult);
@@ -467,7 +467,7 @@ namespace Game
                 }
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_GUILD_REWARDS_REQ_ACHIEVEMENTS);
-                stmt.AddValue(0, reward.ItemID);
+                stmt.SetInt32(0, reward.ItemID);
                 SQLResult reqAchievementResult = DB.World.Query(stmt);
                 if (!reqAchievementResult.IsEmpty())
                 {

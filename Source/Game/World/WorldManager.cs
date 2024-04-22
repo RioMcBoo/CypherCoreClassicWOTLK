@@ -79,7 +79,7 @@ namespace Game
         public void LoadDBAllowedSecurityLevel()
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
-            stmt.AddValue(0, _realm.Id.Index);
+            stmt.SetInt32(0, _realm.Id.Index);
             SQLResult result = DB.Login.Query(stmt);
 
             if (!result.IsEmpty())
@@ -1273,7 +1273,7 @@ namespace Game
             m_Autobroadcasts.Clear();
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_AUTOBROADCAST);
-            stmt.AddValue(0, _realm.Id.Index);
+            stmt.SetInt32(0, _realm.Id.Index);
 
             SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
@@ -1403,10 +1403,10 @@ namespace Game
 
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_UPTIME_PLAYERS);
 
-                stmt.AddValue(0, tmpDiff);
-                stmt.AddValue(1, maxOnlinePlayers);
-                stmt.AddValue(2, _realm.Id.Index);
-                stmt.AddValue(3, (uint)GameTime.GetStartTime());
+                stmt.SetUInt32(0, tmpDiff);
+                stmt.SetUInt32(1, maxOnlinePlayers);
+                stmt.SetInt32(2, _realm.Id.Index);
+                stmt.SetUInt32(3, (uint)GameTime.GetStartTime());
 
                 DB.Login.Execute(stmt);
             }
@@ -1419,9 +1419,9 @@ namespace Game
                     m_timers[WorldTimers.CleanDB].Reset();
 
                     PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_OLD_LOGS);
-                    stmt.AddValue(0, WorldConfig.GetIntValue(WorldCfg.LogdbCleartime));
-                    stmt.AddValue(1, 0);
-                    stmt.AddValue(2, GetRealm().Id.Index);
+                    stmt.SetInt32(0, WorldConfig.GetIntValue(WorldCfg.LogdbCleartime));
+                    stmt.SetInt32(1, 0);
+                    stmt.SetInt32(2, GetRealm().Id.Index);
 
                     DB.Login.Execute(stmt);
                 }
@@ -1642,26 +1642,26 @@ namespace Game
                 case BanMode.IP:
                     // No SQL injection with prepared statements
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
-                    stmt.AddValue(0, nameOrIP);
+                    stmt.SetString(0, nameOrIP);
                     dataBase = DB.Login;
 
                     var stmt2 = LoginDatabase.GetPreparedStatement(LoginStatements.INS_IP_BANNED);
-                    stmt2.AddValue(0, nameOrIP);
-                    stmt2.AddValue(1, duration_secs);
-                    stmt2.AddValue(2, author);
-                    stmt2.AddValue(3, reason);
+                    stmt2.SetString(0, nameOrIP);
+                    stmt2.SetUInt32(1, duration_secs);
+                    stmt2.SetString(2, author);
+                    stmt2.SetString(3, reason);
                     DB.Login.Execute(stmt2);
                     break;
                 case BanMode.Account:
                     // No SQL injection with prepared statements
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME);
-                    stmt.AddValue(0, nameOrIP);
+                    stmt.SetString(0, nameOrIP);
                     dataBase = DB.Login;
                     break;
                 case BanMode.Character:
                     // No SQL injection with prepared statements
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ACCOUNT_BY_NAME);
-                    stmt.AddValue(0, nameOrIP);
+                    stmt.SetString(0, nameOrIP);
                     dataBase = DB.Characters;
                     break;
                 default:
@@ -1688,14 +1688,14 @@ namespace Game
                 {
                     // make sure there is only one active ban
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_NOT_BANNED);
-                    stmt.AddValue(0, account);
+                    stmt.SetInt32(0, account);
                     trans.Append(stmt);
                     // No SQL injection with prepared statements
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ACCOUNT_BANNED);
-                    stmt.AddValue(0, account);
-                    stmt.AddValue(1, duration_secs);
-                    stmt.AddValue(2, author);
-                    stmt.AddValue(3, reason);
+                    stmt.SetInt32(0, account);
+                    stmt.SetUInt32(1, duration_secs);
+                    stmt.SetString(2, author);
+                    stmt.SetString(3, reason);
                     trans.Append(stmt);
                 }
 
@@ -1719,7 +1719,7 @@ namespace Game
             if (mode == BanMode.IP)
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_IP_NOT_BANNED);
-                stmt.AddValue(0, nameOrIP);
+                stmt.SetString(0, nameOrIP);
                 DB.Login.Execute(stmt);
             }
             else
@@ -1735,7 +1735,7 @@ namespace Game
 
                 //NO SQL injection as account is uint32
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_NOT_BANNED);
-                stmt.AddValue(0, account);
+                stmt.SetInt32(0, account);
                 DB.Login.Execute(stmt);
             }
             return true;
@@ -1768,14 +1768,14 @@ namespace Game
 
             // make sure there is only one active ban
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
-            stmt.AddValue(0, guid.GetCounter());
+            stmt.SetInt64(0, guid.GetCounter());
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_BAN);
-            stmt.AddValue(0, guid.GetCounter());
-            stmt.AddValue(1, (long)durationSecs);
-            stmt.AddValue(2, author);
-            stmt.AddValue(3, reason);
+            stmt.SetInt64(0, guid.GetCounter());
+            stmt.SetInt64(1, (long)durationSecs);
+            stmt.SetString(2, author);
+            stmt.SetString(3, reason);
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
 
@@ -1802,7 +1802,7 @@ namespace Game
                 guid = pBanned.GetGUID();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
-            stmt.AddValue(0, guid.GetCounter());
+            stmt.SetInt64(0, guid.GetCounter());
             DB.Characters.Execute(stmt);
             return true;
         }
@@ -1974,7 +1974,7 @@ namespace Game
         public void UpdateRealmCharCount(int accountId)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_COUNT);
-            stmt.AddValue(0, accountId);
+            stmt.SetInt32(0, accountId);
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(UpdateRealmCharCount));
         }
 
@@ -1986,9 +1986,9 @@ namespace Game
                 uint charCount = result.Read<uint>(1);
 
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
-                stmt.AddValue(0, charCount);
-                stmt.AddValue(1, Id);
-                stmt.AddValue(2, _realm.Id.Index);
+                stmt.SetUInt32(0, charCount);
+                stmt.SetUInt32(1, Id);
+                stmt.SetInt32(2, _realm.Id.Index);
                 DB.Login.DirectExecute(stmt);
             }
         }
@@ -2219,8 +2219,8 @@ namespace Game
         public void ResetEventSeasonalQuests(ushort event_id, long eventStartTime)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_SEASONAL_BY_EVENT);
-            stmt.AddValue(0, event_id);
-            stmt.AddValue(1, eventStartTime);
+            stmt.SetUInt16(0, event_id);
+            stmt.SetInt64(1, eventStartTime);
             DB.Characters.Execute(stmt);
 
             foreach (var session in m_sessions.Values)
@@ -2315,8 +2315,8 @@ namespace Game
             m_worldVariables[var] = value;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_WORLD_VARIABLE);
-            stmt.AddValue(0, var);
-            stmt.AddValue(1, value);
+            stmt.SetString(0, var);
+            stmt.SetInt32(1, value);
             DB.Characters.Execute(stmt);
         }
 
@@ -2431,8 +2431,8 @@ namespace Game
 
             // Search for characters that have war mode enabled and played during the last week
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_WAR_MODE_TUNING);
-            stmt.AddValue(0, (uint)PlayerFlags.WarModeDesired);
-            stmt.AddValue(1, (uint)PlayerFlags.WarModeDesired);
+            stmt.SetUInt32(0, (uint)PlayerFlags.WarModeDesired);
+            stmt.SetUInt32(1, (uint)PlayerFlags.WarModeDesired);
 
             SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())

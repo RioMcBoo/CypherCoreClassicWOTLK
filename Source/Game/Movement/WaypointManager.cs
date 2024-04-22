@@ -131,7 +131,7 @@ namespace Game
         {
             // waypoint_path
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_BY_PATHID);
-            stmt.AddValue(0, pathId);
+            stmt.SetInt32(0, pathId);
             {
                 SQLResult result = DB.World.Query(stmt);
             
@@ -149,7 +149,7 @@ namespace Game
             }
             // waypoint_path_data
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_NODE_BY_PATHID);
-            stmt.AddValue(0, pathId);
+            stmt.SetInt32(0, pathId);
             {
                 SQLResult result = DB.World.Query(stmt);
             
@@ -210,25 +210,25 @@ namespace Game
         public void MoveNode(WaypointPath path, WaypointNode node, Position pos)
         {
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_PATH_NODE_POSITION);
-            stmt.AddValue(0, pos.GetPositionX());
-            stmt.AddValue(1, pos.GetPositionY());
-            stmt.AddValue(2, pos.GetPositionZ());
-            stmt.AddValue(3, pos.GetOrientation());
-            stmt.AddValue(4, path.Id);
-            stmt.AddValue(5, node.Id);
+            stmt.SetFloat(0, pos.GetPositionX());
+            stmt.SetFloat(1, pos.GetPositionY());
+            stmt.SetFloat(2, pos.GetPositionZ());
+            stmt.SetFloat(3, pos.GetOrientation());
+            stmt.SetInt32(4, path.Id);
+            stmt.SetInt32(5, node.Id);
             DB.World.Execute(stmt);
         }
 
         public void DeleteNode(WaypointPath path, WaypointNode node)
         {
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_WAYPOINT_PATH_NODE);
-            stmt.AddValue(0, path.Id);
-            stmt.AddValue(1, node.Id);
+            stmt.SetInt32(0, path.Id);
+            stmt.SetInt32(1, node.Id);
             DB.World.Execute(stmt);
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_PATH_NODE);
-            stmt.AddValue(0, path.Id);
-            stmt.AddValue(1, node.Id);
+            stmt.SetInt32(0, path.Id);
+            stmt.SetInt32(1, node.Id);
             DB.World.Execute(stmt);
         }
 

@@ -897,7 +897,7 @@ namespace Game.Chat
                 }
 
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
-                stmt.AddValue(0, ip);
+                stmt.SetString(0, ip);
                 SQLResult result = DB.Login.Query(stmt);
                 return LookupPlayerSearchCommand(result, limit, handler);
             }
@@ -906,7 +906,7 @@ namespace Game.Chat
             static bool HandleLookupPlayerAccountCommand(CommandHandler handler, string account, int limit = -1)
             {
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME);
-                stmt.AddValue(0, account);
+                stmt.SetString(0, account);
                 SQLResult result = DB.Login.Query(stmt);
                 return LookupPlayerSearchCommand(result, limit, handler);
             }
@@ -915,7 +915,7 @@ namespace Game.Chat
             static bool HandleLookupPlayerEmailCommand(CommandHandler handler, string email, int limit = -1)
             {
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_EMAIL);
-                stmt.AddValue(0, email);
+                stmt.SetString(0, email);
                 SQLResult result = DB.Login.Query(stmt);
                 return LookupPlayerSearchCommand(result, limit, handler);
             }
@@ -941,7 +941,7 @@ namespace Game.Chat
                     string accountName = result.Read<string>(1);
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_GUID_NAME_BY_ACC);
-                    stmt.AddValue(0, accountId);
+                    stmt.SetUInt32(0, accountId);
                     SQLResult result2 = DB.Characters.Query(stmt);
 
                     if (!result2.IsEmpty())

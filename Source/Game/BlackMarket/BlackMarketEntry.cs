@@ -130,11 +130,11 @@ namespace Game.BlackMarket
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_BLACKMARKET_AUCTIONS);
 
-            stmt.AddValue(0, _marketId);
-            stmt.AddValue(1, _currentBid);
-            stmt.AddValue(2, GetExpirationTime());
-            stmt.AddValue(3, _numBids);
-            stmt.AddValue(4, _bidder);
+            stmt.SetInt32(0, _marketId);
+            stmt.SetInt64(1, _currentBid);
+            stmt.SetInt64(2, GetExpirationTime());
+            stmt.SetInt32(3, _numBids);
+            stmt.SetInt64(4, _bidder);
 
             trans.Append(stmt);
         }
@@ -142,7 +142,7 @@ namespace Game.BlackMarket
         public void DeleteFromDB(SQLTransaction trans)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_BLACKMARKET_AUCTIONS);
-            stmt.AddValue(0, _marketId);
+            stmt.SetInt32(0, _marketId);
             trans.Append(stmt);
         }
 
@@ -178,11 +178,11 @@ namespace Game.BlackMarket
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_BLACKMARKET_AUCTIONS);
 
-            stmt.AddValue(0, _currentBid);
-            stmt.AddValue(1, GetExpirationTime());
-            stmt.AddValue(2, _numBids);
-            stmt.AddValue(3, _bidder);
-            stmt.AddValue(4, _marketId);
+            stmt.SetInt64(0, _currentBid);
+            stmt.SetInt64(1, GetExpirationTime());
+            stmt.SetInt32(2, _numBids);
+            stmt.SetInt64(3, _bidder);
+            stmt.SetInt32(4, _marketId);
 
             trans.Append(stmt);
 

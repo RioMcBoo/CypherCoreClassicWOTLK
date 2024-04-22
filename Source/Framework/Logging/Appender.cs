@@ -125,11 +125,11 @@ class DBAppender : Appender
             return;
 
         PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_LOG);
-        stmt.AddValue(0, Time.DateTimeToUnixTime(message.mtime));
-        stmt.AddValue(1, realmId);
-        stmt.AddValue(2, message.type.ToString());
-        stmt.AddValue(3, (byte)message.level);
-        stmt.AddValue(4, message.text);
+        stmt.SetInt64(0, Time.DateTimeToUnixTime(message.mtime));
+        stmt.SetInt32(1, realmId);
+        stmt.SetString(2, message.type.ToString());
+        stmt.SetUInt8(3, (byte)message.level);
+        stmt.SetString(4, message.text);
         DB.Login.Execute(stmt);
     }
 

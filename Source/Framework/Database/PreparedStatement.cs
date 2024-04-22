@@ -16,67 +16,67 @@ namespace Framework.Database
             CommandText = commandText;
         }
 
-        public void AddValue(int index, sbyte value)
+        public void SetInt8(int index, sbyte value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, byte value)
+        public void SetUInt8(int index, byte value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, short value)
+        public void SetInt16(int index, short value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, ushort value)
+        public void SetUInt16(int index, ushort value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, int value)
+        public void SetInt32(int index, int value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, uint value)
+        public void SetUInt32(int index, uint value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, long value)
+        public void SetInt64(int index, long value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, ulong value)
+        public void SetUInt64(int index, ulong value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, float value)
+        public void SetFloat(int index, float value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, byte[] value)
+        public void SetBytes(int index, byte[] value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, string value)
+        public void SetString(int index, string value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddValue(int index, bool value)
+        public void SetBool(int index, bool value)
         {
             Parameters.Add(index, value);
         }
 
-        public void AddNull(int index)
+        public void SetNull(int index)
         {
             Parameters.Add(index, null);
         }

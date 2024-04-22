@@ -85,8 +85,8 @@ namespace Game
                 return;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_BUG_REPORT);
-            stmt.AddValue(0, bugReport.Text);
-            stmt.AddValue(1, bugReport.DiagInfo);
+            stmt.SetString(0, bugReport.Text);
+            stmt.SetString(1, bugReport.DiagInfo);
             DB.Characters.Execute(stmt);
         }
 

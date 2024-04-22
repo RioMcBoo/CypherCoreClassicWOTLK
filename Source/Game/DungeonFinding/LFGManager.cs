@@ -80,13 +80,13 @@ namespace Game.DungeonFinding
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_LFG_DATA);
-            stmt.AddValue(0, db_guid);
+            stmt.SetInt32(0, db_guid);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_LFG_DATA);
-            stmt.AddValue(0, db_guid);
-            stmt.AddValue(1, GetDungeon(guid));
-            stmt.AddValue(2, (uint)GetState(guid));
+            stmt.SetInt32(0, db_guid);
+            stmt.SetInt32(1, GetDungeon(guid));
+            stmt.SetUInt32(2, (uint)GetState(guid));
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);

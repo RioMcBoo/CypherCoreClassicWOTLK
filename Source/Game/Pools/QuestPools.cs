@@ -40,14 +40,14 @@ namespace Game
         public static void SaveToDB(QuestPool pool, SQLTransaction trans)
         {
             PreparedStatement delStmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_POOL_QUEST_SAVE);
-            delStmt.AddValue(0, pool.poolId);
+            delStmt.SetInt32(0, pool.poolId);
             trans.Append(delStmt);
 
             foreach (uint questId in pool.activeQuests)
             {
                 PreparedStatement insStmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_POOL_QUEST_SAVE);
-                insStmt.AddValue(0, pool.poolId);
-                insStmt.AddValue(1, questId);
+                insStmt.SetInt32(0, pool.poolId);
+                insStmt.SetUInt32(1, questId);
                 trans.Append(insStmt);
             }
         }
@@ -137,7 +137,7 @@ namespace Game
                     foreach (uint poolId in unknownPoolIds)
                     {
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_POOL_QUEST_SAVE);
-                        stmt.AddValue(0, poolId);
+                        stmt.SetUInt32(0, poolId);
                         trans0.Append(stmt);
                     }
                     DB.Characters.CommitTransaction(trans0);

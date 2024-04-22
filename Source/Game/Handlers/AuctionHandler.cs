@@ -398,18 +398,18 @@ namespace Game
             {
                 // place bid
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_AUCTION_BID);
-                stmt.AddValue(0, auction.Bidder.GetCounter());
-                stmt.AddValue(1, auction.BidAmount);
-                stmt.AddValue(2, (byte)auction.ServerFlags);
-                stmt.AddValue(3, auction.Id);
+                stmt.SetInt64(0, auction.Bidder.GetCounter());
+                stmt.SetInt64(1, auction.BidAmount);
+                stmt.SetUInt8(2, (byte)auction.ServerFlags);
+                stmt.SetInt32(3, auction.Id);
                 trans.Append(stmt);
 
                 auction.BidderHistory.Add(player.GetGUID());
                 if (auction.BidderHistory.Contains(player.GetGUID()))
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_AUCTION_BIDDER);
-                    stmt.AddValue(0, auction.Id);
-                    stmt.AddValue(1, player.GetGUID().GetCounter());
+                    stmt.SetInt32(0, auction.Id);
+                    stmt.SetInt64(1, player.GetGUID().GetCounter());
                     trans.Append(stmt);
                 }
 
@@ -531,7 +531,7 @@ namespace Game
         void HandleAuctionRequestFavoriteList(AuctionRequestFavoriteList requestFavoriteList)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_FAVORITE_AUCTIONS);
-            stmt.AddValue(0, _player.GetGUID().GetCounter());
+            stmt.SetInt64(0, _player.GetGUID().GetCounter());
             GetQueryProcessor().AddCallback(DB.Characters.AsyncQuery(stmt)).WithCallback(favoriteAuctionResult =>
             {
                 AuctionFavoriteList favoriteItems = new();
@@ -926,19 +926,19 @@ namespace Game
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_FAVORITE_AUCTION);
-            stmt.AddValue(0, _player.GetGUID().GetCounter());
-            stmt.AddValue(1, setFavoriteItem.Item.Order);
+            stmt.SetInt64(0, _player.GetGUID().GetCounter());
+            stmt.SetInt32(1, setFavoriteItem.Item.Order);
             trans.Append(stmt);
 
             if (!setFavoriteItem.IsNotFavorite)
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_FAVORITE_AUCTION);
-                stmt.AddValue(0, _player.GetGUID().GetCounter());
-                stmt.AddValue(1, setFavoriteItem.Item.Order);
-                stmt.AddValue(2, setFavoriteItem.Item.ItemID);
-                stmt.AddValue(3, setFavoriteItem.Item.ItemLevel);
-                stmt.AddValue(4, setFavoriteItem.Item.BattlePetSpeciesID);
-                stmt.AddValue(5, setFavoriteItem.Item.SuffixItemNameDescriptionID);
+                stmt.SetInt64(0, _player.GetGUID().GetCounter());
+                stmt.SetInt32(1, setFavoriteItem.Item.Order);
+                stmt.SetInt32(2, setFavoriteItem.Item.ItemID);
+                stmt.SetInt32(3, setFavoriteItem.Item.ItemLevel);
+                stmt.SetInt32(4, setFavoriteItem.Item.BattlePetSpeciesID);
+                stmt.SetInt32(5, setFavoriteItem.Item.SuffixItemNameDescriptionID);
                 trans.Append(stmt);
             }
 

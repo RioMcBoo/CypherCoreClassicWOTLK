@@ -106,8 +106,8 @@ namespace Game.Mails
                     item.SaveToDB(trans);                      // item not in inventory and can be save standalone
                     // owner in data will set at mail receive and item extracting
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
-                    stmt.AddValue(0, receiver_guid);
-                    stmt.AddValue(1, item.GetGUID().GetCounter());
+                    stmt.SetInt64(0, receiver_guid);
+                    stmt.SetInt64(1, item.GetGUID().GetCounter());
                     trans.Append(stmt);
                 }
             }
@@ -153,28 +153,28 @@ namespace Game.Mails
             // Add to DB
             byte index = 0;
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_MAIL);
-            stmt.AddValue(index, mailId);
-            stmt.AddValue(++index, (byte)sender.GetMailMessageType());
-            stmt.AddValue(++index, (sbyte)sender.GetStationery());
-            stmt.AddValue(++index, GetMailTemplateId());
-            stmt.AddValue(++index, sender.GetSenderId());
-            stmt.AddValue(++index, receiver.GetPlayerGUIDLow());
-            stmt.AddValue(++index, GetSubject());
-            stmt.AddValue(++index, GetBody());
-            stmt.AddValue(++index, !m_items.Empty());
-            stmt.AddValue(++index, expire_time);
-            stmt.AddValue(++index, deliver_time);
-            stmt.AddValue(++index, m_money);
-            stmt.AddValue(++index, m_COD);
-            stmt.AddValue(++index, (byte)checkMask);
+            stmt.SetInt64(index, mailId);
+            stmt.SetUInt8(++index, (byte)sender.GetMailMessageType());
+            stmt.SetInt8(++index, (sbyte)sender.GetStationery());
+            stmt.SetInt32(++index, GetMailTemplateId());
+            stmt.SetInt64(++index, sender.GetSenderId());
+            stmt.SetInt64(++index, receiver.GetPlayerGUIDLow());
+            stmt.SetString(++index, GetSubject());
+            stmt.SetString(++index, GetBody());
+            stmt.SetBool(++index, !m_items.Empty());
+            stmt.SetInt64(++index, expire_time);
+            stmt.SetInt64(++index, deliver_time);
+            stmt.SetInt64(++index, m_money);
+            stmt.SetInt64(++index, m_COD);
+            stmt.SetUInt8(++index, (byte)checkMask);
             trans.Append(stmt);
 
             foreach (var item in m_items.Values)
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_MAIL_ITEM);
-                stmt.AddValue(0, mailId);
-                stmt.AddValue(1, item.GetGUID().GetCounter());
-                stmt.AddValue(2, receiver.GetPlayerGUIDLow());
+                stmt.SetInt64(0, mailId);
+                stmt.SetInt64(1, item.GetGUID().GetCounter());
+                stmt.SetInt64(2, receiver.GetPlayerGUIDLow());
                 trans.Append(stmt);
             }
 

@@ -101,7 +101,7 @@ namespace Game.Chat
                 }
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
-                stmt.AddValue(0, newName);
+                stmt.SetString(0, newName);
                 {
                     SQLResult result = DB.Characters.Query(stmt);
                 
@@ -114,7 +114,7 @@ namespace Game.Chat
 
                 // Remove declined name from db
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_DECLINED_NAME);
-                stmt.AddValue(0, player.GetGUID().GetCounter());
+                stmt.SetInt64(0, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
 
                 Player target = player.GetConnectedPlayer();
@@ -128,8 +128,8 @@ namespace Game.Chat
                 else
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_NAME_BY_GUID);
-                    stmt.AddValue(0, newName);
-                    stmt.AddValue(1, player.GetGUID().GetCounter());
+                    stmt.SetString(0, newName);
+                    stmt.SetInt64(1, player.GetGUID().GetCounter());
                     DB.Characters.Execute(stmt);
                 }
 
@@ -163,8 +163,8 @@ namespace Game.Chat
                     handler.SendSysMessage(CypherStrings.RenamePlayerGuid, handler.PlayerLink(player.GetName()), player.GetGUID().ToString());
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                    stmt.AddValue(0, (ushort)AtLoginFlags.Rename);
-                    stmt.AddValue(1, player.GetGUID().GetCounter());
+                    stmt.SetUInt16(0, (ushort)AtLoginFlags.Rename);
+                    stmt.SetInt64(1, player.GetGUID().GetCounter());
                     DB.Characters.Execute(stmt);
                 }
             }
@@ -209,8 +209,8 @@ namespace Game.Chat
             {
                 // Update level and reset XP, everything else will be updated at login
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_LEVEL);
-                stmt.AddValue(0, (byte)newlevel);
-                stmt.AddValue(1, player.GetGUID().GetCounter());
+                stmt.SetUInt8(0, (byte)newlevel);
+                stmt.SetInt64(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
             }
 
@@ -238,8 +238,8 @@ namespace Game.Chat
             {
                 handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, handler.PlayerLink(player.GetName()), player.GetGUID().GetCounter());
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
-                stmt.AddValue(1, player.GetGUID().GetCounter());
+                stmt.SetUInt16(0, (ushort)AtLoginFlags.Customize);
+                stmt.SetInt64(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
             }
 
@@ -282,8 +282,8 @@ namespace Game.Chat
                 onlinePlayer.GetSession().KickPlayer("HandleCharacterChangeAccountCommand GM Command transferring character to another account");
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ACCOUNT_BY_GUID);
-            stmt.AddValue(0, newAccount.GetID());
-            stmt.AddValue(1, player.GetGUID().GetCounter());
+            stmt.SetInt32(0, newAccount.GetID());
+            stmt.SetInt64(1, player.GetGUID().GetCounter());
             DB.Characters.DirectExecute(stmt);
 
             Global.WorldMgr.UpdateRealmCharCount(oldAccountId);
@@ -324,8 +324,8 @@ namespace Game.Chat
             {
                 handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, handler.PlayerLink(player.GetName()), player.GetGUID().GetCounter());
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                stmt.AddValue(0, (ushort)AtLoginFlags.ChangeFaction);
-                stmt.AddValue(1, player.GetGUID().GetCounter());
+                stmt.SetUInt16(0, (ushort)AtLoginFlags.ChangeFaction);
+                stmt.SetInt64(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
             }
 
@@ -350,8 +350,8 @@ namespace Game.Chat
             {
                 handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, handler.PlayerLink(player.GetName()), player.GetGUID().GetCounter());
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                stmt.AddValue(0, (ushort)AtLoginFlags.ChangeRace);
-                stmt.AddValue(1, player.GetGUID().GetCounter());
+                stmt.SetUInt16(0, (ushort)AtLoginFlags.ChangeRace);
+                stmt.SetInt64(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
             }
 
@@ -549,7 +549,7 @@ namespace Game.Chat
                             return false;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_GUID);
-                        stmt.AddValue(0, guid);                        
+                        stmt.SetUInt64(0, guid);                        
                     }
                     // search by name
                     else
@@ -558,7 +558,7 @@ namespace Game.Chat
                             return false;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_NAME);
-                        stmt.AddValue(0, searchString);
+                        stmt.SetString(0, searchString);
                     }
                 }
                 else
@@ -639,9 +639,9 @@ namespace Game.Chat
                 }
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_RESTORE_DELETE_INFO);
-                stmt.AddValue(0, delInfo.name);
-                stmt.AddValue(1, delInfo.accountId);
-                stmt.AddValue(2, delInfo.guid.GetCounter());
+                stmt.SetString(0, delInfo.name);
+                stmt.SetInt32(1, delInfo.accountId);
+                stmt.SetInt64(2, delInfo.guid.GetCounter());
                 DB.Characters.Execute(stmt);
 
                 Global.CharacterCacheStorage.UpdateCharacterInfoDeleted(delInfo.guid, false, delInfo.name);
@@ -695,8 +695,8 @@ namespace Game.Chat
             {
                 // Update level and reset XP, everything else will be updated at login
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_LEVEL);
-                stmt.AddValue(0, newlevel);
-                stmt.AddValue(1, player.GetGUID().GetCounter());
+                stmt.SetInt32(0, newlevel);
+                stmt.SetInt64(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
             }
             

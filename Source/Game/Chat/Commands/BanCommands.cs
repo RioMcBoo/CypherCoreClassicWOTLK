@@ -193,7 +193,7 @@ namespace Game.Chat.Commands
                 targetGuid = target.GetGUID();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANINFO);
-            stmt.AddValue(0, targetGuid.GetCounter());
+            stmt.SetInt64(0, targetGuid.GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
@@ -292,7 +292,7 @@ namespace Game.Chat.Commands
             else
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_FILTER);
-                stmt.AddValue(0, filter);
+                stmt.SetString(0, filter);
                 {
                     SQLResult result = DB.Login.Query(stmt);
                 
@@ -314,7 +314,7 @@ namespace Game.Chat.Commands
                 return false;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUID_BY_NAME_FILTER);
-            stmt.AddValue(0, filter);
+            stmt.SetString(0, filter);
             {
                 SQLResult result = DB.Characters.Query(stmt);
             
@@ -333,7 +333,7 @@ namespace Game.Chat.Commands
                     do
                     {
                         PreparedStatement stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANNED_NAME);
-                        stmt2.AddValue(0, result.Read<ulong>(0));
+                        stmt2.SetUInt64(0, result.Read<ulong>(0));
                         {
                             SQLResult banResult = DB.Characters.Query(stmt2);
                         
@@ -356,7 +356,7 @@ namespace Game.Chat.Commands
                         string char_name = result.Read<string>(1);
 
                         PreparedStatement stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANINFO_LIST);
-                        stmt2.AddValue(0, result.Read<ulong>(0));
+                        stmt2.SetUInt64(0, result.Read<ulong>(0));
                         SQLResult banInfo = DB.Characters.Query(stmt2);
                         if (!banInfo.IsEmpty())
                         {
@@ -407,7 +407,7 @@ namespace Game.Chat.Commands
             else
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_BANNED_BY_IP);
-                stmt.AddValue(0, filter);
+                stmt.SetString(0, filter);
             }
 
             SQLResult result = DB.Login.Query(stmt);

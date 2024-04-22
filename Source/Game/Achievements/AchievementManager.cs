@@ -214,11 +214,11 @@ namespace Game.Achievements
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENT);
-            stmt.AddValue(0, guid.GetCounter());
+            stmt.SetInt64(0, guid.GetCounter());
             DB.Characters.Execute(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENT_PROGRESS);
-            stmt.AddValue(0, guid.GetCounter());
+            stmt.SetInt64(0, guid.GetCounter());
             DB.Characters.Execute(stmt);
 
             DB.Characters.CommitTransaction(trans);
@@ -276,7 +276,7 @@ namespace Game.Achievements
                         Log.outError(LogFilter.Achievement, "Non-existing achievement criteria {0} data removed from table `character_achievement_progress`.", id);
 
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEV_PROGRESS_CRITERIA);
-                        stmt.AddValue(0, id);
+                        stmt.SetInt32(0, id);
                         DB.Characters.Execute(stmt);
                         continue;
                     }
@@ -306,14 +306,14 @@ namespace Game.Achievements
                         continue;
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENT_BY_ACHIEVEMENT);
-                    stmt.AddValue(0, pair.Key);
-                    stmt.AddValue(1, _owner.GetGUID().GetCounter());
+                    stmt.SetInt32(0, pair.Key);
+                    stmt.SetInt64(1, _owner.GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_ACHIEVEMENT);
-                    stmt.AddValue(0, _owner.GetGUID().GetCounter());
-                    stmt.AddValue(1, pair.Key);
-                    stmt.AddValue(2, pair.Value.Date);
+                    stmt.SetInt64(0, _owner.GetGUID().GetCounter());
+                    stmt.SetInt32(1, pair.Key);
+                    stmt.SetInt64(2, pair.Value.Date);
                     trans.Append(stmt);
 
                     pair.Value.Changed = false;
@@ -328,17 +328,17 @@ namespace Game.Achievements
                         continue;
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENT_PROGRESS_BY_CRITERIA);
-                    stmt.AddValue(0, _owner.GetGUID().GetCounter());
-                    stmt.AddValue(1, pair.Key);
+                    stmt.SetInt64(0, _owner.GetGUID().GetCounter());
+                    stmt.SetInt32(1, pair.Key);
                     trans.Append(stmt);
 
                     if (pair.Value.Counter != 0)
                     {
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_ACHIEVEMENT_PROGRESS);
-                        stmt.AddValue(0, _owner.GetGUID().GetCounter());
-                        stmt.AddValue(1, pair.Key);
-                        stmt.AddValue(2, pair.Value.Counter);
-                        stmt.AddValue(3, pair.Value.Date);
+                        stmt.SetInt64(0, _owner.GetGUID().GetCounter());
+                        stmt.SetInt32(1, pair.Key);
+                        stmt.SetInt64(2, pair.Value.Counter);
+                        stmt.SetInt64(3, pair.Value.Date);
                         trans.Append(stmt);
                     }
 
@@ -717,11 +717,11 @@ namespace Game.Achievements
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_GUILD_ACHIEVEMENTS);
-            stmt.AddValue(0, guid.GetCounter());
+            stmt.SetInt64(0, guid.GetCounter());
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_GUILD_ACHIEVEMENT_CRITERIA);
-            stmt.AddValue(0, guid.GetCounter());
+            stmt.SetInt64(0, guid.GetCounter());
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);
@@ -779,7 +779,7 @@ namespace Game.Achievements
                         Log.outError(LogFilter.Achievement, "Non-existing achievement criteria {0} data removed from table `guild_achievement_progress`.", id);
 
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEV_PROGRESS_CRITERIA_GUILD);
-                        stmt.AddValue(0, id);
+                        stmt.SetInt32(0, id);
                         DB.Characters.Execute(stmt);
                         continue;
                     }
@@ -812,18 +812,18 @@ namespace Game.Achievements
                     continue;
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_ACHIEVEMENT);
-                stmt.AddValue(0, _owner.GetId());
-                stmt.AddValue(1, pair.Key);
+                stmt.SetInt64(0, _owner.GetId());
+                stmt.SetInt32(1, pair.Key);
                 trans.Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_ACHIEVEMENT);
-                stmt.AddValue(0, _owner.GetId());
-                stmt.AddValue(1, pair.Key);
-                stmt.AddValue(2, pair.Value.Date);
+                stmt.SetInt64(0, _owner.GetId());
+                stmt.SetInt32(1, pair.Key);
+                stmt.SetInt64(2, pair.Value.Date);
                 foreach (var guid in pair.Value.CompletingPlayers)
                     guidstr.AppendFormat("{0},", guid.GetCounter());
 
-                stmt.AddValue(3, guidstr.ToString());
+                stmt.SetString(3, guidstr.ToString());
                 trans.Append(stmt);
 
                 guidstr.Clear();
@@ -835,16 +835,16 @@ namespace Game.Achievements
                     continue;
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_ACHIEVEMENT_CRITERIA);
-                stmt.AddValue(0, _owner.GetId());
-                stmt.AddValue(1, pair.Key);
+                stmt.SetInt64(0, _owner.GetId());
+                stmt.SetInt32(1, pair.Key);
                 trans.Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_ACHIEVEMENT_CRITERIA);
-                stmt.AddValue(0, _owner.GetId());
-                stmt.AddValue(1, pair.Key);
-                stmt.AddValue(2, pair.Value.Counter);
-                stmt.AddValue(3, pair.Value.Date);
-                stmt.AddValue(4, pair.Value.PlayerGUID.GetCounter());
+                stmt.SetInt64(0, _owner.GetId());
+                stmt.SetInt32(1, pair.Key);
+                stmt.SetInt64(2, pair.Value.Counter);
+                stmt.SetInt64(3, pair.Value.Date);
+                stmt.SetInt64(4, pair.Value.PlayerGUID.GetCounter());
                 trans.Append(stmt);
             }
         }
@@ -1214,7 +1214,7 @@ namespace Game.Achievements
                     Log.outError(LogFilter.Achievement, "Non-existing achievement {0} data has been removed from the table `character_achievement`.", achievementId);
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEVMENT);
-                    stmt.AddValue(0, achievementId);
+                    stmt.SetInt32(0, achievementId);
                     DB.Characters.Execute(stmt);
 
                     continue;

@@ -131,7 +131,7 @@ namespace Game.Networking
         bool CheckAccessLevel(string user)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS);
-            stmt.AddValue(0, user);
+            stmt.SetString(0, user);
             SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
             {

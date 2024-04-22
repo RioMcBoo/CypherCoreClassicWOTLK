@@ -1069,27 +1069,27 @@ namespace Game.Entities
             // Update in DB
             byte index = 0;
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_GAMEOBJECT);
-            stmt.AddValue(0, m_spawnId);
+            stmt.SetInt64(0, m_spawnId);
             DB.World.Execute(stmt);
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_GAMEOBJECT);
-            stmt.AddValue(index++, m_spawnId);
-            stmt.AddValue(index++, GetEntry());
-            stmt.AddValue(index++, mapid);
-            stmt.AddValue(index++, data.SpawnDifficulties.Empty() ? "" : string.Join(",", data.SpawnDifficulties));
-            stmt.AddValue(index++, data.PhaseId);
-            stmt.AddValue(index++, data.PhaseGroup);
-            stmt.AddValue(index++, GetPositionX());
-            stmt.AddValue(index++, GetPositionY());
-            stmt.AddValue(index++, GetPositionZ());
-            stmt.AddValue(index++, GetOrientation());
-            stmt.AddValue(index++, m_localRotation.X);
-            stmt.AddValue(index++, m_localRotation.Y);
-            stmt.AddValue(index++, m_localRotation.Z);
-            stmt.AddValue(index++, m_localRotation.W);
-            stmt.AddValue(index++, m_respawnDelayTime);
-            stmt.AddValue(index++, GetGoAnimProgress());
-            stmt.AddValue(index++, (byte)GetGoState());
+            stmt.SetInt64(index++, m_spawnId);
+            stmt.SetInt32(index++, GetEntry());
+            stmt.SetInt32(index++, mapid);
+            stmt.SetString(index++, data.SpawnDifficulties.Empty() ? "" : string.Join(",", data.SpawnDifficulties));
+            stmt.SetInt32(index++, data.PhaseId);
+            stmt.SetInt32(index++, data.PhaseGroup);
+            stmt.SetFloat(index++, GetPositionX());
+            stmt.SetFloat(index++, GetPositionY());
+            stmt.SetFloat(index++, GetPositionZ());
+            stmt.SetFloat(index++, GetOrientation());
+            stmt.SetFloat(index++, m_localRotation.X);
+            stmt.SetFloat(index++, m_localRotation.Y);
+            stmt.SetFloat(index++, m_localRotation.Z);
+            stmt.SetFloat(index++, m_localRotation.W);
+            stmt.SetUInt32(index++, m_respawnDelayTime);
+            stmt.SetUInt8(index++, GetGoAnimProgress());
+            stmt.SetUInt8(index++, (byte)GetGoState());
             DB.World.Execute(stmt);
         }
 
@@ -1190,35 +1190,35 @@ namespace Game.Entities
 
             // ... and the database
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_GAMEOBJECT);
-            stmt.AddValue(0, spawnId);
+            stmt.SetInt64(0, spawnId);
             trans.Append(stmt);
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_EVENT_GAMEOBJECT);
-            stmt.AddValue(0, spawnId);
+            stmt.SetInt64(0, spawnId);
             trans.Append(stmt);
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
-            stmt.AddValue(0, spawnId);
-            stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToGO);
+            stmt.SetInt64(0, spawnId);
+            stmt.SetUInt32(1, (uint)CreatureLinkedRespawnType.GOToGO);
             trans.Append(stmt);
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
-            stmt.AddValue(0, spawnId);
-            stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToCreature);
+            stmt.SetInt64(0, spawnId);
+            stmt.SetUInt32(1, (uint)CreatureLinkedRespawnType.GOToCreature);
             trans.Append(stmt);
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
-            stmt.AddValue(0, spawnId);
-            stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToGO);
+            stmt.SetInt64(0, spawnId);
+            stmt.SetUInt32(1, (uint)CreatureLinkedRespawnType.GOToGO);
             trans.Append(stmt);
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
-            stmt.AddValue(0, spawnId);
-            stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToGO);
+            stmt.SetInt64(0, spawnId);
+            stmt.SetUInt32(1, (uint)CreatureLinkedRespawnType.CreatureToGO);
             trans.Append(stmt);
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_GAMEOBJECT_ADDON);
-            stmt.AddValue(0, spawnId);
+            stmt.SetInt64(0, spawnId);
             trans.Append(stmt);
 
             DB.World.CommitTransaction(trans);

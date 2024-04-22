@@ -96,12 +96,12 @@ namespace Game.Chat
                     banlist += iter.GetRawValue().ToHexString() + ' ';
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHANNEL);
-                stmt.AddValue(0, _channelName);
-                stmt.AddValue(1, (uint)_channelTeam);
-                stmt.AddValue(2, _announceEnabled);
-                stmt.AddValue(3, _ownershipEnabled);
-                stmt.AddValue(4, _channelPassword);
-                stmt.AddValue(5, banlist);
+                stmt.SetString(0, _channelName);
+                stmt.SetUInt32(1, (uint)_channelTeam);
+                stmt.SetBool(2, _announceEnabled);
+                stmt.SetBool(3, _ownershipEnabled);
+                stmt.SetString(4, _channelPassword);
+                stmt.SetString(5, banlist);
                 DB.Characters.Execute(stmt);
             }
             else if (_nextActivityUpdateTime <= now)
@@ -109,8 +109,8 @@ namespace Game.Chat
                 if (!_playersStore.Empty())
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHANNEL_USAGE);
-                    stmt.AddValue(0, _channelName);
-                    stmt.AddValue(1, (uint)_channelTeam);
+                    stmt.SetString(0, _channelName);
+                    stmt.SetUInt32(1, (uint)_channelTeam);
                     DB.Characters.Execute(stmt);
                 }
             }

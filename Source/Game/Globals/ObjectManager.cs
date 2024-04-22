@@ -1075,8 +1075,8 @@ namespace Game
             {
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_GRAVEYARD_ZONE);
 
-                stmt.AddValue(0, id);
-                stmt.AddValue(1, zoneId);
+                stmt.SetInt32(0, id);
+                stmt.SetInt32(1, zoneId);
 
                 DB.World.Execute(stmt);
 
@@ -1084,21 +1084,21 @@ namespace Game
                 if (team != 0)
                 {
                     PreparedStatement conditionStmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_CONDITION);
-                    conditionStmt.AddValue(0, (uint)ConditionSourceType.Graveyard); // SourceTypeOrReferenceId
-                    conditionStmt.AddValue(1, zoneId); // SourceGroup
-                    conditionStmt.AddValue(2, id); // SourceEntry
-                    conditionStmt.AddValue(3, 0); // SourceId
-                    conditionStmt.AddValue(4, 0); // ElseGroup
-                    conditionStmt.AddValue(5, (uint)ConditionTypes.Team); // ConditionTypeOrReference
-                    conditionStmt.AddValue(6, 0); // ConditionTarget
-                    conditionStmt.AddValue(7, (uint)team); // ConditionValue1
-                    conditionStmt.AddValue(8, 0); // ConditionValue2
-                    conditionStmt.AddValue(9, 0); // ConditionValue3
-                    conditionStmt.AddValue(10, 0); // NegativeCondition
-                    conditionStmt.AddValue(11, 0); // ErrorType
-                    conditionStmt.AddValue(12, 0); // ErrorTextId
-                    conditionStmt.AddValue(13, ""); // ScriptName
-                    conditionStmt.AddValue(14, ""); // Comment
+                    conditionStmt.SetUInt32(0, (uint)ConditionSourceType.Graveyard); // SourceTypeOrReferenceId
+                    conditionStmt.SetInt32(1, zoneId); // SourceGroup
+                    conditionStmt.SetInt32(2, id); // SourceEntry
+                    conditionStmt.SetInt32(3, 0); // SourceId
+                    conditionStmt.SetInt32(4, 0); // ElseGroup
+                    conditionStmt.SetUInt32(5, (uint)ConditionTypes.Team); // ConditionTypeOrReference
+                    conditionStmt.SetInt32(6, 0); // ConditionTarget
+                    conditionStmt.SetUInt32(7, (uint)team); // ConditionValue1
+                    conditionStmt.SetInt32(8, 0); // ConditionValue2
+                    conditionStmt.SetInt32(9, 0); // ConditionValue3
+                    conditionStmt.SetInt32(10, 0); // NegativeCondition
+                    conditionStmt.SetInt32(11, 0); // ErrorType
+                    conditionStmt.SetInt32(12, 0); // ErrorTextId
+                    conditionStmt.SetString(13, ""); // ScriptName
+                    conditionStmt.SetString(14, ""); // Comment
 
                     DB.World.Execute(conditionStmt);
 
@@ -1810,8 +1810,8 @@ namespace Game
             var time = Time.GetMSTime();
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEMPLATE);
-            stmt.AddValue(0, 0);
-            stmt.AddValue(1, 1);
+            stmt.SetInt32(0, 0);
+            stmt.SetInt32(1, 1);
 
             {
                 SQLResult result = DB.World.Query(stmt);
@@ -3615,7 +3615,7 @@ namespace Game
         {
             // find all items from the reference vendor
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_NPC_VENDOR_REF);
-            stmt.AddValue(0, item);
+            stmt.SetInt32(0, item);
             SQLResult result = DB.World.Query(stmt);
 
             if (result.IsEmpty())
@@ -3927,9 +3927,9 @@ namespace Game
                     Global.TerrainMgr.GetZoneAndAreaId(phaseShift, out int zoneId, out int areaId, data.MapId, data.SpawnPoint);
 
                     PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_ZONE_AREA_DATA);
-                    stmt.AddValue(0, zoneId);
-                    stmt.AddValue(1, areaId);
-                    stmt.AddValue(2, guid);
+                    stmt.SetInt32(0, zoneId);
+                    stmt.SetInt32(1, areaId);
+                    stmt.SetInt64(2, guid);
 
                     DB.World.Execute(stmt);
                 }
@@ -4090,8 +4090,8 @@ namespace Game
             {
                 linkedRespawnStorage.Remove(guid);
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
-                stmt.AddValue(0, guidLow);
-                stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToCreature);
+                stmt.SetInt64(0, guidLow);
+                stmt.SetUInt32(1, (uint)CreatureLinkedRespawnType.CreatureToCreature);
                 DB.World.Execute(stmt);
                 return true;
             }
@@ -4121,9 +4121,9 @@ namespace Game
 
             linkedRespawnStorage[guid] = linkedGuid;
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.REP_LINKED_RESPAWN);
-            stmt.AddValue(0, guidLow);
-            stmt.AddValue(1, linkedGuidLow);
-            stmt.AddValue(2, (uint)CreatureLinkedRespawnType.CreatureToCreature);
+            stmt.SetInt64(0, guidLow);
+            stmt.SetInt64(1, linkedGuidLow);
+            stmt.SetUInt32(2, (uint)CreatureLinkedRespawnType.CreatureToCreature);
             DB.World.Execute(stmt);
             return true;
         }
@@ -4778,9 +4778,9 @@ namespace Game
                     Global.TerrainMgr.GetZoneAndAreaId(phaseShift, out int zoneId, out int areaId, data.MapId, data.SpawnPoint);
 
                     PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_GAMEOBJECT_ZONE_AREA_DATA);
-                    stmt.AddValue(0, zoneId);
-                    stmt.AddValue(1, areaId);
-                    stmt.AddValue(2, guid);
+                    stmt.SetInt32(0, zoneId);
+                    stmt.SetInt32(1, areaId);
+                    stmt.SetInt64(2, guid);
                     DB.World.Execute(stmt);
                 }
 
@@ -5401,12 +5401,12 @@ namespace Game
             {
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_NPC_VENDOR);
 
-                stmt.AddValue(0, entry);
-                stmt.AddValue(1, vItem.item);
-                stmt.AddValue(2, vItem.maxcount);
-                stmt.AddValue(3, vItem.incrtime);
-                stmt.AddValue(4, vItem.ExtendedCost);
-                stmt.AddValue(5, (byte)vItem.Type);
+                stmt.SetInt32(0, entry);
+                stmt.SetInt32(1, vItem.item);
+                stmt.SetInt32(2, vItem.maxcount);
+                stmt.SetUInt32(3, vItem.incrtime);
+                stmt.SetInt32(4, vItem.ExtendedCost);
+                stmt.SetUInt8(5, (byte)vItem.Type);
 
                 DB.World.Execute(stmt);
             }
@@ -5425,9 +5425,9 @@ namespace Game
             {
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_NPC_VENDOR);
 
-                stmt.AddValue(0, entry);
-                stmt.AddValue(1, item);
-                stmt.AddValue(2, (byte)type);
+                stmt.SetInt32(0, entry);
+                stmt.SetInt32(1, item);
+                stmt.SetUInt8(2, (byte)type);
 
                 DB.World.Execute(stmt);
             }
@@ -6058,13 +6058,13 @@ namespace Game
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_GAME_TELE);
 
-            stmt.AddValue(0, newId);
-            stmt.AddValue(1, tele.posX);
-            stmt.AddValue(2, tele.posY);
-            stmt.AddValue(3, tele.posZ);
-            stmt.AddValue(4, tele.orientation);
-            stmt.AddValue(5, tele.mapId);
-            stmt.AddValue(6, tele.name);
+            stmt.SetInt32(0, newId);
+            stmt.SetFloat(1, tele.posX);
+            stmt.SetFloat(2, tele.posY);
+            stmt.SetFloat(3, tele.posZ);
+            stmt.SetFloat(4, tele.orientation);
+            stmt.SetInt32(5, tele.mapId);
+            stmt.SetString(6, tele.name);
 
             DB.World.Execute(stmt);
 
@@ -6082,7 +6082,7 @@ namespace Game
                 if (pair.Value.nameLow == name)
                 {
                     PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_GAME_TELE);
-                    stmt.AddValue(0, pair.Value.name);
+                    stmt.SetString(0, pair.Value.name);
                     DB.World.Execute(stmt);
 
                     keyToDelete = pair.Key;
@@ -10012,11 +10012,11 @@ namespace Game
             if (!serverUp)
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_EMPTY_EXPIRED_MAIL);
-                stmt.AddValue(0, curTime);
+                stmt.SetInt64(0, curTime);
                 DB.Characters.Execute(stmt);
             }
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_EXPIRED_MAIL);
-            stmt.AddValue(0, curTime);
+            stmt.SetInt64(0, curTime);
 
             {
                 SQLResult result = DB.Characters.Query(stmt);            
@@ -10029,7 +10029,7 @@ namespace Game
 
                 MultiMap<long, MailItemInfo> itemsCache = new();
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_EXPIRED_MAIL_ITEMS);
-                stmt.AddValue(0, curTime);
+                stmt.SetInt64(0, curTime);
                 {
                     SQLResult items = DB.Characters.Query(stmt);
                 
@@ -10081,31 +10081,31 @@ namespace Game
                                 Item.DeleteFromDB(null, itemInfo.item_guid);
 
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
-                            stmt.AddValue(0, m.messageID);
+                            stmt.SetInt64(0, m.messageID);
                             DB.Characters.Execute(stmt);
                         }
                         else
                         {
                             // Mail will be returned
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_MAIL_RETURNED);
-                            stmt.AddValue(0, m.receiver);
-                            stmt.AddValue(1, m.sender);
-                            stmt.AddValue(2, curTime + 30 * Time.Day);
-                            stmt.AddValue(3, curTime);
-                            stmt.AddValue(4, (byte)MailCheckFlags.Returned);
-                            stmt.AddValue(5, m.messageID);
+                            stmt.SetInt64(0, m.receiver);
+                            stmt.SetInt64(1, m.sender);
+                            stmt.SetInt64(2, curTime + 30 * Time.Day);
+                            stmt.SetInt64(3, curTime);
+                            stmt.SetUInt8(4, (byte)MailCheckFlags.Returned);
+                            stmt.SetInt64(5, m.messageID);
                             DB.Characters.Execute(stmt);
                             foreach (var itemInfo in m.items)
                             {
                                 // Update receiver in mail items for its proper delivery, and in instance_item for avoid lost item at sender delete
                                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_MAIL_ITEM_RECEIVER);
-                                stmt.AddValue(0, m.sender);
-                                stmt.AddValue(1, itemInfo.item_guid);
+                                stmt.SetInt64(0, m.sender);
+                                stmt.SetInt64(1, itemInfo.item_guid);
                                 DB.Characters.Execute(stmt);
 
                                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
-                                stmt.AddValue(0, m.sender);
-                                stmt.AddValue(1, itemInfo.item_guid);
+                                stmt.SetInt64(0, m.sender);
+                                stmt.SetInt64(1, itemInfo.item_guid);
                                 DB.Characters.Execute(stmt);
                             }
                             ++returnedCount;
@@ -10114,7 +10114,7 @@ namespace Game
                     }
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
-                    stmt.AddValue(0, m.messageID);
+                    stmt.SetInt64(0, m.messageID);
                     DB.Characters.Execute(stmt);
                     ++deletedCount;
                 }

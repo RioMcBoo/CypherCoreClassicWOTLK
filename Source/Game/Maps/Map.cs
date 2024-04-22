@@ -2052,10 +2052,10 @@ namespace Game.Maps
                 return;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_RESPAWN);
-            stmt.AddValue(0, (ushort)type);
-            stmt.AddValue(1, spawnId);
-            stmt.AddValue(2, GetId());
-            stmt.AddValue(3, GetInstanceId());
+            stmt.SetUInt16(0, (ushort)type);
+            stmt.SetInt64(1, spawnId);
+            stmt.SetInt32(2, GetId());
+            stmt.SetInt32(3, GetInstanceId());
             DB.Characters.ExecuteOrAppend(dbTrans, stmt);
         }
 
@@ -2713,11 +2713,11 @@ namespace Game.Maps
                 return;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_RESPAWN);
-            stmt.AddValue(0, (ushort)info.type);
-            stmt.AddValue(1, info.spawnId);
-            stmt.AddValue(2, info.respawnTime);
-            stmt.AddValue(3, GetId());
-            stmt.AddValue(4, GetInstanceId());
+            stmt.SetUInt16(0, (ushort)info.type);
+            stmt.SetInt64(1, info.spawnId);
+            stmt.SetInt64(2, info.respawnTime);
+            stmt.SetInt32(3, GetId());
+            stmt.SetInt32(4, GetInstanceId());
             DB.Characters.ExecuteOrAppend(dbTrans, stmt);
         }
 
@@ -2727,8 +2727,8 @@ namespace Game.Maps
                 return;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_RESPAWNS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
+            stmt.SetInt32(0, GetId());
+            stmt.SetInt32(1, GetInstanceId());
             SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
@@ -2765,8 +2765,8 @@ namespace Game.Maps
                 return;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_RESPAWNS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
+            stmt.SetInt32(0, GetId());
+            stmt.SetInt32(1, GetInstanceId());
             DB.Characters.Execute(stmt);
         }
 
@@ -2789,8 +2789,8 @@ namespace Game.Maps
         public void LoadCorpseData()
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CORPSES);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
+            stmt.SetInt32(0, GetId());
+            stmt.SetInt32(1, GetInstanceId());
 
             //        0     1     2     3            4      5          6          7     8      9       10     11        12    13          14          15
             // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, race, class, gender, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
@@ -2804,8 +2804,8 @@ namespace Game.Maps
             MultiMap<long, ChrCustomizationChoice> customizations = new();
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CORPSE_PHASES);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
+            stmt.SetInt32(0, GetId());
+            stmt.SetInt32(1, GetInstanceId());
 
             //        0          1
             // SELECT OwnerGuid, PhaseId FROM corpse_phases cp LEFT JOIN corpse c ON cp.OwnerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?
@@ -2826,8 +2826,8 @@ namespace Game.Maps
             }
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CORPSE_CUSTOMIZATIONS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
+            stmt.SetInt32(0, GetId());
+            stmt.SetInt32(1, GetInstanceId());
 
             //        0             1                            2
             // SELECT cc.ownerGuid, cc.chrCustomizationOptionID, cc.chrCustomizationChoiceID FROM corpse_customizations cc LEFT JOIN corpse c ON cc.ownerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?
@@ -2876,8 +2876,8 @@ namespace Game.Maps
         {
             // DELETE cp, c FROM corpse_phases cp INNER JOIN corpse c ON cp.OwnerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CORPSES_FROM_MAP);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
+            stmt.SetInt32(0, GetId());
+            stmt.SetInt32(1, GetInstanceId());
             DB.Characters.Execute(stmt);
         }
 

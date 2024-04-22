@@ -221,7 +221,7 @@ namespace Game
                         {
                             Log.outError(LogFilter.Misc, $"Auction {auction.Id} has wrong auctionHouseId {auctionHouseId}");
                             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION);
-                            stmt.AddValue(0, auction.Id);
+                            stmt.SetInt32(0, auction.Id);
                             trans.Append(stmt);
                             continue;
                         }
@@ -230,7 +230,7 @@ namespace Game
                         {
                             Log.outError(LogFilter.Misc, $"Auction {auction.Id} has no items");
                             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION);
-                            stmt.AddValue(0, auction.Id);
+                            stmt.SetInt32(0, auction.Id);
                             trans.Append(stmt);
                             continue;
                         }
@@ -349,8 +349,8 @@ namespace Game
                         auction.EndTime = GameTime.GetSystemTime();
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_AUCTION_EXPIRATION);
-                    stmt.AddValue(0, (uint)GameTime.GetGameTime());
-                    stmt.AddValue(1, pendingAuction.AuctionId);
+                    stmt.SetUInt32(0, (uint)GameTime.GetGameTime());
+                    stmt.SetInt32(1, pendingAuction.AuctionId);
                     trans.Append(stmt);
                     ++auctionIndex;
                 } while (auctionIndex < playerPendingAuctions.Auctions.Count);
@@ -389,8 +389,8 @@ namespace Game
                             auction.EndTime = GameTime.GetSystemTime();
 
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_AUCTION_EXPIRATION);
-                        stmt.AddValue(0, (uint)GameTime.GetGameTime());
-                        stmt.AddValue(1, pendingAuction.AuctionId);
+                        stmt.SetUInt32(0, (uint)GameTime.GetGameTime());
+                        stmt.SetInt32(1, pendingAuction.AuctionId);
                         trans.Append(stmt);
                     }
                     DB.Characters.CommitTransaction(trans);
@@ -642,24 +642,24 @@ namespace Game
             if (trans != null)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_AUCTION);
-                stmt.AddValue(0, auction.Id);
-                stmt.AddValue(1, _auctionHouse.Id);
-                stmt.AddValue(2, auction.Owner.GetCounter());
-                stmt.AddValue(3, ObjectGuid.Empty.GetCounter());
-                stmt.AddValue(4, auction.MinBid);
-                stmt.AddValue(5, auction.BuyoutOrUnitPrice);
-                stmt.AddValue(6, auction.Deposit);
-                stmt.AddValue(7, auction.BidAmount);
-                stmt.AddValue(8, Time.DateTimeToUnixTime(auction.StartTime));
-                stmt.AddValue(9, Time.DateTimeToUnixTime(auction.EndTime));
-                stmt.AddValue(10, (byte)auction.ServerFlags);
+                stmt.SetInt32(0, auction.Id);
+                stmt.SetInt32(1, _auctionHouse.Id);
+                stmt.SetInt64(2, auction.Owner.GetCounter());
+                stmt.SetInt64(3, ObjectGuid.Empty.GetCounter());
+                stmt.SetInt64(4, auction.MinBid);
+                stmt.SetInt64(5, auction.BuyoutOrUnitPrice);
+                stmt.SetInt64(6, auction.Deposit);
+                stmt.SetInt64(7, auction.BidAmount);
+                stmt.SetInt64(8, Time.DateTimeToUnixTime(auction.StartTime));
+                stmt.SetInt64(9, Time.DateTimeToUnixTime(auction.EndTime));
+                stmt.SetUInt8(10, (byte)auction.ServerFlags);
                 trans.Append(stmt);
 
                 foreach (Item item in auction.Items)
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_AUCTION_ITEMS);
-                    stmt.AddValue(0, auction.Id);
-                    stmt.AddValue(1, item.GetGUID().GetCounter());
+                    stmt.SetInt32(0, auction.Id);
+                    stmt.SetInt64(1, item.GetGUID().GetCounter());
                     trans.Append(stmt);
                 }
             }
@@ -750,7 +750,7 @@ namespace Game
                 _buckets.Remove(bucket.Key);
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION);
-            stmt.AddValue(0, auction.Id);
+            stmt.SetInt32(0, auction.Id);
             trans.Append(stmt);
 
             foreach (Item item in auction.Items)
@@ -1342,7 +1342,7 @@ namespace Game
                 for (int i = 0; i < batch.ItemsCount; ++i)
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION_ITEMS_BY_ITEM);
-                    stmt.AddValue(0, batch.Items[i].GetGUID().GetCounter());
+                    stmt.SetInt64(0, batch.Items[i].GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     batch.Items[i].SetOwnerGUID(player.GetGUID());
@@ -1446,8 +1446,8 @@ namespace Game
                 foreach (Item item in auction.Items)
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
-                    stmt.AddValue(0, auction.Bidder.GetCounter());
-                    stmt.AddValue(1, item.GetGUID().GetCounter());
+                    stmt.SetInt64(0, auction.Bidder.GetCounter());
+                    stmt.SetInt64(1, item.GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     mail.AddItem(item);

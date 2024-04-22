@@ -159,7 +159,7 @@ namespace Game
             {
                 CalendarInvite invite = eventInvites[i];
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CALENDAR_INVITE);
-                stmt.AddValue(0, invite.InviteId);
+                stmt.SetInt64(0, invite.InviteId);
                 trans.Append(stmt);
 
                 // guild events only? check invite status here?
@@ -174,7 +174,7 @@ namespace Game
             _invites.Remove(calendarEvent.EventId);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CALENDAR_EVENT);
-            stmt.AddValue(0, calendarEvent.EventId);
+            stmt.SetInt64(0, calendarEvent.EventId);
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
 
@@ -203,7 +203,7 @@ namespace Game
 
             SQLTransaction trans = new();
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CALENDAR_INVITE);
-            stmt.AddValue(0, calendarInvite.InviteId);
+            stmt.SetInt64(0, calendarInvite.InviteId);
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
 
@@ -224,15 +224,15 @@ namespace Game
         {
             SQLTransaction trans = new();
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_CALENDAR_EVENT);
-            stmt.AddValue(0, calendarEvent.EventId);
-            stmt.AddValue(1, calendarEvent.OwnerGuid.GetCounter());
-            stmt.AddValue(2, calendarEvent.Title);
-            stmt.AddValue(3, calendarEvent.Description);
-            stmt.AddValue(4, (byte)calendarEvent.EventType);
-            stmt.AddValue(5, calendarEvent.TextureId);
-            stmt.AddValue(6, calendarEvent.Date);
-            stmt.AddValue(7, (uint)calendarEvent.Flags);
-            stmt.AddValue(8, calendarEvent.LockDate);
+            stmt.SetInt64(0, calendarEvent.EventId);
+            stmt.SetInt64(1, calendarEvent.OwnerGuid.GetCounter());
+            stmt.SetString(2, calendarEvent.Title);
+            stmt.SetString(3, calendarEvent.Description);
+            stmt.SetUInt8(4, (byte)calendarEvent.EventType);
+            stmt.SetInt32(5, calendarEvent.TextureId);
+            stmt.SetInt64(6, calendarEvent.Date);
+            stmt.SetUInt32(7, (uint)calendarEvent.Flags);
+            stmt.SetInt64(8, calendarEvent.LockDate);
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
         }
@@ -240,14 +240,14 @@ namespace Game
         public void UpdateInvite(CalendarInvite invite, SQLTransaction trans = null)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_CALENDAR_INVITE);
-            stmt.AddValue(0, invite.InviteId);
-            stmt.AddValue(1, invite.EventId);
-            stmt.AddValue(2, invite.InviteeGuid.GetCounter());
-            stmt.AddValue(3, invite.SenderGuid.GetCounter());
-            stmt.AddValue(4, (byte)invite.Status);
-            stmt.AddValue(5, invite.ResponseTime);
-            stmt.AddValue(6, (byte)invite.Rank);
-            stmt.AddValue(7, invite.Note);
+            stmt.SetInt64(0, invite.InviteId);
+            stmt.SetInt64(1, invite.EventId);
+            stmt.SetInt64(2, invite.InviteeGuid.GetCounter());
+            stmt.SetInt64(3, invite.SenderGuid.GetCounter());
+            stmt.SetUInt8(4, (byte)invite.Status);
+            stmt.SetInt64(5, invite.ResponseTime);
+            stmt.SetUInt8(6, (byte)invite.Rank);
+            stmt.SetString(7, invite.Note);
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 

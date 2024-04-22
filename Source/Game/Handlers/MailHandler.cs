@@ -296,7 +296,7 @@ namespace Game
             else
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_COUNT);
-                stmt.AddValue(0, receiverGuid.GetCounter());
+                stmt.SetInt64(0, receiverGuid.GetCounter());
 
                 GetQueryProcessor().AddCallback(DB.Characters.AsyncQuery(stmt).WithChainingCallback((queryCallback, mailCountResult) =>
                 {
@@ -368,11 +368,11 @@ namespace Game
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
-            stmt.AddValue(0, returnToSender.MailID);
+            stmt.SetInt64(0, returnToSender.MailID);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
-            stmt.AddValue(0, returnToSender.MailID);
+            stmt.SetInt64(0, returnToSender.MailID);
             trans.Append(stmt);
 
             player.RemoveMail(returnToSender.MailID);

@@ -391,10 +391,10 @@ namespace Game.Entities
             {
                 GetSession().m_muteTime = 0;
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
-                stmt.AddValue(0, 0); // Set the mute time to 0
-                stmt.AddValue(1, "");
-                stmt.AddValue(2, "");
-                stmt.AddValue(3, GetSession().GetAccountId());
+                stmt.SetInt32(0, 0); // Set the mute time to 0
+                stmt.SetString(1, "");
+                stmt.SetString(2, "");
+                stmt.SetInt32(3, GetSession().GetAccountId());
                 DB.Login.Execute(stmt);
             }
 
@@ -908,17 +908,17 @@ namespace Game.Entities
             SQLTransaction trans = new SQLTransaction();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
-            stmt.AddValue(0, (short)dstPetSlot);
-            stmt.AddValue(1, GetGUID().GetCounter());
-            stmt.AddValue(2, srcPet.PetNumber);
+            stmt.SetInt16(0, (short)dstPetSlot);
+            stmt.SetInt64(1, GetGUID().GetCounter());
+            stmt.SetInt32(2, srcPet.PetNumber);
             trans.Append(stmt);
 
             if (dstPet != null)
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
-                stmt.AddValue(0, (short)srcPetSlot);
-                stmt.AddValue(1, GetGUID().GetCounter());
-                stmt.AddValue(2, dstPet.PetNumber);
+                stmt.SetInt16(0, (short)srcPetSlot);
+                stmt.SetInt64(1, GetGUID().GetCounter());
+                stmt.SetInt32(2, dstPet.PetNumber);
                 trans.Append(stmt);
             }
 
@@ -3139,13 +3139,13 @@ namespace Game.Entities
 
             // update sql homebind
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_PLAYER_HOMEBIND);
-            stmt.AddValue(0, homebind.GetMapId());
-            stmt.AddValue(1, homebindAreaId);
-            stmt.AddValue(2, homebind.GetPositionX());
-            stmt.AddValue(3, homebind.GetPositionY());
-            stmt.AddValue(4, homebind.GetPositionZ());
-            stmt.AddValue(5, homebind.GetOrientation());
-            stmt.AddValue(6, GetGUID().GetCounter());
+            stmt.SetInt32(0, homebind.GetMapId());
+            stmt.SetInt32(1, homebindAreaId);
+            stmt.SetFloat(2, homebind.GetPositionX());
+            stmt.SetFloat(3, homebind.GetPositionY());
+            stmt.SetFloat(4, homebind.GetPositionZ());
+            stmt.SetFloat(5, homebind.GetOrientation());
+            stmt.SetInt64(6, GetGUID().GetCounter());
             DB.Characters.Execute(stmt);
         }
         public void SetBindPoint(ObjectGuid guid)
@@ -4292,8 +4292,8 @@ namespace Game.Entities
         {
             Corpse.DeleteFromDB(guid, trans);
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-            stmt.AddValue(0, (ushort)AtLoginFlags.Resurrect);
-            stmt.AddValue(1, guid.GetCounter());
+            stmt.SetUInt16(0, (ushort)AtLoginFlags.Resurrect);
+            stmt.SetInt64(1, guid.GetCounter());
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 
@@ -5147,8 +5147,8 @@ namespace Game.Entities
             if (persist)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_REM_AT_LOGIN_FLAG);
-                stmt.AddValue(0, (ushort)flags);
-                stmt.AddValue(1, GetGUID().GetCounter());
+                stmt.SetUInt16(0, (ushort)flags);
+                stmt.SetInt64(1, GetGUID().GetCounter());
 
                 DB.Characters.Execute(stmt);
             }

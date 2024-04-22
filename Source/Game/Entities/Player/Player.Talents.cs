@@ -400,9 +400,9 @@ namespace Game.Entities
 
             // load them asynchronously
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            stmt.AddValue(1, GetActiveTalentGroup());
-            stmt.AddValue(2, traitConfigId);
+            stmt.SetInt64(0, GetGUID().GetCounter());
+            stmt.SetUInt8(1, GetActiveTalentGroup());
+            stmt.SetUInt32(2, traitConfigId);
 
             var myGuid = GetGUID();
 
@@ -1012,8 +1012,8 @@ namespace Game.Entities
                 SetUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.SharedActionBars);
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_ACTION_BY_TRAIT_CONFIG);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                stmt.AddValue(1, traitConfigId);
+                stmt.SetInt64(0, GetGUID().GetCounter());
+                stmt.SetInt32(1, traitConfigId);
                 DB.Characters.Execute(stmt);
 
                 if (isLastSelectedSavedConfig)

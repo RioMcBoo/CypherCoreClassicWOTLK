@@ -198,11 +198,11 @@ namespace Game.Chat
 
             // update position in DB
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_POSITION);
-            stmt.AddValue(0, player.GetPositionX());
-            stmt.AddValue(1, player.GetPositionY());
-            stmt.AddValue(2, player.GetPositionZ());
-            stmt.AddValue(3, player.GetOrientation());
-            stmt.AddValue(4, lowguid);
+            stmt.SetFloat(0, player.GetPositionX());
+            stmt.SetFloat(1, player.GetPositionY());
+            stmt.SetFloat(2, player.GetPositionZ());
+            stmt.SetFloat(3, player.GetOrientation());
+            stmt.SetInt64(4, lowguid);
 
             DB.World.Execute(stmt);
 
@@ -223,14 +223,14 @@ namespace Game.Chat
             Player player = handler.GetPlayer();
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_NEAREST);
-            stmt.AddValue(0, player.GetPositionX());
-            stmt.AddValue(1, player.GetPositionY());
-            stmt.AddValue(2, player.GetPositionZ());
-            stmt.AddValue(3, player.GetMapId());
-            stmt.AddValue(4, player.GetPositionX());
-            stmt.AddValue(5, player.GetPositionY());
-            stmt.AddValue(6, player.GetPositionZ());
-            stmt.AddValue(7, distance * distance);
+            stmt.SetFloat(0, player.GetPositionX());
+            stmt.SetFloat(1, player.GetPositionY());
+            stmt.SetFloat(2, player.GetPositionZ());
+            stmt.SetInt32(3, player.GetMapId());
+            stmt.SetFloat(4, player.GetPositionX());
+            stmt.SetFloat(5, player.GetPositionY());
+            stmt.SetFloat(6, player.GetPositionZ());
+            stmt.SetFloat(7, distance * distance);
             SQLResult result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
@@ -665,8 +665,8 @@ namespace Game.Chat
 
                 // Update movement type
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
-                stmt.AddValue(0, (byte)MovementGeneratorType.Waypoint);
-                stmt.AddValue(1, lowGuid);
+                stmt.SetUInt8(0, (byte)MovementGeneratorType.Waypoint);
+                stmt.SetInt64(1, lowGuid);
                 DB.World.Execute(stmt);
 
                 handler.SendSysMessage(CypherStrings.WaypointAdded);
@@ -702,11 +702,11 @@ namespace Game.Chat
                 creature.SearchFormation();
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_CREATURE_FORMATION);
-                stmt.AddValue(0, leaderGUID);
-                stmt.AddValue(1, lowguid);
-                stmt.AddValue(2, followAngle);
-                stmt.AddValue(3, followDist);
-                stmt.AddValue(4, groupAI);
+                stmt.SetInt64(0, leaderGUID);
+                stmt.SetInt64(1, lowguid);
+                stmt.SetFloat(2, followAngle);
+                stmt.SetFloat(3, followDist);
+                stmt.SetInt32(4, groupAI);
 
                 DB.World.Execute(stmt);
 
@@ -944,9 +944,9 @@ namespace Game.Chat
                 // ..and DB
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_FACTION);
 
-                stmt.AddValue(0, factionId);
-                stmt.AddValue(1, factionId);
-                stmt.AddValue(2, creature.GetEntry());
+                stmt.SetInt32(0, factionId);
+                stmt.SetInt32(1, factionId);
+                stmt.SetInt32(2, creature.GetEntry());
 
                 DB.World.Execute(stmt);
 
@@ -967,8 +967,8 @@ namespace Game.Chat
                 creature.ReplaceAllNpcFlags2(npcFlags2);
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_NPCFLAG);
-                stmt.AddValue(0, (ulong)npcFlags | ((ulong)npcFlags2 << 32));
-                stmt.AddValue(1, creature.GetEntry());
+                stmt.SetUInt64(0, (ulong)npcFlags | ((ulong)npcFlags2 << 32));
+                stmt.SetInt32(1, creature.GetEntry());
                 DB.World.Execute(stmt);
 
                 handler.SendSysMessage(CypherStrings.ValueSavedRejoin);
@@ -1222,9 +1222,9 @@ namespace Game.Chat
                 }
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_WANDER_DISTANCE);
-                stmt.AddValue(0, option);
-                stmt.AddValue(1, (byte)mtype);
-                stmt.AddValue(2, guidLow);
+                stmt.SetFloat(0, option);
+                stmt.SetUInt8(1, (byte)mtype);
+                stmt.SetInt64(2, guidLow);
 
                 DB.World.Execute(stmt);
 
@@ -1240,8 +1240,8 @@ namespace Game.Chat
                     return false;
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_SPAWN_TIME_SECS);
-                stmt.AddValue(0, spawnTime);
-                stmt.AddValue(1, creature.GetSpawnId());
+                stmt.SetUInt32(0, spawnTime);
+                stmt.SetInt64(1, creature.GetSpawnId());
                 DB.World.Execute(stmt);
 
                 creature.SetRespawnDelay(spawnTime);

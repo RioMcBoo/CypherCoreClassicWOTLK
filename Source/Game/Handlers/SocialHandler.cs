@@ -170,7 +170,7 @@ namespace Game
             }
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_WHOIS);
-            stmt.AddValue(0, player.GetSession().GetAccountId());
+            stmt.SetInt32(0, player.GetSession().GetAccountId());
 
             SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())

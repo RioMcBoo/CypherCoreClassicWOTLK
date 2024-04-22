@@ -973,8 +973,8 @@ namespace Game.Entities
                         ss.AppendFormat($"{guid} ");
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_BOP_TRADE);
-                    stmt.AddValue(0, item.GetGUID().GetCounter());
-                    stmt.AddValue(1, ss.ToString());
+                    stmt.SetInt64(0, item.GetGUID().GetCounter());
+                    stmt.SetString(1, ss.ToString());
                     DB.Characters.Execute(stmt);
                 }
 
@@ -4779,7 +4779,7 @@ namespace Game.Entities
                 if (pItem.IsWrapped())
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GIFT);
-                    stmt.AddValue(0, pItem.GetGUID().GetCounter());
+                    stmt.SetInt64(0, pItem.GetGUID().GetCounter());
                     DB.Characters.Execute(stmt);
                 }
 

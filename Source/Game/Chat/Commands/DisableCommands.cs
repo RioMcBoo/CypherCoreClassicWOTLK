@@ -103,8 +103,8 @@ namespace Game.Chat.Commands
                 }
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_DISABLES);
-                stmt.AddValue(0, entry);
-                stmt.AddValue(1, (byte)disableType);
+                stmt.SetInt32(0, entry);
+                stmt.SetUInt8(1, (byte)disableType);
 
                 SQLResult result = DB.World.Query(stmt);
 
@@ -115,10 +115,10 @@ namespace Game.Chat.Commands
                 }
 
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_DISABLES);
-                stmt.AddValue(0, entry);
-                stmt.AddValue(1, (byte)disableType);
-                stmt.AddValue(2, flags.GetValueOrDefault(0));
-                stmt.AddValue(3, disableComment);
+                stmt.SetInt32(0, entry);
+                stmt.SetUInt8(1, (byte)disableType);
+                stmt.SetUInt32(2, flags.GetValueOrDefault(0));
+                stmt.SetString(3, disableComment);
                 DB.World.Execute(stmt);
 
                 handler.SendSysMessage($"Add Disabled {disableType} (Id: {entry}) for reason {disableComment}");
@@ -180,8 +180,8 @@ namespace Game.Chat.Commands
             static bool HandleRemoveDisables(CommandHandler handler, DisableType disableType, int entry)
             {
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_DISABLES);
-                stmt.AddValue(0, entry);
-                stmt.AddValue(1, (byte)disableType);
+                stmt.SetInt32(0, entry);
+                stmt.SetUInt8(1, (byte)disableType);
 
                 SQLResult result = DB.World.Query(stmt);
 
@@ -192,8 +192,8 @@ namespace Game.Chat.Commands
                 }
 
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_DISABLES);
-                stmt.AddValue(0, entry);
-                stmt.AddValue(1, (byte)disableType);
+                stmt.SetInt32(0, entry);
+                stmt.SetUInt8(1, (byte)disableType);
                 DB.World.Execute(stmt);
 
                 handler.SendSysMessage($"Remove Disabled {disableType} (Id: {entry})");

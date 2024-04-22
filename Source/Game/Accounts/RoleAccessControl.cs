@@ -117,10 +117,10 @@ namespace Game.Accounts
         void SavePermission(RBACPermissions permission, bool granted, int realmId)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_RBAC_ACCOUNT_PERMISSION);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, (int)permission);
-            stmt.AddValue(2, granted);
-            stmt.AddValue(3, realmId);
+            stmt.SetInt32(0, GetId());
+            stmt.SetInt32(1, (int)permission);
+            stmt.SetBool(2, granted);
+            stmt.SetInt32(3, realmId);
             DB.Login.Execute(stmt);
         }
 
@@ -143,9 +143,9 @@ namespace Game.Accounts
                 Log.outDebug(LogFilter.Rbac, "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
                                GetId(), GetName(), permissionId, realmId);
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_RBAC_ACCOUNT_PERMISSION);
-                stmt.AddValue(0, GetId());
-                stmt.AddValue(1, (int)permissionId);
-                stmt.AddValue(2, realmId);
+                stmt.SetInt32(0, GetId());
+                stmt.SetInt32(1, (int)permissionId);
+                stmt.SetInt32(2, realmId);
                 DB.Login.Execute(stmt);
 
                 CalculateNewPermissions();
@@ -164,8 +164,8 @@ namespace Game.Accounts
             Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
             // Load account permissions (granted and denied) that affect current realm
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetRealmId());
+            stmt.SetInt32(0, GetId());
+            stmt.SetInt32(1, GetRealmId());
             SQLResult result = DB.Login.Query(stmt);
             LoadFromDBCallback(result);
         }
@@ -177,8 +177,8 @@ namespace Game.Accounts
             Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
             // Load account permissions (granted and denied) that affect current realm
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetRealmId());
+            stmt.SetInt32(0, GetId());
+            stmt.SetInt32(1, GetRealmId());
 
             return DB.Login.AsyncQuery(stmt);
         }

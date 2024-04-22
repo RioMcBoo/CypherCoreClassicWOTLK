@@ -239,8 +239,8 @@ namespace Game
                 return;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_WORLD_STATE);
-            stmt.AddValue(0, worldStateId);
-            stmt.AddValue(1, value);
+            stmt.SetInt32(0, worldStateId);
+            stmt.SetInt32(1, value);
             DB.Characters.Execute(stmt);
         }
 

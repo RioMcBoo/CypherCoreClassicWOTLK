@@ -97,30 +97,30 @@ namespace Game.Entities
 
             byte index = 0;
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CORPSE);
-            stmt.AddValue(index++, GetOwnerGUID().GetCounter());                            // guid
-            stmt.AddValue(index++, GetPositionX());                                         // posX
-            stmt.AddValue(index++, GetPositionY());                                         // posY
-            stmt.AddValue(index++, GetPositionZ());                                         // posZ
-            stmt.AddValue(index++, GetOrientation());                                       // orientation
-            stmt.AddValue(index++, GetMapId());                                             // mapId
-            stmt.AddValue(index++, m_corpseData.DisplayID);                           // displayId
-            stmt.AddValue(index++, items.ToString());                                       // itemCache
-            stmt.AddValue(index++, (byte)m_corpseData.RaceID);                              // race
-            stmt.AddValue(index++, (byte)m_corpseData.Class);                             // class
-            stmt.AddValue(index++, (byte)m_corpseData.Sex);                                 // gender
-            stmt.AddValue(index++, (uint)m_corpseData.Flags);                               // flags
-            stmt.AddValue(index++, (uint)m_corpseData.DynamicFlags);                        // dynFlags
-            stmt.AddValue(index++, (uint)m_time);                                           // time
-            stmt.AddValue(index++, (uint)GetCorpseType());                                  // corpseType
-            stmt.AddValue(index++, GetInstanceId());                                        // instanceId
+            stmt.SetInt64(index++, GetOwnerGUID().GetCounter());                            // guid
+            stmt.SetFloat(index++, GetPositionX());                                         // posX
+            stmt.SetFloat(index++, GetPositionY());                                         // posY
+            stmt.SetFloat(index++, GetPositionZ());                                         // posZ
+            stmt.SetFloat(index++, GetOrientation());                                       // orientation
+            stmt.SetInt32(index++, GetMapId());                                             // mapId
+            stmt.SetInt32(index++, m_corpseData.DisplayID);                           // displayId
+            stmt.SetString(index++, items.ToString());                                       // itemCache
+            stmt.SetUInt8(index++, (byte)m_corpseData.RaceID);                              // race
+            stmt.SetUInt8(index++, (byte)m_corpseData.Class);                             // class
+            stmt.SetUInt8(index++, (byte)m_corpseData.Sex);                                 // gender
+            stmt.SetUInt32(index++, (uint)m_corpseData.Flags);                               // flags
+            stmt.SetUInt32(index++, (uint)m_corpseData.DynamicFlags);                        // dynFlags
+            stmt.SetUInt32(index++, (uint)m_time);                                           // time
+            stmt.SetUInt32(index++, (uint)GetCorpseType());                                  // corpseType
+            stmt.SetInt32(index++, GetInstanceId());                                        // instanceId
             trans.Append(stmt);
 
             foreach (var phaseId in GetPhaseShift().GetPhases().Keys)
             {
                 index = 0;
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CORPSE_PHASES);
-                stmt.AddValue(index++, GetOwnerGUID().GetCounter());                        // OwnerGuid
-                stmt.AddValue(index++, phaseId);                                            // PhaseId
+                stmt.SetInt64(index++, GetOwnerGUID().GetCounter());                        // OwnerGuid
+                stmt.SetInt32(index++, phaseId);                                            // PhaseId
                 trans.Append(stmt);
             }
 
@@ -128,9 +128,9 @@ namespace Game.Entities
             {
                 index = 0;
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CORPSE_CUSTOMIZATIONS);
-                stmt.AddValue(index++, GetOwnerGUID().GetCounter());                        // OwnerGuid
-                stmt.AddValue(index++, customization.ChrCustomizationOptionID);
-                stmt.AddValue(index++, customization.ChrCustomizationChoiceID);
+                stmt.SetInt64(index++, GetOwnerGUID().GetCounter());                        // OwnerGuid
+                stmt.SetInt32(index++, customization.ChrCustomizationOptionID);
+                stmt.SetInt32(index++, customization.ChrCustomizationChoiceID);
                 trans.Append(stmt);
             }
 
@@ -145,15 +145,15 @@ namespace Game.Entities
         public static void DeleteFromDB(ObjectGuid ownerGuid, SQLTransaction trans)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CORPSE);
-            stmt.AddValue(0, ownerGuid.GetCounter());
+            stmt.SetInt64(0, ownerGuid.GetCounter());
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CORPSE_PHASES);
-            stmt.AddValue(0, ownerGuid.GetCounter());
+            stmt.SetInt64(0, ownerGuid.GetCounter());
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CORPSE_CUSTOMIZATIONS);
-            stmt.AddValue(0, ownerGuid.GetCounter());
+            stmt.SetInt64(0, ownerGuid.GetCounter());
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 

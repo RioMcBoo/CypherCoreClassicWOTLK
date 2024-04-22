@@ -49,23 +49,23 @@ namespace Game.Guilds
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_MEMBERS);
-            stmt.AddValue(0, m_id);
+            stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
             byte index = 0;
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD);
-            stmt.AddValue(index, m_id);
-            stmt.AddValue(++index, name);
-            stmt.AddValue(++index, m_leaderGuid.GetCounter());
-            stmt.AddValue(++index, m_info);
-            stmt.AddValue(++index, m_motd);
-            stmt.AddValue(++index, m_createdDate);
-            stmt.AddValue(++index, m_emblemInfo.GetStyle());
-            stmt.AddValue(++index, m_emblemInfo.GetColor());
-            stmt.AddValue(++index, m_emblemInfo.GetBorderStyle());
-            stmt.AddValue(++index, m_emblemInfo.GetBorderColor());
-            stmt.AddValue(++index, m_emblemInfo.GetBackgroundColor());
-            stmt.AddValue(++index, m_bankMoney);
+            stmt.SetInt64(index, m_id);
+            stmt.SetString(++index, name);
+            stmt.SetInt64(++index, m_leaderGuid.GetCounter());
+            stmt.SetString(++index, m_info);
+            stmt.SetString(++index, m_motd);
+            stmt.SetInt64(++index, m_createdDate);
+            stmt.SetInt32(++index, m_emblemInfo.GetStyle());
+            stmt.SetInt32(++index, m_emblemInfo.GetColor());
+            stmt.SetInt32(++index, m_emblemInfo.GetBorderStyle());
+            stmt.SetInt32(++index, m_emblemInfo.GetBorderColor());
+            stmt.SetInt32(++index, m_emblemInfo.GetBackgroundColor());
+            stmt.SetInt64(++index, m_bankMoney);
             trans.Append(stmt);
 
             _CreateDefaultGuildRanks(trans, pLeaderSession.GetSessionDbLocaleIndex()); // Create default ranks
@@ -98,34 +98,34 @@ namespace Game.Guilds
             }
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD);
-            stmt.AddValue(0, m_id);
+            stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_RANKS);
-            stmt.AddValue(0, m_id);
+            stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_TABS);
-            stmt.AddValue(0, m_id);
+            stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
             // Free bank tab used memory and delete items stored in them
             _DeleteBankItems(trans, true);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_ITEMS);
-            stmt.AddValue(0, m_id);
+            stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_RIGHTS);
-            stmt.AddValue(0, m_id);
+            stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_EVENTLOGS);
-            stmt.AddValue(0, m_id);
+            stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_EVENTLOGS);
-            stmt.AddValue(0, m_id);
+            stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);
@@ -184,8 +184,8 @@ namespace Game.Guilds
 
             m_name = name;
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_NAME);
-            stmt.AddValue(0, m_name);
-            stmt.AddValue(1, GetId());
+            stmt.SetString(0, m_name);
+            stmt.SetInt64(1, GetId());
             DB.Characters.Execute(stmt);
 
             GuildNameChanged guildNameChanged = new();
@@ -341,8 +341,8 @@ namespace Game.Guilds
                 Global.ScriptMgr.OnGuildMOTDChanged(this, motd);
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_MOTD);
-                stmt.AddValue(0, motd);
-                stmt.AddValue(1, m_id);
+                stmt.SetString(0, motd);
+                stmt.SetInt64(1, m_id);
                 DB.Characters.Execute(stmt);
 
                 SendEventMOTD(session, true);
@@ -362,8 +362,8 @@ namespace Game.Guilds
                 Global.ScriptMgr.OnGuildInfoChanged(this, info);
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_INFO);
-                stmt.AddValue(0, info);
-                stmt.AddValue(1, m_id);
+                stmt.SetString(0, info);
+                stmt.SetInt64(1, m_id);
                 DB.Characters.Execute(stmt);
             }
         }
@@ -805,14 +805,14 @@ namespace Game.Guilds
 
             // Delete bank rights for rank
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_RIGHTS_FOR_RANK);
-            stmt.AddValue(0, m_id);
-            stmt.AddValue(1, (byte)rankInfo.GetId());
+            stmt.SetInt64(0, m_id);
+            stmt.SetUInt8(1, (byte)rankInfo.GetId());
             trans.Append(stmt);
 
             // Delete rank
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_RANK);
-            stmt.AddValue(0, m_id);
-            stmt.AddValue(1, (byte)rankInfo.GetId());
+            stmt.SetInt64(0, m_id);
+            stmt.SetUInt8(1, (byte)rankInfo.GetId());
             trans.Append(stmt);
 
             m_ranks.Remove(rankInfo);
@@ -826,9 +826,9 @@ namespace Game.Guilds
                 otherRank.SetOrder(otherRank.GetOrder() - 1);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_ORDER);
-                stmt.AddValue(0, (byte)otherRank.GetOrder());
-                stmt.AddValue(1, (byte)otherRank.GetId());
-                stmt.AddValue(2, m_id);
+                stmt.SetUInt8(0, (byte)otherRank.GetOrder());
+                stmt.SetUInt8(1, (byte)otherRank.GetId());
+                stmt.SetInt64(2, m_id);
                 trans.Append(stmt);
             }
 
@@ -860,15 +860,15 @@ namespace Game.Guilds
             SQLTransaction trans = new SQLTransaction();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_ORDER);
-            stmt.AddValue(0, (byte)rankInfo.GetOrder());
-            stmt.AddValue(1, (byte)rankInfo.GetId());
-            stmt.AddValue(2, m_id);
+            stmt.SetUInt8(0, (byte)rankInfo.GetOrder());
+            stmt.SetUInt8(1, (byte)rankInfo.GetId());
+            stmt.SetInt64(2, m_id);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_ORDER);
-            stmt.AddValue(0, (byte)otherRankInfo.GetOrder());
-            stmt.AddValue(1, (byte)otherRankInfo.GetId());
-            stmt.AddValue(2, m_id);
+            stmt.SetUInt8(0, (byte)otherRankInfo.GetOrder());
+            stmt.SetUInt8(1, (byte)otherRankInfo.GetId());
+            stmt.SetInt64(2, m_id);
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);
@@ -1634,7 +1634,7 @@ namespace Game.Guilds
                 bool ok = false;
                 // Player must exist
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_DATA_FOR_GUILD);
-                stmt.AddValue(0, lowguid);
+                stmt.SetInt64(0, lowguid);
                 SQLResult result = DB.Characters.Query(stmt);
                 if (!result.IsEmpty())
                 {
@@ -1820,13 +1820,13 @@ namespace Game.Guilds
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_TAB);
-            stmt.AddValue(0, m_id);
-            stmt.AddValue(1, tabId);
+            stmt.SetInt64(0, m_id);
+            stmt.SetUInt8(1, tabId);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_BANK_TAB);
-            stmt.AddValue(0, m_id);
-            stmt.AddValue(1, tabId);
+            stmt.SetInt64(0, m_id);
+            stmt.SetUInt8(1, tabId);
             trans.Append(stmt);
 
             ++tabId;
@@ -1839,11 +1839,11 @@ namespace Game.Guilds
         void _CreateDefaultGuildRanks(SQLTransaction trans, Locale loc = Locale.enUS)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_RANKS);
-            stmt.AddValue(0, m_id);
+            stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_RIGHTS);
-            stmt.AddValue(0, m_id);
+            stmt.SetInt64(0, m_id);
             trans.Append(stmt);
 
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildMaster, loc), GuildRankRights.All);
@@ -1924,8 +1924,8 @@ namespace Game.Guilds
             }
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_BANK_MONEY);
-            stmt.AddValue(0, m_bankMoney);
-            stmt.AddValue(1, m_id);
+            stmt.SetInt64(0, m_bankMoney);
+            stmt.SetInt64(1, m_id);
             trans.Append(stmt);
             return true;
         }
@@ -1940,8 +1940,8 @@ namespace Game.Guilds
             leader.ChangeRank(trans, GuildRankId.GuildMaster);
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_LEADER);
-            stmt.AddValue(0, m_leaderGuid.GetCounter());
-            stmt.AddValue(1, m_id);
+            stmt.SetInt64(0, m_leaderGuid.GetCounter());
+            stmt.SetInt64(1, m_id);
             trans.Append(stmt);
 
             if (!isInTransaction)
@@ -2527,7 +2527,7 @@ namespace Game.Guilds
         void _DeleteMemberFromDB(SQLTransaction trans, long lowguid)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_MEMBER);
-            stmt.AddValue(0, lowguid);
+            stmt.SetInt64(0, lowguid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 
@@ -2638,8 +2638,8 @@ namespace Game.Guilds
                 m_publicNote = publicNote;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_MEMBER_PNOTE);
-                stmt.AddValue(0, publicNote);
-                stmt.AddValue(1, m_guid.GetCounter());
+                stmt.SetString(0, publicNote);
+                stmt.SetInt64(1, m_guid.GetCounter());
                 DB.Characters.Execute(stmt);
             }
 
@@ -2651,8 +2651,8 @@ namespace Game.Guilds
                 m_officerNote = officerNote;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_MEMBER_OFFNOTE);
-                stmt.AddValue(0, officerNote);
-                stmt.AddValue(1, m_guid.GetCounter());
+                stmt.SetString(0, officerNote);
+                stmt.SetInt64(1, m_guid.GetCounter());
                 DB.Characters.Execute(stmt);
             }
 
@@ -2666,19 +2666,19 @@ namespace Game.Guilds
                     player.SetGuildRank((byte)newRank);
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_MEMBER_RANK);
-                stmt.AddValue(0, (byte)newRank);
-                stmt.AddValue(1, m_guid.GetCounter());
+                stmt.SetUInt8(0, (byte)newRank);
+                stmt.SetInt64(1, m_guid.GetCounter());
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 
             public void SaveToDB(SQLTransaction trans)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_MEMBER);
-                stmt.AddValue(0, m_guildId);
-                stmt.AddValue(1, m_guid.GetCounter());
-                stmt.AddValue(2, (byte)m_rankId);
-                stmt.AddValue(3, m_publicNote);
-                stmt.AddValue(4, m_officerNote);
+                stmt.SetInt64(0, m_guildId);
+                stmt.SetInt64(1, m_guid.GetCounter());
+                stmt.SetUInt8(2, (byte)m_rankId);
+                stmt.SetString(3, m_publicNote);
+                stmt.SetString(4, m_officerNote);
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 
@@ -2752,11 +2752,11 @@ namespace Game.Guilds
                 m_bankWithdraw[tabId] += amount;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW_TABS);
-                stmt.AddValue(0, m_guid.GetCounter());
+                stmt.SetInt64(0, m_guid.GetCounter());
                 for (byte i = 0; i < GuildConst.MaxBankTabs;)
                 {
                     int withdraw = m_bankWithdraw[i++];
-                    stmt.AddValue(i, withdraw);
+                    stmt.SetInt32(i, withdraw);
                 }
 
                 DB.Characters.ExecuteOrAppend(trans, stmt);
@@ -2768,8 +2768,8 @@ namespace Game.Guilds
                 m_bankWithdrawMoney += amount;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW_MONEY);
-                stmt.AddValue(0, m_guid.GetCounter());
-                stmt.AddValue(1, m_bankWithdrawMoney);
+                stmt.SetInt64(0, m_guid.GetCounter());
+                stmt.SetInt64(1, m_bankWithdrawMoney);
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 
@@ -2909,19 +2909,19 @@ namespace Game.Guilds
             public override void SaveToDB(SQLTransaction trans)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_EVENTLOG);
-                stmt.AddValue(0, m_guildId);
-                stmt.AddValue(1, m_guid);
+                stmt.SetInt64(0, m_guildId);
+                stmt.SetInt32(1, m_guid);
                 trans.Append(stmt);
 
                 byte index = 0;
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_EVENTLOG);
-                stmt.AddValue(index, m_guildId);
-                stmt.AddValue(++index, m_guid);
-                stmt.AddValue(++index, (byte)m_eventType);
-                stmt.AddValue(++index, m_playerGuid1);
-                stmt.AddValue(++index, m_playerGuid2);
-                stmt.AddValue(++index, m_newRank);
-                stmt.AddValue(++index, m_timestamp);
+                stmt.SetInt64(index, m_guildId);
+                stmt.SetInt32(++index, m_guid);
+                stmt.SetUInt8(++index, (byte)m_eventType);
+                stmt.SetInt64(++index, m_playerGuid1);
+                stmt.SetInt64(++index, m_playerGuid2);
+                stmt.SetUInt8(++index, m_newRank);
+                stmt.SetInt64(++index, m_timestamp);
                 trans.Append(stmt);
             }
 
@@ -2988,22 +2988,22 @@ namespace Game.Guilds
                 byte index = 0;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_EVENTLOG);
-                stmt.AddValue(index, m_guildId);
-                stmt.AddValue(++index, m_guid);
-                stmt.AddValue(++index, m_bankTabId);
+                stmt.SetInt64(index, m_guildId);
+                stmt.SetInt32(++index, m_guid);
+                stmt.SetUInt8(++index, m_bankTabId);
                 trans.Append(stmt);
 
                 index = 0;
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_BANK_EVENTLOG);
-                stmt.AddValue(index, m_guildId);
-                stmt.AddValue(++index, m_guid);
-                stmt.AddValue(++index, m_bankTabId);
-                stmt.AddValue(++index, (byte)m_eventType);
-                stmt.AddValue(++index, m_playerGuid);
-                stmt.AddValue(++index, m_itemOrMoney);
-                stmt.AddValue(++index, m_itemStackCount);
-                stmt.AddValue(++index, m_destTabId);
-                stmt.AddValue(++index, m_timestamp);
+                stmt.SetInt64(index, m_guildId);
+                stmt.SetInt32(++index, m_guid);
+                stmt.SetUInt8(++index, m_bankTabId);
+                stmt.SetUInt8(++index, (byte)m_eventType);
+                stmt.SetInt64(++index, m_playerGuid);
+                stmt.SetInt64(++index, m_itemOrMoney);
+                stmt.SetUInt16(++index, m_itemStackCount);
+                stmt.SetUInt8(++index, m_destTabId);
+                stmt.SetInt64(++index, m_timestamp);
                 trans.Append(stmt);
             }
 
@@ -3086,13 +3086,13 @@ namespace Game.Guilds
             {
                 byte index = 0;
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_NEWS);
-                stmt.AddValue(index, m_guildId);
-                stmt.AddValue(++index, GetGUID());
-                stmt.AddValue(++index, (byte)GetNewsType());
-                stmt.AddValue(++index, GetPlayerGuid().GetCounter());
-                stmt.AddValue(++index, GetFlags());
-                stmt.AddValue(++index, GetValue());
-                stmt.AddValue(++index, GetTimestamp());
+                stmt.SetInt64(index, m_guildId);
+                stmt.SetInt32(++index, GetGUID());
+                stmt.SetUInt8(++index, (byte)GetNewsType());
+                stmt.SetInt64(++index, GetPlayerGuid().GetCounter());
+                stmt.SetInt32(++index, GetFlags());
+                stmt.SetInt32(++index, GetValue());
+                stmt.SetInt64(++index, GetTimestamp());
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 
@@ -3220,12 +3220,12 @@ namespace Game.Guilds
             public void SaveToDB(SQLTransaction trans)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_RANK);
-                stmt.AddValue(0, m_guildId);
-                stmt.AddValue(1, (byte)m_rankId);
-                stmt.AddValue(2, (byte)m_rankOrder);
-                stmt.AddValue(3, m_name);
-                stmt.AddValue(4, (uint)m_rights);
-                stmt.AddValue(5, m_bankMoneyPerDay);
+                stmt.SetInt64(0, m_guildId);
+                stmt.SetUInt8(1, (byte)m_rankId);
+                stmt.SetUInt8(2, (byte)m_rankOrder);
+                stmt.SetString(3, m_name);
+                stmt.SetUInt32(4, (uint)m_rights);
+                stmt.SetInt32(5, m_bankMoneyPerDay);
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 
@@ -3245,11 +3245,11 @@ namespace Game.Guilds
                         Log.outError(LogFilter.Guild, $"Guild {m_guildId} has broken Tab {i} for rank {m_rankId}. Created default tab.");
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_BANK_RIGHT);
-                    stmt.AddValue(0, m_guildId);
-                    stmt.AddValue(1, i);
-                    stmt.AddValue(2, (byte)m_rankId);
-                    stmt.AddValue(3, (sbyte)rightsAndSlots.GetRights());
-                    stmt.AddValue(4, rightsAndSlots.GetSlots());
+                    stmt.SetInt64(0, m_guildId);
+                    stmt.SetUInt8(1, i);
+                    stmt.SetUInt8(2, (byte)m_rankId);
+                    stmt.SetInt8(3, (sbyte)rightsAndSlots.GetRights());
+                    stmt.SetInt32(4, rightsAndSlots.GetSlots());
                     trans.Append(stmt);
                 }
             }
@@ -3262,9 +3262,9 @@ namespace Game.Guilds
                 m_name = name;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_NAME);
-                stmt.AddValue(0, m_name);
-                stmt.AddValue(1, (byte)m_rankId);
-                stmt.AddValue(2, m_guildId);
+                stmt.SetString(0, m_name);
+                stmt.SetUInt8(1, (byte)m_rankId);
+                stmt.SetInt64(2, m_guildId);
                 DB.Characters.Execute(stmt);
             }
 
@@ -3279,9 +3279,9 @@ namespace Game.Guilds
                 m_rights = rights;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_RIGHTS);
-                stmt.AddValue(0, (uint)m_rights);
-                stmt.AddValue(1, (byte)m_rankId);
-                stmt.AddValue(2, m_guildId);
+                stmt.SetUInt32(0, (uint)m_rights);
+                stmt.SetUInt8(1, (byte)m_rankId);
+                stmt.SetInt64(2, m_guildId);
                 DB.Characters.Execute(stmt);
             }
 
@@ -3293,9 +3293,9 @@ namespace Game.Guilds
                 m_bankMoneyPerDay = money;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_BANK_MONEY);
-                stmt.AddValue(0, money);
-                stmt.AddValue(1, (byte)m_rankId);
-                stmt.AddValue(2, m_guildId);
+                stmt.SetInt32(0, money);
+                stmt.SetUInt8(1, (byte)m_rankId);
+                stmt.SetInt64(2, m_guildId);
                 DB.Characters.Execute(stmt);
             }
 
@@ -3309,11 +3309,11 @@ namespace Game.Guilds
                 if (saveToDB)
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_BANK_RIGHT);
-                    stmt.AddValue(0, m_guildId);
-                    stmt.AddValue(1, rightsAndSlots.GetTabId());
-                    stmt.AddValue(2, (byte)m_rankId);
-                    stmt.AddValue(3, (sbyte)rightsAndSlots.GetRights());
-                    stmt.AddValue(4, rightsAndSlots.GetSlots());
+                    stmt.SetInt64(0, m_guildId);
+                    stmt.SetUInt8(1, rightsAndSlots.GetTabId());
+                    stmt.SetUInt8(2, (byte)m_rankId);
+                    stmt.SetInt8(3, (sbyte)rightsAndSlots.GetRights());
+                    stmt.SetInt32(4, rightsAndSlots.GetSlots());
                     DB.Characters.Execute(stmt);
                 }
             }
@@ -3391,9 +3391,9 @@ namespace Game.Guilds
                     Log.outError(LogFilter.Guild, $"Item (GUID {itemGuid}, id: {itemEntry}) not found in item_instance, deleting from guild bank!");
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_NONEXISTENT_GUILD_BANK_ITEM);
-                    stmt.AddValue(0, m_guildId);
-                    stmt.AddValue(1, m_tabId);
-                    stmt.AddValue(2, slotId);
+                    stmt.SetInt64(0, m_guildId);
+                    stmt.SetUInt8(1, m_tabId);
+                    stmt.SetUInt8(2, slotId);
                     DB.Characters.Execute(stmt);
                     return false;
                 }
@@ -3426,10 +3426,10 @@ namespace Game.Guilds
                 m_icon = icon;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_BANK_TAB_INFO);
-                stmt.AddValue(0, m_name);
-                stmt.AddValue(1, m_icon);
-                stmt.AddValue(2, m_guildId);
-                stmt.AddValue(3, m_tabId);
+                stmt.SetString(0, m_name);
+                stmt.SetString(1, m_icon);
+                stmt.SetInt64(2, m_guildId);
+                stmt.SetUInt8(3, m_tabId);
                 DB.Characters.Execute(stmt);
             }
 
@@ -3441,9 +3441,9 @@ namespace Game.Guilds
                 m_text = text;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_BANK_TAB_TEXT);
-                stmt.AddValue(0, m_text);
-                stmt.AddValue(1, m_guildId);
-                stmt.AddValue(2, m_tabId);
+                stmt.SetString(0, m_text);
+                stmt.SetInt64(1, m_guildId);
+                stmt.SetUInt8(2, m_tabId);
                 DB.Characters.Execute(stmt);
             }
 
@@ -3481,18 +3481,18 @@ namespace Game.Guilds
                 m_items[slotId] = item;
 
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_ITEM);
-                stmt.AddValue(0, m_guildId);
-                stmt.AddValue(1, m_tabId);
-                stmt.AddValue(2, slotId);
+                stmt.SetInt64(0, m_guildId);
+                stmt.SetUInt8(1, m_tabId);
+                stmt.SetUInt8(2, slotId);
                 trans.Append(stmt);
 
                 if (item != null)
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GUILD_BANK_ITEM);
-                    stmt.AddValue(0, m_guildId);
-                    stmt.AddValue(1, m_tabId);
-                    stmt.AddValue(2, slotId);
-                    stmt.AddValue(3, item.GetGUID().GetCounter());
+                    stmt.SetInt64(0, m_guildId);
+                    stmt.SetUInt8(1, m_tabId);
+                    stmt.SetUInt8(2, slotId);
+                    stmt.SetInt64(3, item.GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     item.SetContainedIn(ObjectGuid.Empty);
@@ -3586,12 +3586,12 @@ namespace Game.Guilds
             public void SaveToDB(long guildId)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GUILD_EMBLEM_INFO);
-                stmt.AddValue(0, m_style);
-                stmt.AddValue(1, m_color);
-                stmt.AddValue(2, m_borderStyle);
-                stmt.AddValue(3, m_borderColor);
-                stmt.AddValue(4, m_backgroundColor);
-                stmt.AddValue(5, guildId);
+                stmt.SetInt32(0, m_style);
+                stmt.SetInt32(1, m_color);
+                stmt.SetInt32(2, m_borderStyle);
+                stmt.SetInt32(3, m_borderColor);
+                stmt.SetInt32(4, m_backgroundColor);
+                stmt.SetInt64(5, guildId);
                 DB.Characters.Execute(stmt);
             }
 

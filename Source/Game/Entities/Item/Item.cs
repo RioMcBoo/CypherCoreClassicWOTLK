@@ -112,19 +112,19 @@ namespace Game.Entities
                 {
                     byte index = 0;
                     stmt = CharacterDatabase.GetPreparedStatement(uState == ItemUpdateState.New ? CharStatements.REP_ITEM_INSTANCE : CharStatements.UPD_ITEM_INSTANCE);
-                    stmt.AddValue(index, GetEntry());
-                    stmt.AddValue(++index, GetOwnerGUID().GetCounter());
-                    stmt.AddValue(++index, GetCreator().GetCounter());
-                    stmt.AddValue(++index, GetGiftCreator().GetCounter());
-                    stmt.AddValue(++index, GetCount());
-                    stmt.AddValue(++index, (uint)m_itemData.Expiration);
+                    stmt.SetInt32(index, GetEntry());
+                    stmt.SetInt64(++index, GetOwnerGUID().GetCounter());
+                    stmt.SetInt64(++index, GetCreator().GetCounter());
+                    stmt.SetInt64(++index, GetGiftCreator().GetCounter());
+                    stmt.SetInt32(++index, GetCount());
+                    stmt.SetUInt32(++index, (uint)m_itemData.Expiration);
 
                     StringBuilder ss = new();
                     for (byte i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount; ++i)
                         ss.AppendFormat($"{GetSpellCharges(i)}");
 
-                    stmt.AddValue(++index, ss.ToString());
-                    stmt.AddValue(++index, (uint)m_itemData.DynamicFlags);
+                    stmt.SetString(++index, ss.ToString());
+                    stmt.SetUInt32(++index, (uint)m_itemData.DynamicFlags);
 
                     ss.Clear();
                     for (EnchantmentSlot slot = 0; slot < EnchantmentSlot.Max; ++slot)
@@ -136,39 +136,39 @@ namespace Game.Entities
                             ss.Append("0 0 0 ");
                     }
 
-                    stmt.AddValue(++index, ss.ToString());
+                    stmt.SetString(++index, ss.ToString());
 
-                    stmt.AddValue(++index, m_itemData.Durability);
-                    stmt.AddValue(++index, m_itemData.CreatePlayedTime);
-                    stmt.AddValue(++index, m_text);
-                    stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetSpeciesId));
-                    stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetBreedData));
-                    stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetLevel));
-                    stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetDisplayId));
-                    stmt.AddValue(++index, m_itemData.RandomPropertiesID);
-                    stmt.AddValue(++index, m_itemData.PropertySeed);
-                    stmt.AddValue(++index, (byte)m_itemData.Context);
+                    stmt.SetUInt16(++index, (ushort)m_itemData.Durability);
+                    stmt.SetUInt32(++index, m_itemData.CreatePlayedTime);
+                    stmt.SetString(++index, m_text);
+                    stmt.SetInt32(++index, GetModifier(ItemModifier.BattlePetSpeciesId));
+                    stmt.SetInt32(++index, GetModifier(ItemModifier.BattlePetBreedData));
+                    stmt.SetInt32(++index, GetModifier(ItemModifier.BattlePetLevel));
+                    stmt.SetInt32(++index, GetModifier(ItemModifier.BattlePetDisplayId));
+                    stmt.SetInt32(++index, m_itemData.RandomPropertiesID);
+                    stmt.SetInt32(++index, m_itemData.PropertySeed);
+                    stmt.SetUInt8(++index, (byte)m_itemData.Context);
 
-                    stmt.AddValue(++index, GetGUID().GetCounter());
+                    stmt.SetInt64(++index, GetGUID().GetCounter());
 
                     trans.Append(stmt);
 
                     if ((uState == ItemUpdateState.Changed) && IsWrapped())
                     {
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GIFT_OWNER);
-                        stmt.AddValue(0, GetOwnerGUID().GetCounter());
-                        stmt.AddValue(1, GetGUID().GetCounter());
+                        stmt.SetInt64(0, GetOwnerGUID().GetCounter());
+                        stmt.SetInt64(1, GetGUID().GetCounter());
                         trans.Append(stmt);
                     }
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS);
-                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.SetInt64(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     if (m_itemData.Gems.Size() != 0)
                     {
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_GEMS);
-                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.SetInt64(0, GetGUID().GetCounter());
                         int i = 0;
                         int gemFields = 3;
 
@@ -176,7 +176,7 @@ namespace Game.Entities
                         {
                             if (gemData.ItemId != 0)
                             {
-                                stmt.AddValue(1 + i * gemFields, (int)gemData.ItemId);
+                                stmt.SetInt32(1 + i * gemFields, (int)gemData.ItemId);
                                 StringBuilder gemBonusListIDs = new();
                                 foreach (var bonusListID in gemData.BonusListIDs)
                                 {
@@ -184,23 +184,23 @@ namespace Game.Entities
                                         gemBonusListIDs.AppendFormat($"{bonusListID} ");
                                 }
 
-                                stmt.AddValue(2 + i * gemFields, gemBonusListIDs.ToString());
-                                stmt.AddValue(3 + i * gemFields, (byte)gemData.Context);
+                                stmt.SetString(2 + i * gemFields, gemBonusListIDs.ToString());
+                                stmt.SetUInt8(3 + i * gemFields, (byte)gemData.Context);
                             }
                             else
                             {
-                                stmt.AddValue(1 + i * gemFields, 0);
-                                stmt.AddValue(2 + i * gemFields, "");
-                                stmt.AddValue(3 + i * gemFields, 0);
+                                stmt.SetInt32(1 + i * gemFields, 0);
+                                stmt.SetString(2 + i * gemFields, "");
+                                stmt.SetInt8(3 + i * gemFields, 0);
                             }
                             ++i;
                         }
 
                         for (; i < ItemConst.MaxGemSockets; ++i)
                         {
-                            stmt.AddValue(1 + i * gemFields, 0);
-                            stmt.AddValue(2 + i * gemFields, "");
-                            stmt.AddValue(3 + i * gemFields, 0);
+                            stmt.SetInt32(1 + i * gemFields, 0);
+                            stmt.SetString(2 + i * gemFields, "");
+                            stmt.SetInt8(3 + i * gemFields, 0);
                         }
                         trans.Append(stmt);
                     }
@@ -230,31 +230,31 @@ namespace Game.Entities
                     ];
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
-                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.SetInt64(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     if (transmogMods.Any(modifier => GetModifier(modifier) != 0))
                     {
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_TRANSMOG);
-                        stmt.AddValue(0, GetGUID().GetCounter());
-                        stmt.AddValue(1, GetModifier(ItemModifier.TransmogAppearanceAllSpecs));
-                        stmt.AddValue(2, GetModifier(ItemModifier.TransmogAppearanceSpec1));
-                        stmt.AddValue(3, GetModifier(ItemModifier.TransmogAppearanceSpec2));
-                        stmt.AddValue(4, GetModifier(ItemModifier.TransmogAppearanceSpec3));
-                        stmt.AddValue(5, GetModifier(ItemModifier.TransmogAppearanceSpec4));
-                        stmt.AddValue(6, GetModifier(ItemModifier.TransmogAppearanceSpec5));
-                        stmt.AddValue(7, GetModifier(ItemModifier.EnchantIllusionAllSpecs));
-                        stmt.AddValue(8, GetModifier(ItemModifier.EnchantIllusionSpec1));
-                        stmt.AddValue(9, GetModifier(ItemModifier.EnchantIllusionSpec2));
-                        stmt.AddValue(10, GetModifier(ItemModifier.EnchantIllusionSpec3));
-                        stmt.AddValue(11, GetModifier(ItemModifier.EnchantIllusionSpec4));
-                        stmt.AddValue(12, GetModifier(ItemModifier.EnchantIllusionSpec5));
-                        stmt.AddValue(13, GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs));
-                        stmt.AddValue(14, GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec1));
-                        stmt.AddValue(15, GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec2));
-                        stmt.AddValue(16, GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec3));
-                        stmt.AddValue(17, GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec4));
-                        stmt.AddValue(18, GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec5));
+                        stmt.SetInt64(0, GetGUID().GetCounter());
+                        stmt.SetInt32(1, GetModifier(ItemModifier.TransmogAppearanceAllSpecs));
+                        stmt.SetInt32(2, GetModifier(ItemModifier.TransmogAppearanceSpec1));
+                        stmt.SetInt32(3, GetModifier(ItemModifier.TransmogAppearanceSpec2));
+                        stmt.SetInt32(4, GetModifier(ItemModifier.TransmogAppearanceSpec3));
+                        stmt.SetInt32(5, GetModifier(ItemModifier.TransmogAppearanceSpec4));
+                        stmt.SetInt32(6, GetModifier(ItemModifier.TransmogAppearanceSpec5));
+                        stmt.SetInt32(7, GetModifier(ItemModifier.EnchantIllusionAllSpecs));
+                        stmt.SetInt32(8, GetModifier(ItemModifier.EnchantIllusionSpec1));
+                        stmt.SetInt32(9, GetModifier(ItemModifier.EnchantIllusionSpec2));
+                        stmt.SetInt32(10, GetModifier(ItemModifier.EnchantIllusionSpec3));
+                        stmt.SetInt32(11, GetModifier(ItemModifier.EnchantIllusionSpec4));
+                        stmt.SetInt32(12, GetModifier(ItemModifier.EnchantIllusionSpec5));
+                        stmt.SetInt32(13, GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs));
+                        stmt.SetInt32(14, GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec1));
+                        stmt.SetInt32(15, GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec2));
+                        stmt.SetInt32(16, GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec3));
+                        stmt.SetInt32(17, GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec4));
+                        stmt.SetInt32(18, GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec5));
                         trans.Append(stmt);
                     }
 
@@ -263,21 +263,21 @@ namespace Game.Entities
                 case ItemUpdateState.Removed:
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
-                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.SetInt64(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS);
-                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.SetInt64(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
-                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.SetInt64(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     if (IsWrapped())
                     {
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GIFT);
-                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.SetInt64(0, GetGUID().GetCounter());
                         trans.Append(stmt);
                     }
 
@@ -443,10 +443,10 @@ namespace Game.Entities
             {
                 byte index = 0;
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ITEM_INSTANCE_ON_LOAD);
-                stmt.AddValue(index++, (uint)m_itemData.Expiration);
-                stmt.AddValue(index++, (uint)m_itemData.DynamicFlags);
-                stmt.AddValue(index++, m_itemData.Durability);
-                stmt.AddValue(index++, guid);
+                stmt.SetUInt32(index++, (uint)m_itemData.Expiration);
+                stmt.SetUInt32(index++, (uint)m_itemData.DynamicFlags);
+                stmt.SetInt32(index++, m_itemData.Durability);
+                stmt.SetInt64(index++, guid);
                 DB.Characters.Execute(stmt);
             }
             return true;
@@ -455,19 +455,19 @@ namespace Game.Entities
         public static void DeleteFromDB(SQLTransaction trans, long itemGuid)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
-            stmt.AddValue(0, itemGuid);
+            stmt.SetInt64(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS);
-            stmt.AddValue(0, itemGuid);
+            stmt.SetInt64(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
-            stmt.AddValue(0, itemGuid);
+            stmt.SetInt64(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GIFT);
-            stmt.AddValue(0, itemGuid);
+            stmt.SetInt64(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 
@@ -483,7 +483,7 @@ namespace Game.Entities
         public static void DeleteFromInventoryDB(SQLTransaction trans, long itemGuid)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY_BY_ITEM);
-            stmt.AddValue(0, itemGuid);
+            stmt.SetInt64(0, itemGuid);
             trans.Append(stmt);
         }
 
@@ -1145,17 +1145,17 @@ namespace Game.Entities
             DeleteRefundDataFromDB();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_REFUND_INSTANCE);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            stmt.AddValue(1, GetRefundRecipient().GetCounter());
-            stmt.AddValue(2, GetPaidMoney());
-            stmt.AddValue(3, (ushort)GetPaidExtendedCost());
+            stmt.SetInt64(0, GetGUID().GetCounter());
+            stmt.SetInt64(1, GetRefundRecipient().GetCounter());
+            stmt.SetInt64(2, GetPaidMoney());
+            stmt.SetUInt16(3, (ushort)GetPaidExtendedCost());
             DB.Characters.Execute(stmt);
         }
 
         public void DeleteRefundDataFromDB(SQLTransaction trans = null)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_REFUND_INSTANCE);
-            stmt.AddValue(0, GetGUID().GetCounter());
+            stmt.SetInt64(0, GetGUID().GetCounter());
             if (trans != null)
                 trans.Append(stmt);
             else
@@ -1238,7 +1238,7 @@ namespace Game.Entities
             allowedGUIDs.Clear();
             SetState(ItemUpdateState.Changed, currentOwner);
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_BOP_TRADE);
-            stmt.AddValue(0, GetGUID().GetCounter());
+            stmt.SetInt64(0, GetGUID().GetCounter());
             DB.Characters.Execute(stmt);
         }
 

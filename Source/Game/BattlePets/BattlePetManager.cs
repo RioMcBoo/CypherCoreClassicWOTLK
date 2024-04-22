@@ -278,27 +278,27 @@ namespace Game.BattlePets
                 {
                     case BattlePetSaveInfo.New:
                         stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BATTLE_PETS);
-                        stmt.AddValue(0, pair.Key);
-                        stmt.AddValue(1, _owner.GetBattlenetAccountId());
-                        stmt.AddValue(2, pair.Value.PacketInfo.Species);
-                        stmt.AddValue(3, pair.Value.PacketInfo.Breed);
-                        stmt.AddValue(4, pair.Value.PacketInfo.DisplayID);
-                        stmt.AddValue(5, pair.Value.PacketInfo.Level);
-                        stmt.AddValue(6, pair.Value.PacketInfo.Exp);
-                        stmt.AddValue(7, pair.Value.PacketInfo.Health);
-                        stmt.AddValue(8, pair.Value.PacketInfo.Quality);
-                        stmt.AddValue(9, pair.Value.PacketInfo.Flags);
-                        stmt.AddValue(10, pair.Value.PacketInfo.Name);
-                        stmt.AddValue(11, pair.Value.NameTimestamp);
+                        stmt.SetInt64(0, pair.Key);
+                        stmt.SetInt32(1, _owner.GetBattlenetAccountId());
+                        stmt.SetInt32(2, pair.Value.PacketInfo.Species);
+                        stmt.SetUInt16(3, pair.Value.PacketInfo.Breed);
+                        stmt.SetInt32(4, pair.Value.PacketInfo.DisplayID);
+                        stmt.SetUInt16(5, pair.Value.PacketInfo.Level);
+                        stmt.SetUInt16(6, pair.Value.PacketInfo.Exp);
+                        stmt.SetInt32(7, pair.Value.PacketInfo.Health);
+                        stmt.SetUInt8(8, pair.Value.PacketInfo.Quality);
+                        stmt.SetUInt16(9, pair.Value.PacketInfo.Flags);
+                        stmt.SetString(10, pair.Value.PacketInfo.Name);
+                        stmt.SetInt64(11, pair.Value.NameTimestamp);
                         if (pair.Value.PacketInfo.OwnerInfo.HasValue)
                         {
-                            stmt.AddValue(12, pair.Value.PacketInfo.OwnerInfo.Value.Guid.GetCounter());
-                            stmt.AddValue(13, Global.WorldMgr.GetRealmId().Index);
+                            stmt.SetInt64(12, pair.Value.PacketInfo.OwnerInfo.Value.Guid.GetCounter());
+                            stmt.SetInt32(13, Global.WorldMgr.GetRealmId().Index);
                         }
                         else
                         {
-                            stmt.AddNull(12);
-                            stmt.AddNull(13);
+                            stmt.SetNull(12);
+                            stmt.SetNull(13);
                         }
 
                         trans.Append(stmt);
@@ -306,10 +306,10 @@ namespace Game.BattlePets
                         if (pair.Value.DeclinedName != null)
                         {
                             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_DECLINED_NAME);
-                            stmt.AddValue(0, pair.Key);
+                            stmt.SetInt64(0, pair.Key);
 
                             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                                stmt.AddValue(i + 1, pair.Value.DeclinedName.Name[i]);
+                                stmt.SetString(i + 1, pair.Value.DeclinedName.Name[i]);
 
                             trans.Append(stmt);
                         }
@@ -319,28 +319,28 @@ namespace Game.BattlePets
                         break;
                     case BattlePetSaveInfo.Changed:
                         stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BATTLE_PETS);
-                        stmt.AddValue(0, pair.Value.PacketInfo.Level);
-                        stmt.AddValue(1, pair.Value.PacketInfo.Exp);
-                        stmt.AddValue(2, pair.Value.PacketInfo.Health);
-                        stmt.AddValue(3, pair.Value.PacketInfo.Quality);
-                        stmt.AddValue(4, pair.Value.PacketInfo.Flags);
-                        stmt.AddValue(5, pair.Value.PacketInfo.Name);
-                        stmt.AddValue(6, pair.Value.NameTimestamp);
-                        stmt.AddValue(7, _owner.GetBattlenetAccountId());
-                        stmt.AddValue(8, pair.Key);
+                        stmt.SetUInt16(0, pair.Value.PacketInfo.Level);
+                        stmt.SetUInt16(1, pair.Value.PacketInfo.Exp);
+                        stmt.SetInt32(2, pair.Value.PacketInfo.Health);
+                        stmt.SetUInt8(3, pair.Value.PacketInfo.Quality);
+                        stmt.SetUInt16(4, pair.Value.PacketInfo.Flags);
+                        stmt.SetString(5, pair.Value.PacketInfo.Name);
+                        stmt.SetInt64(6, pair.Value.NameTimestamp);
+                        stmt.SetInt32(7, _owner.GetBattlenetAccountId());
+                        stmt.SetInt64(8, pair.Key);
                         trans.Append(stmt);
 
                         stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME);
-                        stmt.AddValue(0, pair.Key);
+                        stmt.SetInt64(0, pair.Key);
                         trans.Append(stmt);
 
                         if (pair.Value.DeclinedName != null)
                         {
                             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_DECLINED_NAME);
-                            stmt.AddValue(0, pair.Key);
+                            stmt.SetInt64(0, pair.Key);
 
                             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                                stmt.AddValue(i + 1, pair.Value.DeclinedName.Name[i]);
+                                stmt.SetString(i + 1, pair.Value.DeclinedName.Name[i]);
 
                             trans.Append(stmt);
                         }
@@ -349,12 +349,12 @@ namespace Game.BattlePets
                         break;
                     case BattlePetSaveInfo.Removed:
                         stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME);
-                        stmt.AddValue(0, pair.Key);
+                        stmt.SetInt64(0, pair.Key);
                         trans.Append(stmt);
 
                         stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BATTLE_PETS);
-                        stmt.AddValue(0, _owner.GetBattlenetAccountId());
-                        stmt.AddValue(1, pair.Key);
+                        stmt.SetInt32(0, _owner.GetBattlenetAccountId());
+                        stmt.SetInt64(1, pair.Key);
                         trans.Append(stmt);
                         _pets.Remove(pair.Key);
                         break;
@@ -362,16 +362,16 @@ namespace Game.BattlePets
             }
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_SLOTS);
-            stmt.AddValue(0, _owner.GetBattlenetAccountId());
+            stmt.SetInt32(0, _owner.GetBattlenetAccountId());
             trans.Append(stmt);
 
             foreach (var slot in _slots)
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_SLOTS);
-                stmt.AddValue(0, slot.Index);
-                stmt.AddValue(1, _owner.GetBattlenetAccountId());
-                stmt.AddValue(2, slot.Pet.Guid.GetCounter());
-                stmt.AddValue(3, slot.Locked);
+                stmt.SetUInt8(0, slot.Index);
+                stmt.SetInt32(1, _owner.GetBattlenetAccountId());
+                stmt.SetInt64(2, slot.Pet.Guid.GetCounter());
+                stmt.SetBool(3, slot.Locked);
                 trans.Append(stmt);
             }
         }

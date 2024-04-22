@@ -118,7 +118,7 @@ namespace Game.SupportSystem
                     _lastComplaintId = id;
 
                 PreparedStatement chatLogStmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GM_COMPLAINT_CHATLINES);
-                chatLogStmt.AddValue(0, id);
+                chatLogStmt.SetInt32(0, id);
                 SQLResult chatLogResult = DB.Characters.Query(stmt);
 
                 if (!chatLogResult.IsEmpty())

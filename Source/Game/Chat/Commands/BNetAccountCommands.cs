@@ -122,7 +122,7 @@ namespace Game.Chat.Commands
         static bool HandleListGameAccountsCommand(CommandHandler handler, string battlenetAccountName)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
-            stmt.AddValue(0, battlenetAccountName);
+            stmt.SetString(0, battlenetAccountName);
 
             SQLResult accountList = DB.Login.Query(stmt);
             if (!accountList.IsEmpty())
@@ -253,16 +253,16 @@ namespace Game.Chat.Commands
 
                 if (state)
                 {
-                    stmt.AddValue(0, true);                                     // locked
+                    stmt.SetBool(0, true);                                     // locked
                     handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
                 }
                 else
                 {
-                    stmt.AddValue(0, false);                                    // unlocked
+                    stmt.SetBool(0, false);                                    // unlocked
                     handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
                 }
 
-                stmt.AddValue(1, handler.GetSession().GetBattlenetAccountId());
+                stmt.SetInt32(1, handler.GetSession().GetBattlenetAccountId());
 
                 DB.Login.Execute(stmt);
                 return true;

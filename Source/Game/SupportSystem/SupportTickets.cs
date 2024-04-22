@@ -145,18 +145,18 @@ namespace Game.SupportSystem
         {
             byte idx = 0;
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_GM_BUG);
-            stmt.AddValue(idx, _id);
-            stmt.AddValue(++idx, _playerGuid.GetCounter());
-            stmt.AddValue(++idx, _note);
-            stmt.AddValue(++idx, _createTime);
-            stmt.AddValue(++idx, _mapId);
-            stmt.AddValue(++idx, _pos.X);
-            stmt.AddValue(++idx, _pos.Y);
-            stmt.AddValue(++idx, _pos.Z);
-            stmt.AddValue(++idx, _facing);
-            stmt.AddValue(++idx, _closedBy.GetCounter());
-            stmt.AddValue(++idx, _assignedTo.GetCounter());
-            stmt.AddValue(++idx, _comment);
+            stmt.SetInt32(idx, _id);
+            stmt.SetInt64(++idx, _playerGuid.GetCounter());
+            stmt.SetString(++idx, _note);
+            stmt.SetInt64(++idx, _createTime);
+            stmt.SetInt32(++idx, _mapId);
+            stmt.SetFloat(++idx, _pos.X);
+            stmt.SetFloat(++idx, _pos.Y);
+            stmt.SetFloat(++idx, _pos.Z);
+            stmt.SetFloat(++idx, _facing);
+            stmt.SetInt64(++idx, _closedBy.GetCounter());
+            stmt.SetInt64(++idx, _assignedTo.GetCounter());
+            stmt.SetString(++idx, _comment);
 
             DB.Characters.Execute(stmt);
         }
@@ -164,7 +164,7 @@ namespace Game.SupportSystem
         public override void DeleteFromDB()
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GM_BUG);
-            stmt.AddValue(0, _id);
+            stmt.SetInt32(0, _id);
             DB.Characters.Execute(stmt);
         }
 
@@ -262,26 +262,26 @@ namespace Game.SupportSystem
 
             byte idx = 0;
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_GM_COMPLAINT);
-            stmt.AddValue(idx, _id);
-            stmt.AddValue(++idx, _playerGuid.GetCounter());
-            stmt.AddValue(++idx, _note);
-            stmt.AddValue(++idx, _createTime);
-            stmt.AddValue(++idx, _mapId);
-            stmt.AddValue(++idx, _pos.X);
-            stmt.AddValue(++idx, _pos.Y);
-            stmt.AddValue(++idx, _pos.Z);
-            stmt.AddValue(++idx, _facing);
-            stmt.AddValue(++idx, _targetCharacterGuid.GetCounter());
-            stmt.AddValue(++idx, (int)_reportType);
-            stmt.AddValue(++idx, (int)_majorCategory);
-            stmt.AddValue(++idx, (int)_minorCategoryFlags);
+            stmt.SetInt32(idx, _id);
+            stmt.SetInt64(++idx, _playerGuid.GetCounter());
+            stmt.SetString(++idx, _note);
+            stmt.SetInt64(++idx, _createTime);
+            stmt.SetInt32(++idx, _mapId);
+            stmt.SetFloat(++idx, _pos.X);
+            stmt.SetFloat(++idx, _pos.Y);
+            stmt.SetFloat(++idx, _pos.Z);
+            stmt.SetFloat(++idx, _facing);
+            stmt.SetInt64(++idx, _targetCharacterGuid.GetCounter());
+            stmt.SetInt32(++idx, (int)_reportType);
+            stmt.SetInt32(++idx, (int)_majorCategory);
+            stmt.SetInt32(++idx, (int)_minorCategoryFlags);
             if (_chatLog.ReportLineIndex.HasValue)
-                stmt.AddValue(++idx, _chatLog.ReportLineIndex.Value);
+                stmt.SetUInt32(++idx, _chatLog.ReportLineIndex.Value);
             else
-                stmt.AddValue(++idx, -1); // empty ReportLineIndex
-            stmt.AddValue(++idx, _closedBy.GetCounter());
-            stmt.AddValue(++idx, _assignedTo.GetCounter());
-            stmt.AddValue(++idx, _comment);
+                stmt.SetInt32(++idx, -1); // empty ReportLineIndex
+            stmt.SetInt64(++idx, _closedBy.GetCounter());
+            stmt.SetInt64(++idx, _assignedTo.GetCounter());
+            stmt.SetString(++idx, _comment);
             trans.Append(stmt);
 
             uint lineIndex = 0;
@@ -289,10 +289,10 @@ namespace Game.SupportSystem
             {
                 idx = 0;
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GM_COMPLAINT_CHATLINE);
-                stmt.AddValue(idx, _id);
-                stmt.AddValue(++idx, lineIndex);
-                stmt.AddValue(++idx, c.Timestamp);
-                stmt.AddValue(++idx, c.Text);
+                stmt.SetInt32(idx, _id);
+                stmt.SetUInt32(++idx, lineIndex);
+                stmt.SetInt64(++idx, c.Timestamp);
+                stmt.SetString(++idx, c.Text);
 
                 trans.Append(stmt);
                 ++lineIndex;
@@ -304,11 +304,11 @@ namespace Game.SupportSystem
         public override void DeleteFromDB()
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GM_COMPLAINT);
-            stmt.AddValue(0, _id);
+            stmt.SetInt32(0, _id);
             DB.Characters.Execute(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GM_COMPLAINT_CHATLOG);
-            stmt.AddValue(0, _id);
+            stmt.SetInt32(0, _id);
             DB.Characters.Execute(stmt);
         }
 
@@ -399,18 +399,18 @@ namespace Game.SupportSystem
         {
             byte idx = 0;
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_GM_SUGGESTION);
-            stmt.AddValue(idx, _id);
-            stmt.AddValue(++idx, _playerGuid.GetCounter());
-            stmt.AddValue(++idx, _note);
-            stmt.AddValue(++idx, _createTime);
-            stmt.AddValue(++idx, _mapId);
-            stmt.AddValue(++idx, _pos.X);
-            stmt.AddValue(++idx, _pos.Y);
-            stmt.AddValue(++idx, _pos.Z);
-            stmt.AddValue(++idx, _facing);
-            stmt.AddValue(++idx, _closedBy.GetCounter());
-            stmt.AddValue(++idx, _assignedTo.GetCounter());
-            stmt.AddValue(++idx, _comment);
+            stmt.SetInt32(idx, _id);
+            stmt.SetInt64(++idx, _playerGuid.GetCounter());
+            stmt.SetString(++idx, _note);
+            stmt.SetInt64(++idx, _createTime);
+            stmt.SetInt32(++idx, _mapId);
+            stmt.SetFloat(++idx, _pos.X);
+            stmt.SetFloat(++idx, _pos.Y);
+            stmt.SetFloat(++idx, _pos.Z);
+            stmt.SetFloat(++idx, _facing);
+            stmt.SetInt64(++idx, _closedBy.GetCounter());
+            stmt.SetInt64(++idx, _assignedTo.GetCounter());
+            stmt.SetString(++idx, _comment);
 
             DB.Characters.Execute(stmt);
         }
@@ -418,7 +418,7 @@ namespace Game.SupportSystem
         public override void DeleteFromDB()
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GM_SUGGESTION);
-            stmt.AddValue(0, _id);
+            stmt.SetInt32(0, _id);
             DB.Characters.Execute(stmt);
         }
 

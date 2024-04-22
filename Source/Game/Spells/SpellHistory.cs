@@ -76,11 +76,11 @@ namespace Game.Spells
             if (typeof(T) == typeof(Pet))
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_COOLDOWNS);
-                stmt.AddValue(0, _owner.GetCharmInfo().GetPetNumber());
+                stmt.SetInt32(0, _owner.GetCharmInfo().GetPetNumber());
                 trans.Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_CHARGES);
-                stmt.AddValue(0, _owner.GetCharmInfo().GetPetNumber());
+                stmt.SetInt32(0, _owner.GetCharmInfo().GetPetNumber());
                 trans.Append(stmt);
 
                 byte index;
@@ -90,11 +90,11 @@ namespace Game.Spells
                     {
                         index = 0;
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL_COOLDOWN);
-                        stmt.AddValue(index++, _owner.GetCharmInfo().GetPetNumber());
-                        stmt.AddValue(index++, pair.Key);
-                        stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
-                        stmt.AddValue(index++, (int)pair.Value.CategoryId);
-                        stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
+                        stmt.SetInt32(index++, _owner.GetCharmInfo().GetPetNumber());
+                        stmt.SetInt32(index++, pair.Key);
+                        stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
+                        stmt.SetInt32(index++, (int)pair.Value.CategoryId);
+                        stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
                         trans.Append(stmt);
                     }
                 }
@@ -103,21 +103,21 @@ namespace Game.Spells
                 {
                     index = 0;
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL_CHARGES);
-                    stmt.AddValue(index++, _owner.GetCharmInfo().GetPetNumber());
-                    stmt.AddValue(index++, (int)pair.Key);
-                    stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.RechargeStart));
-                    stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.RechargeEnd));
+                    stmt.SetInt32(index++, _owner.GetCharmInfo().GetPetNumber());
+                    stmt.SetInt32(index++, (int)pair.Key);
+                    stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.RechargeStart));
+                    stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.RechargeEnd));
                     trans.Append(stmt);
                 }
             }
             else
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_COOLDOWNS);
-                stmt.AddValue(0, _owner.GetGUID().GetCounter());
+                stmt.SetInt64(0, _owner.GetGUID().GetCounter());
                 trans.Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_CHARGES);
-                stmt.AddValue(0, _owner.GetGUID().GetCounter());
+                stmt.SetInt64(0, _owner.GetGUID().GetCounter());
                 trans.Append(stmt);
 
                 byte index;
@@ -127,12 +127,12 @@ namespace Game.Spells
                     {
                         index = 0;
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_SPELL_COOLDOWN);
-                        stmt.AddValue(index++, _owner.GetGUID().GetCounter());
-                        stmt.AddValue(index++, pair.Key);
-                        stmt.AddValue(index++, pair.Value.ItemId);
-                        stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
-                        stmt.AddValue(index++, (int)pair.Value.CategoryId);
-                        stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
+                        stmt.SetInt64(index++, _owner.GetGUID().GetCounter());
+                        stmt.SetInt32(index++, pair.Key);
+                        stmt.SetInt32(index++, pair.Value.ItemId);
+                        stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
+                        stmt.SetInt32(index++, (int)pair.Value.CategoryId);
+                        stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
                         trans.Append(stmt);
                     }
                 }
@@ -141,10 +141,10 @@ namespace Game.Spells
                 {
                     index = 0;
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_SPELL_CHARGES);
-                    stmt.AddValue(index++, _owner.GetGUID().GetCounter());
-                    stmt.AddValue(index++, (int)pair.Key);
-                    stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.RechargeStart));
-                    stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.RechargeEnd));
+                    stmt.SetInt64(index++, _owner.GetGUID().GetCounter());
+                    stmt.SetInt32(index++, (int)pair.Key);
+                    stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.RechargeStart));
+                    stmt.SetInt64(index++, Time.DateTimeToUnixTime(pair.Value.RechargeEnd));
                     trans.Append(stmt);
                 }
             }

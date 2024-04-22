@@ -124,24 +124,24 @@ namespace Scripts.World.Achievements
                 // For those, we need last_ip...
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ALDL_IP_LOGGING);
 
-                stmt.AddValue(0, playerGuid);
-                stmt.AddValue(1, 0ul);
-                stmt.AddValue(2, realmId);
-                stmt.AddValue(3, (byte)aType);
-                stmt.AddValue(4, playerGuid);
-                stmt.AddValue(5, systemNote);
+                stmt.SetInt32(0, playerGuid);
+                stmt.SetUInt64(1, 0ul);
+                stmt.SetInt32(2, realmId);
+                stmt.SetUInt8(3, (byte)aType);
+                stmt.SetInt32(4, playerGuid);
+                stmt.SetString(5, systemNote);
                 DB.Login.Execute(stmt);
             }
             else // ... but for failed login, we query last_attempt_ip from account table. Which we do with an unique query
             {
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_FACL_IP_LOGGING);
 
-                stmt.AddValue(0, playerGuid);
-                stmt.AddValue(1, 0ul);
-                stmt.AddValue(2, realmId);
-                stmt.AddValue(3, (byte)aType);
-                stmt.AddValue(4, playerGuid);
-                stmt.AddValue(5, systemNote);
+                stmt.SetInt32(0, playerGuid);
+                stmt.SetUInt64(1, 0ul);
+                stmt.SetInt32(2, realmId);
+                stmt.SetUInt8(3, (byte)aType);
+                stmt.SetInt32(4, playerGuid);
+                stmt.SetString(5, systemNote);
                 DB.Login.Execute(stmt);
             }
             return;
@@ -219,12 +219,12 @@ namespace Scripts.World.Achievements
             // Once we have done everything, we can Add the new log.
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_CHAR_IP_LOGGING);
 
-            stmt.AddValue(0, playerGuid);
-            stmt.AddValue(1, player.GetGUID().GetCounter());
-            stmt.AddValue(2, realmId);
-            stmt.AddValue(3, (byte)aType);
-            stmt.AddValue(4, currentIp); // We query the ip here.
-            stmt.AddValue(5, systemNote);
+            stmt.SetInt32(0, playerGuid);
+            stmt.SetInt64(1, player.GetGUID().GetCounter());
+            stmt.SetInt32(2, realmId);
+            stmt.SetUInt8(3, (byte)aType);
+            stmt.SetString(4, currentIp); // We query the ip here.
+            stmt.SetString(5, systemNote);
             // Seeing as the time differences should be minimal, we do not get unixtime and the timestamp right now;
             // Rather, we let it be added with the Sql query.
 
@@ -279,12 +279,12 @@ namespace Scripts.World.Achievements
             // Once we have done everything, we can Add the new log.
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ALDL_IP_LOGGING);
 
-            stmt.AddValue(0, playerGuid);
-            stmt.AddValue(1, guid.GetCounter());
-            stmt.AddValue(2, realmId);
-            stmt.AddValue(3, (byte)aType);
-            stmt.AddValue(4, playerGuid);
-            stmt.AddValue(5, systemNote);
+            stmt.SetInt32(0, playerGuid);
+            stmt.SetInt64(1, guid.GetCounter());
+            stmt.SetInt32(2, realmId);
+            stmt.SetUInt8(3, (byte)aType);
+            stmt.SetInt32(4, playerGuid);
+            stmt.SetString(5, systemNote);
 
             // Seeing as the time differences should be minimal, we do not get unixtime and the timestamp right now;
             // Rather, we let it be added with the Sql query.

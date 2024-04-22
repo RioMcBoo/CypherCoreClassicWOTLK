@@ -274,22 +274,22 @@ namespace Game.Maps
             }
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK);
-            stmt.AddValue(0, playerGuid.GetCounter());
-            stmt.AddValue(1, entries.MapDifficulty.MapID);
-            stmt.AddValue(2, entries.MapDifficulty.LockID);
+            stmt.SetInt64(0, playerGuid.GetCounter());
+            stmt.SetInt32(1, entries.MapDifficulty.MapID);
+            stmt.SetUInt8(2, entries.MapDifficulty.LockID);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_INSTANCE_LOCK);
-            stmt.AddValue(0, playerGuid.GetCounter());
-            stmt.AddValue(1, entries.MapDifficulty.MapID);
-            stmt.AddValue(2, entries.MapDifficulty.LockID);
-            stmt.AddValue(3, instanceLock.GetInstanceId());
-            stmt.AddValue(4, (byte)entries.MapDifficulty.DifficultyID);
-            stmt.AddValue(5, instanceLock.GetData().Data);
-            stmt.AddValue(6, instanceLock.GetData().CompletedEncountersMask);
-            stmt.AddValue(7, instanceLock.GetData().EntranceWorldSafeLocId);
-            stmt.AddValue(8, (ulong)Time.DateTimeToUnixTime(instanceLock.GetExpiryTime()));
-            stmt.AddValue(9, instanceLock.IsExtended() ? 1 : 0);
+            stmt.SetInt64(0, playerGuid.GetCounter());
+            stmt.SetInt32(1, entries.MapDifficulty.MapID);
+            stmt.SetUInt8(2, entries.MapDifficulty.LockID);
+            stmt.SetInt32(3, instanceLock.GetInstanceId());
+            stmt.SetUInt8(4, (byte)entries.MapDifficulty.DifficultyID);
+            stmt.SetString(5, instanceLock.GetData().Data);
+            stmt.SetUInt32(6, instanceLock.GetData().CompletedEncountersMask);
+            stmt.SetInt32(7, instanceLock.GetData().EntranceWorldSafeLocId);
+            stmt.SetUInt64(8, (ulong)Time.DateTimeToUnixTime(instanceLock.GetExpiryTime()));
+            stmt.SetInt32(9, instanceLock.IsExtended() ? 1 : 0);
             trans.Append(stmt);
 
             return instanceLock;
@@ -312,14 +312,14 @@ namespace Game.Maps
                 sharedData.EntranceWorldSafeLocId = updateEvent.EntranceWorldSafeLocId.Value;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INSTANCE);
-            stmt.AddValue(0, sharedData.InstanceId);
+            stmt.SetInt32(0, sharedData.InstanceId);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_INSTANCE);
-            stmt.AddValue(0, sharedData.InstanceId);
-            stmt.AddValue(1, sharedData.Data);
-            stmt.AddValue(2, sharedData.CompletedEncountersMask);
-            stmt.AddValue(3, sharedData.EntranceWorldSafeLocId);
+            stmt.SetInt32(0, sharedData.InstanceId);
+            stmt.SetString(1, sharedData.Data);
+            stmt.SetUInt32(2, sharedData.CompletedEncountersMask);
+            stmt.SetInt32(3, sharedData.EntranceWorldSafeLocId);
             trans.Append(stmt);
         }
 
@@ -333,7 +333,7 @@ namespace Game.Maps
 
             _instanceLockDataById.Remove(instanceId);
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INSTANCE);
-            stmt.AddValue(0, instanceId);
+            stmt.SetInt32(0, instanceId);
             DB.Characters.Execute(stmt);
             Log.outDebug(LogFilter.Instance, $"Deleting instance {instanceId} as it is no longer referenced by any player");
         }
@@ -346,10 +346,10 @@ namespace Game.Maps
                 DateTime oldExpiryTime = instanceLock.GetEffectiveExpiryTime();
                 instanceLock.SetExtended(extended);
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_EXTENSION);
-                stmt.AddValue(0, extended ? 1 : 0);
-                stmt.AddValue(1, playerGuid.GetCounter());
-                stmt.AddValue(2, entries.MapDifficulty.MapID);
-                stmt.AddValue(3, entries.MapDifficulty.LockID);
+                stmt.SetInt32(0, extended ? 1 : 0);
+                stmt.SetInt64(1, playerGuid.GetCounter());
+                stmt.SetInt32(2, entries.MapDifficulty.MapID);
+                stmt.SetUInt8(3, entries.MapDifficulty.LockID);
                 DB.Characters.Execute(stmt);
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
                     $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Instance lock for {playerGuid} is {(extended ? "now" : "no longer")} extended");
@@ -405,10 +405,10 @@ namespace Game.Maps
                     instanceLock.SetExtended(false);
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_FORCE_EXPIRE);
-                    stmt.AddValue(0, Time.DateTimeToUnixTime(newExpiryTime));
-                    stmt.AddValue(1, playerGuid.GetCounter());
-                    stmt.AddValue(2, entries.MapDifficulty.MapID);
-                    stmt.AddValue(3, entries.MapDifficulty.LockID);
+                    stmt.SetInt64(0, Time.DateTimeToUnixTime(newExpiryTime));
+                    stmt.SetInt64(1, playerGuid.GetCounter());
+                    stmt.SetInt32(2, entries.MapDifficulty.MapID);
+                    stmt.SetUInt8(3, entries.MapDifficulty.LockID);
                     trans.Append(stmt);
                 }
                 DB.Characters.CommitTransaction(trans);

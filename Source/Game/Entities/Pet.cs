@@ -436,7 +436,7 @@ namespace Game.Entities
 
                 // remove current data
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_ID);
-                stmt.AddValue(0, GetCharmInfo().GetPetNumber());
+                stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
                 trans.Append(stmt);
 
                 // save pet
@@ -446,25 +446,25 @@ namespace Game.Entities
                 FillPetInfo(owner.GetPetStable().GetCurrentPet(), owner.GetTemporaryPetReactState());
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET);
-                stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-                stmt.AddValue(1, GetEntry());
-                stmt.AddValue(2, ownerLowGUID);
-                stmt.AddValue(3, GetNativeDisplayId());
-                stmt.AddValue(4, GetLevel());
-                stmt.AddValue(5, m_unitData.PetExperience);
-                stmt.AddValue(6, (byte)owner.GetTemporaryPetReactState().GetValueOrDefault(GetReactState()));
-                stmt.AddValue(7, (owner.GetPetStable().GetCurrentActivePetIndex().HasValue ? (short)owner.GetPetStable().GetCurrentActivePetIndex().Value : (short)PetSaveMode.NotInSlot));
-                stmt.AddValue(8, GetName());
-                stmt.AddValue(9, HasPetFlag(UnitPetFlags.CanBeRenamed) ? 0 : 1);
-                stmt.AddValue(10, curhealth);
-                stmt.AddValue(11, curmana);
+                stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
+                stmt.SetInt32(1, GetEntry());
+                stmt.SetInt64(2, ownerLowGUID);
+                stmt.SetInt32(3, GetNativeDisplayId());
+                stmt.SetUInt8(4, (byte)GetLevel());
+                stmt.SetInt32(5, m_unitData.PetExperience);
+                stmt.SetUInt8(6, (byte)owner.GetTemporaryPetReactState().GetValueOrDefault(GetReactState()));
+                stmt.SetInt16(7, (owner.GetPetStable().GetCurrentActivePetIndex().HasValue ? (short)owner.GetPetStable().GetCurrentActivePetIndex().Value : (short)PetSaveMode.NotInSlot));
+                stmt.SetString(8, GetName());
+                stmt.SetInt32(9, HasPetFlag(UnitPetFlags.CanBeRenamed) ? 0 : 1);
+                stmt.SetUInt32(10, curhealth);
+                stmt.SetInt32(11, curmana);
 
-                stmt.AddValue(12, actionBar);
+                stmt.SetString(12, actionBar);
 
-                stmt.AddValue(13, GameTime.GetGameTime());
-                stmt.AddValue(14, m_unitData.CreatedBySpell);
-                stmt.AddValue(15, (byte)GetPetType());
-                stmt.AddValue(16, (ushort)GetSpecialization());
+                stmt.SetInt64(13, GameTime.GetGameTime());
+                stmt.SetInt32(14, m_unitData.CreatedBySpell);
+                stmt.SetUInt8(15, (byte)GetPetType());
+                stmt.SetUInt16(16, (ushort)GetSpecialization());
                 trans.Append(stmt);
 
                 DB.Characters.CommitTransaction(trans);
@@ -501,31 +501,31 @@ namespace Game.Entities
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_ID);
-            stmt.AddValue(0, petNumber);
+            stmt.SetUInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_PET_DECLINEDNAME);
-            stmt.AddValue(0, petNumber);
+            stmt.SetUInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_AURA_EFFECTS);
-            stmt.AddValue(0, petNumber);
+            stmt.SetUInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_AURAS);
-            stmt.AddValue(0, petNumber);
+            stmt.SetUInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELLS);
-            stmt.AddValue(0, petNumber);
+            stmt.SetUInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_COOLDOWNS);
-            stmt.AddValue(0, petNumber);
+            stmt.SetUInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_CHARGES);
-            stmt.AddValue(0, petNumber);
+            stmt.SetUInt32(0, petNumber);
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);
@@ -804,29 +804,29 @@ namespace Game.Entities
                 {
                     case PetSpellState.Removed:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_BY_SPELL);
-                        stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-                        stmt.AddValue(1, pair.Key);
+                        stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
+                        stmt.SetInt32(1, pair.Key);
                         trans.Append(stmt);
 
                         m_spells.Remove(pair.Key);
                         continue;
                     case PetSpellState.Changed:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_BY_SPELL);
-                        stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-                        stmt.AddValue(1, pair.Key);
+                        stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
+                        stmt.SetInt32(1, pair.Key);
                         trans.Append(stmt);
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL);
-                        stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-                        stmt.AddValue(1, pair.Key);
-                        stmt.AddValue(2, (byte)pair.Value.active);
+                        stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
+                        stmt.SetInt32(1, pair.Key);
+                        stmt.SetUInt8(2, (byte)pair.Value.active);
                         trans.Append(stmt);
                         break;
                     case PetSpellState.New:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL);
-                        stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-                        stmt.AddValue(1, pair.Key);
-                        stmt.AddValue(2, (byte)pair.Value.active);
+                        stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
+                        stmt.SetInt32(1, pair.Key);
+                        stmt.SetUInt8(2, (byte)pair.Value.active);
                         trans.Append(stmt);
                         break;
                     case PetSpellState.Unchanged:
@@ -941,11 +941,11 @@ namespace Game.Entities
         void _SaveAuras(SQLTransaction trans)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_AURA_EFFECTS);
-            stmt.AddValue(0, GetCharmInfo().GetPetNumber());
+            stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_AURAS);
-            stmt.AddValue(0, GetCharmInfo().GetPetNumber());
+            stmt.SetInt32(0, GetCharmInfo().GetPetNumber());
             trans.Append(stmt);
 
             byte index;
@@ -966,16 +966,16 @@ namespace Game.Entities
 
                 index = 0;
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_AURA);
-                stmt.AddValue(index++, GetCharmInfo().GetPetNumber());
-                stmt.AddValue(index++, key.Caster.GetRawValue());
-                stmt.AddValue(index++, key.SpellId);
-                stmt.AddValue(index++, key.EffectMask);
-                stmt.AddValue(index++, recalculateMask);
-                stmt.AddValue(index++, (byte)aura.GetCastDifficulty());
-                stmt.AddValue(index++, aura.GetStackAmount());
-                stmt.AddValue(index++, aura.GetMaxDuration());
-                stmt.AddValue(index++, aura.GetDuration());
-                stmt.AddValue(index++, aura.GetCharges());
+                stmt.SetInt32(index++, GetCharmInfo().GetPetNumber());
+                stmt.SetBytes(index++, key.Caster.GetRawValue());
+                stmt.SetInt32(index++, key.SpellId);
+                stmt.SetUInt32(index++, key.EffectMask);
+                stmt.SetUInt32(index++, recalculateMask);
+                stmt.SetUInt8(index++, (byte)aura.GetCastDifficulty());
+                stmt.SetUInt8(index++, aura.GetStackAmount());
+                stmt.SetInt32(index++, aura.GetMaxDuration());
+                stmt.SetInt32(index++, aura.GetDuration());
+                stmt.SetUInt8(index++, aura.GetCharges());
                 trans.Append(stmt);
 
                 foreach (AuraEffect effect in aura.GetAuraEffects())
@@ -984,13 +984,13 @@ namespace Game.Entities
                     {
                         index = 0;
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_AURA_EFFECT);
-                        stmt.AddValue(index++, GetCharmInfo().GetPetNumber());
-                        stmt.AddValue(index++, key.Caster.GetRawValue());
-                        stmt.AddValue(index++, key.SpellId);
-                        stmt.AddValue(index++, key.EffectMask);
-                        stmt.AddValue(index++, effect.GetEffIndex());
-                        stmt.AddValue(index++, effect.GetAmount());
-                        stmt.AddValue(index++, effect.GetBaseAmount());
+                        stmt.SetInt32(index++, GetCharmInfo().GetPetNumber());
+                        stmt.SetBytes(index++, key.Caster.GetRawValue());
+                        stmt.SetInt32(index++, key.SpellId);
+                        stmt.SetUInt32(index++, key.EffectMask);
+                        stmt.SetUInt8(index++, (byte)effect.GetEffIndex());
+                        stmt.SetInt32(index++, effect.GetAmount());
+                        stmt.SetInt32(index++, effect.GetBaseAmount());
                         trans.Append(stmt);
                     }
                 }
@@ -1009,7 +1009,7 @@ namespace Game.Entities
 
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_PET_SPELL);
 
-                    stmt.AddValue(0, spellId);
+                    stmt.SetInt32(0, spellId);
 
                     DB.Characters.Execute(stmt);
                 }
@@ -1722,28 +1722,28 @@ namespace Game.Entities
         public PetLoadQueryHolder(long ownerGuid, int petNumber)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PET_DECLINED_NAME);
-            stmt.AddValue(0, ownerGuid);
-            stmt.AddValue(1, petNumber);
+            stmt.SetInt64(0, ownerGuid);
+            stmt.SetInt32(1, petNumber);
             SetQuery(PetLoginQueryLoad.DeclinedNames, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PET_AURA);
-            stmt.AddValue(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             SetQuery(PetLoginQueryLoad.Auras, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PET_AURA_EFFECT);
-            stmt.AddValue(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             SetQuery(PetLoginQueryLoad.AuraEffects, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PET_SPELL);
-            stmt.AddValue(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             SetQuery(PetLoginQueryLoad.Spells, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PET_SPELL_COOLDOWN);
-            stmt.AddValue(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             SetQuery(PetLoginQueryLoad.Cooldowns, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PET_SPELL_CHARGES);
-            stmt.AddValue(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             SetQuery(PetLoginQueryLoad.Charges, stmt);
         }
     }

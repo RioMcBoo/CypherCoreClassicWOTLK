@@ -88,8 +88,8 @@ namespace Game
                             if (!charInfo.Flags2.HasAnyFlag(CharacterCustomizeFlags.Customize | CharacterCustomizeFlags.Faction | CharacterCustomizeFlags.Race))
                             {
                                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                                stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
-                                stmt.AddValue(1, charInfo.Guid.GetCounter());
+                                stmt.SetUInt16(0, (ushort)AtLoginFlags.Customize);
+                                stmt.SetInt64(1, charInfo.Guid.GetCounter());
                                 DB.Characters.Execute(stmt);
                                 charInfo.Flags2 = CharacterCustomizeFlags.Customize;
                             }
@@ -418,7 +418,7 @@ namespace Game
 
             CharacterCreateInfo createInfo = charCreate.CreateInfo;
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
-            stmt.AddValue(0, charCreate.CreateInfo.Name);
+            stmt.SetString(0, charCreate.CreateInfo.Name);
 
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithChainingCallback((queryCallback, result) =>
             {
@@ -429,7 +429,7 @@ namespace Game
                 }
 
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_SUM_REALM_CHARACTERS);
-                stmt.AddValue(0, GetAccountId());
+                stmt.SetInt32(0, GetAccountId());
                 queryCallback.SetNextQuery(DB.Login.AsyncQuery(stmt));
 
             }).WithChainingCallback((queryCallback, result) =>
@@ -445,7 +445,7 @@ namespace Game
                 }
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_SUM_CHARS);
-                stmt.AddValue(0, GetAccountId());
+                stmt.SetInt32(0, GetAccountId());
                 queryCallback.SetNextQuery(DB.Characters.AsyncQuery(stmt));
 
             }).WithChainingCallback((queryCallback, result) =>
@@ -599,9 +599,9 @@ namespace Game
                     createInfo.CharCount += 1;
 
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
-                    stmt.AddValue(0, createInfo.CharCount);
-                    stmt.AddValue(1, GetAccountId());
-                    stmt.AddValue(2, Global.WorldMgr.GetRealm().Id.Index);
+                    stmt.SetUInt8(0, createInfo.CharCount);
+                    stmt.SetInt32(1, GetAccountId());
+                    stmt.SetInt32(2, Global.WorldMgr.GetRealm().Id.Index);
                     loginTransaction.Append(stmt);
 
                     DB.Login.CommitTransaction(loginTransaction);
@@ -631,8 +631,8 @@ namespace Game
                 }
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_CREATE_INFO);
-                stmt.AddValue(0, GetAccountId());
-                stmt.AddValue(1, (skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter || createInfo.ClassId == Class.Evoker) ? 1200 : 1); // 200 (max chars per realm) + 1000 (max deleted chars per realm)
+                stmt.SetInt32(0, GetAccountId());
+                stmt.SetInt32(1, (skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter || createInfo.ClassId == Class.Evoker) ? 1200 : 1); // 200 (max chars per realm) + 1000 (max deleted chars per realm)
                 queryCallback.WithCallback(finalizeCharacterCreation).SetNextQuery(DB.Characters.AsyncQuery(stmt));
             }));
         }
@@ -727,9 +727,9 @@ namespace Game
             foreach (var reorderInfo in reorderChars.Entries)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_LIST_SLOT);
-                stmt.AddValue(0, reorderInfo.NewPosition);
-                stmt.AddValue(1, reorderInfo.PlayerGUID.GetCounter());
-                stmt.AddValue(2, GetAccountId());
+                stmt.SetUInt8(0, reorderInfo.NewPosition);
+                stmt.SetInt64(1, reorderInfo.PlayerGUID.GetCounter());
+                stmt.SetInt32(2, GetAccountId());
                 trans.Append(stmt);
             }
 
@@ -902,11 +902,11 @@ namespace Game
             pCurrChar.SendInitialPacketsAfterAddToMap();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_ONLINE);
-            stmt.AddValue(0, pCurrChar.GetGUID().GetCounter());
+            stmt.SetInt64(0, pCurrChar.GetGUID().GetCounter());
             DB.Characters.Execute(stmt);
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_ONLINE);
-            stmt.AddValue(0, GetAccountId());
+            stmt.SetInt32(0, GetAccountId());
             DB.Login.Execute(stmt);
 
             pCurrChar.SetInGameTime(GameTime.GetGameTimeMS());
@@ -946,12 +946,12 @@ namespace Game
             {
                 // Delete all of the player's pet spells
                 PreparedStatement stmtSpells = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_PET_SPELLS_BY_OWNER);
-                stmtSpells.AddValue(0, pCurrChar.GetGUID().GetCounter());
+                stmtSpells.SetInt64(0, pCurrChar.GetGUID().GetCounter());
                 DB.Characters.Execute(stmtSpells);
 
                 // Then reset all of the player's pet specualizations
                 PreparedStatement stmtSpec = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_PET_SPECS_BY_OWNER);
-                stmtSpec.AddValue(0, pCurrChar.GetGUID().GetCounter());
+                stmtSpec.SetInt64(0, pCurrChar.GetGUID().GetCounter());
                 DB.Characters.Execute(stmtSpec);
             }
 
@@ -1228,7 +1228,7 @@ namespace Game
 
             // Ensure that there is no character with the desired new name
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
-            stmt.AddValue(0, checkCharacterNameAvailability.Name);
+            stmt.SetString(0, checkCharacterNameAvailability.Name);
 
             var sequenceIndex = checkCharacterNameAvailability.SequenceIndex;
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(result =>
@@ -1276,8 +1276,8 @@ namespace Game
 
             // Ensure that there is no character with the desired new name
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_FREE_NAME);
-            stmt.AddValue(0, request.RenameInfo.Guid.GetCounter());
-            stmt.AddValue(1, request.RenameInfo.NewName);
+            stmt.SetInt64(0, request.RenameInfo.Guid.GetCounter());
+            stmt.SetString(1, request.RenameInfo.NewName);
 
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharRenameCallBack, request.RenameInfo));
         }
@@ -1305,13 +1305,13 @@ namespace Game
 
             // Update name and at_login flag in the db
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
-            stmt.AddValue(0, renameInfo.NewName);
-            stmt.AddValue(1, (ushort)atLoginFlags);
-            stmt.AddValue(2, lowGuid);
+            stmt.SetString(0, renameInfo.NewName);
+            stmt.SetUInt16(1, (ushort)atLoginFlags);
+            stmt.SetInt64(2, lowGuid);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_DECLINED_NAME);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);
@@ -1362,14 +1362,14 @@ namespace Game
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_DECLINED_NAME);
-            stmt.AddValue(0, packet.Player.GetCounter());
+            stmt.SetInt64(0, packet.Player.GetCounter());
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_DECLINED_NAME);
-            stmt.AddValue(0, packet.Player.GetCounter());
+            stmt.SetInt64(0, packet.Player.GetCounter());
 
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                stmt.AddValue(i + 1, packet.DeclinedNames.Name[i]);
+                stmt.SetString(i + 1, packet.DeclinedNames.Name[i]);
 
             trans.Append(stmt);
 
@@ -1454,7 +1454,7 @@ namespace Game
             }
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_CUSTOMIZE_INFO);
-            stmt.AddValue(0, packet.CustomizeInfo.CharGUID.GetCounter());
+            stmt.SetInt64(0, packet.CustomizeInfo.CharGUID.GetCounter());
 
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharCustomizeCallback, packet.CustomizeInfo));
         }
@@ -1537,13 +1537,13 @@ namespace Game
             // Name Change and update atLogin flags
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
-                stmt.AddValue(0, customizeInfo.CharName);
-                stmt.AddValue(1, (ushort)atLoginFlags);
-                stmt.AddValue(2, lowGuid);
+                stmt.SetString(0, customizeInfo.CharName);
+                stmt.SetUInt16(1, (ushort)atLoginFlags);
+                stmt.SetInt64(2, lowGuid);
                 trans.Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_DECLINED_NAME);
-                stmt.AddValue(0, lowGuid);
+                stmt.SetInt64(0, lowGuid);
 
                 trans.Append(stmt);
             }
@@ -1719,7 +1719,7 @@ namespace Game
             }
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS);
-            stmt.AddValue(0, packet.RaceOrFactionChangeInfo.Guid.GetCounter());
+            stmt.SetInt64(0, packet.RaceOrFactionChangeInfo.Guid.GetCounter());
 
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharRaceOrFactionChangeCallback, packet.RaceOrFactionChangeInfo));
         }
@@ -1842,14 +1842,14 @@ namespace Game
             // Name Change and update atLogin flags
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
-                stmt.AddValue(0, factionChangeInfo.Name);
-                stmt.AddValue(1, (ushort)((atLoginFlags | AtLoginFlags.Resurrect) & ~usedLoginFlag));
-                stmt.AddValue(2, lowGuid);
+                stmt.SetString(0, factionChangeInfo.Name);
+                stmt.SetUInt16(1, (ushort)((atLoginFlags | AtLoginFlags.Resurrect) & ~usedLoginFlag));
+                stmt.SetInt64(2, lowGuid);
 
                 trans.Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_DECLINED_NAME);
-                stmt.AddValue(0, lowGuid);
+                stmt.SetInt64(0, lowGuid);
 
                 trans.Append(stmt);
             }
@@ -1860,9 +1860,9 @@ namespace Game
             // Race Change
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_RACE);
-                stmt.AddValue(0, (byte)factionChangeInfo.RaceID);
-                stmt.AddValue(1, (ushort)PlayerExtraFlags.HasRaceChanged);
-                stmt.AddValue(2, lowGuid);
+                stmt.SetUInt8(0, (byte)factionChangeInfo.RaceID);
+                stmt.SetUInt16(1, (ushort)PlayerExtraFlags.HasRaceChanged);
+                stmt.SetInt64(2, lowGuid);
 
                 trans.Append(stmt);
             }
@@ -1874,18 +1874,18 @@ namespace Game
                 // Switch Languages
                 // delete all languages first
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SKILL_LANGUAGES);
-                stmt.AddValue(0, lowGuid);
+                stmt.SetInt64(0, lowGuid);
                 trans.Append(stmt);
 
                 // Now add them back
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_SKILL_LANGUAGE);
-                stmt.AddValue(0, lowGuid);
+                stmt.SetInt64(0, lowGuid);
 
                 // Faction specific languages
                 if (newTeamId == BattleGroundTeamId.Horde)
-                    stmt.AddValue(1, 109);
+                    stmt.SetInt32(1, 109);
                 else
-                    stmt.AddValue(1, 98);
+                    stmt.SetInt32(1, 98);
 
                 trans.Append(stmt);
 
@@ -1893,45 +1893,45 @@ namespace Game
                 if (factionChangeInfo.RaceID != Race.Orc && factionChangeInfo.RaceID != Race.Human)
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_SKILL_LANGUAGE);
-                    stmt.AddValue(0, lowGuid);
+                    stmt.SetInt64(0, lowGuid);
 
                     switch (factionChangeInfo.RaceID)
                     {
                         case Race.Dwarf:
-                            stmt.AddValue(1, 111);
+                            stmt.SetInt32(1, 111);
                             break;
                         case Race.Draenei:
                         case Race.LightforgedDraenei:
-                            stmt.AddValue(1, 759);
+                            stmt.SetInt32(1, 759);
                             break;
                         case Race.Gnome:
-                            stmt.AddValue(1, 313);
+                            stmt.SetInt32(1, 313);
                             break;
                         case Race.NightElf:
-                            stmt.AddValue(1, 113);
+                            stmt.SetInt32(1, 113);
                             break;
                         case Race.Worgen:
-                            stmt.AddValue(1, 791);
+                            stmt.SetInt32(1, 791);
                             break;
                         case Race.Undead:
-                            stmt.AddValue(1, 673);
+                            stmt.SetInt32(1, 673);
                             break;
                         case Race.Tauren:
                         case Race.HighmountainTauren:
-                            stmt.AddValue(1, 115);
+                            stmt.SetInt32(1, 115);
                             break;
                         case Race.Troll:
-                            stmt.AddValue(1, 315);
+                            stmt.SetInt32(1, 315);
                             break;
                         case Race.BloodElf:
                         case Race.VoidElf:
-                            stmt.AddValue(1, 137);
+                            stmt.SetInt32(1, 137);
                             break;
                         case Race.Goblin:
-                            stmt.AddValue(1, 792);
+                            stmt.SetInt32(1, 792);
                             break;
                         case Race.Nightborne:
-                            stmt.AddValue(1, 2464);
+                            stmt.SetInt32(1, 2464);
                             break;
                         default:
                             Log.outError(LogFilter.Player, $"Could not find language data for race ({factionChangeInfo.RaceID}).");
@@ -1947,7 +1947,7 @@ namespace Game
                 {
                     // Delete all Flypaths
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_TAXI_PATH);
-                    stmt.AddValue(0, lowGuid);
+                    stmt.SetInt64(0, lowGuid);
                     trans.Append(stmt);
 
                     if (level > 7)
@@ -1967,8 +1967,8 @@ namespace Game
                         }
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_TAXIMASK);
-                        stmt.AddValue(0, taximaskstream);
-                        stmt.AddValue(1, lowGuid);
+                        stmt.SetString(0, taximaskstream);
+                        stmt.SetInt64(1, lowGuid);
                         trans.Append(stmt);
                     }
 
@@ -1993,21 +1993,21 @@ namespace Game
                     {
                         // Delete Friend List
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SOCIAL_BY_GUID);
-                        stmt.AddValue(0, lowGuid);
+                        stmt.SetInt64(0, lowGuid);
                         trans.Append(stmt);
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SOCIAL_BY_FRIEND);
-                        stmt.AddValue(0, lowGuid);
+                        stmt.SetInt64(0, lowGuid);
                         trans.Append(stmt);
                     }
 
                     // Reset homebind and position
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PLAYER_HOMEBIND);
-                    stmt.AddValue(0, lowGuid);
+                    stmt.SetInt64(0, lowGuid);
                     trans.Append(stmt);
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PLAYER_HOMEBIND);
-                    stmt.AddValue(0, lowGuid);
+                    stmt.SetInt64(0, lowGuid);
 
                     WorldLocation loc;
                     ushort zoneId = 0;
@@ -2022,11 +2022,11 @@ namespace Game
                         zoneId = 1637;
                     }
 
-                    stmt.AddValue(1, loc.GetMapId());
-                    stmt.AddValue(2, zoneId);
-                    stmt.AddValue(3, loc.GetPositionX());
-                    stmt.AddValue(4, loc.GetPositionY());
-                    stmt.AddValue(5, loc.GetPositionZ());
+                    stmt.SetInt32(1, loc.GetMapId());
+                    stmt.SetUInt16(2, zoneId);
+                    stmt.SetFloat(3, loc.GetPositionX());
+                    stmt.SetFloat(4, loc.GetPositionY());
+                    stmt.SetFloat(5, loc.GetPositionZ());
                     trans.Append(stmt);
 
                     Player.SavePositionInDB(loc, zoneId, factionChangeInfo.Guid, trans);
@@ -2038,14 +2038,14 @@ namespace Game
                         int achiev_horde = it.Value;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENT_BY_ACHIEVEMENT);
-                        stmt.AddValue(0, (ushort)(newTeamId == BattleGroundTeamId.Alliance ? achiev_alliance : achiev_horde));
-                        stmt.AddValue(1, lowGuid);
+                        stmt.SetUInt16(0, (ushort)(newTeamId == BattleGroundTeamId.Alliance ? achiev_alliance : achiev_horde));
+                        stmt.SetInt64(1, lowGuid);
                         trans.Append(stmt);
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_ACHIEVEMENT);
-                        stmt.AddValue(0, (ushort)(newTeamId == BattleGroundTeamId.Alliance ? achiev_alliance : achiev_horde));
-                        stmt.AddValue(1, (ushort)(newTeamId == BattleGroundTeamId.Alliance ? achiev_horde : achiev_alliance));
-                        stmt.AddValue(2, lowGuid);
+                        stmt.SetUInt16(0, (ushort)(newTeamId == BattleGroundTeamId.Alliance ? achiev_alliance : achiev_horde));
+                        stmt.SetUInt16(1, (ushort)(newTeamId == BattleGroundTeamId.Alliance ? achiev_horde : achiev_alliance));
+                        stmt.SetInt64(2, lowGuid);
                         trans.Append(stmt);
                     }
 
@@ -2057,15 +2057,15 @@ namespace Game
                         int newItemId = it.Value;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_INVENTORY_FACTION_CHANGE);
-                        stmt.AddValue(0, newItemId);
-                        stmt.AddValue(1, oldItemId);
-                        stmt.AddValue(2, lowGuid);
+                        stmt.SetInt32(0, newItemId);
+                        stmt.SetInt32(1, oldItemId);
+                        stmt.SetInt64(2, lowGuid);
                         trans.Append(stmt);
                     }
 
                     // Delete all current quests
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS);
-                    stmt.AddValue(0, lowGuid);
+                    stmt.SetInt64(0, lowGuid);
                     trans.Append(stmt);
 
                     // Quest conversion
@@ -2075,20 +2075,20 @@ namespace Game
                         int quest_horde = it.Value;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_REWARDED_BY_QUEST);
-                        stmt.AddValue(0, lowGuid);
-                        stmt.AddValue(1, (newTeamId == BattleGroundTeamId.Alliance ? quest_alliance : quest_horde));
+                        stmt.SetInt64(0, lowGuid);
+                        stmt.SetInt32(1, (newTeamId == BattleGroundTeamId.Alliance ? quest_alliance : quest_horde));
                         trans.Append(stmt);
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_FACTION_CHANGE);
-                        stmt.AddValue(0, (newTeamId == BattleGroundTeamId.Alliance ? quest_alliance : quest_horde));
-                        stmt.AddValue(1, (newTeamId == BattleGroundTeamId.Alliance ? quest_horde : quest_alliance));
-                        stmt.AddValue(2, lowGuid);
+                        stmt.SetInt32(0, (newTeamId == BattleGroundTeamId.Alliance ? quest_alliance : quest_horde));
+                        stmt.SetInt32(1, (newTeamId == BattleGroundTeamId.Alliance ? quest_horde : quest_alliance));
+                        stmt.SetInt64(2, lowGuid);
                         trans.Append(stmt);
                     }
 
                     // Mark all rewarded quests as "active" (will count for completed quests achievements)
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE);
-                    stmt.AddValue(0, lowGuid);
+                    stmt.SetInt64(0, lowGuid);
                     trans.Append(stmt);
 
                     // Disable all old-faction specific quests
@@ -2100,8 +2100,8 @@ namespace Game
                             if (quest.AllowableRaces != (RaceMask)(-1) && !quest.AllowableRaces.HasAnyFlag(newRaceMask))
                             {
                                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);
-                                stmt.AddValue(0, lowGuid);
-                                stmt.AddValue(1, quest.Id);
+                                stmt.SetInt64(0, lowGuid);
+                                stmt.SetInt32(1, quest.Id);
                                 trans.Append(stmt);
                             }
                         }
@@ -2114,14 +2114,14 @@ namespace Game
                         int spell_horde = it.Value;
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_BY_SPELL);
-                        stmt.AddValue(0, (newTeamId == BattleGroundTeamId.Alliance ? spell_alliance : spell_horde));
-                        stmt.AddValue(1, lowGuid);
+                        stmt.SetInt32(0, (newTeamId == BattleGroundTeamId.Alliance ? spell_alliance : spell_horde));
+                        stmt.SetInt64(1, lowGuid);
                         trans.Append(stmt);
 
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_SPELL_FACTION_CHANGE);
-                        stmt.AddValue(0, (newTeamId == BattleGroundTeamId.Alliance ? spell_alliance : spell_horde));
-                        stmt.AddValue(1, (newTeamId == BattleGroundTeamId.Alliance ? spell_horde : spell_alliance));
-                        stmt.AddValue(2, lowGuid);
+                        stmt.SetInt32(0, (newTeamId == BattleGroundTeamId.Alliance ? spell_alliance : spell_horde));
+                        stmt.SetInt32(1, (newTeamId == BattleGroundTeamId.Alliance ? spell_horde : spell_alliance));
+                        stmt.SetInt64(2, lowGuid);
                         trans.Append(stmt);
                     }
 
@@ -2135,8 +2135,8 @@ namespace Game
 
                         // select old standing set in db
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_REP_BY_FACTION);
-                        stmt.AddValue(0, oldReputation);
-                        stmt.AddValue(1, lowGuid);
+                        stmt.SetInt32(0, oldReputation);
+                        stmt.SetInt64(1, lowGuid);
 
                         SQLResult result1 = DB.Characters.Query(stmt);
                         if (!result1.IsEmpty())
@@ -2155,15 +2155,15 @@ namespace Game
                             int newDBRep = FinalRep - newBaseRep;
 
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_REP_BY_FACTION);
-                            stmt.AddValue(0, newReputation);
-                            stmt.AddValue(1, lowGuid);
+                            stmt.SetInt32(0, newReputation);
+                            stmt.SetInt64(1, lowGuid);
                             trans.Append(stmt);
 
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_REP_FACTION_CHANGE);
-                            stmt.AddValue(0, (ushort)newReputation);
-                            stmt.AddValue(1, newDBRep);
-                            stmt.AddValue(2, (ushort)oldReputation);
-                            stmt.AddValue(3, lowGuid);
+                            stmt.SetUInt16(0, (ushort)newReputation);
+                            stmt.SetInt32(1, newDBRep);
+                            stmt.SetUInt16(2, (ushort)oldReputation);
+                            stmt.SetInt64(3, lowGuid);
                             trans.Append(stmt);
                         }
                     }
@@ -2226,13 +2226,13 @@ namespace Game
                                 ss += knownTitles[index] + ' ';
 
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_TITLES_FACTION_CHANGE);
-                            stmt.AddValue(0, ss);
-                            stmt.AddValue(1, lowGuid);
+                            stmt.SetString(0, ss);
+                            stmt.SetInt64(1, lowGuid);
                             trans.Append(stmt);
 
                             // unset any currently chosen title
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.RES_CHAR_TITLES_FACTION_CHANGE);
-                            stmt.AddValue(0, lowGuid);
+                            stmt.SetInt64(0, lowGuid);
                             trans.Append(stmt);
                         }
                     }
@@ -2268,7 +2268,7 @@ namespace Game
         void HandleGetUndeleteCooldownStatus(GetUndeleteCharacterCooldownStatus getCooldown)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_LAST_CHAR_UNDELETE);
-            stmt.AddValue(0, GetBattlenetAccountId());
+            stmt.SetInt32(0, GetBattlenetAccountId());
 
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleUndeleteCooldownStatusCallback));
         }
@@ -2298,7 +2298,7 @@ namespace Game
             }
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_LAST_CHAR_UNDELETE);
-            stmt.AddValue(0, GetBattlenetAccountId());
+            stmt.SetInt32(0, GetBattlenetAccountId());
 
             CharacterUndeleteInfo undeleteInfo = undeleteCharacter.UndeleteInfo;
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithChainingCallback((queryCallback, result) =>
@@ -2315,7 +2315,7 @@ namespace Game
                 }
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_GUID);
-                stmt.AddValue(0, undeleteInfo.CharacterGuid.GetCounter());
+                stmt.SetInt64(0, undeleteInfo.CharacterGuid.GetCounter());
                 queryCallback.SetNextQuery(DB.Characters.AsyncQuery(stmt));
             }).WithChainingCallback((queryCallback, result) =>
             {
@@ -2334,7 +2334,7 @@ namespace Game
                 }
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
-                stmt.AddValue(0, undeleteInfo.Name);
+                stmt.SetString(0, undeleteInfo.Name);
                 queryCallback.SetNextQuery(DB.Characters.AsyncQuery(stmt));
             }).WithChainingCallback((queryCallback, result) =>
             {
@@ -2351,7 +2351,7 @@ namespace Game
                 // * team violation
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_SUM_CHARS);
-                stmt.AddValue(0, GetAccountId());
+                stmt.SetInt32(0, GetAccountId());
                 queryCallback.SetNextQuery(DB.Characters.AsyncQuery(stmt));
             }).WithCallback(result =>
             {
@@ -2365,13 +2365,13 @@ namespace Game
                 }
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_RESTORE_DELETE_INFO);
-                stmt.AddValue(0, undeleteInfo.Name);
-                stmt.AddValue(1, GetAccountId());
-                stmt.AddValue(2, undeleteInfo.CharacterGuid.GetCounter());
+                stmt.SetString(0, undeleteInfo.Name);
+                stmt.SetInt32(1, GetAccountId());
+                stmt.SetInt64(2, undeleteInfo.CharacterGuid.GetCounter());
                 DB.Characters.Execute(stmt);
 
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LAST_CHAR_UNDELETE);
-                stmt.AddValue(0, GetBattlenetAccountId());
+                stmt.SetInt32(0, GetBattlenetAccountId());
                 DB.Login.Execute(stmt);
 
                 Global.CharacterCacheStorage.UpdateCharacterInfoDeleted(undeleteInfo.CharacterGuid, false, undeleteInfo.Name);
@@ -2656,194 +2656,194 @@ namespace Game
             var lowGuid = m_guid.GetCounter();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.From, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_CUSTOMIZATIONS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Customizations, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Group, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURAS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Auras, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_EFFECTS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.AuraEffects, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_STORED_LOCATIONS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.AuraStoredLocations, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SPELL);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Spells, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SPELL_FAVORITES);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.SpellFavorites, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.QuestStatus, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.QuestStatusObjectives, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES_CRITERIA);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.QuestStatusObjectivesCriteria, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.QuestStatusObjectivesCriteriaProgress, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_DAILY);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.DailyQuestStatus, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_WEEKLY);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.WeeklyQuestStatus, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_MONTHLY);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.MonthlyQuestStatus, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_SEASONAL);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.SeasonalQuestStatus, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_REPUTATION);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Reputation, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_INVENTORY);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Inventory, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_VOID_STORAGE);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.VoidStorage, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Mails, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.MailItems, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SOCIALLIST);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.SocialList, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_HOMEBIND);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.HomeBind, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SPELLCOOLDOWNS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.SpellCooldowns, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SPELL_CHARGES);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.SpellCharges, stmt);
 
             if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed))
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_DECLINEDNAMES);
-                stmt.AddValue(0, lowGuid);
+                stmt.SetInt64(0, lowGuid);
                 SetQuery(PlayerLoginQueryLoad.DeclinedNames, stmt);
             }
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Guild, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_ARENAINFO);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.ArenaInfo, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACHIEVEMENTS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Achievements, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_CRITERIAPROGRESS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.CriteriaProgress, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_EQUIPMENTSETS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.EquipmentSets, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_TRANSMOG_OUTFITS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.TransmogOutfits, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_CUF_PROFILES);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.CufProfiles, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_BGDATA);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.BgData, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_GLYPHS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Glyphs, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_TALENTS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Talents, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PLAYER_ACCOUNT_DATA);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.AccountData, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_SKILLS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Skills, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_RANDOMBG);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.RandomBg, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_BANNED);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Banned, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUSREW);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.QuestStatusRew, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ACCOUNT_INSTANCELOCKTIMES);
-            stmt.AddValue(0, m_accountId);
+            stmt.SetInt32(0, m_accountId);
             SetQuery(PlayerLoginQueryLoad.InstanceLockTimes, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PLAYER_CURRENCY);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Currency, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CORPSE_LOCATION);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.CorpseLocation, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_PETS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.PetSlots, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_TRAIT_ENTRIES);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.TraitEntries, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_TRAIT_CONFIGS);
-            stmt.AddValue(0, lowGuid);
+            stmt.SetInt64(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.TraitConfigs, stmt);
         }
 
@@ -2869,11 +2869,11 @@ namespace Game
 
             bool result = true;
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(statements[isDeletedCharacters ? 1 : 0][withDeclinedNames ? 1 : 0]);
-            stmt.AddValue(0, accountId);
+            stmt.SetInt32(0, accountId);
             SetQuery(EnumCharacterQueryLoad.Characters, stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(statements[isDeletedCharacters ? 1 : 0][2]);
-            stmt.AddValue(0, accountId);
+            stmt.SetInt32(0, accountId);
             SetQuery(EnumCharacterQueryLoad.Customizations, stmt);
 
             return result;

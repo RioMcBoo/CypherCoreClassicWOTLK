@@ -167,11 +167,11 @@ namespace Game.Loots
 
             SQLTransaction trans = new();
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
-            stmt.AddValue(0, containerId);
+            stmt.SetInt64(0, containerId);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
-            stmt.AddValue(0, containerId);
+            stmt.SetInt64(0, containerId);
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);
@@ -204,7 +204,7 @@ namespace Game.Loots
                 container.AddMoney(loot.gold, trans);
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
-            stmt.AddValue(0, containerId);
+            stmt.SetInt64(0, containerId);
             trans.Append(stmt);
 
             foreach (LootItem li in loot.items)
@@ -249,19 +249,19 @@ namespace Game.Loots
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_ITEMS);
             //   0              1       2           3               4       5       6       7           8               9               10                      11               12
             //container_id, item_id, item_count, item_index, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, random_properties_id, random_properties_seed, context            
-            stmt.AddValue(0, _containerId);
-            stmt.AddValue(1, lootItem.itemid);
-            stmt.AddValue(2, lootItem.count);
-            stmt.AddValue(3, lootItem.LootListId);
-            stmt.AddValue(4, lootItem.follow_loot_rules);
-            stmt.AddValue(5, lootItem.freeforall);
-            stmt.AddValue(6, lootItem.is_blocked);
-            stmt.AddValue(7, lootItem.is_counted);
-            stmt.AddValue(8, lootItem.is_underthreshold);
-            stmt.AddValue(9, lootItem.needs_quest);
-            stmt.AddValue(10, lootItem.randomProperties.RandomPropertiesID);
-            stmt.AddValue(11, lootItem.randomProperties.RandomPropertiesSeed);
-            stmt.AddValue(12, (byte)lootItem.context);
+            stmt.SetInt64(0, _containerId);
+            stmt.SetInt32(1, lootItem.itemid);
+            stmt.SetUInt8(2, lootItem.count);
+            stmt.SetInt32(3, lootItem.LootListId);
+            stmt.SetBool(4, lootItem.follow_loot_rules);
+            stmt.SetBool(5, lootItem.freeforall);
+            stmt.SetBool(6, lootItem.is_blocked);
+            stmt.SetBool(7, lootItem.is_counted);
+            stmt.SetBool(8, lootItem.is_underthreshold);
+            stmt.SetBool(9, lootItem.needs_quest);
+            stmt.SetInt32(10, lootItem.randomProperties.RandomPropertiesID);
+            stmt.SetInt32(11, lootItem.randomProperties.RandomPropertiesSeed);
+            stmt.SetUInt8(12, (byte)lootItem.context);
             trans.Append(stmt);
         }
 
@@ -272,12 +272,12 @@ namespace Game.Loots
                 return;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
-            stmt.AddValue(0, _containerId);
+            stmt.SetInt64(0, _containerId);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_MONEY);
-            stmt.AddValue(0, _containerId);
-            stmt.AddValue(1, _money);
+            stmt.SetInt64(0, _containerId);
+            stmt.SetUInt32(1, _money);
             trans.Append(stmt);
         }
 
@@ -286,7 +286,7 @@ namespace Game.Loots
             _money = 0;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
-            stmt.AddValue(0, _containerId);
+            stmt.SetInt64(0, _containerId);
             DB.Characters.Execute(stmt);
         }
 
@@ -304,10 +304,10 @@ namespace Game.Loots
 
             // Deletes a single item associated with an openable item from the DB
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEM);
-            stmt.AddValue(0, _containerId);
-            stmt.AddValue(1, itemId);
-            stmt.AddValue(2, count);
-            stmt.AddValue(3, itemIndex);
+            stmt.SetInt64(0, _containerId);
+            stmt.SetInt32(1, itemId);
+            stmt.SetInt32(2, count);
+            stmt.SetInt32(3, itemIndex);
             DB.Characters.Execute(stmt);
         }
 

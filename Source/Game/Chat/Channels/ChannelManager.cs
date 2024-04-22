@@ -37,7 +37,7 @@ namespace Game.Chat
             if (days != 0)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_OLD_CHANNELS);
-                stmt.AddValue(0, days * Time.Day);
+                stmt.SetUInt32(0, days * Time.Day);
                 DB.Characters.Execute(stmt);
             }
 
@@ -81,8 +81,8 @@ namespace Game.Chat
                 foreach (var (name, team) in toDelete)
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHANNEL);
-                    stmt.AddValue(0, name);
-                    stmt.AddValue(1, (uint)team);
+                    stmt.SetString(0, name);
+                    stmt.SetUInt32(1, (uint)team);
                     DB.Characters.Execute(stmt);
                 }
             }
@@ -221,7 +221,9 @@ namespace Game.Chat
         ObjectGuid CreateBuiltinChannelGuid(int channelId, AreaTableRecord zoneEntry = null)
         {
             ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
+
             int zoneId = 0;
+
             if (zoneEntry != null && channelEntry.HasFlag(ChatChannelFlags.ZoneBased) && !channelEntry.HasFlag(ChatChannelFlags.LinkedChannel))
                 zoneId = zoneEntry.Id;
 

@@ -48,7 +48,7 @@ namespace Game.Chat.Commands
             }
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_NODE_MAX_NODEID);
-            stmt.AddValue(0, pathId);
+            stmt.SetInt32(0, pathId);
             SQLResult result = DB.World.Query(stmt);
 
             int nodeId = 0;
@@ -58,12 +58,12 @@ namespace Game.Chat.Commands
             Player player = handler.GetPlayer();
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_WAYPOINT_PATH_NODE);
-            stmt.AddValue(0, pathId);
-            stmt.AddValue(1, nodeId);
-            stmt.AddValue(2, player.GetPositionX());
-            stmt.AddValue(3, player.GetPositionY());
-            stmt.AddValue(4, player.GetPositionZ());
-            stmt.AddValue(5, player.GetOrientation());
+            stmt.SetInt32(0, pathId);
+            stmt.SetInt32(1, nodeId);
+            stmt.SetFloat(2, player.GetPositionX());
+            stmt.SetFloat(3, player.GetPositionY());
+            stmt.SetFloat(4, player.GetPositionZ());
+            stmt.SetFloat(5, player.GetOrientation());
             DB.World.Execute(stmt);
 
             if (target != null)
@@ -117,27 +117,27 @@ namespace Game.Chat.Commands
             long guidLow = target.GetSpawnId();
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_ADDON_BY_GUID);
-            stmt.AddValue(0, guidLow);
+            stmt.SetInt64(0, guidLow);
             SQLResult result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
             {
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_ADDON_PATH);
-                stmt.AddValue(0, pathId);
-                stmt.AddValue(1, guidLow);
+                stmt.SetInt32(0, pathId);
+                stmt.SetInt64(1, guidLow);
             }
             else
             {
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_CREATURE_ADDON);
-                stmt.AddValue(0, guidLow);
-                stmt.AddValue(1, pathId);
+                stmt.SetInt64(0, guidLow);
+                stmt.SetInt32(1, pathId);
             }
 
             DB.World.Execute(stmt);
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
-            stmt.AddValue(0, (byte)MovementGeneratorType.Waypoint);
-            stmt.AddValue(1, guidLow);
+            stmt.SetUInt8(0, (byte)MovementGeneratorType.Waypoint);
+            stmt.SetInt64(1, guidLow);
 
             DB.World.Execute(stmt);
 
@@ -373,14 +373,14 @@ namespace Game.Chat.Commands
             }
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_CREATURE_ADDON);
-            stmt.AddValue(0, guidLow);
+            stmt.SetInt64(0, guidLow);
             DB.World.Execute(stmt);
 
             target.UpdateCurrentWaypointInfo(0, 0);
 
             stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
-            stmt.AddValue(0, (byte)MovementGeneratorType.Idle);
-            stmt.AddValue(1, guidLow);
+            stmt.SetUInt8(0, (byte)MovementGeneratorType.Idle);
+            stmt.SetInt64(1, guidLow);
             DB.World.Execute(stmt);
 
             target.LoadPath(0);

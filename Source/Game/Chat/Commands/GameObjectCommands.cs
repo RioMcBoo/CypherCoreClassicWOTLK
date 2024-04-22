@@ -244,14 +244,14 @@ namespace Game.Chat
             Player player = handler.GetPlayer();
 
             PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_GAMEOBJECT_NEAREST);
-            stmt.AddValue(0, player.GetPositionX());
-            stmt.AddValue(1, player.GetPositionY());
-            stmt.AddValue(2, player.GetPositionZ());
-            stmt.AddValue(3, player.GetMapId());
-            stmt.AddValue(4, player.GetPositionX());
-            stmt.AddValue(5, player.GetPositionY());
-            stmt.AddValue(6, player.GetPositionZ());
-            stmt.AddValue(7, distance * distance);
+            stmt.SetFloat(0, player.GetPositionX());
+            stmt.SetFloat(1, player.GetPositionY());
+            stmt.SetFloat(2, player.GetPositionZ());
+            stmt.SetInt32(3, player.GetMapId());
+            stmt.SetFloat(4, player.GetPositionX());
+            stmt.SetFloat(5, player.GetPositionY());
+            stmt.SetFloat(6, player.GetPositionZ());
+            stmt.SetFloat(7, distance * distance);
             SQLResult result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
