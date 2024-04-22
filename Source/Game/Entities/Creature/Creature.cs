@@ -442,56 +442,56 @@ namespace Game.Entities
                     Log.outError(LogFilter.Unit, $"Creature ({GetGUID()}) in wrong state: {m_deathState}");
                     break;
                 case DeathState.Dead:
+                {
+                    if (!m_respawnCompatibilityMode)
                     {
-                        if (!m_respawnCompatibilityMode)
+                        Log.outError(LogFilter.Unit, $"Creature (GUID: {GetGUID().GetCounter()} Entry: {GetEntry()}) in wrong state: DEAD (3)");
+                        break;
+                    }
+                    long now = GameTime.GetGameTime();
+                    if (m_respawnTime <= now)
+                    {
+                        // Delay respawn if spawn group is not active
+                        if (m_creatureData != null && !GetMap().IsSpawnGroupActive(m_creatureData.spawnGroupData.groupId))
                         {
-                            Log.outError(LogFilter.Unit, $"Creature (GUID: {GetGUID().GetCounter()} Entry: {GetEntry()}) in wrong state: DEAD (3)");
-                            break;
+                            m_respawnTime = now + RandomHelper.IRand(4, 7);
+                            break; // Will be rechecked on next Update call after delay expires
                         }
-                        long now = GameTime.GetGameTime();
-                        if (m_respawnTime <= now)
-                        {
-                            // Delay respawn if spawn group is not active
-                            if (m_creatureData != null && !GetMap().IsSpawnGroupActive(m_creatureData.spawnGroupData.groupId))
-                            {
-                                m_respawnTime = now + RandomHelper.URand(4, 7);
-                                break; // Will be rechecked on next Update call after delay expires
-                            }
 
-                            ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.Creature, GetMapId(), GetEntry(), m_spawnId);
-                            long linkedRespawnTime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
-                            if (linkedRespawnTime == 0)             // Can respawn
+                        ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.Creature, GetMapId(), GetEntry(), m_spawnId);
+                        long linkedRespawnTime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
+                        if (linkedRespawnTime == 0)             // Can respawn
                         {
-                                Respawn();
+                            Respawn();
                             break;
                         }
 
                         // linked guid can be a boss, uses std::numeric_limits<time_t>::max to never respawn in that instance
                         if (linkedRespawnTime == -1)
                             m_respawnTime = long.MaxValue;
-                            else                                // the master is dead
+                        else                                // the master is dead
+                        {
+                            ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
+                            if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
+                                SetRespawnTime(Time.Week);
+                            else
                             {
-                                ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
-                                if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
-                                    SetRespawnTime(Time.Week);
+                                // else copy time from master and add a little
+                                long baseRespawnTime = Math.Max(linkedRespawnTime, now);
+                                long offset = RandomHelper.IRand(5, Time.Minute);
+                                                                
+                                // we shall inherit it instead of adding and causing an overflow
+                                if (baseRespawnTime <= long.MaxValue - offset)
+                                    m_respawnTime = baseRespawnTime + offset;
                                 else
-                                {
-                                    // else copy time from master and add a little
-                                    long baseRespawnTime = Math.Max(linkedRespawnTime, now);
-                                    long offset = RandomHelper.URand(5, Time.Minute);
-
-                                    // we shall inherit it instead of adding and causing an overflow
-                                    if (baseRespawnTime <= long.MaxValue - offset)
-                                        m_respawnTime = baseRespawnTime + offset;
-                                    else
-                                        m_respawnTime = long.MaxValue;
-                                }
+                                    m_respawnTime = long.MaxValue;
+                            }
                             
                         }
-                                SaveRespawnTime(); // also save to DB immediately
-                            }
-                        break;
+                        SaveRespawnTime(); // also save to DB immediately
                     }
+                    break;
+                }
                 case DeathState.Corpse:
                     base.Update(diff);
                     if (m_deathState != DeathState.Corpse)

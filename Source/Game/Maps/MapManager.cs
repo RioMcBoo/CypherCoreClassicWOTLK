@@ -382,7 +382,7 @@ namespace Game.Entities
 
         public int GenerateInstanceId()
         {
-            if (_nextInstanceId == 0xFFFFFFFF)
+            if (_nextInstanceId == int.MaxValue)
             {
                 Log.outError(LogFilter.Maps, "Instance ID overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
