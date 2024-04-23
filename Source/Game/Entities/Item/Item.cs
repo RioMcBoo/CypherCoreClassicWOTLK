@@ -104,6 +104,10 @@ namespace Game.Entities
 
         public virtual void SaveToDB(SQLTransaction trans)
         {
+            bool isTransaction = trans != null;
+            if (!isTransaction)
+                trans = new SQLTransaction();
+
             PreparedStatement stmt;
             switch (uState)
             {
@@ -120,8 +124,8 @@ namespace Game.Entities
                     stmt.SetUInt32(++index, (uint)m_itemData.Expiration);
 
                     StringBuilder ss = new();
-                    for (byte i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount; ++i)
-                        ss.AppendFormat($"{GetSpellCharges(i)}");
+                    for (int i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount; ++i)
+                        ss.AppendFormat($"{GetSpellCharges(i)} ");
 
                     stmt.SetString(++index, ss.ToString());
                     stmt.SetUInt32(++index, (uint)m_itemData.DynamicFlags);
@@ -293,6 +297,9 @@ namespace Game.Entities
             }
 
             SetState(ItemUpdateState.Unchanged);
+
+            if (!isTransaction)
+                DB.Characters.CommitTransaction(trans);
         }
 
         public virtual bool LoadFromDB(long guid, ObjectGuid ownerGuid, SQLFields fields, int entry)

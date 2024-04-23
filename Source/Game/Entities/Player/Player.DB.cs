@@ -3757,7 +3757,8 @@ namespace Game.Entities
                 stmt.SetUInt32(index++, GetTalentResetCost());
                 stmt.SetInt64(index++, GetTalentResetTime());
                 stmt.SetUInt8(index++, GetNumRespecs());
-                stmt.SetUInt32(index++, (uint)GetPrimarySpecialization());
+                stmt.SetUInt8(index++, GetActiveTalentGroup());
+                stmt.SetUInt8(index++, GetBonusTalentGroupCount());
                 stmt.SetUInt16(index++, (ushort)m_ExtraFlags);
                 PetStable petStable = GetPetStable();
                 if (petStable != null)
@@ -3784,7 +3785,6 @@ namespace Game.Entities
                     stmt.SetInt32(index++, m_unitData.Power[i]);
 
                 stmt.SetUInt32(index++, GetSession().GetLatency());
-                stmt.SetUInt8(index++, GetActiveTalentGroup());
                 stmt.SetUInt32(index++, (uint)GetLootSpecId());
 
                 ss.Clear();
