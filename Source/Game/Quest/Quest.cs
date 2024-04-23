@@ -34,7 +34,7 @@ namespace Game
             RewardMoneyDifficulty = fields.Read<int>(13);
             RewardMoneyMultiplier = fields.Read<float>(14);
             RewardBonusMoney = fields.Read<int>(15);
-            RewardSpell = fields.Read<int>(16);
+            RewardSpell = (int)fields.Read<uint>(16); //TODO: change to signed in DB
             RewardHonor = fields.Read<int>(17);
             RewardKillHonor = fields.Read<int>(18);
             SourceItemId = fields.Read<int>(19);

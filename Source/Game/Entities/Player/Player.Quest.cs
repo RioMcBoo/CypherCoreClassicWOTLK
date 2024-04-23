@@ -45,7 +45,7 @@ namespace Game.Entities
         public void LearnQuestRewardedSpells(Quest quest)
         {
             //wtf why is rewardspell a uint if it can me -1
-            int spell_id = Convert.ToInt32(quest.RewardSpell);
+            int spell_id = quest.RewardSpell;
             int src_spell_id = quest.SourceSpellID;
 
             // skip quests without rewarded spell
