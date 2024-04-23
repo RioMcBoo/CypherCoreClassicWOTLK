@@ -27,22 +27,7 @@ namespace Game.Networking.Packets
         public byte ActiveGroup;
         public bool IsPetTalents;
         public List<TalentGroupInfo> TalentGroupInfos = new();        
-    }    
-
-    class LearnTalents : ClientPacket
-    {
-        public LearnTalents(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            int count = _worldPacket.ReadBits<int>(6);
-            for (int i = 0; i < count; i++)
-                Talents.Add(_worldPacket.ReadUInt16());
-        }
-
-        public int TalentID;
-        public Array<ushort> Talents = new(PlayerConst.MaxTalentTiers);
-    }    
+    }   
 
     class RespecWipeConfirm : ServerPacket
     {

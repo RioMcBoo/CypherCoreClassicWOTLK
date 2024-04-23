@@ -557,7 +557,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellRank[pair.Value.Rank], Difficulty.None);
                     if (spellEntry == null)
                     {
                         Log.outError(LogFilter.Player, 
