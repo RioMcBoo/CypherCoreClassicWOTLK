@@ -114,11 +114,11 @@ namespace Game
 
             if (!_completedObjectives.Empty())
             {
-                foreach (uint completedObjectiveId in _completedObjectives)
+                foreach (var completedObjectiveId in _completedObjectives)
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
                     stmt.SetInt64(0, _owner.GetGUID().GetCounter());
-                    stmt.SetUInt32(1, completedObjectiveId);
+                    stmt.SetInt32(1, completedObjectiveId);
                     trans.Append(stmt);
                 }
             }

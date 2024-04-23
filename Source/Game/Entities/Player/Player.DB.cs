@@ -1701,7 +1701,7 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Player, "Can't find item guid {0} but is in refundable storage for player {1} ! Removing.", guid, GetGUID().ToString());
+                    Log.outError(LogFilter.Player, $"Can't find item guid {guid} but is in refundable storage for player {GetGUID()} ! Removing.");
                     m_refundableItems.Remove(guid);
                 }
             }
@@ -1730,8 +1730,9 @@ namespace Game.Entities
                         Item test2 = GetItemByPos(item.InventoryBagSlot);
                         if (test2 != null)
                             bagTestGUID = test2.GetGUID().GetCounter();
-                        Log.outError(LogFilter.Player, "Player(GUID: {0} Name: {1}).SaveInventory - the bag({2}) and slot({3}) values for the item with guid {4} (state {5}) are incorrect, " +
-                            "the player doesn't have an item at that position!", GetGUID().ToString(), GetName(), item.InventoryBagSlot, item.InventorySlot, item.GetGUID().ToString(), item.GetState());
+                        Log.outError(LogFilter.Player, $"Player(GUID: {GetGUID()} Name: {GetName()}).SaveInventory - the bag({item.InventoryBagSlot}) and " +
+                            $"slot({item.InventorySlot}) values for the item with guid {item.GetGUID()} (state {item.GetState()}) are incorrect, " +
+                            "the player doesn't have an item at that position!");
                         // according to the test that was just performed nothing should be in this slot, delete
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY_BY_BAG_SLOT);
                         stmt.SetInt64(0, bagTestGUID);
@@ -1749,8 +1750,9 @@ namespace Game.Entities
                     }
                     else if (test != item)
                     {
-                        Log.outError(LogFilter.Player, "Player(GUID: {0} Name: {1}).SaveInventory - the bag({2}) and slot({3}) values for the item with guid {4} are incorrect, " +
-                            "the item with guid {5} is there instead!", GetGUID().ToString(), GetName(), item.InventoryBagSlot, item.InventorySlot, item.GetGUID().ToString(), test.GetGUID().ToString());
+                        Log.outError(LogFilter.Player, $"Player(GUID: {GetGUID()} Name: {GetName()}).SaveInventory - the bag({item.InventoryBagSlot}) and " +
+                            $"slot({item.InventorySlot}) values for the item with guid {item.GetGUID()} are incorrect, " +
+                            $"the item with guid {test.GetGUID()} is there instead!");
                         // save all changes to the item...
                         if (item.GetState() != ItemUpdateState.New) // only for existing items, no dupes
                             item.SaveToDB(trans);
@@ -1783,6 +1785,7 @@ namespace Game.Entities
             }
             ItemUpdateQueue.Clear();
         }
+
         void _SaveSkills(SQLTransaction trans)
         {
             PreparedStatement stmt;// = null;
@@ -1830,6 +1833,7 @@ namespace Game.Entities
                 pair.Value.State = SkillState.Unchanged;
             }
         }
+
         void _SaveSpells(SQLTransaction trans)
         {
             PreparedStatement stmt;
@@ -1881,6 +1885,7 @@ namespace Game.Entities
                     spell.State = PlayerSpellState.Unchanged;
             }
         }
+
         void _SaveAuras(SQLTransaction trans)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_AURA_EFFECT);
@@ -2099,6 +2104,7 @@ namespace Game.Entities
                 }
             }
         }
+
         void _SaveQuestStatus(SQLTransaction trans)
         {
             bool isTransaction = trans != null;
@@ -2184,6 +2190,7 @@ namespace Game.Entities
             if (!isTransaction)
                 DB.Characters.CommitTransaction(trans);
         }
+
         void _SaveDailyQuestStatus(SQLTransaction trans)
         {
             if (!m_DailyQuestChanged)
@@ -2219,6 +2226,7 @@ namespace Game.Entities
                 }
             }
         }
+
         void _SaveWeeklyQuestStatus(SQLTransaction trans)
         {
             if (!m_WeeklyQuestChanged || m_weeklyquests.Empty())
@@ -2239,6 +2247,7 @@ namespace Game.Entities
 
             m_WeeklyQuestChanged = false;
         }
+
         void _SaveSeasonalQuestStatus(SQLTransaction trans)
         {
             if (!m_SeasonalQuestChanged)
@@ -2267,6 +2276,7 @@ namespace Game.Entities
                 }
             }
         }
+
         void _SaveMonthlyQuestStatus(SQLTransaction trans)
         {
             if (!m_MonthlyQuestChanged || m_monthlyquests.Empty())
@@ -2322,7 +2332,7 @@ namespace Game.Entities
 
         void _SaveTraits(SQLTransaction trans)
         {
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
             foreach (var (traitConfigId, state) in m_traitConfigStates)
             {
                 switch (state)
@@ -2461,11 +2471,8 @@ namespace Game.Entities
             }
 
             //deallocate deleted mails...
-            foreach (var m in GetMails().ToList())
-            {
-                if (m.state == MailState.Deleted)
-                    m_mail.Remove(m);
-            }
+            foreach (var m in GetMails().Where(m => m.state == MailState.Deleted))
+                m_mail.Remove(m);
 
             m_mailsUpdated = false;
         }
@@ -2502,6 +2509,7 @@ namespace Game.Entities
                 }
             }
         }
+
         void _SaveStats(SQLTransaction trans)
         {
             // check if stat saving is enabled and if char level is high enough
@@ -2523,8 +2531,8 @@ namespace Game.Entities
             for (Stats i = 0; i < Stats.Max; ++i)
                 stmt.SetInt32(index++, (int)GetStat(i));
 
-            for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                stmt.SetInt32(index++, GetResistance((SpellSchools)i));
+            for (SpellSchools i = 0; i < SpellSchools.Max; ++i)
+                stmt.SetInt32(index++, GetResistance(i));
 
             stmt.SetFloat(index++, m_activePlayerData.BlockPercentage);
             stmt.SetFloat(index++, m_activePlayerData.DodgePercentage);
@@ -2542,6 +2550,7 @@ namespace Game.Entities
 
             trans.Append(stmt);
         }
+
         public void SaveInventoryAndGoldToDB(SQLTransaction trans)
         {
             _SaveInventory(trans);
@@ -2552,6 +2561,7 @@ namespace Game.Entities
             stmt.SetInt64(1, GetGUID().GetCounter());
             trans.Append(stmt);
         }
+
         void _SaveEquipmentSets(SQLTransaction trans)
         {
             foreach (var pair in _equipmentSets)
@@ -2646,6 +2656,7 @@ namespace Game.Entities
                 }
             }
         }
+
         void _SaveVoidStorage(SQLTransaction trans)
         {
             PreparedStatement stmt;
@@ -2716,6 +2727,7 @@ namespace Game.Entities
                 trans.Append(stmt);
             }
         }
+
         void _SaveInstanceTimeRestrictions(SQLTransaction trans)
         {
             if (_instanceResetTimes.Empty())
@@ -2734,6 +2746,7 @@ namespace Game.Entities
                 trans.Append(stmt);
             }
         }
+
         void _SaveBGData(SQLTransaction trans)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PLAYER_BGDATA);
@@ -3907,6 +3920,7 @@ namespace Game.Entities
             if (pet != null)
                 pet.SavePetToDB(PetSaveMode.AsCurrent);
         }
+
         void DeleteSpellFromAllPlayers(int spellId)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_SPELL_SPELLS);

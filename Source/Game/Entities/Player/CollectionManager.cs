@@ -101,8 +101,8 @@ namespace Game.Entities
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.REP_ACCOUNT_TOYS);
                 stmt.SetInt32(0, _owner.GetBattlenetAccountId());
                 stmt.SetInt32(1, pair.Key);
-                stmt.SetBool(2, pair.Value.HasAnyFlag(ToyFlags.Favorite));
-                stmt.SetBool(3, pair.Value.HasAnyFlag(ToyFlags.HasFanfare));
+                stmt.SetBool(2, pair.Value.HasFlag(ToyFlags.Favorite));
+                stmt.SetBool(3, pair.Value.HasFlag(ToyFlags.HasFanfare));
                 trans.Append(stmt);
             }
         }

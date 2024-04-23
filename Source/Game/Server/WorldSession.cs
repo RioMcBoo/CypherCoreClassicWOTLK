@@ -463,8 +463,10 @@ namespace Game
 
             bool hasTutorialsInDB = tutorialsChanged.HasAnyFlag(TutorialsFlag.LoadedFromDB);
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(hasTutorialsInDB ? CharStatements.UPD_TUTORIALS : CharStatements.INS_TUTORIALS);
+
             for (var i = 0; i < SharedConst.MaxAccountTutorialValues; ++i)
                 stmt.SetUInt32(i, tutorials[i]);
+
             stmt.SetInt32(SharedConst.MaxAccountTutorialValues, GetAccountId());
             trans.Append(stmt);
 

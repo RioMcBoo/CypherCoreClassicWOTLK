@@ -180,7 +180,7 @@ namespace Game.Entities
                         {
                             if (gemData.ItemId != 0)
                             {
-                                stmt.SetInt32(1 + i * gemFields, (int)gemData.ItemId);
+                                stmt.SetInt32(1 + i * gemFields, gemData.ItemId);
                                 StringBuilder gemBonusListIDs = new();
                                 foreach (var bonusListID in gemData.BonusListIDs)
                                 {

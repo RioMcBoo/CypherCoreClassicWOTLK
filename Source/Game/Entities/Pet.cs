@@ -458,9 +458,7 @@ namespace Game.Entities
                 stmt.SetInt32(9, HasPetFlag(UnitPetFlags.CanBeRenamed) ? 0 : 1);
                 stmt.SetUInt32(10, curhealth);
                 stmt.SetInt32(11, curmana);
-
                 stmt.SetString(12, actionBar);
-
                 stmt.SetInt64(13, GameTime.GetGameTime());
                 stmt.SetInt32(14, m_unitData.CreatedBySpell);
                 stmt.SetUInt8(15, (byte)GetPetType());
@@ -496,36 +494,36 @@ namespace Game.Entities
             petInfo.SpecializationId = GetSpecialization();
         }
         
-        public static void DeleteFromDB(uint petNumber)
+        public static void DeleteFromDB(int petNumber)
         {
             SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_ID);
-            stmt.SetUInt32(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_PET_DECLINEDNAME);
-            stmt.SetUInt32(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_AURA_EFFECTS);
-            stmt.SetUInt32(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_AURAS);
-            stmt.SetUInt32(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELLS);
-            stmt.SetUInt32(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_COOLDOWNS);
-            stmt.SetUInt32(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             trans.Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_CHARGES);
-            stmt.SetUInt32(0, petNumber);
+            stmt.SetInt32(0, petNumber);
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);
