@@ -716,7 +716,10 @@ namespace Game.Maps
 
             int reqIndex = Path.IndexOfKey(time);
             if (reqIndex != -1)
-                return Path.GetValueAtIndex(reqIndex - 1);
+            {
+                int prevIndex = (reqIndex < 1) ? 1 : (reqIndex - 1);
+                return Path.GetValueAtIndex(prevIndex);
+            }
 
             return Path.LastOrDefault().Value;
         }
@@ -728,7 +731,10 @@ namespace Game.Maps
 
             int reqIndex = Rotations.IndexOfKey(time);
             if (reqIndex != -1)
-                return Rotations.GetValueAtIndex(reqIndex - 1);
+            {
+                int prevIndex = (reqIndex < 1) ? 1 : (reqIndex - 1);
+                return Rotations.GetValueAtIndex(prevIndex);
+            }
 
             return Rotations.LastOrDefault().Value;
         }
