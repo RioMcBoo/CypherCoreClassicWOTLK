@@ -19,8 +19,6 @@ namespace Game.Entities
 
         public void InitTaxiNodesForLevel(Race race, Class chrClass, int level)
         {
-            m_taximask = new byte[((CliDB.TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8];
-
             // class specific initial known nodes
             if (chrClass == Class.Deathknight)
             {
@@ -87,8 +85,8 @@ namespace Game.Entities
             for (var i = 0; index < m_taximask.Length && i != split.Length; ++i, ++index)
             {
                 // load and set bits only for existing taxi nodes
-                if (uint.TryParse(split[i], out uint id))
-                    m_taximask[index] = (byte)(CliDB.TaxiNodesMask[index] & id);
+                if (byte.TryParse(split[i], out byte submask))
+                    m_taximask[index] = (byte)(CliDB.TaxiNodesMask[index] & submask);
             }
         }
 
