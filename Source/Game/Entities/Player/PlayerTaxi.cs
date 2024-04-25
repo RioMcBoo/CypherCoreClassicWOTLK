@@ -17,6 +17,11 @@ namespace Game.Entities
         List<int> m_TaxiDestinations = new();
         int m_flightMasterFactionId;
 
+        public PlayerTaxi(int taxiMaskSize)
+        {
+            m_taximask = new byte[taxiMaskSize];
+        }
+
         public void InitTaxiNodesForLevel(Race race, Class chrClass, int level)
         {
             // class specific initial known nodes
@@ -77,8 +82,6 @@ namespace Game.Entities
 
         public void LoadTaxiMask(string data)
         {
-            m_taximask = new byte[((CliDB.TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8];
-
             var split = new StringArray(data, ' ');
 
             int index = 0;

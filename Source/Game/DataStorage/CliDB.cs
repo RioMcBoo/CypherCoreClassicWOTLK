@@ -145,7 +145,7 @@ namespace Game.DataStorage
             GlyphBindableSpellStorage.ReadDB2(data, "GlyphBindableSpell.db2", HotfixStatements.SEL_GLYPH_BINDABLE_SPELL);
             GlyphPropertiesStorage.ReadDB2(data, "GlyphProperties.db2", HotfixStatements.SEL_GLYPH_PROPERTIES);
             GlyphRequiredSpecStorage.ReadDB2(data, "GlyphRequiredSpec.db2", HotfixStatements.SEL_GLYPH_REQUIRED_SPEC);
-            GlyphSlotStorage.ReadDB2(data, "GlyphSlot.db2", HotfixStatements.SEL_GLYPH_SLOT);          
+            GlyphSlotStorage.ReadDB2(data, "GlyphSlot.db2", HotfixStatements.SEL_GLYPH_SLOT);
             GossipNPCOptionStorage.ReadDB2(data, "GossipNPCOption.db2", HotfixStatements.SEL_GOSSIP_NPC_OPTION);
             GuildColorBackgroundStorage.ReadDB2(data, "GuildColorBackground.db2", HotfixStatements.SEL_GUILD_COLOR_BACKGROUND);
             GuildColorBorderStorage.ReadDB2(data, "GuildColorBorder.db2", HotfixStatements.SEL_GUILD_COLOR_BORDER);
@@ -383,7 +383,7 @@ namespace Game.DataStorage
             foreach (var entry in TaxiPathNodeStorage.Values)
                 TaxiPathNodesByPath[entry.PathID][entry.NodeIndex] = entry;
 
-            var taxiMaskSize = ((TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8;
+            var taxiMaskSize = GetTaxiMaskSize();
             TaxiNodesMask = new byte[taxiMaskSize];
             OldContinentsNodesMask = new byte[taxiMaskSize];
             HordeTaxiNodesMask = new byte[taxiMaskSize];
@@ -816,6 +816,7 @@ namespace Game.DataStorage
         public static byte[] AllianceTaxiNodesMask;
         public static Dictionary<int, Dictionary<int, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new();
         public static Dictionary<int, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
+        public static int GetTaxiMaskSize() { return ((TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8;}
         #endregion
 
         #region Talent Collections
