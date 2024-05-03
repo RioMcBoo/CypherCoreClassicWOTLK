@@ -1398,7 +1398,7 @@ namespace Game.Guilds
 
         public bool LoadBankItemFromDB(SQLFields field)
         {
-            var tabId = field.Read<byte>(45);
+            var tabId = field.Read<byte>(47);
             if (tabId >= _GetPurchasedTabsSize())
             {
                 Log.outError(LogFilter.Guild, $"Invalid tab for item (GUID: {field.Read<long>(0)}, id: {field.Read<int>(1)}) in guild bank, skipped.");
@@ -3365,7 +3365,7 @@ namespace Game.Guilds
 
             public bool LoadItemFromDB(SQLFields field)
             {
-                var slotId = field.Read<byte>(49);
+                var slotId = field.Read<byte>(48);
                 var itemGuid = field.Read<long>(0);
                 var itemEntry = field.Read<int>(1);
                 if (slotId >= GuildConst.MaxBankSlots)
