@@ -2303,6 +2303,9 @@ namespace Game.Guilds
             if (member == null) // Shouldn't happen, just in case
                 return;
 
+            if (tabId >= _GetPurchasedTabsSize())
+                return;
+
             GuildBankQueryResults packet = new();
 
             packet.Money = m_bankMoney;
