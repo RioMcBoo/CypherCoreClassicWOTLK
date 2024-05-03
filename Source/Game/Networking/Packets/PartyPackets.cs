@@ -140,13 +140,13 @@ namespace Game.Networking.Packets
             bool hasRolesDesired = _worldPacket.HasBit();
 
             if (hasPartyIndex)
-                PartyIndex = _worldPacket.ReadUInt8();
+                PartyIndex = (GroupCategory)_worldPacket.ReadUInt8();
 
             if (hasRolesDesired)
                 RolesDesired = _worldPacket.ReadUInt8();
         }
 
-        public byte? PartyIndex;
+        public GroupCategory? PartyIndex = GroupCategory.Home;
         public bool Accept;
         public byte? RolesDesired;
     }

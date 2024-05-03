@@ -2471,7 +2471,7 @@ namespace Game.Entities
             }
 
             //deallocate deleted mails...
-            foreach (var m in GetMails().Where(m => m.state == MailState.Deleted))
+            foreach (var m in GetMails().Where(m => m.state == MailState.Deleted).ToList())
                 m_mail.Remove(m);
 
             m_mailsUpdated = false;
@@ -3642,7 +3642,7 @@ namespace Game.Entities
                 stmt.SetInt64(index++, GetTalentResetTime());
                 stmt.SetUInt8(index++, GetActiveTalentGroup());
                 stmt.SetUInt8(index++, GetBonusTalentGroupCount());
-                stmt.SetUInt32(index++, (uint)m_ExtraFlags);
+                stmt.SetUInt16(index++, (ushort)m_ExtraFlags);
                 stmt.SetInt32(index++, 0); // summonedPetNumber
                 stmt.SetUInt16(index++, (ushort)atLoginFlags);
                 stmt.SetInt64(index++, m_deathExpireTime);
@@ -3655,7 +3655,7 @@ namespace Game.Entities
                 stmt.SetUInt16(index++, m_activePlayerData.TodayHonorableKills);
                 stmt.SetUInt16(index++, m_activePlayerData.YesterdayHonorableKills);
                 stmt.SetInt32(index++, m_playerData.PlayerTitle);
-                stmt.SetInt32(index++, m_activePlayerData.WatchedFactionIndex);
+                stmt.SetUInt32(index++, (uint)m_activePlayerData.WatchedFactionIndex.GetValue()); //TODO: change to signed in DB
                 stmt.SetUInt8(index++, GetDrunkValue());
                 stmt.SetUInt32(index++, (uint)GetHealth());
 

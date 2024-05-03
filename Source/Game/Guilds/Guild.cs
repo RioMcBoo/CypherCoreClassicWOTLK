@@ -248,6 +248,7 @@ namespace Game.Guilds
             QueryGuildInfoResponse response = new();
             response.GuildGUID = GetGUID();
 
+            response.Info = new();
             response.Info.GuildGuid = GetGUID();
             response.Info.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
 
@@ -3210,8 +3211,8 @@ namespace Game.Guilds
                 m_rankId = (GuildRankId)field.Read<byte>(1);
                 m_rankOrder = (GuildRankOrder)field.Read<byte>(2);
                 m_name = field.Read<string>(3);
-                m_rights = (GuildRankRights)field.Read<int>(4);
-                m_bankMoneyPerDay = field.Read<int>(5);
+                m_rights = (GuildRankRights)field.Read<uint>(4);
+                m_bankMoneyPerDay = (int)field.Read<uint>(5); //TODO: Change to singed in DB
                 if (m_rankId == GuildRankId.GuildMaster)                     // Prevent loss of leader rights
                     m_rights |= GuildRankRights.All;
             }
@@ -3561,7 +3562,8 @@ namespace Game.Guilds
 
             public bool ValidateEmblemColors()
             {
-                return ValidateEmblemColors(m_style, m_color, m_borderStyle, m_borderColor, m_backgroundColor);
+                return true; //Temporary hardcoded (need Hotfix update)
+                //return ValidateEmblemColors(m_style, m_color, m_borderStyle, m_borderColor, m_backgroundColor);
             }
 
             public static bool ValidateEmblemColors(int style, int color, int borderStyle, int borderColor, int backgroundColor)
