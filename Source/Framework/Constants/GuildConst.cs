@@ -7,7 +7,7 @@ namespace Framework.Constants
 {
     public class GuildConst
     {
-        public const int MaxBankTabs = 8;
+        public const int MaxBankTabs = 6;
         public const int MaxBankSlots = 98;
         public const int BankMoneyLogsTab = 100;
 

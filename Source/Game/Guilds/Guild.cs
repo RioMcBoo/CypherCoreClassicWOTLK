@@ -513,16 +513,12 @@ namespace Game.Guilds
             if (tabId >= GuildConst.MaxBankTabs)
                 return;
 
-            // Do not get money for bank tabs that the GM bought, we had to buy them already.
-            // This is just a speedup check, GetGuildBankTabPrice will return 0.
-            if (tabId < GuildConst.MaxBankTabs - 2) // 7th tab is actually the 6th
-            {
-                long tabCost = (long)(GetGuildBankTabPrice(tabId) * MoneyConstants.Gold);
+
+            long tabCost = GetGuildBankTabPrice(tabId) * MoneyConstants.Gold;
                 if (!player.HasEnoughMoney(tabCost))                   // Should not happen, this is checked by client
                     return;
 
                 player.ModifyMoney(-tabCost);
-            }
 
             _CreateNewBankTab();
 
@@ -2531,7 +2527,7 @@ namespace Game.Guilds
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 
-        ulong GetGuildBankTabPrice(byte tabId)
+        long GetGuildBankTabPrice(byte tabId)
         {
             // these prices are in gold units, not copper
             switch (tabId)
