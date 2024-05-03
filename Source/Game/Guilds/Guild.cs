@@ -212,8 +212,8 @@ namespace Game.Guilds
                 memberData.Guid = member.GetGUID();
                 memberData.RankID = (int)member.GetRankId();
                 memberData.AreaID = member.GetZoneId();
-                memberData.PersonalAchievementPoints = member.GetAchievementPoints();
-                memberData.GuildReputation = member.GetTotalReputation();
+                //memberData.PersonalAchievementPoints = member.GetAchievementPoints();
+                //memberData.GuildReputation = member.GetTotalReputation();
                 memberData.LastSave = member.GetInactiveDays();
 
                 //GuildRosterProfessionData

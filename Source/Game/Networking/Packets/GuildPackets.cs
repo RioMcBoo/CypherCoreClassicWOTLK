@@ -114,7 +114,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(GuildFlags);
             _worldPacket.WriteInt32(MemberData.Count);
             _worldPacket.WriteBits(WelcomeText.GetByteCount(), 11);
-            _worldPacket.WriteBits(InfoText.GetByteCount(), 10);
+            _worldPacket.WriteBits(InfoText.GetByteCount(), 11);
             _worldPacket.FlushBits();
 
             MemberData.ForEach(p => p.Write(_worldPacket));
@@ -558,7 +558,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            RankID = _worldPacket.ReadUInt8();
+            RankID = _worldPacket.ReadInt32();
             RankOrder = _worldPacket.ReadInt32();
             Flags = _worldPacket.ReadUInt32();
             WithdrawGoldLimit = _worldPacket.ReadInt32();
@@ -569,15 +569,15 @@ namespace Game.Networking.Packets
                 TabWithdrawItemLimit[i] = _worldPacket.ReadInt32();
             }
 
+            OldFlags = _worldPacket.ReadUInt32();
+
             _worldPacket.ResetBitPos();
             int rankNameLen = _worldPacket.ReadBits<int>(7);
 
             RankName = _worldPacket.ReadString(rankNameLen);
-
-            OldFlags = _worldPacket.ReadUInt32();
         }
 
-        public byte RankID;
+        public int RankID;
         public int RankOrder;
         public int WithdrawGoldLimit;
         public uint Flags;
@@ -1492,8 +1492,6 @@ namespace Game.Networking.Packets
             data.WriteBit(SorEligible);
             data.FlushBits();
 
-            DungeonScore.Write(data);
-
             data.WriteString(Name);
             data.WriteString(Note);
             data.WriteString(OfficerNote);
@@ -1504,8 +1502,8 @@ namespace Game.Networking.Packets
         public long TotalXP;
         public int RankID;
         public int AreaID;
-        public int PersonalAchievementPoints;
-        public int GuildReputation;
+        private int PersonalAchievementPoints = -1;
+        private int GuildReputation = -1;
         public int GuildRepToCap;
         public float LastSave;
         public string Name;
@@ -1549,6 +1547,7 @@ namespace Game.Networking.Packets
             }
 
             data.WriteBits(RankName.GetByteCount(), 7);
+            data.FlushBits();
             data.WriteString(RankName);
         }
 
