@@ -57,7 +57,7 @@ namespace Framework.Constants
         SetMotd = 0x1000,
         EditPublicNote = 0x2000,
         ViewOffNote = 0x4000,
-        EOffNote = 0x8000,
+        EditOffNote = 0x8000,
         ModifyGuildInfo = 0x10000,
         WithdrawGoldLock = 0x20000,                   // remove money withdraw capacity
         WithdrawRepair = 0x40000,                   // withdraw for repair

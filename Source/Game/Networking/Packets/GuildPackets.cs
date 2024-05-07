@@ -230,6 +230,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(InviterName.GetByteCount(), 6);
             _worldPacket.WriteBits(GuildName.GetByteCount(), 7);
             _worldPacket.WriteBits(OldGuildName.GetByteCount(), 7);
+            _worldPacket.FlushBits();
 
             _worldPacket.WriteUInt32(InviterVirtualRealmAddress);
             _worldPacket.WriteUInt32(GuildVirtualRealmAddress);
@@ -293,6 +294,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.WriteBit(LoggedOn);
             _worldPacket.WriteBit(Mobile);
+            _worldPacket.FlushBits();
 
             _worldPacket.WriteString(Name);
         }
@@ -311,6 +313,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteBits(MotdText.GetByteCount(), 11);
+            _worldPacket.FlushBits();
+
             _worldPacket.WriteString(MotdText);            
         }
 
@@ -327,6 +331,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(VirtualRealmAddress);
 
             _worldPacket.WriteBits(Name.GetByteCount(), 6);
+            _worldPacket.FlushBits();
+
             _worldPacket.WriteString(Name);
         }
 
@@ -1268,6 +1274,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Tab);
 
             _worldPacket.WriteBits(Text.GetByteCount(), 14);
+            _worldPacket.FlushBits();
+
             _worldPacket.WriteString(Text);
         }
 
@@ -1441,6 +1449,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteBits(GuildName.GetByteCount(), 7);
+            _worldPacket.FlushBits();
             _worldPacket.WriteString(GuildName);
         }
 
@@ -1502,8 +1511,8 @@ namespace Game.Networking.Packets
         public long TotalXP;
         public int RankID;
         public int AreaID;
-        private int PersonalAchievementPoints = -1;
-        private int GuildReputation = -1;
+        public int PersonalAchievementPoints;
+        public int GuildReputation;
         public int GuildRepToCap;
         public float LastSave;
         public string Name;
@@ -1548,6 +1557,7 @@ namespace Game.Networking.Packets
 
             data.WriteBits(RankName.GetByteCount(), 7);
             data.FlushBits();
+
             data.WriteString(RankName);
         }
 

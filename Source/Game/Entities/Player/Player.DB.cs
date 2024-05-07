@@ -3764,7 +3764,7 @@ namespace Game.Entities
                 stmt.SetUInt32(index++, m_PlayedTimeLevel);
                 stmt.SetFloat(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
                 stmt.SetInt64(index++, GameTime.GetGameTime());
-                stmt.SetInt32(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
+                stmt.SetInt32(index++, HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0);
                 //save, far from tavern/city
                 //save, but in tavern/city
                 stmt.SetUInt32(index++, GetTalentResetCost());

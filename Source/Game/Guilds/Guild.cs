@@ -212,8 +212,8 @@ namespace Game.Guilds
                 memberData.Guid = member.GetGUID();
                 memberData.RankID = (int)member.GetRankId();
                 memberData.AreaID = member.GetZoneId();
-                //memberData.PersonalAchievementPoints = member.GetAchievementPoints();
-                //memberData.GuildReputation = member.GetTotalReputation();
+                memberData.PersonalAchievementPoints = member.GetAchievementPoints();
+                memberData.GuildReputation = member.GetTotalReputation();
                 memberData.LastSave = member.GetInactiveDays();
 
                 //GuildRosterProfessionData
@@ -277,7 +277,7 @@ namespace Game.Guilds
                 rankData.RankID = (byte)rankInfo.GetId();
                 rankData.RankOrder = (byte)rankInfo.GetOrder();
                 rankData.Flags = (uint)rankInfo.GetRights();
-                rankData.WithdrawGoldLimit = (rankInfo.GetId() == GuildRankId.GuildMaster ? int.MaxValue : (rankInfo.GetBankMoneyPerDay() / MoneyConstants.Gold));
+                rankData.WithdrawGoldLimit = rankInfo.GetId() == GuildRankId.GuildMaster ? -1 : (rankInfo.GetBankMoneyPerDay() / MoneyConstants.Gold);
                 rankData.RankName = rankInfo.GetName();
 
                 for (byte j = 0; j < GuildConst.MaxBankTabs; ++j)
@@ -455,7 +455,7 @@ namespace Game.Guilds
         public void HandleSetMemberNote(WorldSession session, string note, ObjectGuid guid, bool isPublic)
         {
             // Player must have rights to set public/officer note
-            if (!_HasRankRight(session.GetPlayer(), isPublic ? GuildRankRights.EditPublicNote : GuildRankRights.EOffNote))
+            if (!_HasRankRight(session.GetPlayer(), isPublic ? GuildRankRights.EditPublicNote : GuildRankRights.EditOffNote))
                 SendCommandResult(session, GuildCommandType.EditPublicNote, GuildCommandError.Permissions);
             Member member = GetMember(guid);
             if (member != null)
@@ -516,10 +516,10 @@ namespace Game.Guilds
 
 
             long tabCost = GetGuildBankTabPrice(tabId) * MoneyConstants.Gold;
-                if (!player.HasEnoughMoney(tabCost))                   // Should not happen, this is checked by client
-                    return;
+            if (!player.HasEnoughMoney(tabCost))                   // Should not happen, this is checked by client
+                return;
 
-                player.ModifyMoney(-tabCost);
+            player.ModifyMoney(-tabCost);
 
             _CreateNewBankTab();
 
@@ -667,7 +667,7 @@ namespace Game.Guilds
                     if (memberMe == null || targetRank.GetOrder() <= myRank.GetOrder())
                         SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.RankTooHigh_S, name);
                     else
-                    {
+                    {                        
                         _LogEvent(GuildEventLogTypes.UninvitePlayer, player.GetGUID().GetCounter(), guid.GetCounter());
 
                         Player pMember = Global.ObjAccessor.FindConnectedPlayer(guid);
@@ -2386,7 +2386,7 @@ namespace Game.Guilds
             rankChange.Other = targetGuid;
             rankChange.RankID = (byte)newRank;
             rankChange.Promote = newRank < oldRank;
-            BroadcastPacket(rankChange);
+            BroadcastPacket(rankChange);            
 
             Log.outDebug(LogFilter.Network, $"SMSG_GUILD_RANKS_UPDATE [Broadcast] Target: {targetGuid}, Issuer: {setterGuid}, RankId: {newRank}");
         }
