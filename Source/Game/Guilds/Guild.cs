@@ -1873,7 +1873,6 @@ namespace Game.Guilds
 
             info.CreateMissingTabsIfNeeded(_GetPurchasedTabsSize(), trans);
             info.SaveToDB(trans);
-            DB.Characters.CommitTransaction(trans);
 
             if (!isInTransaction)
                 DB.Characters.CommitTransaction(trans);
